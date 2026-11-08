@@ -17,6 +17,7 @@ base64 = "0.22"
 # The research checkout is never a build dependency or patch destination.
 smolvm = { path = "target/upstream/smolvm", version = "=1.22.0" }
 smolvm-pack = { path = "target/upstream/smolvm/crates/smolvm-pack", version = "=1.22.0" }
+smolvm-registry = { path = "target/upstream/smolvm/crates/smolvm-registry", version = "=1.22.0" }
 smolvm-protocol = { path = "target/upstream/smolvm/crates/smolvm-protocol", version = "=1.22.0" }
 
 [profile.release]

@@ -20,6 +20,37 @@ with patch.dict(sys.modules, {'native_proof': proof}):
 
 
 class OrdinaryRunnerTests(unittest.TestCase):
+    def test_export_sdk_qualification_is_opt_in_and_never_redirects_a_database_fixture(self):
+        root = Path(__file__).resolve().parents[1]
+        main = (root / 'smolbox-port/src/main.rs').read_text()
+        source = (root / 'smolbox-port/src/ordinary_export.rs').read_text()
+        self.assertIn('#[cfg(test)]\nmod ordinary_export;', main)
+        self.assertRegex(source, r'#\[ignore\s*=\s*"explicit ordinary SDK/package/default-domain export fixture; may start one owned helper VM"\]\s*fn ordinary_owned_container_conversion')
+        self.assertRegex(source, r'assert!\(\s*!config\.allow_initialize')
+        self.assertIn('engine::DomainBinding::default_paths', source)
+        self.assertIn('engine::Engine::open_with_host(binding, false, host)', source)
+        self.assertNotIn('test_engine(', source)
+        self.assertNotIn('std::env::set_var', source)
+        self.assertNotIn('std::env::remove_var', source)
+        self.assertIn('retry-cleanup', source)
+        self.assertIn('file.take(6)', source)
+        self.assertNotIn('.kill(', source)
+        self.assertNotIn('.terminate(', source)
+
+    def test_template_growth_qualification_is_explicit_and_never_opens_a_domain(self):
+        root = Path(__file__).resolve().parents[1]
+        source = (root / 'smolbox-engine/src/machine.rs').read_text()
+        annotation = '#[ignore = "explicit approved account-template disk qualification; no manager, domain owner or VM"]'
+        self.assertIn(annotation, source)
+        fixture = source.split('fn ordinary_approved_template_format_and_growth_without_vm()', 1)[1].split('    #[test]', 1)[0]
+        self.assertIn('SMOLBOX_TEMPLATE_GROWTH_APPROVAL', fixture)
+        self.assertIn('SMOLBOX_TEMPLATE_GROWTH_OUTPUT', fixture)
+        self.assertIn('find_existing_template', fixture)
+        self.assertNotIn('AgentManager::', fixture)
+        self.assertNotIn('Engine::', fixture)
+        self.assertNotIn('std::env::set_var', fixture)
+        self.assertNotIn('std::env::remove_var', fixture)
+
     def test_snapshot_allows_only_absent_sdk_root_and_never_initializes_partial_state(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

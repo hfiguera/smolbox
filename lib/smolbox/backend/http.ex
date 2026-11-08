@@ -27,7 +27,10 @@ defmodule SmolBox.Backend.HTTP do
         :inspect_creation,
         :qualify_growth,
         :qualify_capture,
-        :cleanup_capture
+        :cleanup_capture,
+        :qualify_export,
+        :inspect_export,
+        :cleanup_export
       ] and
         Keyword.has_key?(Backend.operations(), operation)
 

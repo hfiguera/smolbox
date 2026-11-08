@@ -27,9 +27,102 @@ pub struct Config {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub approved_checkpoints: Option<Vec<CheckpointApproval>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub approved_export_destinations: Option<Vec<ExportApproval>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub approved_volume_policy: Option<smolbox_engine::LocalVolumePolicy>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub publish_address: Option<String>,
+}
+
+/// Operator-only destination/TLS approval; requests carry IDs, hashes and caps.
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ExportApproval {
+    pub id: String,
+    pub registry: String,
+    pub repository: String,
+    pub credential_ref: String,
+    pub immutable_tags: bool,
+    pub allow_insecure_loopback: bool,
+    pub ca_cert_file: Option<PathBuf>,
+    pub ca_certificate_sha256: Option<String>,
+    pub destination_sha256: String,
+    pub max_artifact_bytes: u64,
+    pub max_staging_bytes: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub conversion_resources: Option<smolbox_engine::ExportConversionResources>,
+    #[serde(skip)]
+    pub resolved: Option<smolbox_engine::ApprovedExportDestination>,
+}
+impl ExportApproval {
+    pub fn resolve(&mut self) -> Result<(), SafeCode> {
+        if let Some(resources) = &self.conversion_resources {
+            resources.validate().map_err(|_| SafeCode::Validation)?;
+            if self.max_staging_bytes > resources.disk_gb * 1_073_741_824 {
+                return Err(SafeCode::Validation);
+            }
+        }
+        let limits = smolbox_protocol::ExportLimits::default();
+        if (smolbox_protocol::OciSource {
+            reference: format!(
+                "{}/{}@sha256:{}",
+                self.registry,
+                self.repository,
+                "0".repeat(64)
+            ),
+            platform: "linux/amd64".into(),
+        })
+        .validate()
+        .is_err()
+            || !valid_hash(&self.destination_sha256)
+            || self.max_artifact_bytes == 0
+            || self.max_artifact_bytes > self.max_staging_bytes
+            || self.max_staging_bytes > limits.staging_bytes
+            || self.credential_ref.is_empty()
+            || self.credential_ref.len() > 128
+            || matches!(self.credential_ref.as_str(), "." | "..")
+            || !self
+                .credential_ref
+                .bytes()
+                .all(|byte| byte.is_ascii_alphanumeric() || b"._-".contains(&byte))
+        {
+            return Err(SafeCode::Validation);
+        }
+        let pem = match (&self.ca_cert_file, &self.ca_certificate_sha256) {
+            (None, None) => None,
+            (Some(path), Some(expected))
+                if path.is_absolute() && path.as_os_str().len() <= 4096 && valid_hash(expected) =>
+            {
+                let bytes = bounded_file(path, 256 * 1024)?;
+                if hash_bytes(&bytes) != *expected {
+                    return Err(SafeCode::Validation);
+                }
+                Some(bytes)
+            }
+            _ => return Err(SafeCode::Validation),
+        };
+        let destination = smolbox_engine::ApprovedExportDestination {
+            id: self.id.clone(),
+            registry: self.registry.clone(),
+            repository: self.repository.clone(),
+            immutable_tags: self.immutable_tags,
+            allow_insecure_loopback: self.allow_insecure_loopback,
+            ca_certificate_pem: pem,
+        };
+        destination.validate().map_err(|_| SafeCode::Validation)?;
+        if destination.digest().map_err(|_| SafeCode::Validation)? != self.destination_sha256 {
+            return Err(SafeCode::Validation);
+        }
+        self.resolved = Some(destination);
+        Ok(())
+    }
+    pub fn matches(&self, request: &smolbox_protocol::ExportRequest) -> bool {
+        self.resolved.is_some()
+            && self.id == request.destination_id
+            && self.destination_sha256 == request.destination_sha256
+            && request.max_artifact_bytes <= self.max_artifact_bytes
+            && request.max_staging_bytes <= self.max_staging_bytes
+    }
 }
 
 /// Operator-only checkpoint paths. Requests carry just the immutable identity.
@@ -174,6 +267,7 @@ pub struct VerifiedPackage {
     pub root: PathBuf,
     pub identity: PackageIdentity,
     pub templates: smolbox_engine::ApprovedTemplates,
+    pub export_assets: Option<smolbox_engine::ApprovedExportAssets>,
 }
 pub fn source_sha256() -> String {
     hash_bytes(include_bytes!("../../vendor/source.json"))
@@ -198,7 +292,7 @@ pub fn hash_bytes(bytes: &[u8]) -> String {
     hex::encode(Sha256::digest(bytes))
 }
 pub fn read_config(path: &Path) -> Result<Config, SafeCode> {
-    let config: Config =
+    let mut config: Config =
         serde_json::from_slice(&bounded_file(path, 65536)?).map_err(|_| SafeCode::Validation)?;
     let domain = smolbox_protocol::DomainIdentity {
         target_id: config.target_id.clone(),
@@ -220,6 +314,18 @@ pub fn read_config(path: &Path) -> Result<Config, SafeCode> {
         || config.approved_artifacts.len() > 64
     {
         return Err(SafeCode::Validation);
+    }
+    if let Some(destinations) = &mut config.approved_export_destinations {
+        if destinations.is_empty() || destinations.len() > 32 {
+            return Err(SafeCode::Validation);
+        }
+        let mut seen = BTreeSet::new();
+        for destination in destinations {
+            destination.resolve()?;
+            if !seen.insert(destination.id.clone()) {
+                return Err(SafeCode::Validation);
+            }
+        }
     }
     if let Some(policy) = &config.approved_volume_policy {
         policy.validate().map_err(|_| SafeCode::Validation)?;
@@ -402,10 +508,61 @@ pub fn verify(executable: &Path, manifest_sha256: &str) -> Result<VerifiedPackag
     }
     Ok(VerifiedPackage {
         templates: approved_templates(&root, &manifest.assets)?,
+        export_assets: approved_export_assets(&root, &manifest.assets)?,
         root,
         identity: manifest.identity,
     })
 }
+fn approved_export_assets(
+    root: &Path,
+    assets: &[Asset],
+) -> Result<Option<smolbox_engine::ApprovedExportAssets>, SafeCode> {
+    // Older approved packages contain only the rootfs directory. Do not invent
+    // a tar from inventory or make their unchanged setup depend on new assets.
+    if !assets
+        .iter()
+        .any(|asset| asset.path() == "agent-rootfs.tar")
+    {
+        return Ok(None);
+    }
+    let names = if cfg!(target_os = "macos") {
+        [
+            "agent-rootfs.tar",
+            "lib/libkrun.dylib",
+            "lib/libkrunfw.5.dylib",
+        ]
+    } else {
+        ["agent-rootfs.tar", "lib/libkrun.so", "lib/libkrunfw.so.5"]
+    };
+    let mut files = Vec::new();
+    for name in names {
+        let matches: Vec<_> = assets.iter().filter(|asset| asset.path() == name).collect();
+        let [Asset::File {
+            path,
+            sha256,
+            bytes,
+            mode,
+        }] = matches.as_slice()
+        else {
+            return Err(SafeCode::Package);
+        };
+        if *bytes == 0
+            || *bytes > 2 * 1024 * 1024 * 1024
+            || !valid_hash(sha256)
+            || *mode & 0o022 != 0
+        {
+            return Err(SafeCode::Package);
+        }
+        files.push(smolbox_engine::ApprovedExportAsset {
+            name: name.into(),
+            path: root.join(path),
+            sha256: sha256.clone(),
+            max_bytes: *bytes,
+        });
+    }
+    Ok(Some(smolbox_engine::ApprovedExportAssets { files }))
+}
+
 fn approved_templates(
     root: &Path,
     assets: &[Asset],
@@ -539,7 +696,7 @@ fn check_parents(root: &Path, relative: &Path) -> Result<(), SafeCode> {
 fn open_file(path: &Path) -> Result<File, SafeCode> {
     let file = OpenOptions::new()
         .read(true)
-        .custom_flags(libc::O_NOFOLLOW | libc::O_CLOEXEC)
+        .custom_flags(libc::O_NOFOLLOW | libc::O_CLOEXEC | libc::O_NONBLOCK)
         .open(path)
         .map_err(|_| SafeCode::Package)?;
     if !file.metadata().map_err(|_| SafeCode::Package)?.is_file() {
@@ -1177,5 +1334,258 @@ mod tests {
         config["generation"] = serde_json::json!("short");
         std::fs::write(&path, serde_json::to_vec(&config).unwrap()).unwrap();
         assert!(read_config(&path).is_err());
+    }
+    #[test]
+    fn export_assets_select_only_manifest_approved_regular_files_and_preserve_legacy_omission() {
+        let root = Path::new("/operator/package");
+        assert!(approved_export_assets(root, &[]).ok().unwrap().is_none());
+        let names = if cfg!(target_os = "macos") {
+            [
+                "agent-rootfs.tar",
+                "lib/libkrun.dylib",
+                "lib/libkrunfw.5.dylib",
+            ]
+        } else {
+            ["agent-rootfs.tar", "lib/libkrun.so", "lib/libkrunfw.so.5"]
+        };
+        let entries = || {
+            names
+                .iter()
+                .map(|name| Asset::File {
+                    path: (*name).into(),
+                    sha256: "a".repeat(64),
+                    bytes: 1024,
+                    mode: 0o400,
+                })
+                .collect::<Vec<_>>()
+        };
+        let approved = approved_export_assets(root, &entries())
+            .ok()
+            .unwrap()
+            .unwrap();
+        assert_eq!(approved.files.len(), 3);
+        for (file, name) in approved.files.iter().zip(names) {
+            assert_eq!(file.path, root.join(name));
+            assert_eq!(file.name, name);
+            assert_eq!(file.sha256, "a".repeat(64));
+            assert_eq!(file.max_bytes, 1024);
+        }
+        for change in 0..7 {
+            let mut invalid = entries();
+            match change {
+                0 => {
+                    invalid.pop();
+                }
+                1 => {
+                    invalid[0] = Asset::Symlink {
+                        path: "agent-rootfs.tar".into(),
+                        target: "elsewhere".into(),
+                    }
+                }
+                2 => {
+                    if let Asset::File { bytes, .. } = &mut invalid[0] {
+                        *bytes = 0;
+                    }
+                }
+                3 => {
+                    if let Asset::File { bytes, .. } = &mut invalid[0] {
+                        *bytes = 2 * 1024 * 1024 * 1024 + 1;
+                    }
+                }
+                4 => {
+                    if let Asset::File { sha256, .. } = &mut invalid[0] {
+                        *sha256 = "bad".into();
+                    }
+                }
+                5 => {
+                    if let Asset::File { mode, .. } = &mut invalid[0] {
+                        *mode = 0o666;
+                    }
+                }
+                _ => invalid.push(Asset::File {
+                    path: "agent-rootfs.tar".into(),
+                    sha256: "a".repeat(64),
+                    bytes: 1024,
+                    mode: 0o400,
+                }),
+            }
+            assert!(approved_export_assets(root, &invalid).is_err());
+        }
+    }
+    #[test]
+    #[ignore = "ordinary operator-approved local package fixture; no engine or VM"]
+    fn ordinary_manifest_rootfs_archive_matches_approved_guest_files() {
+        let package = std::fs::canonicalize(
+            std::env::var_os("SMOLBOX_EXPORT_PACKAGE").expect("explicit package fixture"),
+        )
+        .unwrap();
+        let digest =
+            std::env::var("SMOLBOX_EXPORT_PACKAGE_SHA256").expect("explicit package approval");
+        let verified = verify(&package.join("smolbox-port"), &digest)
+            .ok()
+            .expect("package preflight");
+        let selected = verified.export_assets.expect("declared export assets");
+        assert_eq!(selected.files.len(), 3);
+        let manifest: Manifest =
+            serde_json::from_slice(&std::fs::read(package.join("package.json")).unwrap()).unwrap();
+        let expected: std::collections::BTreeMap<_, _> = manifest
+            .assets
+            .iter()
+            .filter_map(|asset| {
+                asset
+                    .path()
+                    .strip_prefix("agent-rootfs/")
+                    .map(|name| (name.to_owned(), asset))
+            })
+            .collect();
+        let tar = selected
+            .files
+            .iter()
+            .find(|file| file.name == "agent-rootfs.tar")
+            .unwrap();
+        let mut archive = tar::Archive::new(File::open(&tar.path).unwrap());
+        let mut seen = BTreeSet::new();
+        for (index, entry) in archive.entries().unwrap().enumerate() {
+            assert!(index < 32768);
+            let mut entry = entry.unwrap();
+            let path = entry.path().unwrap().into_owned();
+            let name = path.to_str().unwrap();
+            assert!(path
+                .components()
+                .all(|part| matches!(part, Component::Normal(_))));
+            assert!(!name
+                .split('/')
+                .any(|part| part.starts_with(".smolvm-ready.")));
+            assert_eq!(entry.header().uid().unwrap(), 0);
+            assert_eq!(entry.header().gid().unwrap(), 0);
+            assert_eq!(entry.header().mtime().unwrap(), 0);
+            assert!(seen.insert(name.to_owned()));
+            match entry.header().entry_type() {
+                kind if kind.is_file() => {
+                    let Asset::File {
+                        sha256,
+                        bytes,
+                        mode,
+                        ..
+                    } = expected.get(name).expect("declared guest file")
+                    else {
+                        panic!("guest file kind");
+                    };
+                    assert_eq!(entry.size(), *bytes);
+                    assert_eq!(entry.header().mode().unwrap() & 0o777, *mode);
+                    let mut hash = Sha256::new();
+                    let mut buffer = [0; 64 * 1024];
+                    loop {
+                        let count = entry.read(&mut buffer).unwrap();
+                        if count == 0 {
+                            break;
+                        }
+                        hash.update(&buffer[..count]);
+                    }
+                    assert_eq!(&hex::encode(hash.finalize()), sha256);
+                }
+                kind if kind.is_symlink() => {
+                    let Asset::Symlink { target, .. } =
+                        expected.get(name).expect("declared guest link")
+                    else {
+                        panic!("guest link kind");
+                    };
+                    assert_eq!(entry.link_name().unwrap().unwrap(), Path::new(target));
+                }
+                kind if kind.is_dir() => {
+                    assert!(package.join("agent-rootfs").join(&path).is_dir());
+                }
+                _ => panic!("unsupported guest archive kind"),
+            }
+        }
+        assert!(expected.keys().all(|name| seen.contains(name)));
+        assert!(seen.contains("usr/local/bin/smolvm-agent"));
+    }
+    #[test]
+    fn export_catalog_resolves_operator_trust_once_and_bounds_match_executing_engine() {
+        let proof: Vec<smolbox_protocol::ExportPublication> = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/export-publications-v1.json"
+        ))
+        .unwrap();
+        let identity = &proof[0].identity;
+        let root = tempfile::tempdir().unwrap();
+        let path = root.path().join("config.json");
+        let base = serde_json::json!({"schema":2,"target_id":"test","generation":"ab".repeat(16),"allow_initialize":false,"package_manifest_sha256":"cd".repeat(32),"approved_artifacts":[]});
+        let approval = serde_json::json!({"id":identity.destination_id,"registry":identity.registry,"repository":identity.repository,"credential_ref":"publisher","immutable_tags":true,"allow_insecure_loopback":false,"ca_cert_file":null,"ca_certificate_sha256":null,"destination_sha256":identity.destination_sha256,"max_artifact_bytes":1048576,"max_staging_bytes":4194304});
+        let mut value = base;
+        value["approved_export_destinations"] = serde_json::json!([approval.clone()]);
+        std::fs::write(&path, serde_json::to_vec(&value).unwrap()).unwrap();
+        let config = read_config(&path).ok().unwrap();
+        let selected = &config.approved_export_destinations.as_ref().unwrap()[0];
+        assert!(selected.resolved.is_some());
+        assert_eq!(
+            selected.resolved.as_ref().unwrap().digest().unwrap(),
+            identity.destination_sha256
+        );
+        assert!(!serde_json::to_string(selected)
+            .unwrap()
+            .contains("resolved"));
+        for field in [
+            "credential_ref",
+            "destination_sha256",
+            "max_staging_bytes",
+            "immutable_tags",
+        ] {
+            let mut invalid = value.clone();
+            invalid["approved_export_destinations"][0][field] = match field {
+                "max_staging_bytes" => serde_json::json!(0),
+                "immutable_tags" => serde_json::json!(false),
+                _ => serde_json::json!("../invalid"),
+            };
+            std::fs::write(&path, serde_json::to_vec(&invalid).unwrap()).unwrap();
+            assert!(read_config(&path).is_err());
+        }
+        value["approved_export_destinations"] = serde_json::json!([approval.clone(), approval]);
+        std::fs::write(&path, serde_json::to_vec(&value).unwrap()).unwrap();
+        assert!(read_config(&path).is_err());
+        let fifo = root.path().join("trust-fifo");
+        let name = std::ffi::CString::new(fifo.to_str().unwrap()).unwrap();
+        assert_eq!(unsafe { libc::mkfifo(name.as_ptr(), 0o600) }, 0);
+        let mut invalid = value.clone();
+        invalid["approved_export_destinations"] = serde_json::json!([{
+            "id":identity.destination_id,"registry":identity.registry,"repository":identity.repository,"credential_ref":"publisher","immutable_tags":true,"allow_insecure_loopback":false,"ca_cert_file":fifo,"ca_certificate_sha256":"a".repeat(64),"destination_sha256":identity.destination_sha256,"max_artifact_bytes":1048576,"max_staging_bytes":4194304}]);
+        std::fs::write(&path, serde_json::to_vec(&invalid).unwrap()).unwrap();
+        assert!(read_config(&path).is_err());
+        let limits = smolbox_protocol::ExportLimits::default();
+        assert_eq!(
+            limits.staging_bytes,
+            smolbox_engine::JOB_EXPORT_STAGING_BYTES
+        );
+        assert_eq!(limits.metadata_bytes, smolbox_engine::EXPORT_METADATA_BYTES);
+        assert_eq!(
+            limits.upload_chunk_bytes,
+            smolbox_engine::EXPORT_UPLOAD_CHUNK_BYTES
+        );
+        assert_eq!(
+            limits.registry_requests,
+            smolbox_engine::EXPORT_REGISTRY_REQUESTS
+        );
+        assert_eq!(limits.record_bytes, smolbox_engine::EXPORT_RECORD_BYTES);
+        assert_eq!(limits.records, smolbox_engine::EXPORT_RECORDS as u64);
+        assert_eq!(
+            limits.retirement_metadata_bytes,
+            smolbox_engine::JOB_MATERIAL_CONTROL_METADATA_BYTES
+        );
+        assert_eq!(
+            limits.asset_file_bytes,
+            smolbox_engine::EXPORT_ASSET_FILE_BYTES
+        );
+        assert_eq!(
+            limits.asset_total_bytes,
+            smolbox_engine::EXPORT_ASSET_TOTAL_BYTES
+        );
+        assert_eq!(
+            limits.control_metadata_bytes,
+            smolbox_engine::JOB_CONTROL_METADATA_BYTES
+        );
+        assert_eq!(
+            limits.observation_metadata_bytes,
+            smolbox_engine::VOLUME_OBSERVATION_METADATA_BYTES
+        );
     }
 }

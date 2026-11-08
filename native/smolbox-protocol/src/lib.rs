@@ -5,6 +5,10 @@
 use serde_json::Value;
 use std::io::{self, Read, Write};
 
+mod exports;
+pub use exports::{
+    ExportLimits, ExportPublication, ExportPublicationIdentity, ExportRequest, ExportStageCleanup,
+};
 mod capture;
 mod capture_abort_source;
 pub use capture_abort_source::{CaptureAbortSourceQualification, CaptureAbortSourceState};

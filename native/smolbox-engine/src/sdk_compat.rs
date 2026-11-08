@@ -266,6 +266,73 @@ pub(crate) fn observe_records(
 /// A receipt-bound operation needs one row, not adoption of an inventory snapshot.
 /// Limit SQLite's returned blob before allocation and preserve read-only budget/
 /// schema/inode checks used by the node observers.
+/// Bounded dependency projection: inventory can block source work, never mint
+/// child ownership. Do not retain every decoded VM alongside the source record.
+pub(crate) fn has_source_dependents(
+    database: &Path,
+    identity: (u64, u64),
+    source: &str,
+    budget: &crate::ReadBudget,
+) -> Result<bool> {
+    #[derive(serde::Deserialize)]
+    struct Dependency {
+        name: String,
+        #[serde(default)]
+        golden: Option<String>,
+    }
+    if !crate::domain::valid_id(source) {
+        return Err(Error::before(ErrorCode::Validation));
+    }
+    with_observation_budget(database, identity, budget, |connection| {
+        let mut query = connection.prepare("SELECT name,length(CAST(data AS BLOB)),substr(CAST(data AS BLOB),1,?1) FROM vms ORDER BY name LIMIT 1025")
+            .map_err(|_| Error::before(ErrorCode::Database))?;
+        let mut rows = query
+            .query([crate::observations::MAX_RECORD_BYTES + 1])
+            .map_err(|_| Error::before(ErrorCode::Database))?;
+        let mut bytes = 0usize;
+        let mut count = 0usize;
+        let mut found = false;
+        while let Some(row) = rows
+            .next()
+            .map_err(|_| Error::before(ErrorCode::Database))?
+        {
+            budget.check()?;
+            count += 1;
+            let length: usize = row.get(1).map_err(|_| Error::before(ErrorCode::Database))?;
+            bytes = bytes
+                .checked_add(length)
+                .ok_or(Error::before(ErrorCode::OutputLimit))?;
+            if count > crate::observations::MAX_RECORDS
+                || length > crate::observations::MAX_RECORD_BYTES
+                || bytes > crate::observations::MAX_SNAPSHOT_BYTES
+            {
+                return Err(Error::before(ErrorCode::OutputLimit));
+            }
+            let name: String = row.get(0).map_err(|_| Error::before(ErrorCode::Database))?;
+            let blob = row
+                .get_ref(2)
+                .map_err(|_| Error::before(ErrorCode::Database))?;
+            let dependency: Dependency = serde_json::from_slice(
+                blob.as_blob()
+                    .map_err(|_| Error::before(ErrorCode::Database))?,
+            )
+            .map_err(|_| Error::before(ErrorCode::Database))?;
+            if dependency.name != name
+                || !crate::domain::valid_id(&name)
+                || dependency
+                    .golden
+                    .as_ref()
+                    .is_some_and(|parent| !crate::domain::valid_id(parent))
+            {
+                return Err(Error::before(ErrorCode::Database));
+            }
+            found |= dependency.golden.as_deref() == Some(source);
+        }
+        budget.check()?;
+        Ok(found)
+    })
+}
+
 pub(crate) fn observe_record(
     database: &Path,
     identity: (u64, u64),

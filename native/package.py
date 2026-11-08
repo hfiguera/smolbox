@@ -12,6 +12,12 @@ import subprocess
 import tempfile
 import tomllib
 
+import importlib.util
+
+_ROOTFS_SPEC = importlib.util.spec_from_file_location('smolbox_rootfs_archive', Path(__file__).with_name('rootfs_archive.py'))
+rootfs_archive = importlib.util.module_from_spec(_ROOTFS_SPEC)
+_ROOTFS_SPEC.loader.exec_module(rootfs_archive)
+
 ROOT = Path(__file__).resolve().parent
 METADATA = ['SMOLBOX-LICENSE', 'SMOLVM-LICENSE', 'SMOLVM-LICENSES.md', 'NATIVE-SOURCE.json', 'SMOLBOX-POLICY.json']
 MAX_FILES = 16384
@@ -81,6 +87,15 @@ def prepare_owned_template(path, tool):
         raise ValueError('resized template geometry does not match the package baseline')
 
 
+def prepare_export_libraries(directory):
+    # The SDK pack format uses the versioned firmware name. Existing Linux
+    # runtime bundles may contain only the loader's unversioned copy. Materialize
+    # an independent, byte-identical alias inside this owned package; no input or
+    # library load path is rewritten. Both copies enter manifest approval.
+    if platform.system() != 'Darwin' and not (directory / 'libkrunfw.so.5').exists():
+        shutil.copy2(directory / 'libkrunfw.so', directory / 'libkrunfw.so.5')
+
+
 def inventory(root):
     entries = []
     for directory in [root / 'lib', root / 'agent-rootfs']:
@@ -89,7 +104,8 @@ def inventory(root):
                 entries.append({'kind': 'symlink', 'path': path.relative_to(root).as_posix(), 'target': os.readlink(path)})
             elif path.is_file() and not path.name.startswith('.smolvm-ready.'):
                 entries.append({'kind': 'file', 'path': path.relative_to(root).as_posix(), 'sha256': digest(path), 'bytes': path.stat().st_size, 'mode': path.stat().st_mode & 0o777})
-    for name in ['storage-template.ext4', 'overlay-template.ext4', 'storage-template.ext4.zst', 'overlay-template.ext4.zst', *METADATA]:
+    optional = ['agent-rootfs.tar'] if (root / 'agent-rootfs.tar').exists() else []
+    for name in ['storage-template.ext4', 'overlay-template.ext4', 'storage-template.ext4.zst', 'overlay-template.ext4.zst', *METADATA, *optional]:
         path = root / name
         entries.append({'kind': 'file', 'path': name, 'sha256': digest(path), 'bytes': path.stat().st_size, 'mode': path.stat().st_mode & 0o777})
     entries.sort(key=lambda entry: entry['path'])
@@ -112,7 +128,10 @@ def build(executable, assets, output, signing_identity=None):
         shutil.copy2(executable, staging / 'smolbox-port')
         # Libraries are dereferenced so no rewrite/load can escape to the source.
         shutil.copytree(assets / 'lib', staging / 'lib', symlinks=False)
-        shutil.copytree(assets / 'agent-rootfs', staging / 'agent-rootfs', symlinks=True)
+        prepare_export_libraries(staging / 'lib')
+        shutil.copytree(assets / 'agent-rootfs', staging / 'agent-rootfs', symlinks=True,
+                        ignore=shutil.ignore_patterns('.smolvm-ready.*'))
+        rootfs_archive.create(staging / 'agent-rootfs', staging / 'agent-rootfs.tar')
         for name in ['storage-template.ext4', 'overlay-template.ext4']:
             clone_file(assets / name, staging / name)
             # First-release package templates are an empty 1 GiB baseline. The

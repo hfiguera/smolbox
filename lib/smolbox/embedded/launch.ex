@@ -1,7 +1,15 @@
 defmodule SmolBox.Embedded.Launch do
   @moduledoc false
   import Bitwise
-  alias SmolBox.Embedded.{CheckpointContract, Config, ImageContract, Protocol, RegistryContract}
+
+  alias SmolBox.Embedded.{
+    CheckpointContract,
+    Config,
+    ExportContract,
+    ImageContract,
+    Protocol,
+    RegistryContract
+  }
 
   @cleared ~w(DYLD_LIBRARY_PATH DYLD_INSERT_LIBRARIES DYLD_FALLBACK_LIBRARY_PATH DYLD_FRAMEWORK_PATH DYLD_FALLBACK_FRAMEWORK_PATH LD_LIBRARY_PATH LD_PRELOAD)
 
@@ -25,7 +33,8 @@ defmodule SmolBox.Embedded.Launch do
          true <- digest == config.package_identity["build_sha256"],
          {:ok, %{mode: mode}} <- File.lstat(executable),
          true <- (mode &&& 0o111) != 0,
-         {:ok, body} <- Jason.encode(helper_config(config)),
+         helper = helper_config(config),
+         {:ok, body} <- Jason.encode(helper),
          true <- byte_size(body) <= 65_536,
          path = Path.join(directory, "config.json"),
          :ok <- File.write(path, body, [:exclusive]),
@@ -36,7 +45,8 @@ defmodule SmolBox.Embedded.Launch do
          config_path: path,
          directory: directory,
          protocol_major: protocol.major,
-         protocol_minor: protocol.minor
+         protocol_minor: protocol.minor,
+         export_approvals: Map.get(helper, "approved_export_destinations", [])
        }}
     else
       _invalid -> :error
@@ -149,6 +159,7 @@ defmodule SmolBox.Embedded.Launch do
     values = registry_config(values, config, features)
     values = volume_config(values, config, features)
     values = checkpoint_config(values, config, features)
+    values = export_config(values, config, features)
 
     case Config.sdk_identity(config) do
       %{"feature_versions" => %{"ports" => 1}} ->
@@ -172,6 +183,15 @@ defmodule SmolBox.Embedded.Launch do
     do: Map.put(values, "approved_volume_policy", %{"id" => id, "root" => root})
 
   defp volume_config(values, _config, _features), do: values
+
+  defp export_config(values, config, %{"exports" => 1}) do
+    case ExportContract.approvals(config) do
+      [] -> values
+      approvals -> Map.put(values, "approved_export_destinations", approvals)
+    end
+  end
+
+  defp export_config(values, _config, _features), do: values
 
   defp checkpoint_config(values, config, %{"checkpoints" => 1}) do
     case CheckpointContract.approvals(config) do

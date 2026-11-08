@@ -166,6 +166,7 @@ pub(crate) struct DiskGeometry {
     layout: Layout,
     bytes: u64,
     format: DiskFormat,
+    filesystem: bool,
 }
 
 impl DiskGeometry {
@@ -195,6 +196,16 @@ impl DiskGeometry {
         expected_gib: u64,
         budget: &ReadBudget,
     ) -> Result<Self> {
+        Self::capture_mode(directory, raw_name, expected_gib, budget, true)
+    }
+
+    fn capture_mode(
+        directory: &Path,
+        raw_name: &str,
+        expected_gib: u64,
+        budget: &ReadBudget,
+        filesystem: bool,
+    ) -> Result<Self> {
         budget.check()?;
         let expected = capacity(expected_gib)?;
         unredirected(directory)?;
@@ -212,7 +223,7 @@ impl DiskGeometry {
         let (path, format) = smolvm::agent::resolve_disk_image(directory, raw_name);
         let file = open(&path)?;
         let stamp = Stamp::of(&file)?;
-        let (bytes, layout) = layout(&file, format, &path, budget)?;
+        let (bytes, layout) = layout(&file, format, &path, budget, filesystem)?;
         if bytes != expected {
             return Err(Error::before(ErrorCode::Ownership));
         }
@@ -227,6 +238,7 @@ impl DiskGeometry {
             layout,
             bytes,
             format,
+            filesystem,
         })
     }
 
@@ -272,7 +284,7 @@ impl DiskGeometry {
         if Stamp::of(&current)? != self.stamp {
             return Err(Error::before(ErrorCode::Ownership));
         }
-        let (bytes, current_layout) = layout(&current, format, &path, budget)?;
+        let (bytes, current_layout) = layout(&current, format, &path, budget, self.filesystem)?;
         // The pinned SDK enlarges raw backing or the QCOW virtual-size field.
         // It does not grow ext4 until normal boot. Its existing filesystem and
         // QCOW metadata/backing references must be preserved, not fabricated.
@@ -280,6 +292,179 @@ impl DiskGeometry {
             return Err(Error::before(ErrorCode::Ownership));
         }
         Ok(())
+    }
+}
+
+/// Immutable export view: growth geometry alone does not bind payload writes.
+pub(crate) struct ExportDisk {
+    geometry: DiskGeometry,
+    version: FileVersion,
+}
+impl ExportDisk {
+    /// Capture only a private COW whose immediate backing is the already held
+    /// source. A valid QCOW file or matching logical size alone grants nothing.
+    pub(crate) fn capture_source_view(
+        directory: &Path,
+        source: &Self,
+        budget: &ReadBudget,
+    ) -> Result<Self> {
+        source.verify(budget)?;
+        let view = Self::capture(directory, "export-source.raw", source.len() / GIB, budget)?;
+        let Layout::Qcow { backings, .. } = &view.geometry.layout else {
+            return Err(Error::before(ErrorCode::Ownership));
+        };
+        let first = backings
+            .first()
+            .ok_or(Error::before(ErrorCode::Ownership))?;
+        if view.geometry.path != directory.join("export-source.qcow2")
+            || first.path != source.geometry.path
+            || first.version != source.version
+            || first.virtual_bytes != source.len()
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        source.verify(budget)?;
+        view.verify(budget)?;
+        Ok(view)
+    }
+    pub(crate) fn capture(
+        directory: &Path,
+        name: &str,
+        gib: u64,
+        budget: &ReadBudget,
+    ) -> Result<Self> {
+        let geometry = DiskGeometry::capture_mode(directory, name, gib, budget, false)?;
+        let version = FileVersion::of(&geometry.file)?;
+        let disk = Self { geometry, version };
+        disk.verify(budget)?;
+        Ok(disk)
+    }
+    pub(crate) fn len(&self) -> u64 {
+        self.geometry.bytes
+    }
+    pub(crate) fn sdk_source(&self) -> (PathBuf, smolvm::data::disk::DiskFormat) {
+        (
+            self.geometry.path().to_path_buf(),
+            match self.geometry.layout {
+                Layout::Raw { .. } => smolvm::data::disk::DiskFormat::Raw,
+                Layout::Qcow { .. } => smolvm::data::disk::DiskFormat::Qcow2,
+            },
+        )
+    }
+    pub(crate) fn verify(&self, budget: &ReadBudget) -> Result<()> {
+        self.quick_verify(budget)?;
+        self.geometry.after(self.geometry.bytes / GIB, budget)?;
+        self.quick_verify(budget)
+    }
+    fn quick_verify(&self, budget: &ReadBudget) -> Result<()> {
+        budget.check()?;
+        unredirected(&self.geometry.directory)?;
+        let directory = std::fs::symlink_metadata(&self.geometry.directory)
+            .map_err(|_| Error::before(ErrorCode::Io))?;
+        let held = self
+            .geometry
+            .directory_handle
+            .metadata()
+            .map_err(|_| Error::before(ErrorCode::Io))?;
+        let (path, format) =
+            smolvm::agent::resolve_disk_image(&self.geometry.directory, &self.geometry.raw_name);
+        if (directory.dev(), directory.ino()) != self.geometry.directory_identity
+            || (held.dev(), held.ino()) != self.geometry.directory_identity
+            || directory.uid() != unsafe { libc::geteuid() }
+            || directory.mode() & 0o022 != 0
+            || path != self.geometry.path
+            || format != self.geometry.format
+            || FileVersion::of(&self.geometry.file)? != self.version
+            || FileVersion::of(&open(&path)?)? != self.version
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        if let Layout::Qcow { backings, .. } = &self.geometry.layout {
+            for backing in backings {
+                budget.check()?;
+                if backing_parent(&backing.path)? != backing.parent
+                    || FileVersion::of(&open(&backing.path)?)? != backing.version
+                {
+                    return Err(Error::before(ErrorCode::Ownership));
+                }
+            }
+        }
+        Ok(())
+    }
+    pub(crate) fn read_at(&self, offset: u64, bytes: &mut [u8], budget: &ReadBudget) -> Result<()> {
+        if bytes.is_empty()
+            || bytes.len() > 256 * 1024
+            || offset
+                .checked_add(bytes.len() as u64)
+                .is_none_or(|end| end > self.len())
+        {
+            return Err(Error::before(ErrorCode::Validation));
+        }
+        self.quick_verify(budget)?;
+        bytes.fill(0);
+        match &self.geometry.layout {
+            Layout::Raw { .. } => self
+                .geometry
+                .file
+                .read_exact_at(bytes, offset)
+                .map_err(|_| Error::before(ErrorCode::Io))?,
+            Layout::Qcow { backings, .. } => {
+                let mut resolved = vec![false; bytes.len()];
+                crate::qcow_geometry::logical_layer(
+                    &self.geometry.file,
+                    budget,
+                    offset,
+                    bytes,
+                    &mut resolved,
+                )?;
+                for backing in backings {
+                    budget.check()?;
+                    if resolved.iter().all(|value| *value) {
+                        break;
+                    }
+                    let file = open(&backing.path)?;
+                    if FileVersion::of(&file)? != backing.version {
+                        return Err(Error::before(ErrorCode::Ownership));
+                    }
+                    let take = backing
+                        .virtual_bytes
+                        .saturating_sub(offset)
+                        .min(bytes.len() as u64) as usize;
+                    for index in take..bytes.len() {
+                        if !resolved[index] {
+                            bytes[index] = 0;
+                            resolved[index] = true;
+                        }
+                    }
+                    if take > 0 {
+                        match backing.layout {
+                            Layout::Qcow { .. } => crate::qcow_geometry::logical_layer(
+                                &file,
+                                budget,
+                                offset,
+                                &mut bytes[..take],
+                                &mut resolved[..take],
+                            )?,
+                            Layout::Raw { .. } => {
+                                let mut data = vec![0; take];
+                                file.read_exact_at(&mut data, offset)
+                                    .map_err(|_| Error::before(ErrorCode::Io))?;
+                                for index in 0..take {
+                                    if !resolved[index] {
+                                        bytes[index] = data[index];
+                                        resolved[index] = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if FileVersion::of(&file)? != backing.version {
+                        return Err(Error::before(ErrorCode::Ownership));
+                    }
+                }
+            }
+        }
+        self.quick_verify(budget)
     }
 }
 
@@ -311,10 +496,11 @@ fn layout(
     format: DiskFormat,
     path: &Path,
     budget: &ReadBudget,
+    filesystem: bool,
 ) -> Result<(u64, Layout)> {
     let origin = FileVersion::of(file)?;
     let mut remaining = crate::qcow_geometry::IO_BYTES;
-    let (bytes, mut layout) = single_layout(file, format, budget, &mut remaining)?;
+    let (bytes, mut layout) = single_layout(file, format, budget, &mut remaining, filesystem)?;
     if format == DiskFormat::Raw {
         if FileVersion::of(file)? != origin {
             return Err(Error::before(ErrorCode::Ownership));
@@ -346,10 +532,16 @@ fn layout(
         } else {
             DiskFormat::Raw
         };
+        let format = if !filesystem {
+            declared.unwrap_or(format)
+        } else {
+            format
+        };
         if declared.is_some_and(|value| value != format) {
             return Err(Error::before(ErrorCode::Validation));
         }
-        let (virtual_bytes, shape) = single_layout(&backing, format, budget, &mut remaining)?;
+        let (virtual_bytes, shape) =
+            single_layout(&backing, format, budget, &mut remaining, filesystem)?;
         if format == DiskFormat::Raw {
             let data = read::<1024>(&backing, 1024)?;
             for index in 0..sb.len() {
@@ -387,7 +579,11 @@ fn layout(
             return Err(Error::before(ErrorCode::Ownership));
         }
     }
-    let filesystem_bytes = filesystem_size(&sb, bytes)?;
+    let filesystem_bytes = if filesystem {
+        filesystem_size(&sb, bytes)?
+    } else {
+        0
+    };
     if FileVersion::of(file)? != origin {
         return Err(Error::before(ErrorCode::Ownership));
     }
@@ -544,6 +740,7 @@ fn single_layout(
     format: DiskFormat,
     budget: &ReadBudget,
     remaining: &mut u64,
+    filesystem: bool,
 ) -> Result<(u64, Layout)> {
     budget.check()?;
     let len = file
@@ -558,11 +755,15 @@ fn single_layout(
             if len > MAX_BYTES {
                 return Err(Error::before(ErrorCode::Validation));
             }
-            if read::<4>(file, 0)? == *b"QFI\xfb" {
+            if filesystem && read::<4>(file, 0)? == *b"QFI\xfb" {
                 return Err(Error::before(ErrorCode::Validation));
             }
             let sb = read::<1024>(file, 1024)?;
-            let filesystem_bytes = filesystem_size(&sb, len)?;
+            let filesystem_bytes = if filesystem {
+                filesystem_size(&sb, len)?
+            } else {
+                0
+            };
             Ok((
                 len,
                 Layout::Raw {
@@ -652,6 +853,114 @@ pub(crate) mod tests {
         std::fs::set_permissions(&root, std::fs::Permissions::from_mode(0o700)).unwrap();
         (temp, root)
     }
+    #[test]
+    fn export_cow_view_binds_raw_and_qcow_immediate_sources_and_versions() {
+        for qcow_source in [false, true] {
+            let (_temp, root) = directory();
+            if qcow_source {
+                backed_qcow(&root, 3);
+            } else {
+                raw(&root);
+            }
+            let budget = ReadBudget::for_export_work(
+                std::time::Duration::from_secs(30),
+                Cancellation::default(),
+            )
+            .unwrap();
+            let source = ExportDisk::capture(&root, "storage.raw", 1, &budget).unwrap();
+            let helper = root.join("helper");
+            std::fs::create_dir(&helper).unwrap();
+            let path = qcow(&helper, 3);
+            let (base, format) = source.sdk_source();
+            link_backing(&path, base.to_str().unwrap(), Some(format), true);
+            std::fs::rename(path, helper.join("export-source.qcow2")).unwrap();
+            let view = ExportDisk::capture_source_view(&helper, &source, &budget).unwrap();
+            assert_eq!(
+                view.sdk_source(),
+                (helper.join("export-source.qcow2"), DiskFormat::Qcow2)
+            );
+            let mut expected = [0; 1024];
+            let mut actual = [0; 1024];
+            source.read_at(1024, &mut expected, &budget).unwrap();
+            view.read_at(1024, &mut actual, &budget).unwrap();
+            assert_eq!(actual, expected);
+            OpenOptions::new()
+                .write(true)
+                .open(base)
+                .unwrap()
+                .write_all_at(&[9], 0)
+                .unwrap();
+            assert!(view.verify(&budget).is_err());
+            assert!(ExportDisk::capture_source_view(&helper, &source, &budget).is_err());
+        }
+    }
+    #[test]
+    fn export_cow_view_rejects_foreign_same_size_backing_and_unbacked_raw_or_qcow() {
+        let (_temp, root) = directory();
+        raw(&root);
+        let budget = ReadBudget::for_export_work(
+            std::time::Duration::from_secs(30),
+            Cancellation::default(),
+        )
+        .unwrap();
+        let source = ExportDisk::capture(&root, "storage.raw", 1, &budget).unwrap();
+        let foreign = root.join("foreign");
+        std::fs::create_dir(&foreign).unwrap();
+        let foreign = raw(&foreign);
+        let helper = root.join("helper");
+        std::fs::create_dir(&helper).unwrap();
+        let path = qcow(&helper, 3);
+        std::fs::rename(&path, helper.join("export-source.qcow2")).unwrap();
+        assert!(ExportDisk::capture_source_view(&helper, &source, &budget).is_err());
+        link_backing(
+            &helper.join("export-source.qcow2"),
+            foreign.to_str().unwrap(),
+            Some(DiskFormat::Raw),
+            true,
+        );
+        assert!(ExportDisk::capture_source_view(&helper, &source, &budget).is_err());
+        std::fs::remove_file(helper.join("export-source.qcow2")).unwrap();
+        let raw_view = raw(&helper);
+        std::fs::rename(raw_view, helper.join("export-source.raw")).unwrap();
+        assert!(ExportDisk::capture_source_view(&helper, &source, &budget).is_err());
+        source.verify(&budget).unwrap();
+    }
+    #[test]
+    #[ignore = "ordinary filesystem-only SDK witness; requires an explicitly selected libkrun bundle"]
+    fn ordinary_sdk_export_cow_binds_retained_raw_and_qcow_sources_without_vm_entry() {
+        let library = std::env::var_os("SMOLVM_LIB_DIR").expect("explicit SDK library directory");
+        let library = PathBuf::from(library).canonicalize().unwrap();
+        assert_eq!(smolvm::agent::find_lib_dir(), Some(library));
+        for qcow_source in [false, true] {
+            let (_temp, root) = directory();
+            if qcow_source {
+                backed_qcow(&root, 3);
+            } else {
+                raw(&root);
+            }
+            let budget = ReadBudget::for_export_work(
+                std::time::Duration::from_secs(30),
+                Cancellation::default(),
+            )
+            .unwrap();
+            let source = ExportDisk::capture(&root, "storage.raw", 1, &budget).unwrap();
+            let helper = root.join("helper");
+            std::fs::create_dir(&helper).unwrap();
+            let (base, format) = source.sdk_source();
+            let path = helper.join("export-source.qcow2");
+            // Explicit private paths only. This loads the SDK library's pure
+            // overlay creator, with no manager, SDK cache namespace or VMM.
+            smolvm::agent::create_disk_overlays(&[(path.clone(), base, format)]).unwrap();
+            let view = ExportDisk::capture_source_view(&helper, &source, &budget).unwrap();
+            assert_eq!(view.sdk_source(), (path, DiskFormat::Qcow2));
+            let mut expected = [0; 1024];
+            let mut actual = [0; 1024];
+            source.read_at(1024, &mut expected, &budget).unwrap();
+            view.read_at(1024, &mut actual, &budget).unwrap();
+            assert_eq!(actual, expected);
+            source.verify(&budget).unwrap();
+        }
+    }
     pub(crate) fn raw(root: &Path) -> PathBuf {
         let path = root.join("storage.raw");
         let file = OpenOptions::new()
@@ -713,7 +1022,12 @@ pub(crate) mod tests {
         path
     }
 
-    fn link_backing(path: &Path, name: &str, declared: Option<DiskFormat>, unallocated: bool) {
+    pub(crate) fn link_backing(
+        path: &Path,
+        name: &str,
+        declared: Option<DiskFormat>,
+        unallocated: bool,
+    ) {
         let file = OpenOptions::new()
             .read(true)
             .write(true)
@@ -1245,5 +1559,46 @@ pub(crate) mod tests {
         assert!(geometry.verify_after(2).is_ok());
         file.write_all_at(&0u16.to_be_bytes(), 5 * cluster).unwrap();
         assert!(geometry.verify_after(2).is_err());
+    }
+    #[test]
+    fn export_logical_reader_handles_nested_inheritance_and_smaller_backing_eof() {
+        let (_temp, root) = directory();
+        let raw_path = raw(&root);
+        let base = root.join("base.ext4");
+        std::fs::rename(raw_path, &base).unwrap();
+        OpenOptions::new()
+            .write(true)
+            .open(&base)
+            .unwrap()
+            .write_all_at(b"INHERITED", 128 * 1024)
+            .unwrap();
+        let mid = qcow(&root, 3);
+        link_backing(&mid, "base.ext4", Some(DiskFormat::Raw), true);
+        std::fs::rename(mid, root.join("middle.qcow2")).unwrap();
+        let top = qcow(&root, 3);
+        link_backing(&top, "middle.qcow2", Some(DiskFormat::Qcow2), true);
+        let budget = ReadBudget::for_export_work(
+            std::time::Duration::from_secs(30),
+            Cancellation::default(),
+        )
+        .unwrap();
+        let disk = ExportDisk::capture(&root, "storage.raw", 1, &budget).unwrap();
+        let mut data = [0; 9];
+        disk.read_at(128 * 1024, &mut data, &budget).unwrap();
+        assert_eq!(&data, b"INHERITED");
+        drop(disk);
+        OpenOptions::new()
+            .write(true)
+            .open(&top)
+            .unwrap()
+            .write_all_at(&(2 * GIB).to_be_bytes(), 24)
+            .unwrap();
+        let disk = ExportDisk::capture(&root, "storage.raw", 2, &budget).unwrap();
+        let mut beyond = [255; 4096];
+        disk.read_at(GIB - 2048, &mut beyond, &budget).unwrap();
+        assert!(beyond.iter().all(|byte| *byte == 0));
+        disk.read_at(GIB + 128 * 1024, &mut beyond, &budget)
+            .unwrap();
+        assert!(beyond.iter().all(|byte| *byte == 0));
     }
 }

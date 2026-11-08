@@ -177,6 +177,7 @@ defmodule SmolBox.Store.Memory do
           native_capture_resolutions: 1,
           native_capture_cleanup: 1,
           native_capture_abort_sources: 1,
+          native_export_histories: 1,
           local_volumes: 1,
           worker_control: 1,
           schema: 1,
@@ -654,8 +655,12 @@ defmodule SmolBox.Store.Memory do
   end
 
   defp machine_operation(state, :export_resolve, [key, guard, id, observed, now]) do
+    machine_operation(state, :export_resolve, [key, guard, id, observed, nil, now])
+  end
+
+  defp machine_operation(state, :export_resolve, [key, guard, id, observed, cleanup, now]) do
     with {:ok, record} <- machine_guard(state, key, guard, now),
-         {:ok, next} <- ExportOps.resolve(record, id, observed, now),
+         {:ok, next} <- ExportOps.resolve(record, id, observed, cleanup, now),
          do: machine_save(state, next)
   end
 

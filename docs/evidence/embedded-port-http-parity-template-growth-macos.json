@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "status": "passed",
+  "recorded_date": "2026-10-15",
+  "scope": "ordinary-approved-template-disk-format-and-growth-only; HTTP-only package consumers",
+  "platform": "macos",
+  "architecture": "arm64",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "engine_base_commit": "e0b15a4b6edc451f4870243bc8eb8e6b024d1226",
+  "engine_source_file_sha256": {
+    "native/smolbox-engine/src/machine.rs": "6855178c7605702f068f1975d51b56bab725f48403226384cd5afde127560d47"
+  },
+  "test_binary_sha256": "a30f31be26a0580812cb58e12bc9af2e3698c3a4887858a2b0eb1b23aee6dd24",
+  "approved_template_package_manifest_sha256": "903204ff19ac74140e1d0481d364be1d23dcc363eacd4150093819f1184ceef6",
+  "templates": {
+    "overlay-template.ext4": {
+      "sha256": "7d96f5792d089f0de4dd86960ab518c3745d66cb1e80adc01bd9cf4671d6de48",
+      "bytes": 1073741824,
+      "mode": "0400"
+    },
+    "storage-template.ext4": {
+      "sha256": "20dfb5bad0c611621b7573bc1b8d4006c86c7d8f972393d012c3b6e759aa1e53",
+      "bytes": 1073741824,
+      "mode": "0400"
+    }
+  },
+  "storage_gib": 3,
+  "overlay_gib": 2,
+  "original_prefix_hashes_preserved": true,
+  "sdk_format_markers_verified": true,
+  "templates_unchanged": true,
+  "temporary_disks_removed": true,
+  "sdk_domain_opened": false,
+  "manager_created": false,
+  "vm_started": false,
+  "proof_log_sha256": "0240d08f112d4091f2510e6391616200f99cd65da1df5b236057e039f4de0814",
+  "http_only_consumers": {
+    "status": "passed",
+    "archive_sha256": "323e8b99e7002ba6c9acba374704d46324279fa8129b05895dd2f952a26420b2",
+    "native_assets_in_archive": false,
+    "archive_scope": "saved archive before final documentation/evidence edits",
+    "current": {
+      "elixir": "1.20.4",
+      "otp": "29.0.6",
+      "without_rust": true
+    },
+    "minimum": {
+      "elixir": "1.18.4",
+      "otp": "27.3.4.15",
+      "without_rust": true
+    },
+    "report_sha256": {
+      "current": "e09005c29dfdf7c78b4ecf4eb87bd4cf5c86e7004353f92d9c3f1d0797bee020",
+      "minimum": "e2ff61b0c574a663a2568259aeb2e2256f06fce7fb0183c0439a68a31ce144e1"
+    }
+  },
+  "helper_launch_qualified": false,
+  "guest_resize_qualified": false,
+  "qualifies_export_import": false,
+  "native_public_consumers_qualified": false,
+  "historical_qualification_transferred": false,
+  "crash_handling_qualified": false,
+  "distribution_approved": false,
+  "limitations": [
+    "This proves actual SDK formatting and owned sparse disk growth, not machine/guest boot or conversion.",
+    "The original failed helper owner remains retained; no teardown or second domain owner was attempted.",
+    "Linux, exact-package native consumers and remaining P0-P9 gates stay pending."
+  ]
+}

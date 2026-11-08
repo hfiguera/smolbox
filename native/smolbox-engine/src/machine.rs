@@ -158,12 +158,71 @@ pub struct Engine {
     pub(crate) transfers: Option<TransferSupervisor>,
     pub(crate) jobs: crate::jobs::JobPool,
     pub(crate) capture_staging: Arc<crate::capture_staging::Staging>,
+    pub(crate) export_staging: Arc<crate::export_staging::Staging>,
+    pub(crate) export_retention: Arc<crate::export_retention::Registry>,
     templates: Option<crate::assets::PreparedTemplates>,
+    export_assets: Option<crate::ApprovedExportAssets>,
     host: Option<crate::HostContext>,
     boot: Option<(crate::BootLauncher, crate::epoch::ActorEpoch)>,
 }
 
 impl Engine {
+    /// Install package-manifest-approved runtime inputs once, before serving.
+    /// Paths are operator setup, never request fields. Old packages can omit this
+    /// optional catalog and retain their existing behavior without export.
+    pub fn prepare_export_assets(
+        &mut self,
+        assets: crate::ApprovedExportAssets,
+        package_sha256: &str,
+        budget: &crate::ReadBudget,
+    ) -> Result<()> {
+        budget.check()?;
+        if !self.available() {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        let host = self
+            .host
+            .as_ref()
+            .ok_or(Error::before(ErrorCode::Unsupported))?;
+        if host.domain != self.binding || host.package_sha256 != package_sha256 {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        assets.validate()?;
+        let libraries = &host.executables.library_directory;
+        let root = libraries
+            .parent()
+            .ok_or(Error::before(ErrorCode::Ownership))?;
+        if libraries.file_name() != Some(std::ffi::OsStr::new("lib"))
+            || assets
+                .files
+                .iter()
+                .any(|asset| asset.path != root.join(&asset.name))
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        if let Some(previous) = &self.export_assets {
+            return if previous == &assets {
+                Ok(())
+            } else {
+                Err(Error::before(ErrorCode::Conflict))
+            };
+        }
+        let _job = self.jobs.acquire(crate::jobs::Demand::export_source())?;
+        host.validate()?;
+        let qualified = assets.qualify(budget)?;
+        qualified.verify()?;
+        budget.check()?;
+        self.export_assets = Some(assets);
+        Ok(())
+    }
+    pub(crate) fn export_asset_approval(&self) -> Result<&crate::ApprovedExportAssets> {
+        if !self.available() {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        self.export_assets
+            .as_ref()
+            .ok_or(Error::before(ErrorCode::Unsupported))
+    }
     pub(crate) fn capture_assets(&self) -> Result<(PathBuf, PathBuf)> {
         let host = self
             .host
@@ -523,6 +582,9 @@ impl Engine {
         let jobs = crate::jobs::JobPool::default();
         let capture_staging =
             crate::capture_staging::Staging::open(&binding, domain.clone(), jobs.clone())?;
+        let export_staging =
+            crate::export_staging::Staging::open(&binding, domain.clone(), jobs.clone())?;
+        let export_retention = crate::export_retention::Registry::new(domain.clone());
         Ok(Self {
             opened_at: std::time::Instant::now(),
             runtime: EmbeddedRuntime::with_db(db.clone()),
@@ -537,7 +599,10 @@ impl Engine {
             transfers: None,
             jobs,
             capture_staging,
+            export_staging,
+            export_retention,
             templates: None,
+            export_assets: None,
             host: None,
             boot: None,
         })
@@ -642,6 +707,14 @@ impl Engine {
         }
         Ok(actors)
     }
+    /// Cleanup uses the original actor ledger, including after launch admission
+    /// was fenced. It grants no new boot or PID-file-derived manager authority.
+    pub(crate) fn collection_epoch(&self) -> Result<&crate::epoch::ActorEpoch> {
+        self.boot
+            .as_ref()
+            .map(|(_, actors)| actors)
+            .ok_or(Error::before(ErrorCode::Unsupported))
+    }
 
     /// Prepare approved account assets while this engine holds domain ownership,
     /// before a bridge publishes readiness or starts its native executors.
@@ -663,6 +736,28 @@ impl Engine {
             .as_ref()
             .ok_or(Error::before(ErrorCode::Unsupported))?
             .verify()
+    }
+    pub(crate) fn export_sdk_library(&self) -> Result<PathBuf> {
+        self.verify_templates()?;
+        let host = self
+            .host
+            .as_ref()
+            .ok_or(Error::before(ErrorCode::Unsupported))?;
+        host.validate()?;
+        let expected = host
+            .executables
+            .library_directory
+            .canonicalize()
+            .map_err(|_| Error::before(ErrorCode::Ownership))?;
+        if smolvm::agent::find_lib_dir().as_ref() != Some(&expected) {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        Ok(expected)
+    }
+    pub(crate) fn export_manager_rootfs(&self) -> Result<PathBuf> {
+        let library = self.export_sdk_library()?;
+        self.export_asset_approval()?;
+        crate::export_container::package_manager_rootfs(&library)
     }
 
     /// A bridge verifies its package before supplying generic host context.
@@ -1142,13 +1237,17 @@ impl Engine {
         }
         let result = (|| {
             check().map_err(|e| Error::uncertain(e.code))?;
-            let manager = AgentManager::for_vm_with_sizes(
-                &request.name,
-                Some(request.resources.storage_gib),
-                Some(request.resources.overlay_gib),
-            )
-            .map_err(|_| Error::uncertain(ErrorCode::Native))?;
+            // Format fresh raw disks before growing them: copying an immutable
+            // template onto an already larger disk inherits read-only mode and
+            // makes the SDK's format-time expansion fail.
+            let manager = AgentManager::for_vm_with_sizes(&request.name, Some(1), Some(1))
+                .map_err(|_| Error::uncertain(ErrorCode::Native))?;
             prepare_manager_disks(&manager, || self.verify_templates())?;
+            grow_fresh_formatted_disks(
+                manager.storage_path(),
+                manager.overlay_path(),
+                request.resources,
+            )?;
             self.verify_templates()
                 .map_err(|e| Error::uncertain(e.code))?;
             check().map_err(|e| Error::uncertain(e.code))?;
@@ -1391,10 +1490,17 @@ impl Engine {
         if !prepared.verified.covers(&prepared.path) {
             return Err(Error::uncertain(ErrorCode::Ownership));
         }
+        // Container packs use the immutable account templates; format at the
+        // baseline before growth. VM packs retain their original seeded geometry
+        // and existing public SDK seeding path.
+        let (initial_storage, initial_overlay) = match prepared.manifest.mode {
+            PackMode::Container => (1, 1),
+            PackMode::Vm => (request.resources.storage_gib, request.resources.overlay_gib),
+        };
         let manager = AgentManager::for_vm_with_sizes(
             &request.name,
-            Some(request.resources.storage_gib),
-            Some(request.resources.overlay_gib),
+            Some(initial_storage),
+            Some(initial_overlay),
         )
         .map_err(|_| Error::uncertain(ErrorCode::Native))?;
         smolvm::portable_checkpoint::materialize_pack_layers(&request.name, &prepared.path)
@@ -1428,6 +1534,13 @@ impl Engine {
         let seeded =
             AgentManager::for_vm(&request.name).map_err(|_| Error::uncertain(ErrorCode::Native))?;
         prepare_manager_disks(&seeded, || self.verify_templates())?;
+        if prepared.manifest.mode == PackMode::Container {
+            grow_fresh_formatted_disks(
+                seeded.storage_path(),
+                seeded.overlay_path(),
+                request.resources,
+            )?;
+        }
         check()?;
         if !prepared.verified.covers(&prepared.path) {
             return Err(Error::uncertain(ErrorCode::Validation));
@@ -2393,6 +2506,12 @@ impl Engine {
             ObservedState::Stopped => {}
             _ => return Err(Error::before(ErrorCode::State)),
         }
+        // SDK deletion derives its storage path from the process cache root,
+        // independently of the supplied DB. Never enter it for another root,
+        // including synthetic DB-only fixtures or a changed process environment.
+        if smolvm::agent::vm_data_dir(&receipt.name) != self.vm_directory(&receipt.name) {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
         self.authorize_capture_staging_deletion(receipt, budget)?;
         self.verify_lifecycle_preconditions(receipt, &expected)?;
         budget.check()?;
@@ -2685,7 +2804,7 @@ impl Engine {
         self.binding.vm_root.join(smolvm::agent::vm_dir_hash(name))
     }
 
-    fn oci_manager_busy(&self, name: &str) -> Result<bool> {
+    pub(crate) fn oci_manager_busy(&self, name: &str) -> Result<bool> {
         let handles = self
             .owned_oci
             .lock()
@@ -2879,6 +2998,33 @@ fn prepare_manager_disks(
     Ok(())
 }
 
+/// Only fresh, reserved, pre-receipt container/OCI disks enter this helper.
+/// Existing machines use the separate authorized material-transition path.
+fn grow_fresh_formatted_disks(storage: &Path, overlay: &Path, resources: Resources) -> Result<()> {
+    resources.validate().map_err(|e| Error::uncertain(e.code))?;
+    fn grow<K: smolvm::storage::DiskType>(path: &Path, gib: u64) -> Result<()> {
+        crate::assets::prepare_created_disk(path).map_err(|e| Error::uncertain(e.code))?;
+        let disk = smolvm::storage::VmDisk::<K>::open_existing_with_format(
+            path,
+            smolvm::storage::DiskFormat::Raw,
+        )
+        .map_err(|_| Error::uncertain(ErrorCode::Native))?;
+        // Formatting completed through the public SDK before this step. Do not
+        // synthesize a marker, shrink a seeded disk or format again after growth.
+        if disk.needs_format() || disk.size_bytes() > gib * (1 << 30) {
+            return Err(Error::uncertain(ErrorCode::Ownership));
+        }
+        let grown = smolvm::storage::VmDisk::<K>::open_or_create_at(path, gib)
+            .map_err(|_| Error::uncertain(ErrorCode::Native))?;
+        if grown.size_bytes() != gib * (1 << 30) {
+            return Err(Error::uncertain(ErrorCode::Ownership));
+        }
+        Ok(())
+    }
+    grow::<smolvm::storage::Storage>(storage, resources.storage_gib)?;
+    grow::<smolvm::storage::Overlay>(overlay, resources.overlay_gib)
+}
+
 fn database_identity(path: &Path) -> Result<(u64, u64)> {
     let metadata =
         std::fs::symlink_metadata(path).map_err(|_| Error::before(ErrorCode::Database))?;
@@ -2953,6 +3099,232 @@ pub(crate) fn marker_matches(receipt: &CreationReceipt, directory: &Path) -> Res
 #[cfg(test)]
 pub(crate) mod tests {
     use super::*;
+
+    pub(crate) fn fixture_marker(receipt: &CreationReceipt, directory: &Path) {
+        write_marker(receipt, directory).unwrap();
+    }
+
+    #[test]
+    #[ignore = "explicit approved account-template disk qualification; no manager, domain owner or VM"]
+    fn ordinary_approved_template_format_and_growth_without_vm() {
+        use sha2::{Digest, Sha256};
+        use std::fs::File;
+        use std::io::Read;
+        use std::os::unix::fs::DirBuilderExt;
+        let approval = std::env::var_os("SMOLBOX_TEMPLATE_GROWTH_APPROVAL")
+            .expect("explicit preapproved template identities");
+        let approved: BTreeMap<String, crate::TemplateFile> =
+            serde_json::from_slice(&std::fs::read(approval).unwrap()).unwrap();
+        assert_eq!(approved.len(), 2);
+        let output = PathBuf::from(
+            std::env::var_os("SMOLBOX_TEMPLATE_GROWTH_OUTPUT").expect("fresh private output"),
+        );
+        crate::host::unredirected(output.parent().unwrap()).unwrap();
+        std::fs::DirBuilder::new()
+            .mode(0o700)
+            .create(&output)
+            .unwrap();
+        fn digest(path: &Path, bytes: u64) -> String {
+            let mut input = File::open(path).unwrap().take(bytes);
+            let mut hash = Sha256::new();
+            let mut count = 0;
+            let mut buffer = [0; 65536];
+            loop {
+                let n = input.read(&mut buffer).unwrap();
+                if n == 0 {
+                    break;
+                }
+                count += n as u64;
+                hash.update(&buffer[..n]);
+            }
+            assert_eq!(count, bytes);
+            hex::encode(hash.finalize())
+        }
+        let account = dirs::home_dir().unwrap().join(".smolvm");
+        let mut originals = Vec::new();
+        for name in ["storage-template.ext4", "overlay-template.ext4"] {
+            let expected = approved.get(name).unwrap();
+            let path = account.join(name);
+            assert_eq!(path, expected.path);
+            assert_eq!(expected.bytes, 1 << 30);
+            crate::host::unredirected(&path).unwrap();
+            let metadata = std::fs::symlink_metadata(&path).unwrap();
+            assert!(metadata.is_file());
+            assert_eq!(metadata.uid(), unsafe { libc::geteuid() });
+            assert_eq!(metadata.nlink(), 1);
+            assert_eq!(metadata.mode() & 0o777, 0o400);
+            assert_eq!(metadata.len(), expected.bytes);
+            assert_eq!(digest(&path, expected.bytes), expected.sha256);
+            // Plain approved files already exist in the resolver's first root;
+            // it cannot decompress/install templates during this fixture.
+            assert_eq!(
+                smolvm_pack::assets::find_existing_template(name),
+                Some(path.clone())
+            );
+            originals.push((path, metadata));
+        }
+        let storage = output.join("storage.raw");
+        let overlay = output.join("overlay.raw");
+        smolvm::storage::StorageDisk::open_or_create_at(&storage, 1)
+            .unwrap()
+            .ensure_formatted()
+            .unwrap();
+        smolvm::storage::OverlayDisk::open_or_create_at(&overlay, 1)
+            .unwrap()
+            .ensure_formatted()
+            .unwrap();
+        grow_fresh_formatted_disks(
+            &storage,
+            &overlay,
+            Resources {
+                cpus: 1,
+                memory_mib: 512,
+                storage_gib: 3,
+                overlay_gib: 2,
+            },
+        )
+        .unwrap();
+        for (disk, name, gib) in [
+            (&storage, "storage-template.ext4", 3),
+            (&overlay, "overlay-template.ext4", 2),
+        ] {
+            assert_eq!(std::fs::metadata(disk).unwrap().len(), gib << 30);
+            assert_eq!(digest(disk, 1 << 30), approved[name].sha256);
+            assert_eq!(
+                std::fs::read(disk.with_extension("formatted")).unwrap(),
+                b"1"
+            );
+        }
+        for (path, before) in originals {
+            let after = std::fs::symlink_metadata(&path).unwrap();
+            assert_eq!(
+                (
+                    before.dev(),
+                    before.ino(),
+                    before.mode(),
+                    before.len(),
+                    before.mtime(),
+                    before.mtime_nsec(),
+                    before.ctime(),
+                    before.ctime_nsec()
+                ),
+                (
+                    after.dev(),
+                    after.ino(),
+                    after.mode(),
+                    after.len(),
+                    after.mtime(),
+                    after.mtime_nsec(),
+                    after.ctime(),
+                    after.ctime_nsec()
+                )
+            );
+            assert_eq!(
+                digest(&path, 1 << 30),
+                approved[path.file_name().unwrap().to_str().unwrap()].sha256
+            );
+        }
+        // Remove only the four exact files created above, after all reads close.
+        for path in [&storage, &overlay] {
+            std::fs::remove_file(path).unwrap();
+            std::fs::remove_file(path.with_extension("formatted")).unwrap();
+        }
+        let executable = std::env::current_exe().unwrap();
+        let evidence = serde_json::json!({
+            "status":"passed", "scope":"approved-template-format-and-growth-only",
+            "templates":approved, "test_binary_sha256":digest(&executable, std::fs::metadata(&executable).unwrap().len()),
+            "storage_gib":3, "overlay_gib":2, "templates_unchanged":true,
+            "sdk_domain_opened":false, "manager_created":false, "vm_started":false,
+            "helper_launch_qualified":false, "crash_handling_qualified":false,
+            "distribution_approved":false,
+        });
+        std::fs::write(
+            output.join("evidence.json"),
+            serde_json::to_vec_pretty(&evidence).unwrap(),
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn fresh_formatted_growth_preserves_bytes_and_markers_and_rejects_unformatted_disks() {
+        use std::fs::File;
+        use std::io::{Read, Seek, SeekFrom, Write};
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path().canonicalize().unwrap();
+        let storage = root.join("storage.raw");
+        let overlay = root.join("overlay.raw");
+        for path in [&storage, &overlay] {
+            let mut file = File::create(path).unwrap();
+            file.set_len(1 << 30).unwrap();
+            file.write_all(b"inert formatted-disk model").unwrap();
+            file.seek(SeekFrom::End(-4)).unwrap();
+            file.write_all(b"tail").unwrap();
+        }
+        let resources = Resources {
+            cpus: 1,
+            memory_mib: 512,
+            storage_gib: 3,
+            overlay_gib: 2,
+        };
+        assert_eq!(
+            grow_fresh_formatted_disks(&storage, &overlay, resources)
+                .unwrap_err()
+                .code,
+            ErrorCode::Ownership
+        );
+        assert_eq!(std::fs::metadata(&storage).unwrap().len(), 1 << 30);
+        // Private model only: no templates, SDK namespace or lifecycle entry.
+        for path in [&storage, &overlay] {
+            std::fs::write(path.with_extension("formatted"), b"1").unwrap();
+        }
+        grow_fresh_formatted_disks(&storage, &overlay, resources).unwrap();
+        for (path, gib) in [(&storage, 3), (&overlay, 2)] {
+            let mut file = File::open(path).unwrap();
+            assert_eq!(file.metadata().unwrap().len(), gib << 30);
+            let mut prefix = [0; 26];
+            file.read_exact(&mut prefix).unwrap();
+            assert_eq!(&prefix, b"inert formatted-disk model");
+            file.seek(SeekFrom::Start((1 << 30) - 4)).unwrap();
+            let mut tail = [0; 4];
+            file.read_exact(&mut tail).unwrap();
+            assert_eq!(&tail, b"tail");
+            assert_eq!(
+                std::fs::read(path.with_extension("formatted")).unwrap(),
+                b"1"
+            );
+        }
+        // Repeating the bounded growth is harmless; a lower target cannot shrink.
+        grow_fresh_formatted_disks(&storage, &overlay, resources).unwrap();
+        assert!(grow_fresh_formatted_disks(
+            &storage,
+            &overlay,
+            Resources {
+                storage_gib: 1,
+                ..resources
+            }
+        )
+        .is_err());
+        assert_eq!(std::fs::metadata(&storage).unwrap().len(), 3 << 30);
+    }
+
+    #[test]
+    fn collection_keeps_original_ledger_under_quarantine_without_granting_boot() {
+        let temporary = tempfile::tempdir().unwrap();
+        let mut engine = test_engine(temporary.path());
+        let root = temporary.path().canonicalize().unwrap().join("model-epoch");
+        std::fs::create_dir(&root).unwrap();
+        let (_, launcher, actors) =
+            crate::epoch::tests::fixture_for_binding(&root, None, engine.binding().clone());
+        engine.boot = Some((launcher, actors.clone()));
+        drop(actors.begin_boot("unresolved-model").unwrap()); // No process or SDK entry.
+        engine.jobs.quarantine();
+        assert!(engine.boot_epoch().is_err());
+        assert!(!engine.available());
+        let original = engine.collection_epoch().unwrap();
+        assert_eq!(original.identity(), actors.identity());
+        assert!(original.bound_to(engine.binding()));
+        assert!(!original.available());
+    }
 
     #[test]
     fn cancelled_growth_proof_observation_cannot_enter_io_or_reserve_control_capacity() {
@@ -3309,6 +3681,9 @@ pub(crate) mod tests {
         let jobs = crate::jobs::JobPool::default();
         let capture_staging =
             crate::capture_staging::Staging::open(&binding, domain.clone(), jobs.clone()).unwrap();
+        let export_staging =
+            crate::export_staging::Staging::open(&binding, domain.clone(), jobs.clone()).unwrap();
+        let export_retention = crate::export_retention::Registry::new(domain.clone());
         Engine {
             opened_at: std::time::Instant::now(),
             runtime: EmbeddedRuntime::with_db(db.clone()),
@@ -3323,12 +3698,42 @@ pub(crate) mod tests {
             transfers: None,
             jobs,
             capture_staging,
+            export_staging,
+            export_retention,
             templates: None,
+            export_assets: None,
             host: None,
             boot: None,
         }
     }
 
+    pub(crate) fn test_export_host(engine: &mut Engine, root: &Path) {
+        use sha2::{Digest, Sha256};
+        use std::os::unix::fs::PermissionsExt;
+        let executable = root.join("approved-export-host");
+        std::fs::write(&executable, b"test host identity, never executed").unwrap();
+        std::fs::set_permissions(&executable, std::fs::Permissions::from_mode(0o500)).unwrap();
+        let executable = crate::Executable {
+            path: executable,
+            sha256: format!(
+                "{:x}",
+                Sha256::digest(b"test host identity, never executed")
+            ),
+        };
+        engine.host = Some(
+            crate::HostContext::capture(
+                engine.binding().clone(),
+                "b".repeat(32),
+                "c".repeat(64),
+                crate::ExecutableLocator {
+                    boot: executable.clone(),
+                    file_worker: executable,
+                    library_directory: root.join("lib"),
+                },
+            )
+            .unwrap(),
+        );
+    }
     #[test]
     fn metadata_preparation_observes_exact_source_without_changing_machine_storage_or_records() {
         use sha2::{Digest, Sha256};
@@ -5976,5 +6381,119 @@ pub(crate) mod tests {
             drop(engine.gate(&format!("finished-{n}")).unwrap());
         }
         assert!(engine.gates.lock().unwrap().len() <= 2);
+    }
+}
+
+#[cfg(test)]
+mod export_asset_catalog_tests {
+    use super::*;
+    use crate::export_assets::tests::{budget, fixture};
+    use std::os::unix::fs::PermissionsExt;
+    #[test]
+    fn package_catalog_requires_host_domain_package_and_exact_library_root() {
+        let temp = tempfile::tempdir().unwrap();
+        let mut engine = tests::test_engine(temp.path());
+        let assets = fixture(&temp.path().join("assets"));
+        assert!(engine
+            .prepare_export_assets(assets.clone(), &"c".repeat(64), &budget())
+            .is_err());
+        tests::test_export_host(
+            &mut engine,
+            &std::fs::canonicalize(temp.path().join("assets")).unwrap(),
+        );
+        assert_eq!(
+            engine
+                .prepare_export_assets(assets.clone(), &"d".repeat(64), &budget())
+                .unwrap_err()
+                .code,
+            ErrorCode::Ownership
+        );
+        let elsewhere = fixture(&temp.path().join("elsewhere"));
+        assert_eq!(
+            engine
+                .prepare_export_assets(elsewhere, &"c".repeat(64), &budget())
+                .unwrap_err()
+                .code,
+            ErrorCode::Ownership
+        );
+        let domain = engine.host.as_ref().unwrap().domain.clone();
+        engine.host.as_mut().unwrap().domain.generation = "e".repeat(32);
+        assert!(engine
+            .prepare_export_assets(assets.clone(), &"c".repeat(64), &budget())
+            .is_err());
+        engine.host.as_mut().unwrap().domain = domain;
+        assert!(engine.export_asset_approval().is_err());
+        engine
+            .prepare_export_assets(assets.clone(), &"c".repeat(64), &budget())
+            .unwrap();
+        assert!(engine.export_asset_approval().unwrap() == &assets);
+        engine
+            .prepare_export_assets(assets.clone(), &"c".repeat(64), &budget())
+            .unwrap();
+        let mut changed = assets;
+        changed.files[0].sha256 = "f".repeat(64);
+        assert_eq!(
+            engine
+                .prepare_export_assets(changed, &"c".repeat(64), &budget())
+                .unwrap_err()
+                .code,
+            ErrorCode::Conflict
+        );
+        assert_eq!(engine.jobs.counts(), crate::jobs::Counts::default());
+    }
+    #[test]
+    fn asset_setup_preserves_budget_admission_and_rejects_changed_bytes_without_installation() {
+        let temp = tempfile::tempdir().unwrap();
+        let mut engine = tests::test_engine(temp.path());
+        let assets = fixture(&temp.path().join("assets"));
+        tests::test_export_host(
+            &mut engine,
+            &std::fs::canonicalize(temp.path().join("assets")).unwrap(),
+        );
+        let work = engine
+            .jobs
+            .acquire(crate::jobs::Demand::export_source())
+            .unwrap();
+        assert_eq!(
+            engine
+                .prepare_export_assets(assets.clone(), &"c".repeat(64), &budget())
+                .unwrap_err()
+                .code,
+            ErrorCode::Admission
+        );
+        assert!(engine.export_asset_approval().is_err());
+        drop(work);
+        let canceled = budget();
+        canceled.cancel.cancel();
+        assert_eq!(
+            engine
+                .prepare_export_assets(assets.clone(), &"c".repeat(64), &canceled)
+                .unwrap_err()
+                .code,
+            ErrorCode::State
+        );
+        let mut wrong = assets.clone();
+        wrong.files[0].sha256 = "f".repeat(64);
+        assert!(engine
+            .prepare_export_assets(wrong, &"c".repeat(64), &budget())
+            .is_err());
+        assert!(engine.export_asset_approval().is_err());
+        engine
+            .prepare_export_assets(assets.clone(), &"c".repeat(64), &budget())
+            .unwrap();
+        // The catalog stores grants, not persistent file descriptors; packing
+        // independently rehashes and rejects changed bytes under its own job.
+        std::fs::set_permissions(
+            &assets.files[0].path,
+            std::fs::Permissions::from_mode(0o600),
+        )
+        .unwrap();
+        std::fs::write(&assets.files[0].path, b"changed").unwrap();
+        assert!(engine
+            .export_asset_approval()
+            .unwrap()
+            .qualify(&budget())
+            .is_err());
+        assert_eq!(engine.jobs.counts(), crate::jobs::Counts::default());
     }
 }

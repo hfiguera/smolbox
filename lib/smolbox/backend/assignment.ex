@@ -461,20 +461,25 @@ defmodule SmolBox.Backend.Assignment do
     do:
       Enum.all?(
         [
-          exports: %{},
           branch_children: %{},
-          active_export: nil,
           branch: nil,
           active_branch: nil,
           preparation: nil
         ],
         fn {key, empty} -> Map.get(record, key, empty) == empty end
-      ) and (Map.get(record, :mounts, []) == [] or version == 2) and
+      ) and export_histories?(record, version) and
+        (Map.get(record, :mounts, []) == [] or version == 2) and
         growth_histories?(record, version) and
         capture_origin?(record) and
         (version == 2 or
            (Map.get(record, :reserved_ports, []) == [] and
               Map.get(record, :captures, %{}) == %{} and Map.get(record, :active_capture) == nil))
+
+  defp export_histories?(%SmolBox.ManagedMachine{} = record, 2),
+    do: SmolBox.Export.history_valid?(record)
+
+  defp export_histories?(record, _),
+    do: Map.get(record, :exports, %{}) == %{} and Map.get(record, :active_export) == nil
 
   defp growth_histories?(record, 2), do: NativeGrowth.record_valid?(record)
 

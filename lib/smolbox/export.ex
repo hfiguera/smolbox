@@ -18,6 +18,7 @@ defmodule SmolBox.Export do
                 version: 1,
                 receipt: nil,
                 result: nil,
+                native_authority: nil,
                 error: nil,
                 resolved_at_ms: nil
               ]
@@ -42,6 +43,7 @@ defmodule SmolBox.Export do
           state: state(),
           version: pos_integer(),
           receipt: ExportReceipt.t() | nil,
+          native_authority: struct() | nil,
           result: ExportResult.t() | nil,
           error: Error.t() | nil,
           resolved_at_ms: non_neg_integer() | nil
@@ -79,7 +81,7 @@ defmodule SmolBox.Export do
            record.state not in [:accepted, :dispatching, :failed, :cancelled] or
              record.receipt == nil,
          true <- record.state != :verifying or record.receipt != nil do
-      :ok
+      if SmolBox.Embedded.ExportAuthority.valid?(record), do: :ok, else: invalid()
     else
       _invalid -> invalid()
     end
@@ -96,6 +98,7 @@ defmodule SmolBox.Export do
       Enum.all?(machine.exports, fn {id, record} ->
         validate(record) == :ok and record.spec.id == id and
           record.machine == {machine.scope, machine.id} and
+          SmolBox.Embedded.ExportAuthority.entry_valid?(record, machine) and
           (terminal?(record) or machine.active_export == id)
       end) and active?(machine)
   end

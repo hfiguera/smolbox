@@ -9,6 +9,9 @@ defmodule SmolBox.Embedded.Protocol do
     CommandPayload,
     CreationFeatures,
     CreationPayload,
+    ExportContract,
+    ExportPublication,
+    ExportStageCleanup,
     GrowthTransition,
     ImageContract,
     JSON,
@@ -130,6 +133,11 @@ defmodule SmolBox.Embedded.Protocol do
     values =
       if match?(%{"feature_versions" => %{"terminals" => 1}}, sdk),
         do: Map.put(values, "terminals", TerminalContract.limits()),
+        else: values
+
+    values =
+      if match?(%{"feature_versions" => %{"exports" => 1}}, sdk),
+        do: Map.put(values, "exports", ExportContract.limits()),
         else: values
 
     values = volume_limits(values, sdk)
@@ -376,6 +384,21 @@ defmodule SmolBox.Embedded.Protocol do
     do:
       Shape.keys?(outcome, ~w(result transition)) and
         (transition == nil or match?({:ok, _}, GrowthTransition.from_wire(transition)))
+
+  defp outcome?(%{"result" => "exported", "publication" => proof} = outcome, 2),
+    do:
+      Shape.keys?(outcome, ~w(result publication)) and
+        match?({:ok, _}, ExportPublication.from_wire(proof))
+
+  defp outcome?(%{"result" => "export_presence", "publication" => proof} = outcome, 2),
+    do:
+      Shape.keys?(outcome, ~w(result publication)) and
+        (proof == nil or match?({:ok, _}, ExportPublication.from_wire(proof)))
+
+  defp outcome?(%{"result" => "export_staging_cleaned", "cleanup" => proof} = outcome, 2),
+    do:
+      Shape.keys?(outcome, ~w(result cleanup)) and
+        match?({:ok, _}, ExportStageCleanup.from_wire(proof))
 
   defp outcome?(%{"result" => "capture_presence", "transition" => transition} = outcome, 2),
     do:

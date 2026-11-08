@@ -300,6 +300,26 @@ pub fn run_with_policy(
                 Ok(wire::Outcome::GrowthQualified { transition: Box::new(transition), observation })
             })
         },
+        wire::Operation::InspectExport {receipt: supplied, operation_id, request_sha256} => {
+            observation_budget().and_then(|budget| {
+                let publication = engine.inspect_export_publication(&receipt(&supplied), &operation_id, &request_sha256, &budget)?;
+                let converted = publication.map(|proof| {
+                    let proof: wire::ExportPublication = serde_json::from_value(serde_json::to_value(proof).map_err(|_| engine::Error {code: engine::ErrorCode::Ownership, dispatch: engine::Dispatch::NotDispatched})?).map_err(|_| engine::Error {code: engine::ErrorCode::Ownership, dispatch: engine::Dispatch::NotDispatched})?;
+                    proof.matches(&supplied, &operation_id, &request_sha256).map_err(|_| engine::Error {code: engine::ErrorCode::Ownership, dispatch: engine::Dispatch::NotDispatched})?;
+                    Ok(Box::new(proof))
+                }).transpose()?;
+                Ok(wire::Outcome::ExportPresence {publication: converted})
+            })
+        },
+        wire::Operation::CleanupExportStaging {receipt: supplied, operation_id, request_sha256, quiesced} => {
+            observation_budget().and_then(|budget| {
+                let cleanup = engine.cleanup_export_staging(&receipt(&supplied), &operation_id, &request_sha256, quiesced, &budget)?;
+                let cleanup: wire::ExportStageCleanup = serde_json::from_value(serde_json::to_value(cleanup).map_err(|_| engine::Error {code: engine::ErrorCode::Ownership, dispatch: engine::Dispatch::MayHaveDispatched})?).map_err(|_| engine::Error {code: engine::ErrorCode::Ownership, dispatch: engine::Dispatch::MayHaveDispatched})?;
+                cleanup.matches(&supplied, &operation_id, &request_sha256).map_err(|_| engine::Error {code: engine::ErrorCode::Ownership, dispatch: engine::Dispatch::MayHaveDispatched})?;
+                Ok(wire::Outcome::ExportStagingCleaned {cleanup: Box::new(cleanup)})
+            })
+        },
+        wire::Operation::QualifyExport {..} | wire::Operation::AdmitExport {..} | wire::Operation::ExportMachine {..} => Err(engine::Error {code: engine::ErrorCode::Unsupported, dispatch: engine::Dispatch::NotDispatched}),
         wire::Operation::CaptureCheckpoint { receipt: supplied, operation_id, request, chunk_bytes } => {
             engine::ReadBudget::for_checkpoint_work(remaining, cancel.clone()).and_then(|budget| {
                 let mut captured = engine.capture_checkpoint(&receipt(&supplied), &operation_id,
@@ -1240,4 +1260,152 @@ mod mount_tests {
         assert!(mount_selection(Some(&[]), Some(&other)).is_err());
         assert!(mount_selection(None, None).unwrap().is_none());
     }
+}
+
+pub fn export(
+    engine: &engine::Engine,
+    operation: wire::Operation,
+    approval: crate::package::ExportApproval,
+    remaining: Duration,
+    cancel: engine::Cancellation,
+) -> wire::Outcome {
+    let result = (|| -> engine::Result<wire::Outcome> {
+        operation
+            .validate(remaining.as_millis().try_into().unwrap_or(u64::MAX))
+            .map_err(|_| engine::Error {
+                code: engine::ErrorCode::Validation,
+                dispatch: engine::Dispatch::NotDispatched,
+            })?;
+        let request = match &operation {
+            wire::Operation::QualifyExport { request, .. }
+            | wire::Operation::AdmitExport { request, .. }
+            | wire::Operation::ExportMachine { request, .. } => request,
+            _ => {
+                return Err(engine::Error {
+                    code: engine::ErrorCode::Validation,
+                    dispatch: engine::Dispatch::NotDispatched,
+                })
+            }
+        };
+        if !approval.matches(request) {
+            return Err(engine::Error {
+                code: engine::ErrorCode::Unsupported,
+                dispatch: engine::Dispatch::NotDispatched,
+            });
+        }
+        let destination = approval.resolved.as_ref().ok_or(engine::Error {
+            code: engine::ErrorCode::Unsupported,
+            dispatch: engine::Dispatch::NotDispatched,
+        })?;
+        let budget = engine::ReadBudget::for_export_work(remaining, cancel)?;
+        match operation {
+            wire::Operation::AdmitExport {
+                receipt: supplied,
+                operation_id,
+                request,
+            } => {
+                engine.admit_export_intent(
+                    &receipt(&supplied),
+                    &operation_id,
+                    &request.request_sha256,
+                    request.max_staging_bytes,
+                    &request.identity_sha256().map_err(|_| engine::Error {
+                        code: engine::ErrorCode::Validation,
+                        dispatch: engine::Dispatch::NotDispatched,
+                    })?,
+                    &budget,
+                )?;
+                Ok(wire::Outcome::Qualified)
+            }
+            wire::Operation::QualifyExport {
+                receipt: supplied,
+                request,
+            } => {
+                engine.qualify_export(
+                    &receipt(&supplied),
+                    request.max_artifact_bytes,
+                    request.max_staging_bytes,
+                    approval.conversion_resources.as_ref(),
+                    &budget,
+                )?;
+                Ok(wire::Outcome::Qualified)
+            }
+            wire::Operation::ExportMachine {
+                receipt: supplied,
+                operation_id,
+                request,
+                push_token,
+            } => {
+                let credential = engine::RegistryPublishCredential::new(push_token.into_secret())?;
+                engine.check_export_intent(
+                    &receipt(&supplied),
+                    &operation_id,
+                    &request.request_sha256,
+                    request.max_staging_bytes,
+                    &request.identity_sha256().map_err(|_| engine::Error {
+                        code: engine::ErrorCode::Validation,
+                        dispatch: engine::Dispatch::NotDispatched,
+                    })?,
+                    &budget,
+                )?;
+                // Preflight capacity/assets before any scratch registration; source
+                // identity is independently requalified for the actual attempt.
+                engine.qualify_export(
+                    &receipt(&supplied),
+                    request.max_artifact_bytes,
+                    request.max_staging_bytes,
+                    approval.conversion_resources.as_ref(),
+                    &budget,
+                )?;
+                let intent = engine::ContainerExportIntent {
+                    operation_id: operation_id.clone(),
+                    request_sha256: request.request_sha256.clone(),
+                    request_identity_sha256: request.identity_sha256().map_err(|_| {
+                        engine::Error {
+                            code: engine::ErrorCode::Validation,
+                            dispatch: engine::Dispatch::NotDispatched,
+                        }
+                    })?,
+                    max_artifact_bytes: request.max_artifact_bytes,
+                    max_staging_bytes: request.max_staging_bytes,
+                };
+                let packed = engine.pack_export(
+                    &receipt(&supplied),
+                    &intent,
+                    approval.conversion_resources.as_ref(),
+                    &budget,
+                )?;
+                let published = packed
+                    .publish(engine, destination, &request.tag, credential)
+                    .map_err(|e| engine::Error {
+                        code: e.code,
+                        dispatch: engine::Dispatch::MayHaveDispatched,
+                    })?;
+                let proof: wire::ExportPublication = serde_json::from_value(
+                    serde_json::to_value(published.publication()).map_err(|_| engine::Error {
+                        code: engine::ErrorCode::Ownership,
+                        dispatch: engine::Dispatch::MayHaveDispatched,
+                    })?,
+                )
+                .map_err(|_| engine::Error {
+                    code: engine::ErrorCode::Ownership,
+                    dispatch: engine::Dispatch::MayHaveDispatched,
+                })?;
+                proof
+                    .matches_request(&supplied, &operation_id, &request)
+                    .map_err(|_| engine::Error {
+                        code: engine::ErrorCode::Ownership,
+                        dispatch: engine::Dispatch::MayHaveDispatched,
+                    })?;
+                // Retiring the collected handle retains registered scratch; no
+                // cleanup/quiescence assertion accompanies publication success.
+                drop(published);
+                Ok(wire::Outcome::Exported {
+                    publication: Box::new(proof),
+                })
+            }
+            _ => unreachable!(),
+        }
+    })();
+    result.unwrap_or_else(error)
 }

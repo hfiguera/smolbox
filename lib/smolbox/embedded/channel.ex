@@ -5,6 +5,8 @@ defmodule SmolBox.Embedded.Channel do
     CaptureResolutionTransition,
     CaptureStagingCleanupReceipt,
     CaptureTransition,
+    ExportPublication,
+    ExportStageCleanup,
     GrowthTransition,
     ImageContract,
     Protocol,
@@ -22,6 +24,7 @@ defmodule SmolBox.Embedded.Channel do
     :epoch,
     :domain,
     :minor,
+    :export_platform,
     major: 1,
     unavailable: false,
     last_id: 0,
@@ -35,7 +38,13 @@ defmodule SmolBox.Embedded.Channel do
       epoch: hello["epoch"],
       domain: hello["domain"],
       minor: hello["minor"],
-      major: Map.get(hello, "major", 1)
+      major: Map.get(hello, "major", 1),
+      export_platform:
+        case get_in(hello, ["package", "architecture"]) do
+          "x86_64" -> "linux/amd64"
+          "aarch64" -> "linux/arm64"
+          _ -> nil
+        end
     }
 
   def register(channel, operation, bytes, events) do
@@ -54,6 +63,7 @@ defmodule SmolBox.Embedded.Channel do
 
       pending = %{
         operation: RegistryContract.sanitize(operation),
+        export_platform: channel.export_platform,
         sequence: nil,
         done: false,
         credit: bytes,
@@ -299,6 +309,82 @@ defmodule SmolBox.Embedded.Channel do
     do: byte_size(bytes) <= limit
 
   defp chunk_matches?(_operation, _bytes), do: true
+
+  defp terminal_matches?(
+         _domain,
+         %{operation: %{"operation" => name}, output_bytes: 0},
+         %{"result" => "qualified"}
+       )
+       when name in ~w(qualify_export admit_export),
+       do: true
+
+  defp terminal_matches?(
+         _domain,
+         %{
+           operation: %{"operation" => "export_machine"} = request,
+           output_bytes: 0,
+           export_platform: platform
+         },
+         %{"result" => "exported", "publication" => publication}
+       ) do
+    case ExportPublication.from_wire(publication) do
+      {:ok, proof} ->
+        proof.identity["platform"] == platform and
+          ExportPublication.bound_request?(
+            proof,
+            request["receipt"],
+            request["operation_id"],
+            request["request"]
+          )
+
+      :error ->
+        false
+    end
+  end
+
+  defp terminal_matches?(
+         _domain,
+         %{
+           operation: %{"operation" => "inspect_export"} = request,
+           output_bytes: 0,
+           export_platform: platform
+         },
+         %{"result" => "export_presence", "publication" => publication}
+       ) do
+    publication == nil or
+      case ExportPublication.from_wire(publication) do
+        {:ok, proof} ->
+          proof.identity["platform"] == platform and
+            ExportPublication.bound?(
+              proof,
+              request["receipt"],
+              request["operation_id"],
+              request["request_sha256"]
+            )
+
+        :error ->
+          false
+      end
+  end
+
+  defp terminal_matches?(
+         _domain,
+         %{operation: %{"operation" => "cleanup_export_staging"} = request, output_bytes: 0},
+         %{"result" => "export_staging_cleaned", "cleanup" => cleanup}
+       ) do
+    case ExportStageCleanup.from_wire(cleanup) do
+      {:ok, proof} ->
+        ExportStageCleanup.bound?(
+          proof,
+          request["receipt"],
+          request["operation_id"],
+          request["request_sha256"]
+        )
+
+      :error ->
+        false
+    end
+  end
 
   defp terminal_matches?(_domain, pending, %{"result" => "error", "dispatch" => dispatch}),
     do: dispatch != "not_dispatched" or pending.output_bytes == 0

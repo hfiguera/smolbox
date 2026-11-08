@@ -410,6 +410,17 @@ defmodule SmolBox.Backend.EmbeddedReply do
   defp error_operation(:list_images), do: :images
   defp error_operation(:qualify_growth), do: :expand_disks
   defp error_operation(:cleanup_capture), do: :checkpoint
+
+  defp error_operation(operation)
+       when operation in [
+              :export_machine,
+              :qualify_export,
+              :admit_export,
+              :inspect_export,
+              :cleanup_export
+            ],
+       do: :export
+
   defp error_operation(operation), do: operation
 
   @counter_fields ~w(cpu_seconds cpu_millis rss_mb pss_mb private_memory_mb shared_memory_mapped_mb disk_used_mb egress_bytes)a

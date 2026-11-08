@@ -1,0 +1,38 @@
+[
+  {
+    "schema": 1,
+    "source": {
+      "target_id": "fixture-local",
+      "domain_generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "name": "fixture-owned",
+      "owner_token": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "incarnation": "cccccccccccccccccccccccccccccccc",
+      "material_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "material": {
+        "schema": 2,
+        "revision": 0,
+        "record_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "chain_sha256": "d86653329d4d4931f336e9d780b424031a7422cbe805fac8b20a22dc2d22b076",
+        "operation_id": null,
+        "request_sha256": null
+      }
+    },
+    "operation_id": "fixture-export",
+    "request_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "identity": {
+      "destination_id": "fixture-registry",
+      "destination_sha256": "7c1739525e4727a48ff6369f7b6342dd314bfbd4dbdc5d5a67cabd8fb6591312",
+      "registry": "registry.example",
+      "repository": "team/artifact",
+      "tag": "release",
+      "platform_tag": "release-linux-amd64",
+      "platform": "linux/amd64",
+      "content_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "size_bytes": 1234,
+      "config_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "manifest_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "index_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    },
+    "proof_sha256": "b54c350a98dadec0e0c4bc5857bad4e6dd7b905567dbd427b0e24ad7a1c55b0f"
+  }
+]

@@ -29,6 +29,13 @@ defmodule SmolBox.DurableHost.ExportStore do
            do: ExportOps.resolve(machine, id, observed, now)
     end
 
+    if function_exported?(ExportOps, :resolve, 5) do
+      def run(context, :export_resolve, [key, guard, id, observed, cleanup, now]) do
+        with {:ok, machine} <- Database.guarded_machine(context, key, guard, now),
+             do: ExportOps.resolve(machine, id, observed, cleanup, now)
+      end
+    end
+
     def run(_context, _operation, _arguments), do: invalid()
 
     defp histories(context) do

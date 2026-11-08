@@ -403,6 +403,8 @@ fn client(remaining: Duration) -> Result<Client> {
     Client::builder()
         .no_proxy()
         .redirect(reqwest::redirect::Policy::none())
+        // Keep all retries inside the explicit bounded registry/auth protocol.
+        .retry(reqwest::retry::never())
         .http1_only()
         .pool_max_idle_per_host(0)
         .no_gzip()

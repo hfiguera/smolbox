@@ -8,12 +8,13 @@ defmodule SmolBox.ExportReceipt do
   """
   alias SmolBox.{Error, Validation}
   @enforce_keys [:manifest_sha256, :size_bytes, :platform]
-  defstruct @enforce_keys
+  defstruct @enforce_keys ++ [native_publication: nil]
 
   @type t :: %__MODULE__{
           manifest_sha256: String.t(),
           size_bytes: pos_integer(),
-          platform: String.t()
+          platform: String.t(),
+          native_publication: struct() | nil
         }
 
   @doc false
@@ -29,11 +30,23 @@ defmodule SmolBox.ExportReceipt do
     if Validation.struct_shape?(receipt, __MODULE__) and
          Validation.digest?(receipt.manifest_sha256) and
          Validation.integer?(receipt.size_bytes, 1, 9_223_372_036_854_775_807) and
-         receipt.platform in ["linux/amd64", "linux/arm64"],
+         receipt.platform in ["linux/amd64", "linux/arm64"] and
+         native?(receipt),
        do: :ok,
        else: invalid()
   end
 
   def validate(_receipt), do: invalid()
+  defp native?(%{native_publication: nil}), do: true
+
+  defp native?(receipt) do
+    proof = receipt.native_publication
+
+    SmolBox.Embedded.ExportPublication.valid?(proof) and
+      proof.identity["manifest_sha256"] == receipt.manifest_sha256 and
+      proof.identity["size_bytes"] == receipt.size_bytes and
+      proof.identity["platform"] == receipt.platform
+  end
+
   defp invalid, do: {:error, %Error{category: :protocol, operation: :export, evidence: :unknown}}
 end

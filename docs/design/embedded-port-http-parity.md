@@ -351,6 +351,16 @@ fully enrolled/accounted auxiliary VM. Never bypass the guard or turn fixture
 success into product qualification. Host conversion tools become explicit package/
 setup/provenance inputs if selected.
 
+The engine selects export mode from the verified source record, rather than a
+controller assertion. Frozen artifact/staging maxima are upper bounds, not promised
+allocations. Bare packing clamps artifact capacity against measured logical disks.
+Container helper disks are reserved first; tar and artifact share the remaining
+explicit grant. The stream has a finite tar cap, and after the actual layer size
+is known the artifact cap becomes the lesser of its frozen maximum and remaining
+staging. This avoids an arbitrary fixed split while preserving the aggregate bound.
+Legacy fixed-partition records keep their encoding; a distinct optional shared
+budget marker requires a reader that understands it before acting on the record.
+
 Branches acquire authenticated source and child intents, stable ordered gates
 and the extra backing reservation before dispatch. Public SDK fork APIs need an
 owner-context/resource feasibility proof: a forked VMM is not automatically an

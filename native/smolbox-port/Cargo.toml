@@ -19,4 +19,5 @@ libc = "0.2"
 crossbeam-channel = "0.5"
 
 [dev-dependencies]
+tar = "0.4"
 smolvm-pack.workspace = true

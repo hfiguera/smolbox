@@ -19,6 +19,11 @@ const STREAM_EVENTS: u32 = 65538;
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(tag = "type", deny_unknown_fields)]
 pub(crate) enum Kind {
+    Conversion {
+        metadata: Blob,
+        plan: Blob,
+        expected: crate::export_bootstrap::Expected,
+    },
     Capture {
         metadata: Blob,
         expected: crate::capture_worker::Expected,
@@ -92,6 +97,7 @@ impl Blob {
             .map_err(|_| Error::before(ErrorCode::Io))?;
         let meta = file.metadata().map_err(|_| Error::before(ErrorCode::Io))?;
         if !meta.is_file()
+            || meta.nlink() != 1
             || meta.uid() != owner.uid
             || meta.mode() & 0o777 != 0o400
             || meta.len() != self.bytes
@@ -136,12 +142,15 @@ impl Request {
         | Kind::CheckpointMaterialize { metadata, .. }
         | Kind::Grow { metadata, .. }
         | Kind::Pull { metadata, .. }
-        | Kind::Bootstrap { metadata, .. } = &self.kind
+        | Kind::Bootstrap { metadata, .. }
+        | Kind::Conversion { metadata, .. } = &self.kind
         {
             if metadata.path.parent() != self.staging.parent()
                 || metadata.bytes == 0
                 || metadata.bytes
-                    > if matches!(self.kind, Kind::Bootstrap { .. }) {
+                    > if matches!(self.kind, Kind::Conversion { .. }) {
+                        crate::export_bootstrap::METADATA_BYTES as u64
+                    } else if matches!(self.kind, Kind::Bootstrap { .. }) {
                         crate::bootstrap::METADATA_BYTES
                     } else if matches!(self.kind, Kind::Pull { .. }) {
                         crate::image_pull::METADATA_BYTES
@@ -156,6 +165,26 @@ impl Request {
                     } else {
                         crate::buffered::COMMAND_METADATA_BYTES
                     }
+            {
+                return Err(Error::before(ErrorCode::Validation));
+            }
+        }
+        if let Kind::Conversion {
+            metadata,
+            plan,
+            expected,
+        } = &self.kind
+        {
+            expected.validate()?;
+            if self.max_bytes != expected.maximum
+                || plan.bytes != crate::export_bootstrap::PLAN_BYTES
+                || plan.path.parent() != self.staging.parent()
+                || plan.path == self.staging
+                || plan.path == metadata.path
+                || metadata.path == self.staging
+                || (plan.device, plan.inode) == (self.staging_device, self.staging_inode)
+                || (metadata.device, metadata.inode) == (self.staging_device, self.staging_inode)
+                || (plan.device, plan.inode) == (metadata.device, metadata.inode)
             {
                 return Err(Error::before(ErrorCode::Validation));
             }
@@ -208,6 +237,7 @@ impl Request {
         }
         let mode = match self.kind {
             Kind::Read
+            | Kind::Conversion { .. }
             | Kind::Bootstrap { .. }
             | Kind::Pull { .. }
             | Kind::Images { .. }
@@ -222,7 +252,11 @@ impl Request {
         };
         FileOptions {
             guest_path: self.guest_path.clone(),
-            max_bytes: self.max_bytes,
+            max_bytes: if matches!(self.kind, Kind::Conversion { .. }) {
+                1
+            } else {
+                self.max_bytes
+            },
             timeout: Duration::from_secs(1),
             mode,
         }
@@ -262,6 +296,7 @@ impl Request {
         let required_mode = if matches!(
             self.kind,
             Kind::Read
+                | Kind::Conversion { .. }
                 | Kind::Bootstrap { .. }
                 | Kind::Pull { .. }
                 | Kind::Images { .. }
@@ -283,6 +318,7 @@ impl Request {
             || (metadata.dev(), metadata.ino()) != (self.staging_device, self.staging_inode)
             || match self.kind {
                 Kind::Read
+                | Kind::Conversion { .. }
                 | Kind::Bootstrap { .. }
                 | Kind::Pull { .. }
                 | Kind::Images { .. }
@@ -305,6 +341,9 @@ impl Request {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "type", deny_unknown_fields)]
 pub(crate) enum Event {
+    Converted {
+        proof: crate::export_bootstrap::Proof,
+    },
     Captured {
         proof: crate::capture_worker::Proof,
     },
@@ -470,6 +509,8 @@ impl Decoder {
 }
 
 pub(crate) struct Evidence {
+    pub converted: Option<crate::export_bootstrap::Proof>,
+    conversion: Option<crate::export_bootstrap::Expected>,
     pub captured: Option<crate::capture_worker::Proof>,
     capture: Option<crate::capture_worker::Expected>,
     pub stream: Option<crate::CommandOutcome>,
@@ -504,6 +545,11 @@ pub(crate) struct Evidence {
 impl Evidence {
     pub(crate) fn new(request: &Request) -> Self {
         Self {
+            converted: None,
+            conversion: match &request.kind {
+                Kind::Conversion { expected, .. } => Some(expected.clone()),
+                _ => None,
+            },
             captured: None,
             capture: match &request.kind {
                 Kind::Capture { expected, .. } => Some(expected.clone()),
@@ -547,6 +593,7 @@ impl Evidence {
             max_bytes: request.max_bytes,
             exact_write: match request.kind {
                 Kind::Read
+                | Kind::Conversion { .. }
                 | Kind::Bootstrap { .. }
                 | Kind::Pull { .. }
                 | Kind::Images { .. }
@@ -591,6 +638,18 @@ impl Evidence {
             return Err(Error::before(ErrorCode::Validation));
         }
         match frame.event {
+            Event::Converted { proof }
+                if self.ready
+                    && self
+                        .conversion
+                        .as_ref()
+                        .is_some_and(|expected| proof.matches(expected)) =>
+            {
+                self.observed_bytes = proof.bytes;
+                self.converted = Some(proof);
+                self.acknowledged = true;
+                self.terminal = true;
+            }
             Event::StreamOutput { offset, bytes, .. }
                 if self.streaming
                     && self.ready
@@ -657,7 +716,8 @@ impl Evidence {
             }
             Event::Ready if !self.ready && self.sequence == 0 => self.ready = true,
             Event::Progress { bytes }
-                if self.growth.is_none()
+                if self.conversion.is_none()
+                    && self.growth.is_none()
                     && self.materialize.is_none()
                     && self.install.is_none()
                     && self.capture.is_none()
@@ -673,7 +733,8 @@ impl Evidence {
                 self.observed_bytes = bytes;
             }
             Event::Acknowledged { bytes }
-                if self.growth.is_none()
+                if self.conversion.is_none()
+                    && self.growth.is_none()
                     && self.materialize.is_none()
                     && self.install.is_none()
                     && self.capture.is_none()
@@ -696,7 +757,8 @@ impl Evidence {
                 if self.ready
                     && bytes >= self.observed_bytes
                     && bytes <= self.max_bytes
-                    && ((self.growth.is_none()
+                    && ((self.conversion.is_none()
+                        && self.growth.is_none()
                         && self.materialize.is_none()
                         && self.install.is_none()
                         && self.capture.is_none()
@@ -708,7 +770,8 @@ impl Evidence {
                 self.terminal = true;
             }
             Event::Limited { bytes }
-                if self.growth.is_none()
+                if self.conversion.is_none()
+                    && self.growth.is_none()
                     && self.materialize.is_none()
                     && self.install.is_none()
                     && self.capture.is_none()
@@ -853,6 +916,19 @@ pub fn run_file_worker() -> Result<()> {
         streaming: matches!(request.kind, Kind::Streaming { .. }),
     };
     writer.event(Event::Ready)?;
+    if let Kind::Conversion {
+        metadata,
+        plan,
+        expected,
+    } = &request.kind
+    {
+        return writer.event(
+            match crate::export_bootstrap::run_worker(&request, metadata, plan, expected) {
+                Ok(proof) => Event::Converted { proof },
+                Err(_) => Event::Failed { bytes: 0 },
+            },
+        );
+    }
     if let Kind::Bootstrap { metadata, expected } = &request.kind {
         return writer.event(match crate::bootstrap::run(&request, metadata, expected) {
             Ok(proof) => Event::Bootstrapped { proof },
@@ -950,7 +1026,8 @@ pub fn run_file_worker() -> Result<()> {
                             writer.progress(bytes);
                         },
                     ),
-                    Kind::Bootstrap { .. }
+                    Kind::Conversion { .. }
+                    | Kind::Bootstrap { .. }
                     | Kind::Pull { .. }
                     | Kind::Images { .. }
                     | Kind::Buffered { .. }
@@ -979,6 +1056,127 @@ pub fn run_file_worker() -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn conversion_requires_exact_small_terminal_proof_and_rejects_generic_or_retired_events() {
+        let expected = crate::export_bootstrap::Expected {
+            input_sha256: "b".repeat(64),
+            maximum: 32 * 1024 * 1024,
+        };
+        let query = request(Kind::Conversion {
+            metadata: Blob {
+                path: "/private/input".into(),
+                device: 1,
+                inode: 2,
+                bytes: 1,
+            },
+            plan: Blob {
+                path: "/private/plan".into(),
+                device: 1,
+                inode: 3,
+                bytes: crate::export_bootstrap::PLAN_BYTES,
+            },
+            expected: expected.clone(),
+        });
+        let mut query = query;
+        query.max_bytes = expected.maximum;
+        query.validate().unwrap(); // Artifact policy may exceed the ordinary file cap.
+        let proof = crate::export_bootstrap::Proof {
+            input_sha256: expected.input_sha256.clone(),
+            bytes: 20 * 1024 * 1024,
+            sha256: "c".repeat(64),
+            plan_bytes: 1024,
+            plan_sha256: "d".repeat(64),
+        };
+        let mut state = Evidence::new(&query);
+        assert!(state
+            .event(frame(
+                0,
+                Event::Converted {
+                    proof: proof.clone()
+                }
+            ))
+            .is_err());
+        state.event(frame(0, Event::Ready)).unwrap();
+        for event in [
+            Event::Progress { bytes: 1 },
+            Event::Acknowledged { bytes: 1 },
+            Event::Limited { bytes: 1 },
+        ] {
+            assert!(state.event(frame(1, event)).is_err());
+        }
+        for bad in [
+            crate::export_bootstrap::Proof {
+                input_sha256: "e".repeat(64),
+                ..proof.clone()
+            },
+            crate::export_bootstrap::Proof {
+                bytes: expected.maximum + 1,
+                ..proof.clone()
+            },
+            crate::export_bootstrap::Proof {
+                plan_bytes: crate::export_bootstrap::PLAN_BYTES + 1,
+                ..proof.clone()
+            },
+            crate::export_bootstrap::Proof {
+                sha256: "invalid".into(),
+                ..proof.clone()
+            },
+        ] {
+            assert!(state
+                .event(frame(1, Event::Converted { proof: bad }))
+                .is_err());
+        }
+        let encoded = serde_json::to_vec(&frame(
+            1,
+            Event::Converted {
+                proof: proof.clone(),
+            },
+        ))
+        .unwrap();
+        assert!(encoded.len() < MAX_FRAME);
+        state
+            .event(frame(
+                1,
+                Event::Converted {
+                    proof: proof.clone(),
+                },
+            ))
+            .unwrap();
+        assert_eq!(state.converted.as_ref(), Some(&proof));
+        assert_eq!(state.observed_bytes, proof.bytes);
+        assert!(state
+            .event(frame(
+                2,
+                Event::Converted {
+                    proof: proof.clone()
+                }
+            ))
+            .is_err());
+        let mut retired = Evidence::new(&query);
+        retired.event(frame(0, Event::Ready)).unwrap();
+        retired.retire();
+        assert!(retired.event(frame(1, Event::Converted { proof })).is_err());
+        let mut bad = query.clone();
+        bad.max_bytes -= 1;
+        assert!(bad.validate().is_err());
+        let Kind::Conversion { plan, .. } = &mut bad.kind else {
+            unreachable!()
+        };
+        plan.path = bad.staging.clone();
+        bad.max_bytes = expected.maximum;
+        assert!(bad.validate().is_err());
+        let Kind::Conversion { plan, .. } = &mut bad.kind else {
+            unreachable!()
+        };
+        plan.path = "/private/plan".into();
+        plan.inode = bad.staging_inode;
+        assert!(bad.validate().is_err());
+        let read = request(Kind::Read);
+        let mut read = read;
+        read.max_bytes = expected.maximum;
+        assert!(read.validate().is_err());
+    }
 
     #[test]
     fn capture_requires_distinct_exact_proof_and_ignores_retired_or_generic_ack() {

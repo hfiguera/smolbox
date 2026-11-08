@@ -38,6 +38,10 @@ SMOLBOX_UMASK_HELPER="${CARGO_TARGET_DIR:-$native_root/target}/debug/smolbox-por
 # child termination. Never select all ignored tests.
 SMOLBOX_TEST_FILE_WORKER="${CARGO_TARGET_DIR:-$native_root/target}/debug/smolbox-port" \
   cargo test --manifest-path "$native_manifest" -p smolbox-engine --lib ordinary_worker --locked -- --ignored
+# Conversion uses the actual worker process against a bounded local protocol peer;
+# no helper VM starts. Select only this named ordinary fixture.
+SMOLBOX_TEST_FILE_WORKER="${CARGO_TARGET_DIR:-$native_root/target}/debug/smolbox-port" \
+  cargo test --manifest-path "$native_manifest" -p smolbox-engine --lib transfer_supervisor::tests::ordinary_conversion_worker_collects_and_rehashes_both_spools_with_original_leases --locked -- --exact --ignored
 # The guard fixture enters the SDK only with invalid JSON configuration and
 # observes its normal exit. It cannot boot a VM or exercise owner-loss behavior.
 SMOLBOX_TEST_FILE_WORKER="${CARGO_TARGET_DIR:-$native_root/target}/debug/smolbox-port" \

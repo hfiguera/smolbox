@@ -80,7 +80,10 @@ defmodule SmolBox.Backend do
     inspect_creation: 1,
     qualify_growth: 2,
     qualify_capture: 2,
-    cleanup_capture: 3
+    cleanup_capture: 3,
+    qualify_export: 1,
+    inspect_export: 1,
+    cleanup_export: 3
   ]
 
   @doc false

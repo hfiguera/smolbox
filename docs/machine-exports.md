@@ -229,6 +229,34 @@ v11. PostgreSQL uses the existing encrypted machine row and partition transactio
 **no new SQL migration is required**. Its history scan is intended for the example's
 bounded deployments, not a large registry scheduling service.
 
+The embedded parity implementation has a separate gated **codec v28** for native
+export authority. It freezes the enrolled source receipt at acceptance and the
+bounded destination/request identity before dispatch. Native acknowledgement must
+match this authority; independent registry verification and explicit staging
+cleanup remain distinct. Guarded native reservation release requires correlated
+cleanup evidence. Deploy every reader and guarded writer before advertising
+`native_export_histories: 1`. Earlier envelopes reject the new fields, including
+nil defaults; HTTP exports retain v11. This storage support does not enable the
+public embedded export workflow or establish platform qualification.
+
+The gated embedded controller uses one pinned helper for approved preflight and
+publication and freezes the exact byte allowances before dispatch. Verification
+looks up the matching protected native acknowledgement before independently
+checking the registry. Explicit native resolution fences that pinned helper,
+requests distinct staging cleanup, verifies the source disposition and saves
+cleanup with resource release. A missing acknowledgement conveys no absence or
+permission to replay. Busy/stale helpers, invalid proof, changed intent or an
+expired control budget keep reservations and result uncertainty. Container
+conversion and remaining native cleanup cases still need implementation and
+ordinary qualification; public embedded export admission remains disabled.
+
+Native no-stage cleanup can retire an attempt only while its source's protected
+ownership/material journal remains available. Its zero-byte native retirement
+blocks reuse and supplies no publication success or source-absence evidence.
+Registered scratch can be cleaned using its original authority after the VM row
+is removed. If neither the source journal nor protected stage/retirement evidence
+exists, absence cannot create cleanup authority; reservation release stays fenced.
+
 Upgrade every controller, reader, and resource projection writer sharing a store
 before enabling exports. Mixed versions are unsupported. Older releases cannot
 read v11 records or account for their active helper reservations. A code rollback

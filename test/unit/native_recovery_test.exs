@@ -131,6 +131,59 @@ defmodule SmolBox.NativeRecoveryTest do
     assert {:ok, %{slots: 1}} = Memory.usage(context.store, context.native.id)
   end
 
+  test "startup preserves a native export intent as unknown without publication or cleanup replay",
+       context do
+    native = Package.create(backend: true, persistent_backend: true, protocol_major: 2)
+    on_exit(fn -> File.rm_rf!(native.package_path) end)
+    native = %{native | capacity: %{slots: 16, cpus: 64, memory_mb: 131_072, disk_gb: 1024}}
+    config = %{context.config | workers: [Target.normalize(native)]}
+    seed = seed_machine(%{context | native: native, config: config}, :receipt)
+    key = ManagedMachine.key(seed)
+    spec = SmolBox.Store.ExportContract.spec("export-recovery", "export-recovery")
+    {:ok, fingerprint} = SmolBox.ExportSpec.fingerprint(spec, key, config.fingerprint_key)
+
+    [approval] =
+      SmolBox.Embedded.ExportContract.approvals(%{export_destinations: [spec.destination]})
+
+    request = %{
+      "request_sha256" => fingerprint,
+      "destination_id" => spec.destination.id,
+      "destination_sha256" => approval["destination_sha256"],
+      "tag" => spec.tag,
+      "max_artifact_bytes" => 8_589_934_592,
+      "max_staging_bytes" => 137_438_953_472
+    }
+
+    assert {:ok, accepted} =
+             Memory.machine(context.store, :export_accept, [
+               key,
+               spec,
+               fingerprint,
+               native.capacity,
+               config.clock.now()
+             ])
+
+    assert {:ok, sent} =
+             Memory.machine(context.store, :export_advance, [
+               key,
+               Contract.guard(accepted),
+               spec.id,
+               :accepted,
+               [state: :dispatching, native_request: request],
+               config.clock.now()
+             ])
+
+    runtime = start_runtime(config)
+    await(fn -> ready?(runtime) end)
+    assert {:ok, saved} = Memory.machine(context.store, :fetch, [key])
+    assert saved.exports[spec.id].state == :unknown and saved.active_export == spec.id
+    assert saved.exports[spec.id].native_authority == sent.exports[spec.id].native_authority
+    assert saved.exports[spec.id].receipt == nil and saved.exports[spec.id].result == nil
+    assert saved.created_machine == sent.created_machine and saved.reservation == sent.reservation
+    assert {:ok, %{slots: 2, disk_gb: 130}} = Memory.usage(context.store, native.id)
+    assert Enum.all?(operations(native), &(&1 == "inspect"))
+  end
+
   test "a lost creation receipt remains unverified and keeps its reservation", context do
     seed = seed_machine(context, :no_receipt)
     runtime = start_runtime(context.config)
@@ -727,6 +780,32 @@ defmodule SmolBox.NativeRecoveryTest do
           "domain_generation" => native.domain_generation,
           "material_sha256" => String.duplicate("9", 64)
         })
+
+      receipt =
+        if Config.protocol_major(native) == 2,
+          do: Map.put(receipt, "material", Package.receipt(native)["material"]),
+          else: receipt
+
+      receipt =
+        if Config.protocol_major(native) == 2 do
+          ordered = %Jason.OrderedObject{
+            values:
+              Enum.map(
+                ~w(target_id domain_generation name owner_token incarnation material_sha256),
+                &{&1, Map.fetch!(receipt, &1)}
+              )
+          }
+
+          hash =
+            ["smolbox-material-origin-v2", ordered]
+            |> Jason.encode!()
+            |> then(&:crypto.hash(:sha256, &1))
+            |> Base.encode16(case: :lower)
+
+          put_in(receipt, ["material", "chain_sha256"], hash)
+        else
+          receipt
+        end
 
       profile = spec.profile
 

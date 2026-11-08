@@ -409,13 +409,21 @@ impl crate::Engine {
                 );
                 (started, manager.child_pid())
             };
-            dispatch.finish(pid).map_err(|e| Error::uncertain(e.code))?;
+            let enrolled = dispatch
+                .finish_enrollment(pid)
+                .map_err(|e| Error::uncertain(e.code))?;
+            if !enrolled.intent().matches(&receipt.name, &epoch.identity()) {
+                return Err(Error::uncertain(ErrorCode::Ownership));
+            }
             started.map_err(|e| Error::uncertain(crate::sdk_compat::launch_error(&e)))?;
             let pid = pid
                 .filter(|pid| *pid > 0)
                 .ok_or(Error::uncertain(ErrorCode::Ownership))?;
-            let birth = smolvm::process::process_start_time(pid)
-                .ok_or(Error::uncertain(ErrorCode::Ownership))?;
+            let child = enrolled.child();
+            if child.pid != pid || child.birth == 0 {
+                return Err(Error::uncertain(ErrorCode::Ownership));
+            }
+            let birth = child.birth;
             // Preserve actual launch identity even if observation expired during
             // the SDK call; no late bootstrap or success result follows it.
             db.update_vm(&receipt.name, |record| {

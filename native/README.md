@@ -251,6 +251,24 @@ The builder hashes copied license/source metadata as package assets. Its explici
 macOS `--signing-identity` path still needs an actual distribution signer and
 qualification of the resulting signed package; default signing remains ad-hoc.
 
+The builder now adds `agent-rootfs.tar` from its owned rootfs copy, excluding
+runtime readiness markers. Tar entries preserve guest file/link/mode semantics
+with normalized root ownership and timestamps, fixed ordering, finite count/byte/
+time limits and independent input-version checks. The tar digest/size/mode enters
+package approval. Linux bundles lacking the SDK packer's `libkrunfw.so.5` name get
+an independent byte-identical copy of the packaged `libkrunfw.so`; an existing
+versioned file is preserved. The input runtime assets are never changed.
+
+The helper selects export asset grants only from the verified manifest. Shared
+engine setup binds them to package, domain and library root under native admission;
+packing rechecks the files under the retained whole-job budget. Packages without
+the tar retain their previous setup path and cannot provide that pack catalog.
+Public export admission remains disabled while container flattening, publication,
+histories and ordinary export/import qualification are pending. The opt-in
+`ordinary_manifest_rootfs_archive_matches_approved_guest_files` test checks an
+explicit local package's preflight and tar/manifest correspondence without opening
+an engine or VM. It does not qualify guest boot, distribution or crash boundaries.
+
 For offline Linux builds, use the locked Cargo vendor tree with a private
 `CARGO_HOME`, a vendored-source configuration and `CARGO_NET_OFFLINE=true`.
 Transfer a clean source-only dependency archive. When authoring it on macOS,
