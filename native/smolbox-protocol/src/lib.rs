@@ -5,8 +5,14 @@
 use serde_json::Value;
 use std::io::{self, Read, Write};
 
+mod command_payload;
+mod creation_payload;
+pub use command_payload::COMMAND_PAYLOAD_BYTES;
 mod json;
+mod terminal;
 mod wire;
+pub use creation_payload::{MAX_CREATION_CHUNKS, MAX_CREATION_PAYLOAD};
+pub use terminal::{TerminalAction, TerminalLimits, TerminalSpec};
 pub use wire::*;
 mod session;
 pub use session::Session;

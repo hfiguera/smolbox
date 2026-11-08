@@ -10,12 +10,14 @@ import shutil
 import struct
 import subprocess
 import tempfile
+import tomllib
 
 ROOT = Path(__file__).resolve().parent
 METADATA = ['SMOLBOX-LICENSE', 'SMOLVM-LICENSE', 'SMOLVM-LICENSES.md', 'NATIVE-SOURCE.json', 'SMOLBOX-POLICY.json']
 MAX_FILES = 16384
 MAX_METADATA = 4 * 1024 * 1024
 TEMPLATE_BYTES = 1024 ** 3
+ENGINE_VERSION = tomllib.loads((ROOT / 'Cargo.toml').read_text())['workspace']['package']['version']
 
 
 def digest(path):
@@ -140,11 +142,11 @@ def build(executable, assets, output, signing_identity=None):
         shutil.copy2(ROOT / 'vendor/source.json', staging / 'NATIVE-SOURCE.json')
         shutil.copy2(ROOT / 'policy.json', staging / 'SMOLBOX-POLICY.json')
         entries = inventory(staging)
-        identity = {'engine_version': '0.1.0', 'smolvm_revision': source['revision'], 'source_sha256': digest(ROOT / 'vendor/source.json'),
+        identity = {'engine_version': ENGINE_VERSION, 'smolvm_revision': source['revision'], 'source_sha256': digest(ROOT / 'vendor/source.json'),
                     'build_sha256': digest(staging / 'smolbox-port'), 'assets_sha256': hashlib.sha256(compact(entries)).hexdigest(),
                     'platform': 'macos' if platform.system() == 'Darwin' else 'linux',
                     'architecture': {'arm64': 'aarch64', 'x86_64': 'x86_64'}[platform.machine()]}
-        manifest = {'schema': 2, 'policy': json.loads((ROOT / 'policy.json').read_bytes()),
+        manifest = {'schema': 3, 'policy': json.loads((ROOT / 'policy.json').read_bytes()),
                     'identity': identity, 'assets': entries, 'host_tools': [{'path': str(tool), 'sha256': digest(tool)}]}
         body = compact(manifest)
         if len(body) > MAX_METADATA:

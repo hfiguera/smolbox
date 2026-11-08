@@ -73,6 +73,21 @@ defmodule SmolBox.Store.Codec do
   rejected in older envelopes. Coordinate every reader and atomic reservation
   writer before enabling embedded admission; rollback to older readers with
   native records is unsupported. The schema alone does not enable that backend.
+  Versioned native material assignments selectively use v17. Legacy v16
+  assignments gain `version: 1` on read and omit it on write, preserving their
+  original bytes. Version-2 creation authority and material proofs cannot be
+  encoded as v16 or older records. Upgrade every reader and reservation/resource
+  projection writer before advertising `native_material_proofs: 2` or activating
+  protocol-2 targets; unknown v17 bytes must never be treated as absent.
+  Native background launch intent/results retain v17 and the existing Command/
+  LaunchResult shapes. Older native validators reject these combinations.
+  Coordinate every reader before advertising `native_background_launches: 1`;
+  material-reader version 2 alone does not authorize this additional feature.
+  Native retained terminal intent/results also retain v17, reusing Terminal.Spec/
+  Terminal.Result. Older native validators reject this combination. Coordinate
+  every reader and command-slot transaction before advertising
+  `native_terminal_sessions: 1`; HTTP terminals keep v7 and legacy v16 rejects
+  native terminal authority. A reader marker does not enable a helper capability.
   Silently treating undecodable records as absent
   would permit replay and is forbidden.
   """
@@ -86,6 +101,7 @@ defmodule SmolBox.Store.Codec do
     CodecExpansion,
     CodecExports,
     CodecFiles,
+    CodecMaterial,
     CodecNative,
     CodecPorts,
     CodecSources,
@@ -95,6 +111,7 @@ defmodule SmolBox.Store.Codec do
 
   @max_bytes 16_777_216
   @native_prefix "smolbox-record-v16\0"
+  @material_prefix "smolbox-record-v17\0"
   @volumes_prefix "smolbox-record-v15\0"
   @expansion_prefix "smolbox-record-v14\0"
   @branches_prefix "smolbox-record-v13\0"
@@ -219,6 +236,9 @@ defmodule SmolBox.Store.Codec do
   @spec decode(binary()) ::
           {:ok, Execution.t() | SmolBox.ManagedMachine.t() | SmolBox.Volume.t()}
           | {:error, Error.t()}
+  def decode(<<@material_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes, do: decode_material(bytes)
+
   def decode(<<@native_prefix, 131, tag, _rest::binary>> = bytes)
       when tag != 80 and byte_size(bytes) <= @max_bytes, do: decode_native(bytes)
 
@@ -281,7 +301,11 @@ defmodule SmolBox.Store.Codec do
 
   defp encode_native(record) do
     with :ok <- validate_extended(record) do
-      bytes = @native_prefix <> :erlang.term_to_binary(record)
+      bytes =
+        if CodecMaterial.required?(record),
+          do: @material_prefix <> :erlang.term_to_binary(record),
+          else: @native_prefix <> :erlang.term_to_binary(CodecMaterial.strip(record))
+
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
   end
@@ -290,6 +314,7 @@ defmodule SmolBox.Store.Codec do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
     with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         record = CodecMaterial.upgrade(record),
          true <- used == byte_size(payload) and CodecNative.required?(record),
          :ok <- validate_extended(record),
          do: {:ok, record},
@@ -303,6 +328,19 @@ defmodule SmolBox.Store.Codec do
       bytes = @volumes_prefix <> CodecNative.payload(record)
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
+  end
+
+  defp decode_material(<<@material_prefix, payload::binary>>) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <- used == byte_size(payload) and CodecMaterial.required?(record),
+         true <- CodecNative.required?(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_invalid -> invalid())
+  rescue
+    ArgumentError -> invalid()
   end
 
   defp decode_volumes(<<@volumes_prefix, payload::binary>>) do

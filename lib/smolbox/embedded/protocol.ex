@@ -1,10 +1,40 @@
 defmodule SmolBox.Embedded.Protocol do
   @moduledoc false
-  alias SmolBox.Embedded.{JSON, Shape}
+  alias SmolBox.Embedded.{
+    CommandPayload,
+    CreationFeatures,
+    CreationPayload,
+    JSON,
+    LogStream,
+    ObservationShape,
+    SDKIdentity,
+    Shape,
+    TerminalContract
+  }
+
   alias SmolBox.Validation
 
   @capabilities ~w(create inspect start stop delete exec read_file write_file qualify_creation inspect_creation)
+  @observations ~w(health capacity metrics readiness list measurements)
+  @observation_limits %{
+    "records" => 1024,
+    "record_bytes" => 262_144,
+    "snapshot_bytes" => 4_194_304,
+    "cpu_sample_ms" => 25,
+    "disk_entries" => 65_536,
+    "disk_depth" => 32
+  }
   @codes ~w(validation unsupported conflict ownership database state native io overload package deadline cancelled)
+  @job_limits %{
+    "work_slots" => 4,
+    "observation_slots" => 2,
+    "worker_children" => 4,
+    "staging_bytes" => 67_108_864,
+    "descriptors" => 32,
+    "control_fd_headroom" => 8,
+    "agent_request_bytes" => 4_194_304,
+    "agent_reply_overhead_bytes" => 65_536
+  }
   @dispatch ~w(not_dispatched may_have_dispatched)
   @completions ~w(exited cancelled deadline output_limit consumer_lost native_error unknown)
   @states ~w(missing stopped running paused pausing frozen failed unreachable identity_unknown)
@@ -37,46 +67,164 @@ defmodule SmolBox.Embedded.Protocol do
   def limits(minor \\ 4)
   def limits(3), do: @limits
   def limits(4), do: Map.put(@limits, "cancel_grace_ms", 3000)
-  def capabilities, do: @capabilities
-  def version, do: %{major: 1, minor: 4}
-  def valid_outcome?(outcome), do: outcome?(outcome)
+  def limits(1, minor) when minor in [3, 4], do: limits(minor)
 
-  def decode(body) do
-    with {:ok, message} <- JSON.decode(body), true <- server?(message) do
+  def limits(2, 0),
+    do:
+      limits(2, 0, %{
+        "feature_versions" => %{
+          "observability" => 1,
+          "compact_creation" => 1,
+          "job_resources" => 1,
+          "buffered_exec" => 1,
+          "logs" => 1,
+          "terminals" => 1
+        }
+      })
+
+  def limits(_major, _minor), do: nil
+
+  def limits(2, 0, sdk) do
+    compact = match?(%{"feature_versions" => %{"compact_creation" => 1}}, sdk)
+
+    observations =
+      if compact,
+        do: %{@observation_limits | "record_bytes" => 8_388_608, "snapshot_bytes" => 33_554_432},
+        else: @observation_limits
+
+    values =
+      if observers?(sdk), do: Map.put(limits(4), "observations", observations), else: limits(4)
+
+    values =
+      if compact,
+        do: Map.put(values, "creation", CreationPayload.limits()),
+        else: values
+
+    buffered = match?(%{"feature_versions" => %{"buffered_exec" => 1}}, sdk)
+    jobs = if buffered, do: Map.put(@job_limits, "metadata_bytes", 33_554_432), else: @job_limits
+    values = if buffered, do: Map.put(values, "buffered", CommandPayload.limits()), else: values
+
+    values =
+      if match?(%{"feature_versions" => %{"logs" => 1}}, sdk),
+        do: Map.put(values, "logs", LogStream.limits()),
+        else: values
+
+    values =
+      if match?(%{"feature_versions" => %{"terminals" => 1}}, sdk),
+        do: Map.put(values, "terminals", TerminalContract.limits()),
+        else: values
+
+    if match?(%{"feature_versions" => %{"job_resources" => 1}}, sdk),
+      do: Map.put(values, "jobs", jobs),
+      else: values
+  end
+
+  def limits(major, minor, _sdk), do: limits(major, minor)
+  def capabilities, do: @capabilities
+
+  def capabilities(sdk) do
+    terminals =
+      if match?(%{"feature_versions" => %{"terminals" => 1}}, sdk),
+        do: ["terminal_open"],
+        else: []
+
+    stream =
+      if match?(%{"feature_versions" => %{"streaming_exec" => 1}}, sdk),
+        do: ["exec_stream"],
+        else: []
+
+    values =
+      if observers?(sdk),
+        do: @observations ++ @capabilities,
+        else: @capabilities
+
+    values =
+      if match?(%{"feature_versions" => %{"logs" => 1}}, sdk), do: ["logs" | values], else: values
+
+    values =
+      if match?(%{"feature_versions" => %{"background_exec" => 1}}, sdk),
+        do: ["exec_background" | values],
+        else: values
+
+    if match?(%{"feature_versions" => %{"buffered_exec" => 1}}, sdk),
+      do: terminals ++ stream ++ ["exec_buffered" | values],
+      else: terminals ++ stream ++ values
+  end
+
+  defp observers?(%{"feature_versions" => %{"observability" => 1}}), do: true
+  defp observers?(_sdk), do: false
+
+  def version, do: %{major: 1, minor: 4}
+  def valid_outcome?(outcome, major \\ 1), do: major in [1, 2] and outcome?(outcome, major)
+
+  def decode(body, major \\ 1) do
+    with true <- major in [1, 2],
+         {:ok, message} <- JSON.decode(body),
+         true <- server?(message, major) do
       {:ok, message}
     else
       _invalid -> :error
     end
   end
 
-  def approve(hello, config) do
-    hello?(hello) and hello["preflight"] == %{"status" => "ready"} and
-      (hello["minor"] == 3 or config.limits.cancel_grace_ms >= 4000) and
+  def approve(hello, config, expected_sdk \\ nil) do
+    major = if expected_sdk == nil, do: 1, else: 2
+
+    hello?(hello, major) and hello["preflight"] == %{"status" => "ready"} and
+      cancellation_approved?(hello, config, major) and
       hello["domain"] == %{"target_id" => config.id, "generation" => config.domain_generation} and
-      hello["package"] == config.package_identity and hello["capabilities"] == @capabilities
+      hello["package"] == config.package_identity and
+      hello["capabilities"] == capabilities(expected_sdk) and
+      sdk_approved?(hello, expected_sdk, major)
   end
 
-  defp server?(%{"type" => "hello", "hello" => hello} = message),
-    do: Shape.keys?(message, ~w(type hello)) and hello?(hello)
+  defp cancellation_approved?(%{"minor" => 3}, _config, 1), do: true
+  defp cancellation_approved?(_hello, config, _major), do: config.limits.cancel_grace_ms >= 4000
+  defp sdk_approved?(_hello, nil, 1), do: true
 
-  defp server?(%{"type" => "unavailable", "epoch" => epoch} = message),
+  defp sdk_approved?(hello, expected, 2),
+    do: SDKIdentity.valid?(expected) and hello["sdk"] == expected
+
+  defp server?(%{"type" => "hello", "hello" => hello} = message, major),
+    do: Shape.keys?(message, ~w(type hello)) and hello?(hello, major)
+
+  defp server?(%{"type" => "unavailable", "epoch" => epoch} = message, _major),
     do: Shape.keys?(message, ~w(type epoch)) and Shape.hex?(epoch, 32)
 
-  defp server?(%{"type" => "accepted", "sequence" => 0} = message),
+  defp server?(%{"type" => "accepted", "sequence" => 0} = message, _major),
     do: Shape.keys?(message, ~w(type epoch id sequence)) and correlation?(message)
 
-  defp server?(%{"type" => "event", "sequence" => sequence, "event" => event} = message),
+  defp server?(%{"type" => "terminal_opened", "sequence" => sequence} = message, 2),
+    do:
+      Shape.keys?(message, ~w(type epoch id sequence)) and correlation?(message) and
+        Validation.integer?(sequence, 1, TerminalContract.max_sequence())
+
+  defp server?(%{"type" => "event", "sequence" => sequence, "event" => event} = message, major),
     do:
       Shape.keys?(message, ~w(type epoch id sequence event)) and correlation?(message) and
-        Validation.integer?(sequence, 1, 65_536) and event?(event)
+        Validation.integer?(
+          sequence,
+          1,
+          if(event["stream"] == "terminal", do: TerminalContract.max_sequence() - 1, else: 65_536)
+        ) and event?(event, major)
 
-  defp server?(%{"type" => "terminal", "sequence" => sequence, "outcome" => outcome} = message),
-    do:
-      Shape.keys?(message, ~w(type epoch id sequence outcome)) and correlation?(message) and
-        Validation.integer?(sequence, 0, 65_537) and outcome?(outcome) and
-        terminal_sequence?(sequence, outcome)
+  defp server?(
+         %{"type" => "terminal", "sequence" => sequence, "outcome" => outcome} = message,
+         major
+       ),
+       do:
+         Shape.keys?(message, ~w(type epoch id sequence outcome)) and correlation?(message) and
+           Validation.integer?(
+             sequence,
+             0,
+             if(outcome["result"] == "terminal",
+               do: TerminalContract.max_sequence(),
+               else: 65_537
+             )
+           ) and outcome?(outcome, major) and
+           terminal_sequence?(sequence, outcome)
 
-  defp server?(_message), do: false
+  defp server?(_message, _major), do: false
 
   defp terminal_sequence?(0, %{"result" => "error", "dispatch" => "not_dispatched"}), do: true
   defp terminal_sequence?(sequence, _outcome), do: sequence > 0
@@ -86,13 +234,32 @@ defmodule SmolBox.Embedded.Protocol do
       Shape.hex?(message["epoch"], 32) and
         Validation.integer?(message["id"], 1, 9_007_199_254_740_991)
 
-  defp hello?(hello),
+  defp hello?(hello, major),
+    do:
+      hello_version?(hello, major) and Shape.hex?(hello["epoch"], 32) and
+        domain?(hello["domain"]) and package?(hello["package"]) and sdk_matches?(hello, major) and
+        capabilities?(hello["capabilities"], major, hello["sdk"]) and
+        hello["limits"] == limits(major, hello["minor"], hello["sdk"]) and
+        preflight?(hello["preflight"])
+
+  defp hello_version?(hello, 1),
     do:
       Shape.keys?(hello, ~w(major minor epoch domain package capabilities limits preflight)) and
-        hello["major"] == 1 and hello["minor"] in [3, 4] and Shape.hex?(hello["epoch"], 32) and
-        domain?(hello["domain"]) and package?(hello["package"]) and
-        capabilities?(hello["capabilities"]) and hello["limits"] == limits(hello["minor"]) and
-        preflight?(hello["preflight"])
+        hello["major"] == 1 and hello["minor"] in [3, 4]
+
+  defp hello_version?(hello, 2),
+    do:
+      Shape.keys?(hello, ~w(major minor epoch domain package capabilities limits preflight sdk)) and
+        hello["major"] == 2 and hello["minor"] == 0 and SDKIdentity.valid?(hello["sdk"])
+
+  defp hello_version?(_hello, _major), do: false
+
+  defp sdk_matches?(_hello, 1), do: true
+
+  defp sdk_matches?(hello, 2),
+    do:
+      hello["sdk"]["source_revision"] == hello["package"]["smolvm_revision"] and
+        hello["package"]["engine_version"] == "0.2.0"
 
   defp domain?(domain),
     do:
@@ -111,9 +278,10 @@ defmodule SmolBox.Embedded.Protocol do
         package["platform"] in ["linux", "macos"] and
         package["architecture"] in ["x86_64", "aarch64"]
 
-  defp capabilities?(capabilities),
+  defp capabilities?(capabilities, major, sdk),
     do:
-      Validation.list?(capabilities, 10) and Enum.all?(capabilities, &(&1 in @capabilities)) and
+      Validation.list?(capabilities, if(major == 1, do: 10, else: 21)) and
+        Enum.all?(capabilities, &(&1 in capabilities(sdk))) and
         MapSet.size(MapSet.new(capabilities)) == length(capabilities)
 
   defp preflight?(%{"status" => "ready"} = preflight), do: map_size(preflight) == 1
@@ -123,40 +291,93 @@ defmodule SmolBox.Embedded.Protocol do
 
   defp preflight?(_preflight), do: false
 
-  defp event?(event),
+  defp event?(event, major),
     do:
-      Shape.keys?(event, ~w(stream data_base64)) and event["stream"] in ~w(stdout stderr file) and
+      Shape.keys?(event, ~w(stream data_base64)) and
+        (event["stream"] in ~w(stdout stderr file) or
+           (major == 2 and event["stream"] in ~w(log terminal))) and
         match?({:ok, _bytes}, Shape.chunk(event["data_base64"]))
 
-  defp outcome?(%{"result" => "created", "receipt" => receipt} = outcome),
-    do: Shape.keys?(outcome, ~w(result receipt)) and Shape.receipt?(receipt)
+  defp outcome?(%{"result" => "terminal"} = outcome, 2), do: TerminalContract.outcome?(outcome)
 
-  defp outcome?(%{"result" => "qualified"} = outcome), do: map_size(outcome) == 1
+  defp outcome?(%{"result" => "created", "receipt" => receipt} = outcome, major),
+    do: Shape.keys?(outcome, ~w(result receipt)) and Shape.receipt?(receipt, major)
 
-  defp outcome?(%{"result" => "creation_presence", "presence" => presence} = outcome),
+  defp outcome?(%{"result" => "health", "snapshot" => snapshot} = outcome, 2),
+    do: Shape.keys?(outcome, ~w(result snapshot)) and ObservationShape.health?(snapshot)
+
+  defp outcome?(%{"result" => "capacity", "snapshot" => snapshot} = outcome, 2),
+    do: Shape.keys?(outcome, ~w(result snapshot)) and ObservationShape.capacity?(snapshot)
+
+  defp outcome?(%{"result" => "metrics", "text" => text} = outcome, 2),
+    do: Shape.keys?(outcome, ~w(result text)) and Shape.text?(text, 65_536, true)
+
+  defp outcome?(%{"result" => "ready"} = outcome, 2), do: map_size(outcome) == 1
+
+  defp outcome?(%{"result" => "inventory", "count" => count, "bytes" => bytes} = outcome, 2),
+    do:
+      Shape.keys?(outcome, ~w(result count bytes)) and Validation.integer?(count, 0, 1024) and
+        Validation.integer?(bytes, 0, 4_194_304)
+
+  defp outcome?(
+         %{"result" => "measurements", "observation" => observation, "counters" => counters} =
+           outcome,
+         2
+       ),
+       do:
+         Shape.keys?(outcome, ~w(result observation counters)) and observation?(observation, 2) and
+           ObservationShape.counters?(counters)
+
+  defp outcome?(%{"result" => "qualified"} = outcome, _major), do: map_size(outcome) == 1
+
+  defp outcome?(%{"result" => "creation_presence", "presence" => presence} = outcome, _major),
     do: Shape.keys?(outcome, ~w(result presence)) and presence in ~w(absent unverified)
 
-  defp outcome?(%{"result" => "observed", "observation" => observation} = outcome),
-    do: Shape.keys?(outcome, ~w(result observation)) and observation?(observation)
+  defp outcome?(%{"result" => "observed", "observation" => observation} = outcome, major),
+    do: Shape.keys?(outcome, ~w(result observation)) and observation?(observation, major)
 
-  defp outcome?(%{"result" => "command"} = outcome), do: command?(outcome)
-  defp outcome?(%{"result" => "file"} = outcome), do: file?(outcome)
+  defp outcome?(%{"result" => "command"} = outcome, _major), do: command?(outcome)
 
-  defp outcome?(%{"result" => "error", "code" => code, "dispatch" => dispatch} = outcome),
+  defp outcome?(%{"result" => "launched", "pid" => pid} = outcome, 2),
+    do: Shape.keys?(outcome, ~w(result pid)) and Validation.integer?(pid, 1, 4_294_967_295)
+
+  defp outcome?(%{"result" => "file"} = outcome, _major), do: file?(outcome)
+
+  defp outcome?(%{"result" => "logs"} = outcome, 2),
     do:
-      Shape.keys?(outcome, ~w(result code dispatch)) and code in @codes and dispatch in @dispatch
+      Shape.keys?(outcome, ~w(result completion lines bytes wire_bytes)) and
+        outcome["completion"] in ~w(completed cancelled deadline output_limit consumer_lost native_error) and
+        Validation.integer?(outcome["lines"], 0, 10_000) and
+        Validation.integer?(outcome["bytes"], outcome["lines"], 8_388_608) and
+        Validation.integer?(
+          outcome["wire_bytes"],
+          outcome["bytes"] + 3 * outcome["lines"],
+          8_418_608
+        ) and
+        (outcome["completion"] != "completed" or
+           outcome["wire_bytes"] == outcome["bytes"] + 3 * outcome["lines"])
 
-  defp outcome?(_outcome), do: false
-
-  defp observation?(observation),
+  defp outcome?(%{"result" => "error", "code" => code, "dispatch" => dispatch} = outcome, major),
     do:
-      Shape.keys?(observation, ~w(state resources pid_identity)) and
+      Shape.keys?(outcome, ~w(result code dispatch)) and
+        (code in @codes or (major == 2 and code in ~w(output_limit port_conflict not_found))) and
+        dispatch in @dispatch
+
+  defp outcome?(_outcome, _major), do: false
+
+  defp observation?(observation, major),
+    do:
+      (Shape.keys?(observation, ~w(state resources pid_identity)) or
+         (major == 2 and Shape.keys?(observation, ~w(state resources pid_identity configuration)) and
+            CreationFeatures.configuration?(observation["configuration"]))) and
         observation["state"] in @states and
         Shape.optional?(observation["resources"], &Shape.resources?/1) and
         Shape.optional?(observation["pid_identity"], &pid?/1) and missing?(observation)
 
   defp missing?(%{"state" => "missing"} = observation),
-    do: observation["resources"] == nil and observation["pid_identity"] == nil
+    do:
+      observation["resources"] == nil and observation["pid_identity"] == nil and
+        observation["configuration"] == nil
 
   defp missing?(_observation), do: true
 

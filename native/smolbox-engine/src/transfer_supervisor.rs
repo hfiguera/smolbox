@@ -1,23 +1,25 @@
-//! Four bounded file workers. Owned leases and spool admission survive uncertain
+//! File workers share engine-wide job admission. Owned leases survive uncertain
 //! collection; no waitpid sweep or transport request ID is used as authority.
 use crate::host::{private_directory, verified_executable};
-use crate::transfer_worker::{self as ipc, Decoder, Evidence, Kind, Request, MAX_TRANSFER};
+#[cfg(test)]
+use crate::transfer_worker::MAX_TRANSFER;
+use crate::transfer_worker::{self as ipc, Decoder, Evidence, Kind, Request};
 use crate::{
     Cancellation, Dispatch, Error, ErrorCode, Executable, FileCompletion, FileOptions, FileOutcome,
     HostContext, OwnerIdentity, Result,
 };
 use std::fs::File;
-use std::io::{Read, Write};
+use std::io::{Read, Seek, SeekFrom, Write};
 use std::os::fd::AsRawFd;
 use std::os::unix::fs::{DirBuilderExt, MetadataExt, OpenOptionsExt, PermissionsExt};
 use std::path::{Path, PathBuf};
 use std::process::{Child, ChildStdin, ChildStdout, Command, Stdio};
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
-const WORKERS: usize = 4;
-const SPOOL_BYTES: u64 = WORKERS as u64 * MAX_TRANSFER;
+#[cfg(test)]
+const WORKERS: usize = crate::JOB_WORK_SLOTS;
+#[cfg(test)]
+const SPOOL_BYTES: u64 = crate::JOB_STAGING_BYTES;
 const POLL: Duration = Duration::from_millis(5);
 
 /// Only used beneath the verified, exclusively owned domain directory. An older
@@ -54,32 +56,6 @@ pub(crate) fn prepare_directory(path: &Path) -> Result<()> {
     Ok(())
 }
 
-#[derive(Default)]
-struct Budget {
-    workers: usize,
-    bytes: u64,
-}
-#[derive(Default)]
-struct Shared {
-    budget: Mutex<Budget>,
-    unavailable: AtomicBool,
-}
-struct Permit {
-    shared: Arc<Shared>,
-    bytes: u64,
-}
-impl Drop for Permit {
-    fn drop(&mut self) {
-        let mut budget = self
-            .shared
-            .budget
-            .lock()
-            .unwrap_or_else(|error| error.into_inner());
-        budget.workers -= 1;
-        budget.bytes -= self.bytes;
-    }
-}
-
 /// Deletes only the original inode, including when the SDK already removed a
 /// failed read spool. A replacement or redirected path is never cleanup authority.
 pub(crate) struct Spool {
@@ -88,7 +64,7 @@ pub(crate) struct Spool {
     identity: (u64, u64),
 }
 impl Spool {
-    fn new(directory: &Path) -> Result<Self> {
+    pub(crate) fn new(directory: &Path) -> Result<Self> {
         private_directory(directory)?;
         let temporary =
             tempfile::NamedTempFile::new_in(directory).map_err(|_| Error::before(ErrorCode::Io))?;
@@ -125,7 +101,8 @@ impl Drop for Spool {
 pub(crate) struct Prepared {
     pub request: Request,
     pub spool: Spool,
-    _permit: Permit,
+    _permit: crate::jobs::JobLease,
+    _metadata: Option<Spool>,
 }
 impl Prepared {
     /// Caller adapters supply a bounded local source. Never feed an arbitrary
@@ -172,6 +149,9 @@ impl Prepared {
 }
 
 pub(crate) struct Collected {
+    pub stream: Option<crate::CommandOutcome>,
+    pub command: Option<ipc::CommandProof>,
+    pub launched: Option<u32>,
     pub outcome: FileOutcome,
     pub prepared: Prepared,
     // Includes domain, machine and SDK source leases; retained through forwarding.
@@ -181,6 +161,51 @@ pub(crate) struct Collected {
     #[cfg(test)]
     termination_requested: bool,
 }
+fn forward_stream(
+    prepared: &mut Prepared,
+    stderr: bool,
+    offset: u64,
+    bytes: u64,
+    consumer: &mut dyn FnMut(crate::Output) -> std::result::Result<(), ()>,
+) -> std::result::Result<(), FileCompletion> {
+    prepared
+        .spool
+        .verify()
+        .map_err(|_| FileCompletion::NativeError)?;
+    let size = prepared
+        .spool
+        .file
+        .metadata()
+        .map_err(|_| FileCompletion::NativeError)?
+        .len();
+    if size < offset + bytes
+        || size > prepared.request.max_bytes
+        || bytes == 0
+        || bytes > ipc::CHUNK
+    {
+        return Err(FileCompletion::NativeError);
+    }
+    prepared
+        .spool
+        .file
+        .seek(SeekFrom::Start(offset))
+        .map_err(|_| FileCompletion::NativeError)?;
+    let mut buffer = vec![0; bytes as usize];
+    prepared
+        .spool
+        .file
+        .read_exact(&mut buffer)
+        .map_err(|_| FileCompletion::NativeError)?;
+    consumer(crate::Output {
+        stream: if stderr {
+            crate::Stream::Stderr
+        } else {
+            crate::Stream::Stdout
+        },
+        bytes: buffer,
+    })
+    .map_err(|_| FileCompletion::ConsumerLost)
+}
 
 pub(crate) enum RunResult {
     Collected(Box<Collected>),
@@ -188,17 +213,17 @@ pub(crate) enum RunResult {
 }
 
 pub(crate) struct TransferSupervisor {
-    shared: Arc<Shared>,
-    executable: Executable,
-    libraries: PathBuf,
-    owner: OwnerIdentity,
-    epoch: Option<crate::epoch::ActorEpoch>,
+    pub(crate) pool: crate::jobs::JobPool,
+    pub(crate) executable: Executable,
+    pub(crate) libraries: PathBuf,
+    pub(crate) owner: OwnerIdentity,
+    pub(crate) epoch: Option<crate::epoch::ActorEpoch>,
 }
 impl TransferSupervisor {
-    pub(crate) fn new(host: &HostContext) -> Result<Self> {
+    pub(crate) fn new(host: &HostContext, pool: crate::jobs::JobPool) -> Result<Self> {
         host.validate()?;
         Ok(Self {
-            shared: Arc::new(Shared::default()),
+            pool,
             executable: host.executables.file_worker.clone(),
             libraries: host.executables.library_directory.clone(),
             owner: host.owner,
@@ -207,31 +232,10 @@ impl TransferSupervisor {
     }
 
     pub(crate) fn available(&self) -> bool {
-        !self.shared.unavailable.load(Ordering::Acquire)
+        self.pool.available()
     }
     pub(crate) fn set_epoch(&mut self, epoch: crate::epoch::ActorEpoch) {
         self.epoch = Some(epoch);
-    }
-
-    fn admit(&self, bytes: u64) -> Result<Permit> {
-        if !self.available() || bytes == 0 || bytes > MAX_TRANSFER {
-            return Err(Error::before(ErrorCode::Conflict));
-        }
-        let mut budget = self
-            .shared
-            .budget
-            .lock()
-            .map_err(|_| Error::before(ErrorCode::Native))?;
-        if budget.workers >= WORKERS || budget.bytes + bytes > SPOOL_BYTES {
-            return Err(Error::before(ErrorCode::Conflict));
-        }
-        fd_admission(budget.workers + 1)?;
-        budget.workers += 1;
-        budget.bytes += bytes;
-        Ok(Permit {
-            shared: self.shared.clone(),
-            bytes,
-        })
     }
 
     pub(crate) fn prepare(
@@ -242,7 +246,9 @@ impl TransferSupervisor {
         kind: Kind,
     ) -> Result<Prepared> {
         options.validate(matches!(kind, Kind::Write { .. }))?;
-        let permit = self.admit(options.max_bytes)?;
+        let permit = self
+            .pool
+            .acquire(crate::jobs::Demand::transfer(options.max_bytes)?)?;
         let spool = Spool::new(directory)?;
         let mut nonce = [0; 16];
         getrandom::fill(&mut nonce).map_err(|_| Error::before(ErrorCode::Native))?;
@@ -263,6 +269,99 @@ impl TransferSupervisor {
             request,
             spool,
             _permit: permit,
+            _metadata: None,
+        })
+    }
+
+    pub(crate) fn prepare_command(
+        &self,
+        directory: &Path,
+        socket: PathBuf,
+        bytes: &[u8],
+        output: u64,
+    ) -> Result<Prepared> {
+        self.prepare_job(directory, socket, bytes, output, false)
+    }
+
+    pub(crate) fn prepare_background(
+        &self,
+        directory: &Path,
+        socket: PathBuf,
+        bytes: &[u8],
+        output: u64,
+    ) -> Result<Prepared> {
+        self.prepare_job(directory, socket, bytes, output, true)
+    }
+
+    pub(crate) fn prepare_streaming(
+        &self,
+        directory: &Path,
+        socket: PathBuf,
+        bytes: &[u8],
+        output: u64,
+    ) -> Result<Prepared> {
+        let mut prepared = self.prepare_command(directory, socket, bytes, output)?;
+        let Kind::Buffered { metadata } = &prepared.request.kind else {
+            unreachable!()
+        };
+        prepared.request.kind = Kind::Streaming {
+            metadata: metadata.clone(),
+        };
+        prepared.request.validate()?;
+        Ok(prepared)
+    }
+
+    fn prepare_job(
+        &self,
+        directory: &Path,
+        socket: PathBuf,
+        bytes: &[u8],
+        output: u64,
+        background: bool,
+    ) -> Result<Prepared> {
+        let permit = self
+            .pool
+            .acquire(crate::jobs::Demand::command(output, bytes.len() as u64)?)?;
+        let mut metadata = Spool::new(directory)?;
+        metadata
+            .file
+            .write_all(bytes)
+            .map_err(|_| Error::before(ErrorCode::Io))?;
+        metadata
+            .file
+            .set_permissions(std::fs::Permissions::from_mode(0o400))
+            .map_err(|_| Error::before(ErrorCode::Io))?;
+        let blob = ipc::Blob {
+            path: metadata.path.clone(),
+            device: metadata.identity.0,
+            inode: metadata.identity.1,
+            bytes: bytes.len() as u64,
+        };
+        let spool = Spool::new(directory)?;
+        let mut nonce = [0; 16];
+        getrandom::fill(&mut nonce).map_err(|_| Error::before(ErrorCode::Native))?;
+        let request = Request {
+            schema: 1,
+            operation: hex::encode(nonce),
+            owner: self.owner,
+            socket,
+            staging: spool.path.clone(),
+            staging_device: spool.identity.0,
+            staging_inode: spool.identity.1,
+            guest_path: "/workspace/.smolbox-command".into(),
+            max_bytes: output,
+            kind: if background {
+                Kind::Background { metadata: blob }
+            } else {
+                Kind::Buffered { metadata: blob }
+            },
+        };
+        request.validate()?;
+        Ok(Prepared {
+            request,
+            spool,
+            _permit: permit,
+            _metadata: Some(metadata),
         })
     }
 
@@ -275,12 +374,43 @@ impl TransferSupervisor {
         deadline: Instant,
         cancel: &Cancellation,
     ) -> Result<RunResult> {
+        self.run_inner(prepared, leases, deadline, cancel, None)
+    }
+
+    pub(crate) fn run_streaming(
+        &self,
+        prepared: Prepared,
+        leases: Box<dyn Send>,
+        deadline: Instant,
+        cancel: &Cancellation,
+        consumer: &mut dyn FnMut(crate::Output) -> std::result::Result<(), ()>,
+    ) -> Result<RunResult> {
+        self.run_inner(prepared, leases, deadline, cancel, Some(consumer))
+    }
+
+    fn run_inner(
+        &self,
+        prepared: Prepared,
+        leases: Box<dyn Send>,
+        deadline: Instant,
+        cancel: &Cancellation,
+        mut consumer: Option<&mut dyn FnMut(crate::Output) -> std::result::Result<(), ()>>,
+    ) -> Result<RunResult> {
         check_budget(deadline, cancel)?;
         verified_executable(&self.executable)?;
         check_budget(deadline, cancel)?;
         let request_bytes = ipc::encode(&prepared.request)?;
         let mut child = Command::new(&self.executable.path)
-            .arg("--file-worker")
+            .arg(
+                if matches!(
+                    prepared.request.kind,
+                    Kind::Buffered { .. } | Kind::Background { .. } | Kind::Streaming { .. }
+                ) {
+                    "--job-worker"
+                } else {
+                    "--file-worker"
+                },
+            )
             .env_clear()
             .env(
                 if cfg!(target_os = "macos") {
@@ -315,7 +445,7 @@ impl TransferSupervisor {
             _leases: leases,
         };
         let mut evidence = Evidence::new(&owned.prepared.request);
-        let mut decoder = Decoder::default();
+        let mut decoder = Decoder::for_request(&owned.prepared.request);
         let mut sent = 0;
         let mut pipe_eof = false;
         let mut reason = None;
@@ -402,7 +532,34 @@ impl TransferSupervisor {
                         Ok(count) if reason.is_none() => {
                             let valid = decoder.feed(&buffer[..count]).and_then(|events| {
                                 for event in events {
+                                    let output = match event.event {
+                                        ipc::Event::StreamOutput {
+                                            stderr,
+                                            offset,
+                                            bytes,
+                                        } => Some((stderr, offset, bytes)),
+                                        _ => None,
+                                    };
                                     evidence.event(event)?;
+                                    if let Some((stderr, offset, bytes)) = output {
+                                        let failure = match consumer.as_mut() {
+                                            Some(consumer) => forward_stream(
+                                                &mut owned.prepared,
+                                                stderr,
+                                                offset,
+                                                bytes,
+                                                *consumer,
+                                            )
+                                            .err(),
+                                            None => Some(FileCompletion::NativeError),
+                                        };
+                                        if let Some(failure) = failure {
+                                            reason = Some(failure);
+                                            policy.retire(origin.elapsed());
+                                            evidence.retire();
+                                            break;
+                                        }
+                                    }
                                 }
                                 Ok(())
                             });
@@ -430,7 +587,9 @@ impl TransferSupervisor {
                     continue;
                 }
                 let completion = reason.unwrap_or(
-                    if status.success() && evidence.acknowledged && decoder.complete() {
+                    if status.success() && evidence.limited && decoder.complete() {
+                        FileCompletion::OutputLimit
+                    } else if status.success() && evidence.acknowledged && decoder.complete() {
                         FileCompletion::Completed
                     } else {
                         FileCompletion::NativeError
@@ -447,6 +606,21 @@ impl TransferSupervisor {
                     native_acknowledged: evidence.acknowledged,
                 };
                 return Ok(RunResult::Collected(Box::new(Collected {
+                    stream: if status.success() && decoder.complete() {
+                        evidence.stream.clone()
+                    } else {
+                        None
+                    },
+                    launched: if status.success() && decoder.complete() {
+                        evidence.launched
+                    } else {
+                        None
+                    },
+                    command: if status.success() && decoder.complete() {
+                        evidence.command
+                    } else {
+                        None
+                    },
                     outcome,
                     prepared: owned.prepared,
                     _leases: owned._leases,
@@ -467,7 +641,7 @@ impl TransferSupervisor {
                 Some(Action::Terminate) => owned.signal(libc::SIGTERM),
                 Some(Action::Kill) => owned.signal(libc::SIGKILL),
                 Some(Action::Retain) => {
-                    self.shared.unavailable.store(true, Ordering::Release);
+                    self.pool.quarantine();
                     let outcome = FileOutcome {
                         completion: reason.unwrap_or(FileCompletion::NativeError),
                         dispatch: if sent == 0 {
@@ -598,29 +772,6 @@ fn check_budget(deadline: Instant, cancel: &Cancellation) -> Result<()> {
     }
     Ok(())
 }
-fn fd_admission(reserved_workers: usize) -> Result<()> {
-    let mut limit = libc::rlimit {
-        rlim_cur: 0,
-        rlim_max: 0,
-    };
-    if unsafe { libc::getrlimit(libc::RLIMIT_NOFILE, &mut limit) } != 0 {
-        return Err(Error::before(ErrorCode::Io));
-    }
-    let directory = if cfg!(target_os = "linux") {
-        "/proc/self/fd"
-    } else {
-        "/dev/fd"
-    };
-    let used = std::fs::read_dir(directory)
-        .map_err(|_| Error::before(ErrorCode::Io))?
-        .count() as u64;
-    // Four parent-side descriptors for this worker plus eight for control work.
-    if used.saturating_add(8 + reserved_workers as u64 * 4) > limit.rlim_cur {
-        return Err(Error::before(ErrorCode::Conflict));
-    }
-    Ok(())
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -686,7 +837,7 @@ mod tests {
             },
         )
         .unwrap();
-        TransferSupervisor::new(&host).unwrap()
+        TransferSupervisor::new(&host, crate::jobs::JobPool::default()).unwrap()
     }
     fn options() -> FileOptions {
         FileOptions {
@@ -712,26 +863,26 @@ mod tests {
                     .unwrap()
             })
             .collect::<Vec<_>>();
-        assert_eq!(supervisor.shared.budget.lock().unwrap().bytes, SPOOL_BYTES);
+        assert_eq!(supervisor.pool.counts().staging, SPOOL_BYTES);
         assert_eq!(
             supervisor
                 .prepare(&root, root.join("agent.sock"), &options(), Kind::Read)
                 .err()
                 .unwrap()
                 .code,
-            ErrorCode::Conflict
+            ErrorCode::Admission
         );
         drop(prepared.pop());
         supervisor
             .prepare(&root, root.join("agent.sock"), &options(), Kind::Read)
             .unwrap();
-        supervisor.shared.unavailable.store(true, Ordering::Release);
+        supervisor.pool.quarantine();
         assert!(supervisor
             .prepare(&root, root.join("agent.sock"), &options(), Kind::Read)
             .is_err());
-        assert_eq!(supervisor.shared.budget.lock().unwrap().workers, 3);
+        assert_eq!(supervisor.pool.counts().work, 3);
         drop(prepared);
-        assert_eq!(supervisor.shared.budget.lock().unwrap().workers, 0);
+        assert_eq!(supervisor.pool.counts().work, 0);
         assert!(!supervisor.available()); // only explicit engine replacement re-enrolls
     }
 
@@ -850,10 +1001,10 @@ mod tests {
         assert!(!collected.outcome.native_acknowledged);
         assert_eq!(collected.worker_ready, ready);
         assert!(!collected.termination_requested);
-        assert_eq!(supervisor.shared.budget.lock().unwrap().workers, 1);
+        assert_eq!(supervisor.pool.counts().work, 1);
         assert!(crate::sdk_compat::source_lease(&root, "owned").is_err());
         drop(collected);
-        assert_eq!(supervisor.shared.budget.lock().unwrap().workers, 0);
+        assert_eq!(supervisor.pool.counts().work, 0);
         crate::sdk_compat::source_lease(&root, "owned").unwrap();
         assert!(supervisor.available());
     }
@@ -874,6 +1025,399 @@ mod tests {
 
     #[test]
     #[ignore = "requires a built helper; explicit ordinary non-VM agent fixture"]
+    fn ordinary_streaming_worker_forwards_large_command_output_before_sdk_exit() {
+        use smolvm_protocol::{encode_message, AgentRequest, AgentResponse, Envelope};
+        use std::os::unix::net::UnixListener;
+        let directory = tempfile::tempdir_in("/tmp").unwrap();
+        let root = root(&directory);
+        let executable = std::env::var_os("SMOLBOX_TEST_FILE_WORKER").expect("built helper path");
+        let supervisor = supervisor(&root, executable.into());
+        for image in [false, true] {
+            let socket = root.join("agent.sock");
+            let listener = UnixListener::bind(&socket).unwrap();
+            listener.set_nonblocking(true).unwrap();
+            let mut record = smolvm::config::VmRecord::new(
+                "0123456789abcdef".into(),
+                1,
+                512,
+                vec![],
+                vec![],
+                false,
+            );
+            if image {
+                record.image = Some("local-dir:/fixture".into());
+            }
+            let command = crate::BufferedCommand {
+                argv: vec!["/bin/cat".into()],
+                env: (0..64)
+                    .map(|n| (format!("K{n}"), "\u{1}".repeat(8192)))
+                    .collect(),
+                workdir: Some("/workspace".into()),
+                user: if image {
+                    Some("1234:2345".into())
+                } else {
+                    None
+                },
+                stdin: None,
+                timeout: Duration::from_secs(20),
+                max_output_bytes: if image { 16 * 1024 * 1024 } else { 1024 },
+            };
+            let until = Instant::now() + Duration::from_secs(20);
+            let metadata = crate::buffered::Metadata::new(&record, command, until).unwrap();
+            let bytes = serde_json::to_vec(&metadata).unwrap();
+            let prepared = supervisor
+                .prepare_streaming(
+                    &root,
+                    socket.clone(),
+                    &bytes,
+                    if image { 16 * 1024 * 1024 } else { 1024 },
+                )
+                .unwrap();
+            let (delivered, output_seen) = std::sync::mpsc::channel();
+            std::thread::scope(|scope| {
+                let peer = scope.spawn(move || {
+                    let mut socket = loop {
+                        match listener.accept() {
+                            Ok((socket, _)) => break socket,
+                            Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                                assert!(Instant::now() < until);
+                                std::thread::sleep(POLL);
+                            }
+                            Err(error) => panic!("{error}"),
+                        }
+                    };
+                    socket.set_nonblocking(false).unwrap();
+                    socket
+                        .set_read_timeout(Some(Duration::from_secs(10)))
+                        .unwrap();
+                    let mut header = [0; 4];
+                    socket.read_exact(&mut header).unwrap();
+                    let size = u32::from_be_bytes(header) as usize;
+                    assert!(size < crate::AGENT_REQUEST_BYTES);
+                    let mut data = vec![0; size];
+                    socket.read_exact(&mut data).unwrap();
+                    let request = serde_json::from_slice::<Envelope<AgentRequest>>(&data)
+                        .unwrap()
+                        .body;
+                    match request {
+                        AgentRequest::Run {
+                            env,
+                            stdin_data,
+                            background,
+                            interactive,
+                            user,
+                            persistent_overlay_id,
+                            ..
+                        } if image => {
+                            assert_eq!(env.len(), 64);
+                            assert!(env.iter().all(|(_, v)| v.len() == 8192));
+                            assert!(interactive && !background && stdin_data.is_none());
+                            assert_eq!(user.as_deref(), Some("1234:2345"));
+                            assert_eq!(persistent_overlay_id.as_deref(), Some("0123456789abcdef"));
+                        }
+                        AgentRequest::VmExec {
+                            env,
+                            stdin_data,
+                            background,
+                            interactive,
+                            ..
+                        } if !image => {
+                            assert_eq!(env.len(), 64);
+                            assert!(interactive && !background && stdin_data.is_none());
+                        }
+                        _ => panic!("unexpected SDK command"),
+                    }
+                    socket
+                        .write_all(&encode_message(&AgentResponse::Started).unwrap())
+                        .unwrap();
+                    socket
+                        .write_all(
+                            &encode_message(&AgentResponse::Stdout {
+                                data: vec![0, 255, 7],
+                            })
+                            .unwrap(),
+                        )
+                        .unwrap();
+                    // A buffered implementation deadlocks here: no Exit is sent
+                    // until the controller's consumer observes stdout.
+                    output_seen.recv_timeout(Duration::from_secs(5)).unwrap();
+                    if image {
+                        for _ in 0..192 {
+                            socket
+                                .write_all(
+                                    &encode_message(&AgentResponse::Stdout {
+                                        data: vec![42; 65536],
+                                    })
+                                    .unwrap(),
+                                )
+                                .unwrap();
+                        }
+                    }
+                    socket
+                        .write_all(
+                            &encode_message(&AgentResponse::Stderr { data: vec![0, 254] }).unwrap(),
+                        )
+                        .unwrap();
+                    socket
+                        .write_all(
+                            &encode_message(&AgentResponse::Exited {
+                                exit_code: 7,
+                                oom: false,
+                            })
+                            .unwrap(),
+                        )
+                        .unwrap();
+                });
+                let mut output = Vec::new();
+                let mut notified = false;
+                let result = supervisor
+                    .run_streaming(
+                        prepared,
+                        Box::new(()),
+                        until,
+                        &Cancellation::new(),
+                        &mut |event| {
+                            if event.stream == crate::Stream::Stdout && !notified {
+                                delivered.send(()).unwrap();
+                                notified = true;
+                            }
+                            output.push((event.stream, event.bytes));
+                            Ok(())
+                        },
+                    )
+                    .unwrap();
+                let RunResult::Collected(collected) = result else {
+                    panic!("worker not collected")
+                };
+                let proof = collected.stream.as_ref().unwrap();
+                assert_eq!(proof.observed_exit, Some(7));
+                assert_eq!(
+                    proof.output_bytes,
+                    if image { 12 * 1024 * 1024 + 5 } else { 5 }
+                );
+                assert_eq!(proof.completion, crate::Completion::Exited);
+                assert!(!proof.success()); // the observed guest code is nonzero
+                assert!(collected.outcome.success());
+                assert!(!collected.termination_requested);
+                assert_eq!(
+                    output.first().unwrap(),
+                    &(crate::Stream::Stdout, vec![0, 255, 7])
+                );
+                assert_eq!(
+                    output.last().unwrap(),
+                    &(crate::Stream::Stderr, vec![0, 254])
+                );
+                assert_eq!(output.len(), if image { 194 } else { 2 });
+                peer.join().unwrap();
+            });
+            std::fs::remove_file(socket).unwrap();
+        }
+        assert_eq!(supervisor.pool.counts().work, 0);
+        assert_eq!(supervisor.pool.counts().metadata, 0);
+    }
+
+    #[test]
+    #[ignore = "requires a built helper; explicit ordinary non-VM agent fixture"]
+    fn ordinary_command_worker_preserves_stdin_exit_and_background_launch_evidence() {
+        use smolvm_protocol::{encode_message, AgentRequest, AgentResponse, Envelope};
+        use std::io::{Seek, SeekFrom};
+        use std::os::unix::net::UnixListener;
+        let directory = tempfile::tempdir_in("/tmp").unwrap();
+        let root = root(&directory);
+        let executable = std::env::var_os("SMOLBOX_TEST_FILE_WORKER").expect("built helper path");
+        let supervisor = supervisor(&root, executable.into());
+        for (image, launch, reply, max_output) in [
+            (false, false, "", 1024),
+            (true, false, "", 1024),
+            (true, true, "4242", 1024),
+            (true, true, "0", 1024),
+            (true, true, "malformed", 1024),
+            (true, true, "lost", 1024),
+            (true, true, "4242", 1),
+        ] {
+            let socket = root.join("agent.sock");
+            let listener = UnixListener::bind(&socket).unwrap();
+            listener.set_nonblocking(true).unwrap();
+            let mut record = smolvm::config::VmRecord::new(
+                "0123456789abcdef".into(),
+                1,
+                512,
+                vec![],
+                vec![],
+                false,
+            );
+            if image {
+                record.image = Some("local-dir:/fixture".into());
+            }
+            let command = crate::BufferedCommand {
+                argv: vec!["/bin/cat".into()],
+                env: vec![("PRIVATE".into(), "value".into())],
+                workdir: Some("/workspace".into()),
+                user: if image {
+                    Some("1234:2345".into())
+                } else {
+                    None
+                },
+                stdin: if launch {
+                    None
+                } else {
+                    Some("hé\0stdin".into())
+                },
+                timeout: Duration::from_secs(20),
+                max_output_bytes: max_output,
+            };
+            let expires = Instant::now() + Duration::from_secs(20);
+            let metadata = if launch {
+                crate::buffered::Metadata::background(&record, command, expires)
+            } else {
+                crate::buffered::Metadata::new(&record, command, expires)
+            }
+            .unwrap();
+            let bytes = serde_json::to_vec(&metadata).unwrap();
+            let prepared = if launch {
+                supervisor.prepare_background(&root, socket.clone(), &bytes, max_output.min(64))
+            } else {
+                supervisor.prepare_command(&root, socket.clone(), &bytes, max_output)
+            }
+            .unwrap();
+            std::thread::scope(|scope| {
+                let peer = scope.spawn(|| {
+                    let until = Instant::now() + Duration::from_secs(10);
+                    let mut stream = loop {
+                        match listener.accept() {
+                            Ok((s, _)) => break s,
+                            Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                                assert!(Instant::now() < until);
+                                std::thread::sleep(POLL)
+                            }
+                            Err(e) => panic!("{e}"),
+                        }
+                    };
+                    stream.set_nonblocking(false).unwrap();
+                    stream
+                        .set_read_timeout(Some(Duration::from_secs(10)))
+                        .unwrap();
+                    let mut header = [0; 4];
+                    stream.read_exact(&mut header).unwrap();
+                    let mut body = vec![0; u32::from_be_bytes(header) as usize];
+                    stream.read_exact(&mut body).unwrap();
+                    let request = serde_json::from_slice::<Envelope<AgentRequest>>(&body)
+                        .unwrap()
+                        .body;
+                    match request {
+                        AgentRequest::VmExec {
+                            command,
+                            stdin_data,
+                            background,
+                            interactive,
+                            ..
+                        } if !image => {
+                            assert_eq!(command, vec!["/bin/cat"]);
+                            assert_eq!(stdin_data.as_deref(), Some("hé\0stdin"));
+                            assert!(!background && !interactive);
+                        }
+                        AgentRequest::Run {
+                            stdin_data,
+                            user,
+                            persistent_overlay_id,
+                            background,
+                            interactive,
+                            timeout_ms,
+                            ..
+                        } if image => {
+                            assert_eq!(
+                                stdin_data.as_deref(),
+                                if launch { None } else { Some("hé\0stdin") }
+                            );
+                            assert_eq!(user.as_deref(), Some("1234:2345"));
+                            assert_eq!(persistent_overlay_id.as_deref(), Some("0123456789abcdef"));
+                            assert_eq!(background, launch);
+                            assert!(!interactive);
+                            assert_eq!(timeout_ms.is_none(), launch);
+                        }
+                        _ => panic!("unexpected operation"),
+                    }
+                    if reply != "lost" {
+                        stream
+                            .write_all(
+                                &encode_message(&AgentResponse::Completed {
+                                    exit_code: if launch { 0 } else { 7 },
+                                    stdout: if launch {
+                                        reply.as_bytes().to_vec()
+                                    } else {
+                                        vec![0, 255, 7]
+                                    },
+                                    stderr: if launch { vec![] } else { vec![0, 254] },
+                                })
+                                .unwrap(),
+                            )
+                            .unwrap();
+                    }
+                });
+                let result = supervisor
+                    .run(
+                        prepared,
+                        Box::new(()),
+                        Instant::now() + Duration::from_secs(20),
+                        &Cancellation::new(),
+                    )
+                    .unwrap();
+                let RunResult::Collected(mut collected) = result else {
+                    panic!("ordinary worker was not collected")
+                };
+                assert_eq!(
+                    collected.outcome.success(),
+                    !launch || (reply == "4242" && max_output > 1)
+                );
+                assert!(!collected.termination_requested);
+                if launch {
+                    assert!(collected.command.is_none());
+                    assert_eq!(
+                        collected.launched,
+                        if reply == "4242" && max_output > 1 {
+                            Some(4242)
+                        } else {
+                            None
+                        }
+                    );
+                    assert_eq!(collected.outcome.observed_bytes, 0);
+                } else {
+                    let proof = collected.command.as_ref().unwrap();
+                    assert_eq!(proof.exit_code, 7);
+                    assert_eq!((proof.stdout, proof.stderr), (3, 2));
+                    assert!(collected.launched.is_none());
+                }
+                collected
+                    .prepared
+                    .spool
+                    .file
+                    .seek(SeekFrom::Start(0))
+                    .unwrap();
+                let mut output = Vec::new();
+                collected
+                    .prepared
+                    .spool
+                    .file
+                    .read_to_end(&mut output)
+                    .unwrap();
+                assert_eq!(
+                    output,
+                    if launch {
+                        vec![]
+                    } else {
+                        vec![0, 255, 7, 0, 254]
+                    }
+                );
+                peer.join().unwrap();
+            });
+            std::fs::remove_file(socket).unwrap();
+        }
+        assert_eq!(supervisor.pool.counts().work, 0);
+        assert_eq!(supervisor.pool.counts().metadata, 0);
+    }
+
+    #[test]
+    #[ignore = "requires built helper; explicit ordinary non-VM agent fixture"]
     fn ordinary_worker_binary_transfers_use_public_agent_api() {
         use smolvm_protocol::{encode_message, AgentRequest, AgentResponse, Envelope};
         use std::io::{Seek, SeekFrom};
@@ -1004,6 +1548,6 @@ mod tests {
             });
             std::fs::remove_file(socket).unwrap();
         }
-        assert_eq!(supervisor.shared.budget.lock().unwrap().workers, 0);
+        assert_eq!(supervisor.pool.counts().work, 0);
     }
 }

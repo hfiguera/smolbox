@@ -1,6 +1,7 @@
 defmodule SmolBox.Runtime.NativeSupport do
   @moduledoc false
   alias SmolBox.Backend.Binding
+  alias SmolBox.Embedded.Config
   alias SmolBox.Runtime.{Session, Target}
 
   def targets(config), do: Enum.filter(config.workers, &match?(%{kind: :embedded}, &1))
@@ -32,11 +33,61 @@ defmodule SmolBox.Runtime.NativeSupport do
   defp capabilities(%{store: {adapter, _context}} = config) do
     required = [bind_backend: 3, backend_assignments: 4, machine: 3]
 
-    with {:ok, %{backend_bindings: 1, backend_recovery: 1, managed_machines: 1}} <-
+    with {:ok, %{backend_bindings: 1, backend_recovery: 1, managed_machines: 1} = supported} <-
            Session.store(config, :capabilities, []),
+         true <- material_support?(config, supported),
+         true <- background_support?(config, supported),
+         true <- streaming_support?(config, supported),
+         true <- terminal_support?(config, supported),
          true <-
            Enum.all?(required, fn {name, arity} -> function_exported?(adapter, name, arity) end),
          do: :ok,
          else: (_ -> Session.error(:unsupported_capability, :runtime))
   end
+
+  defp material_support?(config, supported),
+    do:
+      Enum.all?(targets(config), fn target ->
+        case Config.protocol_major(target.native_config) do
+          1 -> true
+          2 -> supported[:native_material_proofs] == 2
+          _unsupported -> false
+        end
+      end)
+
+  defp background_support?(config, supported),
+    do:
+      Enum.all?(targets(config), fn target ->
+        case Config.sdk_identity(target.native_config) do
+          %{"feature_versions" => %{"background_exec" => 1}} ->
+            supported[:native_background_launches] == 1
+
+          _ ->
+            true
+        end
+      end)
+
+  defp streaming_support?(config, supported),
+    do:
+      Enum.all?(targets(config), fn target ->
+        case Config.sdk_identity(target.native_config) do
+          %{"feature_versions" => %{"streaming_exec" => 1}} ->
+            supported[:native_streaming_commands] == 1
+
+          _ ->
+            true
+        end
+      end)
+
+  defp terminal_support?(config, supported),
+    do:
+      Enum.all?(targets(config), fn target ->
+        case Config.sdk_identity(target.native_config) do
+          %{"feature_versions" => %{"terminals" => 1}} ->
+            supported[:native_terminal_sessions] == 1
+
+          _ ->
+            true
+        end
+      end)
 end

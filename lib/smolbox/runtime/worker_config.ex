@@ -59,7 +59,9 @@ defmodule SmolBox.Runtime.WorkerConfig do
   hostile multi-tenant host quotas. Requested unsupported hard controls are
   rejected by `SmolBox.Profile`. Reachability alone does not qualify a worker.
   """
+  alias SmolBox.Backend.Features
   alias SmolBox.ExecutionFeatures
+  alias SmolBox.Runtime.Approvals
 
   alias SmolBox.{
     Checkpoint,
@@ -222,7 +224,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   defp pull_supported?(worker, %{command: %SmolBox.ImagePull{source: source}} = spec),
     do:
-      spec.artifact["kind"] == "oci" and worker.runtime_version in ["1.19.0", "1.20.2", "1.22.0"] and
+      spec.artifact["kind"] == "oci" and Features.supports?(worker, :images) and
         source in worker.sources and
         source.architecture == worker.architecture
 
@@ -261,7 +263,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   defp approved_artifact?(worker, spec) do
     if SmolBox.Source.remote?(spec.artifact) do
-      worker.runtime_version in ["1.19.0", "1.20.2", "1.22.0"] and
+      Features.supports?(worker, :remote_sources) and
         (spec.artifact["kind"] != "oci" or spec.profile.network != :offline) and
         Enum.any?(worker.sources, &(SmolBox.Source.artifact(&1) == spec.artifact))
     else
@@ -273,53 +275,42 @@ defmodule SmolBox.Runtime.WorkerConfig do
   end
 
   defp network_supported?(worker, spec),
-    do:
-      spec.profile.network == :offline or
-        worker.runtime_version in ["1.16.0", "1.16.1", "1.17.0", "1.19.0", "1.20.2", "1.22.0"]
+    do: spec.profile.network == :offline or Features.supports?(worker, :networking)
 
   defp file_support?(worker, spec),
     do:
       SmolBox.FileAccess.supports?(worker.client, spec.profile) and
         (not SmolBox.FileAccess.extended?(spec.profile) or
-           worker.runtime_version in ["1.17.0", "1.19.0", "1.20.2", "1.22.0"])
+           Features.supports?(worker, :extended_files))
 
   defp workload_supported?(worker, spec),
-    do:
-      Map.get(spec, :workload) == nil or
-        worker.runtime_version in ["1.17.0", "1.19.0", "1.20.2", "1.22.0"]
+    do: Map.get(spec, :workload) == nil or Features.supports?(worker, :workloads)
 
   defp volume_supported?(worker, spec),
     do:
       Map.get(spec, :volumes, []) == [] or
-        (worker.volume_policy != nil and worker.runtime_version in ["1.20.2", "1.22.0"] and
-           worker.platform == :linux)
-
-  defp volume_policy?(%{volume_policy: nil}), do: true
+        (worker.volume_policy != nil and Features.supports?(worker, :volumes))
 
   defp volume_policy?(worker),
-    do:
-      worker.runtime_version in ["1.20.2", "1.22.0"] and worker.platform == :linux and
-        SmolBox.VolumePolicy.valid?(worker.volume_policy)
+    do: Approvals.volume_policy?(worker.volume_policy, worker.runtime_version, worker.platform)
 
   defp ports_supported?(worker, spec),
     do:
       Map.get(spec, :ports, []) == [] or
-        (worker.runtime_version in ["1.17.0", "1.19.0", "1.20.2", "1.22.0"] and
-           {worker.platform, worker.architecture} in [{:linux, "x86_64"}, {:macos, "aarch64"}])
+        Features.supports?(worker, :ports)
 
   defp approved_checkpoint(worker, spec),
     do: Enum.find(worker.checkpoints, &(Checkpoint.artifact(&1) == spec.artifact))
 
-  defp checkpoints?(worker) do
-    Validation.list?(worker.checkpoints, 32) and
-      Enum.all?(worker.checkpoints, fn checkpoint ->
-        Checkpoint.validate(checkpoint) == :ok and
-          checkpoint.platform == worker.platform and
-          checkpoint.architecture == worker.architecture and
-          checkpoint.runtime_version == worker.runtime_version and
-          checkpoint.profile in worker.profiles
-      end) and unique?(worker.checkpoints, & &1.id)
-  end
+  defp checkpoints?(worker),
+    do:
+      Approvals.checkpoints?(
+        worker.checkpoints,
+        worker.runtime_version,
+        worker.platform,
+        worker.architecture,
+        worker.profiles
+      )
 
   defp valid_fields?(worker) do
     valid_client?(worker.client) and supported_runtime?(worker) and
@@ -371,45 +362,18 @@ defmodule SmolBox.Runtime.WorkerConfig do
         SmolBox.RegistryCredentials.valid?(worker.registry_credentials)
 
   defp branch_policies?(worker),
-    do:
-      Validation.list?(worker.branch_policies, 32) and
-        Enum.all?(
-          worker.branch_policies,
-          &(worker.runtime_version in ["1.19.0", "1.20.2", "1.22.0"] and
-              SmolBox.BranchPolicy.validate(&1) == :ok)
-        ) and unique?(worker.branch_policies, & &1.id)
+    do: Approvals.branch_policies?(worker.branch_policies, worker.runtime_version)
 
   defp capture_policies?(worker),
-    do:
-      Validation.list?(worker.checkpoint_policies, 32) and
-        Enum.all?(
-          worker.checkpoint_policies,
-          &(worker.runtime_version in ["1.19.0", "1.20.2", "1.22.0"] and
-              SmolBox.CheckpointPolicy.validate(&1) == :ok)
-        ) and
-        unique?(worker.checkpoint_policies, & &1.id)
+    do: Approvals.checkpoint_policies?(worker.checkpoint_policies, worker.runtime_version)
 
-  defp exports?(worker) do
-    Validation.list?(worker.export_destinations, 32) and
-      Enum.all?(worker.export_destinations, fn destination ->
-        worker.runtime_version in ["1.19.0", "1.20.2", "1.22.0"] and
-          SmolBox.ExportDestination.validate(destination) == :ok
-      end) and unique?(worker.export_destinations, & &1.id)
-  end
+  defp exports?(worker),
+    do: Approvals.export_destinations?(worker.export_destinations, worker.runtime_version)
 
-  defp sources?(worker) do
-    Validation.list?(worker.sources, 32) and
-      Enum.all?(worker.sources, fn source ->
-        SmolBox.Source.validate(source) == :ok and source.kind in [:registry, :oci] and
-          source.architecture == worker.architecture and
-          worker.runtime_version in ["1.19.0", "1.20.2", "1.22.0"]
-      end) and unique?(worker.sources, & &1.id)
-  end
+  defp sources?(worker),
+    do: Approvals.sources?(worker.sources, worker.runtime_version, worker.architecture)
 
-  defp profiles?(profiles),
-    do:
-      Validation.list?(profiles, 32) and profiles != [] and
-        Enum.all?(profiles, &(Profile.validate(&1) == :ok)) and unique?(profiles, & &1.id)
+  defp profiles?(profiles), do: Approvals.profiles?(profiles)
 
   defp artifact?(
          %{"id" => id, "sha256" => digest, "architecture" => arch, "path" => path} = artifact,
@@ -421,28 +385,15 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   defp artifact?(_artifact, _architecture), do: false
 
-  defp capacity?(capacity) do
-    is_map(capacity) and Enum.sort(Map.keys(capacity)) == [:cpus, :disk_gb, :memory_mb, :slots] and
-      Enum.all?(Map.values(capacity), &Validation.integer?(&1, 1, 1_048_576))
-  end
+  defp capacity?(capacity), do: Approvals.capacity?(capacity)
 
-  defp allocation_floor?(
-         %{storage_gb: storage, overlay_gb: overlay, host_overhead_mb: memory} = floor
-       ),
-       do:
-         map_size(floor) == 3 and Validation.integer?(storage, 1, 64) and
-           Validation.integer?(overlay, 1, 64) and Validation.integer?(memory, 128, 16_384)
-
-  defp allocation_floor?(_floor), do: false
+  defp allocation_floor?(floor), do: Approvals.allocation_floor?(floor)
 
   defp allocation_fits?(worker, profile),
-    do:
-      Enum.all?(worker.allocation_floor, fn {field, minimum} ->
-        Map.fetch!(profile, field) >= minimum
-      end)
+    do: Approvals.allocation_fits?(worker.allocation_floor, profile)
 
   defp unique?(entries, function),
-    do: MapSet.size(MapSet.new(entries, function)) == length(entries)
+    do: Approvals.unique?(entries, function)
 
   defp invalid, do: {:error, %Error{category: :validation, operation: :runtime}}
 end

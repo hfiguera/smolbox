@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use smolbox_protocol::{Artifact, PackageIdentity, SafeCode};
+use smolbox_protocol::{Artifact, PackageIdentity, SafeCode, SdkIdentity};
 use std::collections::BTreeSet;
 use std::fs::{File, OpenOptions};
 use std::io::Read;
@@ -20,6 +20,8 @@ pub struct Config {
     pub allow_initialize: bool,
     pub package_manifest_sha256: String,
     pub approved_artifacts: Vec<Artifact>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub publish_address: Option<String>,
 }
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -67,9 +69,20 @@ pub fn source_sha256() -> String {
     hash_bytes(include_bytes!("../../vendor/source.json"))
 }
 fn policy_matches(manifest: &Manifest) -> bool {
-    manifest.schema == 2
+    manifest.schema == 3
         && serde_json::from_slice::<serde_json::Value>(include_bytes!("../../policy.json"))
             .is_ok_and(|expected| manifest.policy == expected)
+}
+pub fn sdk_identity() -> Result<SdkIdentity, SafeCode> {
+    let policy: serde_json::Value = serde_json::from_slice(include_bytes!("../../policy.json"))
+        .map_err(|_| SafeCode::Package)?;
+    let sdk: SdkIdentity =
+        serde_json::from_value(policy["sdk"].clone()).map_err(|_| SafeCode::Package)?;
+    sdk.validate().map_err(|_| SafeCode::Package)?;
+    if sdk.sdk_version != "1.22.0" || sdk.source_revision != smolbox_engine::SMOLVM_REVISION {
+        return Err(SafeCode::Package);
+    }
+    Ok(sdk)
 }
 pub fn hash_bytes(bytes: &[u8]) -> String {
     hex::encode(Sha256::digest(bytes))
@@ -89,12 +102,20 @@ pub fn read_config(path: &Path) -> Result<Config, SafeCode> {
         owner_token: "0".repeat(64),
         incarnation: "0".repeat(32),
         material_sha256: "0".repeat(64),
+        material: None,
     };
     receipt.validate().map_err(|_| SafeCode::Validation)?;
-    if config.schema != 1
+    if config.schema != 2
         || !valid_hash(&config.package_manifest_sha256)
         || config.approved_artifacts.len() > 64
     {
+        return Err(SafeCode::Validation);
+    }
+    if config.publish_address.as_ref().is_some_and(|value| {
+        value
+            .parse::<std::net::Ipv4Addr>()
+            .map_or(true, |ip| ip.to_string() != *value)
+    }) {
         return Err(SafeCode::Validation);
     }
     for artifact in &config.approved_artifacts {
@@ -510,10 +531,10 @@ mod tests {
     use super::*;
     fn policy_manifest() -> Manifest {
         Manifest {
-            schema: 2,
+            schema: 3,
             policy: serde_json::from_slice(include_bytes!("../../policy.json")).unwrap(),
             identity: PackageIdentity {
-                engine_version: "0.1.0".into(),
+                engine_version: env!("CARGO_PKG_VERSION").into(),
                 smolvm_revision: smolbox_engine::SMOLVM_REVISION.into(),
                 source_sha256: source_sha256(),
                 build_sha256: "a".repeat(64),
@@ -531,7 +552,99 @@ mod tests {
         assert!(policy_matches(&manifest));
         assert_eq!(
             manifest.policy["port_protocol_minor"],
-            smolbox_protocol::PROTOCOL_MINOR
+            smolbox_protocol::PARITY_PROTOCOL_MINOR
+        );
+        assert_eq!(
+            manifest.policy["port_protocol_major"],
+            smolbox_protocol::PARITY_PROTOCOL_MAJOR
+        );
+        assert!(sdk_identity().is_ok());
+        let fixture: smolbox_protocol::ServerMessage = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/hello-v2-current.json"
+        ))
+        .unwrap();
+        let smolbox_protocol::ServerMessage::Hello { hello } = fixture else {
+            unreachable!()
+        };
+        assert!(hello.validate().is_ok());
+        let sdk = sdk_identity().ok().unwrap();
+        assert!(hello.sdk.as_deref() == Some(&sdk));
+        assert!(hello.capabilities == sdk.capabilities());
+        assert!(hello.limits == smolbox_protocol::Limits::for_sdk(&sdk));
+        let buffered = smolbox_protocol::Limits::for_sdk(&sdk_identity().ok().unwrap())
+            .buffered
+            .unwrap();
+        assert_eq!(
+            manifest.policy["buffered_limits"],
+            serde_json::to_value(&buffered).unwrap()
+        );
+        assert_eq!(
+            buffered.metadata_bytes,
+            smolbox_engine::COMMAND_METADATA_BYTES
+        );
+        let limits = smolbox_protocol::Limits::for_sdk(&sdk_identity().ok().unwrap());
+        let terminals = limits.terminals.as_ref().unwrap();
+        assert_eq!(terminals.input_bytes, smolbox_engine::TERMINAL_CHUNK_BYTES);
+        assert_eq!(
+            terminals.total_input_bytes,
+            smolbox_engine::TERMINAL_INPUT_BYTES
+        );
+        assert_eq!(
+            terminals.output_events,
+            smolbox_engine::TERMINAL_BUFFER_EVENTS as u64
+        );
+        let logs = limits.logs.as_ref().unwrap();
+        assert_eq!(
+            manifest.policy["log_limits"],
+            serde_json::to_value(logs).unwrap()
+        );
+        assert_eq!(logs.lines, smolbox_engine::LOG_LINES);
+        assert_eq!(logs.line_bytes, smolbox_engine::LOG_LINE_BYTES as u64);
+        assert_eq!(
+            logs.raw_line_bytes,
+            smolbox_engine::LOG_RAW_LINE_BYTES as u64
+        );
+        assert_eq!(logs.memory_bytes, smolbox_engine::LOG_MEMORY_BYTES);
+        assert_eq!(logs.output_bytes, smolbox_engine::LOG_OUTPUT_BYTES);
+        assert_eq!(logs.poll_ms, smolbox_engine::LOG_POLL_MS);
+        assert_eq!(
+            manifest.policy["job_limits"],
+            serde_json::to_value(&limits.jobs).unwrap()
+        );
+        let jobs = limits.jobs.unwrap();
+        assert_eq!(jobs.work_slots, smolbox_engine::JOB_WORK_SLOTS as u64);
+        assert_eq!(
+            jobs.agent_request_bytes,
+            smolbox_engine::AGENT_REQUEST_BYTES as u64
+        );
+        assert_eq!(
+            jobs.agent_reply_overhead_bytes,
+            smolbox_engine::AGENT_REPLY_OVERHEAD as u64
+        );
+        assert_eq!(
+            jobs.observation_slots,
+            smolbox_engine::JOB_CONTROL_SLOTS as u64
+        );
+        assert_eq!(jobs.worker_children, smolbox_engine::JOB_CHILDREN as u64);
+        assert_eq!(jobs.staging_bytes, smolbox_engine::JOB_STAGING_BYTES);
+        assert_eq!(jobs.descriptors, smolbox_engine::JOB_DESCRIPTORS as u64);
+        assert_eq!(
+            jobs.control_fd_headroom,
+            smolbox_engine::JOB_CONTROL_HEADROOM as u64
+        );
+        assert_eq!(
+            manifest.policy["creation_limits"],
+            serde_json::to_value(
+                smolbox_protocol::Limits::for_sdk(&sdk_identity().ok().unwrap()).creation
+            )
+            .unwrap()
+        );
+        assert_eq!(
+            manifest.policy["observation_limits"],
+            serde_json::to_value(
+                smolbox_protocol::Limits::for_sdk(&sdk_identity().ok().unwrap()).observations
+            )
+            .unwrap()
         );
         assert_eq!(
             manifest.policy["native_cancel_grace_ms"],
@@ -582,10 +695,25 @@ mod tests {
     fn unknown_config_fields_and_invalid_bindings_fail_without_engine_open() {
         let root = tempfile::tempdir().unwrap();
         let path = root.path().join("config.json");
-        let mut config = serde_json::json!({"schema":1,"target_id":"test","generation":"ab".repeat(16),"allow_initialize":false,
+        let mut config = serde_json::json!({"schema":2,"target_id":"test","generation":"ab".repeat(16),"allow_initialize":false,
             "package_manifest_sha256":"cd".repeat(32),"approved_artifacts":[]});
         std::fs::write(&path, serde_json::to_vec(&config).unwrap()).unwrap();
         assert!(read_config(&path).is_ok());
+        for address in ["127.0.0.1", "0.0.0.0", "192.0.2.1"] {
+            config["publish_address"] = address.into();
+            std::fs::write(&path, serde_json::to_vec(&config).unwrap()).unwrap();
+            assert!(read_config(&path).is_ok());
+        }
+        for address in ["localhost", "::1", "127.000.0.1", "127.0.0.1:8080"] {
+            config["publish_address"] = address.into();
+            std::fs::write(&path, serde_json::to_vec(&config).unwrap()).unwrap();
+            assert!(read_config(&path).is_err());
+        }
+        config.as_object_mut().unwrap().remove("publish_address");
+        config["schema"] = 1.into();
+        std::fs::write(&path, serde_json::to_vec(&config).unwrap()).unwrap();
+        assert!(read_config(&path).is_err());
+        config["schema"] = 2.into();
         config["db_path"] = serde_json::json!("/arbitrary/db");
         std::fs::write(&path, serde_json::to_vec(&config).unwrap()).unwrap();
         assert!(read_config(&path).is_err());

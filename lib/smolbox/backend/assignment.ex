@@ -9,30 +9,41 @@ defmodule SmolBox.Backend.Assignment do
   alias SmolBox.Backend.Binding
 
   alias SmolBox.{Command, Error, ExecutionSpec, ManagedMachineSpec, Profile, Validation}
-  alias SmolBox.Embedded.{Config, Identity, Launch, Request}
+  alias SmolBox.Embedded.{Config, CreationFeatures, Identity, Launch, Request}
+  alias SmolBox.Terminal.Spec, as: TerminalSpec
 
   @enforce_keys [:binding, :creation]
   @derive {Inspect, only: [:binding]}
-  defstruct @enforce_keys
-  @type t :: %__MODULE__{binding: Binding.t(), creation: map()}
+  defstruct @enforce_keys ++ [version: 1]
+  @type t :: %__MODULE__{binding: Binding.t(), creation: map(), version: 1 | 2}
 
   # Generate once before the atomic reservation write, never inside dispatch.
   @doc false
   def new(config, spec, name) do
     with :ok <- Config.validate(config),
          :ok <- validate_spec(spec),
-         true <- admission_spec?(spec) and spec.profile in config.profiles,
+         true <-
+           admission_spec?(spec, Config.protocol_major(config)) and
+             spec.profile in config.profiles,
+         true <-
+           CreationFeatures.approved?(CreationFeatures.from_spec(spec), config) and
+             command_approved?(config, spec),
          artifact when not is_nil(artifact) <- approved_artifact(config, spec.artifact) do
       assignment = %__MODULE__{
+        version: Config.protocol_major(config),
         binding: struct!(Binding, Config.domain_binding(config)),
-        creation: %{
-          "name" => name,
-          "owner_token" => random(32),
-          "incarnation" => random(16),
-          "artifact" => Launch.artifact(artifact),
-          "resources" => resources(spec.profile),
-          "labels" => %{}
-        }
+        creation:
+          CreationFeatures.attach(
+            %{
+              "name" => name,
+              "owner_token" => random(32),
+              "incarnation" => random(16),
+              "artifact" => Launch.artifact(artifact),
+              "resources" => resources(spec.profile),
+              "labels" => %{}
+            },
+            CreationFeatures.from_spec(spec)
+          )
       }
 
       if valid?(assignment), do: {:ok, assignment}, else: failure(:validation)
@@ -45,25 +56,41 @@ defmodule SmolBox.Backend.Assignment do
   def supports?(config, spec),
     do:
       Config.validate(config) == :ok and validate_spec(spec) == :ok and
-        admission_spec?(spec) and spec.profile in config.profiles and
+        admission_spec?(spec, Config.protocol_major(config)) and spec.profile in config.profiles and
+        CreationFeatures.approved?(CreationFeatures.from_spec(spec), config) and
+        command_approved?(config, spec) and
         approved_artifact(config, spec.artifact) != nil
 
   @doc false
   def valid?(%__MODULE__{} = assignment),
     do:
       Validation.struct_shape?(assignment, __MODULE__) and Binding.valid?(assignment.binding) and
-        Request.valid?(%{"operation" => "create", "create" => assignment.creation}, 1) and
+        assignment.version in [1, 2] and
+        Request.valid?(
+          %{"operation" => "create", "create" => assignment.creation},
+          1,
+          assignment.version
+        ) and
         assignment.creation["labels"] == %{}
 
   def valid?(_assignment), do: false
 
   @doc false
-  def approved?(assignment, config, spec) do
-    Config.validate(config) == :ok and valid?(assignment) and supported_spec?(spec) and
+  def approved?(assignment, config, spec, retained \\ nil) do
+    Config.validate(config) == :ok and valid?(assignment) and
+      assignment.version == Config.protocol_major(config) and
+      supported_spec?(spec, assignment.version) and
+      features_approved?(assignment, config, spec) and
+      CreationFeatures.matches?(assignment.creation, spec, retained) and
       spec.profile in config.profiles and
       Map.from_struct(assignment.binding) == Config.domain_binding(config) and
       approved_creation?(assignment.creation, approved_artifact(config, spec.artifact))
   end
+
+  defp features_approved?(assignment, config, spec),
+    do:
+      CreationFeatures.approved?(Map.get(assignment.creation, "features"), config) and
+        command_approved?(config, spec)
 
   defp approved_creation?(_creation, nil), do: false
 
@@ -79,12 +106,17 @@ defmodule SmolBox.Backend.Assignment do
       )
 
   def record_valid?(%{backend_assignment: %__MODULE__{} = assignment} = record) do
-    valid?(assignment) and supported_spec?(record.spec) and
+    valid?(assignment) and supported_record?(record, assignment.version) and
+      CreationFeatures.matches?(
+        assignment.creation,
+        record.spec,
+        Map.get(record, :managed_machine)
+      ) and
       assignment.binding.target_id == record.worker_id and
       assignment.creation["name"] == record.machine_name and
       assignment.creation["resources"] == resources(record.spec.profile) and
       artifact_matches?(assignment.creation["artifact"], record.spec.artifact) and
-      optional_histories?(record) and
+      optional_histories?(record, assignment.version) and
       Enum.all?(
         [Map.get(record, :created_machine), Map.get(record, :observed_machine)],
         &observation_matches?(&1, assignment)
@@ -98,25 +130,29 @@ defmodule SmolBox.Backend.Assignment do
     if supports?(config, spec),
       do:
         {:ok,
-         %{
-           "operation" => "qualify_creation",
-           "artifact" => Launch.artifact(approved_artifact(config, spec.artifact)),
-           "resources" => resources(spec.profile),
-           "user" =>
-             case Map.get(spec, :command) do
-               nil -> nil
-               command -> command.user
-             end
-         }},
+         CreationFeatures.attach(
+           %{
+             "operation" => "qualify_creation",
+             "artifact" => Launch.artifact(approved_artifact(config, spec.artifact)),
+             "resources" => resources(spec.profile),
+             "user" =>
+               case Map.get(spec, :command) do
+                 nil -> nil
+                 command -> Map.get(command, :user)
+               end
+           },
+           CreationFeatures.from_spec(spec)
+         )},
       else: failure(:unsupported_capability)
   end
 
   # Admission policy is separate from structural historical validation. A new
   # qualification rule must not make existing v16 native records unreadable.
-  defp admission_spec?(spec),
-    do: supported_spec?(spec) and qualified_user?(Map.get(spec, :command))
+  defp admission_spec?(spec, version),
+    do: supported_spec?(spec, version) and qualified_user?(Map.get(spec, :command))
 
   defp qualified_user?(nil), do: true
+  defp qualified_user?(%TerminalSpec{}), do: true
   defp qualified_user?(%{user: nil}), do: true
 
   defp qualified_user?(%{user: user}) when is_binary(user) do
@@ -140,8 +176,10 @@ defmodule SmolBox.Backend.Assignment do
 
   defp observation_matches?(nil, _assignment), do: true
 
-  defp observation_matches?(%{backend_identity: identity}, assignment),
-    do: Identity.matches?(identity, assignment)
+  defp observation_matches?(%{backend_identity: identity} = machine, assignment),
+    do:
+      Identity.matches?(identity, assignment) and
+        CreationFeatures.observation_matches?(assignment.creation, machine)
 
   defp observation_matches?(_machine, _assignment), do: false
 
@@ -154,11 +192,11 @@ defmodule SmolBox.Backend.Assignment do
         artifact["guest_platform"] ==
           if(expected["architecture"] == "aarch64", do: "linux/arm64", else: "linux/amd64")
 
-  defp supported_spec?(spec) do
-    is_map(spec) and native_profile?(spec.profile) and
+  defp supported_spec?(spec, version) do
+    is_map(spec) and native_profile?(spec.profile, version) and
       is_map(spec.artifact) and map_size(spec.artifact) == 3 and
-      bare_guest?(spec) and
-      command_supported?(Map.get(spec, :command), spec.profile) and
+      bare_guest?(spec, version) and
+      command_supported?(Map.get(spec, :command), spec.profile, version) and
       bounded_files?(Map.get(spec, :inputs, []), "size", 0) and
       bounded_files?(Map.get(spec, :outputs, []), "max_bytes", 1)
   end
@@ -166,20 +204,23 @@ defmodule SmolBox.Backend.Assignment do
   defp bounded_files?(entries, field, minimum),
     do: Enum.all?(entries, &Validation.integer?(&1[field], minimum, 16_777_216))
 
-  defp native_profile?(profile),
+  defp native_profile?(profile, version),
     do:
-      Profile.validate(profile) == :ok and profile.network == :offline and
+      Profile.validate(profile) == :ok and (profile.network == :offline or version == 2) and
         profile.max_output_bytes <= 16_777_216 and profile.max_file_bytes <= 16_777_216 and
         profile.cpus <= 16 and profile.execution_ms <= 86_400_000
 
-  defp bare_guest?(spec),
+  defp bare_guest?(spec, version),
     do:
-      Map.get(spec, :ports, []) == [] and Map.get(spec, :volumes, []) == [] and
-        Map.get(spec, :workload) == nil and not Map.get(spec, :checkpointable, false)
+      Map.get(spec, :volumes, []) == [] and not Map.get(spec, :checkpointable, false) and
+        (version == 2 or (Map.get(spec, :ports, []) == [] and Map.get(spec, :workload) == nil))
 
-  defp command_supported?(nil, _profile), do: true
+  defp command_supported?(nil, _profile, _version), do: true
 
-  defp command_supported?(%Command{background: false, stdin: nil} = command, profile),
+  defp command_supported?(%TerminalSpec{} = terminal, profile, 2),
+    do: TerminalSpec.validate(terminal) == :ok and terminal.session_ms <= profile.execution_ms
+
+  defp command_supported?(%Command{background: false, stdin: nil} = command, profile, 1),
     do:
       Request.command_valid?(%{
         "argv" => command.argv,
@@ -189,9 +230,68 @@ defmodule SmolBox.Backend.Assignment do
         "max_output_bytes" => profile.max_output_bytes
       })
 
-  defp command_supported?(_command, _profile), do: false
+  defp command_supported?(%Command{background: false} = command, profile, 2),
+    do:
+      Request.buffered_command_valid?(%{
+        "argv" => command.argv,
+        "env" => Map.new(command.env),
+        "workdir" => command.workdir,
+        "user" => command.user,
+        "stdin" => command.stdin,
+        "max_output_bytes" => profile.max_output_bytes
+      })
 
-  defp optional_histories?(record),
+  defp command_supported?(%Command{background: true, stdin: nil} = command, profile, 2),
+    do:
+      Request.buffered_command_valid?(%{
+        "argv" => command.argv,
+        "env" => Map.new(command.env),
+        "workdir" => command.workdir,
+        "user" => command.user,
+        "stdin" => nil,
+        "max_output_bytes" => profile.max_output_bytes
+      })
+
+  defp command_supported?(_command, _profile, _version), do: false
+
+  defp command_approved?(config, spec) do
+    sdk = Config.sdk_identity(config)
+
+    case Map.get(spec, :command) do
+      nil ->
+        true
+
+      %Command{} = command ->
+        (command.stdin == nil or match?(%{"feature_versions" => %{"buffered_exec" => 1}}, sdk)) and
+          (not command.background or
+             match?(%{"feature_versions" => %{"background_exec" => 1}}, sdk)) and
+          streaming_approved?(sdk, command, spec.profile)
+
+      %TerminalSpec{} ->
+        match?(%{"feature_versions" => %{"terminals" => 1}}, sdk)
+
+      _ ->
+        false
+    end
+  end
+
+  defp streaming_approved?(sdk, %Command{background: false, stdin: nil} = command, profile),
+    do:
+      match?(%{"feature_versions" => %{"streaming_exec" => 1}}, sdk) or
+        command_supported?(command, profile, 1)
+
+  defp streaming_approved?(_sdk, _command, _profile), do: true
+
+  defp retained_terminal?(%{spec: %{command: %TerminalSpec{}}, managed_machine: key}, 2),
+    do: key != nil
+
+  defp retained_terminal?(%{spec: %{command: %TerminalSpec{}}}, _version), do: false
+  defp retained_terminal?(_record, _version), do: true
+
+  defp supported_record?(record, version),
+    do: supported_spec?(record.spec, version) and retained_terminal?(record, version)
+
+  defp optional_histories?(record, version),
     do:
       Enum.all?(
         [
@@ -206,11 +306,10 @@ defmodule SmolBox.Backend.Assignment do
           branch: nil,
           active_branch: nil,
           preparation: nil,
-          mounts: [],
-          reserved_ports: []
+          mounts: []
         ],
         fn {key, empty} -> Map.get(record, key, empty) == empty end
-      )
+      ) and (version == 2 or Map.get(record, :reserved_ports, []) == [])
 
   defp validate_spec(%ManagedMachineSpec{} = spec), do: ManagedMachineSpec.validate(spec)
   defp validate_spec(spec), do: ExecutionSpec.validate(spec)

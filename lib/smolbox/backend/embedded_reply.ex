@@ -1,7 +1,7 @@
 defmodule SmolBox.Backend.EmbeddedReply do
   @moduledoc false
-  alias SmolBox.Embedded.Identity
-  alias SmolBox.{Error, Machine, Result}
+  alias SmolBox.Embedded.{CreationFeatures, Identity, LogStream}
+  alias SmolBox.{Error, LaunchResult, LogResult, Machine, MachineMeasurements, Result}
 
   def decode(context, operation, request, {:ok, outcome, output, overlay}),
     do: response(context, operation, request, outcome, output, overlay)
@@ -47,6 +47,55 @@ defmodule SmolBox.Backend.EmbeddedReply do
          nil
        ),
        do: observation(context, operation, observation)
+
+  defp response(
+         context,
+         :machine_measurements,
+         _request,
+         %{"result" => "measurements", "observation" => observed, "counters" => counters},
+         %{stdout: <<>>, stderr: <<>>, file: <<>>},
+         nil
+       ) do
+    case observation(context, :inspect_machine, observed) do
+      {:ok, machine} ->
+        values = Map.new(counters, fn {key, value} -> {counter_field(key), value} end)
+
+        {:ok,
+         struct!(
+           MachineMeasurements,
+           Map.merge(values, %{machine: machine, checked_at_ms: System.system_time(:millisecond)})
+         )}
+
+      {:error, error} ->
+        {:error, %{error | operation: :machine_measurements}}
+    end
+  end
+
+  defp response(
+         _context,
+         :logs,
+         request,
+         %{"result" => "logs", "completion" => "completed"} = outcome,
+         %{stdout: <<>>, stderr: <<>>, file: bytes},
+         nil
+       ) do
+    with {:ok, lines, parser} <- LogStream.decode(bytes, request["max_bytes"]),
+         true <-
+           parser.count == outcome["lines"] and parser.bytes == outcome["bytes"] and
+             byte_size(bytes) == outcome["wire_bytes"],
+         do: {:ok, %LogResult{lines: lines}},
+         else: (_ -> error(:protocol, :logs, :dispatch_uncertain))
+  end
+
+  defp response(
+         _context,
+         :exec,
+         %{"operation" => "exec_background"},
+         %{"result" => "launched", "pid" => pid},
+         %{stdout: <<>>, stderr: <<>>, file: <<>>},
+         nil
+       ),
+       do: {:ok, %LaunchResult{pid: pid}}
 
   defp response(
          _context,
@@ -97,25 +146,30 @@ defmodule SmolBox.Backend.EmbeddedReply do
   defp observation(_context, operation, %{"state" => "missing"}),
     do: error(:not_found, operation, :not_dispatched)
 
-  defp observation(context, operation, %{
-         "state" => state,
-         "resources" => resources,
-         "pid_identity" => pid
-       })
+  defp observation(
+         context,
+         operation,
+         %{
+           "state" => state,
+           "resources" => resources,
+           "pid_identity" => pid
+         } = observed
+       )
        when state in ["running", "stopped"] do
     expected = context.assignment.creation["resources"]
     identity = %{context.identity | pid_identity: pid}
 
-    if resources == expected and valid_state?(state, pid) and lifecycle_state?(operation, state),
-      do:
-        {:ok,
-         machine(
-           context,
-           if(state == "running", do: :running, else: :stopped),
-           resources,
-           identity
-         )},
-      else: error(:identity_conflict, operation, :dispatch_uncertain)
+    if resources == expected and valid_state?(state, pid) and lifecycle_state?(operation, state) and
+         configuration_matches?(context, observed),
+       do:
+         {:ok,
+          machine(
+            context,
+            if(state == "running", do: :running, else: :stopped),
+            resources,
+            identity
+          )},
+       else: error(:identity_conflict, operation, :dispatch_uncertain)
   end
 
   defp observation(_context, operation, %{"state" => "identity_unknown"}),
@@ -140,6 +194,8 @@ defmodule SmolBox.Backend.EmbeddedReply do
       memory_mb: resources["memory_mib"],
       storage_gb: resources["storage_gib"],
       overlay_gb: resources["overlay_gib"],
+      network: context.spec.profile.network,
+      ports: CreationFeatures.ports(context.assignment.creation),
       backend_identity: identity
     }
 
@@ -160,6 +216,17 @@ defmodule SmolBox.Backend.EmbeddedReply do
 
   defp command(operation, outcome, _output, overlay),
     do: {:error, operation_error(operation, outcome, overlay)}
+
+  defp configuration_matches?(context, observed) do
+    actual =
+      case observed["configuration"] do
+        nil -> {:ok, :offline, []}
+        value -> CreationFeatures.observed(value)
+      end
+
+    actual ==
+      {:ok, context.spec.profile.network, CreationFeatures.ports(context.assignment.creation)}
+  end
 
   defp operation_error(operation, outcome, overlay) do
     category = if overlay, do: overlay.category, else: category(outcome)
@@ -190,10 +257,13 @@ defmodule SmolBox.Backend.EmbeddedReply do
 
   defp category(_outcome), do: :protocol
   defp code_category("validation"), do: :validation
+  defp code_category("not_found"), do: :not_found
   defp code_category(code) when code in ~w(unsupported package), do: :unsupported_capability
   defp code_category(code) when code in ~w(conflict ownership), do: :identity_conflict
   defp code_category("database"), do: :store
   defp code_category("overload"), do: :admission_exhausted
+  defp code_category("output_limit"), do: :output_limit
+  defp code_category("port_conflict"), do: :port_conflict
   defp code_category("deadline"), do: :expired
   defp code_category(_code), do: :unknown
 
@@ -206,4 +276,7 @@ defmodule SmolBox.Backend.EmbeddedReply do
   defp error_operation(:inspect_machine), do: :inspect
   defp error_operation(:inspect_creation), do: :inspect
   defp error_operation(operation), do: operation
+
+  @counter_fields ~w(cpu_seconds cpu_millis rss_mb pss_mb private_memory_mb shared_memory_mapped_mb disk_used_mb egress_bytes)a
+  defp counter_field(key), do: Enum.find(@counter_fields, &(Atom.to_string(&1) == key))
 end

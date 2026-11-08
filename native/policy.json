@@ -1,12 +1,76 @@
 {
-  "schema": 1,
-  "port_protocol_minor": 4,
+  "schema": 2,
+  "port_protocol_major": 2,
+  "port_protocol_minor": 0,
+  "sdk": {
+    "sdk_version": "1.22.0",
+    "source_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "feature_versions": {
+      "lifecycle": 1,
+      "foreground_exec": 1,
+      "extended_exec": 1,
+      "files": 1,
+      "extended_files": 1,
+      "material_proofs": 2,
+      "observability": 1,
+      "networking": 1,
+      "ports": 1,
+      "workloads": 1,
+      "compact_creation": 1,
+      "job_resources": 1,
+      "buffered_exec": 1,
+      "background_exec": 1,
+      "logs": 1,
+      "streaming_exec": 1,
+      "terminals": 1
+    }
+  },
+  "observation_limits": {
+    "records": 1024,
+    "record_bytes": 8388608,
+    "snapshot_bytes": 33554432,
+    "cpu_sample_ms": 25,
+    "disk_entries": 65536,
+    "disk_depth": 32
+  },
+  "log_limits": {
+    "lines": 10000,
+    "line_bytes": 131064,
+    "raw_line_bytes": 1048576,
+    "output_bytes": 8388608,
+    "memory_bytes": 6291456,
+    "poll_ms": 100
+  },
   "native_cancel_grace_ms": 3000,
+  "publish_address_default": "127.0.0.1",
   "sdk_source": "unmodified",
   "domain_ownership": "exclusive_cooperating_owner",
   "sdk_observation_schema": 1,
   "transfer_supervisor": 1,
   "boot_owner_guard": 1,
   "asset_preparation": 2,
-  "rustler_enabled": false
+  "rustler_enabled": false,
+  "creation_limits": {
+    "schema": 1,
+    "payload_bytes": 655360,
+    "chunks": 10,
+    "chunk_bytes": 65536
+  },
+  "job_limits": {
+    "work_slots": 4,
+    "observation_slots": 2,
+    "worker_children": 4,
+    "staging_bytes": 67108864,
+    "descriptors": 32,
+    "control_fd_headroom": 8,
+    "agent_request_bytes": 4194304,
+    "agent_reply_overhead_bytes": 65536,
+    "metadata_bytes": 33554432
+  },
+  "buffered_limits": {
+    "payload_bytes": 720896,
+    "chunks": 11,
+    "metadata_bytes": 8388608,
+    "stdin_bytes": 65536
+  }
 }

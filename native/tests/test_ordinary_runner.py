@@ -20,6 +20,41 @@ with patch.dict(sys.modules, {'native_proof': proof}):
 
 
 class OrdinaryRunnerTests(unittest.TestCase):
+    def test_current_handshake_matches_shared_fixture_and_older_descriptors_stay_smaller(self):
+        root = Path(__file__).resolve().parents[1]
+        hello = json.loads((root / 'smolbox-protocol/fixtures/hello-v2-current.json').read_bytes())['hello']
+        policy = json.loads((root / 'policy.json').read_bytes())
+        manifest = {'schema': 3, 'identity': hello['package'], 'policy': policy}
+        self.assertEqual(proof.capabilities(manifest), hello['capabilities'])
+        self.assertEqual(proof.limits(manifest), hello['limits'])
+        older = json.loads(json.dumps(manifest))
+        older['policy']['sdk']['feature_versions'] = {'material_proofs': 2}
+        self.assertNotIn('terminal_open', proof.capabilities(older))
+        self.assertNotIn('terminals', proof.limits(older))
+        self.assertNotIn('jobs', proof.limits(older))
+
+    def test_manifest_selection_binds_protocol_config_sdk_and_engine(self):
+        revision = '9f446ae00219148ca4a703914f44a8e2fab11655'
+        identity = {'engine_version': '0.1.0', 'smolvm_revision': revision,
+                    'platform': 'macos', 'architecture': 'aarch64'}
+        self.assertEqual(proof.protocol({'schema': 1, 'identity': identity}), (1, 3))
+        self.assertEqual(proof.protocol({'schema': 2, 'identity': identity,
+                         'policy': {'port_protocol_minor': 4}}), (1, 4))
+        policy = json.loads((Path(__file__).resolve().parents[1] / 'policy.json').read_bytes())
+        current = {'schema': 3, 'identity': dict(identity, engine_version='0.2.0'), 'policy': policy}
+        self.assertEqual(proof.protocol(current), (2, 0))
+        self.assertEqual(proof.config_schema(current), 2)
+        ordinary.check_upgrade(current, dict(current))
+        for change in [dict(current, schema=2), dict(current, identity=identity)]:
+            with self.assertRaises(AssertionError):
+                proof.protocol(change)
+        with self.assertRaisesRegex(AssertionError, 'fresh enrollment'):
+            ordinary.check_upgrade(current, dict(current, schema=2))
+        wrong = json.loads(json.dumps(current))
+        wrong['policy']['sdk']['source_revision'] = '0' * 40
+        with self.assertRaises(AssertionError):
+            proof.protocol(wrong)
+
     def test_clean_upgrade_cannot_adopt_legacy_receipts_or_change_policy(self):
         identity = {name: 'fixture' for name in ['platform', 'architecture', 'engine_version', 'smolvm_revision']}
         clean = {'schema': 2, 'policy': {'domain_ownership': 'exclusive'}, 'identity': identity}

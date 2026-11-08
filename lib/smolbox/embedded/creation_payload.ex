@@ -1,0 +1,93 @@
+defmodule SmolBox.Embedded.CreationPayload do
+  @moduledoc false
+  alias SmolBox.Embedded.{Config, CreationFeatures, JSON}
+  @maximum 655_360
+  @chunk 65_536
+
+  def limits,
+    do: %{"schema" => 1, "payload_bytes" => @maximum, "chunks" => 10, "chunk_bytes" => @chunk}
+
+  def pack(operation, config) do
+    case Config.sdk_identity(config) do
+      %{"feature_versions" => %{"compact_creation" => 1}} -> pack_operation(operation)
+      _legacy -> {:ok, operation}
+    end
+  end
+
+  def encode(features) do
+    if CreationFeatures.valid?(features) do
+      network = features["network"]
+
+      bytes =
+        IO.iodata_to_binary([
+          "SBCF",
+          <<1>>,
+          flag(network["enabled"]),
+          strings(network["hosts"]),
+          strings(network["cidrs"]),
+          <<length(features["ports"])::unsigned-big-16>>,
+          Enum.map(features["ports"], fn mapping ->
+            <<mapping["host"]::unsigned-big-16, mapping["guest"]::unsigned-big-16>>
+          end),
+          workload(features["workload"])
+        ])
+
+      if byte_size(bytes) <= @maximum,
+        do: {:ok, %{"schema" => 1, "chunks" => chunks(bytes)}},
+        else: :error
+    else
+      :error
+    end
+  end
+
+  defp pack_operation(%{"operation" => name, "create" => create} = operation)
+       when name in ~w(create inspect_creation) do
+    with {:ok, value} <- pack_fields(create), do: {:ok, %{operation | "create" => value}}
+  end
+
+  defp pack_operation(%{"operation" => "qualify_creation"} = operation),
+    do: pack_fields(operation)
+
+  defp pack_operation(operation), do: {:ok, operation}
+
+  defp pack_fields(%{"features" => %{"workload" => workload} = features} = fields)
+       when not is_nil(workload) do
+    case JSON.encode(features) do
+      {:ok, encoded} when byte_size(encoded) <= 262_144 ->
+        {:ok, fields}
+
+      _large ->
+        with {:ok, payload} <- encode(features),
+             do: {:ok, fields |> Map.delete("features") |> Map.put("features_payload", payload)}
+    end
+  end
+
+  defp pack_fields(fields), do: {:ok, fields}
+
+  defp strings(values), do: [<<length(values)::unsigned-big-16>>, Enum.map(values, &string/1)]
+  defp string(value), do: [<<byte_size(value)::unsigned-big-32>>, value]
+  defp flag(true), do: <<1>>
+  defp flag(false), do: <<0>>
+  defp optional(nil), do: <<0>>
+  defp optional(value), do: [<<1>>, string(value)]
+  defp workload(nil), do: <<0>>
+
+  defp workload(value) do
+    env = Enum.sort(value["env"])
+
+    [
+      <<1>>,
+      strings(value["entrypoint"]),
+      strings(value["cmd"]),
+      <<length(env)::unsigned-big-16>>,
+      Enum.map(env, fn {key, value} -> [string(key), string(value)] end),
+      optional(value["workdir"])
+    ]
+  end
+
+  defp chunks(<<>>), do: []
+  defp chunks(bytes) when byte_size(bytes) <= @chunk, do: [Base.encode64(bytes)]
+
+  defp chunks(<<head::binary-size(@chunk), rest::binary>>),
+    do: [Base.encode64(head) | chunks(rest)]
+end

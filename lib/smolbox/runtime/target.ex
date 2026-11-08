@@ -1,6 +1,6 @@
 defmodule SmolBox.Runtime.Target do
   @moduledoc false
-  alias SmolBox.Backend.{Assignment, Embedded, HTTP}
+  alias SmolBox.Backend.{Assignment, Embedded, Features, HTTP}
   alias SmolBox.Embedded.{Config, Port}
   alias SmolBox.{Error, MachineSpec}
   alias SmolBox.Runtime.WorkerConfig
@@ -52,7 +52,14 @@ defmodule SmolBox.Runtime.Target do
             :capacity,
             :allocation_floor,
             :qualification,
-            :draining
+            :draining,
+            :checkpoints,
+            :sources,
+            :export_destinations,
+            :checkpoint_policies,
+            :branch_policies,
+            :volume_policy,
+            :registry_credentials
           ])
           |> Map.merge(%{
             kind: :embedded,
@@ -60,12 +67,7 @@ defmodule SmolBox.Runtime.Target do
             connection: reference,
             domain_binding: Config.domain_binding(config),
             native_config: config,
-            runtime_version: config.package_identity["engine_version"],
-            checkpoints: [],
-            sources: [],
-            export_destinations: [],
-            checkpoint_policies: [],
-            branch_policies: []
+            runtime_version: config.package_identity["engine_version"]
           })
         )
 
@@ -109,6 +111,17 @@ defmodule SmolBox.Runtime.Target do
   def id(%__MODULE__{id: id}), do: id
   def id(%Config{id: id}), do: id
   def id(%{client: %{worker: %{id: id}}}), do: id
+
+  # runtime_version retains the operational health identity (the native engine
+  # or HTTP server). SDK/source eligibility must use this distinct identity.
+  def sdk_version(%__MODULE__{kind: :embedded, native_config: config}),
+    do: Config.sdk_version(config)
+
+  def sdk_version(%Config{} = config), do: Config.sdk_version(config)
+  def sdk_version(%{runtime_version: version}), do: version
+  def sdk_version(_unrecognized), do: nil
+
+  def supports_feature?(target, feature), do: Features.supports?(target, feature)
 
   def endpoint(%{kind: :http, client: client}),
     do: {:http, client.worker.base_url, client.worker.unix_socket}
@@ -176,7 +189,10 @@ defmodule SmolBox.Runtime.Target do
         cpus: profile.cpus,
         memory_mb: profile.memory_mb,
         storage_gb: profile.storage_gb,
-        overlay_gb: profile.overlay_gb
+        overlay_gb: profile.overlay_gb,
+        network: profile.network,
+        ports: Map.get(spec, :ports, []),
+        workload: Map.get(spec, :workload)
       )
     else
       {:error, %Error{category: :unsupported_capability, operation: :create}}

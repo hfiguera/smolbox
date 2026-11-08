@@ -1,7 +1,7 @@
 defmodule SmolBox.Embedded.Launch do
   @moduledoc false
   import Bitwise
-  alias SmolBox.Embedded.Config
+  alias SmolBox.Embedded.{Config, Protocol}
 
   @cleared ~w(DYLD_LIBRARY_PATH DYLD_INSERT_LIBRARIES DYLD_FALLBACK_LIBRARY_PATH DYLD_FRAMEWORK_PATH DYLD_FALLBACK_FRAMEWORK_PATH LD_LIBRARY_PATH LD_PRELOAD)
 
@@ -20,11 +20,7 @@ defmodule SmolBox.Embedded.Launch do
 
     with :ok <- plain_path(executable),
          :ok <- plain_path(Path.join(config.package_path, "package.json")),
-         {:ok, minor} <-
-           protocol_minor(
-             Path.join(config.package_path, "package.json"),
-             config.package_manifest_sha256
-           ),
+         {:ok, protocol} <- protocol(Path.join(config.package_path, "package.json"), config),
          {:ok, digest} <- hash(executable, 268_435_456),
          true <- digest == config.package_identity["build_sha256"],
          {:ok, %{mode: mode}} <- File.lstat(executable),
@@ -35,7 +31,13 @@ defmodule SmolBox.Embedded.Launch do
          :ok <- File.write(path, body, [:exclusive]),
          :ok <- File.chmod(path, 0o600) do
       {:ok,
-       %{executable: executable, config_path: path, directory: directory, protocol_minor: minor}}
+       %{
+         executable: executable,
+         config_path: path,
+         directory: directory,
+         protocol_major: protocol.major,
+         protocol_minor: protocol.minor
+       }}
     else
       _invalid -> :error
     end
@@ -113,9 +115,9 @@ defmodule SmolBox.Embedded.Launch do
     }
   end
 
-  defp helper_config(config),
-    do: %{
-      "schema" => 1,
+  defp helper_config(config) do
+    values = %{
+      "schema" => Config.protocol_major(config),
       "target_id" => config.id,
       "generation" => config.domain_generation,
       "allow_initialize" => config.allow_initialize,
@@ -123,18 +125,26 @@ defmodule SmolBox.Embedded.Launch do
       "approved_artifacts" => Enum.map(config.artifacts, &artifact/1)
     }
 
-  defp protocol_minor(path, expected_hash) do
+    case Config.sdk_identity(config) do
+      %{"feature_versions" => %{"ports" => 1}} ->
+        Map.put(values, "publish_address", config.publish_address)
+
+      _legacy ->
+        values
+    end
+  end
+
+  defp protocol(path, config) do
     with {:ok, file} <- File.open(path, [:read, :binary, :raw]) do
       try do
         with {:ok, bytes} <- :file.read(file, 4_194_305),
              true <- byte_size(bytes) <= 4_194_304,
-             true <- Base.encode16(:crypto.hash(:sha256, bytes), case: :lower) == expected_hash,
-             {:ok, manifest} <- Jason.decode(bytes) do
-          case manifest do
-            %{"schema" => 2, "policy" => %{"port_protocol_minor" => 4}} -> {:ok, 4}
-            %{"schema" => 1} -> {:ok, 3}
-            _unsupported -> :error
-          end
+             true <-
+               Base.encode16(:crypto.hash(:sha256, bytes), case: :lower) ==
+                 config.package_manifest_sha256,
+             {:ok, manifest} <- Jason.decode(bytes),
+             true <- manifest["identity"] == config.package_identity do
+          manifest_protocol(manifest, config)
         else
           _invalid -> :error
         end
@@ -143,6 +153,43 @@ defmodule SmolBox.Embedded.Launch do
       end
     end
   end
+
+  defp manifest_protocol(%{"schema" => 3, "policy" => policy}, config) do
+    if Config.protocol_major(config) == 2 and
+         policy["schema"] == 2 and policy["port_protocol_major"] == 2 and
+         policy["port_protocol_minor"] == 0 and policy["sdk"] == Config.sdk_identity(config) and
+         publisher_policy?(policy, Config.sdk_identity(config)) and
+         limit_policy?(policy, config),
+       do: {:ok, %{major: 2, minor: 0}},
+       else: :error
+  end
+
+  defp manifest_protocol(%{"schema" => 2, "policy" => %{"port_protocol_minor" => 4}}, config),
+    do: legacy_protocol(config, 4)
+
+  defp manifest_protocol(%{"schema" => 1}, config), do: legacy_protocol(config, 3)
+  defp manifest_protocol(_manifest, _config), do: :error
+
+  defp limit_policy?(policy, config) do
+    limits = Protocol.limits(2, 0, Config.sdk_identity(config))
+
+    Enum.all?(
+      [
+        {"creation_limits", "creation"},
+        {"job_limits", "jobs"},
+        {"buffered_limits", "buffered"},
+        {"log_limits", "logs"},
+        {"observation_limits", "observations"}
+      ],
+      fn {field, key} -> policy[field] == limits[key] end
+    )
+  end
+
+  defp publisher_policy?(policy, sdk),
+    do: sdk["feature_versions"]["ports"] != 1 or policy["publish_address_default"] == "127.0.0.1"
+
+  defp legacy_protocol(config, minor),
+    do: if(Config.protocol_major(config) == 1, do: {:ok, %{major: 1, minor: minor}}, else: :error)
 
   defp plain_path(path) do
     [root | parts] = Path.split(path)

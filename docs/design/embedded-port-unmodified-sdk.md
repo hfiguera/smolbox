@@ -9,6 +9,12 @@ the user's request.
 See the [completion audit](embedded-port-unmodified-sdk-completion-audit.md) and
 [exact clean-package evidence](../evidence/embedded-port-unmodified-sdk-ordinary.json).
 
+The branch's next proposed milestone is
+[HTTP feature parity](embedded-port-http-parity.md), with a separate
+[implementation plan](embedded-port-http-parity-implementation-plan.md). It expands
+the offline scope below; this completed migration and its qualification claims
+remain unchanged. The additional capabilities are planned, not implemented.
+
 This design supersedes the upstream-patch dependency in the
 [original design](embedded-port.md). It does not change the installed helper,
 current development admission, or existing qualification evidence by itself.

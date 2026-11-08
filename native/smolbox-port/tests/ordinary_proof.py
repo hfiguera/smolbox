@@ -8,15 +8,15 @@ from pathlib import Path
 import secrets
 import time
 
-from native_proof import Port, observed, operation, save, snapshot
+from native_proof import Port, config_schema, observed, operation, save, snapshot
 
 
 def check_upgrade(previous, replacement):
     for key in ['platform', 'architecture', 'engine_version', 'smolvm_revision']:
         assert previous['identity'][key] == replacement['identity'][key], 'incompatible upgrade tuple'
-    if previous.get('schema') == 2 or replacement.get('schema') == 2:
-        assert previous.get('schema') == replacement.get('schema') == 2, \
-            'patched-to-clean migration requires drain/delete and fresh enrollment'
+    if previous.get('schema', 0) >= 2 or replacement.get('schema', 0) >= 2:
+        assert previous.get('schema') == replacement.get('schema') and previous['schema'] in (2, 3), \
+            'native protocol migration requires drain/delete and fresh enrollment'
         assert previous['policy'] == replacement['policy'], 'incompatible native policy'
 
 
@@ -72,7 +72,7 @@ def prove(args):
                    'retained_full_receipt': True, 'domain_generation_unchanged': True,
                    'old_assets_retained_during_upgrade': True, 'codec_rollback_qualified': False}
     config = output / 'config.json'
-    save(config, {'schema': 1, **domain, 'allow_initialize': False,
+    save(config, {'schema': config_schema(manifest), **domain, 'allow_initialize': False,
                   'package_manifest_sha256': hashlib.sha256(manifest_bytes).hexdigest(),
                   'approved_artifacts': [artifact]})
     before = snapshot()
@@ -135,7 +135,7 @@ def prove(args):
         port.close()
         if upgrade:
             config = output / 'upgrade-config.json'
-            save(config, {'schema': 1, **domain, 'allow_initialize': False,
+            save(config, {'schema': config_schema(next_manifest), **domain, 'allow_initialize': False,
                          'package_manifest_sha256': hashlib.sha256(next_manifest_bytes).hexdigest(),
                          'approved_artifacts': [artifact]})
         port = Port(next_package, config, output / 'second.stderr')

@@ -2,8 +2,24 @@ defmodule SmolBox.Embedded.Port do
   @moduledoc false
   use GenServer
   @behaviour SmolBox.Embedded.Bridge
-  alias SmolBox.Backend.Budget
-  alias SmolBox.Embedded.{Channel, Config, Frame, JSON, Launch, Outbox, Protocol, Request, Shape}
+  alias SmolBox.Backend.{Budget, Features}
+
+  alias SmolBox.Embedded.{
+    Channel,
+    CommandPayload,
+    Config,
+    CreationFeatures,
+    CreationPayload,
+    Frame,
+    JSON,
+    Launch,
+    Outbox,
+    Protocol,
+    Request,
+    Shape,
+    TerminalContract
+  }
+
   alias SmolBox.{Error, Validation}
 
   @impl true
@@ -18,14 +34,14 @@ defmodule SmolBox.Embedded.Port do
 
   @impl true
   def submit(server, request, budget, observer) do
-    if Budget.valid?(budget) and Request.valid?(request, budget.timeout_ms) and is_pid(observer),
+    if Budget.valid?(budget) and request_shape?(request, budget.timeout_ms) and is_pid(observer),
       do: call(server, {:submit, request, budget, observer, now() + budget.timeout_ms}),
       else: failure(:validation)
   end
 
   @impl true
   def submit(server, request, budget, observer, epoch) do
-    if Budget.valid?(budget) and Request.valid?(request, budget.timeout_ms) and is_pid(observer) and
+    if Budget.valid?(budget) and request_shape?(request, budget.timeout_ms) and is_pid(observer) and
          Shape.hex?(epoch, 32),
        do: call(server, {:submit, request, budget, observer, now() + budget.timeout_ms, epoch}),
        else: failure(:validation)
@@ -41,6 +57,13 @@ defmodule SmolBox.Embedded.Port do
       do: call(server, {:upload, handle, bytes})
 
   def upload(_server, _handle, _bytes), do: failure(:validation)
+  @impl true
+  def terminal_control(server, handle, control) do
+    if TerminalContract.action?(control),
+      do: call(server, {:terminal_control, handle, control}),
+      else: failure(:validation)
+  end
+
   @impl true
   def activate(server, binding), do: call(server, {:activate, binding})
   @impl true
@@ -60,8 +83,42 @@ defmodule SmolBox.Embedded.Port do
   @impl true
   def health(server), do: call(server, :health)
 
-  defp call(server, request) do
-    GenServer.call(server, request, 15_000)
+  @impl true
+  def health(server, timeout), do: call(server, :health, timeout)
+  @impl true
+  def submit(server, request, budget, observer, epoch, timeout) do
+    if Budget.valid?(budget) and request_shape?(request, budget.timeout_ms) and is_pid(observer) and
+         Shape.hex?(epoch, 32),
+       do:
+         call(
+           server,
+           {:submit, request, budget, observer, now() + budget.timeout_ms, epoch},
+           timeout
+         ),
+       else: failure(:validation)
+  end
+
+  @impl true
+  def terminal_control(server, handle, control, timeout) do
+    if TerminalContract.action?(control),
+      do: call(server, {:terminal_control, handle, control}, timeout),
+      else: failure(:validation)
+  end
+
+  @impl true
+  def acknowledge(server, handle, bytes, timeout),
+    do: call(server, {:acknowledge, handle, bytes}, timeout)
+
+  @impl true
+  def cancel(server, handle, timeout), do: call(server, {:cancel, handle}, timeout)
+
+  # The caller does not choose the protocol. This only bounds input before the
+  # GenServer call; Channel.register enforces the approved session's exact major.
+  defp request_shape?(request, budget),
+    do: Request.valid?(request, budget, 1) or Request.valid?(request, budget, 2)
+
+  defp call(server, request, timeout \\ 15_000) do
+    GenServer.call(server, request, timeout)
   catch
     :exit, _redacted -> failure(:unknown, :dispatch_uncertain)
   end
@@ -81,6 +138,7 @@ defmodule SmolBox.Embedded.Port do
         cleanup_watcher: Launch.watch(self()),
         frame: %Frame{},
         channel: nil,
+        protocol_major: Config.protocol_major(config),
         protocol_minor: nil,
         records: %{},
         handles: %{},
@@ -117,6 +175,7 @@ defmodule SmolBox.Embedded.Port do
           package_identity: state.config.package_identity,
           package_manifest_sha256: state.config.package_manifest_sha256,
           protocol_minor: if(state.channel, do: state.channel.minor),
+          protocol_major: if(state.channel, do: state.channel.major),
           epoch: if(state.channel, do: state.channel.epoch)
         }}, state}
 
@@ -216,6 +275,33 @@ defmodule SmolBox.Embedded.Port do
     end
   end
 
+  def handle_call({:terminal_control, handle, control}, {caller, _tag}, state) do
+    with {:ok, id, record} <- lookup(state, handle),
+         true <- caller == record.observer and not record.notified and record.error == nil,
+         true <- not state.closing,
+         true <- now() < record.deadline,
+         %{"operation" => "terminal_open"} <- record.operation,
+         sequence = state.channel.pending[id].terminal_control + 1,
+         {:ok, channel, true} <- Channel.terminal_control(state.channel, id, sequence, control),
+         message = %{
+           "type" => "terminal_control",
+           "epoch" => channel.epoch,
+           "id" => id,
+           "sequence" => sequence,
+           "control" => control
+         },
+         {:ok, outbox} <-
+           Outbox.put(
+             state.outbox,
+             %{kind: :terminal_control, id: id, message: message},
+             state.config.limits.send_queue_bytes
+           ) do
+      {:reply, :ok, schedule_flush(%{state | channel: channel, outbox: outbox})}
+    else
+      _invalid -> {:reply, failure(:admission_exhausted), state}
+    end
+  end
+
   def handle_call(:shutdown, _from, state) do
     state = %{state | shutting_down: true, status: :closing}
     state = close_channel(state, :unknown)
@@ -240,7 +326,13 @@ defmodule SmolBox.Embedded.Port do
         case Launch.open(prepared) do
           {:ok, port} ->
             {:noreply,
-             %{state | port: port, protocol_minor: prepared.protocol_minor, status: :handshaking}}
+             %{
+               state
+               | port: port,
+                 protocol_major: prepared.protocol_major,
+                 protocol_minor: prepared.protocol_minor,
+                 status: :handshaking
+             }}
 
           _failed ->
             {:noreply, failed_start(state)}
@@ -356,11 +448,16 @@ defmodule SmolBox.Embedded.Port do
   defp register(state, operation, budget, observer, caller, remaining) do
     limits = state.config.limits
 
+    credit_bytes =
+      if operation["operation"] == "terminal_open",
+        do: min(limits.initial_credit_bytes, operation["terminal"]["max_buffer_bytes"]),
+        else: limits.initial_credit_bytes
+
     with {:ok, id, channel} <-
            Channel.register(
              state.channel,
              operation,
-             limits.initial_credit_bytes,
+             credit_bytes,
              limits.initial_credit_events
            ),
          message = %{
@@ -368,10 +465,14 @@ defmodule SmolBox.Embedded.Port do
            "epoch" => channel.epoch,
            "id" => id,
            "budget_ms" => remaining,
-           "initial_credit" => limits.initial_credit_bytes,
+           "initial_credit" => credit_bytes,
            "initial_event_credit" => limits.initial_credit_events,
            "operation" => operation
          },
+         {:ok, wire_operation} <- CreationPayload.pack(operation, state.config),
+         message = %{message | "operation" => wire_operation},
+         {:ok, wire_operation} <- CommandPayload.pack(wire_operation),
+         message = %{message | "operation" => wire_operation},
          {:ok, outbox} <-
            Outbox.put(
              state.outbox,
@@ -421,24 +522,47 @@ defmodule SmolBox.Embedded.Port do
   defp approved?(config, %{"operation" => operation, "create" => create})
        when operation in ~w(create inspect_creation) do
     create["artifact"] in Enum.map(config.artifacts, &Launch.artifact/1) and
+      CreationFeatures.approved?(create["features"], config) and
       Enum.any?(config.profiles, fn profile ->
-        create["resources"] == %{
-          "cpus" => profile.cpus,
-          "memory_mib" => profile.memory_mb,
-          "storage_gib" => profile.storage_gb,
-          "overlay_gib" => profile.overlay_gb
-        }
+        Map.get(create, "features", %{})
+        |> Map.get("network", %{"enabled" => false, "hosts" => [], "cidrs" => []}) ==
+          CreationFeatures.network(profile.network) and
+          create["resources"] == %{
+            "cpus" => profile.cpus,
+            "memory_mib" => profile.memory_mb,
+            "storage_gib" => profile.storage_gb,
+            "overlay_gib" => profile.overlay_gb
+          }
       end)
   end
+
+  defp approved?(config, %{"operation" => name})
+       when name in ~w(health capacity metrics readiness list measurements),
+       do: Features.supports?(config, :observability)
 
   defp approved?(config, %{"operation" => "qualify_creation"} = request),
     do: approved?(config, %{"operation" => "create", "create" => request})
 
+  defp approved?(config, %{"operation" => "exec_buffered"}),
+    do: Features.supports?(config, :buffered_exec)
+
+  defp approved?(config, %{"operation" => "exec_background"}),
+    do: Features.supports?(config, :background_exec)
+
+  defp approved?(config, %{"operation" => "exec_stream"}),
+    do: Features.supports?(config, :streaming_exec)
+
+  defp approved?(config, %{"operation" => "terminal_open"}),
+    do: Features.supports?(config, :terminals)
+
+  defp approved?(config, %{"operation" => "logs"}), do: Features.supports?(config, :logs)
+
   defp approved?(_config, _operation), do: true
 
   defp receive_body(%{status: :handshaking} = state, body) do
-    with {:ok, %{"type" => "hello", "hello" => hello}} <- Protocol.decode(body),
-         true <- Protocol.approve(hello, state.config),
+    with {:ok, %{"type" => "hello", "hello" => hello}} <-
+           Protocol.decode(body, state.protocol_major),
+         true <- Protocol.approve(hello, state.config, Config.sdk_identity(state.config)),
          true <- hello["minor"] == state.protocol_minor,
          {:ok, outbox} <-
            Outbox.put(
@@ -465,7 +589,7 @@ defmodule SmolBox.Embedded.Port do
   defp receive_body(%{closing: true} = state, _body), do: {:ok, state}
 
   defp receive_body(state, body) do
-    with {:ok, message} <- Protocol.decode(body),
+    with {:ok, message} <- Protocol.decode(body, state.protocol_major),
          {:ok, channel, event} <- Channel.receive_message(state.channel, message) do
       receive_correlated(%{state | channel: channel}, event, byte_size(body))
     else
@@ -479,7 +603,14 @@ defmodule SmolBox.Embedded.Port do
   defp receive_correlated(state, {id, event}, bytes) do
     with {:ok, record} <- Map.fetch(state.records, id),
          true <- record.sent do
-      record = %{record | response_bytes: record.response_bytes + bytes}
+      # Terminal transcripts have a bounded unread window, not a lifetime
+      # response cap. Channel enforces byte/event credit and exact total proof.
+      charged =
+        if record.operation["operation"] == "terminal_open",
+          do: max(record.response_bytes, bytes),
+          else: record.response_bytes + bytes
+
+      record = %{record | response_bytes: charged}
       state = %{state | records: Map.put(state.records, id, record)}
 
       state =
@@ -502,6 +633,12 @@ defmodule SmolBox.Embedded.Port do
 
   defp deliver(state, id, :accepted) do
     notify(state.records[id], :accepted)
+    state
+  end
+
+  defp deliver(state, id, :terminal_opened) do
+    record = state.records[id]
+    if record.error == nil, do: notify(record, :terminal_opened)
     state
   end
 

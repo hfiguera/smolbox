@@ -2,12 +2,16 @@ defmodule SmolBox.Terminal.Server do
   @moduledoc false
   use GenServer
   alias SmolBox.Error
-  alias SmolBox.Terminal.{Connection, Handle, Spec, Wire}
+  alias SmolBox.Terminal.{Connection, Handle, Result, Spec}
 
   def start(client, name, spec, consumer, observer \\ self()) do
+    start_connection(client.worker, name, spec, consumer, observer)
+  end
+
+  def start_connection(source, name, spec, consumer, observer \\ self()) do
     token = make_ref()
 
-    case GenServer.start(__MODULE__, {client, name, spec, observer, consumer, token}) do
+    case GenServer.start(__MODULE__, {source, name, spec, observer, consumer, token}) do
       {:ok, pid} -> {:ok, %Handle{pid: pid, token: token}}
       {:error, %Error{} = error} -> {:error, error}
       _failed -> failure(:transport)
@@ -39,11 +43,21 @@ defmodule SmolBox.Terminal.Server do
   end
 
   @impl GenServer
-  def init({client, name, spec, observer, consumer, token}) do
-    # Monitor before opening: a vanished owner cannot leave an orphaned socket.
+  def init({source, name, spec, observer, consumer, token}) do
+    # Monitor before opening: a vanished owner cannot leave an orphaned connection.
     observer_ref = Process.monitor(observer)
 
-    case Connection.open(client.worker, name, spec) do
+    case Connection.open(source, name, spec) do
+      {:ok, connection} ->
+        initialize(connection, spec, observer, observer_ref, consumer, token)
+
+      {:error, error} ->
+        {:stop, error}
+    end
+  end
+
+  defp initialize(connection, spec, observer, observer_ref, consumer, token) do
+    case attach(connection, consumer) do
       {:ok, connection} ->
         now = now()
 
@@ -56,7 +70,6 @@ defmodule SmolBox.Terminal.Server do
           consumer_ref: if(consumer, do: Process.monitor(consumer)),
           token: token,
           registry: nil,
-          input_left: client.worker.max_request_bytes,
           queue: :queue.new(),
           bytes: 0,
           count: 0,
@@ -71,6 +84,7 @@ defmodule SmolBox.Terminal.Server do
         {:ok, state}
 
       {:error, error} ->
+        Connection.close(connection)
         {:stop, error}
     end
   end
@@ -85,7 +99,7 @@ defmodule SmolBox.Terminal.Server do
         {:reply, failure(:identity_conflict), state}
 
       true ->
-        {:reply, :ok, %{state | consumer: caller, consumer_ref: Process.monitor(caller)}}
+        bind(state, caller)
     end
   end
 
@@ -118,11 +132,39 @@ defmodule SmolBox.Terminal.Server do
 
   def handle_call(_request, _from, state), do: {:reply, failure(:authentication), state}
 
+  defp attach(connection, nil), do: {:ok, connection}
+  defp attach(connection, _consumer), do: Connection.send(connection, :attach)
+
+  defp bind(%{connection: nil} = state, caller),
+    do: {:reply, :ok, %{state | consumer: caller, consumer_ref: Process.monitor(caller)}}
+
+  defp bind(state, caller) do
+    case Connection.send(state.connection, :attach) do
+      {:ok, connection} ->
+        {:reply, :ok,
+         %{
+           state
+           | connection: connection,
+             consumer: caller,
+             consumer_ref: Process.monitor(caller)
+         }}
+
+      {:error, error} ->
+        {:reply, {:error, error}, finish(state, {:error, error})}
+    end
+  end
+
   defp consumer_call(:next, state) do
     case :queue.out(state.queue) do
       {{:value, bytes}, queue} ->
-        {:reply, {:ok, {:output, bytes}},
-         %{state | queue: queue, bytes: state.bytes - byte_size(bytes), count: state.count - 1}}
+        next = %{
+          state
+          | queue: queue,
+            bytes: state.bytes - byte_size(bytes),
+            count: state.count - 1
+        }
+
+        {:reply, {:ok, {:output, bytes}}, acknowledge(next, byte_size(bytes))}
 
       {:empty, _queue} ->
         if state.outcome,
@@ -132,7 +174,7 @@ defmodule SmolBox.Terminal.Server do
   end
 
   defp consumer_call(:close, %{outcome: nil, close_at: nil} = state) do
-    case Connection.send_frame(state.connection, :close) do
+    case Connection.send(state.connection, :close) do
       {:ok, connection} ->
         {:reply, :ok, %{state | connection: connection, close_at: now() + state.spec.close_ms}}
 
@@ -151,36 +193,39 @@ defmodule SmolBox.Terminal.Server do
 
   defp consumer_call({:input, bytes}, state) when is_binary(bytes) do
     if byte_size(bytes) in 1..state.spec.max_input_bytes,
-      do: transmit(state, {:binary, bytes}),
+      do: transmit(state, {:input, bytes}),
       else: {:reply, failure(:validation), state}
   end
 
   defp consumer_call({:resize, cols, rows}, state) do
     if Spec.dimensions?(cols, rows),
-      do: transmit(state, {:text, Jason.encode!(%{type: "resize", cols: cols, rows: rows})}),
+      do: transmit(state, {:resize, cols, rows}),
       else: {:reply, failure(:validation), state}
   end
 
   defp consumer_call(_request, state), do: {:reply, failure(:validation), state}
 
-  defp transmit(state, {_kind, bytes} = frame) do
-    if byte_size(bytes) > state.input_left do
-      result = uncertain(:output_limit, :terminal)
-      {:reply, result, finish(state, result)}
-    else
-      case Connection.send_frame(state.connection, frame) do
-        {:ok, connection} ->
-          {:reply, :ok,
-           %{
-             state
-             | connection: connection,
-               active_at: now(),
-               input_left: state.input_left - byte_size(bytes)
-           }}
+  defp transmit(state, command) do
+    case Connection.send(state.connection, command) do
+      {:ok, connection} ->
+        {:reply, :ok,
+         %{
+           state
+           | connection: connection,
+             active_at: now()
+         }}
 
-        {:error, error} ->
-          {:reply, {:error, error}, finish(state, {:error, error})}
-      end
+      {:error, error} ->
+        {:reply, {:error, error}, finish(state, {:error, error})}
+    end
+  end
+
+  defp acknowledge(%{connection: nil} = state, _bytes), do: state
+
+  defp acknowledge(state, bytes) do
+    case Connection.acknowledge(state.connection, bytes) do
+      {:ok, connection} -> %{state | connection: connection}
+      {:error, error} -> finish(state, {:error, error})
     end
   end
 
@@ -204,7 +249,21 @@ defmodule SmolBox.Terminal.Server do
     {:stop, :normal, finish(state, uncertain(:unknown, :terminal_consumer))}
   end
 
-  def handle_info(_message, state), do: {:noreply, state}
+  def handle_info(_message, %{connection: nil} = state), do: {:noreply, state}
+
+  def handle_info(message, state) do
+    case Connection.handle_message(state.connection, message) do
+      {:ok, connection, events} ->
+        next = reduce_events(%{state | connection: connection}, events)
+        {:noreply, next}
+
+      {:error, error} ->
+        {:noreply, finish(state, {:error, error})}
+
+      :ignore ->
+        {:noreply, state}
+    end
+  end
 
   defp expired(state) do
     cond do
@@ -227,11 +286,8 @@ defmodule SmolBox.Terminal.Server do
 
   defp poll(state) do
     case Connection.poll(state.connection) do
-      {:ok, connection, frames} ->
-        next =
-          Enum.reduce_while(frames, %{state | connection: connection}, &reduce_frame/2)
-
-        if next.outcome != nil, do: finish(next, next.outcome), else: next
+      {:ok, connection, events} ->
+        reduce_events(%{state | connection: connection}, events)
 
       {:error, error} ->
         operation = if state.close_at, do: :terminal_close, else: :terminal
@@ -239,37 +295,43 @@ defmodule SmolBox.Terminal.Server do
     end
   end
 
-  defp reduce_frame(frame, state) do
-    case frame(state, frame) do
+  defp reduce_events(state, events) do
+    next = Enum.reduce_while(events, state, &reduce_event/2)
+    if next.outcome != nil, do: finish(next, next.outcome), else: next
+  end
+
+  defp reduce_event(event, state) do
+    case event(state, event) do
       {:ok, next} -> {:cont, next}
       {:error, error} -> {:halt, finish(state, {:error, error})}
     end
   end
 
-  defp frame(%{outcome: outcome} = state, {:close, _code, _reason}) when not is_nil(outcome),
+  defp event(%{outcome: outcome} = state, :closed) when not is_nil(outcome),
     do: {:ok, state}
 
-  defp frame(%{outcome: outcome}, _frame) when not is_nil(outcome), do: failure(:protocol)
+  defp event(%{outcome: outcome}, _event) when not is_nil(outcome), do: failure(:protocol)
 
-  defp frame(state, frame) do
-    case Wire.event(frame) do
-      {:ok, {:output, bytes}} ->
-        output(state, bytes)
+  defp event(state, {:output, bytes}) when is_binary(bytes), do: output(state, bytes)
 
-      {:ok, {:exit, result}} ->
-        {:ok, %{state | outcome: {:ok, result}}}
-
-      {:ok, {:pong, bytes}} ->
-        with {:ok, connection} <- Connection.send_frame(state.connection, {:pong, bytes}),
-             do: {:ok, %{state | connection: connection}}
-
-      {:ok, :ignore} ->
-        {:ok, state}
-
-      {:error, category} ->
-        uncertain(category, if(state.close_at, do: :terminal_close, else: :terminal))
-    end
+  defp event(state, {:exit, result}) do
+    if Result.valid?(result),
+      do: {:ok, %{state | outcome: {:ok, result}}},
+      else: uncertain(:unknown, :terminal)
   end
+
+  defp event(state, {:pong, bytes}) when is_binary(bytes) do
+    with {:ok, connection} <- Connection.send(state.connection, {:pong, bytes}),
+         do: {:ok, %{state | connection: connection}}
+  end
+
+  defp event(state, :ignore), do: {:ok, state}
+  defp event(state, :closed), do: event(state, {:error, :unknown})
+
+  defp event(state, {:error, category}),
+    do: uncertain(category, if(state.close_at, do: :terminal_close, else: :terminal))
+
+  defp event(_state, _invalid), do: failure(:protocol)
 
   defp output(state, <<>>), do: {:ok, state}
 
@@ -294,7 +356,7 @@ defmodule SmolBox.Terminal.Server do
   defp finish(%{connection: nil} = state, _outcome), do: state
 
   defp finish(state, outcome) do
-    Connection.send_frame(state.connection, :close)
+    Connection.send(state.connection, :close)
     Connection.close(state.connection)
     notify(state, {state.token, :terminal_outcome, outcome})
     Process.demonitor(state.observer_ref, [:flush])

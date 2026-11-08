@@ -12,7 +12,9 @@ defmodule SmolBox.Runtime.TerminalObservation do
     task =
       Task.async(fn ->
         Backend.open_managed_terminal(
-          Target.connection(session.worker),
+          Backend.bounded(Target.connection(session.worker, record),
+            timeout_ms: max(1, Session.remaining(session, record, :execution))
+          ),
           record.machine_name,
           record.spec.command,
           nil,

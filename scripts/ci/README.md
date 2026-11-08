@@ -136,6 +136,11 @@ absent from PATH. This copies the public Runtime example into the fresh consumer
 records its source hashes, checks the native inventory before/after, and verifies
 owned deletion. `--minimum` selects the minimum dependency/toolchain lane.
 `--native-public` and the internal `--native-ordinary` mode are mutually exclusive.
+Add `--native-terminal` only with `--native-public` to request the ordinary
+retained-image PTY proof from a terminal-capable package. It requires the native
+terminal reader gate, verifies binary input/output, resizing, Exit and slot
+release, and remains within normal lifecycle mode. The consumer report includes
+the exact proof-tool digests and terminal evidence; omission does not qualify PTY.
 Native consumer options require one of those explicit modes; omission is rejected
 before native work because crash validation remains deferred.
 Native consumer deadlines/output overflow retain the child collector and record

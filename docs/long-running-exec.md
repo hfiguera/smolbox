@@ -1,5 +1,15 @@
 # Long-running commands and background launch
 
+Embedded Port protocol-2 packages declaring `background_exec: 1` implement the
+same retained-image launch API through an owned bounded SDK worker. They require
+store capability `native_background_launches: 1` after all native v17 readers
+support the launch combination. Launch returns `LaunchResult` and durable
+`:launched` evidence; uncertainty retains the command slot and reservation and
+never authorizes automatic replay. Streaming background execution and stdin
+remain unsupported. Public/codec and ordinary non-VM SDK checks pass; ordinary
+Linux/macOS guest and exact-package qualification remain pending. See
+[Embedded setup](embedded-port.html) for package and reader approval.
+
 SmolBox supports finite foreground command timeouts up to 24 hours and explicit
 background launch on managed persistent image machines. Both require the qualified
 smolvm 1.17.0, 1.19.0, 1.20.2 or 1.22.0 runtime. Background launch confirms a process was started; it is not
@@ -106,6 +116,13 @@ is provided. Background standard streams are discarded by the qualified upstream
 path; applications should deliberately write logs to files if required.
 
 ## Concurrency, cancellation and recovery
+
+Embedded Port packages declaring `logs: 1` support the managed console tail/follow
+API and `LogResult`, with receipt-bound reads and independent stream credit.
+Callbacks receive complete `{:log, line}` events; failing callbacks detach.
+Reads take no command slot or mutation lock and persist no transcript. Missing
+logs and stream EOF provide no lifecycle/workload evidence. Public and non-VM
+file/codec checks pass; ordinary Linux/macOS package qualification remains pending.
 
 One command or launch operation can own a machine's command slot across controllers
 sharing a store. Input staging occurs before launch within that slot. Background

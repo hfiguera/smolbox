@@ -33,6 +33,7 @@ fn hello() -> Hello {
         ],
         limits: Limits::default(),
         preflight: Preflight::Ready,
+        sdk: None,
     }
 }
 fn receipt() -> Receipt {
@@ -43,6 +44,7 @@ fn receipt() -> Receipt {
         owner_token: "67".repeat(32),
         incarnation: "89".repeat(16),
         material_sha256: "ab".repeat(32),
+        material: None,
     }
 }
 fn command() -> Operation {
@@ -74,9 +76,1070 @@ fn session() -> Session {
     s
 }
 
+fn parity_hello() -> Hello {
+    let value: Value = serde_json::from_str(include_str!("../fixtures/hello-v2.json")).unwrap();
+    let ServerMessage::Hello { hello } = ServerMessage::decode(value).unwrap() else {
+        unreachable!()
+    };
+    *hello
+}
+
+#[test]
+fn terminal_wire_binds_open_controls_whole_credit_and_collected_exit_without_lifetime_output_cap() {
+    Outcome::Terminal {
+        completion: Completion::NativeError,
+        dispatch: Dispatch::NotDispatched,
+        observed_exit: None,
+        worker_collected: true,
+        output_bytes: 0,
+    }
+    .validate_for(2)
+    .unwrap();
+    let message = ClientMessage::decode(
+        serde_json::from_str(include_str!("../fixtures/terminal-open-request.json")).unwrap(),
+    )
+    .unwrap();
+    let mut h = parity_hello();
+    let mut old = Session::new(h.clone()).unwrap();
+    old.approve(&h).unwrap();
+    assert!(matches!(
+        old.admit(message.clone()).unwrap(),
+        ServerMessage::Terminal {
+            outcome: Outcome::Error {
+                code: SafeCode::Unsupported,
+                dispatch: Dispatch::NotDispatched
+            },
+            ..
+        }
+    ));
+    h.sdk.as_mut().unwrap().feature_versions.extend([
+        ("terminals".into(), 1),
+        ("buffered_exec".into(), 1),
+        ("job_resources".into(), 1),
+    ]);
+    h.limits = Limits::for_sdk(h.sdk.as_ref().unwrap());
+    h.capabilities.push(Capability::TerminalOpen);
+    h.validate().unwrap();
+    assert!(h.limits.terminals.is_some());
+    let mut session = Session::new(h.clone()).unwrap();
+    session.approve(&h).unwrap();
+    session.admit(message).unwrap();
+    assert!(session
+        .terminal_control(&h.epoch, 1, 1, &TerminalAction::Attach)
+        .is_err());
+    assert!(session.event(1, Stream::Terminal, b"early").is_err());
+    session.terminal_opened(1).unwrap();
+    assert!(session.terminal_opened(1).is_err());
+    assert!(session
+        .terminal_control(
+            &h.epoch,
+            1,
+            1,
+            &TerminalAction::Input {
+                data_base64: encode_chunk(b"input").unwrap()
+            }
+        )
+        .is_err());
+    assert!(session
+        .terminal_control(&h.epoch, 1, 1, &TerminalAction::Attach)
+        .unwrap());
+    assert!(session
+        .terminal_control(&h.epoch, 1, 1, &TerminalAction::Attach)
+        .is_err());
+    session
+        .terminal_control(
+            &h.epoch,
+            1,
+            2,
+            &TerminalAction::Input {
+                data_base64: encode_chunk(b"\0\xff").unwrap(),
+            },
+        )
+        .unwrap();
+    // More than the historical 65,536-event cap, with bounded outstanding credit.
+    for _ in 0..65_540 {
+        session.event(1, Stream::Terminal, b"\0\xff").unwrap();
+        assert!(session.credit(&h.epoch, 1, 1, 0).is_err());
+        session.credit(&h.epoch, 1, 2, 1).unwrap();
+    }
+    session
+        .terminal_control(
+            &h.epoch,
+            1,
+            3,
+            &TerminalAction::Resize {
+                cols: 120,
+                rows: 43,
+            },
+        )
+        .unwrap();
+    session
+        .terminal_control(&h.epoch, 1, 4, &TerminalAction::Close)
+        .unwrap();
+    assert!(session
+        .terminal_control(
+            &h.epoch,
+            1,
+            5,
+            &TerminalAction::Resize { cols: 80, rows: 24 }
+        )
+        .is_err());
+    for (code, collected) in [(Some(7), false), (Some(124), true), (None, true)] {
+        assert!(session
+            .terminal(
+                1,
+                Outcome::Terminal {
+                    completion: Completion::Exited,
+                    dispatch: Dispatch::MayHaveDispatched,
+                    observed_exit: code,
+                    worker_collected: collected,
+                    output_bytes: 131080
+                }
+            )
+            .is_err());
+    }
+    assert!(session.terminal(1, unknown()).is_err());
+    session
+        .terminal(
+            1,
+            Outcome::Terminal {
+                completion: Completion::Exited,
+                dispatch: Dispatch::MayHaveDispatched,
+                observed_exit: Some(7),
+                worker_collected: true,
+                output_bytes: 131080,
+            },
+        )
+        .unwrap();
+    assert!(!session
+        .terminal_control(&h.epoch, 1, 5, &TerminalAction::Close)
+        .unwrap());
+    assert!(session
+        .terminal_control(&"ef".repeat(16), 1, 5, &TerminalAction::Close)
+        .is_err());
+    h.sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .remove("buffered_exec");
+    assert!(h.validate().is_err());
+}
+
+fn parity_receipt() -> Receipt {
+    let value: Value = serde_json::from_str(include_str!("../fixtures/created-v2.json")).unwrap();
+    let ServerMessage::Terminal {
+        outcome: Outcome::Created { receipt },
+        ..
+    } = ServerMessage::decode(value).unwrap()
+    else {
+        unreachable!()
+    };
+    receipt
+}
+
+fn observation_hello() -> Hello {
+    let mut approved = parity_hello();
+    let sdk = approved.sdk.as_mut().unwrap();
+    sdk.feature_versions.insert("observability".into(), 1);
+    approved.limits = Limits::for_sdk(sdk);
+    approved.capabilities.extend([
+        Capability::Health,
+        Capability::Capacity,
+        Capability::Metrics,
+        Capability::Readiness,
+        Capability::List,
+        Capability::Measurements,
+    ]);
+    approved
+}
+
+fn creation_features() -> CreationFeatures {
+    CreationFeatures {
+        compact: false,
+        network: NetworkPolicy {
+            enabled: false,
+            hosts: vec![],
+            cidrs: vec![],
+        },
+        ports: vec![PortMapping {
+            host: 8080,
+            guest: 80,
+        }],
+        workload: Some(StartupWorkload {
+            entrypoint: vec![],
+            cmd: vec!["/bin/app".into()],
+            env: Default::default(),
+            workdir: None,
+        }),
+    }
+}
+
+fn compact_fixture() -> Value {
+    serde_json::from_str(include_str!("../fixtures/compact-creation-request.json")).unwrap()
+}
+
+#[test]
+fn buffered_command_codec_requires_capability_and_preserves_nul_stdin_and_credit() {
+    let value: Value =
+        serde_json::from_str(include_str!("../fixtures/buffered-command-request.json")).unwrap();
+    let message = ClientMessage::decode(value.clone()).ok().unwrap();
+    let ClientMessage::Request {
+        operation: Operation::ExecBuffered { command, .. },
+        ..
+    } = &message
+    else {
+        unreachable!()
+    };
+    assert_eq!(command.stdin.as_deref(), Some("hé\0stdin"));
+    let mut h = observation_hello();
+    let mut s = Session::new(h.clone()).ok().unwrap();
+    s.approve(&h).unwrap();
+    assert!(matches!(
+        s.admit(message.clone()).unwrap(),
+        ServerMessage::Terminal {
+            outcome: Outcome::Error {
+                code: SafeCode::Unsupported,
+                ..
+            },
+            ..
+        }
+    ));
+    h.sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .extend([("buffered_exec".into(), 1), ("job_resources".into(), 1)]);
+    h.capabilities.push(Capability::ExecBuffered);
+    h.limits = Limits::for_sdk(h.sdk.as_ref().unwrap());
+    let mut s = Session::new(h.clone()).ok().unwrap();
+    s.approve(&h).unwrap();
+    s.admit(message).unwrap();
+    s.event(1, Stream::Stdout, b"out\0\xff").unwrap();
+    assert!(s
+        .terminal(
+            1,
+            Outcome::Command {
+                completion: Completion::Exited,
+                dispatch: Dispatch::MayHaveDispatched,
+                observed_exit: Some(7),
+                running_observed: true,
+                output_bytes: 5
+            }
+        )
+        .is_ok());
+    let mut broken = value.clone();
+    broken["operation"]["command"] = json!({});
+    assert!(ClientMessage::decode(broken).is_err());
+    let mut broken = value;
+    broken["operation"]["command_payload"]["schema"] = json!(2);
+    assert!(ClientMessage::decode(broken).is_err());
+    h.sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .remove("job_resources");
+    assert!(h.validate().is_err());
+}
+
+#[test]
+fn background_ack_requires_its_own_capability_and_never_accepts_exit_output_or_stdin() {
+    let value: Value =
+        serde_json::from_str(include_str!("../fixtures/background-command-request.json")).unwrap();
+    let message = ClientMessage::decode(value.clone()).ok().unwrap();
+    let mut h = observation_hello();
+    h.sdk.as_mut().unwrap().feature_versions.extend([
+        ("job_resources".into(), 1),
+        ("buffered_exec".into(), 1),
+        ("background_exec".into(), 1),
+    ]);
+    h.limits = Limits::for_sdk(h.sdk.as_ref().unwrap());
+    let mut unapproved = Session::new(h.clone()).ok().unwrap();
+    unapproved.approve(&h).unwrap();
+    assert!(matches!(
+        unapproved.admit(message.clone()).unwrap(),
+        ServerMessage::Terminal {
+            outcome: Outcome::Error {
+                code: SafeCode::Unsupported,
+                dispatch: Dispatch::NotDispatched
+            },
+            ..
+        }
+    ));
+    h.capabilities.push(Capability::ExecBackground);
+    let mut s = Session::new(h.clone()).ok().unwrap();
+    s.approve(&h).unwrap();
+    s.admit(message.clone()).unwrap();
+    assert!(s.event(1, Stream::Stdout, b"pid=4242\n").is_err());
+    assert!(s.terminal(1, unknown()).is_err());
+    assert!(s.terminal(1, Outcome::Launched { pid: 0 }).is_err());
+    s.terminal(1, Outcome::Launched { pid: 4242 }).unwrap();
+    assert!(s.terminal(1, Outcome::Launched { pid: 4242 }).is_err());
+    assert!(Outcome::Launched { pid: 4242 }.validate_for(1).is_err());
+    let mut invalid = value;
+    invalid["operation"]["operation"] = json!("exec_buffered");
+    let mut stdin = ClientMessage::decode(invalid).ok().unwrap();
+    if let ClientMessage::Request { operation, .. } = &mut stdin {
+        let Operation::ExecBuffered { receipt, command } = operation else {
+            unreachable!()
+        };
+        command.stdin = Some("forbidden".into());
+        *operation = Operation::ExecBackground {
+            receipt: receipt.clone(),
+            command: command.clone(),
+        };
+    }
+    assert!(stdin.validate().is_err());
+    h.sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .remove("buffered_exec");
+    assert!(h.validate().is_err());
+}
+
+#[test]
+fn streaming_commands_require_explicit_capability_nil_stdin_and_actual_exit_evidence() {
+    let value: Value =
+        serde_json::from_str(include_str!("../fixtures/streaming-command-request.json")).unwrap();
+    let message = ClientMessage::decode(value).unwrap();
+    let mut h = observation_hello();
+    h.sdk.as_mut().unwrap().feature_versions.extend([
+        ("job_resources".into(), 1),
+        ("buffered_exec".into(), 1),
+        ("streaming_exec".into(), 1),
+    ]);
+    h.limits = Limits::for_sdk(h.sdk.as_ref().unwrap());
+    let mut unapproved = Session::new(h.clone()).unwrap();
+    unapproved.approve(&h).unwrap();
+    assert!(matches!(
+        unapproved.admit(message.clone()).unwrap(),
+        ServerMessage::Terminal {
+            outcome: Outcome::Error {
+                code: SafeCode::Unsupported,
+                dispatch: Dispatch::NotDispatched
+            },
+            ..
+        }
+    ));
+    h.capabilities.push(Capability::ExecStream);
+    let mut session = Session::new(h.clone()).unwrap();
+    session.approve(&h).unwrap();
+    session.admit(message.clone()).unwrap();
+    session.event(1, Stream::Stdout, b"out\0\xff").unwrap();
+    session.event(1, Stream::Stderr, b"err\0\xfe").unwrap();
+    assert!(session
+        .terminal(1, Outcome::Launched { pid: 4242 })
+        .is_err());
+    assert!(session
+        .terminal(
+            1,
+            Outcome::Command {
+                completion: Completion::Exited,
+                dispatch: Dispatch::MayHaveDispatched,
+                observed_exit: None,
+                running_observed: true,
+                output_bytes: 10
+            }
+        )
+        .is_err());
+    session
+        .terminal(
+            1,
+            Outcome::Command {
+                completion: Completion::Exited,
+                dispatch: Dispatch::MayHaveDispatched,
+                observed_exit: Some(7),
+                running_observed: true,
+                output_bytes: 10,
+            },
+        )
+        .unwrap();
+    let mut invalid = message;
+    if let ClientMessage::Request {
+        operation: Operation::ExecStream { command, .. },
+        ..
+    } = &mut invalid
+    {
+        command.stdin = Some("forbidden".into());
+    } else {
+        unreachable!()
+    }
+    assert!(invalid.validate().is_err());
+    h.sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .remove("buffered_exec");
+    assert!(h.validate().is_err());
+}
+
+#[test]
+fn console_stream_has_distinct_credit_completion_and_version_authority() {
+    let mut h = observation_hello();
+    h.sdk.as_mut().unwrap().feature_versions.extend([
+        ("logs".into(), 1),
+        ("buffered_exec".into(), 1),
+        ("job_resources".into(), 1),
+    ]);
+    h.limits = Limits::for_sdk(h.sdk.as_ref().unwrap());
+    let operation = Operation::Logs {
+        receipt: parity_receipt(),
+        tail: 2,
+        follow: false,
+        max_bytes: 128,
+    };
+    let mut unavailable = Session::new(h.clone()).ok().unwrap();
+    unavailable.approve(&h).unwrap();
+    assert!(matches!(
+        unavailable.admit(request(1, operation.clone())).unwrap(),
+        ServerMessage::Terminal {
+            outcome: Outcome::Error {
+                code: SafeCode::Unsupported,
+                ..
+            },
+            ..
+        }
+    ));
+    h.capabilities.push(Capability::Logs);
+    let mut s = Session::new(h.clone()).ok().unwrap();
+    s.approve(&h).unwrap();
+    s.admit(request(1, operation)).unwrap();
+    assert!(s.event(1, Stream::Stdout, b"not command output").is_err());
+    let mut frame = vec![0; 4];
+    frame.extend_from_slice(&8u32.to_be_bytes());
+    frame.extend_from_slice("hé\0line".as_bytes());
+    s.event(1, Stream::Log, &frame).unwrap();
+    assert!(s.terminal(1, unknown()).is_err());
+    assert!(s
+        .terminal(
+            1,
+            Outcome::Logs {
+                completion: Completion::Completed,
+                lines: 2,
+                bytes: 10,
+                wire_bytes: 15
+            }
+        )
+        .is_err());
+    s.terminal(
+        1,
+        Outcome::Logs {
+            completion: Completion::Completed,
+            lines: 2,
+            bytes: 10,
+            wire_bytes: 16,
+        },
+    )
+    .unwrap();
+    s.admit(request(
+        2,
+        Operation::Logs {
+            receipt: parity_receipt(),
+            tail: 0,
+            follow: true,
+            max_bytes: 128,
+        },
+    ))
+    .unwrap();
+    assert!(s
+        .terminal(
+            2,
+            Outcome::Logs {
+                completion: Completion::Completed,
+                lines: 0,
+                bytes: 0,
+                wire_bytes: 0
+            }
+        )
+        .is_err());
+    s.terminal(
+        2,
+        Outcome::Logs {
+            completion: Completion::Deadline,
+            lines: 0,
+            bytes: 0,
+            wire_bytes: 0,
+        },
+    )
+    .unwrap();
+    assert!(Outcome::Error {
+        code: SafeCode::NotFound,
+        dispatch: Dispatch::NotDispatched
+    }
+    .validate_for(1)
+    .is_err());
+    h.sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .remove("buffered_exec");
+    assert!(h.validate().is_err());
+}
+
+#[test]
+fn compact_creation_preserves_utf8_and_requires_the_explicit_transport_gate() {
+    let message = ClientMessage::decode(compact_fixture()).ok().unwrap();
+    let ClientMessage::Request { operation, .. } = &message else {
+        unreachable!()
+    };
+    let features = operation.creation_features().unwrap();
+    assert!(features.compact);
+    assert_eq!(
+        features.workload.as_ref().unwrap().cmd,
+        vec!["literal; $(text)", "é\u{1}"]
+    );
+    assert_eq!(
+        features.workload.as_ref().unwrap().env["PRIVATE"],
+        "opaque\u{1}value"
+    );
+    let mut approved = observation_hello();
+    approved
+        .sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .extend([("ports".into(), 1), ("workloads".into(), 1)]);
+    let mut s = Session::new(approved.clone()).ok().unwrap();
+    s.approve(&approved).unwrap();
+    assert!(matches!(
+        s.admit(message.clone()).unwrap(),
+        ServerMessage::Terminal {
+            outcome: Outcome::Error {
+                code: SafeCode::Unsupported,
+                dispatch: Dispatch::NotDispatched
+            },
+            ..
+        }
+    ));
+    approved
+        .sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .insert("compact_creation".into(), 1);
+    approved.limits = Limits::for_sdk(approved.sdk.as_ref().unwrap());
+    assert_eq!(approved.limits.frame_bytes, MAX_FRAME_BYTES as u64);
+    assert_eq!(
+        approved.limits.creation.as_ref().unwrap().payload_bytes,
+        MAX_CREATION_PAYLOAD as u64
+    );
+    let mut s = Session::new(approved.clone()).ok().unwrap();
+    s.approve(&approved).unwrap();
+    assert!(matches!(
+        s.admit(message).unwrap(),
+        ServerMessage::Accepted { .. }
+    ));
+}
+
+#[test]
+fn large_compact_workload_roundtrips_with_the_original_frame_cap() {
+    fn string(bytes: &mut Vec<u8>, value: &str) {
+        bytes.extend((value.len() as u32).to_be_bytes());
+        bytes.extend(value.as_bytes());
+    }
+    let mut bytes = b"SBCF\x01\x00\x00\x00\x00\x00\x00\x00\x01".to_vec();
+    bytes.extend(1u16.to_be_bytes());
+    string(&mut bytes, "/bin/app");
+    bytes.extend(0u16.to_be_bytes());
+    bytes.extend(64u16.to_be_bytes());
+    for n in 0..64 {
+        string(&mut bytes, &format!("KEY_{n:02}"));
+        string(&mut bytes, &"\u{1}".repeat(8192));
+    }
+    bytes.push(0);
+    let chunks: Vec<_> = bytes
+        .chunks(MAX_CHUNK_BYTES)
+        .map(|chunk| encode_chunk(chunk).unwrap())
+        .collect();
+    let mut value = compact_fixture();
+    value["operation"]["features_payload"]["chunks"] = json!(chunks);
+    let mut frame = Vec::new();
+    write_frame(&mut frame, &value).unwrap();
+    assert!(frame.len() < MAX_FRAME_BYTES);
+    let parsed = read_frame(&mut frame.as_slice()).unwrap().unwrap();
+    let ClientMessage::Request { operation, .. } = ClientMessage::decode(parsed).ok().unwrap()
+    else {
+        unreachable!()
+    };
+    let features = operation.creation_features().unwrap();
+    assert!(features.compact);
+    let env = &features.workload.as_ref().unwrap().env;
+    assert_eq!(env.len(), 64);
+    assert!(env
+        .values()
+        .all(|value| value.len() == 8192 && value.bytes().all(|byte| byte == 1)));
+    let original = serde_json::to_value(features).unwrap();
+    assert!(write_frame(&mut Vec::new(), &original).is_err());
+}
+
+#[test]
+fn compact_payload_rejects_truncation_trailing_data_large_counts_and_duplicate_encodings() {
+    let value = compact_fixture();
+    let encoded = value["operation"]["features_payload"]["chunks"][0]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    let bytes = decode_chunk(&encoded).unwrap();
+    for size in 0..bytes.len() {
+        let mut broken = value.clone();
+        // Empty is intentionally invalid too.
+        use base64::Engine;
+        broken["operation"]["features_payload"]["chunks"][0] =
+            json!(base64::engine::general_purpose::STANDARD.encode(&bytes[..size]));
+        assert!(ClientMessage::decode(broken).is_err(), "prefix {size}");
+    }
+    for broken_bytes in [
+        [bytes.as_slice(), &[0]].concat(),
+        {
+            let mut b = bytes.clone();
+            b[5] = 2;
+            b
+        },
+        {
+            let mut b = bytes.clone();
+            b[6] = 255;
+            b[7] = 255;
+            b
+        },
+    ] {
+        let mut broken = value.clone();
+        broken["operation"]["features_payload"]["chunks"][0] =
+            json!(encode_chunk(&broken_bytes).unwrap());
+        assert!(ClientMessage::decode(broken).is_err());
+    }
+    let mut broken = value.clone();
+    broken["operation"]["features"] = json!({});
+    assert!(ClientMessage::decode(broken).is_err());
+    let mut broken = value.clone();
+    broken["operation"]["features_payload"]["extra"] = json!(true);
+    assert!(ClientMessage::decode(broken).is_err());
+    let mut broken = value;
+    broken["operation"]["features_payload"]["chunks"] = json!([encoded, encoded]);
+    assert!(ClientMessage::decode(broken).is_err());
+    let mut features = serde_json::to_value(creation_features()).unwrap();
+    features["compact"] = json!(true);
+    assert!(serde_json::from_value::<CreationFeatures>(features).is_err());
+}
+
+#[test]
+fn creation_features_require_each_explicit_sdk_gate_before_dispatch() {
+    let query = Operation::QualifyCreation {
+        artifact: Artifact {
+            path: "/approved.smolmachine".into(),
+            sha256: "ef".repeat(32),
+            max_bytes: 1024,
+            guest_platform: "linux/arm64".into(),
+        },
+        resources: Resources {
+            cpus: 1,
+            memory_mib: 512,
+            storage_gib: 1,
+            overlay_gib: 1,
+        },
+        user: None,
+        features: Some(Box::new(creation_features())),
+    };
+    for mut approved in [hello(), parity_hello()] {
+        let mut s = Session::new(approved.clone()).unwrap();
+        s.approve(&approved).unwrap();
+        assert!(matches!(
+            s.admit(request(1, query.clone())).unwrap(),
+            ServerMessage::Terminal {
+                outcome: Outcome::Error {
+                    code: SafeCode::Unsupported,
+                    dispatch: Dispatch::NotDispatched
+                },
+                ..
+            }
+        ));
+        if approved.major == 2 {
+            let sdk = approved.sdk.as_mut().unwrap();
+            sdk.feature_versions.insert("ports".into(), 1);
+            assert!(!creation_features().approved(&approved));
+            approved
+                .sdk
+                .as_mut()
+                .unwrap()
+                .feature_versions
+                .insert("workloads".into(), 1);
+            let mut s = Session::new(approved.clone()).unwrap();
+            s.approve(&approved).unwrap();
+            assert!(matches!(
+                s.admit(request(1, query.clone())).unwrap(),
+                ServerMessage::Accepted { .. }
+            ));
+            let mut enabled = creation_features();
+            enabled.network = NetworkPolicy {
+                enabled: true,
+                hosts: vec!["api.example.com".into()],
+                cidrs: vec![],
+            };
+            assert!(!enabled.approved(&approved));
+            approved
+                .sdk
+                .as_mut()
+                .unwrap()
+                .feature_versions
+                .insert("networking".into(), 1);
+            assert!(enabled.approved(&approved));
+        }
+    }
+    let mut empty = creation_features();
+    empty.ports.clear();
+    empty.workload = None;
+    assert!(!empty.approved(&parity_hello()));
+}
+
+#[test]
+fn creation_workload_bounds_match_public_requests_and_reject_unknown_fields() {
+    let original = creation_features();
+    assert!(original.validate().is_ok());
+    let mut invalid = original.clone();
+    invalid
+        .workload
+        .as_mut()
+        .unwrap()
+        .env
+        .insert("1INVALID".into(), "value".into());
+    assert!(invalid.validate().is_err());
+    let mut invalid = original.clone();
+    invalid.workload.as_mut().unwrap().cmd = vec!["x".repeat(16384); 4];
+    assert!(invalid.validate().is_err());
+    let mut invalid = original.clone();
+    invalid.ports.push(invalid.ports[0]);
+    assert!(invalid.validate().is_err());
+    let mut wire = serde_json::to_value(&original).unwrap();
+    wire["workload"]["restart"] = json!("always");
+    assert!(serde_json::from_value::<CreationFeatures>(wire).is_err());
+}
+
+#[test]
+fn network_observation_and_port_conflict_cannot_be_mislabelled_legacy() {
+    let observed = Outcome::Observed {
+        observation: Observation {
+            state: ObservedState::Stopped,
+            resources: None,
+            pid_identity: None,
+            configuration: Some(Box::new(MachineConfiguration {
+                network: creation_features().network,
+                ports: creation_features().ports,
+                backend: Some("virtio-net".into()),
+            })),
+        },
+    };
+    assert!(observed.validate_for(2).is_ok());
+    assert!(observed.validate_for(1).is_err());
+    let error = Outcome::Error {
+        code: SafeCode::PortConflict,
+        dispatch: Dispatch::MayHaveDispatched,
+    };
+    assert!(error.validate_for(2).is_ok());
+    assert!(error.validate_for(1).is_err());
+    let mut invalid = serde_json::to_value(&observed).unwrap();
+    invalid["observation"]["configuration"] = Value::Null;
+    assert!(serde_json::from_value::<Outcome>(invalid).is_err());
+    let query = Operation::QualifyCreation {
+        artifact: Artifact {
+            path: "/approved.smolmachine".into(),
+            sha256: "ef".repeat(32),
+            max_bytes: 1024,
+            guest_platform: "linux/arm64".into(),
+        },
+        resources: Resources {
+            cpus: 1,
+            memory_mib: 512,
+            storage_gib: 1,
+            overlay_gib: 1,
+        },
+        user: None,
+        features: None,
+    };
+    let mut wire = serde_json::to_value(&query).unwrap();
+    assert!(wire.get("features").is_none());
+    wire["features"] = Value::Null;
+    assert!(serde_json::from_value::<Operation>(wire).is_err());
+}
+
+#[test]
+fn observations_require_the_explicit_sdk_feature_and_versioned_limits() {
+    let approved = observation_hello();
+    assert!(approved.validate().is_ok());
+    let mut legacy = hello();
+    legacy.capabilities = vec![Capability::Health];
+    assert!(legacy.validate().is_err());
+    let mut missing_feature = parity_hello();
+    missing_feature.capabilities.push(Capability::Health);
+    assert!(missing_feature.validate().is_err());
+    let mut wrong_limits = approved.clone();
+    wrong_limits.limits = Limits::default();
+    assert!(wrong_limits.validate().is_err());
+    let ready = Outcome::Ready;
+    assert!(ready.validate_for(2).is_ok());
+    assert!(ready.validate_for(1).is_err());
+    let full = Outcome::Health {
+        snapshot: HealthSnapshot {
+            total: 1,
+            running: 2,
+            uptime_seconds: 0,
+        },
+    };
+    assert!(full.validate().is_err());
+}
+
+#[test]
+fn job_limits_require_the_explicit_feature_and_exact_pool_contract() {
+    let mut approved = observation_hello();
+    approved
+        .sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .insert("job_resources".into(), 1);
+    approved.limits = Limits::for_sdk(approved.sdk.as_ref().unwrap());
+    assert!(approved.validate().is_ok());
+    assert_eq!(approved.limits.jobs.as_ref().unwrap().work_slots, 4);
+    let mut wrong = approved.clone();
+    wrong.limits.jobs.as_mut().unwrap().work_slots = 5;
+    assert!(wrong.validate().is_err());
+    let mut wrong = approved.clone();
+    wrong.limits.jobs = None;
+    assert!(wrong.validate().is_err());
+    let mut wrong = observation_hello();
+    wrong.limits.jobs = approved.limits.jobs;
+    assert!(wrong.validate().is_err());
+    assert!(Limits::default().jobs.is_none());
+}
+
+#[test]
+fn inventory_uses_credited_chunks_and_cannot_complete_with_unaccounted_bytes() {
+    let approved = observation_hello();
+    let mut session = Session::new(approved.clone()).unwrap();
+    session.approve(&approved).unwrap();
+    let req = ClientMessage::Request {
+        epoch: approved.epoch.clone(),
+        id: 1,
+        budget_ms: 1000,
+        initial_credit: INITIAL_CREDIT_BYTES,
+        initial_event_credit: INITIAL_CREDIT_EVENTS,
+        operation: Operation::List,
+    };
+    assert!(matches!(
+        session.admit(req).unwrap(),
+        ServerMessage::Accepted { .. }
+    ));
+    assert!(session.event(1, Stream::Stdout, b"[]").is_err());
+    assert!(session.event(1, Stream::File, b"[]").is_ok());
+    assert!(session
+        .terminal(1, Outcome::Inventory { count: 0, bytes: 1 })
+        .is_err());
+    assert!(session
+        .terminal(
+            1,
+            Outcome::Health {
+                snapshot: HealthSnapshot {
+                    total: 0,
+                    running: 0,
+                    uptime_seconds: 0
+                }
+            }
+        )
+        .is_err());
+    assert!(session
+        .terminal(1, Outcome::Inventory { count: 0, bytes: 2 })
+        .is_ok());
+    assert!(Outcome::Inventory {
+        count: 1025,
+        bytes: 0
+    }
+    .validate()
+    .is_err());
+}
+
+#[test]
+fn observation_completion_is_bound_to_its_own_request_kind() {
+    let approved = observation_hello();
+    let mut session = Session::new(approved.clone()).unwrap();
+    session.approve(&approved).unwrap();
+    let req = ClientMessage::Request {
+        epoch: approved.epoch.clone(),
+        id: 1,
+        budget_ms: 1000,
+        initial_credit: INITIAL_CREDIT_BYTES,
+        initial_event_credit: INITIAL_CREDIT_EVENTS,
+        operation: Operation::Health,
+    };
+    session.admit(req).unwrap();
+    assert!(session.terminal(1, Outcome::Ready).is_err());
+    assert!(session
+        .terminal(
+            1,
+            Outcome::Health {
+                snapshot: HealthSnapshot {
+                    total: 0,
+                    running: 0,
+                    uptime_seconds: 0
+                }
+            }
+        )
+        .is_ok());
+}
+
+#[test]
+fn parity_shared_fixtures_bind_sdk_identity_features_and_versioned_material() {
+    let h = parity_hello();
+    assert_eq!(h.major, 2);
+    assert_eq!(h.minor, 0);
+    assert_eq!(h.sdk.as_ref().unwrap().sdk_version, "1.22.0");
+    assert_eq!(
+        h.sdk
+            .as_ref()
+            .unwrap()
+            .feature_versions
+            .get("material_proofs"),
+        Some(&2)
+    );
+    let versioned = parity_receipt();
+    versioned.validate_for(2).unwrap();
+    assert!(versioned.validate_for(1).is_err());
+    assert!(receipt().validate_for(2).is_err());
+    let value: Value =
+        serde_json::from_str(include_str!("../fixtures/inspect-v2-request.json")).unwrap();
+    let mut session = Session::new(h.clone()).unwrap();
+    session.approve(&h).unwrap();
+    assert!(matches!(
+        session
+            .admit(ClientMessage::decode(value).unwrap())
+            .unwrap(),
+        ServerMessage::Accepted { .. }
+    ));
+}
+
+#[test]
+fn legacy_serialization_has_no_sdk_or_material_and_cannot_admit_new_proofs() {
+    let serialized = serde_json::to_value(hello()).unwrap();
+    assert!(serialized.get("sdk").is_none());
+    assert!(serde_json::to_value(receipt())
+        .unwrap()
+        .get("material")
+        .is_none());
+    let operation = Operation::Inspect {
+        receipt: parity_receipt(),
+    };
+    let mut session = session();
+    let result = session.admit(request(1, operation)).unwrap();
+    assert!(matches!(
+        result,
+        ServerMessage::Terminal {
+            outcome: Outcome::Error {
+                code: SafeCode::Ownership,
+                dispatch: Dispatch::NotDispatched
+            },
+            ..
+        }
+    ));
+    assert_eq!(session.pending_count(), 0);
+}
+
+#[test]
+fn parity_cannot_admit_legacy_receipt_or_downgraded_material() {
+    let h = parity_hello();
+    let mut session = Session::new(h.clone()).unwrap();
+    session.approve(&h).unwrap();
+    let operation = Operation::Inspect { receipt: receipt() };
+    assert!(matches!(
+        session.admit(request(1, operation)).unwrap(),
+        ServerMessage::Terminal {
+            outcome: Outcome::Error {
+                code: SafeCode::Ownership,
+                dispatch: Dispatch::NotDispatched
+            },
+            ..
+        }
+    ));
+    assert_eq!(session.pending_count(), 0);
+}
+
+#[test]
+fn parity_hello_rejects_wrong_sdk_source_unknown_features_versions_and_legacy_approval() {
+    let good = parity_hello();
+    let mut variants = Vec::new();
+    let mut wrong = good.clone();
+    wrong.sdk = None;
+    variants.push(wrong);
+    let mut wrong = good.clone();
+    wrong.sdk.as_mut().unwrap().source_revision = "00".repeat(20);
+    variants.push(wrong);
+    let mut wrong = good.clone();
+    wrong
+        .sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .insert("arbitrary".into(), 1);
+    variants.push(wrong);
+    let mut wrong = good.clone();
+    wrong
+        .sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .insert("networking".into(), 2);
+    variants.push(wrong);
+    let mut wrong = good.clone();
+    wrong
+        .sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .remove("material_proofs");
+    variants.push(wrong);
+    let mut wrong = good.clone();
+    wrong.minor = 1;
+    variants.push(wrong);
+    for wrong in variants {
+        assert!(wrong.validate().is_err());
+    }
+    assert!(good.approve(&hello()).is_err());
+    let mut legacy = hello();
+    legacy.sdk = good.sdk.clone();
+    assert!(legacy.validate().is_err());
+}
+
+#[test]
+fn material_proof_requires_exact_shape_root_hash_bounds_and_correlated_transition_identity() {
+    let good = serde_json::to_value(parity_receipt()).unwrap();
+    for (key, value) in [
+        ("schema", json!(1)),
+        ("revision", json!(1025)),
+        ("record_sha256", json!("00".repeat(32))),
+        ("operation_id", json!("unexpected-root-operation")),
+        ("request_sha256", json!("aa".repeat(32))),
+        ("unknown", json!(true)),
+    ] {
+        let mut wrong = good.clone();
+        wrong["material"][key] = value;
+        let parsed = serde_json::from_value::<Receipt>(wrong);
+        assert!(parsed.is_err() || parsed.unwrap().validate_for(2).is_err());
+    }
+    let mut advanced = good.clone();
+    advanced["material"]["revision"] = json!(1);
+    advanced["material"]["record_sha256"] = json!("00".repeat(32));
+    assert!(serde_json::from_value::<Receipt>(advanced.clone())
+        .unwrap()
+        .validate_for(2)
+        .is_err());
+    advanced["material"]["operation_id"] = json!("grow-1");
+    advanced["material"]["request_sha256"] = json!("aa".repeat(32));
+    serde_json::from_value::<Receipt>(advanced)
+        .unwrap()
+        .validate_for(2)
+        .unwrap();
+}
+
 #[test]
 fn qualification_has_no_receipt_or_stream_and_cannot_satisfy_a_command() {
     let operation = Operation::QualifyCreation {
+        features: None,
         artifact: Artifact {
             path: "/approved.smolmachine".into(),
             sha256: "aa".repeat(32),
@@ -113,6 +1176,7 @@ fn unknown() -> Outcome {
 #[test]
 fn intent_presence_is_streamless_and_cannot_mint_receipts_or_satisfy_commands() {
     let create = Create {
+        features: None,
         name: "candidate".into(),
         owner_token: "ab".repeat(32),
         incarnation: "cd".repeat(16),
@@ -337,6 +1401,7 @@ fn cross_domain_receipts_fail_before_scheduling_and_do_not_mint_authority() {
         }
     ));
     let create = Create {
+        features: None,
         name: "owned".into(),
         owner_token: receipt().owner_token,
         incarnation: receipt().incarnation,

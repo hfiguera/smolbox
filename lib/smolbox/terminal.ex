@@ -115,7 +115,7 @@ defmodule SmolBox.Terminal do
       else: failure(:validation)
   end
 
-  @doc "Request WebSocket close; wait for the closed event. Closure does not prove guest termination."
+  @doc "Request terminal closure; wait for the closed event. Closure does not prove guest termination."
   @spec close(Handle.t()) :: :ok | {:error, Error.t()}
   def close(handle), do: safe_call(handle, :close)
 

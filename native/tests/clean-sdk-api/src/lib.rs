@@ -4,6 +4,8 @@ use smolvm::embedded::EmbeddedRuntime;
 use std::io::Read;
 use std::path::Path;
 
+pub mod parity;
+
 pub fn transfer(
     socket: &Path,
     guest_path: &str,

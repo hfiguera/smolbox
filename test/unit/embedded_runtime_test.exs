@@ -3,7 +3,7 @@ defmodule SmolBox.EmbeddedRuntimeTest do
   alias SmolBox.{Command, ExecutionSpec, Machines, ManagedMachineSpec, TestArtifacts}
   alias SmolBox.Embedded.Port
   alias SmolBox.Runtime.Config
-  alias SmolBox.Store.Memory
+  alias SmolBox.Store.{Codec, Memory}
   alias SmolBox.Test.EmbeddedPackage, as: Package
 
   defmodule NoRecoveryStore do
@@ -26,7 +26,8 @@ defmodule SmolBox.EmbeddedRuntimeTest do
       Package.create(
         backend: true,
         persistent_backend: true,
-        protocol_minor: if(context[:unmodified], do: 4, else: 3)
+        protocol_major: context[:protocol_major] || 1,
+        protocol_minor: context[:protocol_minor] || if(context[:unmodified], do: 4, else: 3)
       )
 
     on_exit(fn -> File.rm_rf!(native.package_path) end)
@@ -55,78 +56,103 @@ defmodule SmolBox.EmbeddedRuntimeTest do
     %{native: native, store: store, options: options, spec: spec}
   end
 
-  test "normal public startup reconciles, runs retained work while draining and resumes",
-       context do
-    runtime = start_supervised!(SmolBox.child_spec(context.options))
-    await(fn -> match?({:ok, [%{status: :ready}]}, SmolBox.workers(runtime)) end)
-    assert {:ok, handle} = Machines.create(runtime, context.spec)
-    assert {:ok, %{state: :stopped} = created} = Machines.await(runtime, handle, 5000)
-    assert created.backend_assignment != nil
-    assert :ok = SmolBox.drain_worker(runtime, context.native.id)
+  for {major, minor} <- [{1, 3}, {1, 4}, {2, 0}] do
+    @tag protocol_major: major, protocol_minor: minor
+    test "protocol #{major}.#{minor} public startup runs retained work while draining and resumes",
+         context do
+      runtime = start_supervised!(SmolBox.child_spec(context.options))
+      await(fn -> match?({:ok, [%{status: :ready}]}, SmolBox.workers(runtime)) end)
+      assert {:ok, handle} = Machines.create(runtime, context.spec)
+      assert {:ok, %{state: :stopped} = created} = Machines.await(runtime, handle, 5000)
+      assert created.backend_assignment != nil
+      assert created.backend_assignment.version == context.protocol_major
+      assert {:ok, encoded} = Codec.encode(created)
+      assert {:ok, ^created} = Codec.decode(encoded)
 
-    assert {:ok, %{assessment: :blocked, reserved: %{slots: 1}}} =
-             SmolBox.worker_maintenance(runtime, context.native.id)
+      if context.protocol_major == 2 do
+        assert String.starts_with?(encoded, "smolbox-record-v17\0")
+        assert created.created_machine.backend_identity.receipt["material"]["revision"] == 0
+      else
+        assert String.starts_with?(encoded, "smolbox-record-v16\0")
+        refute Map.has_key?(created.created_machine.backend_identity.receipt, "material")
+      end
 
-    assert {:ok, _} = Machines.start(runtime, handle, created.version)
-    assert {:ok, %{state: :running}} = Machines.await(runtime, handle, 5000)
-    {:ok, command} = Command.new(["echo"])
+      assert :ok = SmolBox.drain_worker(runtime, context.native.id)
 
-    {:ok, spec} =
-      ExecutionSpec.new(
-        scope: context.spec.scope,
-        id: "existing-command",
-        profile: context.spec.profile,
-        artifact: context.spec.artifact,
-        command: command
-      )
+      assert {:ok, %{assessment: :blocked, reserved: %{slots: 1}}} =
+               SmolBox.worker_maintenance(runtime, context.native.id)
 
-    data = <<0, 255, 7>>
-    artifacts = elem(context.options[:artifact_store], 1)
-    Agent.update(artifacts, &Map.put(&1, {"public", "input"}, data))
+      assert {:ok, _} = Machines.start(runtime, handle, created.version)
+      assert {:ok, %{state: :running}} = Machines.await(runtime, handle, 5000)
+      {:ok, command} = Command.new(["echo"])
 
-    input = %{
-      "source" => "input",
-      "path" => "/workspace/in.bin",
-      "size" => 3,
-      "sha256" => SmolBox.Files.sha256(data),
-      "mode" => "runtime_default"
-    }
+      {:ok, spec} =
+        ExecutionSpec.new(
+          scope: context.spec.scope,
+          id: "existing-command",
+          profile: context.spec.profile,
+          artifact: context.spec.artifact,
+          command: command
+        )
 
-    output = %{"destination" => "collected", "path" => "/workspace/in.bin", "max_bytes" => 32}
-    spec = %{spec | inputs: [input], outputs: [output]}
-    assert {:ok, execution} = Machines.submit(runtime, handle, spec)
+      data = <<0, 255, 7>>
+      artifacts = elem(context.options[:artifact_store], 1)
+      Agent.update(artifacts, &Map.put(&1, {"public", "input"}, data))
 
-    assert {:ok, %{state: :completed, collection: :complete, result: %{exit_code: 7}}} =
-             SmolBox.await(runtime, execution, 5000)
+      input = %{
+        "source" => "input",
+        "path" => "/workspace/in.bin",
+        "size" => 3,
+        "sha256" => SmolBox.Files.sha256(data),
+        "mode" => "runtime_default"
+      }
 
-    assert Agent.get(artifacts, &Map.fetch!(&1, {execution, "collected"})) ==
-             {data, SmolBox.Files.sha256(data)}
+      output = %{"destination" => "collected", "path" => "/workspace/in.bin", "max_bytes" => 32}
+      spec = %{spec | inputs: [input], outputs: [output]}
+      assert {:ok, execution} = Machines.submit(runtime, handle, spec)
 
-    assert {:ok, %{state: :running} = running} = Machines.await(runtime, handle, 5000)
-    assert {:ok, _} = Machines.stop(runtime, handle, running.version)
-    assert {:ok, %{state: :stopped} = stopped} = Machines.await(runtime, handle, 5000)
-    assert {:ok, _} = Machines.delete(runtime, handle, stopped.version)
-    assert {:ok, %{state: :deleted}} = Machines.await(runtime, handle, 5000)
+      assert {:ok, %{state: :completed, collection: :complete, result: %{exit_code: 7}}} =
+               SmolBox.await(runtime, execution, 5000)
 
-    assert {:ok, queued} = SmolBox.submit(runtime, %{spec | id: "drained", queue_ms: 100})
-    assert {:ok, %{state: :expired, worker_id: nil}} = SmolBox.await(runtime, queued, 5000)
-    assert {:ok, report} = SmolBox.worker_maintenance(runtime, context.native.id)
-    assert report.records == [] and report.reserved.slots == 0
+      assert Agent.get(artifacts, &Map.fetch!(&1, {execution, "collected"})) ==
+               {data, SmolBox.Files.sha256(data)}
 
-    assert {:ok, %{mode: :active}} =
-             SmolBox.resume_worker(runtime, context.native.id, report.control.version)
+      # Command result availability precedes durable slot retirement. Wait for
+      # retirement before taking the version used by the next lifecycle CAS.
+      await(fn ->
+        match?({:ok, %{active_execution: nil}}, Machines.inspect(runtime, handle)) and
+          match?(
+            {:ok, %{cleanup: :complete}},
+            SmolBox.fetch(runtime, elem(execution, 0), elem(execution, 1))
+          )
+      end)
 
-    assert {:ok, next} = SmolBox.submit(runtime, %{spec | id: "resumed"})
-    assert {:ok, %{state: :completed}} = SmolBox.await(runtime, next, 5000)
+      assert {:ok, %{state: :running} = running} = Machines.await(runtime, handle, 5000)
+      assert {:ok, _} = lifecycle(runtime, handle, :stop, running.version)
+      assert {:ok, %{state: :stopped} = stopped} = Machines.await(runtime, handle, 5000)
+      assert {:ok, _} = lifecycle(runtime, handle, :delete, stopped.version)
+      assert {:ok, %{state: :deleted}} = Machines.await(runtime, handle, 5000)
 
-    await(fn ->
-      match?(
-        {:ok, %{cleanup: :complete, reservation: nil}},
-        SmolBox.fetch(runtime, elem(next, 0), elem(next, 1))
-      )
-    end)
+      assert {:ok, queued} = SmolBox.submit(runtime, %{spec | id: "drained", queue_ms: 100})
+      assert {:ok, %{state: :expired, worker_id: nil}} = SmolBox.await(runtime, queued, 5000)
+      assert {:ok, report} = SmolBox.worker_maintenance(runtime, context.native.id)
+      assert report.records == [] and report.reserved.slots == 0
 
-    assert {:ok, %{slots: 0}} = Memory.usage(context.store, context.native.id)
+      assert {:ok, %{mode: :active}} =
+               SmolBox.resume_worker(runtime, context.native.id, report.control.version)
+
+      assert {:ok, next} = SmolBox.submit(runtime, %{spec | id: "resumed"})
+      assert {:ok, %{state: :completed}} = SmolBox.await(runtime, next, 5000)
+
+      await(fn ->
+        match?(
+          {:ok, %{cleanup: :complete, reservation: nil}},
+          SmolBox.fetch(runtime, elem(next, 0), elem(next, 1))
+        )
+      end)
+
+      assert {:ok, %{slots: 0}} = Memory.usage(context.store, context.native.id)
+    end
   end
 
   test "missing recovery capability and multiple native domains reject before helper launch",
@@ -199,6 +225,19 @@ defmodule SmolBox.EmbeddedRuntimeTest do
     else
       Process.sleep(25)
       await(check, remaining - 1)
+    end
+  end
+
+  # A stale optimistic version proves no dispatch. Refresh that version only;
+  # uncertain outcomes must never enter this retry path.
+  defp lifecycle(runtime, handle, operation, version, attempts \\ 100) do
+    case apply(Machines, operation, [runtime, handle, version]) do
+      {:error, %{category: :stale_version, evidence: :not_dispatched}} when attempts > 0 ->
+        {:ok, current} = Machines.inspect(runtime, handle)
+        lifecycle(runtime, handle, operation, current.version, attempts - 1)
+
+      result ->
+        result
     end
   end
 end

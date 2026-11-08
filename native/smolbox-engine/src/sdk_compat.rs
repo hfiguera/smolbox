@@ -9,6 +9,18 @@ use std::path::Path;
 
 pub const OBSERVATION_SCHEMA: u32 = 1;
 
+/// The pinned SDK transports launch failures as text. Keep the same narrow
+/// virtio bind-conflict classification as its public HTTP path, without
+/// publishing diagnostics or treating an unrelated conflict as a port error.
+pub(crate) fn launch_error(error: &smolvm::Error) -> ErrorCode {
+    let text = error.to_string().to_ascii_lowercase();
+    if text.contains("virtio") && text.contains("address already in use") {
+        ErrorCode::PortConflict
+    } else {
+        ErrorCode::Native
+    }
+}
+
 #[derive(serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Schema {
@@ -60,6 +72,75 @@ fn with_observation<T>(
     identity: (u64, u64),
     action: impl FnOnce(&rusqlite::Connection) -> Result<T>,
 ) -> Result<T> {
+    let budget = crate::ReadBudget::new(
+        std::time::Duration::from_secs(30),
+        crate::Cancellation::new(),
+    )?;
+    with_observation_budget(database, identity, &budget, action)
+}
+
+pub(crate) fn observe_records(
+    database: &Path,
+    identity: (u64, u64),
+    budget: &crate::ReadBudget,
+) -> Result<Vec<smolvm::config::VmRecord>> {
+    with_observation_budget(database, identity, budget, |connection| {
+        let mut query = connection
+            .prepare("SELECT name,length(CAST(data AS BLOB)),substr(CAST(data AS BLOB),1,?1) FROM vms ORDER BY name LIMIT 1025")
+            .map_err(|_| Error::before(ErrorCode::Database))?;
+        let mut rows = query
+            .query([crate::observations::MAX_RECORD_BYTES + 1])
+            .map_err(|_| Error::before(ErrorCode::Database))?;
+        let mut records = Vec::new();
+        let mut bytes = 0;
+        while let Some(row) = rows
+            .next()
+            .map_err(|_| Error::before(ErrorCode::Database))?
+        {
+            budget.check()?;
+            if records.len() >= crate::observations::MAX_RECORDS {
+                return Err(Error::before(ErrorCode::OutputLimit));
+            }
+            let length: usize = row.get(1).map_err(|_| Error::before(ErrorCode::Database))?;
+            bytes += length;
+            if length > crate::observations::MAX_RECORD_BYTES
+                || bytes > crate::observations::MAX_SNAPSHOT_BYTES
+            {
+                return Err(Error::before(ErrorCode::OutputLimit));
+            }
+            let name = row
+                .get_ref(0)
+                .map_err(|_| Error::before(ErrorCode::Database))?
+                .as_str()
+                .map_err(|_| Error::before(ErrorCode::Database))?;
+            if !crate::domain::valid_id(name) {
+                return Err(Error::before(ErrorCode::Unsupported));
+            }
+            let value = row
+                .get_ref(2)
+                .map_err(|_| Error::before(ErrorCode::Database))?;
+            let record: smolvm::config::VmRecord = serde_json::from_slice(
+                value
+                    .as_blob()
+                    .map_err(|_| Error::before(ErrorCode::Database))?,
+            )
+            .map_err(|_| Error::before(ErrorCode::Database))?;
+            if record.name != name {
+                return Err(Error::before(ErrorCode::Database));
+            }
+            records.push(record);
+        }
+        Ok(records)
+    })
+}
+
+fn with_observation_budget<T>(
+    database: &Path,
+    identity: (u64, u64),
+    budget: &crate::ReadBudget,
+    action: impl FnOnce(&rusqlite::Connection) -> Result<T>,
+) -> Result<T> {
+    budget.check()?;
     // Hold the enrolled inode open, preventing inode reuse during path checks.
     let pinned = open_database_inode(database, identity)?;
     check_sidecars(database)?;
@@ -70,6 +151,8 @@ fn with_observation<T>(
             | rusqlite::OpenFlags::SQLITE_OPEN_NOFOLLOW,
     )
     .map_err(|_| Error::before(ErrorCode::Database))?;
+    let interrupted = budget.clone();
+    connection.progress_handler(1000, Some(move || interrupted.check().is_err()));
     connection
         .busy_timeout(std::time::Duration::ZERO)
         .map_err(|_| Error::before(ErrorCode::Database))?;
@@ -95,6 +178,7 @@ fn with_observation<T>(
     drop(connection);
     open_database_inode(database, identity)?;
     drop(pinned);
+    budget.check()?;
     Ok(observation)
 }
 
@@ -220,6 +304,25 @@ pub(crate) fn source_lease(vm_root: &Path, name: &str) -> Result<SourceLease> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn only_a_virtio_bind_conflict_has_the_public_port_conflict_category() {
+        assert_eq!(
+            launch_error(&smolvm::Error::VmCreation(
+                "virtio-net: Address already in use (private details)".into()
+            )),
+            ErrorCode::PortConflict
+        );
+        for message in [
+            "address already in use: database",
+            "virtio startup failed",
+            "private unrelated error",
+        ] {
+            assert_eq!(
+                launch_error(&smolvm::Error::VmCreation(message.into())),
+                ErrorCode::Native
+            );
+        }
+    }
     fn database() -> (
         tempfile::TempDir,
         smolvm::db::SmolvmDb,

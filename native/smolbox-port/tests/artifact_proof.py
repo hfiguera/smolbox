@@ -13,7 +13,7 @@ import subprocess
 import tarfile
 import zlib
 
-from native_proof import Port, save, snapshot
+from native_proof import Port, config_schema, save, snapshot
 
 
 def archive(files):
@@ -104,7 +104,7 @@ def prove(args):
         pack(path, description, data, args.zstd.resolve())
         specs.append({'path': str(path), 'sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
                       'max_bytes': path.stat().st_size, 'guest_platform': platform})
-    config = {'schema': 1, 'target_id': domain['target_id'], 'generation': domain['generation'],
+    config = {'schema': config_schema(json.loads(manifest_bytes)), 'target_id': domain['target_id'], 'generation': domain['generation'],
               'allow_initialize': False, 'package_manifest_sha256': hashlib.sha256(manifest_bytes).hexdigest(),
               'approved_artifacts': [*specs, control, vm_control]}
     save(output / 'config.json', config)

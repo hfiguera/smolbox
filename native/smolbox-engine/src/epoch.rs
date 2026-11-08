@@ -101,6 +101,9 @@ impl BootDispatch {
     }
 }
 impl ActorEpoch {
+    pub(crate) fn identity(&self) -> String {
+        self.0.epoch.clone()
+    }
     pub(crate) fn new(launcher: &BootLauncher, host: &HostContext) -> Result<Self> {
         let directory = launcher
             .executable()

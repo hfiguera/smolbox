@@ -199,7 +199,7 @@ defmodule SmolBox.Machines do
          {:ok, record} <- Machines.store(config, :fetch, [handle]),
          {:ok, worker} <- Machines.worker(config, record),
          :ok <- Target.require_operation(worker, :expand_disks),
-         true <- worker.runtime_version in ["1.20.2", "1.22.0"] do
+         true <- Target.supports_feature?(worker, :disk_growth) do
       Machines.store(config, :expansion_accept, [
         handle,
         id,

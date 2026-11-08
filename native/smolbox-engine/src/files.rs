@@ -42,6 +42,7 @@ pub enum FileCompletion {
     Deadline,
     NativeError,
     ConsumerLost,
+    OutputLimit,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

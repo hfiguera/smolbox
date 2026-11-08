@@ -4,18 +4,22 @@ The helper runs the shared engine through framed stdin/stdout and hosts the
 `_boot-vm` entry point in the same executable. It never starts HTTP or invokes
 ordinary smolvm CLI operations. The internal Elixir bridge, store integration and
 observational recovery use this helper. Public development admission accepts
-explicitly approved packages. Clean-package ordinary platform/consumer qualification
-has passed on Linux x86_64 and macOS arm64; distribution and crash gates remain separate.
+explicitly approved packages. Exact engine 0.1.0 clean packages have ordinary
+platform/consumer qualification on Linux x86_64 and macOS arm64; the new 0.2.0
+packages need their own qualification. Distribution and crash gates remain separate.
 
 Build only against the verified source snapshot and private copied libraries:
 
-The builder produces manifest schema 2. Its exact compiled policy and source
+The builder produces manifest schema 3 for engine 0.2.0 and protocol 2.0. Its exact compiled policy and source
 metadata are mandatory hashed assets (`SMOLBOX-POLICY.json`, `NATIVE-SOURCE.json`);
 licenses are mandatory assets too. The approved manifest digest in helper config
-binds those policies without changing receipt fields or codec v16. Legacy package
-approvals remain historical; they cannot approve clean package bytes. Ordinary
-compatible upgrade proofs require matching clean policy, while patched-to-clean
-migration requires drain/delete and fresh enrollment.
+binds those policies and the exact SDK feature descriptor. Private helper config
+schema 2 selects this protocol. Fresh creates use journal-bound material receipts;
+durable assignments require selective codec v17 and reader-first store upgrade.
+The Elixir bridge separately preserves approved engine 0.1.0/protocol 1.3/1.4
+packages and v16 authority. Legacy approvals cannot approve rebuilt bytes or
+promote receipts. Ordinary compatible upgrade proofs require matching engine,
+SDK and policy; a major-protocol migration requires drain/delete and fresh authority.
 
 ```sh
 python3 native/bootstrap.py

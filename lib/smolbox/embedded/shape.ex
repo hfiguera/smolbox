@@ -1,5 +1,6 @@
 defmodule SmolBox.Embedded.Shape do
   @moduledoc false
+  alias SmolBox.Embedded.MaterialProof
   alias SmolBox.Validation
 
   def keys?(value, keys),
@@ -26,12 +27,27 @@ defmodule SmolBox.Embedded.Shape do
   def optional?(nil, _predicate), do: true
   def optional?(value, predicate), do: predicate.(value)
 
-  def receipt?(receipt) do
+  def receipt?(receipt, major \\ 1)
+
+  def receipt?(receipt, 1) do
     keys?(receipt, ~w(target_id domain_generation name owner_token incarnation material_sha256)) and
       id?(receipt["target_id"]) and id?(receipt["name"]) and
       hex?(receipt["domain_generation"], 32) and hex?(receipt["owner_token"], 64) and
       hex?(receipt["incarnation"], 32) and Validation.digest?(receipt["material_sha256"])
   end
+
+  def receipt?(receipt, 2) do
+    keys?(
+      receipt,
+      ~w(target_id domain_generation name owner_token incarnation material_sha256 material)
+    ) and
+      receipt?(Map.delete(receipt, "material"), 1) and
+      MaterialProof.valid?(receipt["material"]) and
+      (receipt["material"]["revision"] != 0 or
+         receipt["material"]["record_sha256"] == receipt["material_sha256"])
+  end
+
+  def receipt?(_receipt, _unsupported), do: false
 
   def resources?(resources),
     do:

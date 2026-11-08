@@ -1,6 +1,6 @@
 defmodule SmolBox.Test.EmbeddedPackage do
   @moduledoc false
-  alias SmolBox.Embedded.{Config, Limits, Protocol}
+  alias SmolBox.Embedded.{Config, Limits, Protocol, SDKIdentity}
   alias SmolBox.Profile
 
   def create(options \\ []) do
@@ -12,8 +12,11 @@ defmodule SmolBox.Test.EmbeddedPackage do
     File.write!(executable, "#!" <> python <> "\n" <> source)
     File.chmod!(executable, 0o700)
 
+    major = Keyword.get(options, :protocol_major, 1)
+    minor = Keyword.get(options, :protocol_minor, if(major == 2, do: 0, else: 3))
+
     identity = %{
-      "engine_version" => "0.1.0",
+      "engine_version" => if(major == 2, do: "0.2.0", else: "0.1.0"),
       "smolvm_revision" => "9f446ae00219148ca4a703914f44a8e2fab11655",
       "source_sha256" => String.duplicate("2", 64),
       "build_sha256" => hash(File.read!(executable)),
@@ -22,25 +25,13 @@ defmodule SmolBox.Test.EmbeddedPackage do
       "architecture" => "aarch64"
     }
 
-    minor = Keyword.get(options, :protocol_minor, 3)
-
-    manifest = Jason.encode!(Map.put(manifest_metadata(minor), "identity", identity))
+    sdk = options[:sdk_identity] || SDKIdentity.implemented("1.22.0", identity["smolvm_revision"])
+    manifest = Jason.encode!(Map.put(manifest_metadata(major, minor, sdk), "identity", identity))
     File.write!(Path.join(root, "package.json"), manifest)
 
     File.write!(
       Path.join(root, "fixture.json"),
-      Jason.encode!(%{
-        "identity" => identity,
-        "limits" => Protocol.limits(minor),
-        "protocol_minor" => minor,
-        "capabilities" => Protocol.capabilities(),
-        "wrong_hello" => options[:wrong_hello] || false,
-        "backend" => options[:backend] || false,
-        "persistent_backend" => options[:persistent_backend] || false,
-        "ignore_shutdown" => options[:ignore_shutdown] || false,
-        "reject_qualification" => options[:reject_qualification] || false,
-        "vm_artifact" => options[:vm_artifact] || false
-      })
+      Jason.encode!(fixture_metadata(identity, major, minor, options))
     )
 
     {:ok, profile} = Profile.new("offline-v1")
@@ -51,7 +42,7 @@ defmodule SmolBox.Test.EmbeddedPackage do
           [
             handshake_ms: 2000,
             shutdown_ms: 1000,
-            cancel_grace_ms: cancel_grace(minor)
+            cancel_grace_ms: cancel_grace(major, minor)
           ],
           options[:limits] || []
         )
@@ -78,7 +69,8 @@ defmodule SmolBox.Test.EmbeddedPackage do
         profiles: [profile],
         capacity: %{slots: 1, cpus: 1, memory_mb: 512, disk_gb: 2},
         allocation_floor: %{storage_gb: 1, overlay_gb: 1, host_overhead_mb: 256},
-        limits: limits
+        limits: limits,
+        sdk_identity: if(major == 2, do: sdk, else: nil)
       )
 
     config
@@ -91,14 +83,29 @@ defmodule SmolBox.Test.EmbeddedPackage do
     end
   end
 
-  def receipt(config),
-    do: %{
+  def receipt(config) do
+    receipt = %{
       "target_id" => config.id,
       "domain_generation" => config.domain_generation,
       "name" => "fixture-vm",
       "owner_token" => String.duplicate("7", 64),
       "incarnation" => String.duplicate("8", 32),
       "material_sha256" => String.duplicate("9", 64)
+    }
+
+    if Config.protocol_major(config) == 2,
+      do: Map.put(receipt, "material", material()),
+      else: receipt
+  end
+
+  defp material,
+    do: %{
+      "schema" => 2,
+      "revision" => 0,
+      "record_sha256" => String.duplicate("9", 64),
+      "chain_sha256" => String.duplicate("a", 64),
+      "operation_id" => nil,
+      "request_sha256" => nil
     }
 
   def command(config, mode),
@@ -115,9 +122,68 @@ defmodule SmolBox.Test.EmbeddedPackage do
     }
 
   def hash(bytes), do: Base.encode16(:crypto.hash(:sha256, bytes), case: :lower)
-  defp manifest_metadata(4), do: %{"schema" => 2, "policy" => %{"port_protocol_minor" => 4}}
-  defp manifest_metadata(3), do: %{"schema" => 1}
-  defp cancel_grace(4), do: 4000
-  defp cancel_grace(3), do: 500
+
+  defp fixture_metadata(identity, major, minor, options) do
+    sdk =
+      if(major == 2,
+        do:
+          options[:sdk_identity] || SDKIdentity.implemented("1.22.0", identity["smolvm_revision"]),
+        else: nil
+      )
+
+    %{
+      "identity" => identity,
+      "limits" => Protocol.limits(major, minor, sdk),
+      "protocol_major" => major,
+      "protocol_minor" => minor,
+      "sdk" => sdk,
+      "capabilities" => Protocol.capabilities(sdk),
+      "wrong_hello" => options[:wrong_hello] || false,
+      "backend" => options[:backend] || false,
+      "persistent_backend" => options[:persistent_backend] || false,
+      "ignore_shutdown" => options[:ignore_shutdown] || false,
+      "reject_qualification" => options[:reject_qualification] || false,
+      "vm_artifact" => options[:vm_artifact] || false
+    }
+  end
+
+  defp manifest_metadata(2, 0, sdk) do
+    policy = "native/policy.json" |> File.read!() |> Jason.decode!() |> Map.put("sdk", sdk)
+
+    policy =
+      if sdk["feature_versions"]["observability"] == 1,
+        do: Map.put(policy, "observation_limits", Protocol.limits(2, 0, sdk)["observations"]),
+        else: Map.delete(policy, "observation_limits")
+
+    policy =
+      if sdk["feature_versions"]["compact_creation"] == 1,
+        do: Map.put(policy, "creation_limits", Protocol.limits(2, 0, sdk)["creation"]),
+        else: Map.delete(policy, "creation_limits")
+
+    policy =
+      if sdk["feature_versions"]["job_resources"] == 1,
+        do: Map.put(policy, "job_limits", Protocol.limits(2, 0, sdk)["jobs"]),
+        else: Map.delete(policy, "job_limits")
+
+    policy =
+      if sdk["feature_versions"]["buffered_exec"] == 1,
+        do: Map.put(policy, "buffered_limits", Protocol.limits(2, 0, sdk)["buffered"]),
+        else: Map.delete(policy, "buffered_limits")
+
+    policy =
+      if sdk["feature_versions"]["logs"] == 1,
+        do: Map.put(policy, "log_limits", Protocol.limits(2, 0, sdk)["logs"]),
+        else: Map.delete(policy, "log_limits")
+
+    %{"schema" => 3, "policy" => policy}
+  end
+
+  defp manifest_metadata(1, 4, _sdk),
+    do: %{"schema" => 2, "policy" => %{"port_protocol_minor" => 4}}
+
+  defp manifest_metadata(1, 3, _sdk), do: %{"schema" => 1}
+  defp cancel_grace(2, 0), do: 4000
+  defp cancel_grace(1, 4), do: 4000
+  defp cancel_grace(1, 3), do: 500
   defp random, do: Base.encode16(:crypto.strong_rand_bytes(8), case: :lower)
 end

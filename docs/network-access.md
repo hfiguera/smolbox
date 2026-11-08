@@ -1,5 +1,10 @@
 # Controlled network access
 
+Embedded Port now translates exact approved policies and validates recorded
+network configuration when its protocol-2 package declares `networking: 1`.
+Ordinary permitted/denied traffic qualification for the new package remains
+pending. See [Embedded Port setup](embedded-port.md) for its development status.
+
 Approve specific outbound destinations when a guest needs network access.
 Offline remains the default. These policies require a supported smolvm version
 from **1.16.0** onward; see [Supported platforms](supported-platforms.md).

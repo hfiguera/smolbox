@@ -64,7 +64,8 @@ defmodule SmolBox.Embedded.Bridge do
   @type terminal :: map()
   @type event ::
           :accepted
-          | {:output, :stdout | :stderr | :file, binary()}
+          | :terminal_opened
+          | {:output, :stdout | :stderr | :file | :log | :terminal, binary()}
           | {:terminal, terminal(), Error.t() | nil}
           | {:bridge_error, Error.t()}
           | {:channel_lost, Error.t()}
@@ -78,9 +79,24 @@ defmodule SmolBox.Embedded.Bridge do
               :ok | {:error, Error.t()}
   @callback cancel(server(), handle()) :: :ok | {:error, Error.t()}
   @callback upload(server(), handle(), binary()) :: :ok | {:error, Error.t()}
+  # Controls are ordered, epoch-bound to the opaque handle, and admitted only
+  # from the terminal observer. Input admission does not prove guest consumption.
+  @callback terminal_control(server(), handle(), map()) :: :ok | {:error, Error.t()}
   @callback activate(server(), binding :: map()) :: :ok | {:error, Error.t()}
   @callback activate(server(), binding :: map(), epoch :: String.t()) :: :ok | {:error, Error.t()}
   @callback quiesce(server(), epoch :: String.t()) :: :ok | {:error, Error.t()}
   @callback shutdown(server()) :: :ok | {:error, Error.t()}
   @callback health(server()) :: {:ok, map()} | {:error, Error.t()}
+  # Interactive adapters use finite call budgets from one absolute deadline.
+  # Legacy non-interactive bridges may omit these variants; a bridge advertising
+  # terminals must implement them with the same caller/observer identity checks.
+  @callback health(server(), pos_integer()) :: {:ok, map()} | {:error, Error.t()}
+  @callback submit(server(), request(), Budget.t(), pid(), String.t(), pos_integer()) ::
+              {:ok, handle()} | {:error, Error.t()}
+  @callback terminal_control(server(), handle(), map(), pos_integer()) ::
+              :ok | {:error, Error.t()}
+  @callback acknowledge(server(), handle(), pos_integer(), pos_integer()) ::
+              :ok | {:error, Error.t()}
+  @callback cancel(server(), handle(), pos_integer()) :: :ok | {:error, Error.t()}
+  @optional_callbacks health: 2, submit: 6, terminal_control: 4, acknowledge: 4, cancel: 3
 end
