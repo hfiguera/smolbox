@@ -10,7 +10,14 @@ defmodule SmolBox.Embedded.BranchCompletion do
   Inspect output omits receipt, process and ownership fields. Feature admission
   remains separately gated by the approved native descriptor and store support.
   """
-  alias SmolBox.Embedded.{BranchPublication, BranchReleaseTransition, BranchRequest, Shape}
+  alias SmolBox.Embedded.{
+    BranchCanonical,
+    BranchPublication,
+    BranchReleaseTransition,
+    BranchRequest,
+    Shape
+  }
+
   alias SmolBox.Validation
 
   @enforce_keys [:schema, :publication, :child, :identity_sha256, :held]
@@ -39,10 +46,7 @@ defmodule SmolBox.Embedded.BranchCompletion do
   def valid?(_), do: false
 
   @doc false
-  def to_wire(%__MODULE__{} = value) do
-    wire = Map.new(Map.from_struct(value), fn {key, field} -> {Atom.to_string(key), field} end)
-    if value.release == nil, do: Map.delete(wire, "release"), else: wire
-  end
+  def to_wire(%__MODULE__{} = value), do: BranchCanonical.optional_release_fields(value)
 
   @doc false
   def wire?(value) when is_map(value),

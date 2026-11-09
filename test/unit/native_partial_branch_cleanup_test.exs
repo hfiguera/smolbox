@@ -14,6 +14,7 @@ defmodule SmolBox.NativePartialBranchCleanupTest do
     Codec,
     Contract,
     Memory,
+    NativeBranchBackingContract,
     NativePartialBranchBackingContract,
     NativePartialBranchCleanupContract,
     NativePartialBranchDisposalContract,
@@ -334,7 +335,7 @@ defmodule SmolBox.NativePartialBranchCleanupTest do
              ])
 
     assert {:ok, pending} =
-             NativePartialBranchBackingContract.accept(Memory, store, source, retired, 1503)
+             NativeBranchBackingContract.accept(Memory, store, source, retired, 1503)
 
     source = Cleanup.fetch(Memory, store, source)
 
@@ -342,7 +343,7 @@ defmodule SmolBox.NativePartialBranchCleanupTest do
       NativePartialBranchBackingContract.proof(pending.branch.native_authority.backing.request)
 
     assert {:ok, closed} =
-             NativePartialBranchBackingContract.complete_proof(
+             NativeBranchBackingContract.complete_proof(
                Memory,
                store,
                source,

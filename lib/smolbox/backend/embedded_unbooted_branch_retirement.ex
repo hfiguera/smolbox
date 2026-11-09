@@ -6,7 +6,6 @@ defmodule SmolBox.Backend.EmbeddedUnbootedBranchRetirement do
     Call,
     NativeBranchAdmission,
     NativeBranchRetirement,
-    NativeGrowth,
     Protocol,
     UnbootedBranchChildAbsence,
     UnbootedBranchDisposal
@@ -59,18 +58,10 @@ defmodule SmolBox.Backend.EmbeddedUnbootedBranchRetirement do
 
   defp scope?(context, parent, child),
     do:
-      pinned?(context) and NativeBranchAdmission.retirement_pair?(parent, child) and
+      EmbeddedBranchOperation.pinned?(context) and
+        NativeBranchAdmission.retirement_pair?(parent, child) and
         match?(%{disposal: %{proof: %UnbootedBranchDisposal{}}}, child.branch.native_authority) and
-        source_context?(context, parent)
-
-  defp pinned?(context),
-    do: context.pinned and context.quiesced and is_pid(context.server) and context.epoch != nil
-
-  defp source_context?(context, parent),
-    do:
-      context.spec == parent.spec and context.assignment == parent.backend_assignment and
-        context.name == parent.machine_name and context.profile == parent.spec.profile and
-        NativeGrowth.current_identity(parent) == {:ok, context.identity}
+        EmbeddedBranchOperation.source?(context, parent)
 
   defp bound?(request, context),
     do:

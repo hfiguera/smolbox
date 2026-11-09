@@ -2,7 +2,15 @@ defmodule SmolBox.Runtime.NativeBranchBacking do
   @moduledoc false
   alias SmolBox.{Backend, Error, ManagedMachine}
   alias SmolBox.Embedded.BranchBackingRelease
-  alias SmolBox.Runtime.{BranchObservation, MachineSession, NativeResolution, Session, Target}
+
+  alias SmolBox.Runtime.{
+    BranchObservation,
+    Deadline,
+    MachineSession,
+    NativeResolution,
+    Session,
+    Target
+  }
 
   # A saved acknowledgement is historical and idempotent. Returning the closed
   # record requires neither a replacement helper nor another namespace query.
@@ -89,14 +97,8 @@ defmodule SmolBox.Runtime.NativeBranchBacking do
     end
   end
 
-  defp remaining(deadline) do
-    timeout = deadline - now()
-    if timeout > 0, do: {:ok, timeout}, else: Session.error(:expired, :branch)
-  end
+  defp remaining(deadline), do: Deadline.remaining(deadline, :branch)
 
-  defp uncertain({:error, %Error{} = error}),
-    do: {:error, %{error | evidence: :dispatch_uncertain, operation: :branch}}
-
-  defp uncertain(result), do: result
+  defp uncertain(result), do: Error.uncertain(result, :branch)
   defp now, do: System.monotonic_time(:millisecond)
 end

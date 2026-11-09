@@ -39,7 +39,7 @@ defmodule SmolBox.Embedded.NativeUnbootedBranchDisposalResult do
       child.branch.source == ManagedMachine.key(parent) and
         receipt == proof.publication["previous"] and
         Identity.valid?(identity) and identity.receipt == proof.publication["receipt"] and
-        source?(result.source, identity, parent, proof, child)
+        source_matches?(result.source, identity, parent, proof, child)
     else
       _ -> false
     end
@@ -47,7 +47,8 @@ defmodule SmolBox.Embedded.NativeUnbootedBranchDisposalResult do
 
   def bound?(_, _, _), do: false
 
-  defp source?(source, identity, parent, proof, child) do
+  @doc false
+  def source_matches?(source, identity, parent, proof, child) do
     profile = DiskExpansion.profile(parent)
     pid = get_in(proof.publication, ~w(change child_origin intent source_pid))
     # bound?/3 already requires the exact previous/current publication heads.

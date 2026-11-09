@@ -6,6 +6,8 @@ defmodule SmolBox.Embedded.NativeBranchAdmission do
     NativeBranchBacking,
     NativeBranchRetirement,
     NativeGrowth,
+    NativePartialBranchCollection,
+    NativePartialBranchDisposal,
     NativeUnbootedBranchDisposal,
     UnbootedBranchDisposalCandidate
   }
@@ -52,6 +54,17 @@ defmodule SmolBox.Embedded.NativeBranchAdmission do
     else
       _ -> false
     end
+  end
+
+  def partial_collection_pending?(parent, child),
+    do: partial_pending?(parent, child, &NativePartialBranchCollection.eligible?/1)
+
+  def partial_disposal_pending?(parent, child),
+    do: partial_pending?(parent, child, &NativePartialBranchDisposal.eligible?/1)
+
+  defp partial_pending?(parent, child, eligible?) do
+    ManagedMachine.validate(parent) == :ok and ManagedMachine.validate(child) == :ok and
+      eligible?.(child) and NativePartialBranchCollection.source_pending?(parent, child)
   end
 
   def retirement_pair?(parent, child) do

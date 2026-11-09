@@ -70,6 +70,23 @@ defmodule SmolBox.Embedded.BranchBackingRelease do
         request["operation_id"] !=
           get_in(request, ~w(completion release change request operation_id))
 
+  @doc false
+  def disposal_request_identity?(request, distinct?, digest) do
+    BranchRequest.release?(Map.take(request, ~w(operation_id request_sha256))) and
+      request["quiesced"] == true and request["backing_removed"] == true and distinct?.(request) and
+      request["request_sha256"] == digest.(request)
+  end
+
+  @doc false
+  def matches_disposal?(proof, request, request?) do
+    value = if is_struct(proof, __MODULE__), do: to_wire(proof), else: proof
+
+    valid?(value) and request?.(request) and
+      value["publication"] == request["disposal"]["publication"] and
+      value["operation_id"] == request["operation_id"] and
+      value["request_sha256"] == request["request_sha256"]
+  end
+
   def request_digest(request),
     do:
       BranchCanonical.digest([

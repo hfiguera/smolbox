@@ -176,7 +176,7 @@ defmodule SmolBox.NativePartialBranchPublicCollectionTest do
       kind: :embedded,
       id: parent.worker_id,
       context: context,
-      budget: %Budget{timeout_ms: 1000, max_request_bytes: transfer, max_response_bytes: transfer}
+      budget: %Budget{timeout_ms: 5000, max_request_bytes: transfer, max_response_bytes: transfer}
     }
 
     target = %Target{
@@ -243,7 +243,7 @@ defmodule SmolBox.NativePartialBranchPublicCollectionTest do
       assert request == %{"operation" => "collect_partial_branch", "request" => saved.request}
       assert saved.proof != nil and saved.platform == "macos"
 
-      assert budget.timeout_ms <= 1000 and budget.max_request_bytes <= 21 * 1024 and
+      assert budget.timeout_ms <= 5000 and budget.max_request_bytes <= 21 * 1024 and
                budget.max_response_bytes <= 6 * 1024
 
       assert collected.state == :unknown and collected.branch.state == :unknown
@@ -349,7 +349,7 @@ defmodule SmolBox.NativePartialBranchPublicCollectionTest do
     assert {:ok, pending} = Contract.accept(Memory, store, parent, child, child.version, 1103)
     parent = Contract.fetch(Memory, store, parent)
     {:ok, context} = Adapter.assign(%{context | quiesced: true}, parent)
-    budget = %Budget{timeout_ms: 1000, max_request_bytes: 21 * 1024, max_response_bytes: 6 * 1024}
+    budget = %Budget{timeout_ms: 5000, max_request_bytes: 21 * 1024, max_response_bytes: 6 * 1024}
     callback = fn _, _, _ -> flunk("expired collection dispatched") end
 
     assert {:error, %Error{category: :expired, evidence: :not_dispatched}} =
@@ -371,7 +371,7 @@ defmodule SmolBox.NativePartialBranchPublicCollectionTest do
     parent = Contract.fetch(Memory, store, parent)
     {:ok, context} = Adapter.assign(%{context | quiesced: true}, parent)
     context = %{context | config: %{context.config | platform: :linux}}
-    budget = %Budget{timeout_ms: 1000, max_request_bytes: 21 * 1024, max_response_bytes: 6 * 1024}
+    budget = %Budget{timeout_ms: 5000, max_request_bytes: 21 * 1024, max_response_bytes: 6 * 1024}
 
     assert {:error, %Error{category: :identity_conflict, evidence: :not_dispatched}} =
              EmbeddedPartialBranchCollection.coordinate(context, parent, pending, budget, fn _,

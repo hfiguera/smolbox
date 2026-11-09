@@ -16,6 +16,7 @@ defmodule SmolBox.Store.NativePartialBranchCleanupResolutionContract do
   alias SmolBox.Store.{
     Codec,
     Contract,
+    NativeBranchBackingContract,
     NativePartialBranchBackingContract,
     NativePartialBranchCleanupContract,
     NativePartialBranchDisposalContract,
@@ -222,7 +223,7 @@ defmodule SmolBox.Store.NativePartialBranchCleanupResolutionContract do
              ])
 
     assert {:ok, pending} =
-             NativePartialBranchBackingContract.accept(adapter, store, source, retired, 1503)
+             NativeBranchBackingContract.accept(adapter, store, source, retired, 1503)
 
     source = fetch(adapter, store, source)
 
@@ -230,7 +231,7 @@ defmodule SmolBox.Store.NativePartialBranchCleanupResolutionContract do
       NativePartialBranchBackingContract.proof(pending.branch.native_authority.backing.request)
 
     assert {:ok, closed} =
-             NativePartialBranchBackingContract.complete_proof(
+             NativeBranchBackingContract.complete_proof(
                adapter,
                store,
                source,

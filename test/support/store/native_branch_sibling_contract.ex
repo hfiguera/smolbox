@@ -44,8 +44,8 @@ defmodule SmolBox.Store.NativeBranchSiblingContract do
     children = if reverse, do: [second, first], else: [first, second]
 
     {parent, retired, usage} =
-      Enum.reduce(Enum.with_index(children), {parent, [], usage}, fn {child, index},
-                                                                     {source, prior, charges} ->
+      Enum.reduce(Stream.with_index(children), {parent, [], usage}, fn {child, index},
+                                                                       {source, prior, charges} ->
         now = 1600 + index * 10
         sibling = if child.id == first.id, do: second, else: first
         sibling = fetch(adapter, store, sibling)
@@ -113,7 +113,7 @@ defmodule SmolBox.Store.NativeBranchSiblingContract do
     assert {:ok, ^usage} = adapter.usage(store, parent.worker_id)
 
     {parent, pending} =
-      Enum.reduce(Enum.with_index(retired), {parent, []}, fn {child, index}, {source, prior} ->
+      Enum.reduce(Stream.with_index(retired), {parent, []}, fn {child, index}, {source, prior} ->
         assert {:ok, accepted} =
                  NativeBranchBackingContract.accept(adapter, store, source, child, 1704 + index)
 
@@ -122,8 +122,8 @@ defmodule SmolBox.Store.NativeBranchSiblingContract do
       end)
 
     {parent, closed, usage} =
-      Enum.reduce(Enum.with_index(pending), {parent, [], usage}, fn {child, index},
-                                                                    {source, prior, charges} ->
+      Enum.reduce(Stream.with_index(pending), {parent, [], usage}, fn {child, index},
+                                                                      {source, prior, charges} ->
         now = 1710 + index * 10
         others = Enum.reject(pending, &(&1.id == child.id))
         others = Enum.map(others, &fetch(adapter, store, &1))

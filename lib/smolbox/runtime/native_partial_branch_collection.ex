@@ -1,6 +1,7 @@
 defmodule SmolBox.Runtime.NativePartialBranchCollection do
   @moduledoc false
   alias SmolBox.{Backend, Error, ManagedMachine}
+  alias SmolBox.Embedded.NativeBranchAdmission
   alias SmolBox.Embedded.NativePartialBranchCollection, as: Collection
   alias SmolBox.Embedded.NativePartialBranchCollectionResult
   alias SmolBox.Runtime.{MachineSession, NativeResolution, Session, Target}
@@ -37,7 +38,7 @@ defmodule SmolBox.Runtime.NativePartialBranchCollection do
   defp fenced(config, coordinator, child, version, worker, deadline) do
     with {:ok, _} <- remaining(deadline),
          {:ok, parent} <- MachineSession.claim(config, child.branch.source),
-         true <- Collection.pending?(parent, child) do
+         true <- NativeBranchAdmission.partial_collection_pending?(parent, child) do
       NativeResolution.run(config, coordinator, parent, worker, :branch, fn pinned ->
         accept(config, parent, child, version, pinned, deadline)
       end)

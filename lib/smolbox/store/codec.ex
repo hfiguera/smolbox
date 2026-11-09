@@ -1222,7 +1222,7 @@ defmodule SmolBox.Store.Codec do
       encode_native_record(
         record,
         @native_partial_branch_cleanups_prefix,
-        &CodecNativePartialBranchCleanupResolutions.strip/1
+        &CodecNativePartialBranchCleanupResolutions.transform(&1, :strip)
       )
 
   defp decode_native_partial_branch_cleanups(
@@ -1232,7 +1232,7 @@ defmodule SmolBox.Store.Codec do
 
     with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
          true <- used == byte_size(payload) and CodecNativePartialBranchCleanups.required?(record),
-         record = CodecNativePartialBranchCleanupResolutions.upgrade(record),
+         record = CodecNativePartialBranchCleanupResolutions.transform(record, :upgrade),
          :ok <- validate_extended(record),
          do: {:ok, record},
          else: (_ -> invalid())
@@ -1245,7 +1245,7 @@ defmodule SmolBox.Store.Codec do
       encode_native_record(
         record,
         @native_partial_branch_backings_prefix,
-        &CodecNativePartialBranchCleanups.strip/1
+        &CodecNativePartialBranchCleanups.transform(&1, :strip)
       )
 
   defp decode_native_partial_branch_backings(
@@ -1256,7 +1256,7 @@ defmodule SmolBox.Store.Codec do
     with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
          true <-
            used == byte_size(payload) and CodecNativePartialBranchBackings.required?(record),
-         record = CodecNativePartialBranchCleanups.upgrade(record),
+         record = CodecNativePartialBranchCleanups.transform(record, :upgrade),
          :ok <- validate_extended(record),
          do: {:ok, record},
          else: (_ -> invalid())
@@ -1269,7 +1269,7 @@ defmodule SmolBox.Store.Codec do
       encode_native_record(
         record,
         @native_partial_branch_retirements_prefix,
-        &CodecNativePartialBranchCleanups.strip/1
+        &CodecNativePartialBranchCleanups.transform(&1, :strip)
       )
 
   defp decode_native_partial_branch_retirements(
@@ -1281,7 +1281,7 @@ defmodule SmolBox.Store.Codec do
          true <-
            used == byte_size(payload) and CodecNativePartialBranchRetirements.required?(record),
          false <- CodecNativePartialBranchBackings.required?(record),
-         record = CodecNativePartialBranchCleanups.upgrade(record),
+         record = CodecNativePartialBranchCleanups.transform(record, :upgrade),
          :ok <- validate_extended(record),
          do: {:ok, record},
          else: (_ -> invalid())
@@ -1294,7 +1294,7 @@ defmodule SmolBox.Store.Codec do
       encode_native_record(
         record,
         @native_partial_branch_disposals_prefix,
-        &CodecNativePartialBranchCleanups.strip/1
+        &CodecNativePartialBranchCleanups.transform(&1, :strip)
       )
 
   defp decode_native_partial_branch_disposals(
@@ -1306,7 +1306,7 @@ defmodule SmolBox.Store.Codec do
          true <-
            used == byte_size(payload) and CodecNativePartialBranchDisposals.required?(record),
          false <- CodecNativePartialBranchRetirements.required?(record),
-         record = CodecNativePartialBranchCleanups.upgrade(record),
+         record = CodecNativePartialBranchCleanups.transform(record, :upgrade),
          :ok <- validate_extended(record),
          do: {:ok, record},
          else: (_ -> invalid())
@@ -1319,7 +1319,7 @@ defmodule SmolBox.Store.Codec do
       encode_native_record(
         record,
         @native_partial_branch_collections_prefix,
-        &CodecNativePartialBranchDisposals.strip/1
+        &CodecNativePartialBranchDisposals.transform(&1, :strip)
       )
 
   defp decode_native_partial_branch_collections(
@@ -1330,7 +1330,7 @@ defmodule SmolBox.Store.Codec do
     with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
          true <-
            used == byte_size(payload) and CodecNativePartialBranchCollections.required?(record),
-         record = CodecNativePartialBranchDisposals.upgrade(record),
+         record = CodecNativePartialBranchDisposals.transform(record, :upgrade),
          :ok <- validate_extended(record),
          do: {:ok, record},
          else: (_ -> invalid())

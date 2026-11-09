@@ -5,15 +5,8 @@ defmodule SmolBox.Store.CodecNativePartialBranchDisposals do
   @defaults %{NativeBranchAuthority => [partial_disposal: nil]}
   def reader, do: 1
 
-  def strip(record) do
-    if required?(record), do: raise(ArgumentError)
-    CodecFields.transform(record, @defaults, :strip)
-  end
-
-  def upgrade(record) do
-    if required?(record), do: raise(ArgumentError)
-    CodecFields.transform(record, @defaults, :upgrade)
-  end
+  def transform(record, mode),
+    do: CodecFields.transform_optional(record, @defaults, mode, &required?/1)
 
   def required?(%{branch: %{native_authority: authority}}) when is_map(authority),
     do: Map.get(authority, :partial_disposal) != nil

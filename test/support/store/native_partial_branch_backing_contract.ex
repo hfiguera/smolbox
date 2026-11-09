@@ -4,7 +4,6 @@ defmodule SmolBox.Store.NativePartialBranchBackingContract do
 
   alias SmolBox.Embedded.{
     BranchBackingRelease,
-    BranchCanonical,
     BranchPublication,
     NativeBranchBacking,
     PartialBranchBackingRelease,
@@ -55,51 +54,33 @@ defmodule SmolBox.Store.NativePartialBranchBackingContract do
     {source, child, usage}
   end
 
-  defdelegate accept(adapter, store, parent, child, now, removed \\ true),
-    to: NativeBranchBackingContract
-
-  defdelegate complete_proof(adapter, store, parent, child, proof, now),
-    to: NativeBranchBackingContract
-
-  defdelegate fetch(adapter, store, record), to: NativeBranchBackingContract
-
   # Synthetic native accounting acknowledgement. No filesystem deletion or SDK
   # operation occurs; ordinary platform qualification remains separate.
   def proof(request) do
-    publication = get_in(request, ~w(disposal publication))
-    plan = get_in(publication, ~w(change child_origin intent plan))
-    bytes = (plan["ordinary_child"]["disk_gb"] + plan["minimum_extra_disk_gb"]) * 1_073_741_824
-
-    proof = %BranchBackingRelease{
-      schema: 1,
-      publication: publication,
-      operation_id: request["operation_id"],
-      request_sha256: request["request_sha256"],
-      native_bytes: bytes,
-      proof_sha256:
-        BranchCanonical.digest([
-          "smolbox-branch-backing-release-v1",
-          1,
-          BranchCanonical.ordered(publication, :publication),
-          request["operation_id"],
-          request["request_sha256"],
-          bytes
-        ])
-    }
-
+    proof = NativeBranchBackingContract.proof(request, request["disposal"]["publication"])
     assert PartialBranchBackingRelease.matches?(proof, request)
     proof
   end
 
   def completed(adapter, store, mode, provenance \\ "deleted") do
     {source, child, usage} = prepare(adapter, store, mode, provenance)
-    assert {:error, _} = accept(adapter, store, source, child, 1312, false)
 
     assert {:error, _} =
-             accept(adapter, store, source, %{child | version: child.version + 1}, 1312)
+             NativeBranchBackingContract.accept(adapter, store, source, child, 1312, false)
 
-    assert {:ok, pending} = accept(adapter, store, source, child, 1312)
-    source = fetch(adapter, store, source)
+    assert {:error, _} =
+             NativeBranchBackingContract.accept(
+               adapter,
+               store,
+               source,
+               %{child | version: child.version + 1},
+               1312
+             )
+
+    assert {:ok, pending} =
+             NativeBranchBackingContract.accept(adapter, store, source, child, 1312)
+
+    source = NativeBranchBackingContract.fetch(adapter, store, source)
     saved = pending.branch.native_authority.backing
     assert pending.branch.state == :backing_pending and saved.proof == nil
 
@@ -116,7 +97,7 @@ defmodule SmolBox.Store.NativePartialBranchBackingContract do
     ack = proof(saved.request)
 
     assert {:error, _} =
-             complete_proof(
+             NativeBranchBackingContract.complete_proof(
                adapter,
                store,
                source,
@@ -126,7 +107,7 @@ defmodule SmolBox.Store.NativePartialBranchBackingContract do
              )
 
     assert {:error, _} =
-             complete_proof(
+             NativeBranchBackingContract.complete_proof(
                adapter,
                store,
                source,
@@ -136,8 +117,18 @@ defmodule SmolBox.Store.NativePartialBranchBackingContract do
              )
 
     assert {:ok, ^usage} = adapter.usage(store, source.worker_id)
-    assert {:ok, closed} = complete_proof(adapter, store, source, pending, ack, 1313)
-    source = fetch(adapter, store, source)
+
+    assert {:ok, closed} =
+             NativeBranchBackingContract.complete_proof(
+               adapter,
+               store,
+               source,
+               pending,
+               ack,
+               1313
+             )
+
+    source = NativeBranchBackingContract.fetch(adapter, store, source)
     assert closed.branch.state == :closed and closed.state == :deleted
     assert closed.branch.native_authority.backing == %{saved | proof: ack}
 
@@ -160,7 +151,9 @@ defmodule SmolBox.Store.NativePartialBranchBackingContract do
     assert {:ok, %{slots: 0, cpus: 0, memory_mb: 0, disk_gb: 0}} =
              adapter.usage(store, source.worker_id)
 
-    assert {:ok, ^closed} = complete_proof(adapter, store, source, closed, ack, 1314)
+    assert {:ok, ^closed} =
+             NativeBranchBackingContract.complete_proof(adapter, store, source, closed, ack, 1314)
+
     roundtrip(closed)
     {source, closed, ack}
   end

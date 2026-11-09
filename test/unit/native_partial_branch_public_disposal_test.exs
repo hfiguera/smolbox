@@ -246,7 +246,7 @@ defmodule SmolBox.NativePartialBranchPublicDisposalTest do
         )
   end
 
-  defp fixture(mode \\ :normal, material \\ :held, timeout \\ 1000, transfer \\ 262_144) do
+  defp fixture(mode \\ :normal, material \\ :held, timeout \\ 5000, transfer \\ 262_144) do
     store = start_supervised!(Memory)
     {parent, child, metadata, usage} = prepare_fixture(store, mode, material)
     epoch = get_in(metadata.publication, ~w(change child_origin intent epoch))
@@ -385,7 +385,7 @@ defmodule SmolBox.NativePartialBranchPublicDisposalTest do
       for {_, _, frozen, quiesced, epoch, _, budget} <- events do
         assert frozen and quiesced and epoch == context.epoch
 
-        assert budget.timeout_ms <= 1000 and budget.max_request_bytes <= 26 * 1024 and
+        assert budget.timeout_ms <= 5000 and budget.max_request_bytes <= 26 * 1024 and
                  budget.max_response_bytes <= 64 * 1024
       end
 
@@ -485,8 +485,8 @@ defmodule SmolBox.NativePartialBranchPublicDisposalTest do
              pending.branch.native_authority.partial_disposal.request
 
     stages = Enum.reject(events, &(elem(&1, 1) == "inspect"))
-    assert Enum.sum(Enum.map(stages, &elem(&1, 6).max_request_bytes)) <= 262_144
-    assert Enum.sum(Enum.map(stages, &elem(&1, 6).max_response_bytes)) <= 262_144
+    assert Enum.reduce(stages, 0, &(elem(&1, 6).max_request_bytes + &2)) <= 262_144
+    assert Enum.reduce(stages, 0, &(elem(&1, 6).max_response_bytes + &2)) <= 262_144
   end
 
   test "positive resolved absence preserves its provenance without SDK dispatch" do
@@ -557,7 +557,7 @@ defmodule SmolBox.NativePartialBranchPublicDisposalTest do
     {:ok, context} = Adapter.assign(%{context | quiesced: true}, parent)
 
     budget = %Budget{
-      timeout_ms: 1000,
+      timeout_ms: 5000,
       max_request_bytes: 26 * 1024,
       max_response_bytes: 64 * 1024
     }

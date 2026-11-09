@@ -4,7 +4,6 @@ defmodule SmolBox.Store.NativeUnbootedBranchBackingContract do
 
   alias SmolBox.Embedded.{
     BranchBackingRelease,
-    BranchCanonical,
     BranchPublication,
     NativeBranchBacking,
     UnbootedBranchBackingRelease,
@@ -66,27 +65,7 @@ defmodule SmolBox.Store.NativeUnbootedBranchBackingContract do
   # Synthetic native accounting acknowledgement. No filesystem deletion or SDK
   # operation occurs; ordinary platform qualification remains separate.
   def proof(request) do
-    publication = get_in(request, ~w(disposal publication))
-    plan = get_in(publication, ~w(change child_origin intent plan))
-    bytes = (plan["ordinary_child"]["disk_gb"] + plan["minimum_extra_disk_gb"]) * 1_073_741_824
-
-    proof = %BranchBackingRelease{
-      schema: 1,
-      publication: publication,
-      operation_id: request["operation_id"],
-      request_sha256: request["request_sha256"],
-      native_bytes: bytes,
-      proof_sha256:
-        BranchCanonical.digest([
-          "smolbox-branch-backing-release-v1",
-          1,
-          BranchCanonical.ordered(publication, :publication),
-          request["operation_id"],
-          request["request_sha256"],
-          bytes
-        ])
-    }
-
+    proof = NativeBranchBackingContract.proof(request, request["disposal"]["publication"])
     assert UnbootedBranchBackingRelease.matches?(proof, request)
     proof
   end

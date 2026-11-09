@@ -2,9 +2,10 @@ defmodule SmolBox.Runtime.NativePartialBranchDisposal do
   @moduledoc false
   alias SmolBox.{Backend, Error, ManagedMachine}
   alias SmolBox.Backend.Budget
+  alias SmolBox.Embedded.NativeBranchAdmission
   alias SmolBox.Embedded.NativePartialBranchDisposal, as: Disposal
   alias SmolBox.Embedded.NativePartialBranchDisposalResult
-  alias SmolBox.Runtime.{MachineSession, NativeResolution, Session, Target}
+  alias SmolBox.Runtime.{Deadline, MachineSession, NativeResolution, Session, Target}
 
   def run(config, coordinator, child, version) do
     with :ok <- ManagedMachine.validate(child),
@@ -38,7 +39,7 @@ defmodule SmolBox.Runtime.NativePartialBranchDisposal do
   defp fenced(config, coordinator, child, version, worker, budget, deadline) do
     with {:ok, _} <- remaining(deadline),
          {:ok, parent} <- MachineSession.claim(config, child.branch.source),
-         true <- Disposal.pending?(parent, child) do
+         true <- NativeBranchAdmission.partial_disposal_pending?(parent, child) do
       NativeResolution.run(config, coordinator, parent, worker, :deleted, fn pinned ->
         accept(config, child, version, pinned, budget, deadline)
       end)
@@ -124,23 +125,9 @@ defmodule SmolBox.Runtime.NativePartialBranchDisposal do
 
   defp complete(config, parent, child, result, worker, deadline) do
     completed =
-      with true <- result_bound?(result, parent, child, worker),
-           {:ok, _} <- remaining(deadline),
-           {:ok, current} <- MachineSession.claim(config, child.branch.source),
-           {:ok, _} <- remaining(deadline),
-           do:
-             MachineSession.store(config, :branch_resolve, [
-               child.branch.source,
-               Session.guard(current),
-               child.id,
-               result.source,
-               result,
-               config.clock.now()
-             ]),
-           else: (
-             false -> Session.error(:identity_conflict, :branch)
-             error -> error
-           )
+      if result_bound?(result, parent, child, worker),
+        do: MachineSession.commit_branch_result(config, child, result, deadline),
+        else: Session.error(:identity_conflict, :branch)
 
     uncertain(completed)
   end
@@ -179,15 +166,9 @@ defmodule SmolBox.Runtime.NativePartialBranchDisposal do
     end
   end
 
-  defp remaining(deadline) do
-    timeout = deadline - now()
-    if timeout > 0, do: {:ok, timeout}, else: Session.error(:expired, :branch)
-  end
+  defp remaining(deadline), do: Deadline.remaining(deadline, :branch)
 
-  defp uncertain({:error, %Error{} = error}),
-    do: {:error, %{error | evidence: :dispatch_uncertain, operation: :branch}}
-
-  defp uncertain(value), do: value
+  defp uncertain(result), do: Error.uncertain(result, :branch)
   defp platform(worker), do: Atom.to_string(Target.connection(worker).context.config.platform)
   defp now, do: System.monotonic_time(:millisecond)
 end

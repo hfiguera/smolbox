@@ -8,6 +8,7 @@ defmodule SmolBox.Backend.Embedded do
     EmbeddedBranchBacking,
     EmbeddedBranchDeletion,
     EmbeddedBranchDeletionAction,
+    EmbeddedBranchOperation,
     EmbeddedBranchRetirement,
     EmbeddedCapture,
     EmbeddedCaptureCleanup,
@@ -241,22 +242,29 @@ defmodule SmolBox.Backend.Embedded do
   def invoke(context, :prepare_artifact, arguments, budget),
     do: EmbeddedPreparation.run(context, arguments, budget)
 
-  def invoke(context, operation, [parent, child], budget)
+  def invoke(context, operation, [_, _] = pair, budget)
       when operation in [
              :dispose_partial_branch,
              :resolve_partial_branch_disposal,
              :qualify_partial_branch_cleanup
            ],
-      do: EmbeddedPartialBranchDisposal.run(context, operation, parent, child, budget)
+      do:
+        EmbeddedBranchOperation.run_disposal(
+          context,
+          operation,
+          pair,
+          budget,
+          EmbeddedPartialBranchDisposal
+        )
 
-  def invoke(context, :cleanup_partial_branch_disposal, [parent, child], budget),
+  def invoke(context, :cleanup_partial_branch_disposal, [_, _] = pair, budget),
     do:
-      EmbeddedPartialBranchCleanup.run(
+      EmbeddedBranchOperation.run_disposal(
         context,
         :cleanup_partial_branch_disposal,
-        parent,
-        child,
-        budget
+        pair,
+        budget,
+        EmbeddedPartialBranchCleanup
       )
 
   def invoke(context, :collect_partial_branch, [parent, child], budget),
@@ -274,13 +282,20 @@ defmodule SmolBox.Backend.Embedded do
   def invoke(context, :resolve_branch_deletion, [child], budget),
     do: EmbeddedBranchDeletion.run(context, child, budget)
 
-  def invoke(context, operation, [parent, child], budget)
+  def invoke(context, operation, [_, _] = pair, budget)
       when operation in [
              :inspect_unbooted_branch_disposal,
              :dispose_unbooted_branch,
              :resolve_unbooted_branch_disposal
            ],
-      do: EmbeddedUnbootedBranchDisposal.run(context, operation, parent, child, budget)
+      do:
+        EmbeddedBranchOperation.run_disposal(
+          context,
+          operation,
+          pair,
+          budget,
+          EmbeddedUnbootedBranchDisposal
+        )
 
   def invoke(context, :retire_partial_branch, [parent, child], budget),
     do: EmbeddedPartialBranchRetirement.run(context, parent, child, budget)

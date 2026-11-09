@@ -1,6 +1,7 @@
 defmodule SmolBox.Embedded.BranchCanonical do
   @moduledoc false
   alias SmolBox.Embedded.Shape
+  alias SmolBox.Validation
 
   @transition_fields ~w(schema previous receipt change)
 
@@ -27,6 +28,27 @@ defmodule SmolBox.Embedded.BranchCanonical do
 
   def wire_fields(value),
     do: Map.new(Map.from_struct(value), fn {key, field} -> {Atom.to_string(key), field} end)
+
+  def optional_release_fields(value) do
+    fields = wire_fields(value)
+    if value.release == nil, do: Map.delete(fields, "release"), else: fields
+  end
+
+  def valid_request_proof?(%{__struct__: module} = value, module, maximum),
+    do:
+      Validation.struct_shape?(value, module) and
+        valid_request_proof?(module.to_wire(value), module, maximum)
+
+  def valid_request_proof?(value, module, maximum),
+    do:
+      Shape.keys?(value, ~w(schema request proof_sha256)) and value["schema"] === 1 and
+        module.request?(value["request"]) and value["proof_sha256"] == module.proof_digest(value) and
+        byte_size(Jason.encode!(value)) <= maximum
+
+  def request_proof_matches?(proof, request, module, request?) do
+    value = if is_struct(proof, module), do: module.to_wire(proof), else: proof
+    module.valid?(value) and request?.(request) and value["request"] == request
+  end
 
   def transition_shape?(value),
     do:
