@@ -4,6 +4,10 @@ This source checkout supports public development Runtime admission. Read
 [the setup guide](../../docs/embedded-port.md) first. The Elixir dependency alone
 includes no native package and performs no downloads or Rust compilation.
 
+For the single-command demo, see the
+[Embedded Port quickstart preview](../../docs/embedded-quickstart.md). The rest of
+this example exercises the larger managed lifecycle.
+
 Approve the helper package and offline artifact, then set:
 
 - `SMOLBOX_EMBEDDED_PACKAGE`: absolute private package directory.

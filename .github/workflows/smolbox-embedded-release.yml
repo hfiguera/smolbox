@@ -1,0 +1,64 @@
+name: Build Embedded Port release candidates
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: github.ref_type == 'tag'
+    environment: embedded-port-release
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            target: linux-x86_64
+          - runner: macos-15
+            target: macos-aarch64
+    runs-on: ${{ matrix.runner }}
+    env:
+      TARGET: ${{ matrix.target }}
+      RUSTUP_TOOLCHAIN: '1.98.1'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Require reviewed distribution inputs for this tag
+        run: |
+          set -euo pipefail
+          test "v$(sed -n 's/^  @version "\(.*\)"$/\1/p' mix.exs)" = "$GITHUB_REF_NAME"
+          jq -e --arg target "$TARGET" '.[$target].distribution_approved == true' native/release-inputs.json
+      - name: Install the build tools
+        run: |
+          set -euo pipefail
+          python3 -c 'import sys; assert sys.version_info >= (3, 11), "Python 3.11 or later is required"'
+          rustup toolchain install "$RUSTUP_TOOLCHAIN" --profile minimal
+          if [[ "$TARGET" == macos-* ]]; then
+            brew install e2fsprogs zstd
+          else
+            sudo apt-get update
+            sudo apt-get install -y e2fsprogs zstd
+          fi
+      - name: Build the reviewed package and archive
+        run: bash native/build_release_candidate.sh "$GITHUB_REF_NAME" "$TARGET"
+      - name: Attest the archive built on this runner
+        id: provenance
+        uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f # v3.2.0
+        with:
+          subject-path: release-output/smolbox-embedded-${{ matrix.target }}.tar.gz
+      - name: Name the attestation for the public installer
+        env:
+          BUNDLE: ${{ steps.provenance.outputs.bundle-path }}
+        run: cp "$BUNDLE" "release-output/smolbox-embedded-$TARGET.tar.gz.sigstore.jsonl"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: embedded-port-${{ matrix.target }}
+          path: release-output/
+          if-no-files-found: error
