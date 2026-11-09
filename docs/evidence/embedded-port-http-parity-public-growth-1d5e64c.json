@@ -1,0 +1,561 @@
+{
+  "schema": 1,
+  "scope": "ordinary-public-linux-packed-container-stopped-growth-current-minimum-memory-postgresql",
+  "qualified_elixir_source_commit": "1d5e64c91718a2c213f811091f039b91d2d02314",
+  "native_source_commit": "a8e28af6564f3f02a81fbc9b9b7345ac728e7709",
+  "elixir_archive_sha256": "6956a16de60e0d74bb89925d21855f1b00b047eab645a893527c6c12b093b9bb",
+  "public_source_archive_sha256": "19b0d2be70e81dfdd6ac195154a351339d459e82b9b0112841510e4d814fee51",
+  "memory_consumers": [
+    {
+      "toolchain_mode": "current",
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "report_sha256": "7c5d71f9b48d8434440faf3e1be3a544bf2472604217719cb9635d117d4b752d",
+      "native_evidence_sha256": "6e2d70469f675c21a8eb1e6c4960832da15db86be40bed027b6d4362c7e47fea",
+      "without_rust": true,
+      "evidence": {
+        "campaign": "ordinary-public-native-growth",
+        "conflicting_growth_rejected": true,
+        "crash_handling_qualified": false,
+        "deliberate_process_interruption": false,
+        "drain_retained": true,
+        "duplicate_growth_retained": true,
+        "file_bytes": 65554,
+        "file_sha256": "25ac6018e1a86a5aa310d7cd70d12c517e89e42b33afb021d07ca3c0ce909638",
+        "final_reserved_disk_gb": 0,
+        "final_reserved_slots": 0,
+        "fixture_sha256": "339995f33fe84c2ed5a4e212a0acb9afab22df972bf2c2b4aa8e412ea0af5bc4",
+        "growth_budget_rejected_before_dispatch": true,
+        "growth_history_retained": true,
+        "identity": {
+          "architecture": "x86_64",
+          "assets_sha256": "0b0dc7a8c2178459f557a73e48382c5a6235767936186918da33842c6ec44428",
+          "build_sha256": "2c4b6edd549b796ab0830ce51c23e6f89a7fc105a8860439d278e5535970a972",
+          "engine_version": "0.2.0",
+          "platform": "linux",
+          "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+          "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+        },
+        "immutable_creation_retained": true,
+        "inventory_after": [],
+        "inventory_before": [],
+        "material_chain_retained": true,
+        "omitted_target_retained": true,
+        "overlay_geometry_verified": true,
+        "owned_deleted": true,
+        "package_manifest_sha256": "000be529f0c9e52a3c36ea3c46723dec95ecc22a12906bf54a0a3b5cbd4049e7",
+        "phase": "single",
+        "public_native_admission_enabled": true,
+        "running_growth_rejected": true,
+        "scope": "public-port-package-consumer",
+        "stopped_runtime_replacement": true,
+        "storage_filesystem_growth": true,
+        "store_mode": "ephemeral",
+        "without_rust": true,
+        "worker_capacity": {
+          "slots": 1,
+          "cpus": 1,
+          "memory_mb": 768,
+          "disk_gb": 8
+        }
+      }
+    },
+    {
+      "toolchain_mode": "minimum",
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "report_sha256": "8098376a163c2db92af16f4a7fdd7b16d36e83529f2f1b778571d20d326384c0",
+      "native_evidence_sha256": "ea596c76178a6aa3902420b602e77915116210b05b76821072f557031b2316ae",
+      "without_rust": true,
+      "evidence": {
+        "campaign": "ordinary-public-native-growth",
+        "conflicting_growth_rejected": true,
+        "crash_handling_qualified": false,
+        "deliberate_process_interruption": false,
+        "drain_retained": true,
+        "duplicate_growth_retained": true,
+        "file_bytes": 65554,
+        "file_sha256": "25ac6018e1a86a5aa310d7cd70d12c517e89e42b33afb021d07ca3c0ce909638",
+        "final_reserved_disk_gb": 0,
+        "final_reserved_slots": 0,
+        "fixture_sha256": "339995f33fe84c2ed5a4e212a0acb9afab22df972bf2c2b4aa8e412ea0af5bc4",
+        "growth_budget_rejected_before_dispatch": true,
+        "growth_history_retained": true,
+        "identity": {
+          "architecture": "x86_64",
+          "assets_sha256": "0b0dc7a8c2178459f557a73e48382c5a6235767936186918da33842c6ec44428",
+          "build_sha256": "2c4b6edd549b796ab0830ce51c23e6f89a7fc105a8860439d278e5535970a972",
+          "engine_version": "0.2.0",
+          "platform": "linux",
+          "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+          "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+        },
+        "immutable_creation_retained": true,
+        "inventory_after": [],
+        "inventory_before": [],
+        "material_chain_retained": true,
+        "omitted_target_retained": true,
+        "overlay_geometry_verified": true,
+        "owned_deleted": true,
+        "package_manifest_sha256": "000be529f0c9e52a3c36ea3c46723dec95ecc22a12906bf54a0a3b5cbd4049e7",
+        "phase": "single",
+        "public_native_admission_enabled": true,
+        "running_growth_rejected": true,
+        "scope": "public-port-package-consumer",
+        "stopped_runtime_replacement": true,
+        "storage_filesystem_growth": true,
+        "store_mode": "ephemeral",
+        "without_rust": true,
+        "worker_capacity": {
+          "cpus": 1,
+          "memory_mb": 768,
+          "slots": 1,
+          "disk_gb": 8
+        }
+      }
+    }
+  ],
+  "postgresql_consumers": [
+    {
+      "toolchain_mode": "current",
+      "same_pinned_launcher_as_memory_consumer": true,
+      "without_rust": true,
+      "phases": {
+        "prepare": {
+          "evidence_sha256": "8faeca763f71824bbfa2c48cf1eb466bbe797a3b4d1457e54b407ff41dfacf97",
+          "evidence": {
+            "scope": "public-linux-growth-runtime",
+            "identity": {
+              "architecture": "x86_64",
+              "assets_sha256": "0b0dc7a8c2178459f557a73e48382c5a6235767936186918da33842c6ec44428",
+              "build_sha256": "2c4b6edd549b796ab0830ce51c23e6f89a7fc105a8860439d278e5535970a972",
+              "engine_version": "0.2.0",
+              "platform": "linux",
+              "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+              "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+            },
+            "phase": "prepare",
+            "package_manifest_sha256": "000be529f0c9e52a3c36ea3c46723dec95ecc22a12906bf54a0a3b5cbd4049e7",
+            "prepared_stopped": true,
+            "owned_deleted": false,
+            "store_mode": "durable",
+            "fixture_sha256": "339995f33fe84c2ed5a4e212a0acb9afab22df972bf2c2b4aa8e412ea0af5bc4",
+            "worker_capacity": {
+              "slots": 1,
+              "cpus": 1,
+              "memory_mb": 768,
+              "disk_gb": 8
+            },
+            "deliberate_process_interruption": false,
+            "crash_handling_qualified": false,
+            "reserved_slots": 1,
+            "reserved_disk_gb": 5
+          }
+        },
+        "resume": {
+          "evidence_sha256": "384d98a90bfa412a34034ff467c91a13ef76f2f10ae6294139f8c3aeda9ac0d1",
+          "evidence": {
+            "scope": "public-linux-growth-runtime",
+            "identity": {
+              "architecture": "x86_64",
+              "assets_sha256": "0b0dc7a8c2178459f557a73e48382c5a6235767936186918da33842c6ec44428",
+              "build_sha256": "2c4b6edd549b796ab0830ce51c23e6f89a7fc105a8860439d278e5535970a972",
+              "engine_version": "0.2.0",
+              "platform": "linux",
+              "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+              "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+            },
+            "phase": "resume",
+            "package_manifest_sha256": "000be529f0c9e52a3c36ea3c46723dec95ecc22a12906bf54a0a3b5cbd4049e7",
+            "owned_deleted": true,
+            "separate_normal_beam_restart": true,
+            "historical_output_after_normal_beam_restart": true,
+            "final_reserved_slots": 0,
+            "final_reserved_disk_gb": 0,
+            "store_mode": "durable",
+            "fixture_sha256": "339995f33fe84c2ed5a4e212a0acb9afab22df972bf2c2b4aa8e412ea0af5bc4",
+            "worker_capacity": {
+              "slots": 1,
+              "cpus": 1,
+              "memory_mb": 768,
+              "disk_gb": 8
+            },
+            "deliberate_process_interruption": false,
+            "crash_handling_qualified": false,
+            "file_bytes": 65554,
+            "file_sha256": "25ac6018e1a86a5aa310d7cd70d12c517e89e42b33afb021d07ca3c0ce909638",
+            "stopped_runtime_replacement": true,
+            "growth_history_retained": true,
+            "immutable_creation_retained": true,
+            "growth_budget_rejected_before_dispatch": true,
+            "running_growth_rejected": true,
+            "drain_retained": true,
+            "duplicate_growth_retained": true,
+            "conflicting_growth_rejected": true,
+            "storage_filesystem_growth": true,
+            "overlay_geometry_verified": true,
+            "omitted_target_retained": true,
+            "material_chain_retained": true
+          }
+        }
+      }
+    },
+    {
+      "toolchain_mode": "minimum",
+      "same_pinned_launcher_as_memory_consumer": true,
+      "without_rust": true,
+      "phases": {
+        "prepare": {
+          "evidence_sha256": "8f4cccc43348863ac57f040c76a1be036236415884c6561a54c03cf71291fdde",
+          "evidence": {
+            "scope": "public-linux-growth-runtime",
+            "identity": {
+              "architecture": "x86_64",
+              "assets_sha256": "0b0dc7a8c2178459f557a73e48382c5a6235767936186918da33842c6ec44428",
+              "build_sha256": "2c4b6edd549b796ab0830ce51c23e6f89a7fc105a8860439d278e5535970a972",
+              "engine_version": "0.2.0",
+              "platform": "linux",
+              "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+              "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+            },
+            "phase": "prepare",
+            "package_manifest_sha256": "000be529f0c9e52a3c36ea3c46723dec95ecc22a12906bf54a0a3b5cbd4049e7",
+            "prepared_stopped": true,
+            "owned_deleted": false,
+            "store_mode": "durable",
+            "fixture_sha256": "339995f33fe84c2ed5a4e212a0acb9afab22df972bf2c2b4aa8e412ea0af5bc4",
+            "worker_capacity": {
+              "cpus": 1,
+              "memory_mb": 768,
+              "slots": 1,
+              "disk_gb": 8
+            },
+            "deliberate_process_interruption": false,
+            "crash_handling_qualified": false,
+            "reserved_slots": 1,
+            "reserved_disk_gb": 5
+          }
+        },
+        "resume": {
+          "evidence_sha256": "30783cdbc60093c81ea4a558570cc6592460b4f7cbdd50d31887481494173e4e",
+          "evidence": {
+            "scope": "public-linux-growth-runtime",
+            "identity": {
+              "architecture": "x86_64",
+              "assets_sha256": "0b0dc7a8c2178459f557a73e48382c5a6235767936186918da33842c6ec44428",
+              "build_sha256": "2c4b6edd549b796ab0830ce51c23e6f89a7fc105a8860439d278e5535970a972",
+              "engine_version": "0.2.0",
+              "platform": "linux",
+              "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+              "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+            },
+            "phase": "resume",
+            "package_manifest_sha256": "000be529f0c9e52a3c36ea3c46723dec95ecc22a12906bf54a0a3b5cbd4049e7",
+            "owned_deleted": true,
+            "separate_normal_beam_restart": true,
+            "historical_output_after_normal_beam_restart": true,
+            "final_reserved_slots": 0,
+            "final_reserved_disk_gb": 0,
+            "store_mode": "durable",
+            "fixture_sha256": "339995f33fe84c2ed5a4e212a0acb9afab22df972bf2c2b4aa8e412ea0af5bc4",
+            "worker_capacity": {
+              "cpus": 1,
+              "memory_mb": 768,
+              "slots": 1,
+              "disk_gb": 8
+            },
+            "deliberate_process_interruption": false,
+            "crash_handling_qualified": false,
+            "file_bytes": 65554,
+            "file_sha256": "25ac6018e1a86a5aa310d7cd70d12c517e89e42b33afb021d07ca3c0ce909638",
+            "stopped_runtime_replacement": true,
+            "growth_history_retained": true,
+            "immutable_creation_retained": true,
+            "growth_budget_rejected_before_dispatch": true,
+            "running_growth_rejected": true,
+            "drain_retained": true,
+            "duplicate_growth_retained": true,
+            "conflicting_growth_rejected": true,
+            "storage_filesystem_growth": true,
+            "overlay_geometry_verified": true,
+            "omitted_target_retained": true,
+            "material_chain_retained": true
+          }
+        }
+      }
+    }
+  ],
+  "final_custody": {
+    "frozen_sources": [
+      {
+        "commit": "1d5e64c91718a2c213f811091f039b91d2d02314",
+        "files_verified": 1274
+      },
+      {
+        "commit": "c27b70523301d32407de8e2a0997f15fd369dddc",
+        "files_verified": 1269
+      },
+      {
+        "commit": "0b2028137b612fb274735ae5877e55e4bc6b2efd",
+        "files_verified": 1273
+      }
+    ],
+    "package_manifest_sha256": "000be529f0c9e52a3c36ea3c46723dec95ecc22a12906bf54a0a3b5cbd4049e7",
+    "helper_mode": "0755",
+    "asset_entries_verified": 806,
+    "asset_bytes_and_modes_verified": true,
+    "sdk_table_counts": {
+      "vms": 0,
+      "vm_create_reservations": 0,
+      "vm_pause_operations": 0,
+      "vm_resize_intents": 0,
+      "vm_resize_receipts": 0
+    },
+    "native_inventory": [],
+    "postgres_client_count_before_smart_stop": 0,
+    "postgres_smart_stopped": true,
+    "native_processes": [],
+    "crash_validation_performed": false
+  },
+  "final_store": {
+    "usage": {
+      "slots": 0,
+      "cpus": 0,
+      "memory_mb": 0,
+      "disk_gb": 0
+    },
+    "capabilities": {
+      "atomic": true,
+      "durable": true,
+      "native_disk_growth": 1,
+      "managed_disk_expansion": 1
+    }
+  },
+  "private_archive": {
+    "sha256": "9a232edf6b49dc2cff500064f826a36559fcc06255d936feaa146e0e3ea6c3c2",
+    "bytes": 428788850,
+    "mode": "0600",
+    "copied_and_verified_locally": true,
+    "includes_stopped_sdk_data_and_cache": true
+  },
+  "normal_shutdown": {
+    "observed_utc": "2026-10-16T12:38:32Z",
+    "unit_active_state": "inactive",
+    "unit_result": "success",
+    "main_pid": 0,
+    "exit_status": 0,
+    "recovery_marker_archived_before_shutdown": true,
+    "run_disk_retained": true
+  },
+  "preceding_attempt": {
+    "elixir_source_commit": "0b2028137b612fb274735ae5877e55e4bc6b2efd",
+    "memory_current_passed": true,
+    "memory_minimum_passed": true,
+    "postgresql_current_prepare_resume_passed": true,
+    "postgresql_minimum_prepare_passed": false,
+    "postgresql_minimum_resume_run": false,
+    "failure": {
+      "rejected": {
+        "category": "stale_version",
+        "operation": "expand_disks",
+        "evidence": "not_dispatched"
+      },
+      "exception": "MatchError",
+      "frames": [
+        {
+          "arity": 1,
+          "function": "prepare",
+          "line": 258,
+          "module": "Elixir.SmolBox.Example.EmbeddedGrowth"
+        },
+        {
+          "arity": 2,
+          "function": "execute",
+          "line": 123,
+          "module": "Elixir.SmolBox.Example.EmbeddedGrowth"
+        },
+        {
+          "arity": 3,
+          "function": "run",
+          "line": 89,
+          "module": "Elixir.SmolBox.Example.EmbeddedGrowth"
+        },
+        {
+          "arity": 1,
+          "function": "run",
+          "line": 70,
+          "module": "Elixir.SmolBox.DurableGrowthProof"
+        },
+        {
+          "arity": 1,
+          "function": "__FILE__",
+          "line": 97,
+          "module": "elixir_compiler_3"
+        },
+        {
+          "arity": 4,
+          "function": "dispatch",
+          "line": 77,
+          "module": "elixir_compiler"
+        },
+        {
+          "arity": 4,
+          "function": "compile",
+          "line": 52,
+          "module": "elixir_compiler"
+        },
+        {
+          "arity": 2,
+          "function": "maybe_fast_compile",
+          "line": 39,
+          "module": "elixir_compiler"
+        }
+      ]
+    },
+    "reason": "Before any resize, a running-machine negative check receives stale_version/not_dispatched after a normal record version change. Historical native recovery and guest IO already succeeded.",
+    "same_owner_stop": {
+      "status": "accepted"
+    },
+    "same_owner_delete": {
+      "status": "accepted"
+    },
+    "same_owner_close": {
+      "status": "closed"
+    },
+    "forced_termination": false
+  },
+  "runner_correction": {
+    "commit": "1d5e64c91718a2c213f811091f039b91d2d02314",
+    "retry_only": "stale_version/not_dispatched",
+    "version_must_advance": true,
+    "maximum_refreshes": 10,
+    "state_identity_history_and_accounting_must_be_unchanged": true,
+    "accepted_or_uncertain_work_retried": false,
+    "production_library_changed": false
+  },
+  "validation": {
+    "focused-current": {
+      "passed": 42,
+      "excluded_runtime_or_deferred": 3,
+      "log_sha256": "1c0662cf63209e940f9b55082c95f8f849d3a7ad15d6aa0a4554e3ac9973094c"
+    },
+    "focused-minimum": {
+      "passed": 42,
+      "excluded_runtime_or_deferred": 3,
+      "log_sha256": "8b4811f2658683048c7d9c0a6ebd791cd1e364483b11b99ace528203f855d51c"
+    },
+    "ordinary-root": {
+      "passed": 1626,
+      "excluded_runtime_or_deferred": 42,
+      "log_sha256": "654268c677326eac78fcb65ac475bf8037186a0b2bbb302f41649c80af3b243d",
+      "maximum_concurrent_cases": 4
+    },
+    "documentation": {
+      "warnings_as_errors": true,
+      "log_sha256": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d"
+    },
+    "credo": {
+      "strict_findings": 50,
+      "new_findings": 0,
+      "log_sha256": "cdb2165e750ef10d8a56a45340bf44f1d8260e22fe406a8472967353f800994b"
+    },
+    "http_only_consumers": [
+      {
+        "toolchain_mode": "current",
+        "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+        "archive_sha256": "6956a16de60e0d74bb89925d21855f1b00b047eab645a893527c6c12b093b9bb",
+        "report_sha256": "55e3576aa69242c1895f1206f22658845435599cad820c6022e0fb9bb5199b86",
+        "without_rust": true,
+        "native_assets_exercised": false,
+        "smoke": {
+          "checkpoint": true,
+          "client": true,
+          "guest_files": true,
+          "interactive": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "managed_branches": true,
+          "managed_checkpoints": true,
+          "managed_exports": true,
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.22.0",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.5",
+            "mint": "1.11.0",
+            "mint_web_socket": "1.0.6",
+            "nimble_options": "1.1.1",
+            "req": "0.7.5",
+            "telemetry": "1.4.2"
+          },
+          "without_rust": true,
+          "workload": true
+        }
+      },
+      {
+        "toolchain_mode": "minimum",
+        "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+        "archive_sha256": "6956a16de60e0d74bb89925d21855f1b00b047eab645a893527c6c12b093b9bb",
+        "report_sha256": "666b93eb3967247abcb5003af793e9de71535bc65e36fcdab5a5c022debfaa75",
+        "without_rust": true,
+        "native_assets_exercised": false,
+        "smoke": {
+          "checkpoint": true,
+          "client": true,
+          "guest_files": true,
+          "interactive": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "managed_branches": true,
+          "managed_checkpoints": true,
+          "managed_exports": true,
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.22.0",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.0",
+            "mint": "1.11.0",
+            "mint_web_socket": "1.0.6",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          },
+          "without_rust": true,
+          "workload": true
+        }
+      }
+    ],
+    "final_documentation": {
+      "warnings_as_errors": true,
+      "log_sha256": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d"
+    },
+    "final_coverage_and_runner": {
+      "passed": 15,
+      "log_sha256": "79c28ec2c48a46ad81e7733a993dcfffea7555eb6d0434e30ec918b637fb128e"
+    }
+  },
+  "limitations": [
+    "Offline packed Python workload on Linux x86_64; bare/OCI and remaining source/platform/resource combinations remain required.",
+    "Workspace filesystem capacity and overlay geometry are observed; bare guest overlay filesystem growth is not qualified.",
+    "Memory Runtime replacement retains its store in the same BEAM; PostgreSQL prepare/resume crosses normally exiting BEAMs with stable keys, partition and artifacts.",
+    "No network/workload/terminal/mounted-volume qualification transfers from older packages to this native bundle.",
+    "Saved-state/branch/registry activation and full P0-P9 parity remain pending."
+  ],
+  "crash_validation_performed": false,
+  "distribution_approved": false,
+  "parity_complete": false,
+  "sdk_vm_cache": {
+    "total_child_entries": 948,
+    "vm_directories": 0,
+    "shared_content_addressed_cache_entries": 936,
+    "shared_content_addressed_cache_files": 412,
+    "shared_content_addressed_cache_symlinks": 389,
+    "shared_content_addressed_cache_logical_bytes": 153914066,
+    "zero_byte_gate_lock_files": 12,
+    "shared_inputs_and_empty_gate_locks_retained": true
+  }
+}

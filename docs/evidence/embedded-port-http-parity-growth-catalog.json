@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "scope": "explicit-durable-growth-artifact-selection-with-retained-catalog",
+  "baseline_commit": "2578e8c",
+  "inputs": [
+    {
+      "path": "examples/embedded_port/lib/growth_demo.ex",
+      "sha256": "2742a35722afe40cdd591cb3e662718fbe9b63710d6745f149773e92aced5c27"
+    },
+    {
+      "path": "examples/durable_host/scripts/embedded-growth.exs",
+      "sha256": "c434f7e134bb8cd9d4f75b56be79d9d24a5bcdf6c43d08bc133e6bab77d0e47a"
+    },
+    {
+      "path": "test/unit/embedded_growth_example_test.exs",
+      "sha256": "84718a4c0f6e54309faab3fb554563b520d27e0f5d365fe7ee7d8e9f3cdbb98c"
+    }
+  ],
+  "behavior": [
+    "Select one explicitly approved catalog entry by artifact_id before store/output/runtime startup.",
+    "Require explicit selection for multiple entries; reject absent, unknown and duplicate selections.",
+    "Keep the legacy single-artifact artifact/artifact_sha256 settings and application id unchanged.",
+    "Allow the durable launcher to retain its full artifacts catalog, including previous fixture approvals, under the existing domain/partition/keys.",
+    "Existing Config validation still checks the entire native approval catalog; selection grants no new source or cleanup authority."
+  ],
+  "validation": [
+    {
+      "lane": "ordinary-current",
+      "passed": 1639,
+      "excluded": 42,
+      "excluded_tags": [
+        "runtime",
+        "deferred_crash"
+      ],
+      "log_sha256": "34c97ea01b51731369ce569b24c50fc6f98641f38ecda97425e4a9300538f009"
+    },
+    {
+      "lane": "focused-minimum",
+      "passed": 15,
+      "log_sha256": "ec499ad7ed2767d4562d98b034122290bafafdad569e555e088cc55ce88615e5"
+    },
+    {
+      "lane": "strict-credo",
+      "findings": 50,
+      "identical_to_baseline_ignoring_shifted_lines": true,
+      "log_sha256": "cdb2165e750ef10d8a56a45340bf44f1d8260e22fe406a8472967353f800994b",
+      "baseline_log_sha256": "cdb2165e750ef10d8a56a45340bf44f1d8260e22fe406a8472967353f800994b"
+    },
+    {
+      "lane": "documentation-warnings-as-errors",
+      "status": "passed",
+      "log_sha256": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d"
+    }
+  ],
+  "native_engine_changed": false,
+  "protocol_or_codec_changed": false,
+  "durable_bare_growth_qualified": false,
+  "remaining": [
+    "Freeze this source and qualify current/minimum durable bare-growth prepare/resume using the original partition, keys and retained Python catalog.",
+    "Record exact native/public package identities and preserve private evidence; do not transfer prior source qualification."
+  ],
+  "parity_complete": false,
+  "crash_validation_performed": false,
+  "distribution_approved": false
+}

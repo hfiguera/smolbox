@@ -267,7 +267,7 @@ defmodule SmolBox.NativeBranchDeletionActionTest do
         File.write!(path, bytes, [:exclusive])
         File.chmod!(path, 0o600)
         on_exit(fn -> File.rm(path) end)
-        paths = Path.wildcard(Path.expand("_build/test/lib/*/ebin"))
+        paths = Path.wildcard(Path.join(Mix.Project.build_path(), "lib/*/ebin"))
 
         code =
           ~S/[path, kind] = System.argv(); case path |> File.read!() |> SmolBox.Store.Codec.decode() do {:ok, %{branch: %{native_authority: authority}}} -> slot = if kind == "continue", do: :delete_continuation, else: :delete_cleanup; case Map.fetch!(authority, slot) do %{request: %{"action" => ^kind}} -> IO.puts("fresh-action"); _ -> System.halt(1) end; _ -> System.halt(1) end/

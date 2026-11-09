@@ -7,7 +7,11 @@ defmodule SmolBox.DurableHost.VolumeStore do
 
     def capabilities(context) do
       Database.query(context, "SELECT payload FROM smolbox_volumes LIMIT 0", [])
-      %{local_volumes: 1}
+
+      if Code.ensure_loaded?(SmolBox.Embedded.VolumeAuthority) and
+           Code.ensure_loaded?(SmolBox.Embedded.VolumeAttachment),
+         do: %{local_volumes: 1, native_volumes: 1},
+         else: %{local_volumes: 1}
     end
 
     def accept(context, v, capacity) do

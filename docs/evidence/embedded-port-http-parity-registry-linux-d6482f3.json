@@ -1,0 +1,168 @@
+{
+  "schema": 1,
+  "status": "passed-scoped-engine-registry-bare-linux",
+  "scope": "anonymous immutable smolmachine registry preparation and fresh cached bare creation through the shared engine",
+  "witness_source_commit": "d6482f37a8440a8dcd6965a589d5bd5a4d797e91",
+  "source_files_verified": 1568,
+  "native_production_source_commit": "14f45d6208b4c24aaf89e66906974aa065c66daa",
+  "production_engine_port_policy_changed": false,
+  "native_manifest_sha256": "25bed0542378cda71db2e6c51d10e02c8a89239802d5930084a4fa415b6ed086",
+  "native_identity": {
+    "engine_version": "0.2.0",
+    "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+    "build_sha256": "f50e53e85875371eea36e62d3e7655536b72f291b2bc5027f2f710d69e33b7f5",
+    "assets_sha256": "64a20a93a48f11b62b74692c356dc460ce7fcf01b87be57ea5db9b5d7ea59d66",
+    "platform": "linux",
+    "architecture": "x86_64"
+  },
+  "sdk_version": "1.22.0",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_source_unmodified_before_after_build": true,
+  "witness_sha256": "2f0597f7b557afbbae8b1d64d6e91f15abb7f56e486f599e40099633d1832d6e",
+  "rust_toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "approved_artifact_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+  "artifact_bytes": 14952849,
+  "workflow": {
+    "artifact_bytes": 14952849,
+    "cached_creation": true,
+    "cold_preparation": true,
+    "crash_validation_performed": false,
+    "credential_workflow_qualified": false,
+    "data_retained": true,
+    "distribution_approved": false,
+    "guest_network_enabled": false,
+    "host_cache_retained": true,
+    "normal_owner_shutdown": true,
+    "ordinary_restart": true,
+    "owned_deleted": true,
+    "package_manifest_sha256": "25bed0542378cda71db2e6c51d10e02c8a89239802d5930084a4fa415b6ed086",
+    "public_registry_admission_enabled": false,
+    "scope": "ordinary-owned-engine-registry-artifact",
+    "source": {
+      "content_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+      "platform": "linux/amd64",
+      "reference": "127.0.0.1:44587/team/ordinary@sha256:7b45a3809c692738d72330c8d7703c398a2b2b4aa5d55efa6af36af222a35ec0"
+    },
+    "status": "passed",
+    "warm_preparation": true
+  },
+  "fixture": {
+    "status": "passed",
+    "witness_exit_status": 0,
+    "counts": {
+      "manifest": 2,
+      "blob": 1,
+      "other": 0,
+      "authorization_present": 0,
+      "stream_errors": 0
+    },
+    "fixture_unchanged": true,
+    "normal_fixture_shutdown": true,
+    "forced_termination": false,
+    "crash_validation_performed": false,
+    "finished_utc": "2026-10-16T17:52:15.157312+00:00"
+  },
+  "custody": {
+    "source_commit": "d6482f37a8440a8dcd6965a589d5bd5a4d797e91",
+    "source_files_verified": 1568,
+    "manifest_sha256": "25bed0542378cda71db2e6c51d10e02c8a89239802d5930084a4fa415b6ed086",
+    "helper_sha256": "f50e53e85875371eea36e62d3e7655536b72f291b2bc5027f2f710d69e33b7f5",
+    "witness_sha256": "2f0597f7b557afbbae8b1d64d6e91f15abb7f56e486f599e40099633d1832d6e",
+    "assets_verified": 806,
+    "host_tools_verified": true,
+    "original_domain_unchanged": true,
+    "sdk_counts": {
+      "vms": 0,
+      "vm_create_reservations": 0,
+      "vm_pause_operations": 0,
+      "vm_resize_intents": 0,
+      "vm_resize_receipts": 0
+    },
+    "native_processes_or_zombies": [],
+    "original_fixture_and_witness_collected": true,
+    "account_lock_available": true,
+    "retained_cache_rehashed": true,
+    "cache_bytes": 14952849,
+    "normal_owner_shutdown": true,
+    "normal_fixture_shutdown": true,
+    "owned_deleted": true,
+    "crash_validation_performed": false
+  },
+  "environment": {
+    "explicitly_approved_separate_network_provisioning_vm": true,
+    "fresh_genuine_account_default_sdk_domain": true,
+    "copied_package_software_only": true,
+    "sdk_data_receipts_or_keys_copied": false,
+    "original_valid_warm_cache_preserved": true,
+    "home_xdg_namespace_override": false,
+    "test_network_isolation_changed": false,
+    "seal_or_reset_performed": false
+  },
+  "validation": {
+    "local_example_models": 7,
+    "linux_example_models": 7,
+    "strict_clippy_all_targets": true,
+    "python_native_tests": 47,
+    "python_expected_skips": 4,
+    "sdk_inventories_verified": true,
+    "linux_build_logs_sha256": {
+      "build.log": "0312c645f44dffc40addb4afb4a040e9ed86fdb01c9c5c0d586d7fe115c907e6",
+      "examples.log": "271843c0b30e6566c96013feb10015e7c7ae244e92bc37cfcc6750335e931452",
+      "python.log": "9f9eb824fd4735711b56d08e4ec61584ac7f6ad936067ce744deef1dc19c71d9",
+      "sdk-before.log": "d72ab76a473fec0ec8090dd05aafb648f33a6601c9fed487c68e6d41e7223d94",
+      "sdk-after.log": "d72ab76a473fec0ec8090dd05aafb648f33a6601c9fed487c68e6d41e7223d94"
+    },
+    "local_model_logs_sha256": {
+      "models": "9cde8cc1f12a7cdd00620d82989c1d66fe59768294f207d25a9ea23774c57bc0",
+      "clippy": "34426221b3ba4849f84258e5dab4d4b4c5be7e463d576475acf6f843a75b9121"
+    }
+  },
+  "earlier_failed_attempt": {
+    "source_commit": "75672ae2e9bbc20c5d154bcd39b5e9311e38b5d9",
+    "result": "Unsupported (NotDispatched): image-only user requested for bare exec by witness",
+    "cold_warm_and_cached_creation_passed": true,
+    "guest_exec_dispatched": false,
+    "normal_original_stop_delete_owner_close": true,
+    "normal_fixture_shutdown": true,
+    "sdk_tables_and_native_processes_empty": true,
+    "cache_retained_rehashed": true,
+    "private_archive_sha256": "5829414084eea925daf68fbc22d70d5102e5b1569247d0c53ccf3c4bf23dab51",
+    "private_archive_bytes": 253758128,
+    "private_archive_verified_locally_and_outer": true
+  },
+  "private_archive_sha256": "38ba6323e12a4b449e3a8c98bd7304bea0cecd2497a37bd9b7df4da757de6437",
+  "private_archive_bytes": 157593364,
+  "private_archive_verified_locally_and_outer": true,
+  "private_archives_mode": "0600",
+  "normal_lab_shutdown": {
+    "observed_utc": "2026-10-16T17:55:39Z",
+    "active_state": "inactive",
+    "result": "success",
+    "exit_status": 0,
+    "main_pid": 0,
+    "original_run_disk_retained": true,
+    "original_run_disk_bytes": 24766644224,
+    "original_run_disk_size_and_mtime_unchanged": true,
+    "separate_provision_disk_retained": true,
+    "separate_provision_disk_bytes": 3022913536
+  },
+  "credential_workflow_qualified": false,
+  "public_registry_admission_enabled": false,
+  "full_parity_accepted": false,
+  "crash_validation_performed": false,
+  "distribution_approved": false,
+  "remaining": [
+    "Credential/rotation/realm/redaction workflows and additional registry destination cases.",
+    "Other artifact/source/resource/platform combinations and current/minimum public native consumers.",
+    "Remaining P0-P9 gates, public source admission and distribution review; crash validation remains deferred."
+  ],
+  "final_documentation_validation": {
+    "warnings_as_errors": true,
+    "coverage_manifest_cases": 4,
+    "logs_sha256": {
+      "docs": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+      "coverage": "f833f3611f75a717bb387b6bc5ad57e83a34eb42851c9d07c786383c75cca1e6"
+    }
+  }
+}

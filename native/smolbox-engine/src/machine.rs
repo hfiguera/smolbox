@@ -1851,6 +1851,15 @@ impl Engine {
         receipt: &CreationReceipt,
         budget: &crate::ReadBudget,
     ) -> Result<Observation> {
+        self.inspect_mode(receipt, budget, true)
+    }
+
+    fn inspect_mode(
+        &self,
+        receipt: &CreationReceipt,
+        budget: &crate::ReadBudget,
+        probe_agent: bool,
+    ) -> Result<Observation> {
         budget.check()?;
         self.verify_database_identity()?;
         receipt.validate(&self.binding)?;
@@ -1923,7 +1932,13 @@ impl Engine {
         {
             state = ObservedState::IdentityUnknown;
         }
-        if state == ObservedState::Running {
+        if !probe_agent
+            && state == ObservedState::Running
+            && record.state != smolvm::config::RecordState::Running
+        {
+            state = ObservedState::IdentityUnknown;
+        }
+        if state == ObservedState::Running && probe_agent {
             budget.check()?;
             let socket = self.vm_directory(&receipt.name).join("agent.sock");
             if AgentClient::connect_for_state_probe(socket)
@@ -2068,7 +2083,9 @@ impl Engine {
         let permit =
             journal.prepare_geometry(receipt, operation_id, request, &before, &metadata)?;
         journal.enter(&permit)?;
-        let result = (|| {
+        // Failures leave the entered journal and reservations unresolved. No
+        // SDK mutation is retried, and a partial geometry is never authorized.
+        (|| {
             let result = supervisor
                 .run(
                     prepared,
@@ -2136,10 +2153,7 @@ impl Engine {
             let receipt = journal.complete(receipt, &permit, &after)?;
             drop(collected);
             Ok(receipt)
-        })();
-        // Failures leave the entered journal and reservations unresolved. No
-        // SDK mutation is retried, and a partial geometry is never authorized.
-        result
+        })()
     }
 
     /// Pure local observation of already recorded correlated success. Missing
@@ -2437,24 +2451,34 @@ impl Engine {
         mut mounts: Option<crate::QualifiedVolumeMounts>,
         budget: Option<(std::time::Instant, &Cancellation)>,
     ) -> Result<Observation> {
+        // Capture the fallback before any preflight/SDK work. Readiness never
+        // grants another budget after the original one-shot boot returns.
+        let fallback = Cancellation::default();
+        let (deadline, cancel) = budget.unwrap_or((
+            std::time::Instant::now() + std::time::Duration::from_secs(30),
+            &fallback,
+        ));
         let check = || {
-            if budget.is_some_and(|(deadline, cancel)| {
-                cancel.is_cancelled() || std::time::Instant::now() >= deadline
-            }) {
+            if cancel.is_cancelled() || std::time::Instant::now() >= deadline {
                 Err(Error::before(ErrorCode::State))
             } else {
                 Ok(())
             }
         };
         check()?;
-        if budget.is_some_and(|(deadline, _)| {
-            deadline.saturating_duration_since(std::time::Instant::now())
-                > std::time::Duration::from_secs(86400)
-        }) {
+        if deadline.saturating_duration_since(std::time::Instant::now())
+            > std::time::Duration::from_secs(86400)
+        {
             return Err(Error::before(ErrorCode::Validation));
         }
+        // The SDK convenience start couples application rejection to VM stop.
+        // Packed image boot uses our enrolled manager and a bounded one-shot
+        // launch worker instead; bare/checkpoint starts retain their own path.
+        let record = self.record(receipt)?;
+        if record.source_smolmachine.is_some() && record.image.is_some() {
+            return self.start_packed_owned(receipt, mounts, deadline, cancel.clone());
+        }
         if let Some(mounts) = &mut mounts {
-            let (deadline, cancel) = budget.ok_or(Error::before(ErrorCode::Ownership))?;
             self.volume_record_mounts(mounts, &creation_read_budget(deadline, cancel)?)?;
             mounts.promote_start()?;
         }
@@ -2471,7 +2495,6 @@ impl Engine {
         reject_unqualified_oci_boot(&record)?;
         match &mounts {
             Some(mounts) => {
-                let (deadline, cancel) = budget.ok_or(Error::before(ErrorCode::Ownership))?;
                 self.verify_machine_mounts(
                     receipt,
                     &record,
@@ -2486,7 +2509,6 @@ impl Engine {
         let boot = self.boot_epoch()?;
         self.verify_lifecycle_preconditions(receipt, &expected)?;
         if let Some(mounts) = &mounts {
-            let (deadline, cancel) = budget.ok_or(Error::before(ErrorCode::Ownership))?;
             self.verify_machine_mounts(
                 receipt,
                 &self.record(receipt)?,
@@ -2495,29 +2517,17 @@ impl Engine {
             )?;
         }
         if let Some(owned) = self.runtime_boots.get(receipt)? {
-            let cleanup = match budget {
-                Some((deadline, cancel)) => creation_read_budget(deadline, cancel)?,
-                None => crate::ReadBudget::new(
-                    std::time::Duration::from_secs(30),
-                    Cancellation::default(),
-                )?,
-            };
+            let cleanup = creation_read_budget(deadline, cancel)?;
             self.stop_runtime_boot(receipt, &expected, &owned, &cleanup)?;
             self.finish_stop_result(receipt, &cleanup, self.inspect_under(receipt, &cleanup))?;
         }
         let record = self.record(receipt)?;
         let lifecycle =
             crate::checkpoint_lifecycle::Lifecycle::at(&self.vm_directory(&receipt.name));
-        let checkpoint_budget = match budget {
-            Some((deadline, cancel)) => crate::ReadBudget::for_checkpoint_work(
-                deadline.saturating_duration_since(std::time::Instant::now()),
-                cancel.clone(),
-            )?,
-            None => crate::ReadBudget::for_checkpoint_work(
-                std::time::Duration::from_secs(86_400),
-                Cancellation::default(),
-            )?,
-        };
+        let checkpoint_budget = crate::ReadBudget::for_checkpoint_work(
+            deadline.saturating_duration_since(std::time::Instant::now()),
+            cancel.clone(),
+        )?;
         let checkpoint_start =
             if crate::material::MaterialJournal::at(&self.vm_directory(&receipt.name))
                 .branch_child(receipt, &record)?
@@ -2529,6 +2539,9 @@ impl Engine {
                 lifecycle.prepare(receipt, &record, &checkpoint_budget)?
             };
         check()?;
+        // Reserve the bounded SDK relay before boot dispatch. Its sockets and
+        // threads retire on collection; boot authority stays in runtime_boots.
+        let _readiness = self.jobs.acquire(crate::jobs::Demand::branch_probe())?;
         let owned_boot = self.runtime_boots.reserve(receipt, &self.jobs)?;
         self.track_handle(receipt)?;
         if let Err(error) = check() {
@@ -2593,12 +2606,26 @@ impl Engine {
             }
             lifecycle.complete(permit, receipt, &record, pid, &checkpoint_budget)?;
         }
-        self.inspect(receipt)
-            .map_err(|error| Error::uncertain(error.code))
-            .and_then(|observation| {
-                check().map_err(|error| Error::uncertain(error.code))?;
+        let readiness = crate::ReadBudget {
+            deadline,
+            cancel: cancel.clone(),
+        };
+        let directory = self.vm_directory(&receipt.name);
+        crate::runtime_boot::wait_until_ready(
+            &readiness,
+            || {
+                let observation = self.inspect_mode(receipt, &readiness, false)?;
+                owned_boot.verify_running(
+                    receipt,
+                    &observation,
+                    self.runtime.pid(&receipt.name),
+                )?;
                 Ok(observation)
-            })
+            },
+            |attempt| {
+                crate::branch_agent::boot_probe(&directory.join("agent.sock"), &directory, attempt)
+            },
+        )
     }
 
     pub fn stop(&self, receipt: &CreationReceipt) -> Result<Observation> {
@@ -3188,6 +3215,12 @@ impl Engine {
                 .is_none_or(|transfers| transfers.available())
     }
 
+    pub(crate) fn registry_account_enabled(&self) -> bool {
+        // Verified host contexts opt into the actual account's operator setup.
+        // Receipt-free model engines never inspect the caller's credentials.
+        self.host.is_some()
+    }
+
     pub(crate) fn source_lease(
         &self,
         receipt: &CreationReceipt,
@@ -3208,6 +3241,62 @@ impl Engine {
         Ok(handles
             .get(name)
             .is_some_and(|manager| manager.try_lock().is_err()))
+    }
+
+    pub(crate) fn register_image_boot(
+        &self,
+        receipt: &CreationReceipt,
+        manager: Arc<Mutex<AgentManager>>,
+    ) -> Result<Arc<crate::runtime_boot::Owned>> {
+        let mut handles = self
+            .owned_handles
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        let mut managers = self
+            .owned_managers
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        if handles.contains_key(&receipt.name) || managers.contains_key(&receipt.name) {
+            return Err(Error::before(ErrorCode::Conflict));
+        }
+        let owned = self.runtime_boots.reserve(receipt, &self.jobs)?;
+        handles.insert(receipt.name.clone(), receipt.clone());
+        managers.insert(receipt.name.clone(), manager);
+        Ok(owned)
+    }
+
+    // Caller must first close BootEntry while still unentered. That shared
+    // fence prevents the detached worker from entering after retirement.
+    pub(crate) fn retire_unentered_image_boot(
+        &self,
+        receipt: &CreationReceipt,
+        manager: &Arc<Mutex<AgentManager>>,
+        owned: &Arc<crate::runtime_boot::Owned>,
+    ) -> Result<()> {
+        let mut handles = self
+            .owned_handles
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        let mut managers = self
+            .owned_managers
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        if handles.get(&receipt.name) != Some(receipt)
+            || !managers
+                .get(&receipt.name)
+                .is_some_and(|current| Arc::ptr_eq(current, manager))
+            || manager
+                .try_lock()
+                .map_err(|_| Error::before(ErrorCode::Conflict))?
+                .child_pid()
+                .is_some()
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        self.runtime_boots.retire(owned)?;
+        handles.remove(&receipt.name);
+        managers.remove(&receipt.name);
+        Ok(())
     }
 
     pub(crate) fn runtime_pid(&self, name: &str) -> Option<i32> {
@@ -3393,41 +3482,6 @@ impl Engine {
             Some(_) => return Err(Error::before(ErrorCode::Ownership)),
         }
         Ok(())
-    }
-
-    pub(crate) fn activate_files(
-        &self,
-        receipt: &CreationReceipt,
-        timeout: std::time::Duration,
-        cancel: &Cancellation,
-    ) -> Result<bool> {
-        if self.inspect(receipt)?.state != ObservedState::Running {
-            return Err(Error::before(ErrorCode::State));
-        }
-        let record = self.record(receipt)?;
-        self.verify_templates()?;
-        if record.image.is_none() {
-            return Ok(true);
-        }
-        self.track_handle(receipt)?;
-        self.runtime
-            .connect_machine(&receipt.name)
-            .map_err(|_| Error::before(ErrorCode::Native))?;
-        let mut collector = Collector::new(8192);
-        collector.mark_dispatch();
-        let result = self.runtime.exec_streaming_with_options(
-            &receipt.name,
-            vec!["/bin/true".into()],
-            smolvm::embedded::ExecOptions {
-                timeout: Some(timeout),
-                ..Default::default()
-            },
-            &cancel.exec,
-            |event| collector.event(event, cancel, &mut |_| Ok(())),
-        );
-        Ok(collector
-            .finish(result.is_ok(), cancel.is_cancelled(), false)
-            .success())
     }
 
     pub(crate) fn transfer_directory(&self) -> Result<PathBuf> {
@@ -5416,7 +5470,7 @@ pub(crate) mod tests {
     }
 
     #[test]
-    fn mounted_commands_require_policy_and_running_backing_before_worker_or_sdk_entry() {
+    fn mounted_guest_work_requires_policy_and_running_backing_before_worker_or_sdk_entry() {
         let temp = tempfile::tempdir().unwrap();
         let engine = test_engine(temp.path());
         let (_volume_directory, mounts) = crate::volumes::owned_handle(&engine);
@@ -5529,6 +5583,90 @@ pub(crate) mod tests {
         ] {
             assert_eq!(error.dispatch, crate::Dispatch::NotDispatched);
         }
+        let file_options = || crate::FileOptions {
+            guest_path: "/mnt/volumes/data/value".into(),
+            max_bytes: 1024,
+            timeout: std::time::Duration::from_secs(1),
+            mode: None,
+        };
+        struct Unread;
+        impl std::io::Read for Unread {
+            fn read(&mut self, _: &mut [u8]) -> std::io::Result<usize> {
+                panic!("unqualified file input must not be read");
+            }
+        }
+        let file_output = std::cell::Cell::new(0);
+        for error in [
+            engine
+                .read_file(&receipt, file_options(), Cancellation::new(), |_| {
+                    file_output.set(file_output.get() + 1);
+                    Ok(())
+                })
+                .err()
+                .unwrap(),
+            engine
+                .write_file(&receipt, file_options(), b"data", Cancellation::new())
+                .err()
+                .unwrap(),
+            engine
+                .write_file_from_reader(&receipt, file_options(), Unread, 4, Cancellation::new())
+                .err()
+                .unwrap(),
+        ] {
+            assert_eq!(error.code, ErrorCode::Ownership);
+            assert_eq!(error.dispatch, crate::Dispatch::NotDispatched);
+        }
+        for error in [
+            engine
+                .read_file_with_volume_policy(
+                    &receipt,
+                    file_options(),
+                    Cancellation::new(),
+                    |_| {
+                        file_output.set(file_output.get() + 1);
+                        Ok(())
+                    },
+                    &policy,
+                )
+                .err()
+                .unwrap(),
+            engine
+                .write_file_with_volume_policy(
+                    &receipt,
+                    file_options(),
+                    b"data",
+                    Cancellation::new(),
+                    &policy,
+                )
+                .err()
+                .unwrap(),
+            engine
+                .write_file_from_reader_with_volume_policy(
+                    &receipt,
+                    file_options(),
+                    Unread,
+                    4,
+                    Cancellation::new(),
+                    &policy,
+                )
+                .err()
+                .unwrap(),
+        ] {
+            assert_eq!(error.dispatch, crate::Dispatch::NotDispatched);
+        }
+        let mut crossed_policy = policy.clone();
+        crossed_policy.id.push_str("-other");
+        assert!(engine
+            .write_file_from_reader_with_volume_policy(
+                &receipt,
+                file_options(),
+                Unread,
+                4,
+                Cancellation::new(),
+                &crossed_policy
+            )
+            .is_err());
+        assert_eq!(file_output.get(), 0);
         let request = || crate::TerminalRequest {
             options: crate::TerminalOptions {
                 program: "/bin/sh".into(),

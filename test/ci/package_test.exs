@@ -2,6 +2,52 @@ defmodule SmolBox.CI.PackageTest do
   use ExUnit.Case, async: true
   alias SmolBox.CI.{NativeConsumer, Package, Util}
 
+  test "retained native owners keep their source after failure and repeated cleanup" do
+    root = Util.temporary("retained-consumer-model")
+    consumer = Path.join(root, "consumer")
+    File.mkdir!(consumer)
+    source = Path.join(consumer, "native-proof.exs")
+    File.write!(source, "original frozen proof")
+    on_exit(fn -> File.rm_rf!(root) end)
+
+    assert :ok = NativeConsumer.retain_source(consumer, %{retained: true, running: true})
+    assert :retained = Package.cleanup_source(root)
+    assert File.read!(source) == "original frozen proof"
+
+    # The on-disk guard also survives the original caller, without granting any
+    # process signalling, SDK deletion or ownership authority to another caller.
+    Process.delete({NativeConsumer, :retained_source, consumer})
+    assert :retained = Package.cleanup_source(root)
+    marker = Path.join(consumer, ".native-consumer-retained.json")
+    assert Bitwise.band(File.stat!(marker).mode, 0o777) == 0o600
+    assert JSON.decode!(File.read!(marker))["cleanup_authority"] == false
+    assert File.read!(source) == "original frozen proof"
+  end
+
+  test "retained source guard remains effective when diagnostic writing fails" do
+    root = Util.temporary("retained-consumer-io-model")
+    consumer = Path.join(root, "consumer")
+    source = Path.join(root, "original.ex")
+    File.write!(source, "preserve even when the marker cannot be written")
+    on_exit(fn -> File.rm_rf!(root) end)
+
+    assert :diagnostic_unavailable =
+             NativeConsumer.retain_source(consumer, %{retained: true, running: true})
+
+    assert :retained = Package.cleanup_source(root)
+    assert File.exists?(source)
+  end
+
+  test "ordinary completed consumers still clean their temporary source" do
+    root = Util.temporary("completed-consumer-model")
+    consumer = Path.join(root, "consumer")
+    File.mkdir!(consumer)
+    on_exit(fn -> File.rm_rf!(root) end)
+    assert :ok = NativeConsumer.retain_source(consumer, %{retained: false, running: false})
+    Package.cleanup_source(root)
+    refute File.exists?(root)
+  end
+
   test "native lifecycle modes require a package and cannot be combined" do
     assert_raise ArgumentError, ~r/native-terminal requires explicit --native-public/, fn ->
       NativeConsumer.validate_options!(native_terminal: true)
@@ -34,6 +80,165 @@ defmodule SmolBox.CI.PackageTest do
     end
 
     NativeConsumer.validate_options!([])
+  end
+
+  test "image consumers require explicit separate public mode and bounded private settings" do
+    assert_raise ArgumentError, ~r/requires explicit --native-public/, fn ->
+      NativeConsumer.validate_options!(native_images: true)
+    end
+
+    assert_raise ArgumentError, ~r/must run separately/, fn ->
+      NativeConsumer.validate_options!(
+        native_images: true,
+        native_public: true,
+        native_growth: true
+      )
+    end
+
+    assert_raise ArgumentError, ~r/explicit absolute --native-images-settings/, fn ->
+      NativeConsumer.validate_options!(native_images: true, native_public: true)
+    end
+
+    assert_raise ArgumentError, ~r/settings require --native-images/, fn ->
+      NativeConsumer.validate_options!(native_images_settings: "/private/settings.json")
+    end
+
+    root = Util.temporary("image-settings-model")
+    on_exit(fn -> File.rm_rf!(root) end)
+    path = Path.join(root, "settings.json")
+    File.write!(path, "{}")
+    File.chmod!(path, 0o644)
+
+    assert_raise ArgumentError, ~r/private file permissions/, fn ->
+      NativeConsumer.validate_options!(
+        native_images: true,
+        native_public: true,
+        native_images_settings: path
+      )
+    end
+  end
+
+  test "network consumers require an explicit public isolated-namespace campaign" do
+    assert_raise ArgumentError, ~r/requires explicit --native-public/, fn ->
+      NativeConsumer.validate_options!(native_network: true)
+    end
+
+    assert_raise ArgumentError, ~r/must run separately/, fn ->
+      NativeConsumer.validate_options!(
+        native_network: true,
+        native_terminal: true,
+        native_public: true
+      )
+    end
+
+    assert_raise ArgumentError, ~r/explicit --native-host-port/, fn ->
+      NativeConsumer.validate_options!(native_network: true, native_public: true)
+    end
+
+    assert_raise ArgumentError, ~r/verified namespace identity/, fn ->
+      NativeConsumer.validate_options!(
+        native_network: true,
+        native_public: true,
+        native_host_port: 28_732
+      )
+    end
+
+    assert_raise ArgumentError, ~r/options require --native-network/, fn ->
+      NativeConsumer.validate_options!(namespace_identity: "net:[42]")
+    end
+  end
+
+  test "startup workload consumers require an explicit separate ordinary campaign" do
+    assert_raise ArgumentError, ~r/requires explicit --native-public/, fn ->
+      NativeConsumer.validate_options!(native_workload: true)
+    end
+
+    assert_raise ArgumentError, ~r/must run separately/, fn ->
+      NativeConsumer.validate_options!(
+        native_workload: true,
+        native_public: true,
+        native_network: true
+      )
+    end
+
+    assert_raise ArgumentError, ~r/verified namespace identity/, fn ->
+      NativeConsumer.validate_options!(native_workload: true, native_public: true)
+    end
+  end
+
+  test "growth consumers require explicit public mode and a separate campaign" do
+    assert_raise ArgumentError, ~r/requires explicit --native-public/, fn ->
+      NativeConsumer.validate_options!(native_growth: true)
+    end
+
+    for other <- [:native_volume, :native_terminal, :native_network, :native_workload] do
+      assert_raise ArgumentError, ~r/must run separately/, fn ->
+        NativeConsumer.validate_options!(
+          [native_growth: true, native_public: true] ++ [{other, true}]
+        )
+      end
+    end
+  end
+
+  test "optional growth settings require the growth campaign and private bounded absolute input" do
+    assert_raise ArgumentError, ~r/settings require --native-growth/, fn ->
+      NativeConsumer.validate_options!(native_growth_settings: "/private/settings.json")
+    end
+
+    assert_raise ArgumentError, ~r/explicit absolute path/, fn ->
+      NativeConsumer.validate_options!(
+        native_growth: true,
+        native_public: true,
+        native_growth_settings: "settings.json"
+      )
+    end
+
+    root = Util.temporary("growth-settings-model")
+    on_exit(fn -> File.rm_rf!(root) end)
+    path = Path.join(root, "settings.json")
+    File.write!(path, "{}")
+    File.chmod!(path, 0o644)
+
+    assert_raise ArgumentError, ~r/private file permissions/, fn ->
+      NativeConsumer.validate_options!(
+        native_growth: true,
+        native_public: true,
+        native_growth_settings: path
+      )
+    end
+
+    File.chmod!(path, 0o600)
+    File.write!(path, String.duplicate(" ", 65_537))
+
+    assert_raise ArgumentError, ~r/private file permissions or size/, fn ->
+      NativeConsumer.validate_options!(
+        native_growth: true,
+        native_public: true,
+        native_growth_settings: path
+      )
+    end
+  end
+
+  test "volume consumers require a separate explicit public campaign and canonical-root approval" do
+    assert_raise ArgumentError, ~r/requires explicit --native-public/, fn ->
+      NativeConsumer.validate_options!(native_volume: true)
+    end
+
+    assert_raise ArgumentError, ~r/explicit absolute --native-volume-root/, fn ->
+      NativeConsumer.validate_options!(native_volume: true, native_public: true)
+    end
+
+    assert_raise ArgumentError, ~r/must run separately/, fn ->
+      NativeConsumer.validate_options!(
+        native_volume: true,
+        native_public: true,
+        native_terminal: true
+      )
+    end
+
+    assert_raise ArgumentError, ~r/root requires --native-volume/, fn ->
+      NativeConsumer.validate_options!(native_volume_root: "/approved/volumes")
+    end
   end
 
   test "public documentation and the onboarding notebook are accepted in the published package" do

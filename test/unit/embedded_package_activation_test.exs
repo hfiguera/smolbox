@@ -59,24 +59,35 @@ defmodule SmolBox.EmbeddedPackageActivationTest do
     end
   end
 
-  test "package policy and the Elixir feature contract agree without enabling planned features",
+  test "current package policy agrees while older terminal descriptors remain approved",
        %{
          native: native
        } do
     policy = "native/policy.json" |> File.read!() |> Jason.decode!()
-    assert :ok = Config.validate(native)
-    assert Config.protocol_major(native) == policy["port_protocol_major"]
-    assert policy["sdk"] == Config.sdk_identity(native)
-    assert SDKIdentity.valid?(Config.sdk_identity(native))
-    assert Features.native_versions(native).material_proofs == 2
+    refute Features.supports?(native, :terminal_preflight)
 
-    for feature <- ~w(networking ports workloads background_exec logs streaming_exec terminals)a do
-      assert Features.supports?(native, feature)
+    assert SDKIdentity.approved?(
+             Config.sdk_identity(native),
+             "1.22.0",
+             native.package_identity["smolvm_revision"]
+           )
+
+    current = Package.create(protocol_major: 2, sdk_identity: policy["sdk"])
+    on_exit(fn -> File.rm_rf!(current.package_path) end)
+    assert :ok = Config.validate(current)
+    assert Config.protocol_major(current) == policy["port_protocol_major"]
+    assert policy["sdk"] == Config.sdk_identity(current)
+    assert SDKIdentity.valid?(Config.sdk_identity(current))
+    assert Features.native_versions(current).material_proofs == 2
+
+    for feature <-
+          ~w(networking ports workloads background_exec logs streaming_exec terminals terminal_preflight)a do
+      assert Features.supports?(current, feature)
     end
 
     for feature <- ~w(remote_sources images
                        volumes disk_growth checkpoints exports branches)a do
-      refute Features.supports?(native, feature)
+      refute Features.supports?(current, feature)
     end
   end
 
@@ -92,6 +103,60 @@ defmodule SmolBox.EmbeddedPackageActivationTest do
     assert config["publish_address"] == "127.0.0.1"
     assert config["package_manifest_sha256"] == native.package_manifest_sha256
     assert Package.received(native) == []
+  end
+
+  test "Linux image descriptor requires exact package approval and retains older surfaces" do
+    hello =
+      "native/smolbox-protocol/fixtures/hello-v2-linux-images.json"
+      |> File.read!()
+      |> Jason.decode!()
+      |> Map.fetch!("hello")
+
+    native = Package.create(protocol_major: 2, platform: :linux, sdk_identity: hello["sdk"])
+    on_exit(fn -> File.rm_rf!(native.package_path) end)
+    assert :ok = Config.validate(native)
+    assert Features.supports?(native, :remote_sources)
+    assert Features.supports?(native, :images)
+    assert Package.received(native) == []
+    sdk = hello["sdk"]
+    refute SDKIdentity.approved?(sdk, "1.22.0", sdk["source_revision"], :macos)
+    refute SDKIdentity.approved?(sdk, "1.22.0", sdk["source_revision"])
+
+    for {feature, required} <- [
+          {"images", "job_resources"},
+          {"remote_sources", "compact_creation"}
+        ] do
+      incomplete = update_in(sdk["feature_versions"], &Map.delete(&1, required))
+      assert incomplete["feature_versions"][feature] == 1
+      refute SDKIdentity.approved?(incomplete, "1.22.0", sdk["source_revision"], :linux)
+    end
+
+    older = update_in(sdk["feature_versions"], &Map.drop(&1, ~w(images remote_sources)))
+    assert SDKIdentity.approved?(older, "1.22.0", sdk["source_revision"], :linux)
+    refute Features.supports?(%{native | sdk_identity: older}, :images)
+    refute Features.supports?(%{native | sdk_identity: older}, :remote_sources)
+  end
+
+  test "Linux storage descriptor enables growth only for an explicitly approved package" do
+    hello =
+      "native/smolbox-protocol/fixtures/hello-v2-linux-current.json"
+      |> File.read!()
+      |> Jason.decode!()
+      |> Map.fetch!("hello")
+
+    native = Package.create(protocol_major: 2, platform: :linux, sdk_identity: hello["sdk"])
+    on_exit(fn -> File.rm_rf!(native.package_path) end)
+    assert :ok = Config.validate(native)
+    assert Features.supports?(native, :disk_growth)
+    assert Features.supports?(native, :volumes)
+    assert Features.native_versions(native).disk_growth == 1
+    assert Package.received(native) == []
+
+    sdk = hello["sdk"]
+    older = update_in(sdk["feature_versions"], &Map.delete(&1, "disk_growth"))
+    native = %{native | sdk_identity: older}
+    assert SDKIdentity.approved?(older, "1.22.0", older["source_revision"], :linux)
+    refute Features.supports?(native, :disk_growth)
   end
 
   test "reapproved mismatched SDK or relabelled legacy manifest fails before launch", %{

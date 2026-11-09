@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "status": "incomplete-environment-blocked-before-sdk-creation",
+  "scope": "ordinary shared-engine OCI/image witness; Linux build/models and bounded host metadata failure only",
+  "source_commit": "257b0f2c4cb772924caa9ce86af04f74d2bdeafa",
+  "source_files_verified": 1561,
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "native_manifest_sha256": "ed0b891f1385edfecfad9d097d5f27ba8c186196ed720eb66794349a8d895c37",
+  "native_helper_sha256": "ad5109fb1f63a1dd3aa9bec7f4849c6bb8d165a0f7a968ff8fd82ab98b013eaa",
+  "witness_executable_sha256": "162a66903168f7930b3938354565394fcd73ffd870a7d9e52d7e1748f7244dcd",
+  "rust_toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "linux_example_models_passed": 4,
+  "failed_stage": "prepare_oci_metadata",
+  "failure": {
+    "error": "native Native (MayHaveDispatched)",
+    "forced_termination": false,
+    "owner_retained": true
+  },
+  "normal_close_unstarted": true,
+  "sdk_vm_created_or_started": false,
+  "guest_image_operations_qualified": false,
+  "environment": {
+    "test_mode_qemu_restrict_on": true,
+    "default_route_available": false,
+    "uplink_dns_available": false,
+    "registry_dns_errors": [
+      {
+        "host": "registry-1.docker.io",
+        "errno": -3,
+        "kind": "gaierror"
+      },
+      {
+        "host": "auth.docker.io",
+        "errno": -3,
+        "kind": "gaierror"
+      }
+    ],
+    "boundary_source": "Existing lab launch-vm.sh assigns restrict=on to test/probe and restrict=off only to provision."
+  },
+  "custody": {
+    "source_commit": "257b0f2c4cb772924caa9ce86af04f74d2bdeafa",
+    "source_files_verified": 1561,
+    "manifest_sha256": "ed0b891f1385edfecfad9d097d5f27ba8c186196ed720eb66794349a8d895c37",
+    "helper_sha256": "ad5109fb1f63a1dd3aa9bec7f4849c6bb8d165a0f7a968ff8fd82ab98b013eaa",
+    "example_sha256": "162a66903168f7930b3938354565394fcd73ffd870a7d9e52d7e1748f7244dcd",
+    "assets_verified": 806,
+    "sdk_counts": {
+      "vms": 0,
+      "vm_create_reservations": 0,
+      "vm_pause_operations": 0,
+      "vm_resize_intents": 0,
+      "vm_resize_receipts": 0
+    },
+    "native_processes": [],
+    "native_zombies": [],
+    "account_lock_available": true,
+    "original_domain_unchanged": true,
+    "metadata_failed_before_create": true,
+    "no_vm_launched": true,
+    "normal_close_unstarted": true,
+    "crash_validation_performed": false
+  },
+  "normal_lab_shutdown": {
+    "observed_utc": "2026-10-16T16:49:52Z",
+    "active_state": "inactive",
+    "result": "success",
+    "exit_status": 0,
+    "main_pid": 0,
+    "run_disk_bytes": 24766644224,
+    "recovery_marker_archived": true
+  },
+  "private_archive_sha256": "29cb74bb5f9f35b0c1ad150cf6c894957f35705650179fc00af2385fadf21bba",
+  "private_archive_bytes": 167755360,
+  "archive_verified_locally_and_outer": true,
+  "prepared_software_bundle": {
+    "sha256": "14a1c66b9a8c1522389ec31551303f267e700e3cf410102be6603d17e8be5d28",
+    "bytes": 77828360,
+    "verified_locally_and_outer": true
+  },
+  "prepared_bundle_contains_original_domain_state": false,
+  "network_enabled_vm_launched": false,
+  "network_change_requires_explicit_approval": true,
+  "public_oci_admission_enabled": false,
+  "parity_complete": false,
+  "crash_validation_performed": false,
+  "distribution_approved": false,
+  "logs": {
+    "build.log": "f2b0ef86ff11a939ae4976b906a80867698b7138ad66702399dcd340b39a1ad8",
+    "models.log": "d2c011a6b911597fa4f4643e32a796408259ac672cfd36f18e83a6b5a86c983f",
+    "ordinary.log": "2863902d7de7bf3b4b7439db9da2d2e4c821e6d4de2cdbe7e41e78860049faaa",
+    "sdk-before.log": "d72ab76a473fec0ec8090dd05aafb648f33a6601c9fed487c68e6d41e7223d94",
+    "sdk-after.log": "d72ab76a473fec0ec8090dd05aafb648f33a6601c9fed487c68e6d41e7223d94",
+    "sdk-final.log": "d72ab76a473fec0ec8090dd05aafb648f33a6601c9fed487c68e6d41e7223d94",
+    "metadata-transport-diagnosis.json": "58f0c8cb7ecf5cc5823088c6d0301da43a68326585fa66c5038a80a6756f71c8",
+    "metadata-network-reason.json": "8b8a94a4c40e1ab8202c03840173634113033793dd86c73e302b2afb26816029"
+  },
+  "next_action": "If explicitly approved, use a separate network-enabled provisioning clone and genuine fresh OS account/default SDK domain. Preserve current run disk and never invoke seal/reset. The prebuilt software bundle excludes original databases, receipts, keys and account state.",
+  "remaining": [
+    "Ordinary direct OCI/image success, registry/source/credential acceptance and public P4 activation.",
+    "Remaining P0-P9 saved-state, platform/resource/codec/upgrade/drain gates and final distribution review."
+  ],
+  "network_enabled_environment_approved_by_user": true,
+  "approval_scope": "Separate network-enabled provisioning clone, genuine fresh OS account/default SDK domain, existing run disk retained; no seal/reset or deferred crash campaigns."
+}

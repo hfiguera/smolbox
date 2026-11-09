@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "status": "implemented-with-scoped-linux-configured-startup-acceptance",
+  "scope": "ordinary OCI startup observations and shared Docker config/artifact blob redirect transport",
+  "startup_fixture": {
+    "explicit_entrypoint_cmd_env_workdir": true,
+    "image_user_case": "default root only",
+    "observed_start_counts": [
+      1,
+      2
+    ],
+    "observation_is_single_bounded_exec": true,
+    "observation_launches_or_retries_workload": false,
+    "arbitrary_workload_claims_rejected": true
+  },
+  "artifact_blob_redirect": {
+    "origin": "https://registry-1.docker.io/",
+    "destination": "https://production.cloudfront.docker.com:443",
+    "statuses": [
+      307,
+      308
+    ],
+    "max_hops": 1,
+    "authorization_forwarded": false,
+    "digest_size_cache_publication_and_deadline_checks_preserved": true,
+    "unapproved_origin_redirect_never_publishes": true,
+    "arbitrary_registry_redirects_supported": false
+  },
+  "public_oci_admission_enabled": false,
+  "full_parity_accepted": false,
+  "live_startup_behavior_qualified": true,
+  "live_registry_artifact_redirect_qualified": false,
+  "crash_validation_performed": false,
+  "distribution_approved": false,
+  "validation": {
+    "registry_models_passed": 12,
+    "cold_warm_corrupt_cache_case_passed": 1,
+    "oci_example_models_passed": 3,
+    "volume_example_models_passed": 2,
+    "strict_clippy_workspace_all_targets": true,
+    "python_native_tests": 47,
+    "python_expected_skips": 4,
+    "unmodified_sdk_inventories_verified": true,
+    "documentation_warnings_as_errors": true
+  },
+  "logs_sha256": {
+    "registry": "0fa7c78fc20172c7ed9f465755decaacd59f42e30fa276d6784f649c9568343e",
+    "cache": "e4609abbe3b71f51c5004c6e2a732737e3ea85a13a3d79ae62e7bcc23842b9b4",
+    "examples": "3158d898a6da7efaeba40219fdf7fae884f5e34b309ffdec7c84b0c93ae024ce",
+    "clippy": "eecb0eb594200feadbf14c6fb36306ec8ded210b2248da5f9d271cfd67783ff1",
+    "python": "41fab7a2d00294a74120d18f60aaf6ba814cff49ce7e64e9356b75cbc8086f15",
+    "sdk": "d72ab76a473fec0ec8090dd05aafb648f33a6601c9fed487c68e6d41e7223d94",
+    "docs": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d"
+  },
+  "startup_qualification_scope": "fixed explicit argv/env/workdir, default image user, observed counters 1 and 2 only",
+  "follow_up_evidence": "embedded-port-http-parity-oci-startup-linux-14f45d6.json"
+}

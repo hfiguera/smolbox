@@ -41,7 +41,7 @@ defmodule SmolBox.Embedded.Request do
 
   def observation?(%{"operation" => name}),
     do:
-      name in ~w(health capacity metrics readiness list measurements inspect_export inspect_growth inspect_capture inspect_capture_resolution inspect_oci_creation inspect_registry_creation inspect_checkpoint_creation checkpoint_preflight inspect_branch_completion qualify_held_branch_release qualify_branch_child_absence)
+      name in ~w(health capacity metrics readiness list measurements terminal_preflight inspect_export inspect_growth inspect_capture inspect_capture_resolution inspect_oci_creation inspect_registry_creation inspect_checkpoint_creation checkpoint_preflight inspect_branch_completion qualify_held_branch_release qualify_branch_child_absence)
 
   def observation?(_request), do: false
 
@@ -395,6 +395,11 @@ defmodule SmolBox.Embedded.Request do
          Shape.keys?(operation, ~w(operation receipt operation_id request quiesced)) and
            Shape.receipt?(operation["receipt"], 2) and Shape.id?(operation["operation_id"]) and
            CaptureTransition.request?(operation["request"]) and budget <= 30_000
+
+  defp operation?(%{"operation" => "terminal_preflight"} = operation, budget, 2),
+    do:
+      Shape.keys?(operation, ~w(operation receipt)) and
+        Shape.receipt?(operation["receipt"], 2) and budget <= 30_000
 
   defp operation?(%{"operation" => "terminal_open"} = operation, budget, 2),
     do:

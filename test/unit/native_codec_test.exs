@@ -229,7 +229,7 @@ defmodule SmolBox.Store.NativeCodecTest do
     path = Path.join(config.package_path, "material-record.etf")
     File.write!(path, bytes, [:exclusive])
     File.chmod!(path, 0o600)
-    paths = Path.wildcard(Path.expand("_build/test/lib/*/ebin"))
+    paths = Path.wildcard(Path.join(Mix.Project.build_path(), "lib/*/ebin"))
 
     code =
       "[path] = System.argv(); case path |> File.read!() |> SmolBox.Store.Codec.decode() do " <>
@@ -497,7 +497,7 @@ defmodule SmolBox.Store.NativeCodecTest do
     path = Path.join(config.package_path, "terminal-record.etf")
     File.write!(path, bytes, [:exclusive])
     File.chmod!(path, 0o600)
-    paths = Path.wildcard(Path.expand("_build/test/lib/*/ebin"))
+    paths = Path.wildcard(Path.join(Mix.Project.build_path(), "lib/*/ebin"))
 
     code =
       "[path] = System.argv(); case path |> File.read!() |> SmolBox.Store.Codec.decode() do " <>
@@ -576,7 +576,7 @@ defmodule SmolBox.Store.NativeCodecTest do
     path = Path.join(config.package_path, "record.etf")
     File.write!(path, bytes, [:exclusive])
     File.chmod!(path, 0o600)
-    paths = Path.wildcard(Path.expand("_build/test/lib/*/ebin"))
+    paths = Path.wildcard(Path.join(Mix.Project.build_path(), "lib/*/ebin"))
 
     code =
       "[path] = System.argv(); case path |> File.read!() |> SmolBox.Store.Codec.decode() do " <>

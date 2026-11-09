@@ -24,6 +24,7 @@ pub(crate) struct Launch {
 /// Engine must supply a receipt-bound record and retain its lifecycle leases.
 pub struct Metadata {
     schema: u32,
+    packed: bool,
     machine: String,
     source: ImagePullRequest,
     launch: Launch,
@@ -32,6 +33,7 @@ pub struct Metadata {
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct Expected {
+    pub packed: bool,
     pub source: ImagePullRequest,
     pub machine: String,
     pub metadata_sha256: String,
@@ -40,15 +42,24 @@ pub(crate) struct Expected {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct Proof {
-    pub image: ImageObservation,
+    pub image: Option<ImageObservation>,
     pub metadata_sha256: String,
     pub container_id: Option<String>,
+    pub launch_rejected: bool,
 }
 impl Proof {
     pub(crate) fn matches(&self, expected: &Expected) -> bool {
         self.metadata_sha256 == expected.metadata_sha256
-            && expected.source.matches(&self.image)
-            && self.container_id.is_some() == expected.launch_required
+            && match (&self.image, expected.packed) {
+                (None, true) => true,
+                (Some(image), false) => expected.source.matches(image),
+                _ => false,
+            }
+            && if self.launch_rejected {
+                expected.packed && expected.launch_required && self.container_id.is_none()
+            } else {
+                self.container_id.is_some() == expected.launch_required
+            }
             && self.container_id.as_ref().is_none_or(|id| {
                 !id.is_empty()
                     && id.len() <= 128
@@ -58,9 +69,38 @@ impl Proof {
             })
     }
 }
+impl Expected {
+    pub(crate) fn validate_source(&self) -> Result<()> {
+        if self.packed {
+            if self.source.reference.is_empty()
+                || self.source.reference.len() > 16384
+                || self.source.reference.contains('\0')
+                || self.source.platform != crate::oci::native_oci_platform()
+            {
+                return Err(Error::before(ErrorCode::Validation));
+            }
+            Ok(())
+        } else {
+            self.source.validate()
+        }
+    }
+}
 impl Metadata {
     pub fn from_record(record: &smolvm::config::VmRecord, deadline_ns: u64) -> Result<Self> {
-        if record.source_smolmachine.is_some()
+        Self::for_origin(record, deadline_ns, false)
+    }
+    pub(crate) fn from_packed_record(
+        record: &smolvm::config::VmRecord,
+        deadline_ns: u64,
+    ) -> Result<Self> {
+        Self::for_origin(record, deadline_ns, true)
+    }
+    fn for_origin(
+        record: &smolvm::config::VmRecord,
+        deadline_ns: u64,
+        packed: bool,
+    ) -> Result<Self> {
+        if record.source_smolmachine.is_some() != packed
             || record.stop_on_exit
             || !record.remote_volumes.is_empty()
         {
@@ -72,6 +112,7 @@ impl Metadata {
             .ok_or(Error::before(ErrorCode::Unsupported))?;
         let metadata = Self {
             schema: 1,
+            packed,
             machine: record.name.clone(),
             source: ImagePullRequest {
                 reference: image,
@@ -106,6 +147,7 @@ impl Metadata {
             return Err(Error::before(ErrorCode::OutputLimit));
         }
         Ok(Expected {
+            packed: self.packed,
             source: self.source.clone(),
             machine: self.machine.clone(),
             metadata_sha256: hex::encode(Sha256::digest(bytes)),
@@ -113,7 +155,14 @@ impl Metadata {
         })
     }
     fn validate(&self) -> Result<()> {
-        self.source.validate()?;
+        Expected {
+            packed: self.packed,
+            source: self.source.clone(),
+            machine: self.machine.clone(),
+            metadata_sha256: String::new(),
+            launch_required: !self.launch.argv.is_empty(),
+        }
+        .validate_source()?;
         let text = |value: &str, max| value.len() <= max && !value.contains('\0');
         if self.schema != 1
             || self.deadline_ns == 0
@@ -122,7 +171,7 @@ impl Metadata {
             || self.launch.argv.first().is_some_and(String::is_empty)
             || self.launch.argv.iter().any(|v| !text(v, 1024 * 1024))
             || self.launch.env.iter().any(|(k, v)| {
-                k.is_empty() || k.contains('=') || !text(k, 16384) || !text(v, 1024 * 1024)
+                k.is_empty() || k.contains('=') || !text(k, 1024 * 1024) || !text(v, 1024 * 1024)
             })
             || self
                 .launch
@@ -141,7 +190,7 @@ impl Metadata {
                 .launch
                 .user
                 .as_ref()
-                .is_some_and(|v| v.is_empty() || !text(v, 16384))
+                .is_some_and(|v| v.is_empty() || !text(v, 1024 * 1024))
             || self.launch.mounts.len() > 64
             || self.launch.mounts.iter().any(|(tag, path, _)| {
                 tag.is_empty() || !text(tag, 128) || !path.starts_with('/') || !text(path, 4096)
@@ -198,18 +247,31 @@ pub(crate) fn run(
         return Err(Error::before(ErrorCode::Ownership));
     }
     metadata.remaining()?;
-    let pull = crate::image_pull::Metadata {
-        schema: 1,
-        request: metadata.source.clone(),
-        deadline_ns: metadata.deadline_ns,
+    let image = if metadata.packed {
+        None // Packed layers are already bound to creation; never pull an alias.
+    } else {
+        let pull = crate::image_pull::Metadata {
+            schema: 1,
+            request: metadata.source.clone(),
+            deadline_ns: metadata.deadline_ns,
+        };
+        let registry = match &request.kind {
+            crate::transfer_worker::Kind::Bootstrap { registry, .. } => registry.as_ref(),
+            _ => return Err(Error::before(ErrorCode::Validation)),
+        };
+        Some(crate::image_pull::execute_with_registry(
+            &request.socket,
+            &pull,
+            registry,
+        )?)
     };
-    let image = crate::image_pull::execute(&request.socket, &pull)?;
     if metadata.launch.argv.is_empty() {
         metadata.remaining()?;
         return Ok(Proof {
             image,
             metadata_sha256: expected.metadata_sha256.clone(),
             container_id: None,
+            launch_rejected: false,
         });
     }
     let mut agent = crate::agent_io::BoundedAgent::connect_bootstrap_launch(&request.socket)?;
@@ -226,20 +288,28 @@ pub(crate) fn run(
         .client
         .recv_raw()
         .map_err(|_| Error::uncertain(ErrorCode::Native))?;
-    let smolvm_protocol::AgentResponse::Completed {
-        exit_code: 0,
-        stdout,
-        ..
-    } = response
-    else {
-        return Err(Error::uncertain(ErrorCode::Native));
+    let (container_id, launch_rejected) = match response {
+        smolvm_protocol::AgentResponse::Completed {
+            exit_code: 0,
+            stdout,
+            ..
+        } => (
+            Some(String::from_utf8(stdout).map_err(|_| Error::uncertain(ErrorCode::Native))?),
+            false,
+        ),
+        smolvm_protocol::AgentResponse::Error { .. }
+        | smolvm_protocol::AgentResponse::Completed { .. }
+            if metadata.packed =>
+        {
+            (None, true)
+        }
+        _ => return Err(Error::uncertain(ErrorCode::Native)),
     };
-    let container_id =
-        String::from_utf8(stdout).map_err(|_| Error::uncertain(ErrorCode::Native))?;
     let proof = Proof {
         image,
         metadata_sha256: expected.metadata_sha256.clone(),
-        container_id: Some(container_id),
+        container_id,
+        launch_rejected,
     };
     if !proof.matches(expected) {
         return Err(Error::uncertain(ErrorCode::Native));
@@ -251,6 +321,12 @@ pub(crate) fn run(
 #[cfg(test)]
 pub(crate) mod tests {
     use super::*;
+    pub(crate) fn packed_plan(empty: bool) -> Metadata {
+        let mut metadata = plan(empty);
+        metadata.packed = true;
+        metadata.source.reference = "packed-fixture:tag".into();
+        metadata
+    }
     pub(crate) fn plan(empty: bool) -> Metadata {
         let source = crate::oci::tests::verified();
         let mut features = crate::oci::tests::features();
@@ -331,9 +407,10 @@ pub(crate) mod tests {
             layer_count: 2,
         };
         let proof = Proof {
-            image,
+            image: Some(image),
             metadata_sha256: expected.metadata_sha256.clone(),
             container_id: Some("smolvm-fixture".into()),
+            launch_rejected: false,
         };
         assert!(proof.matches(&expected));
         assert!(!Proof {
@@ -369,5 +446,50 @@ pub(crate) mod tests {
         metadata = plan(false);
         metadata.launch.argv = vec!["x".repeat(1024 * 1024); 5];
         assert!(metadata.expected().is_err());
+    }
+
+    #[test]
+    fn packed_launch_rejection_is_not_an_oci_pull_or_application_success() {
+        let metadata = packed_plan(false);
+        let expected = metadata.expected().unwrap();
+        assert!(expected.packed);
+        assert!(expected.source.validate().is_err()); // No registry alias pull.
+        let proof = Proof {
+            image: None,
+            metadata_sha256: expected.metadata_sha256.clone(),
+            container_id: None,
+            launch_rejected: true,
+        };
+        assert!(proof.matches(&expected));
+        assert!(!Proof {
+            launch_rejected: false,
+            ..proof.clone()
+        }
+        .matches(&expected));
+        assert!(!Proof {
+            container_id: Some("container".into()),
+            ..proof.clone()
+        }
+        .matches(&expected));
+        assert!(!proof.matches(&plan(false).expected().unwrap()));
+        assert!(!proof.matches(&packed_plan(true).expected().unwrap()));
+        let mut changed = metadata;
+        changed.launch.argv.push("changed".into());
+        assert!(!proof.matches(&changed.expected().unwrap()));
+    }
+
+    #[test]
+    fn inherited_image_metadata_keeps_manifest_bounds_and_origin_is_explicit() {
+        let mut metadata = packed_plan(false);
+        metadata.launch.env[0].0 = "E".repeat(32768);
+        metadata.launch.user = Some("u".repeat(32768));
+        assert!(metadata.expected().is_ok());
+        let mut record =
+            smolvm::config::VmRecord::new("owned".into(), 1, 512, vec![], vec![], false);
+        record.image = Some("packed-fixture:tag".into());
+        assert!(Metadata::from_packed_record(&record, 1).is_err());
+        record.source_smolmachine = Some("/approved/fixture".into());
+        assert!(Metadata::from_record(&record, 1).is_err());
+        assert!(Metadata::from_packed_record(&record, 1).is_ok());
     }
 }

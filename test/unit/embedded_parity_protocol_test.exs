@@ -35,7 +35,7 @@ defmodule SmolBox.Embedded.ParityProtocolTest do
     refute Request.valid?(stripped["operation"], 1000, 2)
   end
 
-  test "volume negotiation binds exact limits Linux and dependencies without activation" do
+  test "volume negotiation requires explicit Linux approval, exact limits and dependencies" do
     message = fixture("hello-v2-volumes.json")
     hello = message["hello"]
     assert {:ok, _} = Protocol.decode(Jason.encode!(message), 2)
@@ -44,6 +44,20 @@ defmodule SmolBox.Embedded.ParityProtocolTest do
     assert hello["limits"]["volumes"]["control_metadata_bytes"] == 262_144
     assert hello["limits"]["jobs"]["metadata_bytes"] == 33_554_432
     refute SDKIdentity.approved?(hello["sdk"], "1.22.0", hello["package"]["smolvm_revision"])
+
+    assert SDKIdentity.approved?(
+             hello["sdk"],
+             "1.22.0",
+             hello["package"]["smolvm_revision"],
+             :linux
+           )
+
+    refute SDKIdentity.approved?(
+             hello["sdk"],
+             "1.22.0",
+             hello["package"]["smolvm_revision"],
+             :macos
+           )
 
     for key <- Map.keys(hello["limits"]["volumes"]) do
       altered = put_in(message, ["hello", "limits", "volumes", key], 0)

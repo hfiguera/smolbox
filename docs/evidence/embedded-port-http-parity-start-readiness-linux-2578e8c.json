@@ -1,0 +1,616 @@
+{
+  "schema": 1,
+  "status": "passed-scoped-ordinary-linux-qualification",
+  "scope": "same-boot readiness; bare/packed Memory growth, bare PostgreSQL normal-BEAM pairs and public PTY regressions",
+  "native_source_commit": "2578e8cbeaacac1a4db807d662b9ceb90328f2ae",
+  "native_frozen_files": 1552,
+  "public_catalog_source_commit": "7156e3db345e579afb284128c4afa8da44233e88",
+  "public_catalog_frozen_files": 1283,
+  "native_manifest_sha256": "f611974b7f6a4e32defcb7a88f3c998bd8fdd09d2e23406c740e5f8b564ef361",
+  "native_helper_sha256": "46f1fa75fd39a0680c869765ae00d845016633ea631950a1fa19a17df95d4c5e",
+  "assets_sha256": "39d92d2c64ca8fef2ea27578ce1f5224e977e045407663c40d251e4c8d2232c4",
+  "package_identity": {
+    "engine_version": "0.2.0",
+    "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+    "build_sha256": "46f1fa75fd39a0680c869765ae00d845016633ea631950a1fa19a17df95d4c5e",
+    "assets_sha256": "39d92d2c64ca8fef2ea27578ce1f5224e977e045407663c40d251e4c8d2232c4",
+    "platform": "linux",
+    "architecture": "x86_64"
+  },
+  "sdk_identity": {
+    "sdk_version": "1.22.0",
+    "source_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "feature_versions": {
+      "lifecycle": 1,
+      "foreground_exec": 1,
+      "extended_exec": 1,
+      "files": 1,
+      "extended_files": 1,
+      "material_proofs": 2,
+      "observability": 1,
+      "networking": 1,
+      "ports": 1,
+      "workloads": 1,
+      "compact_creation": 1,
+      "job_resources": 1,
+      "buffered_exec": 1,
+      "background_exec": 1,
+      "logs": 1,
+      "streaming_exec": 1,
+      "terminals": 1,
+      "volumes": 1,
+      "disk_growth": 1,
+      "terminal_preflight": 1
+    }
+  },
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "rust_build_toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "memory_consumers": [
+    {
+      "lane": "current",
+      "kind": "bare",
+      "public_source_commit": "2578e8cbeaacac1a4db807d662b9ceb90328f2ae",
+      "public_archive_sha256": "068f3d3ee721efe356d4f48f99b17d48f2f235db789dc6d550b4a720ab48996d",
+      "without_rust": true,
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "evidence": {
+        "immutable_creation_retained": true,
+        "material_chain_retained": true,
+        "growth_history_retained": true,
+        "storage_filesystem_growth": true,
+        "overlay_geometry_verified": true,
+        "duplicate_growth_retained": true,
+        "conflicting_growth_rejected": true,
+        "growth_budget_rejected_before_dispatch": true,
+        "running_growth_rejected": true,
+        "drain_retained": true,
+        "omitted_target_retained": true,
+        "stopped_runtime_replacement": true,
+        "owned_deleted": true,
+        "file_bytes": 65554,
+        "file_sha256": "25ac6018e1a86a5aa310d7cd70d12c517e89e42b33afb021d07ca3c0ce909638",
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0,
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "store_mode": "ephemeral"
+      },
+      "report_sha256": "cbeae41758cfedc754d0aefed15e0055b68bd460de7fc12996fb862e3c1f849e"
+    },
+    {
+      "lane": "current",
+      "kind": "packed",
+      "public_source_commit": "2578e8cbeaacac1a4db807d662b9ceb90328f2ae",
+      "public_archive_sha256": "068f3d3ee721efe356d4f48f99b17d48f2f235db789dc6d550b4a720ab48996d",
+      "without_rust": true,
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "evidence": {
+        "immutable_creation_retained": true,
+        "material_chain_retained": true,
+        "growth_history_retained": true,
+        "storage_filesystem_growth": true,
+        "overlay_geometry_verified": true,
+        "duplicate_growth_retained": true,
+        "conflicting_growth_rejected": true,
+        "growth_budget_rejected_before_dispatch": true,
+        "running_growth_rejected": true,
+        "drain_retained": true,
+        "omitted_target_retained": true,
+        "stopped_runtime_replacement": true,
+        "owned_deleted": true,
+        "file_bytes": 65554,
+        "file_sha256": "25ac6018e1a86a5aa310d7cd70d12c517e89e42b33afb021d07ca3c0ce909638",
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0,
+        "fixture_sha256": "339995f33fe84c2ed5a4e212a0acb9afab22df972bf2c2b4aa8e412ea0af5bc4",
+        "store_mode": "ephemeral"
+      },
+      "report_sha256": "8d3482f1bfee0c1539e4090e76b90a4fa2791fddfc43319fbb36d2c22523fe51"
+    },
+    {
+      "lane": "minimum",
+      "kind": "bare",
+      "public_source_commit": "2578e8cbeaacac1a4db807d662b9ceb90328f2ae",
+      "public_archive_sha256": "068f3d3ee721efe356d4f48f99b17d48f2f235db789dc6d550b4a720ab48996d",
+      "without_rust": true,
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "evidence": {
+        "immutable_creation_retained": true,
+        "material_chain_retained": true,
+        "growth_history_retained": true,
+        "storage_filesystem_growth": true,
+        "overlay_geometry_verified": true,
+        "duplicate_growth_retained": true,
+        "conflicting_growth_rejected": true,
+        "growth_budget_rejected_before_dispatch": true,
+        "running_growth_rejected": true,
+        "drain_retained": true,
+        "omitted_target_retained": true,
+        "stopped_runtime_replacement": true,
+        "owned_deleted": true,
+        "file_bytes": 65554,
+        "file_sha256": "25ac6018e1a86a5aa310d7cd70d12c517e89e42b33afb021d07ca3c0ce909638",
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0,
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "store_mode": "ephemeral"
+      },
+      "report_sha256": "deb0ef0f3b03b17a3b61bef70605fa272337afd9d0894cfb82a56a251d2b03b5"
+    },
+    {
+      "lane": "minimum",
+      "kind": "packed",
+      "public_source_commit": "2578e8cbeaacac1a4db807d662b9ceb90328f2ae",
+      "public_archive_sha256": "068f3d3ee721efe356d4f48f99b17d48f2f235db789dc6d550b4a720ab48996d",
+      "without_rust": true,
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "evidence": {
+        "immutable_creation_retained": true,
+        "material_chain_retained": true,
+        "growth_history_retained": true,
+        "storage_filesystem_growth": true,
+        "overlay_geometry_verified": true,
+        "duplicate_growth_retained": true,
+        "conflicting_growth_rejected": true,
+        "growth_budget_rejected_before_dispatch": true,
+        "running_growth_rejected": true,
+        "drain_retained": true,
+        "omitted_target_retained": true,
+        "stopped_runtime_replacement": true,
+        "owned_deleted": true,
+        "file_bytes": 65554,
+        "file_sha256": "25ac6018e1a86a5aa310d7cd70d12c517e89e42b33afb021d07ca3c0ce909638",
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0,
+        "fixture_sha256": "339995f33fe84c2ed5a4e212a0acb9afab22df972bf2c2b4aa8e412ea0af5bc4",
+        "store_mode": "ephemeral"
+      },
+      "report_sha256": "c4336b909fecd009b075a76e329aa975a6a57d96f322a7fc03b05a9131afdc7c"
+    }
+  ],
+  "durable_consumers": [
+    {
+      "lane": "current",
+      "public_source_commit": "7156e3db345e579afb284128c4afa8da44233e88",
+      "source_archive_sha256": "55365a3e8e5d94aed01c7d72a252804e748a27ef524150627b589c24b5fd93b0",
+      "artifact_id": "bare",
+      "without_rust_asserted_by_frozen_launcher": true,
+      "original_partition_keys_and_python_approval_retained": true,
+      "separate_normal_beam_restart": true,
+      "historical_output_after_normal_beam_restart": true,
+      "prepared_reservation": {
+        "slots": 1,
+        "disk_gb": 5
+      },
+      "evidence": {
+        "immutable_creation_retained": true,
+        "material_chain_retained": true,
+        "growth_history_retained": true,
+        "storage_filesystem_growth": true,
+        "overlay_geometry_verified": true,
+        "duplicate_growth_retained": true,
+        "conflicting_growth_rejected": true,
+        "growth_budget_rejected_before_dispatch": true,
+        "running_growth_rejected": true,
+        "drain_retained": true,
+        "omitted_target_retained": true,
+        "stopped_runtime_replacement": true,
+        "owned_deleted": true,
+        "file_bytes": 65554,
+        "file_sha256": "25ac6018e1a86a5aa310d7cd70d12c517e89e42b33afb021d07ca3c0ce909638",
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0,
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "store_mode": "durable"
+      },
+      "prepare_sha256": "5e6a0a8865698713548d4e49435d52a35bcb24b40b13325f7550099b0254732e",
+      "resume_sha256": "1e2e0c75b1fa05d1548370102e9107f27a74b15278a848a8411fda76978795f4"
+    },
+    {
+      "lane": "minimum",
+      "public_source_commit": "7156e3db345e579afb284128c4afa8da44233e88",
+      "source_archive_sha256": "55365a3e8e5d94aed01c7d72a252804e748a27ef524150627b589c24b5fd93b0",
+      "artifact_id": "bare",
+      "without_rust_asserted_by_frozen_launcher": true,
+      "original_partition_keys_and_python_approval_retained": true,
+      "separate_normal_beam_restart": true,
+      "historical_output_after_normal_beam_restart": true,
+      "prepared_reservation": {
+        "slots": 1,
+        "disk_gb": 5
+      },
+      "evidence": {
+        "immutable_creation_retained": true,
+        "material_chain_retained": true,
+        "growth_history_retained": true,
+        "storage_filesystem_growth": true,
+        "overlay_geometry_verified": true,
+        "duplicate_growth_retained": true,
+        "conflicting_growth_rejected": true,
+        "growth_budget_rejected_before_dispatch": true,
+        "running_growth_rejected": true,
+        "drain_retained": true,
+        "omitted_target_retained": true,
+        "stopped_runtime_replacement": true,
+        "owned_deleted": true,
+        "file_bytes": 65554,
+        "file_sha256": "25ac6018e1a86a5aa310d7cd70d12c517e89e42b33afb021d07ca3c0ce909638",
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0,
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "store_mode": "durable"
+      },
+      "prepare_sha256": "0d9e22690ab45d4b72ea2b3d8a942b0348229e4676406975e3d8873b3c33192a",
+      "resume_sha256": "3e083e08e714d1387e191b260f9913ea06a5c3f1cbcd480e72d424da456bba25"
+    }
+  ],
+  "terminal_consumers": [
+    {
+      "lane": "current",
+      "public_source_commit": "7156e3db345e579afb284128c4afa8da44233e88",
+      "public_archive_sha256": "9521a7f58fc5431cdcbf2db718c2ee6eb2a590e0bf9825664fc7b399bf69b1d9",
+      "without_rust": true,
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "terminal": {
+        "binary_input_bytes": 3,
+        "binary_output_verified": true,
+        "codec": 17,
+        "deliberate_process_interruption": false,
+        "duplicate_open_reuses_execution": true,
+        "exercised": true,
+        "observed_exit": 7,
+        "resize": {
+          "cols": 120,
+          "rows": 43
+        },
+        "scope": "ordinary-public-retained-image-pty",
+        "slot_released": true,
+        "transcript_persisted": false
+      },
+      "owned_deleted": true,
+      "final_reserved_slots": 0,
+      "draining_blocks_new_assignments": true,
+      "existing_command_while_draining": true,
+      "retained_after_normal_runtime_restart": true,
+      "drain_survives_runtime_restart": true,
+      "report_sha256": "1732b0511d6480cd01f5f7a7156d4e40c4e355da30034a0ee6f18e9249ec6cd0"
+    },
+    {
+      "lane": "minimum",
+      "public_source_commit": "7156e3db345e579afb284128c4afa8da44233e88",
+      "public_archive_sha256": "9521a7f58fc5431cdcbf2db718c2ee6eb2a590e0bf9825664fc7b399bf69b1d9",
+      "without_rust": true,
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "terminal": {
+        "binary_input_bytes": 3,
+        "binary_output_verified": true,
+        "codec": 17,
+        "deliberate_process_interruption": false,
+        "duplicate_open_reuses_execution": true,
+        "exercised": true,
+        "observed_exit": 7,
+        "resize": {
+          "cols": 120,
+          "rows": 43
+        },
+        "scope": "ordinary-public-retained-image-pty",
+        "slot_released": true,
+        "transcript_persisted": false
+      },
+      "owned_deleted": true,
+      "final_reserved_slots": 0,
+      "draining_blocks_new_assignments": true,
+      "existing_command_while_draining": true,
+      "retained_after_normal_runtime_restart": true,
+      "drain_survives_runtime_restart": true,
+      "report_sha256": "0c56cc0ce7e5aeeceb50fa8893ce6a88b577a64bf04010b75c8372fcfd047c3d"
+    }
+  ],
+  "http_only_consumers": [
+    {
+      "lane": "current",
+      "source_commit": "2578e8cbeaacac1a4db807d662b9ceb90328f2ae",
+      "public_archive_sha256": "068f3d3ee721efe356d4f48f99b17d48f2f235db789dc6d550b4a720ab48996d",
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "without_rust": true,
+      "native_assets_exercised": false,
+      "smoke": {
+        "checkpoint": true,
+        "client": true,
+        "guest_files": true,
+        "interactive": true,
+        "legacy_1_14_6_explicit": "1.14.6",
+        "legacy_runtime_explicit": "1.14.1",
+        "managed_branches": true,
+        "managed_checkpoints": true,
+        "managed_exports": true,
+        "network_policy": true,
+        "offline_default": true,
+        "runtime_1_16_0_explicit": "1.16.0",
+        "runtime_default": "1.22.0",
+        "supervisor": true,
+        "unqualified_runtime_rejected": "1.16.2",
+        "versions": {
+          "jason": "1.4.5",
+          "mint": "1.11.0",
+          "mint_web_socket": "1.0.6",
+          "nimble_options": "1.1.1",
+          "req": "0.7.5",
+          "telemetry": "1.4.2"
+        },
+        "without_rust": true,
+        "workload": true
+      },
+      "report_sha256": "5242977f1e09428f11a5e82fd607f605d4e036e79bf4d5422f05407e96883090"
+    },
+    {
+      "lane": "minimum",
+      "source_commit": "2578e8cbeaacac1a4db807d662b9ceb90328f2ae",
+      "public_archive_sha256": "068f3d3ee721efe356d4f48f99b17d48f2f235db789dc6d550b4a720ab48996d",
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "without_rust": true,
+      "native_assets_exercised": false,
+      "smoke": {
+        "checkpoint": true,
+        "client": true,
+        "guest_files": true,
+        "interactive": true,
+        "legacy_1_14_6_explicit": "1.14.6",
+        "legacy_runtime_explicit": "1.14.1",
+        "managed_branches": true,
+        "managed_checkpoints": true,
+        "managed_exports": true,
+        "network_policy": true,
+        "offline_default": true,
+        "runtime_1_16_0_explicit": "1.16.0",
+        "runtime_default": "1.22.0",
+        "supervisor": true,
+        "unqualified_runtime_rejected": "1.16.2",
+        "versions": {
+          "jason": "1.4.0",
+          "mint": "1.11.0",
+          "mint_web_socket": "1.0.6",
+          "nimble_options": "1.1.0",
+          "req": "0.7.4",
+          "telemetry": "1.3.0"
+        },
+        "without_rust": true,
+        "workload": true
+      },
+      "report_sha256": "8d2b8db28e321280b48f21ffd86878945cb5d6ffe261bc82e0661ad0684c3357"
+    },
+    {
+      "lane": "current",
+      "source_commit": "7156e3db345e579afb284128c4afa8da44233e88",
+      "public_archive_sha256": "9521a7f58fc5431cdcbf2db718c2ee6eb2a590e0bf9825664fc7b399bf69b1d9",
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "without_rust": true,
+      "native_assets_exercised": false,
+      "smoke": {
+        "checkpoint": true,
+        "client": true,
+        "guest_files": true,
+        "interactive": true,
+        "legacy_1_14_6_explicit": "1.14.6",
+        "legacy_runtime_explicit": "1.14.1",
+        "managed_branches": true,
+        "managed_checkpoints": true,
+        "managed_exports": true,
+        "network_policy": true,
+        "offline_default": true,
+        "runtime_1_16_0_explicit": "1.16.0",
+        "runtime_default": "1.22.0",
+        "supervisor": true,
+        "unqualified_runtime_rejected": "1.16.2",
+        "versions": {
+          "jason": "1.4.5",
+          "mint": "1.11.0",
+          "mint_web_socket": "1.0.6",
+          "nimble_options": "1.1.1",
+          "req": "0.7.5",
+          "telemetry": "1.4.2"
+        },
+        "without_rust": true,
+        "workload": true
+      },
+      "report_sha256": "a19c37fa385895ce6f87f500902765d6b95dafcb73337a623f90560747c58dc3"
+    },
+    {
+      "lane": "minimum",
+      "source_commit": "7156e3db345e579afb284128c4afa8da44233e88",
+      "public_archive_sha256": "9521a7f58fc5431cdcbf2db718c2ee6eb2a590e0bf9825664fc7b399bf69b1d9",
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "without_rust": true,
+      "native_assets_exercised": false,
+      "smoke": {
+        "checkpoint": true,
+        "client": true,
+        "guest_files": true,
+        "interactive": true,
+        "legacy_1_14_6_explicit": "1.14.6",
+        "legacy_runtime_explicit": "1.14.1",
+        "managed_branches": true,
+        "managed_checkpoints": true,
+        "managed_exports": true,
+        "network_policy": true,
+        "offline_default": true,
+        "runtime_1_16_0_explicit": "1.16.0",
+        "runtime_default": "1.22.0",
+        "supervisor": true,
+        "unqualified_runtime_rejected": "1.16.2",
+        "versions": {
+          "jason": "1.4.0",
+          "mint": "1.11.0",
+          "mint_web_socket": "1.0.6",
+          "nimble_options": "1.1.0",
+          "req": "0.7.4",
+          "telemetry": "1.3.0"
+        },
+        "without_rust": true,
+        "workload": true
+      },
+      "report_sha256": "104daf3a41aa4819c611223966ba2520044f9b807c99958e02263fd4702c762f"
+    }
+  ],
+  "custody": {
+    "source_commit": "2578e8cbeaacac1a4db807d662b9ceb90328f2ae",
+    "source_files_verified": 1552,
+    "manifest_sha256": "f611974b7f6a4e32defcb7a88f3c998bd8fdd09d2e23406c740e5f8b564ef361",
+    "helper_sha256": "46f1fa75fd39a0680c869765ae00d845016633ea631950a1fa19a17df95d4c5e",
+    "assets_sha256": "39d92d2c64ca8fef2ea27578ce1f5224e977e045407663c40d251e4c8d2232c4",
+    "assets_verified": 806,
+    "old_package_assets_unchanged": true,
+    "sdk_table_counts": {
+      "vms": 0,
+      "vm_create_reservations": 0,
+      "vm_pause_operations": 0,
+      "vm_resize_intents": 0,
+      "vm_resize_receipts": 0
+    },
+    "native_processes": [],
+    "per_vm_cache_directories": 0,
+    "immutable_input_bases_retained": [
+      {
+        "role": "storage",
+        "logical_bytes": 1073741824,
+        "allocated_bytes": 4206592,
+        "sha256": "fe909fae214718834a74724b99a224ab03994e795856adb2fb62067ab4c01403",
+        "immutable_mode": "0444",
+        "artifact_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1"
+      },
+      {
+        "role": "overlay",
+        "logical_bytes": 1073741824,
+        "allocated_bytes": 4206592,
+        "sha256": "cd6d0fc9fcca2076840c5c209cd8b5072ce1ef28b141ecf7bc0cece47afebe21",
+        "immutable_mode": "0444",
+        "artifact_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1"
+      }
+    ],
+    "shared_input_cache_retained": true,
+    "reports": [
+      {
+        "lane": "current",
+        "kind": "bare",
+        "report_sha256": "cbeae41758cfedc754d0aefed15e0055b68bd460de7fc12996fb862e3c1f849e",
+        "without_rust": true
+      },
+      {
+        "lane": "current",
+        "kind": "packed",
+        "report_sha256": "8d3482f1bfee0c1539e4090e76b90a4fa2791fddfc43319fbb36d2c22523fe51",
+        "without_rust": true
+      },
+      {
+        "lane": "minimum",
+        "kind": "bare",
+        "report_sha256": "deb0ef0f3b03b17a3b61bef70605fa272337afd9d0894cfb82a56a251d2b03b5",
+        "without_rust": true
+      },
+      {
+        "lane": "minimum",
+        "kind": "packed",
+        "report_sha256": "c4336b909fecd009b075a76e329aa975a6a57d96f322a7fc03b05a9131afdc7c",
+        "without_rust": true
+      },
+      {
+        "lane": "current",
+        "kind": "postgres-bare-prepare",
+        "report_sha256": "5e6a0a8865698713548d4e49435d52a35bcb24b40b13325f7550099b0254732e",
+        "without_rust_asserted_by_frozen_launcher": true
+      },
+      {
+        "lane": "current",
+        "kind": "postgres-bare-resume",
+        "report_sha256": "1e2e0c75b1fa05d1548370102e9107f27a74b15278a848a8411fda76978795f4",
+        "without_rust_asserted_by_frozen_launcher": true
+      },
+      {
+        "lane": "minimum",
+        "kind": "postgres-bare-prepare",
+        "report_sha256": "0d9e22690ab45d4b72ea2b3d8a942b0348229e4676406975e3d8873b3c33192a",
+        "without_rust_asserted_by_frozen_launcher": true
+      },
+      {
+        "lane": "minimum",
+        "kind": "postgres-bare-resume",
+        "report_sha256": "3e083e08e714d1387e191b260f9913ea06a5c3f1cbcd480e72d424da456bba25",
+        "without_rust_asserted_by_frozen_launcher": true
+      },
+      {
+        "lane": "current",
+        "kind": "terminal",
+        "report_sha256": "1732b0511d6480cd01f5f7a7156d4e40c4e355da30034a0ee6f18e9249ec6cd0",
+        "without_rust": true
+      },
+      {
+        "lane": "minimum",
+        "kind": "terminal",
+        "report_sha256": "0c56cc0ce7e5aeeceb50fa8893ce6a88b577a64bf04010b75c8372fcfd047c3d",
+        "without_rust": true
+      }
+    ],
+    "sql_source_commit": "7156e3db345e579afb284128c4afa8da44233e88",
+    "sql_source_files_verified": 1283,
+    "postgres_keys_unchanged": true,
+    "original_python_approval_retained": true,
+    "original_partition_retained": true,
+    "crash_validation_performed": false
+  },
+  "normal_postgres_shutdown": {
+    "normal_smart_shutdown": true,
+    "server_stopped": true,
+    "original_data_directory_retained": true,
+    "deliberate_interruption": false
+  },
+  "normal_lab_shutdown": {
+    "observed_utc": "2026-10-16T15:21:52Z",
+    "active_state": "inactive",
+    "result": "success",
+    "exit_status": 0,
+    "main_pid": 0,
+    "run_disk_bytes": 15117385728,
+    "recovery_marker_archived": true
+  },
+  "private_archive_sha256": "ffbe675b96f237f5d39dd2418e0800d145fe0b6d999e453ad2c94df9bbe44e97",
+  "private_archive_bytes": 321888350,
+  "archive_verified_locally_and_outer": true,
+  "original_failed_workflow_replayed": false,
+  "readiness_gap_ordinary_fixture_acceptance": true,
+  "full_bare_growth_parity": false,
+  "parity_complete": false,
+  "crash_validation_performed": false,
+  "distribution_approved": false,
+  "logs": {
+    "release-build.log": "fada83f547103864815ccbf67989c29761579d1b708a70025c469a7b54d59df4",
+    "sdk-before.log": "1b50e6d5c64d89e3c65963495188108dd77dd99bfec86af8e113fcc5f1291b53",
+    "sdk-after.log": "d72ab76a473fec0ec8090dd05aafb648f33a6601c9fed487c68e6d41e7223d94",
+    "sdk-final.log": "d72ab76a473fec0ec8090dd05aafb648f33a6601c9fed487c68e6d41e7223d94",
+    "python-native.log": "902dcd0e1f2d6d59ef06a4fdb5f56f951610d07bc5570b5017874e9ab87a5252",
+    "postgres-current-compile.log": "52c653d5759268f0840c767a3db9fa1befb229e65a7cbea9a75cba36ec76cfa9",
+    "postgres-minimum-compile.log": "f962244e0018a385f659c9d5d8b68e94ddfc3dfcdea3ea54661cbda3e13adf94",
+    "postgres-normal-stop.log": "b96eed09ceecee583bb032d10bd228d4e6e9097f3574750e5700c8ba92ad30ab"
+  },
+  "remaining": [
+    "Complete remaining P0-P9 source/platform/resource and operation/arity/specification acceptance; all full-parity matrix rows remain pending.",
+    "P4/P8 admission and ordinary qualification, other terminal/growth combinations, and remaining upgrade/drain/codec/resource gates.",
+    "Changed macOS qualification requires a legitimate isolated account/domain; retained real default-domain data remains untouched.",
+    "Final setup, source/signing/provenance/license review and exact final-package consumer/HTTP regressions; distribution approval remains separate.",
+    "Bound connection setup for other owner-process SDK exchanges before their full deadline/cancellation acceptance; the new readiness probe uses the bounded constructor."
+  ],
+  "explicitly_deferred": [
+    "Live helper/BEAM-loss, forced termination campaigns, boot pauses, watcher injection, persistence interruption and destructive CLI-race validation."
+  ],
+  "documentation_and_manifest_checks": [
+    {
+      "lane": "documentation-warnings-as-errors",
+      "status": "passed",
+      "log_sha256": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d"
+    },
+    {
+      "lane": "parity-coverage-manifest",
+      "status": "passed",
+      "log_sha256": "bd32e9203821dbf7d000c7c08ae406cd823594d871146d51d1bad084b5fc26b3"
+    }
+  ]
+}

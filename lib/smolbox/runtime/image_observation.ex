@@ -8,7 +8,7 @@ defmodule SmolBox.Runtime.ImageObservation do
     result =
       Session.io(session, record, :execution, fn ->
         Backend.pull_image(
-          Target.connection(session.worker),
+          Target.connection(session.worker, record),
           record.machine_name,
           record.spec.command.source
         )

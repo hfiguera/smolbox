@@ -4,6 +4,7 @@ defmodule SmolBox.NativeCaptureHistoryTest do
   alias SmolBox.Embedded.{
     CaptureTransition,
     GrowthTransition,
+    HistoricalExecution,
     Identity,
     MaterialHistory,
     NativeGrowth
@@ -227,6 +228,58 @@ defmodule SmolBox.NativeCaptureHistoryTest do
              })
   end
 
+  test "collected command snapshots retain capture prefixes without claiming the current source" do
+    original = fixture()
+    [first, second] = capture_proofs()
+    before = historical_command(original, "before-capture")
+    captured = capture(original, first, 1200)
+    between = historical_command(captured, "between-captures")
+    final = capture(captured, second, 1300)
+
+    assert HistoricalExecution.matches?(before, final)
+    assert HistoricalExecution.matches?(between, final)
+    refute HistoricalExecution.matches?(between, original)
+    refute HistoricalExecution.matches?(historical_command(final, "future-capture"), captured)
+    refute HistoricalExecution.matches?(before, %{final | captures: %{}})
+    refute HistoricalExecution.matches?(%{before | managed_machine: {"foreign", "source"}}, final)
+
+    unknown = %{between | state: :unknown, evidence: :unknown, result: nil}
+    assert HistoricalExecution.matches?(unknown, final)
+    assert unknown.result == nil and unknown.cleanup == :complete
+    assert before.result.exit_code == 7
+    assert final.reservation == original.reservation
+    assert final.created_machine == original.created_machine
+  end
+
+  defp historical_command(parent, id) do
+    {:ok, command} = Command.new(["/bin/true"])
+
+    {:ok, spec} =
+      ExecutionSpec.new(
+        scope: parent.scope,
+        id: id,
+        profile: parent.spec.profile,
+        artifact: parent.spec.artifact,
+        command: command
+      )
+
+    {:ok, fingerprint} = ExecutionSpec.fingerprint(spec, String.duplicate("k", 32))
+    {:ok, execution} = Execution.new(spec, fingerprint, 1400)
+    assert {:ok, _, attached} = MachineOps.attach(%{parent | state: :running}, execution, 1401)
+
+    completed = %{
+      attached
+      | state: :completed,
+        evidence: :exited,
+        collection: :complete,
+        cleanup: :complete,
+        result: %SmolBox.Result{exit_code: 7, stdout: <<0, 255>>, stderr: <<>>}
+    }
+
+    assert :ok = Execution.validate(completed)
+    completed
+  end
+
   test "Memory atomically saves capture proof and source identity while rejected proofs retain usage" do
     store = start_supervised!(Memory)
     NativeCaptureContract.run(Memory, store)
@@ -246,7 +299,7 @@ defmodule SmolBox.NativeCaptureHistoryTest do
     on_exit(fn -> File.rm(path) end)
     File.write!(path, bytes, [:exclusive])
     File.chmod!(path, 0o600)
-    paths = Path.wildcard(Path.expand("_build/test/lib/*/ebin"))
+    paths = Path.wildcard(Path.join(Mix.Project.build_path(), "lib/*/ebin"))
 
     code = ~S"""
     [path] = System.argv()

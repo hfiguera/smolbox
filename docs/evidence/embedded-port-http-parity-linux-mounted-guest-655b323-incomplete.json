@@ -1,0 +1,193 @@
+{
+  "schema": 1,
+  "scope": "ordinary-mounted-guest-incomplete-and-failed-boot-cleanup",
+  "checked_at_utc": "2026-10-16T06:59:36.898633+00:00",
+  "source_commit": "655b32373b7620417014dd4127b984290845d49d",
+  "implementation_commits": [
+    "d263c40",
+    "aed5f13",
+    "53784c9",
+    "655b323"
+  ],
+  "later_diagnostics_only_commit": "17e798b",
+  "native_inputs": {
+    "files_verified": 265,
+    "archive_sha256": "95379f22cb56102744bd6eb21a345edc5f1fcbc8cda9fc25c80d970d7116276b",
+    "inventory_sha256": "1ce4622e30ba310cfbcafabab67610d3c3b3d814274b92e864128487831215f0"
+  },
+  "native_bundle": {
+    "manifest_schema": 3,
+    "package_manifest_sha256": "8df2877ad25a81e7ac5b68c369886387cf56ceeca23bc248f4d42f30ea62727a",
+    "identity": {
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "2d5a215e63c64742de22e9b27bd49482895b352cd7679729ab372a14b766db0d",
+      "assets_sha256": "d05190f3ac57574fa28484f2354595373fa3040bdd7f6b1027d5896304153d55",
+      "platform": "linux",
+      "architecture": "x86_64"
+    },
+    "sdk_version": "1.22.0",
+    "sdk_source_verified_unmodified": true,
+    "rust_toolchain": "1.98.1",
+    "published": false,
+    "retained_privately": true
+  },
+  "witness_executable_sha256": "beca98931196a89a5bb80e64851619c0cdbbc836d8fa702ffc619a17b3a725e3",
+  "validation": {
+    "macos": {
+      "ordinary_units_passed": 1015,
+      "engine_units": 860,
+      "port_units": 78,
+      "protocol_units": 77,
+      "protocol_contracts_passed": 56,
+      "boot_ownership_models_passed": 12,
+      "strict_clippy_all_targets": "passed",
+      "sdk_caches_verified_unmodified": 2,
+      "native_vm_qualification": false
+    },
+    "linux": {
+      "ordinary_units_passed": 1016,
+      "engine_units": 861,
+      "port_units": 78,
+      "protocol_units": 77,
+      "protocol_contracts_passed": 56,
+      "boot_ownership_models_passed": 13,
+      "normal_exit_peer_preserved_sdk_wait_status": true,
+      "owner_retention_model_passed": true,
+      "strict_clippy_all_targets": "passed",
+      "optimized_helper_and_witness_builds": "passed",
+      "sdk_caches_verified_unmodified": 2
+    },
+    "ignored_opt_ins": 22,
+    "unchanged_sparse_case_filtered": 1,
+    "later_diagnostics": {
+      "scope": "macos-source-model-only",
+      "harness_models_passed": 2,
+      "strict_clippy_all_targets": "passed",
+      "live_run_claimed": false
+    },
+    "shared_backend_parity_inventory": {
+      "tests_passed": 4,
+      "runtime_excluded": true,
+      "deferred_crash_excluded": true,
+      "completion_guard_preserved": true
+    },
+    "ordinary_runner_contracts_passed": 11
+  },
+  "attempts": [
+    {
+      "source_commit": "d263c40",
+      "status": "failed-before-machine-create",
+      "reason": "Witness supplied guest mount targets out of canonical order.",
+      "vm_started": false,
+      "original_volumes_deleted": true,
+      "normal_empty_epoch_shutdown": true,
+      "failure_not_relabelled_as_success": true
+    },
+    {
+      "source_commit": "aed5f13",
+      "status": "failed-sdk-startup",
+      "reason": "Witness omitted explicit SMOLVM_LIB_DIR for the parent SDK.",
+      "sdk_diagnostic_observed": "libkrun/libkrunfw not found",
+      "original_creation_receipt_returned": true,
+      "record_remained_created_without_pid": true,
+      "boot_child_normally_exited_and_collected": true,
+      "original_actor_epoch_closed": true,
+      "idle_witness_teardown": {
+        "signal": "SIGTERM",
+        "only_after_original_epoch_closed": true,
+        "pidfd_pid_and_birth_verified": true,
+        "live_vm_terminated": false,
+        "helper_or_beam_loss_test": false
+      },
+      "original_machine_and_volumes_later_deleted_with_full_original_receipt_and_proofs": true,
+      "cleanup_did_not_start_vm": true,
+      "cleanup_report_sha256": "2c8d7f5207c21b34adb51bf9d8da799b116e7cbef4c73a97702c0e62b68918bb",
+      "raw_sdk_vm_log_removed_with_explicit_owned_vm_deletion": true,
+      "failure_not_relabelled_as_success": true
+    },
+    {
+      "source_commit": "655b323",
+      "status": "failed-guest-command",
+      "original_creation_receipt_returned": true,
+      "mounted_offline_vm_started": true,
+      "mounts": {
+        "count": 2,
+        "readonly_and_writable_configurations_observed": true
+      },
+      "command_completion": "Exited",
+      "stderr_bytes": 613,
+      "stderr_body_retained": false,
+      "exact_guest_failure_cause": "unresolved; bounded private diagnostics added for next run",
+      "backing_observation": {
+        "writable_root_mode": "0755",
+        "guest_first_file_bytes": 4096,
+        "guest_first_file_contents_verified": false,
+        "shared_subdirectory_present": true,
+        "readonly_backing_contains_only_original_seed": true
+      },
+      "backing_report_sha256": "e8d40376df35baee69b8736b7fb5821847b79d3e70ecd56b1a7ab0377760fa05",
+      "normal_stop": true,
+      "original_machine_and_volumes_deleted": true,
+      "normal_original_owner_shutdown": true,
+      "completion_marker_written": false,
+      "failure_not_relabelled_as_success": true
+    }
+  ],
+  "failed_created_boot_cleanup": {
+    "scope": "original-in-memory-enrollment-only",
+    "requires_no_stored_pid": true,
+    "requires_original_child_absence_or_matching_birth_and_readonly_linux_exit_evidence": true,
+    "does_not_reap_before_sdk_collection": true,
+    "pending_missing_or_live_enrollment_rejected": true,
+    "sdk_return_and_positive_collection_fences_preserved": true,
+    "metadata_retained_until_original_collection": true,
+    "validation_scope": "deterministic row/actor models and a normally released non-VM child; no new live failed-boot campaign"
+  },
+  "fixture": {
+    "sha256": "339995f33fe84c2ed5a4e212a0acb9afab22df972bf2c2b4aa8e412ea0af5bc4",
+    "bytes": 41681345,
+    "scope": "explicitly-approved-existing-python-container-data-fixture"
+  },
+  "terminal": {
+    "sdk_records": 0,
+    "native_owners": 0,
+    "volume_root_empty": true,
+    "lab_shutdown": "normal-guest-shutdown",
+    "lab_terminal_observed_at_utc": "2026-10-16T07:00:46Z",
+    "lab_state": "inactive",
+    "lab_result": "success",
+    "lab_exit_status": 0,
+    "lab_main_pid": 0,
+    "retained_domain_and_run_disk": true,
+    "normal_shutdown_marker_archived": true,
+    "macos_export_custody_untouched": true
+  },
+  "private_archive": {
+    "sha256": "ed9670ecac0f3ff6d3ffb348f7645f92587db70a5ab388d87823afa8da8b5f84",
+    "bytes": 79836122,
+    "mode": "0600",
+    "copied_digest_verified": true,
+    "retired_unix_control_socket_omitted_by_tar": true
+  },
+  "qualification": {
+    "guest_volume_contract_passed": false,
+    "public_volume_admission_enabled": false,
+    "public_branch_admission_enabled": false,
+    "new_package_public_current_minimum_consumers_passed": false,
+    "historical_package_qualification_transferred": false,
+    "crash_handling_qualified": false,
+    "crash_validation_deferred": true,
+    "live_forced_termination_fault_campaign_run": false,
+    "full_parity_complete": false,
+    "distribution_approved": false
+  },
+  "remaining": [
+    "Rerun the fixed guest command with bounded private stderr and resolve its actual assertion or guest behavior.",
+    "Complete mounted guest commands/stdin/background/files/PTY and retained writes across stopped owner replacement.",
+    "Complete durable volume attachments/readers and public activation, source/platform/resource combinations and remaining P7 acceptance.",
+    "Run current/minimum public no-Rust consumers for the new package.",
+    "Complete remaining remote-source, growth, saved-state, branch, durable-store, upgrade/platform and HTTP regression gates."
+  ]
+}

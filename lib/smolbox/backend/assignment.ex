@@ -9,6 +9,7 @@ defmodule SmolBox.Backend.Assignment do
   alias SmolBox.Backend.{Binding, Features}
 
   alias SmolBox.{
+    ArtifactPreparation,
     Checkpoint,
     Command,
     Error,
@@ -490,15 +491,22 @@ defmodule SmolBox.Backend.Assignment do
 
   defp optional_histories?(record, version),
     do:
-      Enum.all?(
-        [
-          preparation: nil
-        ],
-        fn {key, empty} -> Map.get(record, key, empty) == empty end
-      ) and NativeBranchAuthority.history_valid?(record) and export_histories?(record, version) and
+      preparation_history?(record, version) and NativeBranchAuthority.history_valid?(record) and
+        export_histories?(record, version) and
         (Map.get(record, :mounts, []) == [] or version == 2) and
         growth_histories?(record, version) and
         checkpointable_origin?(record) and capture_histories?(record, version)
+
+  defp preparation_history?(record, version) do
+    case Map.get(record, :preparation) do
+      nil ->
+        true
+
+      prepared ->
+        version == 2 and NativeSource.registry_artifact?(record.spec.artifact) and
+          ArtifactPreparation.matches?(prepared, record.spec.artifact)
+    end
+  end
 
   defp capture_histories?(_record, 2), do: true
 

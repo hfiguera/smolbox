@@ -296,9 +296,11 @@ pub(super) fn inspect(
     intent: &LocalVolumeIntent,
     budget: &ReadBudget,
 ) -> Result<VolumeProvisionPresence> {
-    let staging = observe(root, binding, domain, intent, budget)?;
+    budget.check()?;
+    intent.validate()?;
+    root.verify(budget)?;
     let Some(ledger) = existing_ledger(domain)? else {
-        return Ok(match staging {
+        return Ok(match observe(root, binding, domain, intent, budget)? {
             VolumeStagingPresence::Absent => VolumeProvisionPresence::Absent,
             _ => VolumeProvisionPresence::Unverified,
         });
@@ -308,6 +310,12 @@ pub(super) fn inspect(
         &cstring(&format!("{}.provisioned.json", intent.worker_volume_id))?,
         budget,
     )?;
+    let staging = match &receipt {
+        Some(provision) => {
+            super::observe_provisioned(root, binding, domain, intent, provision, budget)?
+        }
+        None => observe(root, binding, domain, intent, budget)?,
+    };
     let result = match (staging, receipt) {
         (VolumeStagingPresence::Absent, None) => VolumeProvisionPresence::Absent,
         (VolumeStagingPresence::Staged(backing), Some(receipt)) => {
@@ -322,6 +330,30 @@ pub(super) fn inspect(
     ledger.verify()?;
     root.verify(budget)?;
     Ok(result)
+}
+
+/// Recheck the immutable completed identity, permitting only owner-rwx,
+/// non-group/world-writable, non-special permission evolution. No chmod/chown or
+/// record update occurs. Incomplete staging uses its separate exact-mode check.
+pub(super) fn verify_completed_backing(
+    directory: &std::fs::File,
+    proof: &VolumeProvisionReceipt,
+) -> Result<()> {
+    use std::os::unix::fs::MetadataExt;
+    proof.validate()?;
+    let metadata = directory
+        .metadata()
+        .map_err(|_| Error::before(ErrorCode::Ownership))?;
+    if !metadata.is_dir()
+        || (metadata.dev(), metadata.ino()) != (proof.backing.device, proof.backing.inode)
+        || metadata.uid() != proof.account.uid
+        || metadata.gid() != proof.account.gid
+        || metadata.mode() & 0o7022 != 0
+        || metadata.mode() & 0o700 != 0o700
+    {
+        return Err(Error::before(ErrorCode::Ownership));
+    }
+    Ok(())
 }
 
 #[cfg(test)]

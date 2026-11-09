@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "status": "implemented-with-models-and-ordinary-local-provider-checks",
+  "scope": "bounded trusted Docker credential provider and opt-in account bearer/mirror fixture",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_modified": false,
+  "registry_related_tests_passed": 63,
+  "python_checks": 50,
+  "python_expected_skips": 4,
+  "provider_protocol": {
+    "argument": "get",
+    "stdin": "SDK-normalized registry server key only",
+    "credential_added_to_argv_or_environment": false,
+    "stdout_max_bytes": 131072,
+    "stderr_max_bytes": 65536,
+    "stderr_retained_or_logged": false,
+    "original_operation_deadline_and_cancellation_preserved": true,
+    "reserved_direct_children": 1,
+    "reserved_work_descriptors": 20,
+    "two_control_observers_preserved": true,
+    "late_credentials_promoted": false,
+    "provider_retirement_deadline_seconds": 15,
+    "collection_timeout_releases_admission": false
+  },
+  "collection": {
+    "exact_direct_child_handle": true,
+    "both_pipes_required": true,
+    "descendant_pipe_ambiguity_retains_job_and_quarantines": true,
+    "unowned_descendant_signals": false,
+    "providers_are_trusted_operator_programs": true,
+    "arbitrary_code_sandbox": false
+  },
+  "ordinary_local_provider_cases": [
+    "successful credential",
+    "normal missing-entry exit (inline fallback verified separately by account model)",
+    "96031-byte escaped reply decoded to 16000-byte secret"
+  ],
+  "deterministic_only_boundaries": [
+    "oversized/malformed output",
+    "retirement/escalation policy",
+    "descendant pipe writer ambiguity",
+    "pre-cancelled spawn rejection",
+    "retained reservation and control headroom"
+  ],
+  "prepared_native_case": {
+    "mode": "account-bearer",
+    "original_registry": "registry.fixture.invalid",
+    "mirror": "loopback ephemeral fixture",
+    "original_source_identity_changed_by_rotation": false,
+    "expected_authenticated_reads": 3,
+    "expected_operator_rotations": 1,
+    "live_case_run": false,
+    "tls_token_exchange_qualified": false,
+    "all_credential_modes_qualified": false
+  },
+  "source_sha256": {
+    "registry_provider.rs": "f48fc61865cd0cfaa83e47e9251b1bc3a98b8c335f4c0b1831e28c82399aa195",
+    "registry_account.rs": "779727c1d2f03325a16b880a905f2b430db8b18fc8b2086c54efdce8f2ae0883",
+    "registry_io.rs": "9240a8ab1566f799cbf2161d341ff29e9531df4b8d76ec872f0be84c88f17d1e",
+    "jobs.rs": "01b0b22791498fa42279153b4988568b52a577abac45a8797fcb28fc470d3863"
+  },
+  "changed_native_package_built_or_qualified": false,
+  "public_image_registry_admission_enabled": false,
+  "crash_validation_performed": false,
+  "parity_complete": false,
+  "distribution_approved": false,
+  "guest_oci_auth_and_mirror_path_implemented": false,
+  "remaining_gates": [
+    "Guest OCI pull/start account credentials and mirrors through protected IPC",
+    "Changed-package ordinary registry bearer/mirror/rotation acceptance",
+    "TLS token exchanges, other credential modes and qualified real providers",
+    "Current/minimum public native consumers and all remaining P0-P9 gates"
+  ],
+  "checks": {
+    "rust_workspace_passed": 1113,
+    "rust_workspace_ignored": 24,
+    "strict_all_target_clippy": true,
+    "sdk_inventory_verified_unmodified": true,
+    "python_checks": 50,
+    "python_expected_skips": 4,
+    "parity_coverage_checks": 4,
+    "docs_warnings_as_errors": true,
+    "oci_example_models_passed": 5,
+    "volume_example_models_passed": 2
+  },
+  "registry_fixture_sha256": "6168d801ccf8e6ff4fa60dd7088b0ee8ecb92363c264cd52517e6558dadd7e9e",
+  "private_log_sha256": {
+    "registry-provider-workspace-tests.log": "984d8c29b3cbfdc89e1951374c0f586bb656775a915ae1f3ab4e7e11a61391fd",
+    "registry-provider-tests.log": "1389a44fa9908d72c69f0c3863c7c129abcd78fc5cd0dddbcd268a550a72a850",
+    "registry-provider-clippy.log": "73f69fcdf1132c682b7012f36c67608264ad13e3edefef7e4ec9406227fcdb21",
+    "registry-provider-python-tests.log": "7492fde7f38a48a3e9e70aa92e5fedb00bd993b45806951db0f8c422c85afe85",
+    "registry-provider-sdk-check.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+    "registry-provider-coverage.log": "afaf0822ec3d14cccc829948e7d540d1ef5f8c02594afa0497d52ad9347d06bb",
+    "registry-provider-example-tests.log": "d2d2ae81cedb77248c3d2b315a72401d92787fc761a91c389307eb0de9888629",
+    "registry-provider-volume-example-tests.log": "5072588de7fd1cec76d3ddb672df38b16a9f5bab47aa0d5ee8ce44148d101c29"
+  }
+}

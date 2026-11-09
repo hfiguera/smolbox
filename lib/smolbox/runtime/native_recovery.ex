@@ -2,7 +2,7 @@ defmodule SmolBox.Runtime.NativeRecovery do
   @moduledoc false
   alias SmolBox.{Backend, DiskExpansion, Error, Execution, Machine, ManagedMachine}
   alias SmolBox.Backend.EmbeddedContext
-  alias SmolBox.Embedded.{Call, Health, NativeCapture}
+  alias SmolBox.Embedded.{Call, Health, HistoricalExecution, NativeCapture, NativeGrowth}
 
   alias SmolBox.Runtime.{
     MachineSession,
@@ -41,22 +41,41 @@ defmodule SmolBox.Runtime.NativeRecovery do
           do: previous,
           else: %{channel: channel, cursor: nil, phase: :scanning}
 
-      if recovery.phase == :ready and health.status == :ready and
-           NativeAuthority.available?(coordinator, target.id) do
-        {:ok, WorkerHealth.observe(target, config.clock) |> Map.put(:recovery, recovery)}
-      else
-        coordinated_scan(config, target, recovery, coordinator)
-      end
+      if recovery.phase == :ready and health.status == :ready,
+        do: observe_ready(config, target, recovery, coordinator),
+        else: coordinated_scan(config, target, recovery, coordinator)
     else
       _ -> Session.error(:unknown, :reconcile)
     end
   end
 
-  defp coordinated_scan(config, target, recovery, coordinator),
-    do:
-      NativeAuthority.run(coordinator, target.id, fn ->
-        scan(config, target, recovery, coordinator)
-      end)
+  defp observe_ready(config, target, recovery, coordinator) do
+    activity = NativeAuthority.activity(coordinator, target.id)
+
+    cond do
+      activity.ready ->
+        {:ok, WorkerHealth.observe(target, config.clock) |> Map.put(:recovery, recovery)}
+
+      activity.held ->
+        # Preserve this same owner's completed scan through bounded work.
+        {:ok, report(config, :unavailable, recovery)}
+
+      true ->
+        coordinated_scan(config, target, recovery, coordinator)
+    end
+  end
+
+  defp coordinated_scan(config, target, recovery, coordinator) do
+    case NativeAuthority.run(coordinator, target.id, fn ->
+           scan(config, target, recovery, coordinator)
+         end) do
+      {:error, %Error{category: :admission_exhausted}} ->
+        {:ok, report(config, :unavailable, recovery)}
+
+      result ->
+        result
+    end
+  end
 
   defp scan(config, target, recovery, coordinator) do
     {owner, epoch} = recovery.channel
@@ -124,10 +143,42 @@ defmodule SmolBox.Runtime.NativeRecovery do
   defp classify(config, target, %SmolBox.Volume{} = volume),
     do: NativeVolumeRecovery.classify(config, target, volume)
 
+  defp classify(
+         config,
+         target,
+         %Execution{cleanup: :complete, reservation: nil, managed_machine: key} = record
+       )
+       when not is_nil(key) do
+    with true <- bound?(target, record),
+         {:ok, parent} <- MachineSession.store(config, :fetch, [key]),
+         {:ok, history} <- NativeGrowth.transitions(parent) do
+      classify_history(config, target, record, parent, history)
+    else
+      _ -> Session.error(:identity_conflict, :reconcile)
+    end
+  end
+
   defp classify(config, target, record) do
-    with true <-
-           record.worker_id == target.id and record.backend_assignment != nil and
-             Map.from_struct(record.backend_assignment.binding) == target.domain_binding,
+    classify_material(config, target, record)
+  end
+
+  defp classify_history(config, target, record, _parent, []),
+    do: classify_material(config, target, record)
+
+  defp classify_history(_config, _target, record, parent, [_ | _]),
+    do:
+      if(HistoricalExecution.matches?(record, parent),
+        do: :ok,
+        else: Session.error(:identity_conflict, :reconcile)
+      )
+
+  defp bound?(target, record),
+    do:
+      record.worker_id == target.id and record.backend_assignment != nil and
+        Map.from_struct(record.backend_assignment.binding) == target.domain_binding
+
+  defp classify_material(config, target, record) do
+    with true <- bound?(target, record),
          reference = Target.connection(target, record),
          {:ok, observed} <- observation(reference, record),
          true <- observation_valid?(record, observed) do

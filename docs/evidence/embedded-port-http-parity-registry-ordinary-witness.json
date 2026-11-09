@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "status": "implemented-with-scoped-anonymous-bare-linux-acceptance",
+  "scope": "anonymous real smolmachine registry preparation/cached creation with original engine ownership",
+  "implemented_checks": [
+    "exact source/artifact identity and explicit host cache bounds",
+    "cold download and warm manifest-refetch/cache reuse",
+    "fresh cached creation, guest exec, normal stop/restart and retained data",
+    "owned deletion, retained cache requalification and normal engine shutdown"
+  ],
+  "fixture": {
+    "immutable_approved_artifact_only": true,
+    "get_only_loopback_registry_routes": true,
+    "sdk_or_control_plane_handlers": false,
+    "expected_manifest_gets": 2,
+    "expected_blob_gets": 1,
+    "credentials_accepted": false,
+    "normal_shutdown_after_witness_collection": true,
+    "timeout_signals_or_fault_modes": false
+  },
+  "models": {
+    "source_example": 5,
+    "volume_example": 2,
+    "strict_clippy_all_targets": true,
+    "python_tests": 47,
+    "python_expected_skips": 4,
+    "sdk_inventories_verified": true,
+    "documentation_warnings_as_errors": true
+  },
+  "logs_sha256": {
+    "models": "80e822bf8dbcfb1d19dd306298485e201aa0dea17889b814dfb889522579a448",
+    "clippy": "ceece5d1d7d5e86d241973c856f403edd33b77f33a2ff3e44404175c6dd82638",
+    "python": "3bb565ffa4dceb1991b055df31cb209e72443f1522a916ae69eed3933ca05b6a",
+    "sdk": "d72ab76a473fec0ec8090dd05aafb648f33a6601c9fed487c68e6d41e7223d94",
+    "docs": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d"
+  },
+  "production_engine_port_or_policy_changed": false,
+  "package_to_qualify": "25bed0542378cda71db2e6c51d10e02c8a89239802d5930084a4fa415b6ed086",
+  "live_registry_artifact_workflow_qualified": true,
+  "credential_workflow_qualified": false,
+  "public_registry_admission_enabled": false,
+  "full_parity_accepted": false,
+  "crash_validation_performed": false,
+  "distribution_approved": false,
+  "first_attempt": {
+    "source_commit": "75672ae2e9bbc20c5d154bcd39b5e9311e38b5d9",
+    "cold_preparation": true,
+    "warm_preparation": true,
+    "manifest_gets": 2,
+    "blob_gets": 1,
+    "fresh_cached_creation": true,
+    "failure": "Unsupported (NotDispatched): witness requested image-only numeric user on bare guest",
+    "guest_execution_dispatched": false,
+    "normal_stop_delete_owner_close": true,
+    "normal_fixture_shutdown": true,
+    "sdk_tables_empty": true,
+    "native_processes_or_zombies_empty": true,
+    "account_lock_available": true,
+    "retained_cache_rehashed": true,
+    "backend_restriction_preserved": true
+  },
+  "correction": "Registry commands omit the image-only user field; OCI commands retain explicit numeric user.",
+  "correction_logs_sha256": {
+    "models": "9cde8cc1f12a7cdd00620d82989c1d66fe59768294f207d25a9ea23774c57bc0",
+    "clippy": "34426221b3ba4849f84258e5dab4d4b4c5be7e463d576475acf6f843a75b9121"
+  },
+  "qualification_scope": "anonymous fixed bare smolmachine and declared host cache only",
+  "follow_up_evidence": "embedded-port-http-parity-registry-linux-d6482f3.json"
+}

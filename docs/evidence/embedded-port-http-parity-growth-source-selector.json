@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "status": "ordinary-growth-workflow-source-selection-models-passed-cli-settings-and-native-acceptance-pending",
+  "workflow": {
+    "local_single_artifact_default_preserved": true,
+    "explicit_remote_source_id_required": true,
+    "simultaneous_non_nil_artifact_and_source_ids_rejected": true,
+    "unknown_duplicate_or_non_binary_source_ids_rejected": true,
+    "source_identity_from_existing_catalog_only": true,
+    "catalogs_and_registry_policy_preserved": true,
+    "oci_requires_explicit_network_profile_before_output_or_owner_start": true,
+    "local_default_profile_identity_preserved": true,
+    "remote_manifest_not_reported_as_local_fixture_blob": true
+  },
+  "validation": {
+    "current_passed": 43,
+    "minimum_passed": 43,
+    "current_toolchain": "Elixir 1.20.4 / OTP 29.0.6",
+    "minimum_toolchain": "Elixir 1.18.4 / OTP 27.3.4.15",
+    "credo_diff_new_issues": 0,
+    "live_sdk_or_vm_opened": false
+  },
+  "input_sha256": {
+    "examples/embedded_port/lib/growth_demo.ex": "4af1d7a1409bd6d9db3f8af3deb6644dd202466bd3f7e38927f85c0dd5f52885",
+    "test/unit/embedded_growth_example_test.exs": "55f5b365b8a4218e2b1acf36d5ba829b460270d0aa377773319187519c32d6a2"
+  },
+  "private_log_sha256": {
+    "remote-growth-selector-current-final.log": "ea30a9798acd0b3d9dc98bb3ab09428b8bfb43513065339a61d9c14b3e060923",
+    "remote-growth-selector-minimum-final.log": "9d6a0e699ec69217e0e126e9b836c1d6b8a55ef43771d59bd0005c1a7ec015af",
+    "remote-growth-selector-credo-final.log": "ab3e9ee4665990bed3c4c5fff0973b42319d0c569ac0f5f757f5512281c1ba45"
+  },
+  "scope": {
+    "production_library_or_native_sdk_changed": false,
+    "public_cli_settings_wired": false,
+    "ordinary_remote_source_growth_qualified": false,
+    "past_local_qualification_transferred": false,
+    "parity_complete": false,
+    "crash_validation_deferred": true,
+    "crash_handling_qualified": false,
+    "distribution_approved": false
+  },
+  "remaining": [
+    "wire explicit source/network/cache settings through public and durable growth launchers",
+    "qualify actual OCI and registry growth across required source/store/platform/resource combinations"
+  ]
+}

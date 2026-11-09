@@ -10,6 +10,8 @@ use std::io::{Read, Seek, SeekFrom, Write};
 use std::time::{Duration, Instant};
 
 pub const COMMAND_METADATA_BYTES: u64 = 8 * 1024 * 1024;
+/// Match the clean SDK buffered-exec ceiling for discarded file activation output.
+pub(crate) const FILE_ACTIVATION_OUTPUT_BYTES: u64 = 11 * 1024 * 1024;
 
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -83,8 +85,64 @@ pub(crate) struct Metadata {
     image: Option<ImageContext>,
     deadline_ns: u64,
     background: bool,
+    // Private per-job metadata only. Legacy payloads keep their original
+    // CLOCK_MONOTONIC epoch; new jobs match std::time::Instant.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    instant_clock: bool,
 }
 impl Metadata {
+    fn now_ns(&self) -> Result<u64> {
+        if self.instant_clock {
+            instant_clock_ns()
+        } else {
+            monotonic_ns()
+        }
+    }
+    pub(crate) fn file_activation(
+        record: &smolvm::config::VmRecord,
+        expires: Instant,
+    ) -> Result<Option<Self>> {
+        if record.image.is_none() {
+            return Ok(None);
+        }
+        let metadata = Self::new(
+            record,
+            BufferedCommand {
+                argv: vec!["/bin/true".into()],
+                env: vec![],
+                workdir: None,
+                user: None,
+                stdin: None,
+                timeout: expires.saturating_duration_since(Instant::now()),
+                max_output_bytes: FILE_ACTIVATION_OUTPUT_BYTES,
+            },
+            expires,
+        )?;
+        metadata.file_activation_deadline()?;
+        Ok(Some(metadata))
+    }
+    pub(crate) fn file_activation_deadline(&self) -> Result<Instant> {
+        self.validate()?;
+        let c = &self.command;
+        let anchor = Instant::now();
+        let remaining = Duration::from_nanos(self.deadline_ns.saturating_sub(self.now_ns()?));
+        if !self.instant_clock
+            || self.image.is_none()
+            || self.background
+            || c.argv != ["/bin/true"]
+            || !c.env.is_empty()
+            || c.workdir.is_some()
+            || c.user.is_some()
+            || c.stdin.is_some()
+            || c.max_output_bytes != FILE_ACTIVATION_OUTPUT_BYTES
+            || c.timeout > Duration::from_secs(600)
+            || remaining.is_zero()
+            || remaining > c.timeout
+        {
+            return Err(Error::before(ErrorCode::Validation));
+        }
+        Ok(anchor + remaining)
+    }
     pub(crate) fn execute_streaming(
         &self,
         client: &mut smolvm::agent::AgentClient,
@@ -94,7 +152,7 @@ impl Metadata {
         if self.background || self.command.stdin.is_some() {
             return Err(Error::before(ErrorCode::Unsupported));
         }
-        let remaining = Duration::from_nanos(self.deadline_ns.saturating_sub(monotonic_ns()?));
+        let remaining = Duration::from_nanos(self.deadline_ns.saturating_sub(self.now_ns()?));
         if remaining.is_zero() {
             return Err(Error::before(ErrorCode::State));
         }
@@ -153,7 +211,7 @@ impl Metadata {
             return Err(Error::uncertain(ErrorCode::Native));
         }
         for _ in 0..65537 {
-            if monotonic_ns()? >= self.deadline_ns {
+            if self.now_ns()? >= self.deadline_ns {
                 return Err(Error::uncertain(ErrorCode::Native));
             }
             match client.recv_raw() {
@@ -197,13 +255,14 @@ impl Metadata {
                 unprivileged: config.unprivileged,
             }
         });
-        let now = monotonic_ns()?;
+        let now = instant_clock_ns()?;
         let remaining = expires.saturating_duration_since(Instant::now());
         Ok(Self {
             command,
             image,
             deadline_ns: now.saturating_add(remaining.as_nanos() as u64),
             background: false,
+            instant_clock: true,
         })
     }
     pub(crate) fn background(
@@ -261,7 +320,7 @@ impl Metadata {
             .as_ref()
             .ok_or(Error::before(ErrorCode::Unsupported))?;
         let anchor = Instant::now();
-        let remaining = Duration::from_nanos(self.deadline_ns.saturating_sub(monotonic_ns()?));
+        let remaining = Duration::from_nanos(self.deadline_ns.saturating_sub(self.now_ns()?));
         if remaining.is_zero() {
             return Err(Error::before(ErrorCode::State));
         }
@@ -281,7 +340,7 @@ impl Metadata {
         if self.background {
             return Err(Error::before(ErrorCode::Validation));
         }
-        let remaining = Duration::from_nanos(self.deadline_ns.saturating_sub(monotonic_ns()?));
+        let remaining = Duration::from_nanos(self.deadline_ns.saturating_sub(self.now_ns()?));
         if remaining.is_zero() {
             return Err(Error::before(ErrorCode::State));
         }
@@ -315,7 +374,7 @@ impl Metadata {
         if !self.background {
             return Err(Error::before(ErrorCode::Validation));
         }
-        let remaining = Duration::from_nanos(self.deadline_ns.saturating_sub(monotonic_ns()?));
+        let remaining = Duration::from_nanos(self.deadline_ns.saturating_sub(self.now_ns()?));
         if remaining.is_zero() {
             return Err(Error::before(ErrorCode::State));
         }
@@ -340,12 +399,26 @@ impl Metadata {
             .map_err(|_| Error::uncertain(ErrorCode::Native))
     }
 }
+// Match std::time::Instant for conversion in both directions. Darwin's POSIX
+// CLOCK_MONOTONIC and CLOCK_UPTIME_RAW have different resolution/rate semantics:
+// https://doc.rust-lang.org/std/time/struct.Instant.html#underlying-system-calls
+fn instant_clock_ns() -> Result<u64> {
+    #[cfg(target_os = "macos")]
+    let clock = libc::CLOCK_UPTIME_RAW;
+    #[cfg(not(target_os = "macos"))]
+    let clock = libc::CLOCK_MONOTONIC;
+    clock_ns(clock)
+}
+
 pub(crate) fn monotonic_ns() -> Result<u64> {
+    clock_ns(libc::CLOCK_MONOTONIC)
+}
+fn clock_ns(clock: libc::clockid_t) -> Result<u64> {
     let mut value = libc::timespec {
         tv_sec: 0,
         tv_nsec: 0,
     };
-    if unsafe { libc::clock_gettime(libc::CLOCK_MONOTONIC, &mut value) } != 0
+    if unsafe { libc::clock_gettime(clock, &mut value) } != 0
         || value.tv_sec < 0
         || value.tv_nsec < 0
     {
@@ -721,6 +794,49 @@ mod tests {
     use super::*;
 
     #[test]
+    fn file_activation_is_fixed_and_preserves_original_overlay_without_a_runtime_manager() {
+        let mut record =
+            smolvm::config::VmRecord::new("owned".into(), 1, 512, vec![], vec![], false);
+        let until = Instant::now() + Duration::from_secs(30);
+        assert!(Metadata::file_activation(&record, until).unwrap().is_none());
+        record.image = Some("local-dir:/fixture".into());
+        record.fork_overlay_owner = Some("original-overlay".into());
+        let metadata = Metadata::file_activation(&record, until).unwrap().unwrap();
+        assert_eq!(
+            metadata.image.as_ref().unwrap().overlay.as_deref(),
+            Some("original-overlay")
+        );
+        for _ in 0..4096 {
+            assert!(metadata.file_activation_deadline().unwrap() <= until);
+        }
+        let mut legacy = Metadata::new(&record, metadata.command.clone(), until).unwrap();
+        legacy.instant_clock = false;
+        legacy.deadline_ns = monotonic_ns().unwrap() + 1_000_000_000;
+        let encoded = serde_json::to_value(&legacy).unwrap();
+        assert!(encoded.get("instant_clock").is_none());
+        let decoded: Metadata = serde_json::from_value(encoded).unwrap();
+        assert!(!decoded.instant_clock);
+        assert!(decoded.file_activation_deadline().is_err());
+        for mode in 0..11 {
+            let mut altered = metadata.clone();
+            match mode {
+                0 => altered.command.argv.push("injected".into()),
+                1 => altered.command.env.push(("ENV".into(), "value".into())),
+                2 => altered.command.stdin = Some("input".into()),
+                3 => altered.command.user = Some("root".into()),
+                4 => altered.command.workdir = Some("/".into()),
+                5 => altered.command.max_output_bytes += 1,
+                6 => altered.background = true,
+                7 => altered.image = None,
+                8 => altered.deadline_ns = 0,
+                9 => altered.command.timeout = Duration::from_secs(601),
+                _ => altered.instant_clock = false,
+            }
+            assert!(altered.file_activation_deadline().is_err());
+        }
+    }
+
+    #[test]
     fn terminal_metadata_binds_single_program_and_image_context_without_guest_lifetime_authority() {
         let mut record =
             smolvm::config::VmRecord::new("owned".into(), 1, 512, vec![], vec![], false);
@@ -754,7 +870,7 @@ mod tests {
         let metadata = Metadata::new(&record, command, until).unwrap();
         let (config, deadline) = metadata.terminal(&options).unwrap();
         assert!(config.timeout.is_none() && config.stdin.is_none() && !config.stop_vm_on_exit);
-        assert!(deadline <= until + Duration::from_millis(1));
+        assert!(deadline <= until);
         for mode in 0..3 {
             let mut altered = metadata.clone();
             match mode {

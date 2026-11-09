@@ -1,0 +1,152 @@
+{
+  "schema": 1,
+  "status": "scoped-ordinary-linux-registry-and-oci-acceptance",
+  "source_commit": "5788a29ba45b3cc386fb17a69c8cae2ac855a565",
+  "source_files_verified": 1576,
+  "sdk": {
+    "version": "1.22.0",
+    "revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "unmodified_before_after_build": true,
+    "cli_or_sdk_http_fallback": false
+  },
+  "package": {
+    "manifest_sha256": "36ed1c49f45cec1753099a7b4fa240af3c74d7f70318c0805eca41b2efcbbba9",
+    "helper_sha256": "7c81a6bf68fdf8f42bd668e28ffa7f466ec1e796a9fb087e29715beb8783a950",
+    "witness_sha256": "7fdc28c5d4e9578241d54a3c0902e3d691f6844d4f65b8f6642ebaa3ca769e18",
+    "assets_sha256": "64a20a93a48f11b62b74692c356dc460ce7fcf01b87be57ea5db9b5d7ea59d66",
+    "assets_verified": 806,
+    "platform": "linux",
+    "architecture": "x86_64",
+    "engine_version": "0.2.0",
+    "manifest_schema": 3,
+    "protocol": "2.0",
+    "host_tools_verified": true
+  },
+  "build": {
+    "rust_toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+    "registry_checks_passed": 71,
+    "example_models_passed": 7,
+    "python_checks": 50,
+    "python_expected_skips": 4,
+    "initial_assembly_missing_template_input": true,
+    "complete_approved_software_assets_supplied": true,
+    "empty_rootfs_directories_restored_from_pinned_archive": 64,
+    "final_assets_match_approved_64a20a93_inventory": true,
+    "sdk_state_or_keys_installed_from_other_account": false
+  },
+  "registry": {
+    "mode": "operator-account-bearer-mirror-rotation",
+    "source": {
+      "content_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+      "platform": "linux/amd64",
+      "reference": "registry.fixture.invalid/team/ordinary@sha256:7b45a3809c692738d72330c8d7703c398a2b2b4aa5d55efa6af36af222a35ec0"
+    },
+    "artifact_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+    "artifact_bytes": 14952849,
+    "cold_download": true,
+    "warm_manifest_refetch_and_cache_reuse": true,
+    "fresh_cached_creation": true,
+    "ordinary_guest_file_io": true,
+    "restart_data_retained": true,
+    "owned_deleted": true,
+    "retained_host_cache_rehashed": true,
+    "request_counts": {
+      "manifest": 2,
+      "blob": 1,
+      "other": 0,
+      "authorization_present": 3,
+      "authorized": 3,
+      "unauthorized": 0,
+      "operator_rotations": 1,
+      "stream_errors": 0
+    },
+    "fixture_unchanged": true,
+    "normal_fixture_and_owner_collection": true,
+    "all_credential_modes_qualified": false,
+    "tls_identity_basic_exchange_qualified": false,
+    "finished_utc": "2026-10-16T19:08:33.521460+00:00"
+  },
+  "oci": {
+    "direct_create_start_exec": true,
+    "image_list_pull": true,
+    "configured_startup_argv_env_workdir_default_uid": true,
+    "startup_observations": [
+      {
+        "duplicate_startup_observed": false,
+        "explicit_entrypoint_cmd_env_workdir": true,
+        "image_default_user": true,
+        "observed_starts": 1
+      },
+      {
+        "duplicate_startup_observed": false,
+        "explicit_entrypoint_cmd_env_workdir": true,
+        "image_default_user": true,
+        "observed_starts": 2
+      }
+    ],
+    "ordinary_restart_data_retained": true,
+    "owned_deleted": true,
+    "normal_owner_shutdown": true,
+    "operator_guest_credentials_qualified": false,
+    "scope": "ordinary pinned anonymous OCI/images plus fixed startup workload"
+  },
+  "custody": {
+    "fresh_genuine_account_uid": 1005,
+    "default_sdk_domain": true,
+    "old_domain_or_receipts_adopted": false,
+    "registry_sdk_tables": {
+      "vms": 0,
+      "vm_create_reservations": 0,
+      "vm_pause_operations": 0,
+      "vm_resize_intents": 0,
+      "vm_resize_receipts": 0
+    },
+    "oci_sdk_tables": {
+      "vms": 0,
+      "vm_create_reservations": 0,
+      "vm_pause_operations": 0,
+      "vm_resize_intents": 0,
+      "vm_resize_receipts": 0
+    },
+    "native_processes_or_zombies": [],
+    "account_lock_available": true,
+    "domain_json_unchanged": true,
+    "private_archive_sha256": "c38e8901c93dd543d1ecd990aaf157157545286f6f98a88d7ac89c3dac45cd17",
+    "private_archive_bytes": 158361408,
+    "archive_verified_local_and_outer": true,
+    "raw_credentials_receipts_keys_and_packages_in_git": false
+  },
+  "lab": {
+    "observed_utc": "2026-10-16T19:17:12Z",
+    "active_state": "inactive",
+    "result": "success",
+    "exit_status": 0,
+    "main_pid": 0,
+    "original_run_disk_bytes": 24766644224,
+    "original_run_disk_mtime": 1792169349,
+    "original_run_disk_unchanged": true,
+    "separate_provision_disk_retained": true,
+    "provision_disk_bytes": 3869114368
+  },
+  "http_only_consumers": {
+    "current_passed": true,
+    "minimum_passed": true,
+    "without_rust": true,
+    "native_assets_absent": true,
+    "native_runtime_exercised": false,
+    "same_archive_sha256": "5042a357670da626637fc7b9cdc3f65a72f86d9945bb24a68701cb37abd97722",
+    "current_toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+    "minimum_toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)"
+  },
+  "current_minimum_public_native_consumers_qualified": false,
+  "public_oci_registry_admission_enabled": false,
+  "historical_package_qualification_transferred": false,
+  "all_parity_rows_complete": false,
+  "crash_validation_performed": false,
+  "distribution_approved": false,
+  "remaining_gates": [
+    "Other credential/source/resource/platform combinations",
+    "Current/minimum public native consumers and public P4 admission",
+    "Remaining P0-P9 acceptance requirements"
+  ]
+}

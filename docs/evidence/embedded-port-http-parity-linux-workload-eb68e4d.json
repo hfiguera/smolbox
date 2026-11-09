@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "scope": "exact-linux-package-ordinary-public-workload-attempt",
+  "checked_at_utc": "2026-10-16T03:01:45Z",
+  "status": "failed",
+  "native_source_commit": "0e35c3f6a281f192fb7402fd706858431705442d",
+  "qualification_tool_source_commit": "eb68e4d011703524aa4b213ca2a6f9f7b2bb5c36",
+  "qualification_tool_archive_sha256": "8e7b0d688ff9e7b52905fcf7150418211a0776152111dadf46f845776e363a27",
+  "native_bundle": {
+    "manifest_schema": 3,
+    "package_manifest_sha256": "47fb386421462de60266a7812fbebb73a7bb5b8a2d690ac78579193efac34603",
+    "identity": {
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "c1d85441a63ddec54fae0abcddf2bfa9820ea164f5b17561f3ce4db561e7b07f",
+      "assets_sha256": "ffd234d5f3a6633e2aa207556b35a92b43700690685fe431c8d4cf5353eb3200",
+      "platform": "linux",
+      "architecture": "x86_64"
+    },
+    "sdk_source_verified_unmodified": true
+  },
+  "fixture": {
+    "bytes": 41681341,
+    "fixture_defaults_sha256": "674595033254d389947f5ee19db405ddcfb3404a49e92c14934e48a5ac8dbecd",
+    "fixture_sha256": "6daf3372eb5ab03ef0eb5af2bba8f583952d44ae744540f53865c0c8eabc174e",
+    "image_digest": "sha256:28eb0cb65acb65b970e85c0dc57d10067868fae8dd00d072413df273132123ac",
+    "layer_content": [
+      {
+        "tar_bytes": 50860544,
+        "uncompressed_tar_sha256": "7bae6c8cef01a129cc3a9eb16f37cf8e4deb84085586ab425377bcedf30a411b",
+        "upstream_layer_digest": "sha256:c5680ba2a701892cf5e9304fcdc601ebc8df014c6f6354b451614c98917e4c64"
+      }
+    ],
+    "package_manifest_sha256": "47fb386421462de60266a7812fbebb73a7bb5b8a2d690ac78579193efac34603",
+    "scope": "ordinary-python-container-fixture",
+    "sdk_source_modified": false,
+    "sdk_vm_started": false,
+    "source_fixture_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+    "status": "created",
+    "storage_template_included": false,
+    "preparation_tool_sha256": "82a01395778e92565c242976c93ea5adbcf344f7f6da43364b5c3c258e40c617",
+    "retained_privately": true,
+    "published": false
+  },
+  "current_consumer": {
+    "status": "failed",
+    "without_rust": true,
+    "final_consumer_report_produced": false,
+    "completed_before_failure": [
+      "neutral",
+      "inherited",
+      "override"
+    ],
+    "completed_case_scope": {
+      "normal_start_cycles_each": 2,
+      "stopped_runtime_replacement_each": true,
+      "unchanged_workload_identity": true,
+      "duplicate_create_idempotence": true,
+      "changed_workload_rejected_before_dispatch": true,
+      "ordinary_exec_does_not_relaunch": true,
+      "console_snapshot_completed": true,
+      "owned_deletion_and_empty_inventory_between_cases": true,
+      "application_exit_status_attested": false
+    },
+    "failed_case": {
+      "kind": "missing",
+      "created_stopped": true,
+      "public_start_state": "unknown",
+      "public_start_phase": "uncertain",
+      "helper_channel_closed": true,
+      "independent_read_only_sdk_state_after_owner_exit": "stopped",
+      "independent_read_only_sdk_pid_after_owner_exit": null
+    },
+    "proof_tool_sha256": {
+      "native-proof.exs": "d5c77f23f1726cfbc027738d2287935189674c73f6a393cebe9fda3d2330b3bb"
+    },
+    "workload_startup_qualified": false
+  },
+  "minimum_consumer": {
+    "status": "not-run",
+    "reason": "current lane did not complete"
+  },
+  "source_analysis": {
+    "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "sdk_path": "src/embedded/runtime.rs",
+    "api": "EmbeddedRuntime::start_machine_with_interceptor",
+    "behavior": "On launch_image_workload error, stop the VM, mark its row stopped and return the error.",
+    "required_smolbox_behavior": "Missing startup executable permits a running VM and subsequent execution, matching the existing HTTP feature contract.",
+    "next_implementation": "Separate owned VM boot/enrollment from bounded workload launch using public unmodified SDK APIs. Do not hide the failed start, relaunch implicitly or change upstream source."
+  },
+  "cleanup": {
+    "scope": "explicit-full-receipt-stopped-cleanup",
+    "full_saved_receipt_used": true,
+    "stopped_before_delete": true,
+    "owned_deleted": true,
+    "sdk_inventory_empty": true,
+    "normal_helper_shutdown": true,
+    "forced_termination": false
+  },
+  "tooling_validation": {
+    "ci_package_tests_passed": 7,
+    "python_runner_guards_passed": 22,
+    "strict_clippy_all_targets": "passed",
+    "credo_findings": 50,
+    "credo_added_findings": 0,
+    "credo_removed_findings": 0,
+    "normal_and_independent_sdk_inventory_checks": "passed"
+  },
+  "lab_teardown": {
+    "sdk_inventory_empty": true,
+    "native_owner_processes_absent": true,
+    "all_qualification_handles_terminal": true,
+    "privileged_read_only_process_verification": true,
+    "normal_guest_shutdown": true,
+    "host_unit_active_state": "inactive",
+    "host_unit_result": "success",
+    "host_unit_exit_status": 0,
+    "run_disk_and_enrolled_domain_retained": true,
+    "fixture_and_raw_evidence_retained_privately": true,
+    "normal_shutdown_marker_archived_before_shutdown": true,
+    "forced_termination": false
+  },
+  "full_parity_acceptance": "pending",
+  "public_native_branch_admission_enabled": false,
+  "crash_handling_qualified": false,
+  "distribution_approved": false
+}

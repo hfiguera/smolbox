@@ -1,0 +1,169 @@
+{
+  "schema": 1,
+  "scope": "owned-packed-start-implementation-and-exact-linux-development-build",
+  "checked_at_utc": "2026-10-16T03:53:44Z",
+  "source_commit": "1b477174aedcafa52b56043dd14927f6ba539993",
+  "implementation_commits": [
+    "3638f96",
+    "81bdf5d",
+    "1b47717"
+  ],
+  "native_input_files_verified": 261,
+  "native_bundle": {
+    "manifest_schema": 3,
+    "package_manifest_sha256": "eed7ec014072565f33f7dafd173897c39118b391fb69dc3daac24253181e22aa",
+    "identity": {
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "fedcfdaf92efbf8c35ce6c3780231ac72a7b402bff7171fdf55bf51547986664",
+      "assets_sha256": "ffd234d5f3a6633e2aa207556b35a92b43700690685fe431c8d4cf5353eb3200",
+      "platform": "linux",
+      "architecture": "x86_64"
+    },
+    "sdk_version": "1.22.0",
+    "sdk_source_verified_unmodified": true,
+    "rust_toolchain": "1.98.1",
+    "retained_privately": true,
+    "published": false
+  },
+  "fixture": {
+    "bytes": 41681356,
+    "fixture_defaults_sha256": "674595033254d389947f5ee19db405ddcfb3404a49e92c14934e48a5ac8dbecd",
+    "fixture_sha256": "04b8d781af26f2e6133a0974deea745d44e5109be21e1213df23a6cbb0bd2747",
+    "image_digest": "sha256:28eb0cb65acb65b970e85c0dc57d10067868fae8dd00d072413df273132123ac",
+    "layer_content": [
+      {
+        "tar_bytes": 50860544,
+        "uncompressed_tar_sha256": "7bae6c8cef01a129cc3a9eb16f37cf8e4deb84085586ab425377bcedf30a411b",
+        "upstream_layer_digest": "sha256:c5680ba2a701892cf5e9304fcdc601ebc8df014c6f6354b451614c98917e4c64"
+      }
+    ],
+    "package_manifest_sha256": "eed7ec014072565f33f7dafd173897c39118b391fb69dc3daac24253181e22aa",
+    "scope": "ordinary-python-container-fixture",
+    "sdk_source_modified": false,
+    "sdk_vm_started": false,
+    "source_fixture_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+    "status": "created",
+    "storage_template_included": false,
+    "retained_privately": true,
+    "published": false
+  },
+  "implementation": [
+    "Owned packed-image boot and bounded one-shot workload launch are separate public-SDK operations.",
+    "Packed launch sends no registry pull and fabricates no image observation.",
+    "Typed redacted launch rejection is distinct from container acknowledgement and from uncertain exchange.",
+    "Original manager and opaque boot enrollment remain charged until actual normal collection.",
+    "An unentered cancellation fence prevents late boot after registration retirement.",
+    "Neutral offline records may omit DNS hosts only when no network device is enabled.",
+    "Bare-pack reinspection checks link count independently of timestamp equality.",
+    "Ordinary worker fixtures use an optimized helper within the unchanged executable byte limit."
+  ],
+  "validation": {
+    "macos_final_source": {
+      "source_commit": "1b477174aedcafa52b56043dd14927f6ba539993",
+      "engine_units_passed": 850,
+      "port_units_passed": 77,
+      "protocol_units_passed": 77,
+      "protocol_contracts_passed": 56,
+      "ignored_opt_ins": 22,
+      "filtered_unchanged_sparse_test": 1,
+      "strict_clippy_all_targets": "passed",
+      "python_native_cases": 43,
+      "python_skipped": 4,
+      "vm_started": false
+    },
+    "linux_full_source_81bdf5d": {
+      "engine_units_passed": 849,
+      "port_units_passed": 77,
+      "protocol_units_passed": 77,
+      "protocol_contracts_passed": 56,
+      "ignored_opt_ins": 22,
+      "filtered_unchanged_sparse_test": 1
+    },
+    "linux_final_source": {
+      "source_commit": "1b477174aedcafa52b56043dd14927f6ba539993",
+      "focused_image_start_tests_passed": 10,
+      "ordinary_bootstrap_worker_test": "passed",
+      "worker_cases": 6,
+      "strict_clippy_all_targets": "passed",
+      "optimized_helper_build": "passed",
+      "package_build": "passed",
+      "data_only_fixture_preparation": "passed",
+      "sdk_inventory_checks": "passed",
+      "full_suite_repeated_after_neutral_eligibility_change": false
+    },
+    "shared_host_contracts": {
+      "cases_passed": 48,
+      "runtime_and_deferred_crash_excluded": true
+    },
+    "unchanged_sparse_test": {
+      "status": "passed-earlier-in-this-change",
+      "source_state": "before final reply-projection, metadata-bound and neutral-eligibility changes",
+      "vm_started": false
+    }
+  },
+  "preserved_failures": [
+    {
+      "scope": "Linux bare-pack model at 3638f96",
+      "test": "branch::retention::boot::tests::original_bare_pack_is_pinned_without_comparing_grown_disk_geometry",
+      "status": "reproduced",
+      "cause": "An added hard link can preserve ctime; version equality did not recheck link count.",
+      "ordinary_filesystem_samples_with_unchanged_ctime": 8,
+      "fixed_in": "81bdf5d",
+      "fixed_linux_full_suite": "passed",
+      "vm_started": false
+    },
+    {
+      "scope": "ordinary Linux worker fixture used oversized debug helper",
+      "debug_executable_bytes": 269706456,
+      "executable_limit_bytes": 268435456,
+      "rejected_before_worker_launch": true,
+      "resolution": "Use the optimized helper; keep the executable limit unchanged.",
+      "optimized_worker_cases": "passed",
+      "default_runner_fixed_in": "1b47717",
+      "vm_started": false
+    },
+    {
+      "scope": "public current workload attempt against package e2ac9fb1",
+      "package_manifest_sha256": "e2ac9fb17373b607a8c8eb208961d08d332868af74d040fe5afb1243ea5f92e4",
+      "fixture_sha256": "4bbea75ee0f55c4ba6d2eda82c6ec0214ded9110d4d20dd3f78c3c5d1b193747",
+      "kind": "neutral",
+      "public_state": "unknown",
+      "public_error_category": "unsupported_capability",
+      "public_error_evidence": "unknown",
+      "sdk_row_state_after_attempt": "created",
+      "sdk_pid_after_attempt": null,
+      "cause": "Preflight incorrectly required DNS hosts for a neutral offline record with no network device.",
+      "fixed_in": "1b47717",
+      "full_saved_receipt_cleanup": "passed",
+      "receipt_inspection_before_delete": "stopped",
+      "sdk_inventory_restored": true,
+      "vm_started": false
+    }
+  ],
+  "current_package_vm_qualification": {
+    "status": "not-run",
+    "current_public_workload_consumer": "pending",
+    "minimum_public_workload_consumer": "pending",
+    "network_and_terminal_regressions": "pending",
+    "reason": "Complete the corrected build window and normally shut down before starting the ordinary public campaign in a fresh guarded window."
+  },
+  "lab_teardown": {
+    "all_handles_terminal": true,
+    "sdk_inventory_empty": true,
+    "native_owner_processes_absent": true,
+    "privileged_read_only_process_verification": true,
+    "normal_guest_shutdown": true,
+    "host_unit_active_state": "inactive",
+    "host_unit_result": "success",
+    "host_unit_exit_status": 0,
+    "run_disk_and_enrolled_domain_retained": true,
+    "normal_shutdown_marker_archived": true,
+    "forced_termination": false
+  },
+  "full_parity_acceptance": "pending",
+  "public_native_branch_admission_enabled": false,
+  "crash_handling_qualified": false,
+  "distribution_approved": false
+}

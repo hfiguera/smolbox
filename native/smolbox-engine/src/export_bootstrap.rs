@@ -891,6 +891,7 @@ pub(crate) mod tests {
         let output_blob = blob(&output, 0);
         let request = crate::transfer_worker::Request {
             schema: 1,
+            file_activation: None,
             operation: "a".repeat(32),
             owner: crate::OwnerIdentity::capture().unwrap(),
             socket: root.join("agent.sock"),

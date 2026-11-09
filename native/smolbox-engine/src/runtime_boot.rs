@@ -88,6 +88,24 @@ impl Owned {
             .map(Arc::as_ref)
             .ok_or(Error::before(ErrorCode::Ownership))
     }
+    /// A database snapshot is only a candidate. The start-only readiness wait
+    /// remains bound to this returned enrollment, never a discovered live PID.
+    pub(crate) fn verify_running(
+        &self,
+        receipt: &CreationReceipt,
+        observation: &Observation,
+        runtime_pid: Option<i32>,
+    ) -> Result<()> {
+        self.matches(receipt)?;
+        let child = self.enrolled()?.child();
+        if observation.state != crate::ObservedState::Running
+            || observation.pid_identity != Some((child.pid, child.birth))
+            || runtime_pid != Some(child.pid)
+        {
+            return Err(Error::uncertain(ErrorCode::Ownership));
+        }
+        Ok(())
+    }
     pub(crate) fn verify_before(
         &self,
         receipt: &CreationReceipt,
@@ -95,17 +113,25 @@ impl Owned {
     ) -> Result<()> {
         self.matches(receipt)?;
         let child = self.enrolled()?.child();
-        if !receipt.matches(row)?
-            || row.forkpoint_held
-            || !matches!(
-                row.state,
-                smolvm::config::RecordState::Running | smolvm::config::RecordState::Stopped
-            )
-            || !(row.pid.zip(row.pid_start_time) == Some((child.pid, child.birth))
-                || (row.state == smolvm::config::RecordState::Stopped
-                    && row.pid.is_none()
-                    && row.pid_start_time.is_none()))
-        {
+        // SDK startup can return an error after an enrolled child exits while
+        // leaving the original row Created. Permit its normal SDK cleanup only
+        // with this original enrollment, no stored PID and positive absence or
+        // read-only exit evidence for the originally enrolled child. Do not reap
+        // its wait status before the normal SDK collection call.
+        // A Created row, absent PID or missing enrollment alone grants nothing.
+        let failed_created = row.state == smolvm::config::RecordState::Created
+            && row.pid.is_none()
+            && row.pid_start_time.is_none()
+            && created_child_exited(child)?;
+        let retained_state = matches!(
+            row.state,
+            smolvm::config::RecordState::Running | smolvm::config::RecordState::Stopped
+        ) && (row.pid.zip(row.pid_start_time)
+            == Some((child.pid, child.birth))
+            || (row.state == smolvm::config::RecordState::Stopped
+                && row.pid.is_none()
+                && row.pid_start_time.is_none()));
+        if !receipt.matches(row)? || row.forkpoint_held || !(failed_created || retained_state) {
             return Err(Error::before(ErrorCode::Ownership));
         }
         Ok(())
@@ -149,6 +175,58 @@ impl Owned {
         budget.check()
     }
 }
+
+/// Retry only read-only agent reachability after the SDK's single boot call.
+/// The caller verifies original enrollment on every snapshot. Uncertain return
+/// neither stops the child nor retires its authority/resources.
+pub(crate) fn wait_until_ready(
+    budget: &ReadBudget,
+    mut observe_original: impl FnMut() -> Result<Observation>,
+    mut probe: impl FnMut(&ReadBudget) -> Result<()>,
+) -> Result<Observation> {
+    let uncertain = |error: Error| Error::uncertain(error.code);
+    loop {
+        budget.check().map_err(uncertain)?;
+        let before = observe_original().map_err(uncertain)?;
+        let attempt = ReadBudget {
+            deadline: budget
+                .deadline
+                .min(std::time::Instant::now() + std::time::Duration::from_millis(250)),
+            cancel: budget.cancel.clone(),
+        };
+        match probe(&attempt) {
+            Ok(()) => {
+                budget.check().map_err(uncertain)?;
+                let after = observe_original().map_err(uncertain)?;
+                if before != after {
+                    return Err(Error::uncertain(ErrorCode::Ownership));
+                }
+                budget.check().map_err(uncertain)?;
+                return Ok(after);
+            }
+            // A per-attempt timeout is not the original operation's timeout.
+            // Admission, identity, filesystem and protocol-limit failures stop.
+            Err(error) if matches!(error.code, ErrorCode::Native | ErrorCode::State) => {}
+            Err(error) => return Err(uncertain(error)),
+        }
+        budget.check().map_err(uncertain)?;
+        std::thread::sleep(
+            std::time::Duration::from_millis(25).min(
+                budget
+                    .deadline
+                    .saturating_duration_since(std::time::Instant::now()),
+            ),
+        );
+    }
+}
+fn created_child_exited(child: crate::OwnerIdentity) -> Result<bool> {
+    match smolvm::process::process_start_time(child.pid) {
+        Some(birth) => Ok(cfg!(target_os = "linux")
+            && birth == child.birth
+            && !smolvm::process::is_alive(child.pid)),
+        None => crate::epoch::gone(child),
+    }
+}
 impl Engine {
     pub(crate) fn stop_runtime_boot(
         &self,
@@ -165,15 +243,39 @@ impl Engine {
         self.verify_record(receipt, &before)?;
         owned.verify_before(receipt, &before)?;
         let _work = self.jobs.acquire(crate::jobs::Demand::branch_delete())?;
+        let manager = self
+            .owned_managers
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?
+            .get(&receipt.name)
+            .cloned();
         owned.call(
             receipt,
             self.collection_epoch()?,
-            self.runtime.pid(&receipt.name),
+            self.runtime_pid(&receipt.name),
             budget,
             || {
-                self.runtime
-                    .stop_machine(&receipt.name)
-                    .map_err(|_| Error::uncertain(ErrorCode::Native))
+                if let Some(manager) = manager {
+                    let _source = self.source_lease(receipt)?;
+                    manager
+                        .try_lock()
+                        .map_err(|_| Error::before(ErrorCode::Conflict))?
+                        .stop()
+                        .map_err(|_| Error::uncertain(ErrorCode::Native))?;
+                    self.db
+                        .update_vm(&receipt.name, |row| {
+                            row.state = smolvm::config::RecordState::Stopped;
+                            row.pid = None;
+                            row.pid_start_time = None;
+                        })
+                        .map_err(|_| Error::uncertain(ErrorCode::Database))?
+                        .ok_or(Error::uncertain(ErrorCode::Ownership))?;
+                    Ok(())
+                } else {
+                    self.runtime
+                        .stop_machine(&receipt.name)
+                        .map_err(|_| Error::uncertain(ErrorCode::Native))
+                }
             },
         )?;
         let after = self
@@ -186,7 +288,7 @@ impl Engine {
         stopped.state = smolvm::config::RecordState::Stopped;
         stopped.pid = None;
         stopped.pid_start_time = None;
-        verify_stopped(receipt, &stopped, &after, self.runtime.pid(&receipt.name))?;
+        verify_stopped(receipt, &stopped, &after, self.runtime_pid(&receipt.name))?;
         budget.check().map_err(|e| Error::uncertain(e.code))?;
         Ok(())
     }

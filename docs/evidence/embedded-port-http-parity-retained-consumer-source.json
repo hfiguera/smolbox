@@ -1,0 +1,173 @@
+{
+  "schema": 1,
+  "scope": "retained-native-consumer-source-and-explicit-machine-resolution-control",
+  "baseline_commit": "ee5452804f945fa4b22057ab1e3cc47cf37843d5",
+  "inputs": [
+    {
+      "path": "dev/smolbox/ci/native_consumer.ex",
+      "sha256": "537b34f59d60604a574a51e6ba1328c2270880f5c891ef2a7a9aca7edbfabdbc"
+    },
+    {
+      "path": "dev/smolbox/ci/package.ex",
+      "sha256": "bc739d566eb487149925b81c98d5d9208bc11d9e51576c3caa8bc90b6655aa17"
+    },
+    {
+      "path": "examples/embedded_port/lib/growth_control.ex",
+      "sha256": "a3009b0d98a702d02fa347e580b39174b3e150b12af64fa60fecf76894c646d2"
+    },
+    {
+      "path": "test/ci/package_test.exs",
+      "sha256": "747cc650835428c88e701171efb8610a219b550ab1190cb744247893861edcfa"
+    },
+    {
+      "path": "test/unit/embedded_growth_example_test.exs",
+      "sha256": "9f09fe556ceefdb8f5929f24341988d0595968e5c4aa8477e31736627a1851ec"
+    }
+  ],
+  "behavior": [
+    "Mark retained native children before diagnostic I/O; preserve source trees through package failure cleanup.",
+    "Use an in-process guard when marker writing fails and a private on-disk marker for repeated cleanup.",
+    "A retained-source marker grants no process or SDK cleanup authority.",
+    "Completed consumers still clean their temporary source.",
+    "The keeper accepts explicit quiesced, exact-version original-machine resolution through Machines.resolve, without replaying start or resize."
+  ],
+  "validation": [
+    {
+      "lane": "focused-current",
+      "passed": 25,
+      "excluded": 0,
+      "log_sha256": "c5f2410df79c295621071ed079d6f02b93cc33a4baa79cc09203c0410595b8dc"
+    },
+    {
+      "lane": "focused-minimum",
+      "passed": 25,
+      "excluded": 0,
+      "log_sha256": "c06a0a5f4537ffa04b30822cd2908ce0260afcc2c318af6b583b54369159fd2f"
+    },
+    {
+      "lane": "ordinary-root-followup",
+      "passed": 1637,
+      "excluded": 42,
+      "log_sha256": "178ffc9811ef19431e7817b8e91810a4129568ce62ec215c1bf0cd86ca92c403"
+    },
+    {
+      "lane": "unchanged-volume-isolated",
+      "passed": 3,
+      "excluded": 0,
+      "log_sha256": "c55efcc3862bcc20d4942a72991f0aef64a38fe5a798a34587d393e6b4082bd1"
+    }
+  ],
+  "initial_checks": [
+    {
+      "status": "failed",
+      "reason": "A new cleanup model asserted :ok, but the existing File.rm_rf! call returns removed paths. The corrected test verifies actual source removal.",
+      "log_sha256": "49fe77634ed8e4e15fd78ace688e40ba6387759dfa499b5667d0672de8a70700"
+    },
+    {
+      "status": "failed",
+      "reason": "The unchanged native volume lifecycle test received stale_version/not_dispatched after reading a stopped version. Its source is unchanged; isolated and full follow-up results are recorded separately.",
+      "passed": 1636,
+      "total": 1637,
+      "log_sha256": "9551792e05a6243a229c4e7551f432459b469041b0ea4f56c1037233afec0570"
+    }
+  ],
+  "credo": {
+    "strict_findings": 50,
+    "unchanged_from_baseline": true,
+    "log_sha256": "cdb2165e750ef10d8a56a45340bf44f1d8260e22fe406a8472967353f800994b"
+  },
+  "live_retained_failure_retest_performed": false,
+  "product_api_or_codec_changed": false,
+  "native_helper_changed": false,
+  "sdk_source_changed": false,
+  "crash_validation_performed": false,
+  "distribution_approved": false,
+  "parity_complete": false,
+  "documentation": {
+    "warnings_as_errors": true,
+    "passed": true,
+    "log_sha256": "d72017544cc46acfeb06ecf37f32dcf4025b3c9e11eb2aed18c4229d5e612e16"
+  },
+  "source_commit": "018188ad7d63b43335941554b35babcd37f37ae5",
+  "http_only_consumers": [
+    {
+      "lane": "current",
+      "archive_sha256": "a1e92f5731c7a1cd2ad644e75367dddd92d0a308eb69d6d5f1d7199fc89ef253",
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "report_sha256": "39ce28edd376137c06e96bd6a4cff3d55426a4e2a94874de51d23514705792b9",
+      "without_rust": true,
+      "native_assets_exercised": false,
+      "smoke": {
+        "checkpoint": true,
+        "client": true,
+        "guest_files": true,
+        "interactive": true,
+        "legacy_1_14_6_explicit": "1.14.6",
+        "legacy_runtime_explicit": "1.14.1",
+        "managed_branches": true,
+        "managed_checkpoints": true,
+        "managed_exports": true,
+        "network_policy": true,
+        "offline_default": true,
+        "runtime_1_16_0_explicit": "1.16.0",
+        "runtime_default": "1.22.0",
+        "supervisor": true,
+        "unqualified_runtime_rejected": "1.16.2",
+        "versions": {
+          "jason": "1.4.5",
+          "mint": "1.11.0",
+          "mint_web_socket": "1.0.6",
+          "nimble_options": "1.1.1",
+          "req": "0.7.5",
+          "telemetry": "1.4.2"
+        },
+        "without_rust": true,
+        "workload": true
+      }
+    },
+    {
+      "lane": "minimum",
+      "archive_sha256": "a1e92f5731c7a1cd2ad644e75367dddd92d0a308eb69d6d5f1d7199fc89ef253",
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "report_sha256": "1bb85efc33d42ecac968ab7e0fd320a9c20f18a95cca2c28b9738280d2d7affa",
+      "without_rust": true,
+      "native_assets_exercised": false,
+      "smoke": {
+        "checkpoint": true,
+        "client": true,
+        "guest_files": true,
+        "interactive": true,
+        "legacy_1_14_6_explicit": "1.14.6",
+        "legacy_runtime_explicit": "1.14.1",
+        "managed_branches": true,
+        "managed_checkpoints": true,
+        "managed_exports": true,
+        "network_policy": true,
+        "offline_default": true,
+        "runtime_1_16_0_explicit": "1.16.0",
+        "runtime_default": "1.22.0",
+        "supervisor": true,
+        "unqualified_runtime_rejected": "1.16.2",
+        "versions": {
+          "jason": "1.4.0",
+          "mint": "1.11.0",
+          "mint_web_socket": "1.0.6",
+          "nimble_options": "1.1.0",
+          "req": "0.7.4",
+          "telemetry": "1.3.0"
+        },
+        "without_rust": true,
+        "workload": true
+      }
+    }
+  ],
+  "coverage_manifest_checks": {
+    "passed": 4,
+    "log_sha256": "fc26b821574db7632acb7e9d120a2467f568eec0742b2df5b3cffac473710109"
+  },
+  "documentation_followup": {
+    "warnings_as_errors": true,
+    "passed": true,
+    "log_sha256": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d"
+  }
+}

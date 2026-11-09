@@ -143,6 +143,35 @@ uncoordinated external client.
 
 ## Persistence and upgrades
 
+The embedded Port Linux candidate exposes the same managed API through an
+explicitly approved `disk_growth: 1` SDK descriptor and exact native package.
+It keeps creation authority immutable and stores an authenticated material
+transition for each completed growth. Stores additionally require
+`native_disk_growth: 1`; native growth histories selectively use codec v18,
+while the HTTP encodings below remain unchanged. The shared engine holds
+machine/source/geometry leases through normal child collection, verifies both
+disk sizes and correlates the SDK metadata update before issuing the transition.
+Completed-proof lookup never replays the resize. The exact Linux package in the
+[public stopped-growth evidence](evidence/embedded-port-http-parity-public-growth-1d5e64c.json)
+passes unmounted packed-image workflows on current/minimum Memory and PostgreSQL
+consumers. That scope verifies workspace filesystem growth and overlay geometry;
+That historical checkpoint does not qualify bare/OCI or other source/resource combinations. Changed packages
+need their own acceptance. Older packages and macOS descriptors do not gain this
+capability implicitly. Mounted machines remain ineligible.
+
+The newer [Linux e7387c9c checkpoint](evidence/embedded-port-http-parity-linux-bare-growth-c728e31.json)
+passes current/minimum public bare-VM Memory consumers from client c728e31 without
+Rust. It checks two expansions, workspace filesystem capacity, overlay geometry,
+retained data, immutable creation, normal stopped Runtime replacement, draining
+and owned deletion with zero reservations. Its private records and archive verify.
+Matching [PostgreSQL 16.15 pairs](evidence/embedded-port-http-parity-linux-bare-postgresql-c728e31.json)
+now pass prepare/resume in separate normally exited BEAMs using the same frozen
+library source. Original keys, authority, binary data and historical output survive;
+final deletion releases all reservations and both test databases shut down normally.
+Other sources, mounted/other durable histories and platform/resource combinations
+remain pending on this package. Earlier package evidence keeps its own scope; full HTTP parity remains
+incomplete, with crash qualification deferred.
+
 Adapters advertise `managed_disk_expansion: 1` and implement `:expansion_accept`
 and `:expansion_advance` under the existing `Store.machine/3` boundary. Acceptance
 must serialize with all worker capacity updates and drain changes. Run the shared

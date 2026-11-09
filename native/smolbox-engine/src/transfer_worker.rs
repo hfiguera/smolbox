@@ -13,6 +13,9 @@ use std::time::Duration;
 pub(crate) const MAX_TRANSFER: u64 = 16 * 1024 * 1024;
 pub(crate) const CHUNK: u64 = 64 * 1024;
 pub(crate) const MAX_FRAME: usize = 16 * 1024;
+// Secrets travel only in this bounded private input frame. Output frames keep
+// their independent smaller ceiling; no metadata file carries credentials.
+const MAX_REQUEST: usize = 256 * 1024;
 pub(crate) const MAX_EVENTS: u32 = (MAX_TRANSFER / CHUNK) as u32 + 3;
 const STREAM_EVENTS: u32 = 65538;
 
@@ -36,10 +39,14 @@ pub(crate) enum Kind {
     Bootstrap {
         metadata: Blob,
         expected: crate::bootstrap::Expected,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        registry: Option<crate::guest_registry::Plan>,
     },
     Pull {
         metadata: Blob,
         expected: crate::ImagePullRequest,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        registry: Option<crate::guest_registry::Plan>,
     },
     Images {
         deadline_ns: u64,
@@ -134,10 +141,23 @@ pub(crate) struct Request {
     pub guest_path: String,
     pub max_bytes: u64,
     pub kind: Kind,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_activation: Option<Blob>,
 }
 
 impl Request {
     pub(crate) fn validate(&self) -> Result<()> {
+        if let Some(metadata) = &self.file_activation {
+            if !matches!(self.kind, Kind::Read | Kind::Write { .. })
+                || metadata.bytes == 0
+                || metadata.bytes > crate::buffered::COMMAND_METADATA_BYTES
+                || metadata.path.parent() != self.staging.parent()
+                || metadata.path == self.staging
+                || (metadata.device, metadata.inode) == (self.staging_device, self.staging_inode)
+            {
+                return Err(Error::before(ErrorCode::Validation));
+            }
+        }
         if let Kind::Buffered { metadata }
         | Kind::Background { metadata }
         | Kind::Streaming { metadata }
@@ -197,13 +217,31 @@ impl Request {
             }
         }
         if let Kind::Bootstrap { expected, .. } = &self.kind {
-            expected.source.validate()?;
+            expected.validate_source()?;
             if self.max_bytes != 1
                 || !crate::domain::valid_id(&expected.machine)
                 || !valid_hex(&expected.metadata_sha256, 64)
             {
                 return Err(Error::before(ErrorCode::Validation));
             }
+        }
+        match &self.kind {
+            Kind::Bootstrap {
+                expected,
+                registry: Some(registry),
+                ..
+            } => {
+                if expected.packed {
+                    return Err(Error::before(ErrorCode::Validation));
+                }
+                registry.validate(&expected.source)?;
+            }
+            Kind::Pull {
+                expected,
+                registry: Some(registry),
+                ..
+            } => registry.validate(expected)?,
+            _ => {}
         }
         if let Kind::Pull { expected, .. } = &self.kind {
             expected.validate()?;
@@ -435,8 +473,29 @@ pub(crate) struct Frame {
 }
 
 pub(crate) fn encode(value: &impl Serialize) -> Result<Vec<u8>> {
+    encode_bounded(value, MAX_FRAME)
+}
+
+pub(crate) fn encode_request(value: &Request) -> Result<Vec<u8>> {
+    value.validate()?;
+    encode_bounded(value, request_limit(value))
+}
+
+fn request_limit(value: &Request) -> usize {
+    match value.kind {
+        Kind::Pull {
+            registry: Some(_), ..
+        }
+        | Kind::Bootstrap {
+            registry: Some(_), ..
+        } => MAX_REQUEST,
+        _ => MAX_FRAME,
+    }
+}
+
+fn encode_bounded(value: &impl Serialize, maximum: usize) -> Result<Vec<u8>> {
     let bytes = serde_json::to_vec(value).map_err(|_| Error::before(ErrorCode::Validation))?;
-    if bytes.is_empty() || bytes.len() > MAX_FRAME {
+    if bytes.is_empty() || bytes.len() > maximum {
         return Err(Error::before(ErrorCode::Validation));
     }
     let mut frame = (bytes.len() as u32).to_be_bytes().to_vec();
@@ -450,7 +509,7 @@ fn read_request(reader: &mut impl Read) -> Result<Request> {
         .read_exact(&mut header)
         .map_err(|_| Error::before(ErrorCode::Io))?;
     let size = u32::from_be_bytes(header) as usize;
-    if size == 0 || size > MAX_FRAME {
+    if size == 0 || size > MAX_REQUEST {
         return Err(Error::before(ErrorCode::Validation));
     }
     let mut bytes = vec![0; size];
@@ -459,6 +518,9 @@ fn read_request(reader: &mut impl Read) -> Result<Request> {
         .map_err(|_| Error::before(ErrorCode::Io))?;
     let request: Request =
         serde_json::from_slice(&bytes).map_err(|_| Error::before(ErrorCode::Validation))?;
+    if size > request_limit(&request) {
+        return Err(Error::before(ErrorCode::Validation));
+    }
     request.validate()?;
     Ok(request)
 }
@@ -972,13 +1034,19 @@ pub fn run_file_worker() -> Result<()> {
             },
         );
     }
-    if let Kind::Bootstrap { metadata, expected } = &request.kind {
+    if let Kind::Bootstrap {
+        metadata, expected, ..
+    } = &request.kind
+    {
         return writer.event(match crate::bootstrap::run(&request, metadata, expected) {
             Ok(proof) => Event::Bootstrapped { proof },
             Err(_) => Event::Failed { bytes: 0 },
         });
     }
-    if let Kind::Pull { metadata, expected } = &request.kind {
+    if let Kind::Pull {
+        metadata, expected, ..
+    } = &request.kind
+    {
         return writer.event(match crate::image_pull::run(&request, metadata, expected) {
             Ok(image) => Event::ImagePulled { image },
             Err(_) => Event::Failed { bytes: 0 },
@@ -1048,13 +1116,54 @@ pub fn run_file_worker() -> Result<()> {
         }
         return writer.event(crate::buffered::run(&request, metadata, output)?);
     }
+    // Image-root activation and the transfer share this one collected worker.
+    // Never attach a second SDK runtime manager to an already enrolled VM.
+    let file_deadline = match &request.file_activation {
+        Some(blob) => {
+            let activation: crate::buffered::Metadata =
+                blob.read(request.owner, crate::buffered::COMMAND_METADATA_BYTES)?;
+            let expires = activation.file_activation_deadline()?;
+            let activated = crate::agent_io::BoundedAgent::connect(&request.socket, 64 * 1024)
+                .and_then(|mut agent| {
+                    let stopper = agent.stopper();
+                    let mut bytes = 0u64;
+                    let mut exit = None;
+                    let mut failed = false;
+                    agent.observe_until(expires, |client| {
+                        activation.execute_streaming(client, |event| match event {
+                            smolvm::agent::ExecEvent::Stdout(data)
+                            | smolvm::agent::ExecEvent::Stderr(data) => {
+                                bytes = bytes.saturating_add(data.len() as u64);
+                                if bytes > crate::buffered::FILE_ACTIVATION_OUTPUT_BYTES {
+                                    failed = true;
+                                    stopper.stop();
+                                }
+                            }
+                            smolvm::agent::ExecEvent::Exit(code) => exit = Some(code),
+                            smolvm::agent::ExecEvent::Error(_) => failed = true,
+                        })
+                    })?;
+                    // Like HTTP files, activation discards the program's exit
+                    // status. The normal Exit authenticates the exchange; only
+                    // the following file acknowledgement proves file success.
+                    if failed || exit.is_none() || agent.limited() {
+                        return Err(Error::uncertain(ErrorCode::Native));
+                    }
+                    Ok(())
+                });
+            if activated.is_err() {
+                return writer.event(Event::Failed { bytes: 0 });
+            }
+            Some(expires)
+        }
+        None => None,
+    };
     // A header-first relay bounds SDK allocation before its receive buffer.
     // AgentClient calls still own the guest protocol and create no runtime.
     let mut observed = 0;
     let result = crate::agent_io::BoundedAgent::connect(&request.socket, request.max_bytes)
         .and_then(|mut connection| {
-            {
-                let client = &mut connection.client;
+            let transfer = |client: &mut smolvm::agent::AgentClient| {
                 match request.kind {
                     Kind::Read => client
                         .read_file_to_path_capped(
@@ -1092,8 +1201,12 @@ pub fn run_file_worker() -> Result<()> {
                         unreachable!()
                     }
                 }
+                .map_err(|_| Error::uncertain(ErrorCode::Native))
+            };
+            match file_deadline {
+                Some(expires) => connection.observe_until(expires, transfer),
+                None => transfer(&mut connection.client),
             }
-            .map_err(|_| Error::uncertain(ErrorCode::Native))
         });
     if observed > request.max_bytes {
         return Err(Error::uncertain(ErrorCode::Native));
@@ -1108,6 +1221,70 @@ pub fn run_file_worker() -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn guest_registry_input_is_source_bound_bounded_and_keeps_output_frame_limit() {
+        let expected = crate::ImagePullRequest {
+            reference: format!("registry.example/team/app@sha256:{}", "a".repeat(64)),
+            platform: "linux/amd64".into(),
+        };
+        let plan: crate::guest_registry::Plan = serde_json::from_value(serde_json::json!({
+            "source":expected, "effective_reference":expected.reference,
+            "auth":{"username":"<token>","password":"\n".repeat(16000)}
+        }))
+        .unwrap();
+        let mut value = request(Kind::Pull {
+            metadata: Blob {
+                path: "/private/meta".into(),
+                device: 1,
+                inode: 1,
+                bytes: 100,
+            },
+            expected: expected.clone(),
+            registry: Some(plan),
+        });
+        value.max_bytes = 1;
+        let encoded = encode_request(&value).unwrap();
+        assert!(encoded.len() > MAX_FRAME && encoded.len() < MAX_REQUEST);
+        assert!(encode(&value).is_err()); // ordinary/output framing stays small
+        let decoded = read_request(&mut std::io::Cursor::new(encoded)).unwrap();
+        assert!(matches!(
+            decoded.kind,
+            Kind::Pull {
+                registry: Some(_),
+                ..
+            }
+        ));
+        if let Kind::Pull { expected, .. } = &mut value.kind {
+            expected.reference = expected.reference.replace("team/app", "other/app");
+        }
+        assert!(encode_request(&value).is_err());
+        let mut oversized = std::io::Cursor::new(((MAX_REQUEST + 1) as u32).to_be_bytes());
+        assert!(read_request(&mut oversized).is_err());
+        assert_eq!(oversized.position(), 4); // reject before reading/allocating body
+    }
+
+    #[test]
+    fn legacy_anonymous_guest_registry_frames_decode_without_new_fields() {
+        let expected = crate::ImagePullRequest {
+            reference: format!("registry.example/app@sha256:{}", "a".repeat(64)),
+            platform: "linux/amd64".into(),
+        };
+        let mut value = request(Kind::Pull {
+            metadata: Blob {
+                path: "/private/meta".into(),
+                device: 1,
+                inode: 1,
+                bytes: 100,
+            },
+            expected,
+            registry: None,
+        });
+        value.max_bytes = 1;
+        let old = encode(&value).unwrap();
+        assert!(!String::from_utf8_lossy(&old[4..]).contains("\"registry\":"));
+        let decoded = read_request(&mut std::io::Cursor::new(old.clone())).unwrap();
+        assert_eq!(encode_request(&decoded).unwrap(), old);
+    }
     #[test]
     fn branch_preparation_requires_credited_distinct_proof_and_rejects_file_ack_or_replay() {
         let expected = crate::branch_worker::Expected {
@@ -1788,8 +1965,41 @@ mod tests {
             guest_path: "/workspace/data".into(),
             max_bytes: MAX_TRANSFER,
             kind,
+            file_activation: None,
         }
     }
+    #[test]
+    fn activation_metadata_cannot_alias_file_spool_or_cross_worker_kind() {
+        let base = request(Kind::Read);
+        assert!(base.validate().is_ok());
+        let encoded = serde_json::to_value(&base).unwrap();
+        assert!(encoded.get("file_activation").is_none());
+        let decoded: Request = serde_json::from_value(encoded).unwrap();
+        assert!(decoded.file_activation.is_none());
+        let blob = Blob {
+            path: "/private/activation".into(),
+            device: 1,
+            inode: 2,
+            bytes: 512,
+        };
+        let mut selected = base.clone();
+        selected.file_activation = Some(blob.clone());
+        assert!(selected.validate().is_ok());
+        for mode in 0..6 {
+            let mut altered = selected.clone();
+            let metadata = altered.file_activation.as_mut().unwrap();
+            match mode {
+                0 => metadata.path = altered.staging.clone(),
+                1 => metadata.inode = altered.staging_inode,
+                2 => metadata.path = "/elsewhere/activation".into(),
+                3 => metadata.bytes = 0,
+                4 => metadata.bytes = crate::buffered::COMMAND_METADATA_BYTES + 1,
+                _ => altered.kind = Kind::Images { deadline_ns: 1 },
+            }
+            assert!(altered.validate().is_err());
+        }
+    }
+
     fn frame(sequence: u32, event: Event) -> Frame {
         Frame {
             operation: "a".repeat(32),
@@ -1811,11 +2021,13 @@ mod tests {
             layer_count: 0,
         };
         let proof = crate::bootstrap::Proof {
-            image,
+            image: Some(image),
             metadata_sha256: expected.metadata_sha256.clone(),
             container_id: Some("smolvm-fixture".into()),
+            launch_rejected: false,
         };
         let mut query = request(Kind::Bootstrap {
+            registry: None,
             metadata: Blob {
                 path: "/private/metadata".into(),
                 device: 1,
@@ -1829,7 +2041,7 @@ mod tests {
         for event in [
             Event::Acknowledged { bytes: 0 },
             Event::ImagePulled {
-                image: proof.image.clone(),
+                image: proof.image.clone().unwrap(),
             },
             Event::Bootstrapped {
                 proof: crate::bootstrap::Proof {
@@ -1873,6 +2085,7 @@ mod tests {
             layer_count: 2,
         };
         let mut query = request(Kind::Pull {
+            registry: None,
             metadata: Blob {
                 path: "/private/meta".into(),
                 device: 1,

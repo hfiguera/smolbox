@@ -335,7 +335,7 @@
       ],
       "contract": "terminals",
       "http_supported": true,
-      "port_operation_supported": false,
+      "port_operation_supported": true,
       "parity_status": "pending",
       "acceptance": [
         "terminals:validation-and-dispatch",
@@ -897,7 +897,13 @@
       ],
       "acceptance_status": "pending",
       "evidence": [
-        "docs/evidence/embedded-port-http-parity-linux-package.json"
+        "docs/evidence/embedded-port-http-parity-linux-package.json",
+        "docs/evidence/embedded-port-http-parity-linux-public-consumers-5788a29.json",
+        "docs/evidence/embedded-port-http-parity-public-images-admission.json",
+        "docs/evidence/embedded-port-http-parity-public-images-linux-e7387c9c.json",
+        "docs/evidence/embedded-port-http-parity-linux-public-images-4efcf6c.json",
+        "docs/evidence/embedded-port-http-parity-linux-recovery-consumers-32698dc.json",
+        "docs/evidence/embedded-port-http-parity-remote-source-growth-models.json"
       ]
     },
     {
@@ -921,7 +927,11 @@
       ],
       "acceptance_status": "pending",
       "evidence": [
-        "docs/evidence/embedded-port-http-parity-linux-package.json"
+        "docs/evidence/embedded-port-http-parity-linux-package.json",
+        "docs/evidence/embedded-port-http-parity-linux-public-consumers-5788a29.json",
+        "docs/evidence/embedded-port-http-parity-public-images-linux-e7387c9c.json",
+        "docs/evidence/embedded-port-http-parity-linux-public-images-4efcf6c.json",
+        "docs/evidence/embedded-port-http-parity-linux-recovery-consumers-32698dc.json"
       ]
     },
     {
@@ -946,7 +956,11 @@
       ],
       "acceptance_status": "pending",
       "evidence": [
-        "docs/evidence/embedded-port-http-parity-linux-package.json"
+        "docs/evidence/embedded-port-http-parity-linux-package.json",
+        "docs/evidence/embedded-port-http-parity-linux-public-consumers-5788a29.json",
+        "docs/evidence/embedded-port-http-parity-public-images-linux-e7387c9c.json",
+        "docs/evidence/embedded-port-http-parity-linux-public-images-4efcf6c.json",
+        "docs/evidence/embedded-port-http-parity-linux-recovery-consumers-32698dc.json"
       ]
     },
     {
@@ -970,7 +984,11 @@
       ],
       "acceptance_status": "pending",
       "evidence": [
-        "docs/evidence/embedded-port-http-parity-linux-package.json"
+        "docs/evidence/embedded-port-http-parity-linux-package.json",
+        "docs/evidence/embedded-port-http-parity-linux-public-consumers-5788a29.json",
+        "docs/evidence/embedded-port-http-parity-public-images-linux-e7387c9c.json",
+        "docs/evidence/embedded-port-http-parity-linux-public-images-4efcf6c.json",
+        "docs/evidence/embedded-port-http-parity-linux-recovery-consumers-32698dc.json"
       ]
     },
     {
@@ -989,7 +1007,12 @@
         "Imported packed metadata does not prove a download."
       ],
       "acceptance_status": "pending",
-      "evidence": []
+      "evidence": [
+        "docs/evidence/embedded-port-http-parity-public-images-admission.json",
+        "docs/evidence/embedded-port-http-parity-public-images-linux-e7387c9c.json",
+        "docs/evidence/embedded-port-http-parity-linux-public-images-4efcf6c.json",
+        "docs/evidence/embedded-port-http-parity-linux-recovery-consumers-32698dc.json"
+      ]
     },
     {
       "id": "logs",
@@ -1035,7 +1058,18 @@
         "test/unit/embedded_terminal_contract_test.exs",
         "test/unit/terminal_embedded_connection_test.exs",
         "docs/evidence/embedded-port-http-parity-terminal-macos.json",
-        "docs/evidence/embedded-port-http-parity-linux-package.json"
+        "docs/evidence/embedded-port-http-parity-linux-package.json",
+        "test/unit/embedded_backend_test.exs",
+        "test/unit/embedded_package_activation_test.exs",
+        "native/smolbox-engine/src/terminal_supervisor.rs",
+        "native/smolbox-protocol/fixtures/terminal-preflight-request.json",
+        "docs/evidence/embedded-port-http-parity-terminal-preflight.json",
+        "docs/evidence/embedded-port-http-parity-terminal-preflight-linux-9bf4764.json",
+        "docs/evidence/embedded-port-http-parity-start-readiness-linux-2578e8c.json",
+        "docs/evidence/embedded-port-http-parity-image-start-linux-88f8d5b.json",
+        "docs/evidence/embedded-port-http-parity-linux-public-consumers-5788a29.json",
+        "docs/evidence/embedded-port-http-parity-linux-public-images-4efcf6c.json",
+        "docs/evidence/embedded-port-http-parity-linux-recovery-consumers-32698dc.json"
       ]
     },
     {
@@ -1053,7 +1087,9 @@
         "Exclusive attachments including read-only; unknown deletion retains capacity."
       ],
       "acceptance_status": "pending",
-      "evidence": []
+      "evidence": [
+        "docs/evidence/embedded-port-http-parity-public-volumes-40c7d3d.json"
+      ]
     },
     {
       "id": "disk-growth",
@@ -1073,7 +1109,21 @@
         "macOS HTTP growth has no qualification campaign."
       ],
       "acceptance_status": "pending",
-      "evidence": []
+      "evidence": [
+        "test/unit/native_growth_history_test.exs",
+        "test/unit/embedded_growth_example_test.exs",
+        "docs/evidence/embedded-port-http-parity-public-growth-1d5e64c.json",
+        "docs/evidence/embedded-port-http-parity-bare-fixture-preparation.json",
+        "docs/evidence/embedded-port-http-parity-bare-growth-ee54528.json",
+        "docs/evidence/embedded-port-http-parity-portable-growth-probe.json",
+        "docs/evidence/embedded-port-http-parity-start-readiness-linux-2578e8c.json",
+        "docs/evidence/embedded-port-http-parity-image-start-linux-88f8d5b.json",
+        "docs/evidence/embedded-port-http-parity-growth-owned-control.json",
+        "docs/evidence/embedded-port-http-parity-linux-bare-growth-c728e31.json",
+        "docs/evidence/embedded-port-http-parity-linux-bare-postgresql-c728e31.json",
+        "docs/evidence/embedded-port-http-parity-remote-source-growth-models.json",
+        "docs/evidence/embedded-port-http-parity-growth-source-selector.json"
+      ]
     },
     {
       "id": "checkpoints",
@@ -1331,7 +1381,11 @@
         "Creation absence remains read-only and requires owned quiescence/material proof."
       ],
       "acceptance_status": "pending",
-      "evidence": []
+      "evidence": [
+        "docs/evidence/embedded-port-http-parity-public-images-linux-e7387c9c.json",
+        "docs/evidence/embedded-port-http-parity-linux-public-images-4efcf6c.json",
+        "docs/evidence/embedded-port-http-parity-linux-recovery-consumers-32698dc.json"
+      ]
     }
   ],
   "specifications": [
@@ -1451,7 +1505,8 @@
         "draining-and-upgrade:durable-accounting-and-no-replay"
       ],
       "evidence": [
-        "docs/evidence/embedded-port-http-parity-linux-package.json"
+        "docs/evidence/embedded-port-http-parity-linux-package.json",
+        "docs/evidence/embedded-port-http-parity-linux-public-consumers-5788a29.json"
       ]
     }
   ]

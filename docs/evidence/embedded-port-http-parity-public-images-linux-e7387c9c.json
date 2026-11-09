@@ -1,0 +1,161 @@
+{
+  "schema": 1,
+  "status": "linux-package-rebuilt-public-images-acceptance-incomplete",
+  "native_source_commit": "30239b6fe99c6166c748cc9790b0a5c1301919ed",
+  "native_source_archive_sha256": "755afa025d90abfe59c665f27deefc3d21921bcc95b2758d1ec6550c94546856",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_unmodified_before_after": true,
+  "platform": "linux",
+  "architecture": "x86_64",
+  "manifest_sha256": "e7387c9cf607605d2a2af40333cfc4da9c8f4d3320d447cbd8182613ca1b3db4",
+  "helper_sha256": "19e3981b3a475470b28cb51b4c4e363399b47e554d8aa52bfc5a759b62272fca",
+  "assets_sha256": "f4f2a5ff4d8783e226dbceab2759c12f2b9db19153fed9c04e22e10c6d734c3b",
+  "assets": 806,
+  "asset_changes_from_36ed1c49": [
+    "SMOLBOX-POLICY.json"
+  ],
+  "validation": {
+    "frozen_source_files_verified": 1584,
+    "linux_rust_toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+    "linux_workspace_passed": 1121,
+    "linux_workspace_ignored": 24,
+    "strict_all_target_clippy": "passed",
+    "python_tests": 50,
+    "python_expected_skips": 4,
+    "elixir_broad_sweep": {
+      "passed": 1648,
+      "excluded": 13,
+      "source_commit": "83ff34e793b25816b84c2883d8aba19d7288267e",
+      "before_final_store_error_detail_refinement": true
+    },
+    "image_binding_checks_passed": 46,
+    "duplicate_runtime_checks_passed": 67,
+    "final_error_compatibility_checks_passed": 18,
+    "both_binding_bugs_independently_reproduced": true,
+    "duplicate_qualification_regression_reproduced": true,
+    "coverage_checks_passed": 4,
+    "docs_warnings_as_errors": "passed",
+    "generated_local_doc_pages_checked": 166
+  },
+  "public_attempts": [
+    {
+      "toolchain": "current",
+      "elixir_archive_sha256": "5d03cb47dad54b93ade002c39f2a0b8044f0cb7fb8225099009eaf97b50a5893",
+      "status": "failed-original-owner-retired-with-explicit-approval-disks-preserved",
+      "failure": "image pull used unassigned native context; retained execution is unknown",
+      "mutating_pull_dispatched": false,
+      "registry_workflow_reached": false
+    },
+    {
+      "toolchain": "minimum",
+      "elixir_source_commit": "3b153f6fa0a966bb0d0b9a3d2b0ba8919d3cf7b8",
+      "elixir_archive_sha256": "6d39cef3da28a779e9f5e58348b990dd36bd2ed03ca91bff53009e362ca49afe",
+      "status": "failed-original-owner-retired-with-explicit-approval-disks-preserved",
+      "failure": "image pull reported admission exhaustion; retained execution is unknown",
+      "mutating_pull_dispatch_proven": false,
+      "registry_workflow_reached": false
+    }
+  ],
+  "partial_observation": {
+    "genuine_fresh_accounts": 2,
+    "default_sdk_domains": true,
+    "source_creation_and_start": true,
+    "configured_startup_counter_one": true,
+    "binary_upload_and_guest_copy_bytes": 65537,
+    "stopped_runtime_replacement_qualified": false,
+    "image_pull_qualified": false,
+    "registry_cold_warm_qualified": false
+  },
+  "fix_commits": {
+    "strict_protocol_clippy": "2800061fdc5fddb2dde99dcc5ccfd4e587c87137",
+    "strict_engine_clippy": "99406ad508b3ce9169eb61ea58c39fcdcf656bb4",
+    "strict_port_clippy": "30239b6fe99c6166c748cc9790b0a5c1301919ed",
+    "assigned_pull_and_managed_key": "3b153f6fa0a966bb0d0b9a3d2b0ba8919d3cf7b8",
+    "accepted_retry_before_qualification": "83ff34e793b25816b84c2883d8aba19d7288267e",
+    "store_error_compatibility": "f4324508bd0d6ed4a1e109e574c4ca3bc6a0e252"
+  },
+  "remaining": [
+    "Owned VM rows/disks and unknown Memory snapshots are preserved and archived. Explicit owned disposal remains pending; original owners/helpers/VM children are collected with scoped user approval.",
+    "Ordinary current/minimum public OCI and registry reruns with the corrected Elixir consumer.",
+    "Other credential, source, platform and resource cases and remaining P0-P9 gates."
+  ],
+  "scope": {
+    "public_ordinary_qualified": false,
+    "source_vms_deleted": false,
+    "normal_lab_shutdown_complete": true,
+    "historical_qualification_transferred": false,
+    "parity_complete": false,
+    "crash_validation_deferred": true,
+    "crash_handling_qualified": false,
+    "distribution_approved": false
+  },
+  "native_log_sha256": {
+    "build.log": "431cca944243c9339130573dd6f506403d2d6a9da7668e1dd0a02cb339ee9938",
+    "workspace.log": "525aa74b5d49d98730aa2caec53c7f7b47e2d5ad53914ff7cb422797d7f812d7",
+    "clippy.log": "0d27d247f6061db0ad1fe8fc121052ee3007c8d42c1bb0da78221b7f83f51eec",
+    "python.log": "e1476c09343ecd46e819fd0bb178b34771842532238a364af7059dc8c169158e",
+    "sdk-before.log": "d72ab76a473fec0ec8090dd05aafb648f33a6601c9fed487c68e6d41e7223d94",
+    "sdk-after.log": "d72ab76a473fec0ec8090dd05aafb648f33a6601c9fed487c68e6d41e7223d94",
+    "package-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "private_model_log_sha256": {
+    "protocol-clippy-fix.log": "9fa8d691cb744be58a7b1a0ab022af6bf065ea8dd86b5193c6dec5a143a9a2dd",
+    "image-binding-final.log": "1e7aab925ef0f49a99fed738162064433256b6409af8bd2d0b0d2c8c35c00a0d",
+    "regression-old-unassigned-reference.log": "5a03e08e19e836a2568e8bdba6871aad0ed8f5139bc30cc8c0a98edb358123b6",
+    "regression-old-managed-key.log": "cfd19d0251725356d760cf1695959f4101b5bd620157f53010cf0e75e894c646",
+    "image-dedup-before-v2.log": "c5304629e55cff6b7c4cafbde0d26e87d3e7a98fc372542d2e55887a6008e4eb",
+    "image-dedup-fixed.log": "aaca02cb4a0d83131365468fbec9bd70bb254618f1d11a9f904c5528e3000592",
+    "elixir-after-public-fixes.log": "b57b69d327ac7ea49096349aa9e4dd91a1af1838ab9ca2ccd44dc5b5923367c9",
+    "image-dedup-final-v2.log": "72ba527813ccc1526650488868bdf2a6c1c11bf3bf388f4fc14608f6b33111a1",
+    "docs-e738.log": "5b835b475770394377ebff5b108338aa666df7d1734bebf1784feec855f3a204",
+    "coverage-e738-v2.log": "5819e77d567cf698548331ac6607692e64e0a602509effb92997459d943b5710"
+  },
+  "input_sha256": {
+    "lib/smolbox/machines.ex": "b835b41ff650cb9ea7056e3c5906c605885e0ba1661c3acc05359d8ea3e701fc",
+    "lib/smolbox/runtime/image_observation.ex": "0f2a8047a9073323c8908f1f5a2dbe3fcb60a4917cb003e734467384b0629872",
+    "lib/smolbox/backend/embedded_operation.ex": "8885ba097528428e9356cb08c60e06b7824bbf2ee5f5576a5d4bbfd0e604b0c7",
+    "test/unit/native_source_codec_test.exs": "344a204e66bf764fa6953c80721b1bbe095812cea0a0b14af5573903834c74b2",
+    "test/unit/embedded_images_runtime_test.exs": "7f5461b5c38cbff3f57a33306d02025d73f86f05366d3c2d9bea3b9a15d78a81",
+    "test/support/embedded_fixture.py": "c4a0825a3a7176f5fa0cf278959d207878279d422b21f1e0975c3d159bd1712a"
+  },
+  "approved_teardown": {
+    "explicit_user_approval": true,
+    "signals": "SIGTERM to the two exact original proof BEAMs only",
+    "original_beams_helpers_and_vm_children_collected": true,
+    "account_processes_and_zombies": 0,
+    "both_native_domain_locks_available": true,
+    "domain_and_original_source_inputs_unchanged": true,
+    "package_assets_verified_per_account": 806,
+    "original_sdk_vm_rows_preserved": 2,
+    "original_sdk_disks_preserved": 4,
+    "all_four_archived_disk_hashes_match_physical_files": true,
+    "private_full_archive_sha256": "a142cfec3293f39fc239e11a57a0730bcfa4a7638cae5466c8731def6ad678c2",
+    "private_full_archive_bytes": 663515033,
+    "private_archive_verified_local_and_outer": true,
+    "private_archive_mode": "0600",
+    "forced_escalation": false,
+    "unknown_execution_resolved": false,
+    "crash_qualification_performed": false
+  },
+  "normal_lab_shutdown": {
+    "observed_utc": "2026-10-16T20:52:23Z",
+    "active_state": "inactive",
+    "sub_state": "dead",
+    "result": "success",
+    "exit_status": 0,
+    "main_pid": 0,
+    "test_unit_inactive": true,
+    "original_run_disk_bytes": 24766644224,
+    "original_run_disk_mtime": 1792169349,
+    "original_run_disk_unchanged": true,
+    "separate_provision_disk_retained": true,
+    "forced_lab_stop_used": false
+  },
+  "private_custody_sha256": {
+    "approved-teardowns.json": "3682070c28a19df9b0fe57fdf8801df482766931fa6f7f0eeb663c7b2b5fdd55",
+    "collection-observation.json": "d0df0e39c774eeb7cbf40a23cac81a39c6091118bd975b2744955116bfb6da2c",
+    "retained-custody.json": "ef63c3f1fef355c698f571911b35d7bc6439a6a899bfcbbedfb9119c9c34cb2d",
+    "disk-archive-verification.json": "a62a55ea5f0a7cd9cbb0676bc55c0bbd63e000f38a0146ed2c2ace2914990edb",
+    "shutdown-final.json": "1fcd916dd2140e20c1ed602016f607781c387b88528520325f3c702ecbd8a319"
+  }
+}

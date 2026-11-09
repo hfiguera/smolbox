@@ -41,6 +41,81 @@ def stopped_children(port, enabled, witnesses):
     witnesses.append({'stopped_helper_children': 0})
 
 
+def terminal_preflight(port, receipt, state):
+    """Observe eligibility without mutation, terminal events or new children."""
+    before = snapshot()
+    owned_children = children(port) if os.uname().sysname == 'Linux' else None
+    outcome, events = port.call(operation('terminal_preflight', receipt), budget=2000)
+    assert not events, 'preflight emitted terminal or stream events'
+    if state == 'missing':
+        assert outcome == {'result': 'error', 'code': 'not_found',
+                           'dispatch': 'not_dispatched'}, outcome
+    else:
+        assert outcome == {'result': 'ready'}, outcome
+    assert snapshot() == before, 'preflight changed SDK machine records'
+    if owned_children is not None:
+        assert children(port) == owned_children, 'preflight changed owned children'
+    observed(port, 'inspect', receipt, state)
+    return {'state': state, 'no_stream_events': True,
+            'sdk_records_unchanged': True,
+            'owned_children_unchanged': owned_children is not None}
+
+
+def observe_native(port, state, resources, receipt=None):
+    """Bind ordinary read-only results to one isolated owned lifecycle."""
+    count = int(state not in (None, 'missing'))
+    running = int(state == 'running')
+    health, events = port.call({'operation': 'health'})
+    assert not events and health['result'] == 'health'
+    assert health['snapshot']['total'] == count and health['snapshot']['running'] == running
+    capacity, events = port.call({'operation': 'capacity'})
+    assert not events and capacity['result'] == 'capacity'
+    allocated = capacity['snapshot']
+    assert allocated['allocated_cpus'] == running * resources['cpus']
+    assert allocated['allocated_memory_mb'] == running * resources['memory_mib']
+    metrics, events = port.call({'operation': 'metrics'})
+    assert not events and metrics['result'] == 'metrics'
+    gauges = dict(line.split() for line in metrics['text'].splitlines()
+                  if line and not line.startswith('#'))
+    assert float(gauges['smolbox_native_machines']) == count
+    assert float(gauges['smolbox_native_running_machines']) == running
+    assert float(gauges['smolbox_native_allocated_cpus']) == running * resources['cpus']
+    assert float(gauges['smolbox_native_allocated_memory_mb']) == running * resources['memory_mib']
+    ready, events = port.call({'operation': 'readiness'}, budget=2000)
+    assert not events and ready['result'] == 'ready'
+    inventory, events = port.call({'operation': 'list'})
+    assert inventory['result'] == 'inventory' and inventory['count'] == count
+    assert all(stream == 'file' for stream, _ in events)
+    encoded = b''.join(data for _, data in events)
+    assert inventory['bytes'] == len(encoded)
+    records = json.loads(encoded)
+    assert isinstance(records, list) and len(records) == count
+    if count:
+        assert records[0]['name'] == receipt['name'] and records[0]['state'] == state
+        assert records[0]['cpus'] == resources['cpus']
+        assert records[0]['memoryMb'] == resources['memory_mib']
+    sampled = None
+    if receipt is not None:
+        measured, events = port.call(operation('measurements', receipt))
+        assert not events and measured['result'] == 'measurements'
+        assert measured['observation']['state'] == state
+        counters = measured['counters']
+        if running:
+            assert measured['observation']['resources'] == resources
+            assert type(counters['cpu_millis']) is int and counters['cpu_millis'] >= 0
+            assert type(counters['rss_mb']) is int and counters['rss_mb'] > 0
+            sampled = True
+        else:
+            # A stopped/absent process is unavailable, not a fabricated zero.
+            assert counters['cpu_millis'] is None and counters['rss_mb'] is None
+            sampled = False
+    return {'state': state or 'empty', 'total': count, 'running': running,
+            'allocated_cpus': allocated['allocated_cpus'],
+            'allocated_memory_mb': allocated['allocated_memory_mb'],
+            'inventory_count': len(records), 'running_process_sampled': sampled,
+            'metrics_bound_to_lifecycle': True, 'readiness': True}
+
+
 def prove(args):
     if args.child_reaping:
         assert os.uname().sysname == 'Linux' and os.uname().nodename == 'smolbox-nested'
@@ -50,6 +125,8 @@ def prove(args):
     package, fixture = args.package.resolve(), args.fixture.resolve()
     manifest_bytes = (package / 'package.json').read_bytes()
     manifest = json.loads(manifest_bytes)
+    if args.terminal_preflight:
+        assert manifest['policy']['sdk']['feature_versions'].get('terminal_preflight') == 1
     assert manifest['identity']['platform'] == ('macos' if os.uname().sysname == 'Darwin' else 'linux')
     with fixture.open('rb') as stream:
         assert hashlib.file_digest(stream, 'sha256').hexdigest() == args.sha256
@@ -76,6 +153,9 @@ def prove(args):
                   'package_manifest_sha256': hashlib.sha256(manifest_bytes).hexdigest(),
                   'approved_artifacts': [artifact]})
     before = snapshot()
+    if args.observability:
+        assert before == [], 'observability qualification requires an isolated empty SDK inventory'
+        assert manifest['policy']['sdk']['feature_versions'].get('observability') == 1
     save(output / 'inventory-before.json', before)
     create = {'name': 'sb-ordinary-' + secrets.token_hex(8),
               'owner_token': secrets.token_hex(32), 'incarnation': secrets.token_hex(16),
@@ -84,13 +164,25 @@ def prove(args):
               'labels': {'proof': 'ordinary-lifecycle'}}
     save(output / 'intent.json', create)
     port = Port(package, config, output / 'first.stderr')
+    observations = []
+    preflights = []
+
+    def observe(current, state, receipt=None):
+        if args.observability:
+            observations.append(observe_native(current, state, create['resources'], receipt))
+        if args.terminal_preflight and receipt is not None:
+            preflights.append(terminal_preflight(current, receipt, state))
+
     try:
+        observe(port, None)
         created, events = port.call({'operation': 'create', 'create': create})
         save(output / 'create-result.json', created)
         assert created['result'] == 'created' and not events, created
         receipt = created['receipt']
         save(output / 'receipt.json', receipt)
+        observe(port, 'stopped', receipt)
         observed(port, 'start', receipt, 'running')
+        observe(port, 'running', receipt)
         command = {'argv': ['/bin/sh', '-c',
                            'printf "cpu=%s mem_kib=%s storage_sectors=%s overlay_sectors=%s env=%s cwd=%s user=%s" '
                            '"$(nproc)" "$(awk \'/MemTotal/ {print $2}\' /proc/meminfo)" '
@@ -128,6 +220,7 @@ def prove(args):
         read_exact(port)
         observed(port, 'stop', receipt, 'stopped')
         stopped_children(port, args.child_reaping, reaping)
+        observe(port, 'stopped', receipt)
         observed(port, 'start', receipt, 'running')
         read_exact(port)
         observed(port, 'stop', receipt, 'stopped')
@@ -142,11 +235,13 @@ def prove(args):
         port = Port(next_package, config, output / 'second.stderr')
         assert port.hello['epoch'] != epoch
         observed(port, 'inspect', receipt, 'stopped')
+        observe(port, 'stopped', receipt)
         observed(port, 'start', receipt, 'running')
         read_exact(port)
         observed(port, 'stop', receipt, 'stopped')
         stopped_children(port, args.child_reaping, reaping)
         observed(port, 'delete', receipt, 'missing')
+        observe(port, 'missing', receipt)
         port.close()
         after = snapshot()
         assert after == before, 'inventory changed beyond owned fixture deletion'
@@ -161,6 +256,8 @@ def prove(args):
                     'inventory_before': before, 'inventory_after': after,
                     'upgrade': upgrade,
                     'normal_stop_child_reaping': reaping,
+                    'ordinary_observability': observations,
+                    'ordinary_terminal_preflight': preflights,
                     'deliberate_process_interruption': False,
                     'crash_handling_qualified': False}
         save(output / 'evidence.json', evidence)
@@ -179,4 +276,8 @@ if __name__ == '__main__':
     parser.add_argument('--sha256', required=True)
     parser.add_argument('--upgrade-package', type=Path)
     parser.add_argument('--child-reaping', action='store_true')
+    parser.add_argument('--observability', action='store_true',
+                        help='check ordinary observations against an isolated empty SDK lifecycle')
+    parser.add_argument('--terminal-preflight', action='store_true',
+                        help='check standalone read-only image eligibility during ordinary lifecycle')
     prove(parser.parse_args())

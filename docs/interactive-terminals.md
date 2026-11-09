@@ -13,11 +13,14 @@ provided.
 
 The HTTP backend enables this API. Explicitly approved embedded Port packages
 declaring `terminals: 1` also route managed terminals through owned PTY workers,
-bounded session controls and native durable authority. One exact optimized macOS package now has ordinary retained-image PTY and
-current/minimum public no-Rust consumer evidence in
-`docs/evidence/embedded-port-http-parity-terminal-macos.json`. Linux, PostgreSQL
-and broader resource/interference qualification remain pending. The evidence
-does not qualify other package bytes or unsupported source combinations.
+bounded session controls and native durable authority. Exact packages have ordinary
+retained-image PTY and current/minimum public no-Rust consumer evidence on
+[macOS](evidence/embedded-port-http-parity-terminal-macos.json) and
+[Linux](evidence/embedded-port-http-parity-linux-mounted-guest-7993b53.json).
+The Linux package also passes PTY on an internally mounted local-container machine
+across normal stopped-owner replacement; public volume admission remains disabled.
+PostgreSQL, changed macOS packages and broader resource/interference qualification
+remain pending. Evidence applies to its exact package bytes and source combinations.
 `Client.open_terminal` remains an HTTP client operation.
 
 ## Open and use a managed terminal

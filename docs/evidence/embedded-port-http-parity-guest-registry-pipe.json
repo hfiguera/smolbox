@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "status": "implemented-with-models-and-ordinary-local-worker-peers",
+  "scope": "parent-selected guest OCI credentials/mirrors via protected private worker input",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_modified": false,
+  "worker": {
+    "platform": "macos",
+    "architecture": "aarch64",
+    "helper_sha256": "160dfc119dc641959d5a422ba1f34cacd208cce6500630ea51f66c5d519f5593",
+    "helper_bytes": 17996656,
+    "release_build": true,
+    "frozen_private_binary_verified": true,
+    "sdk_vm_created_or_started": false,
+    "package_qualified": false
+  },
+  "ordinary_worker_cases": {
+    "pull": 9,
+    "bootstrap": 8,
+    "credentials_cover_pull_and_startup": true,
+    "large_escaped_password_bytes": 16014,
+    "maximum_guest_password_bytes": 16384,
+    "normal_exact_child_collection": true,
+    "termination_requested": false,
+    "default_sdk_domain_opened": false
+  },
+  "boundaries": {
+    "guest_pair_precedence_matches_sdk": true,
+    "docker_identity_token_preserved": true,
+    "worker_selects_host_settings": false,
+    "registry_credentials_in_metadata_files_startup_hashes_or_receipts": false,
+    "registry_credentials_added_to_worker_argv_or_environment": false,
+    "registry_setup_input_limit": 262144,
+    "ordinary_input_limit": 16384,
+    "output_frame_limit": 16384,
+    "legacy_anonymous_frame_roundtrip": true,
+    "mirror_keeps_original_source_and_manifest_pin": true,
+    "returned_mirror_alias_retagged_as_original": false,
+    "original_deadline_and_owned_reservations_retained": true,
+    "mounted_backing_descriptors_close_before_provider": true
+  },
+  "checks": {
+    "new_guest_registry_models": 6,
+    "rust_workspace_passed": 1119,
+    "rust_ignored": 24,
+    "strict_clippy_all_targets": true,
+    "python_checks": 50,
+    "python_expected_skips": 4,
+    "elixir_wire_codec_credential_contracts": 48,
+    "parity_coverage_checks": 4,
+    "oci_example_models": 5,
+    "volume_example_models": 2,
+    "sdk_inventory_unmodified": true,
+    "docs_warnings_as_errors": true
+  },
+  "source_sha256": {
+    "guest_registry.rs": "13b49b0ac3f9c7cac62ed70fe81c7a4a1e6cfce62e804818a5e9644380365c47",
+    "image_pull.rs": "d6bbd163ad938c06d2e78e876c5c6593d559a00b533f4226e158482c06a82043",
+    "bootstrap.rs": "11a9c44ac015741cd4b3ab88b28861fe15343a814968603dcc9c3e0430051c04",
+    "registry_account.rs": "d3fd6c013e8b387002fb697de1fa71f4f130771c183974efd5bca13061ce0699",
+    "transfer_supervisor.rs": "7c0035def92158d949da74448e05132e67f412608f8c228f9bc1bf00c5724340",
+    "transfer_worker.rs": "1c082a6401820a0507f014c31a4d66890f5317a3781e3d58249983ba566ba27c",
+    "oci_start.rs": "7be8fc80e84ba11a88a11f03267b5f3ef93d51ee3b39b962f05ed241497800ab",
+    "jobs.rs": "cffd3bb51d61fbc6020651e5058da86ee072014fccf0db0fc05fc6fdeee7c21f",
+    "lib.rs": "7227a586e92f01a6992d7406778ff7a3778062680c9357bee3215dabdd322361"
+  },
+  "private_log_sha256": {
+    "guest-registry-tests.log": "20d787bb40c295dcd334fac2e862ce8887f98c6192041e032f2f71bd7e9c3669",
+    "guest-registry-workspace-tests.log": "f8bcb5e4cf37b15e6bbed116e147740ec1729c8e7d414a29190eb489d9745bb7",
+    "guest-registry-clippy.log": "c2ae315450b307992662b62847d53ee6249c7d9c0773c3af1cfb0bc639e53605",
+    "guest-registry-worker-pull.log": "3cfc06075d2fb8e924a91ed70ddce262a3bdf883009651683d20e2dfe3a7af00",
+    "guest-registry-worker-bootstrap.log": "33266f9f7944490bc50c86fbd5313ed2a47c185057707995a7c8efe39129a1b8",
+    "guest-registry-elixir-contracts.log": "c054346974e0d95c31ef806ec43c5f1b9f1bea74ddbb61a3e88a79c0badb7351",
+    "guest-registry-python-tests.log": "d2c67747a1ca9a280f870c7b0a01634ac091eb2b2acbb18135ee5fc4b2b652aa",
+    "guest-registry-sdk-check.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+    "guest-registry-example-tests.log": "ab91c541b59249c3546a1b1cba5320dc0e1ea3ce9fe180bc806569aa831a50ff",
+    "guest-registry-volume-example-tests.log": "5072588de7fd1cec76d3ddb672df38b16a9f5bab47aa0d5ee8ce44148d101c29",
+    "guest-registry-coverage.log": "3c088d8f73bf85e2d128c730637383db7cda5a5024b58a5b830b698a1e04acce"
+  },
+  "changed_native_vm_package_qualified": false,
+  "real_guest_registry_mirror_success_qualified": false,
+  "public_registry_image_admission_enabled": false,
+  "crash_validation_performed": false,
+  "parity_complete": false,
+  "distribution_approved": false,
+  "remaining_gates": [
+    "New exact package and ordinary authenticated VM/platform acceptance",
+    "Real registry/mirror/credential modes and current/minimum native consumers",
+    "Public P4 activation and all remaining P0-P9 acceptance requirements"
+  ]
+}

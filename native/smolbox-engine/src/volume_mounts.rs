@@ -8,7 +8,6 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 use std::fs::File;
-use std::os::unix::fs::MetadataExt;
 use std::path::PathBuf;
 use std::sync::Arc;
 
@@ -475,17 +474,7 @@ fn cleanup_absent(
 }
 
 fn verify(directory: &File, proof: &VolumeProvisionReceipt) -> Result<()> {
-    let metadata = directory
-        .metadata()
-        .map_err(|_| Error::before(ErrorCode::Ownership))?;
-    if (metadata.dev(), metadata.ino()) != (proof.backing.device, proof.backing.inode)
-        || metadata.uid() != proof.account.uid
-        || metadata.gid() != proof.account.gid
-        || metadata.mode() & 0o7777 != proof.backing.mode
-    {
-        return Err(Error::before(ErrorCode::Ownership));
-    }
-    Ok(())
+    super::verify_completed_backing(directory, proof)
 }
 
 #[cfg(test)]
@@ -744,6 +733,44 @@ pub(crate) mod tests {
         std::fs::remove_dir_all(&path).unwrap();
         symlink(f.policy.root.join("saved"), &path).unwrap();
         assert!(qualified.records(&budget()).is_err());
+    }
+
+    #[test]
+    fn safe_completed_mode_changes_preserve_mount_authority_without_rewriting_it() {
+        use std::os::unix::fs::MetadataExt;
+        let f = fixture();
+        let qualified = qualified(&f);
+        let path = f.request.proof.node_path();
+        let completed = f.domain.join("volume-staging").join(format!(
+            "{}.provisioned.json",
+            f.request.proof.backing.intent.worker_volume_id
+        ));
+        let before = std::fs::read(&completed).unwrap();
+        for mode in [0o750, 0o755] {
+            std::fs::set_permissions(&path, std::fs::Permissions::from_mode(mode)).unwrap();
+            assert_eq!(
+                qualified.records(&budget()).unwrap(),
+                vec![(
+                    path.to_str().unwrap().into(),
+                    f.request.target.clone(),
+                    f.request.readonly
+                )]
+            );
+            assert_eq!(std::fs::metadata(&path).unwrap().mode() & 0o7777, mode);
+        }
+        for change in 0..3 {
+            let mut crossed = f.request.proof.clone();
+            match change {
+                0 => crossed.account.uid += 1,
+                1 => crossed.account.gid += 1,
+                _ => crossed.backing.inode += 1,
+            }
+            assert!(verify(&qualified.backings[0].directory, &crossed).is_err());
+        }
+        std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o770)).unwrap();
+        assert!(qualified.records(&budget()).is_err());
+        assert_eq!(std::fs::metadata(&path).unwrap().mode() & 0o7777, 0o770);
+        assert_eq!(std::fs::read(completed).unwrap(), before);
     }
 
     #[test]

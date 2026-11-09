@@ -1,0 +1,282 @@
+{
+  "schema": 1,
+  "scope": "failed-ordinary-public-linux-growth-runtime-replacement-and-deterministic-correction",
+  "qualified_workflow": false,
+  "runner_source_commit": "7bcfd189dc289eee655bdd55fea28f98af055320",
+  "native_source_commit": "a8e28af6564f3f02a81fbc9b9b7345ac728e7709",
+  "public_inputs_sha256": "11fe00bdfa990b120b9372a05edb342985edf5ef81140dd67878a8be8cbab6fd",
+  "elixir_archive_sha256": "fe0ec6e45e7472f7a169d7eb3fd28e3a947049be7b4f8425448c50e630f03aa8",
+  "native_inputs_sha256": "5190e102da8acfc15d91173164023bf2381bbe2f09e1c7d592c0d4838d3888b3",
+  "native_frozen_files_including_license": 268,
+  "public_frozen_files": 1266,
+  "package_manifest_sha256": "000be529f0c9e52a3c36ea3c46723dec95ecc22a12906bf54a0a3b5cbd4049e7",
+  "identity": {
+    "engine_version": "0.2.0",
+    "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+    "build_sha256": "2c4b6edd549b796ab0830ce51c23e6f89a7fc105a8860439d278e5535970a972",
+    "assets_sha256": "0b0dc7a8c2178459f557a73e48382c5a6235767936186918da33842c6ec44428",
+    "platform": "linux",
+    "architecture": "x86_64"
+  },
+  "sdk": {
+    "sdk_version": "1.22.0",
+    "source_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "feature_versions": {
+      "lifecycle": 1,
+      "foreground_exec": 1,
+      "extended_exec": 1,
+      "files": 1,
+      "extended_files": 1,
+      "material_proofs": 2,
+      "observability": 1,
+      "networking": 1,
+      "ports": 1,
+      "workloads": 1,
+      "compact_creation": 1,
+      "job_resources": 1,
+      "buffered_exec": 1,
+      "background_exec": 1,
+      "logs": 1,
+      "streaming_exec": 1,
+      "terminals": 1,
+      "volumes": 1,
+      "disk_growth": 1
+    }
+  },
+  "failure": {
+    "stage": "stopped-runtime-replacement-readiness",
+    "diagnostic_sha256": "7288dba85ca273d1618f35207cae78f851bd0b8bac55b9e79aa5743f07345914",
+    "redacted_diagnostic": {
+      "rejected": null,
+      "exception": "MatchError",
+      "frames": [
+        {
+          "arity": 2,
+          "function": "wait",
+          "line": 521,
+          "module": "Elixir.SmolBox.Example.EmbeddedGrowth"
+        },
+        {
+          "arity": 2,
+          "function": "resume",
+          "line": 312,
+          "module": "Elixir.SmolBox.Example.EmbeddedGrowth"
+        },
+        {
+          "arity": 2,
+          "function": "execute",
+          "line": 117,
+          "module": "Elixir.SmolBox.Example.EmbeddedGrowth"
+        },
+        {
+          "arity": 3,
+          "function": "run",
+          "line": 89,
+          "module": "Elixir.SmolBox.Example.EmbeddedGrowth"
+        },
+        {
+          "arity": 1,
+          "function": "run",
+          "line": 44,
+          "module": "Elixir.SmolBox.EmbeddedGrowthRuntimeProof"
+        },
+        {
+          "arity": 1,
+          "function": "__FILE__",
+          "line": 79,
+          "module": "elixir_compiler_3"
+        },
+        {
+          "arity": 4,
+          "function": "dispatch",
+          "line": 102,
+          "module": "elixir_compiler"
+        },
+        {
+          "arity": 4,
+          "function": "compile",
+          "line": 76,
+          "module": "elixir_compiler"
+        }
+      ]
+    }
+  },
+  "before_replacement_checkpoint_sha256": "ee4133bb9710292e64c1559e50aa2484ed218af721c61774634569f81801a3d4",
+  "original_owner_control": {
+    "status1": {
+      "sha256": "049c0b2d4225f2555ac00429ef7220562bd8f8f88aac48d6d3e0857c4ba9ed7d",
+      "result": {
+        "version": 451,
+        "state": "stopped",
+        "active_expansion": null,
+        "expansions": {
+          "first": "completed"
+        }
+      }
+    },
+    "delete1": {
+      "sha256": "0ba7c0356149946bf0642fab4ef85b95e7090f6f785d0fb84323d0c442e5190a",
+      "result": {
+        "status": "accepted"
+      }
+    },
+    "status2": {
+      "sha256": "5e861008547ef9e575c215ae006700cdf8cb80000207070517840a282579e270",
+      "result": {
+        "version": 452,
+        "state": "deleting",
+        "active_expansion": null,
+        "expansions": {
+          "first": "completed"
+        }
+      }
+    },
+    "status3": {
+      "sha256": "5e861008547ef9e575c215ae006700cdf8cb80000207070517840a282579e270",
+      "result": {
+        "version": 452,
+        "state": "deleting",
+        "active_expansion": null,
+        "expansions": {
+          "first": "completed"
+        }
+      }
+    }
+  },
+  "before_replacement_records": [
+    {
+      "id": "after-first-growth",
+      "state": "completed",
+      "cleanup": "complete",
+      "exit_code": 0,
+      "evidence": "exited",
+      "reserved_disk_gb": null
+    },
+    {
+      "id": "baseline-space",
+      "state": "completed",
+      "cleanup": "complete",
+      "exit_code": 0,
+      "evidence": "exited",
+      "reserved_disk_gb": null
+    },
+    {
+      "id": "first-grown-space",
+      "state": "completed",
+      "cleanup": "complete",
+      "exit_code": 0,
+      "evidence": "exited",
+      "reserved_disk_gb": null
+    },
+    {
+      "id": "first-read",
+      "state": "completed",
+      "cleanup": "complete",
+      "exit_code": 0,
+      "evidence": "exited",
+      "reserved_disk_gb": null
+    },
+    {
+      "id": "write",
+      "state": "completed",
+      "cleanup": "complete",
+      "exit_code": 7,
+      "evidence": "exited",
+      "reserved_disk_gb": null
+    },
+    {
+      "id": "original",
+      "state": "stopped",
+      "disk_sizes": {
+        "overlay_gb": 3,
+        "storage_gb": 2
+      },
+      "reserved_disk_gb": 5,
+      "growth_states": {
+        "first": "completed"
+      }
+    }
+  ],
+  "private_logs_sha256": {
+    "linux-growth-a8e28af-port-protocol.log": "ff15ef609a0389f6cb1b277a32e44ef71f5e077822da151128437fba2a2849dc",
+    "linux-growth-a8e28af-clippy.log": "a1a2a9d63c7062e16c3e4e62b1f83403499d22b13722ad52d79b483efb54f51e",
+    "linux-growth-a8e28af-build.log": "e5853f67ca28ea21c833aff476ca3c627fea3542ccdcc3973e0e7869eb5cb8a4",
+    "linux-growth-a8e28af-worker.log": "4c9fab6bfbdb1cf8ec5c71ba5297a505b7e6962633eb54a0b5bd43ce76131e15",
+    "linux-growth-a8e28af-package.json": "9f577aedbb3330f37c2bf7afcedff6e00d1ee153a3080608d83c50e708bb1409",
+    "public-growth-7bcfd18-memory-current-driver.log": "6782ff91dfaacc8c4336271953db6cd1281537639b4b6fb66ecff72895852143",
+    "public-growth-7bcfd18-memory-current-native.log": "a5ac7df7e05e34d294d2476e597429fdd99a4c810bffb69c7ec3879be4b4a33b",
+    "public-growth-7bcfd18-memory-current-native.log.retained.json": "9bfc665e31253d649a203be9c4a414e66e0305c168413363fd7faad0e802d4c3"
+  },
+  "driver": {
+    "status": "failed",
+    "retained": true,
+    "deletion_authority": false
+  },
+  "native_source_checks": {
+    "ordinary_port_passed": 78,
+    "explicit_ignored_port_unselected": 2,
+    "protocol_contracts_passed": 57,
+    "strict_clippy": "passed",
+    "release_build": "passed",
+    "exact_ordinary_raw_qcow_growth_worker_passed": 1,
+    "unmodified_sdk_caches_verified": 2
+  },
+  "correction": {
+    "scope": "authoritative-parent-material-prefix-validation-for-collected-historical-commands",
+    "physical_acceptance": "pending",
+    "ordinary_root_passed": 1620,
+    "runtime_and_deferred_excluded": 42,
+    "final_focused_passed": 41,
+    "final_focused_deferred_excluded": 3,
+    "exdoc_warnings_as_errors": true,
+    "credo_changed_file_findings": 0,
+    "credo_findings_elsewhere": 50,
+    "repository_credo_clean": false,
+    "production_files_sha256": {
+      "lib/smolbox/embedded/historical_execution.ex": "52000f982d5941781821110401e87a822be9e6ca352f02b0f5621d2d65f031f8",
+      "lib/smolbox/runtime/native_recovery.ex": "861c26088b5a6c5403181ffaa324cad8ad17b684c605f010aa13e845cf23417a"
+    },
+    "private_logs_sha256": {
+      "historical-growth-recovery-root.log": "e09b64d9832835f0e082d513fbed5890686b8c786651921f954db0a2c35cdd54",
+      "historical-growth-recovery-final-41.log": "75fda4d19ac134b441c53c7bf43e30ad7ad0cf332dbdcccba915933891e8a92a",
+      "historical-growth-recovery-final-credo.json": "cdb2165e750ef10d8a56a45340bf44f1d8260e22fe406a8472967353f800994b",
+      "historical-growth-recovery-docs.log": "051e09e26e6eda0c13bc005f311cb689f53ac4eface6f6e05b3c975fa2537176"
+    }
+  },
+  "private_archives": [
+    {
+      "sha256": "2298895fac069a4cd53f9f4a7754c9384927ce47aec3fd05194fc4abc22c89b4",
+      "bytes": 673498369,
+      "mode": "0600",
+      "copied_and_digest_verified": true,
+      "scope": "parked-owner-stopped-disks-authority-store-records-and-exact-inputs"
+    },
+    {
+      "sha256": "25ccd86aac3efc29b2524e51a93ded9abf8e1d53f5b8d7b9a471401dad8be2ef",
+      "bytes": 5367,
+      "mode": "0600",
+      "copied_and_digest_verified": true,
+      "scope": "native-build-tests-and-retained-consumer-logs"
+    }
+  ],
+  "custody": {
+    "original_beam": "parked-live-awaiting-explicit-teardown-answer",
+    "sdk_vm_state": "stopped",
+    "sdk_vm_child": "collected",
+    "accepted_owned_deletion": "pending-dispatch-recovery-frozen",
+    "replacement_sdk_owner_started": false,
+    "normal_lab_shutdown": "pending",
+    "macos_custody_touched": false,
+    "lab_watchdog_expiry_utc": "2026-10-16T11:32:24Z"
+  },
+  "qualification": {
+    "complete_public_growth": false,
+    "minimum_public_growth": "pending",
+    "postgresql_growth": "pending",
+    "remaining_source_platform_resource_combinations": "pending",
+    "full_http_feature_parity": false,
+    "crash_validation": "deferred",
+    "distribution_approved": false
+  }
+}

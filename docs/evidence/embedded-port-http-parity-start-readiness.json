@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "scope": "same-enrolled-boot-bounded-post-SDK-agent-readiness",
+  "baseline_commit": "8bda064",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "inputs": [
+    {
+      "path": "native/smolbox-engine/src/agent_io.rs",
+      "sha256": "716a48154f89c95dccddc59dd277aa61db053046ec311ec083cd31309f338edb"
+    },
+    {
+      "path": "native/smolbox-engine/src/branch_agent.rs",
+      "sha256": "b3552b69bdcdf92c9190b81f50eb34923acb3f0dfdca6329d9f6f62a083f29ff"
+    },
+    {
+      "path": "native/smolbox-engine/src/machine.rs",
+      "sha256": "4325778d8c5f61b0dbf9a658fa235adadad9a857e8e9e7f44432a3ad57d7bd8f"
+    },
+    {
+      "path": "native/smolbox-engine/src/runtime_boot.rs",
+      "sha256": "82af70dabbba05f2d8f141d5464d8a4db20e6e59615476a985d14aa59f3f0fbf"
+    },
+    {
+      "path": "native/smolbox-engine/src/runtime_boot/tests.rs",
+      "sha256": "623b60198907f357f76de28d284f494baa527a9793bd9de03db9c4824f5e8e19"
+    }
+  ],
+  "diagnosis": {
+    "preserved_private_archive_sha256": "9ea9d6cdc258c3d4f8bbd9848c7668f2fad228622f5632ff9f4920c74d7b9620",
+    "failed_workflow_record_mtime_utc": "2026-10-16T13:51:03Z",
+    "guest_accept_loop_timestamp_utc": "2026-10-16T13:51:06.471403Z",
+    "guest_ready_sent_uptime_ms": 3710,
+    "guest_accept_loop_uptime_ms": 9920,
+    "old_engine_postcondition": "One 3000-ms SDK agent state probe after one-shot SDK start and boot enrollment.",
+    "conclusion": "Preserved failure precedes control accept-loop readiness. The bounded wait addresses this observed readiness gap; the failed live workflow has not been rerun with changed bytes.",
+    "live_root_cause_or_fix_qualified": false
+  },
+  "behavior": [
+    "One SDK start and original opaque boot enrollment; retry only read-only control transport observations.",
+    "Use the same absolute deadline and cancellation token, including a thirty-second default captured before preflight.",
+    "Verify original receipt, enrolled PID/birth and runtime PID before each probe and after success; reject changed observations.",
+    "Bound connection backlog waits, reply headers, SDK exchange and relay collection; reserve work/descriptor/metadata allowance before boot dispatch.",
+    "Cancellation or uncertainty closes observation sockets and retains original boot authority and resource metadata, without automatic stop or lifecycle replay.",
+    "Decoded agent rejection, malformed response, oversized header and ownership/admission/filesystem failures are not retried.",
+    "Ordinary inspection, packed workload startup, public HTTP APIs, protocol schemas and record codecs retain their existing paths."
+  ],
+  "validation": [
+    {
+      "lane": "ordinary-rust-workspace",
+      "passed": 1087,
+      "ignored": 24,
+      "engine_passed": 874,
+      "port_passed": 78,
+      "protocol_passed": 77,
+      "contracts_passed": 58,
+      "log_sha256": "917d53bdfc5734c7d27d5d9e510f4b8b8a699c30877d742e407720e9bbf55ef4"
+    },
+    {
+      "lane": "ordinary-elixir-current",
+      "passed": 1637,
+      "excluded": 42,
+      "excluded_tags": [
+        "runtime",
+        "deferred_crash"
+      ],
+      "log_sha256": "5a45ec76ef27d611cc7bc8b4a6f0c7d31ed0c7bea34daa7af414d5409c3aa72e"
+    },
+    {
+      "lane": "native-python",
+      "run": 47,
+      "skipped": 4,
+      "log_sha256": "5b6939cfbe98c111349758db08bdc7a667996a87c113242662a141485797374b"
+    },
+    {
+      "lane": "strict-clippy-all-workspace-targets",
+      "status": "passed",
+      "log_sha256": "9c60ae64dea59bcfe15e88164b9abbd730189b3e0dd9c326ec99291e32dc10a3"
+    },
+    {
+      "lane": "both-unmodified-sdk-inventories",
+      "status": "passed",
+      "log_sha256": "d72ab76a473fec0ec8090dd05aafb648f33a6601c9fed487c68e6d41e7223d94"
+    },
+    {
+      "lane": "documentation-warnings-as-errors",
+      "status": "passed",
+      "log_sha256": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d"
+    },
+    {
+      "lane": "parity-coverage-manifest",
+      "passed": 4,
+      "log_sha256": "2759ba21c8aaaf462bf72a958ec0fbe654b328d414e95590732521c06a638e18"
+    }
+  ],
+  "initial_checks": [
+    {
+      "status": "failed",
+      "reason": "The new socket-peer fixtures used the redirected macOS /tmp spelling. Ownership guards rejected before SDK exchange; fixtures now create their directories under the canonical temporary root. No production path checks were relaxed.",
+      "log_sha256": "7784315274cd26212435786c68d2394b6f03375e988f55a7523f2d456f91860b",
+      "initial_workspace_log_sha256": "b5922bcf8d00afad251d8b57ad2e4af52925c2e8aca6f67d797a369a1ab4773a",
+      "initial_workspace_engine_passed": 869,
+      "initial_workspace_failed": 3,
+      "initial_workspace_ignored": 22
+    }
+  ],
+  "new_non_vm_cases": 9,
+  "native_package_built_or_qualified": false,
+  "remaining": [
+    "Build and qualify exact changed Linux package with current/minimum public consumers and HTTP-only consumers without Rust/native assets.",
+    "Repeat bare stopped-growth Memory and durable-store workflows, plus required packed regressions and other source/resource combinations.",
+    "Remaining P0-P9 acceptance, legitimate isolated macOS qualification, upgrade/codec/drain/resource gates."
+  ],
+  "parity_complete": false,
+  "bare_growth_qualified": false,
+  "crash_validation_performed": false,
+  "distribution_approved": false
+}

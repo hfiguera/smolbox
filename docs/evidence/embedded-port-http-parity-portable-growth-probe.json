@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "scope": "portable-workspace-growth-qualification-probe",
+  "baseline_commit": "ddb368352ec8c19c4ab6deebf1c92efe7dfc7bc3",
+  "inputs": [
+    {
+      "path": "examples/embedded_port/lib/growth_demo.ex",
+      "sha256": "96d628424aab2aed7a56898e542a9f14f3c99e249b932940bb6e977e91c4d691"
+    },
+    {
+      "path": "test/unit/embedded_growth_example_test.exs",
+      "sha256": "bbff6f9c37c2413332e210e6b1893f54cb572264533c58fd2ceaf358dcbc9af4"
+    }
+  ],
+  "semantics": [
+    "Use POSIX shell, df -Pk, awk and sleep available in approved packed and BusyBox bare fixtures.",
+    "Convert measured KiB filesystem capacity to bytes and keep the original byte ranges.",
+    "Reject failed, absent, malformed, excessive or ambiguous measurements before success.",
+    "At most eleven measurements and ten one-second waits under the unchanged managed command absolute execution budget."
+  ],
+  "validation": [
+    {
+      "lane": "focused-current",
+      "passed": 33,
+      "excluded_runtime_or_deferred": 0,
+      "log_sha256": "2ab8d54e3f3c5020646861608a30e597415bf96b83fc4fa32e6720a5a166d587"
+    },
+    {
+      "lane": "focused-minimum",
+      "passed": 33,
+      "excluded_runtime_or_deferred": 0,
+      "log_sha256": "563287b2a337fcecd90b5575103088e70bbe6f9579393cebc2974676c01db0a5"
+    },
+    {
+      "lane": "ordinary-root",
+      "passed": 1633,
+      "excluded_runtime_or_deferred": 42,
+      "log_sha256": "fba285126175545d7ff2c02a60041c1391d58cc1b1e3423ffc30739334ab175c"
+    }
+  ],
+  "minimum_initial_environment_failure": {
+    "reason": "Relative MIX_BUILD_PATH broke rebar dependency include resolution; rerun uses absolute build path and explicit OTP root. No source change was made for this rerun.",
+    "log_sha256": "85f56cae10ef04600c93a32c9582154471b74184e6b627adcafd199a75f74ec6"
+  },
+  "credo": {
+    "strict_findings": 50,
+    "unchanged_from_baseline": true,
+    "log_sha256": "cdb2165e750ef10d8a56a45340bf44f1d8260e22fe406a8472967353f800994b"
+  },
+  "production_api_or_codec_changed": false,
+  "native_helper_changed": false,
+  "bare_guest_boot_qualified": false,
+  "bare_guest_growth_qualified": false,
+  "ordinary_changed_source_consumer_qualification": false,
+  "crash_validation_performed": false,
+  "distribution_approved": false,
+  "parity_complete": false,
+  "documentation": {
+    "warnings_as_errors": true,
+    "passed": true,
+    "log_sha256": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d"
+  }
+}

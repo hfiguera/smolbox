@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "scope": "historical-native-material-recovery-http-only-package-consumers",
+  "source_commit": "c27b70523301d32407de8e2a0997f15fd369dddc",
+  "physical_run_evidence": "embedded-port-http-parity-growth-replacement-7bcfd18.json",
+  "consumers": [
+    {
+      "mode": "current",
+      "report_sha256": "8752858ada8f0b5875bd3d3b60faff214d13f08a08489f7418fc169d42c1f897",
+      "log_sha256": "2082232bb2820b32dc3523587c1ebc591452c6ac319091d5e4840e512669b566",
+      "package_sha256": "c0e470fa332a4b92eb8e1fba659264ca9d3713c52563dd472d0f2e1b0db60ec6",
+      "platform": "macos",
+      "architecture": "arm64",
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "without_rust": true,
+      "native": {
+        "scope": "not-requested",
+        "exercised": false
+      },
+      "smoke": {
+        "checkpoint": true,
+        "client": true,
+        "guest_files": true,
+        "interactive": true,
+        "legacy_1_14_6_explicit": "1.14.6",
+        "legacy_runtime_explicit": "1.14.1",
+        "managed_branches": true,
+        "managed_checkpoints": true,
+        "managed_exports": true,
+        "network_policy": true,
+        "offline_default": true,
+        "runtime_1_16_0_explicit": "1.16.0",
+        "runtime_default": "1.22.0",
+        "supervisor": true,
+        "unqualified_runtime_rejected": "1.16.2",
+        "versions": {
+          "jason": "1.4.5",
+          "mint": "1.11.0",
+          "mint_web_socket": "1.0.6",
+          "nimble_options": "1.1.1",
+          "req": "0.7.5",
+          "telemetry": "1.4.2"
+        },
+        "without_rust": true,
+        "workload": true
+      }
+    },
+    {
+      "mode": "minimum",
+      "report_sha256": "ad8a27f59f5cbad39c64556ed12128ba74a8340b2987f97a7a7bc0198d89bacf",
+      "log_sha256": "6b317cec34367cf35f9b595cabf0f18ed0411c9d04ab2f5ba769dcd1066ad7e9",
+      "package_sha256": "c0e470fa332a4b92eb8e1fba659264ca9d3713c52563dd472d0f2e1b0db60ec6",
+      "platform": "macos",
+      "architecture": "arm64",
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "without_rust": true,
+      "native": {
+        "scope": "not-requested",
+        "exercised": false
+      },
+      "smoke": {
+        "checkpoint": true,
+        "client": true,
+        "guest_files": true,
+        "interactive": true,
+        "legacy_1_14_6_explicit": "1.14.6",
+        "legacy_runtime_explicit": "1.14.1",
+        "managed_branches": true,
+        "managed_checkpoints": true,
+        "managed_exports": true,
+        "network_policy": true,
+        "offline_default": true,
+        "runtime_1_16_0_explicit": "1.16.0",
+        "runtime_default": "1.22.0",
+        "supervisor": true,
+        "unqualified_runtime_rejected": "1.16.2",
+        "versions": {
+          "jason": "1.4.0",
+          "mint": "1.11.0",
+          "mint_web_socket": "1.0.6",
+          "nimble_options": "1.1.0",
+          "req": "0.7.4",
+          "telemetry": "1.3.0"
+        },
+        "without_rust": true,
+        "workload": true
+      }
+    }
+  ],
+  "elixir_archive_sha256": "c0e470fa332a4b92eb8e1fba659264ca9d3713c52563dd472d0f2e1b0db60ec6",
+  "qualification": {
+    "current_and_minimum_http_only_consumers_passed": true,
+    "fixed_complete_native_growth": "pending",
+    "crash_validation": "deferred",
+    "full_http_feature_parity": false,
+    "distribution_approved": false
+  }
+}

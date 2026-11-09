@@ -33,7 +33,17 @@ defmodule SmolBox.CI.Package do
           native_output: :string,
           native_ordinary: :boolean,
           native_public: :boolean,
-          native_terminal: :boolean
+          native_terminal: :boolean,
+          native_volume: :boolean,
+          native_growth: :boolean,
+          native_growth_settings: :string,
+          native_images: :boolean,
+          native_images_settings: :string,
+          native_volume_root: :string,
+          native_network: :boolean,
+          native_workload: :boolean,
+          native_host_port: :integer,
+          namespace_identity: :string
         ],
         [:report]
       )
@@ -92,8 +102,15 @@ defmodule SmolBox.CI.Package do
       Util.write_json!(options[:report], report)
       IO.puts("Package consumer passed: #{options[:report]}")
     after
-      File.rm_rf!(root)
+      cleanup_source(root)
     end
+  end
+
+  @doc false
+  def cleanup_source(root) do
+    if NativeConsumer.retained_source?(Path.join(root, "consumer")),
+      do: :retained,
+      else: File.rm_rf!(root)
   end
 
   defp consumer_environment(consumer, options) do

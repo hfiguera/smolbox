@@ -541,6 +541,13 @@ defmodule SmolBox.Embedded.Channel do
     end
   end
 
+  defp terminal_matches?(
+         _domain,
+         %{operation: %{"operation" => "terminal_preflight"}, output_bytes: 0},
+         %{"result" => "ready"}
+       ),
+       do: true
+
   defp terminal_matches?(_domain, pending, %{"result" => "error", "dispatch" => dispatch}),
     do: dispatch != "not_dispatched" or pending.output_bytes == 0
 

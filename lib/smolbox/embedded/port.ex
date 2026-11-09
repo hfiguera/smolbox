@@ -679,6 +679,9 @@ defmodule SmolBox.Embedded.Port do
       config.platform == :linux and Features.supports?(config, :volumes) and
         VolumeContract.approved?(request, config.volume_policy)
 
+  defp operation_approved?(config, %{"operation" => "terminal_preflight"}),
+    do: Features.supports?(config, :terminal_preflight)
+
   defp operation_approved?(config, %{"operation" => "terminal_open"}),
     do: Features.supports?(config, :terminals)
 

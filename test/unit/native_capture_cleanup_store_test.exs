@@ -94,7 +94,7 @@ defmodule SmolBox.NativeCaptureCleanupStoreTest do
     on_exit(fn -> File.rm(path) end)
     File.write!(path, bytes, [:exclusive])
     File.chmod!(path, 0o600)
-    paths = Path.wildcard(Path.expand("_build/test/lib/*/ebin"))
+    paths = Path.wildcard(Path.join(Mix.Project.build_path(), "lib/*/ebin"))
 
     code = ~S"""
     [path] = System.argv()

@@ -182,6 +182,7 @@ defmodule SmolBox.Store.Memory do
           native_capture_abort_sources: 1,
           native_export_histories: 1,
           local_volumes: 1,
+          native_volumes: 1,
           worker_control: 1,
           schema: 1,
           durable: false,

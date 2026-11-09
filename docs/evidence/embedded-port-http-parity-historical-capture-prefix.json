@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "scope": "deterministic-collected-command-capture-material-prefix-regression",
+  "production_source_commit": "c27b70523301d32407de8e2a0997f15fd369dddc",
+  "test_sha256": "ed9464365ca7a3db4ef3db078f160786aad1f03b0ba3a9a50f0dc4df140cd3b2",
+  "focused_passed": 22,
+  "log_sha256": "b53c6f2ab27dc153e079936dbe35aa4829d59a3edbd88dff4d1ca61783406f52",
+  "credo_changed_file_findings": 0,
+  "credo_findings_elsewhere": 50,
+  "sdk_owner_or_vm_opened": false,
+  "completed_and_unknown_results_preserved": true,
+  "original_creation_and_reservation_preserved": true,
+  "future_missing_and_foreign_histories_rejected": true,
+  "qualification": {
+    "physical_capture": "pending",
+    "fixed_linux_growth_repeat": "pending",
+    "full_http_feature_parity": false,
+    "crash_validation": "deferred",
+    "distribution_approved": false
+  }
+}

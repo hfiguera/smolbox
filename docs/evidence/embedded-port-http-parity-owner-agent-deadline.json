@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "scope": "owner-process-branch-agent-connection-deadline",
+  "baseline_commit": "afaa468",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "inputs": [
+    {
+      "path": "native/smolbox-engine/src/branch_agent.rs",
+      "sha256": "da0eaf4b1a13a7d6f00c588aa2cef49a4f756f4bf53b1f7aaaff85d0f15521ac"
+    }
+  ],
+  "behavior": [
+    "Use the unmodified SDK bounded Unix connector for branch identity, release and boot-probe exchanges.",
+    "Check the original deadline and cancellation after connection setup and immediately before SDK action entry.",
+    "Replace the short local setup read timeout with the original remaining caller budget; retain the socket-only absolute-budget guardian.",
+    "Keep branch actions one-shot, original ownership and journals retained on uncertain results, and retry classification limited to read-only boot probes."
+  ],
+  "validation": [
+    {
+      "lane": "branch-agent-socket-peers",
+      "passed": 6,
+      "new_cases": 2,
+      "log_sha256": "02ae6954ef4dc0be49448e3d72495e88660b1478786308768e9796fe9bab6944"
+    },
+    {
+      "lane": "ordinary-rust-workspace",
+      "passed": 1089,
+      "ignored": 24,
+      "engine_passed": 876,
+      "port_passed": 78,
+      "protocol_passed": 77,
+      "contracts_passed": 58,
+      "log_sha256": "65ddaffd69f8e50f9b52226a6dfc76e557372bf17e5b475bb5918c0781a72ad9"
+    },
+    {
+      "lane": "strict-clippy-all-workspace-targets",
+      "status": "passed",
+      "log_sha256": "0f69aabcafd9c875db6da740f73737048d50f4c116c1bc88a29edaa3ad8b70f7"
+    },
+    {
+      "lane": "rust-format",
+      "status": "passed",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "lane": "unmodified-sdk-default-inventory",
+      "status": "passed",
+      "log_sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+    },
+    {
+      "lane": "unmodified-sdk-clean-inventory",
+      "status": "passed",
+      "log_sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+    },
+    {
+      "lane": "parity-coverage-manifest",
+      "passed": 4,
+      "log_sha256": "8b22de45d5c8d12ee538d6092b541e54ed8ae08bfcb75911cd4e6538493185fb"
+    },
+    {
+      "lane": "documentation-warnings-as-errors",
+      "status": "passed",
+      "log_sha256": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d"
+    }
+  ],
+  "initial_checks": [
+    {
+      "status": "failed",
+      "reason": "The zero-entry Unix-listener backlog did not saturate on macOS. The fake socket fixture now requests an explicit one-entry backlog. No production guard was weakened.",
+      "passed": 5,
+      "failed": 1,
+      "log_sha256": "e2b9cfd8fa0dd0da5ebf797a0b9220a11f65b9c4916b2a229d6b3cab5628a1d7"
+    }
+  ],
+  "remaining": [
+    "Build and ordinarily qualify exact changed packages; do not transfer historical Linux manifest f611974b acceptance to changed bytes.",
+    "P4 approved networked OCI/registry/image workflows and P8 saved-state public activation and ordinary acceptance.",
+    "Remaining P0-P9 source/platform/resource/upgrade gates and final public setup/provenance/signing/license review."
+  ],
+  "native_package_built_or_qualified": false,
+  "public_branch_admission_enabled": false,
+  "parity_complete": false,
+  "crash_validation_performed": false,
+  "distribution_approved": false
+}

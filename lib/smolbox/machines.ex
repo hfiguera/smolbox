@@ -306,7 +306,6 @@ defmodule SmolBox.Machines do
          :ok <- ExecutionSpec.validate(spec),
          :ok <- ExecutionSupport.check(config, spec),
          :ok <- supported_machine(config, handle),
-         :ok <- approved_command(config, handle, spec),
          {:ok, fingerprint} <- ExecutionSpec.fingerprint(spec, config.fingerprint_key),
          digest =
            :crypto.mac(
@@ -317,14 +316,40 @@ defmodule SmolBox.Machines do
            )
            |> Base.encode16(case: :lower),
          {:ok, record} <- Execution.new(spec, digest, config.clock.now()),
-         {:ok, accepted} <-
-           Machines.store(config, :submit, [
-             handle,
-             record,
-             config.max_pending,
-             config.clock.now()
-           ]),
-         do: {:ok, Execution.key(accepted)}
+         do: submit_record(config, handle, record)
+  end
+
+  defp submit_record(config, handle, record) do
+    # An accepted identity already owns its command slot. Repeating expensive
+    # source qualification can compete with that very command's native budget.
+    # Unknown/completed records are returned unchanged; no mutation is replayed.
+    case Session.store(config, :fetch, [Execution.key(record)]) do
+      {:ok, %Execution{fingerprint: fingerprint, managed_machine: machine} = existing}
+      when fingerprint == record.fingerprint and machine == handle ->
+        if Execution.validate(existing) == :ok,
+          do: {:ok, Execution.key(existing)},
+          else: Session.error(:store, :store)
+
+      {:ok, %Execution{}} ->
+        Session.error(:identity_conflict, :store)
+
+      {:error, %Error{category: :not_found}} ->
+        with :ok <- approved_command(config, handle, record.spec),
+             {:ok, accepted} <-
+               Machines.store(config, :submit, [
+                 handle,
+                 record,
+                 config.max_pending,
+                 config.clock.now()
+               ]),
+             do: {:ok, Execution.key(accepted)}
+
+      {:error, %Error{}} = error ->
+        error
+
+      _ ->
+        Session.error(:store, :store)
+    end
   end
 
   @doc """

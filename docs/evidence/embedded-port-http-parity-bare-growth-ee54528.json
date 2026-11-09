@@ -1,0 +1,249 @@
+{
+  "schema": 1,
+  "scope": "ordinary-linux-bare-growth-failed-after-first-completed-growth",
+  "public_source_commit": "ee5452804f945fa4b22057ab1e3cc47cf37843d5",
+  "public_archive_sha256": "6931886df8f0ed5b110b07dd7b0b255736693279c0f9429d2d99912e39bd95ce",
+  "native_source_commit": "9bf4764bb0462f754ba9144ffe3e9e043f285991",
+  "native_manifest_sha256": "6d6cb984a11ef4934b9759934437cddf2a85130f649023849736dcb02cf8d564",
+  "native_helper_sha256": "fae80cb8803b657c5db35dad21785ef40912d31944ee4562089cdbb24b33c15b",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+  "status": "failed",
+  "facts": {
+    "initial_bare_boot": true,
+    "initial_binary_file_write_and_read": true,
+    "initial_workspace_measured_by_portable_probe": true,
+    "first_growth_completed": true,
+    "first_growth_target_gib": {
+      "storage": 2,
+      "overlay": 3
+    },
+    "post_growth_start": "unknown",
+    "reservation_retained_before_teardown": {
+      "slots": 1,
+      "disk_gb": 5
+    },
+    "start_or_resize_replayed": false,
+    "post_growth_data_or_filesystem_acceptance": false,
+    "remaining_native_lanes_run": false,
+    "root_cause_established": false
+  },
+  "failure": {
+    "rejected": null,
+    "exception": "MatchError",
+    "frames": [
+      {
+        "arity": 4,
+        "function": "lifecycle",
+        "line": 543,
+        "module": "Elixir.SmolBox.Example.EmbeddedGrowth"
+      },
+      {
+        "arity": 1,
+        "function": "prepare",
+        "line": 288,
+        "module": "Elixir.SmolBox.Example.EmbeddedGrowth"
+      },
+      {
+        "arity": 2,
+        "function": "execute",
+        "line": 114,
+        "module": "Elixir.SmolBox.Example.EmbeddedGrowth"
+      },
+      {
+        "arity": 3,
+        "function": "run",
+        "line": 89,
+        "module": "Elixir.SmolBox.Example.EmbeddedGrowth"
+      },
+      {
+        "arity": 1,
+        "function": "run",
+        "line": 44,
+        "module": "Elixir.SmolBox.EmbeddedGrowthRuntimeProof"
+      },
+      {
+        "arity": 1,
+        "function": "__FILE__",
+        "line": 79,
+        "module": "elixir_compiler_3"
+      },
+      {
+        "arity": 4,
+        "function": "dispatch",
+        "line": 102,
+        "module": "elixir_compiler"
+      },
+      {
+        "arity": 4,
+        "function": "compile",
+        "line": 76,
+        "module": "elixir_compiler"
+      }
+    ]
+  },
+  "package_location_probe": {
+    "relocated_identical_package_failed_before_hello": true,
+    "original_approved_location_ready": true,
+    "protected_template_references_bind_original_paths": true,
+    "references_rewritten": false
+  },
+  "teardown": {
+    "guest_normal_sdk_shutdown": true,
+    "filesystems_quiesced_acknowledged": true,
+    "forced_kill_fallback": false,
+    "guest_exited_before_runner_retirement": true,
+    "zombie_before_parent_retirement": true,
+    "runner_retirement_signal": "SIGTERM",
+    "purpose": "normal teardown of failed parked qualification after SDK guest quiescence and exit; not a loss-validation campaign",
+    "vm_collected_after_normal_parent_retirement": true,
+    "normal_owned_cleanup_with_original_full_receipt": true,
+    "memory_records_imported_as_ownership": false,
+    "managed_memory_workflow_cleanup_qualified": false,
+    "original_unknown_reservation_not_claimed_released": true
+  },
+  "custody": {
+    "source_commit": "ee5452804f945fa4b22057ab1e3cc47cf37843d5",
+    "source_files_verified": 1279,
+    "native_manifest_sha256": "6d6cb984a11ef4934b9759934437cddf2a85130f649023849736dcb02cf8d564",
+    "native_helper_sha256": "fae80cb8803b657c5db35dad21785ef40912d31944ee4562089cdbb24b33c15b",
+    "assets_verified_per_package": 806,
+    "sdk_table_counts": {
+      "vms": 0,
+      "vm_create_reservations": 0,
+      "vm_pause_operations": 0,
+      "vm_resize_intents": 0,
+      "vm_resize_receipts": 0
+    },
+    "per_vm_cache_directories": 0,
+    "immutable_input_bases_unchanged": {
+      "storage": "fe909fae214718834a74724b99a224ab03994e795856adb2fb62067ab4c01403",
+      "overlay": "cd6d0fc9fcca2076840c5c209cd8b5072ce1ef28b141ecf7bc0cece47afebe21"
+    },
+    "shared_input_cache_retained": true,
+    "original_store_state_before_teardown": "unknown; five GiB and one slot retained, not a passing managed cleanup",
+    "native_owned_cleanup_with_original_full_receipt": true,
+    "memory_records_imported_as_ownership": false,
+    "bare_growth_qualified": false,
+    "crash_validation_performed": false
+  },
+  "archives": [
+    {
+      "purpose": "stopped-disks-and-authentic-evidence-before-runner-retirement",
+      "sha256": "9ea9d6cdc258c3d4f8bbd9848c7668f2fad228622f5632ff9f4920c74d7b9620",
+      "bytes": 245685116,
+      "mode": "0600",
+      "copied_and_verified_locally": true
+    },
+    {
+      "purpose": "final-owned-cleanup-and-evidence",
+      "sha256": "5517d72cbc2a1426305af5fb646da29868d1c262e0d41269e944f09057dea53d",
+      "bytes": 245665265,
+      "mode": "0600",
+      "copied_and_verified_locally": true
+    }
+  ],
+  "normal_lab_shutdown": {
+    "observed_utc": "2026-10-16T14:16:13Z",
+    "active_state": "inactive",
+    "result": "success",
+    "exit_status": 0,
+    "main_pid": 0,
+    "run_disk_retained": true,
+    "run_disk_bytes": 12852920320,
+    "original_domain_retained": true,
+    "recovery_marker_archived_before_shutdown": true
+  },
+  "logs": {
+    "normal-sdk-stop.log": "ec02ee49b9b0f27a3609f9b754955005322311b90570f80661d4a12fb5dae4a0",
+    "sdk-final-inventories.log": "d72ab76a473fec0ec8090dd05aafb648f33a6601c9fed487c68e6d41e7223d94",
+    "bare-current-r2-native.log": "42263a75ee2a11fbb820023413e8ecbc743c9972c7fa8e39c1a838b6d11cf656",
+    "failure-summary.jsonl": "03b209ba950ef91138299b689a4fab7b2aef661b53dd2b98f591a305e1613168",
+    "bare-current-native/failure.json": "84c889c7f37f49fc8bf30b108cfc76c96c11a0c7abfeda9c79281d2dad8e66a5",
+    "owned-cleanup/inspect.json": "5a14bc1eb2584cb045856b6ec569f6c391873436ae7ec7ca90b29caad6fd9b37",
+    "owned-cleanup/stop.json": "5a14bc1eb2584cb045856b6ec569f6c391873436ae7ec7ca90b29caad6fd9b37",
+    "owned-cleanup/delete.json": "14601eb5429f72219eb607adba968650d2b351aec7b3044d4e203eb4b8fe40ab"
+  },
+  "consumer_source_retention_gap": {
+    "observed": true,
+    "description": "The package wrapper removed its temporary consumer tree after Child returned retained failure while the qualification child remained parked. Frozen inputs and SDK/disks were preserved separately. The subsequent source guard and resolution control have deterministic contracts; no live retained-failure retest is claimed.",
+    "source_followup": "docs/evidence/embedded-port-http-parity-retained-consumer-source.json",
+    "retained_diagnostic_sha256": "d0ae46043cfa82dbe916e8c9ab0f511b425dd6fa1af1a91da38c8fbe67f6cd66"
+  },
+  "parity_complete": false,
+  "bare_growth_qualified": false,
+  "crash_validation_performed": false,
+  "distribution_approved": false,
+  "http_only_consumers": [
+    {
+      "lane": "current",
+      "archive_sha256": "6931886df8f0ed5b110b07dd7b0b255736693279c0f9429d2d99912e39bd95ce",
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "report_sha256": "0b4335a0d0e563dcb65fdb6910c89c5c358907c263ef72f8f9ba0b87f6fa7fd6",
+      "without_rust": true,
+      "native_assets_exercised": false,
+      "smoke": {
+        "checkpoint": true,
+        "client": true,
+        "guest_files": true,
+        "interactive": true,
+        "legacy_1_14_6_explicit": "1.14.6",
+        "legacy_runtime_explicit": "1.14.1",
+        "managed_branches": true,
+        "managed_checkpoints": true,
+        "managed_exports": true,
+        "network_policy": true,
+        "offline_default": true,
+        "runtime_1_16_0_explicit": "1.16.0",
+        "runtime_default": "1.22.0",
+        "supervisor": true,
+        "unqualified_runtime_rejected": "1.16.2",
+        "versions": {
+          "jason": "1.4.5",
+          "mint": "1.11.0",
+          "mint_web_socket": "1.0.6",
+          "nimble_options": "1.1.1",
+          "req": "0.7.5",
+          "telemetry": "1.4.2"
+        },
+        "without_rust": true,
+        "workload": true
+      }
+    },
+    {
+      "lane": "minimum",
+      "archive_sha256": "6931886df8f0ed5b110b07dd7b0b255736693279c0f9429d2d99912e39bd95ce",
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "report_sha256": "cecc5ce7bcfee52fccf2e7bb4722ce4423afeb8b6f207b8dbd9ee3ce62f9e7cb",
+      "without_rust": true,
+      "native_assets_exercised": false,
+      "smoke": {
+        "checkpoint": true,
+        "client": true,
+        "guest_files": true,
+        "interactive": true,
+        "legacy_1_14_6_explicit": "1.14.6",
+        "legacy_runtime_explicit": "1.14.1",
+        "managed_branches": true,
+        "managed_checkpoints": true,
+        "managed_exports": true,
+        "network_policy": true,
+        "offline_default": true,
+        "runtime_1_16_0_explicit": "1.16.0",
+        "runtime_default": "1.22.0",
+        "supervisor": true,
+        "unqualified_runtime_rejected": "1.16.2",
+        "versions": {
+          "jason": "1.4.0",
+          "mint": "1.11.0",
+          "mint_web_socket": "1.0.6",
+          "nimble_options": "1.1.0",
+          "req": "0.7.4",
+          "telemetry": "1.3.0"
+        },
+        "without_rust": true,
+        "workload": true
+      }
+    }
+  ]
+}

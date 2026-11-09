@@ -521,6 +521,23 @@ mod tests {
     }
 
     #[test]
+    fn oversized_executable_is_refused_before_hashing_its_sparse_contents() {
+        let temporary = tempfile::tempdir().unwrap();
+        let path = temporary.path().join("oversized-test-model");
+        let file = File::create(&path).unwrap();
+        file.set_len(EXECUTABLE_BYTES + 1).unwrap();
+        file.set_permissions(std::fs::Permissions::from_mode(0o500))
+            .unwrap();
+        let error = verified_executable(&Executable {
+            path,
+            sha256: "0".repeat(64),
+        })
+        .unwrap_err();
+        assert_eq!(error.code, ErrorCode::Ownership);
+        assert_eq!(error.dispatch, crate::Dispatch::NotDispatched);
+    }
+
+    #[test]
     fn copied_test_executable_loads_and_exits_normally_without_vm_dispatch() {
         let temporary = tempfile::tempdir().unwrap();
         let root = temporary.path().canonicalize().unwrap();

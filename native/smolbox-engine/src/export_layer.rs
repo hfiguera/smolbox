@@ -142,8 +142,8 @@ pub(super) fn forward(old: &Option<Layer>, next: &Option<Layer>) -> bool {
                     (Some(old), Some(next)) => {
                         old.maximum == next.maximum
                             && old.file.is_none()
-                            && ((!old.entered && next.entered && next.file.is_none())
-                                || (old.entered && next.entered && next.file.is_some()))
+                            && next.entered
+                            && old.entered == next.file.is_some()
                     }
                     _ => false,
                 }

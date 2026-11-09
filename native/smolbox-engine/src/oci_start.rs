@@ -7,6 +7,43 @@ use std::time::{Duration, Instant};
 
 const POLL: Duration = Duration::from_millis(5);
 
+#[cfg(test)]
+mod readiness_tests;
+
+#[derive(Clone, Copy)]
+enum Origin<'a> {
+    Oci(Option<&'a crate::ImagePullRequest>),
+    Packed,
+}
+
+#[derive(Default)]
+struct BootEntry(Mutex<Option<bool>>);
+impl BootEntry {
+    fn enter(&self) -> Result<()> {
+        let mut state = self
+            .0
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        if state.is_some() {
+            return Err(Error::before(ErrorCode::State));
+        }
+        *state = Some(true);
+        Ok(())
+    }
+    fn close_unentered(&self) -> Result<bool> {
+        let mut state = self
+            .0
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        if state.is_none() {
+            *state = Some(false);
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    }
+}
+
 enum BootstrapPlan {
     Prepared(Box<crate::transfer_supervisor::Prepared>),
     Pending {
@@ -30,6 +67,58 @@ impl BootstrapPlan {
                 metadata,
             } => supervisor.prepare_bootstrap_reserved(permit, &directory, socket, &metadata),
         }
+    }
+}
+
+// A saved running row is only a candidate. Both readiness and the final
+// bootstrap observation must match the original returned boot enrollment.
+struct BootObservation<'a> {
+    domain: &'a crate::domain::DomainGuard,
+    database: &'a std::path::Path,
+    database_identity: (u64, u64),
+    directory: &'a std::path::Path,
+    receipt: &'a CreationReceipt,
+    owned: &'a crate::runtime_boot::Owned,
+}
+impl BootObservation<'_> {
+    fn observe(
+        &self,
+        runtime_pid: Option<i32>,
+        budget: &crate::ReadBudget,
+    ) -> Result<(Observation, VmRecord)> {
+        budget.check()?;
+        self.domain.verify()?;
+        let record = crate::sdk_compat::observe_record(
+            self.database,
+            self.database_identity,
+            &self.receipt.name,
+            budget,
+        )?
+        .ok_or(Error::before(ErrorCode::Ownership))?;
+        if !self.receipt.matches(&record)?
+            || !crate::machine::marker_matches(self.receipt, self.directory)?
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        let observation = Observation {
+            state: crate::identity::record_state(&record, false),
+            resources: Some(crate::Resources {
+                cpus: record.cpus,
+                memory_mib: record.mem,
+                storage_gib: record
+                    .storage_gb
+                    .ok_or(Error::before(ErrorCode::Ownership))?,
+                overlay_gib: record
+                    .overlay_gb
+                    .ok_or(Error::before(ErrorCode::Ownership))?,
+            }),
+            pid_identity: record.pid.zip(record.pid_start_time),
+            configuration: crate::MachineConfiguration::observe(&record),
+        };
+        self.owned
+            .verify_running(self.receipt, &observation, runtime_pid)?;
+        budget.check()?;
+        Ok((observation, record))
     }
 }
 
@@ -129,16 +218,20 @@ fn observe_job<T: Send + 'static>(
 
 #[cfg(test)]
 fn launch_features(record: &VmRecord) -> Result<LaunchFeatures> {
-    launch_features_qualified(record, false)
+    launch_features_qualified(record, false, false)
 }
 
-fn launch_features_qualified(record: &VmRecord, mounted: bool) -> Result<LaunchFeatures> {
+fn launch_features_qualified(
+    record: &VmRecord,
+    mounted: bool,
+    packed: bool,
+) -> Result<LaunchFeatures> {
     // This first direct-OCI path has no auxiliary device, source, restore,
     // secret resolver, shell init, or implicit lifecycle behavior. Other parity
     // combinations remain pending until their approvals/owners are integrated.
-    if record.source_smolmachine.is_some()
+    if record.source_smolmachine.is_some() != packed
         || record.image.is_none()
-        || !record.network
+        || (!packed && !record.network)
         || (!mounted && !record.mounts.is_empty())
         || !record.staged_mounts.is_empty()
         || !record.disks.is_empty()
@@ -174,7 +267,7 @@ fn launch_features_qualified(record: &VmRecord, mounted: bool) -> Result<LaunchF
         || record.host_uid_owner.is_some()
         || record.forkpoint_held
         || !record.fork_env.is_empty()
-        || record.source_registry_ref.is_some()
+        || (!packed && record.source_registry_ref.is_some())
         || record.network_name.is_some()
         || record.guest_subnet.is_some()
         || record.dns.is_some()
@@ -184,9 +277,12 @@ fn launch_features_qualified(record: &VmRecord, mounted: bool) -> Result<LaunchF
         || record.health_retries.is_some()
         || record.health_startup_grace_secs.is_some()
         || record.restart.policy != smolvm::config::RestartPolicy::Never
-        || record.network_backend != Some(smolvm::network::NetworkBackend::VirtioNet)
+        || record.network_backend
+            != (record.network || !record.ports.is_empty())
+                .then_some(smolvm::network::NetworkBackend::VirtioNet)
         || record.allowed_cidrs.is_none()
-        || record.dns_filter_hosts.is_none()
+        || (record.dns_filter_hosts.is_none()
+            && (!packed || record.network || !record.ports.is_empty()))
     {
         return Err(Error::before(ErrorCode::Unsupported));
     }
@@ -209,7 +305,7 @@ impl crate::Engine {
         cancel: Cancellation,
     ) -> Result<Observation> {
         source.validate()?;
-        self.start_oci_inner(receipt, Some(source), None, deadline, cancel)
+        self.start_image_inner(receipt, Origin::Oci(Some(source)), None, deadline, cancel)
     }
 
     /// Owned direct-OCI boot and one bounded agent bootstrap. The bridge must
@@ -221,7 +317,7 @@ impl crate::Engine {
         deadline: Instant,
         cancel: Cancellation,
     ) -> Result<Observation> {
-        self.start_oci_inner(receipt, None, None, deadline, cancel)
+        self.start_image_inner(receipt, Origin::Oci(None), None, deadline, cancel)
     }
 
     /// OCI launch with current operator policy and fresh journal-bound backing
@@ -254,13 +350,23 @@ impl crate::Engine {
             }
             None => None,
         };
-        self.start_oci_inner(receipt, Some(source), mounts, deadline, cancel)
+        self.start_image_inner(receipt, Origin::Oci(Some(source)), mounts, deadline, cancel)
     }
 
-    fn start_oci_inner(
+    pub(crate) fn start_packed_owned(
         &self,
         receipt: &CreationReceipt,
-        approved_source: Option<&crate::ImagePullRequest>,
+        mounts: Option<crate::QualifiedVolumeMounts>,
+        deadline: Instant,
+        cancel: Cancellation,
+    ) -> Result<Observation> {
+        self.start_image_inner(receipt, Origin::Packed, mounts, deadline, cancel)
+    }
+
+    fn start_image_inner(
+        &self,
+        receipt: &CreationReceipt,
+        origin: Origin<'_>,
         mut mounts: Option<crate::QualifiedVolumeMounts>,
         deadline: Instant,
         cancel: Cancellation,
@@ -296,7 +402,8 @@ impl crate::Engine {
             .observation_record(&receipt.name, &budget)?
             .ok_or(Error::before(ErrorCode::State))?;
         self.verify_record(receipt, &record)?;
-        if approved_source.is_some_and(|source| {
+        let packed = matches!(origin, Origin::Packed);
+        if matches!(origin, Origin::Oci(Some(source)) if {
             source.platform != crate::oci::native_oci_platform()
                 || record.image.as_deref() != Some(source.reference.as_str())
         }) {
@@ -309,13 +416,15 @@ impl crate::Engine {
                 .ok_or(Error::before(ErrorCode::Unsupported))?,
             platform: crate::oci::native_oci_platform().into(),
         };
-        self.qualified_pull_record(receipt, &intent, &budget)?;
+        if !packed {
+            self.qualified_pull_record(receipt, &intent, &budget)?;
+        }
         match &mounts {
             Some(mounts) => self.verify_machine_mounts(receipt, &record, mounts, &budget)?,
             None if record.mounts.is_empty() => {}
             None => return Err(Error::before(ErrorCode::Ownership)),
         }
-        let features = launch_features_qualified(&record, mounts.is_some())?;
+        let features = launch_features_qualified(&record, mounts.is_some(), packed)?;
         let expected = self.inspect(receipt)?;
         if expected.state != ObservedState::Stopped {
             return Err(Error::before(ErrorCode::State));
@@ -329,6 +438,16 @@ impl crate::Engine {
         if smolvm::portable_checkpoint::pending_dir(&directory).is_some() {
             return Err(Error::before(ErrorCode::Unsupported));
         }
+        let features = if packed {
+            features
+                .with_packed_layers(
+                    &smolvm::agent::machine_layers_cache_dir(&record.name),
+                    record.source_smolmachine.as_deref(),
+                )
+                .map_err(|_| Error::before(ErrorCode::Native))?
+        } else {
+            features
+        };
         let deadline_ns = crate::buffered::monotonic_ns()?
             .checked_add(
                 u64::try_from(
@@ -339,7 +458,11 @@ impl crate::Engine {
                 .map_err(|_| Error::before(ErrorCode::Validation))?,
             )
             .ok_or(Error::before(ErrorCode::Validation))?;
-        let metadata = crate::bootstrap::Metadata::from_record(&record, deadline_ns)?;
+        let metadata = if packed {
+            crate::bootstrap::Metadata::from_packed_record(&record, deadline_ns)?
+        } else {
+            crate::bootstrap::Metadata::from_record(&record, deadline_ns)?
+        };
         let proof_intent = metadata.expected()?;
         let transfer_directory = self.transfer_directory()?;
         let plan = if mounts.is_some() {
@@ -361,31 +484,28 @@ impl crate::Engine {
             )?))
         };
         check(deadline, &cancel)?;
-        let manager = Arc::new(Mutex::new(
-            AgentManager::for_vm_with_sizes(&record.name, record.storage_gb, record.overlay_gb)
-                .map_err(|_| Error::before(ErrorCode::Native))?,
-        ));
-        {
-            let mut handles = self
-                .owned_managers
-                .lock()
-                .map_err(|_| Error::before(ErrorCode::Native))?;
-            if handles.contains_key(&record.name) {
-                return Err(Error::before(ErrorCode::Conflict));
-            }
-            handles.insert(record.name.clone(), manager.clone());
-        }
         if let Some(mounts) = &mounts {
             self.verify_machine_mounts(receipt, &self.record(receipt)?, mounts, &budget)?;
         }
-        self.track_handle(receipt)?;
+        let manager = Arc::new(Mutex::new(
+            AgentManager::for_vm(&record.name).map_err(|_| Error::before(ErrorCode::Native))?,
+        ));
+        let owned_boot = self.register_image_boot(receipt, manager.clone())?;
+        let retained_boot = owned_boot.clone();
+        let retained_manager = manager.clone();
+        let entry = Arc::new(BootEntry::default());
+        let worker_entry = entry.clone();
         let db = self.db.clone();
         let database = self.binding().database.clone();
         let database_identity = self.database_identity;
         let domain = self.domain.clone();
+        let retained_receipt = receipt;
         let receipt = receipt.clone();
         let work_cancel = cancel.clone();
-        observe_owned(self.jobs.clone(), deadline, cancel, move || {
+        let registry_enabled = self.registry_account_enabled();
+        let registry_jobs = self.jobs.clone();
+        let registry_source = (!packed).then_some(intent);
+        let result = observe_owned(self.jobs.clone(), deadline, cancel, move || {
             check(deadline, &work_cancel)?;
             if let Some(mounts) = &mounts {
                 let budget = crate::ReadBudget::new(
@@ -396,6 +516,7 @@ impl crate::Engine {
                 )?;
                 mounts.recheck_before_launch(&budget)?;
             }
+            worker_entry.enter()?;
             let dispatch = epoch.begin_boot(&receipt.name)?;
             let (started, pid) = {
                 let manager = manager
@@ -415,15 +536,16 @@ impl crate::Engine {
             if !enrolled.intent().matches(&receipt.name, &epoch.identity()) {
                 return Err(Error::uncertain(ErrorCode::Ownership));
             }
+            let child = enrolled.child();
+            let (child_pid, birth) = (child.pid, child.birth);
+            owned_boot.enroll(enrolled, &epoch)?;
             started.map_err(|e| Error::uncertain(crate::sdk_compat::launch_error(&e)))?;
             let pid = pid
                 .filter(|pid| *pid > 0)
                 .ok_or(Error::uncertain(ErrorCode::Ownership))?;
-            let child = enrolled.child();
-            if child.pid != pid || child.birth == 0 {
+            if child_pid != pid || birth == 0 {
                 return Err(Error::uncertain(ErrorCode::Ownership));
             }
-            let birth = child.birth;
             // Preserve actual launch identity even if observation expired during
             // the SDK call; no late bootstrap or success result follows it.
             db.update_vm(&receipt.name, |record| {
@@ -434,14 +556,65 @@ impl crate::Engine {
             .map_err(|_| Error::uncertain(ErrorCode::Database))?
             .ok_or(Error::uncertain(ErrorCode::Ownership))?;
             check(deadline, &work_cancel).map_err(|e| Error::uncertain(e.code))?;
-            // SDK success includes agent readiness. Close mount descriptors before
-            // spawning the bootstrap worker; volume gates/proof follow collection.
+            // Close mount descriptors before the readiness relay or bootstrap
+            // worker. Volume gates/proof remain retained through collection.
             let mount_authority = mounts
                 .map(|mounts| mounts.into_worker_authority())
                 .transpose()
                 .map_err(|e| Error::uncertain(e.code))?;
+            let observation = BootObservation {
+                domain: &domain,
+                database: &database,
+                database_identity,
+                directory: &directory,
+                receipt: &receipt,
+                owned: &owned_boot,
+            };
+            let readiness = crate::ReadBudget {
+                deadline,
+                cancel: work_cancel.clone(),
+            };
+            // SDK doorbell/marker readiness can precede the control accept
+            // loop. Retry only Ping, never image pull or workload launch.
+            crate::runtime_boot::wait_until_ready(
+                &readiness,
+                || {
+                    let runtime_pid = manager
+                        .try_lock()
+                        .map_err(|_| Error::uncertain(ErrorCode::Conflict))?
+                        .child_pid();
+                    observation
+                        .observe(runtime_pid, &readiness)
+                        .map(|(observation, _)| observation)
+                },
+                |attempt| {
+                    crate::branch_agent::boot_probe(
+                        &directory.join("agent.sock"),
+                        &directory,
+                        attempt,
+                    )
+                },
+            )?;
+            // Resolve only in the admitted owner, after closing mounted backing
+            // descriptors. Provider and bootstrap worker share a sequential child
+            // slot beside the enrolled VMM; workers never load host settings.
+            let registry = match (registry_enabled, registry_source.as_ref()) {
+                (true, Some(source)) => Some(
+                    crate::guest_registry::Plan::resolve(
+                        source,
+                        &crate::registry_account::Context {
+                            deadline,
+                            cancel: &work_cancel,
+                            pool: &registry_jobs,
+                        },
+                    )
+                    .map_err(|e| Error::uncertain(e.code))?,
+                ),
+                _ => None,
+            };
             let prepared = plan
                 .prepare(&supervisor)
+                .and_then(|prepared| prepared.with_registry(registry))
                 .map_err(|e| Error::uncertain(e.code))?;
             let crate::transfer_supervisor::RunResult::Collected(collected) = supervisor.run(
                 prepared,
@@ -469,47 +642,99 @@ impl crate::Engine {
                 work_cancel.clone(),
             )
             .map_err(|e| Error::uncertain(e.code))?;
-            let after = crate::sdk_compat::observe_record(
-                &database,
-                database_identity,
-                &receipt.name,
-                &budget,
-            )?
-            .ok_or(Error::uncertain(ErrorCode::Ownership))?;
-            if !receipt.matches(&after)?
-                || !crate::machine::marker_matches(&receipt, &directory)?
-                || after.pid.zip(after.pid_start_time) != Some((pid, birth))
-                || crate::identity::record_state(&after, false) != ObservedState::Running
-            {
-                return Err(Error::uncertain(ErrorCode::Ownership));
-            }
+            let runtime_pid = manager
+                .try_lock()
+                .map_err(|_| Error::uncertain(ErrorCode::Conflict))?
+                .child_pid();
+            let (after, record) = observation
+                .observe(runtime_pid, &budget)
+                .map_err(|e| Error::uncertain(e.code))?;
             let journal = crate::material::MaterialJournal::at(&directory);
             journal.verify(&receipt)?;
-            journal.verify_mount_record(&receipt, &after)?;
+            // Keep the full material/mount journal check after bootstrap; the
+            // readiness snapshots above confer no new material authority.
+            journal.verify_mount_record(&receipt, &record)?;
             budget.check().map_err(|e| Error::uncertain(e.code))?;
-            Ok(Observation {
-                state: ObservedState::Running,
-                resources: Some(crate::Resources {
-                    cpus: after.cpus,
-                    memory_mib: after.mem,
-                    storage_gib: after
-                        .storage_gb
-                        .ok_or(Error::uncertain(ErrorCode::Ownership))?,
-                    overlay_gib: after
-                        .overlay_gb
-                        .ok_or(Error::uncertain(ErrorCode::Ownership))?,
-                }),
-                pid_identity: Some((pid, birth)),
-                configuration: crate::MachineConfiguration::observe(&after),
-            })
-        })
-        .map_err(|error| Error::uncertain(error.code))
+            Ok(after)
+        });
+        if entry.close_unentered()? {
+            self.retire_unentered_image_boot(retained_receipt, &retained_manager, &retained_boot)?;
+            result.map_err(|error| Error::before(error.code))
+        } else {
+            result.map_err(|error| Error::uncertain(error.code))
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn cancelled_unentered_boot_cannot_enter_after_registration_is_retired() {
+        let entry = Arc::new(BootEntry::default());
+        let (resume, wait) = mpsc::sync_channel(0);
+        let worker = entry.clone();
+        let thread = std::thread::spawn(move || {
+            wait.recv().unwrap();
+            worker.enter()
+        });
+        assert!(entry.close_unentered().unwrap());
+        resume.send(()).unwrap();
+        assert_eq!(thread.join().unwrap().unwrap_err().code, ErrorCode::State);
+        assert!(!entry.close_unentered().unwrap());
+        let entered = BootEntry::default();
+        entered.enter().unwrap();
+        assert!(!entered.close_unentered().unwrap());
+        assert!(entered.enter().is_err());
+    }
+
+    #[test]
+    fn packed_offline_boot_never_expands_egress_or_enables_restore() {
+        let mut record = record();
+        record.source_smolmachine = Some("/approved/fixture".into());
+        record.network = false;
+        record.network_backend = None;
+        record.allowed_cidrs = Some(vec![]);
+        record.dns_filter_hosts = Some(vec![]);
+        assert!(launch_features_qualified(&record, false, false).is_err());
+        let features = launch_features_qualified(&record, false, true).unwrap();
+        assert_eq!(features.dns_filter_hosts, Some(vec![]));
+        assert_eq!(features.watch_parent, Some(true));
+        record.ports.push((28732, 8000));
+        assert!(launch_features_qualified(&record, false, true).is_err());
+        record.network_backend = Some(smolvm::network::NetworkBackend::VirtioNet);
+        assert!(launch_features_qualified(&record, false, true).is_ok());
+        record.forkable = true;
+        assert!(launch_features_qualified(&record, false, true).is_err());
+    }
+
+    #[test]
+    fn neutral_packed_record_without_dns_filter_is_valid_only_without_a_network_device() {
+        let mut record = smolvm::embedded::MachineSpec {
+            name: "owned".into(),
+            persistent: true,
+            image: Some("packed-fixture:tag".into()),
+            resources: smolvm::agent::VmResources {
+                network: false,
+                allowed_cidrs: Some(vec![]),
+                ..Default::default()
+            },
+            ..Default::default()
+        }
+        .to_record();
+        record.source_smolmachine = Some("/approved/fixture".into());
+        assert!(record.dns_filter_hosts.is_none());
+        assert!(launch_features_qualified(&record, false, true).is_ok());
+        record.ports.push((28732, 8000));
+        record.network_backend = Some(smolvm::network::NetworkBackend::VirtioNet);
+        assert!(launch_features_qualified(&record, false, true).is_err());
+        record.dns_filter_hosts = Some(vec![]);
+        assert!(launch_features_qualified(&record, false, true).is_ok());
+        record.network = true;
+        record.dns_filter_hosts = None;
+        assert!(launch_features_qualified(&record, false, true).is_err());
+    }
 
     #[test]
     fn pending_mounted_bootstrap_keeps_admission_without_opening_spools() {
@@ -555,7 +780,7 @@ mod tests {
         let mut record = record();
         record.mounts = vec![("/approved/volume".into(), "/mnt/volumes/data".into(), true)];
         assert!(launch_features(&record).is_err());
-        let features = launch_features_qualified(&record, true).unwrap();
+        let features = launch_features_qualified(&record, true, false).unwrap();
         assert_eq!(features.watch_parent, Some(true));
         assert!(features.extra_disks.is_empty() && features.packed_layers_dir.is_none());
         let metadata = crate::bootstrap::Metadata::from_record(&record, 1).unwrap();
@@ -569,7 +794,7 @@ mod tests {
         record
             .staged_mounts
             .push((0, "/staged".into(), "/mnt/volumes/staged".into()));
-        assert!(launch_features_qualified(&record, true).is_err());
+        assert!(launch_features_qualified(&record, true, false).is_err());
     }
 
     #[test]

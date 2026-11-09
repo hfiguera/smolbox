@@ -304,14 +304,21 @@ pub struct VerifiedPackage {
 pub fn source_sha256() -> String {
     hash_bytes(include_bytes!("../../vendor/source.json"))
 }
+// Package approval is platform-specific. The macOS/default policy retains its
+// earlier descriptor; Linux volumes still require explicit operator approval.
+#[cfg(target_os = "linux")]
+const POLICY_BYTES: &[u8] = include_bytes!("../../policy-linux.json");
+#[cfg(not(target_os = "linux"))]
+const POLICY_BYTES: &[u8] = include_bytes!("../../policy.json");
+
 fn policy_matches(manifest: &Manifest) -> bool {
     manifest.schema == 3
-        && serde_json::from_slice::<serde_json::Value>(include_bytes!("../../policy.json"))
+        && serde_json::from_slice::<serde_json::Value>(POLICY_BYTES)
             .is_ok_and(|expected| manifest.policy == expected)
 }
 pub fn sdk_identity() -> Result<SdkIdentity, SafeCode> {
-    let policy: serde_json::Value = serde_json::from_slice(include_bytes!("../../policy.json"))
-        .map_err(|_| SafeCode::Package)?;
+    let policy: serde_json::Value =
+        serde_json::from_slice(POLICY_BYTES).map_err(|_| SafeCode::Package)?;
     let sdk: SdkIdentity =
         serde_json::from_value(policy["sdk"].clone()).map_err(|_| SafeCode::Package)?;
     sdk.validate().map_err(|_| SafeCode::Package)?;
@@ -462,7 +469,7 @@ pub fn verify(executable: &Path, manifest_sha256: &str) -> Result<VerifiedPackag
     {
         return Err(SafeCode::Package);
     }
-    if bounded_file(&root.join("SMOLBOX-POLICY.json"), 8192)? != include_bytes!("../../policy.json")
+    if bounded_file(&root.join("SMOLBOX-POLICY.json"), 8192)? != POLICY_BYTES
         || bounded_file(&root.join("NATIVE-SOURCE.json"), 8192)?
             != include_bytes!("../../vendor/source.json")
     {
@@ -693,7 +700,7 @@ fn verify_inventory(
                 let marker = path
                     .file_name()
                     .is_some_and(|name| name.to_string_lossy().starts_with(".smolvm-ready."));
-                if !declared.contains(relative) && !(marker && meta.is_file() && meta.len() <= 4096)
+                if !(declared.contains(relative) || marker && meta.is_file() && meta.len() <= 4096)
                 {
                     return Err(SafeCode::Package);
                 }
@@ -890,7 +897,7 @@ mod tests {
     fn policy_manifest() -> Manifest {
         Manifest {
             schema: 3,
-            policy: serde_json::from_slice(include_bytes!("../../policy.json")).unwrap(),
+            policy: serde_json::from_slice(POLICY_BYTES).unwrap(),
             identity: PackageIdentity {
                 engine_version: env!("CARGO_PKG_VERSION").into(),
                 smolvm_revision: smolbox_engine::SMOLVM_REVISION.into(),
@@ -917,10 +924,12 @@ mod tests {
             smolbox_protocol::PARITY_PROTOCOL_MAJOR
         );
         assert!(sdk_identity().is_ok());
-        let fixture: smolbox_protocol::ServerMessage = serde_json::from_str(include_str!(
-            "../../smolbox-protocol/fixtures/hello-v2-current.json"
-        ))
-        .unwrap();
+        let fixture_bytes = if cfg!(target_os = "linux") {
+            include_str!("../../smolbox-protocol/fixtures/hello-v2-linux-images.json")
+        } else {
+            include_str!("../../smolbox-protocol/fixtures/hello-v2-terminal-preflight.json")
+        };
+        let fixture: smolbox_protocol::ServerMessage = serde_json::from_str(fixture_bytes).unwrap();
         let smolbox_protocol::ServerMessage::Hello { hello } = fixture else {
             unreachable!()
         };
@@ -941,6 +950,22 @@ mod tests {
             smolbox_engine::COMMAND_METADATA_BYTES
         );
         let limits = smolbox_protocol::Limits::for_sdk(&sdk_identity().ok().unwrap());
+        assert_eq!(
+            manifest.policy.get("volume_limits"),
+            limits
+                .volumes
+                .as_ref()
+                .map(|value| serde_json::to_value(value).unwrap())
+                .as_ref()
+        );
+        assert_eq!(
+            sdk.feature_versions.get("volumes").copied(),
+            if cfg!(target_os = "linux") {
+                Some(1)
+            } else {
+                None
+            }
+        );
         let terminals = limits.terminals.as_ref().unwrap();
         assert_eq!(terminals.input_bytes, smolbox_engine::TERMINAL_CHUNK_BYTES);
         assert_eq!(
@@ -1257,7 +1282,7 @@ mod tests {
     }
 
     #[test]
-    fn negotiated_volume_bounds_match_engine_constants_and_remain_unadvertised() {
+    fn negotiated_volume_bounds_match_engine_constants_and_platform_policy() {
         let limits = smolbox_protocol::VolumeLimits::default();
         assert_eq!(limits.work_ms, smolbox_engine::VOLUME_WORK_MS);
         assert_eq!(limits.observation_ms, smolbox_engine::VOLUME_OBSERVATION_MS);
@@ -1281,10 +1306,11 @@ mod tests {
             limits.observation_metadata_bytes,
             smolbox_engine::VOLUME_OBSERVATION_METADATA_BYTES
         );
-        assert!(
+        assert_eq!(
             smolbox_protocol::Limits::for_sdk(&sdk_identity().ok().unwrap())
                 .volumes
-                .is_none()
+                .is_some(),
+            cfg!(target_os = "linux")
         );
     }
 

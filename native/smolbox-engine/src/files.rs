@@ -87,6 +87,52 @@ impl Engine {
         total_bytes: u64,
         cancel: Cancellation,
     ) -> Result<FileOutcome> {
+        self.write_file_mode(receipt, options, reader, total_bytes, cancel, None)
+    }
+
+    /// Upload with the operator's current mount policy. Proof/gate qualification
+    /// precedes input staging; collected/uncertain work retains that authority.
+    pub fn write_file_with_volume_policy(
+        &self,
+        receipt: &CreationReceipt,
+        options: FileOptions,
+        data: &[u8],
+        cancel: Cancellation,
+        policy: &crate::LocalVolumePolicy,
+    ) -> Result<FileOutcome> {
+        self.write_file_from_reader_with_volume_policy(
+            receipt,
+            options,
+            std::io::Cursor::new(data),
+            data.len() as u64,
+            cancel,
+            policy,
+        )
+    }
+
+    /// Reader variant of [`Self::write_file_with_volume_policy`]. The reader is
+    /// not consumed until saved/current mount authority and work admission agree.
+    pub fn write_file_from_reader_with_volume_policy(
+        &self,
+        receipt: &CreationReceipt,
+        options: FileOptions,
+        reader: impl Read,
+        total_bytes: u64,
+        cancel: Cancellation,
+        policy: &crate::LocalVolumePolicy,
+    ) -> Result<FileOutcome> {
+        self.write_file_mode(receipt, options, reader, total_bytes, cancel, Some(policy))
+    }
+
+    fn write_file_mode(
+        &self,
+        receipt: &CreationReceipt,
+        options: FileOptions,
+        reader: impl Read,
+        total_bytes: u64,
+        cancel: Cancellation,
+        policy: Option<&crate::LocalVolumePolicy>,
+    ) -> Result<FileOutcome> {
         options.validate(true)?;
         if total_bytes > options.max_bytes {
             return Err(Error::before(ErrorCode::Validation));
@@ -95,19 +141,44 @@ impl Engine {
         if let Some(outcome) = before_budget(expires, &cancel) {
             return Ok(outcome);
         }
-        self.guest_work_record(receipt)?;
+        let record = self.guest_work_record(receipt)?;
+        let mount_budget = mount_budget(expires, &cancel)?;
+        let mounts = self.worker_mounts(receipt, &record, policy, &mount_budget)?;
+        let gate = self.gate(&receipt.name)?;
+        let machine = gate
+            .try_lock()
+            .map_err(|_| Error::before(ErrorCode::Conflict))?;
+        let source = self.source_lease(receipt)?;
+        if self.inspect(receipt)?.state != crate::ObservedState::Running {
+            return Err(Error::before(ErrorCode::State));
+        }
+        self.verify_templates()?;
+        let activation = crate::buffered::Metadata::file_activation(&record, expires)?;
         let transfers = self
             .transfers
             .as_ref()
             .ok_or(Error::before(ErrorCode::Unsupported))?;
-        let mut prepared = transfers.prepare(
+        let kind = Kind::Write {
+            total: total_bytes,
+            mode: options.mode,
+        };
+        let (permit, mount_authority) = self.reserve_mounted_worker(
+            receipt,
+            mounts,
+            crate::transfer_supervisor::TransferSupervisor::file_demand(
+                &options,
+                &kind,
+                activation.as_ref(),
+            )?,
+            &mount_budget,
+        )?;
+        let mut prepared = transfers.prepare_file_reserved(
+            permit,
             &self.transfer_directory()?,
             self.vm_directory(&receipt.name).join("agent.sock"),
             &options,
-            Kind::Write {
-                total: total_bytes,
-                mode: options.mode,
-            },
+            kind,
+            activation.as_ref(),
         )?;
         if let Err(error) = prepared.upload(reader, expires, &cancel) {
             if let Some(outcome) = before_budget(expires, &cancel) {
@@ -115,11 +186,6 @@ impl Engine {
             }
             return Err(error);
         }
-        let gate = self.gate(&receipt.name)?;
-        let machine = gate
-            .try_lock()
-            .map_err(|_| Error::before(ErrorCode::Conflict))?;
-        let source = self.source_lease(receipt)?;
         if let Some(outcome) = before_budget(expires, &cancel) {
             return Ok(outcome);
         }
@@ -127,22 +193,9 @@ impl Engine {
             expires.saturating_duration_since(Instant::now()),
             cancel.clone(),
         );
-        if !self.activate_files(
-            receipt,
-            expires.saturating_duration_since(Instant::now()),
-            &cancel,
-        )? {
-            return Ok(finish(
-                false,
-                cancel.is_cancelled(),
-                deadline.finish(),
-                0,
-                false,
-            ));
-        }
         let collected = transfers.run(
             prepared,
-            Box::new((machine, source, self.domain.clone())),
+            Box::new((machine, source, self.domain.clone(), mount_authority)),
             expires,
             &cancel,
         )?;
@@ -163,29 +216,72 @@ impl Engine {
         receipt: &CreationReceipt,
         options: FileOptions,
         cancel: Cancellation,
+        consumer: impl FnMut(Vec<u8>) -> std::result::Result<(), ()>,
+    ) -> Result<FileOutcome> {
+        self.read_file_mode(receipt, options, cancel, consumer, None)
+    }
+
+    /// Read with freshly qualified mount authority, retained through bounded
+    /// worker collection and forwarding of acknowledged bytes to the consumer.
+    pub fn read_file_with_volume_policy(
+        &self,
+        receipt: &CreationReceipt,
+        options: FileOptions,
+        cancel: Cancellation,
+        consumer: impl FnMut(Vec<u8>) -> std::result::Result<(), ()>,
+        policy: &crate::LocalVolumePolicy,
+    ) -> Result<FileOutcome> {
+        self.read_file_mode(receipt, options, cancel, consumer, Some(policy))
+    }
+
+    fn read_file_mode(
+        &self,
+        receipt: &CreationReceipt,
+        options: FileOptions,
+        cancel: Cancellation,
         mut consumer: impl FnMut(Vec<u8>) -> std::result::Result<(), ()>,
+        policy: Option<&crate::LocalVolumePolicy>,
     ) -> Result<FileOutcome> {
         options.validate(false)?;
         let expires = Instant::now() + options.timeout;
         if let Some(outcome) = before_budget(expires, &cancel) {
             return Ok(outcome);
         }
-        self.guest_work_record(receipt)?;
-        let transfers = self
-            .transfers
-            .as_ref()
-            .ok_or(Error::before(ErrorCode::Unsupported))?;
-        let prepared = transfers.prepare(
-            &self.transfer_directory()?,
-            self.vm_directory(&receipt.name).join("agent.sock"),
-            &options,
-            Kind::Read,
-        )?;
+        let record = self.guest_work_record(receipt)?;
+        let mount_budget = mount_budget(expires, &cancel)?;
+        let mounts = self.worker_mounts(receipt, &record, policy, &mount_budget)?;
         let gate = self.gate(&receipt.name)?;
         let machine = gate
             .try_lock()
             .map_err(|_| Error::before(ErrorCode::Conflict))?;
         let source = self.source_lease(receipt)?;
+        if self.inspect(receipt)?.state != crate::ObservedState::Running {
+            return Err(Error::before(ErrorCode::State));
+        }
+        self.verify_templates()?;
+        let activation = crate::buffered::Metadata::file_activation(&record, expires)?;
+        let transfers = self
+            .transfers
+            .as_ref()
+            .ok_or(Error::before(ErrorCode::Unsupported))?;
+        let (permit, mount_authority) = self.reserve_mounted_worker(
+            receipt,
+            mounts,
+            crate::transfer_supervisor::TransferSupervisor::file_demand(
+                &options,
+                &Kind::Read,
+                activation.as_ref(),
+            )?,
+            &mount_budget,
+        )?;
+        let prepared = transfers.prepare_file_reserved(
+            permit,
+            &self.transfer_directory()?,
+            self.vm_directory(&receipt.name).join("agent.sock"),
+            &options,
+            Kind::Read,
+            activation.as_ref(),
+        )?;
         if let Some(outcome) = before_budget(expires, &cancel) {
             return Ok(outcome);
         }
@@ -193,22 +289,9 @@ impl Engine {
             expires.saturating_duration_since(Instant::now()),
             cancel.clone(),
         );
-        if !self.activate_files(
-            receipt,
-            expires.saturating_duration_since(Instant::now()),
-            &cancel,
-        )? {
-            return Ok(finish(
-                false,
-                cancel.is_cancelled(),
-                deadline.finish(),
-                0,
-                false,
-            ));
-        }
         let result = transfers.run(
             prepared,
-            Box::new((machine, source, self.domain.clone())),
+            Box::new((machine, source, self.domain.clone(), mount_authority)),
             expires,
             &cancel,
         )?;
@@ -226,6 +309,16 @@ impl Engine {
         }
         Ok(outcome)
     }
+}
+
+fn mount_budget(expires: Instant, cancel: &Cancellation) -> Result<crate::ReadBudget> {
+    crate::ReadBudget::new(
+        expires
+            .saturating_duration_since(Instant::now())
+            .min(Duration::from_secs(30))
+            .max(Duration::from_nanos(1)),
+        cancel.clone(),
+    )
 }
 
 fn before_budget(expires: Instant, cancel: &Cancellation) -> Option<FileOutcome> {
@@ -277,29 +370,6 @@ fn forward(
         forwarded += count as u64;
     }
     Ok(())
-}
-
-fn finish(
-    ok: bool,
-    cancelled: bool,
-    expired: bool,
-    observed_bytes: u64,
-    native_acknowledged: bool,
-) -> FileOutcome {
-    FileOutcome {
-        completion: if expired {
-            FileCompletion::Deadline
-        } else if cancelled {
-            FileCompletion::Cancelled
-        } else if ok {
-            FileCompletion::Completed
-        } else {
-            FileCompletion::NativeError
-        },
-        dispatch: Dispatch::MayHaveDispatched,
-        observed_bytes,
-        native_acknowledged,
-    }
 }
 
 #[cfg(test)]

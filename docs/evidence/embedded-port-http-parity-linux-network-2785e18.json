@@ -1,0 +1,305 @@
+{
+  "schema": 1,
+  "scope": "ordinary-linux-public-network-and-mapping-consumers",
+  "checked_at_utc": "2026-10-16T05:06:29Z",
+  "source_commit": "2785e1882c0f58711637d05e6271a82e6f0ba207",
+  "native_bundle": {
+    "manifest_schema": 3,
+    "package_manifest_sha256": "af4bc9ff5d86580dd712d6947bf2d0ba7c3a021c91939a0a67fcef21b88660f4",
+    "identity": {
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "fbc1a792b79873e12c8081ddcbaaa3979d4030c6e63d5ca478383d9530c3c471",
+      "assets_sha256": "ffd234d5f3a6633e2aa207556b35a92b43700690685fe431c8d4cf5353eb3200",
+      "platform": "linux",
+      "architecture": "x86_64"
+    },
+    "sdk_version": "1.22.0",
+    "sdk_source_verified_unmodified": true,
+    "rust_toolchain": "1.98.1",
+    "retained_privately": true,
+    "published": false
+  },
+  "fixture": {
+    "bytes": 41681345,
+    "fixture_defaults_sha256": "674595033254d389947f5ee19db405ddcfb3404a49e92c14934e48a5ac8dbecd",
+    "fixture_sha256": "339995f33fe84c2ed5a4e212a0acb9afab22df972bf2c2b4aa8e412ea0af5bc4",
+    "image_digest": "sha256:28eb0cb65acb65b970e85c0dc57d10067868fae8dd00d072413df273132123ac",
+    "layer_content": [
+      {
+        "tar_bytes": 50860544,
+        "uncompressed_tar_sha256": "7bae6c8cef01a129cc3a9eb16f37cf8e4deb84085586ab425377bcedf30a411b",
+        "upstream_layer_digest": "sha256:c5680ba2a701892cf5e9304fcdc601ebc8df014c6f6354b451614c98917e4c64"
+      }
+    ],
+    "package_manifest_sha256": "af4bc9ff5d86580dd712d6947bf2d0ba7c3a021c91939a0a67fcef21b88660f4",
+    "scope": "ordinary-python-container-fixture",
+    "sdk_source_modified": false,
+    "sdk_vm_started": false,
+    "source_fixture_sha256": "76e71b388c2127a809fa25ecd01ac9d5e5498ee98c093e4d9f84fc874d5f36f2",
+    "status": "created",
+    "storage_template_included": false
+  },
+  "native_inputs": {
+    "files_verified": 261,
+    "archive_sha256": "6f163f08a47a47ad54cec94c60a2c209f20fc164464c5c00aa1168c3385aadba",
+    "inventory_sha256": "92994b94f55a6defa851826ed8e51bb21463e6ec626687b069d364a3cd39fc9b"
+  },
+  "consumers": [
+    {
+      "consumer": "current",
+      "proof": "passed",
+      "without_rust": true,
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "source_archive_sha256": "b2cbd6526b7cc13629207219b9d3d2ecd1a0d5e2dd94615b144c6055ed2778ae",
+      "report_sha256": "97caa28f5b98aa9d5363f2b94ffc7fe029d830f102a06e7defce5eb53aa90c22",
+      "proof_tool_sha256": {
+        "native-proof.exs": "d5c77f23f1726cfbc027738d2287935189674c73f6a393cebe9fda3d2330b3bb",
+        "native_proof.py": "43fdb6e7f20bc6a05acfefde2f23bb708e5db3c92cd4509744bc1dbe0a32548d",
+        "network_fixture.py": "9eceef406d1dd803553fca477bfaa6fbb5c08beca645593548e6e791b9c53f1a",
+        "network_proof.py": "95c507c4bf511e046c02dccb5142ad8d8df53765b4376b7fcef5fdb49ad1cb48",
+        "ordinary_proof.py": "b07539d4dd07526ebbcd41810c2a33dc87b4ea7b18b6e66a57c389356e3e5b74"
+      },
+      "cases": [
+        {
+          "conflict_rolls_back_before_dispatch": true,
+          "cycles": [
+            {
+              "host_positive_controls": [
+                true,
+                true
+              ],
+              "inbound_reply_verified": true,
+              "loopback_listeners": [
+                "127.0.0.1:28732",
+                "[::1]:28732"
+              ],
+              "outbound_reached": [
+                false,
+                false
+              ]
+            },
+            {
+              "host_positive_controls": [
+                true,
+                true
+              ],
+              "inbound_reply_verified": true,
+              "loopback_listeners": [
+                "127.0.0.1:28732",
+                "[::1]:28732"
+              ],
+              "outbound_reached": [
+                false,
+                false
+              ]
+            }
+          ],
+          "draining_survives_runtime_replacement": true,
+          "duplicate_create_reuses_identity": true,
+          "network": "offline",
+          "owned_deleted": true,
+          "reservation_survives_stop_and_runtime_replacement": true
+        },
+        {
+          "conflict_rolls_back_before_dispatch": true,
+          "cycles": [
+            {
+              "host_positive_controls": [
+                true,
+                true
+              ],
+              "inbound_reply_verified": true,
+              "loopback_listeners": [
+                "127.0.0.1:28732",
+                "[::1]:28732"
+              ],
+              "outbound_reached": [
+                true,
+                false
+              ]
+            },
+            {
+              "host_positive_controls": [
+                true,
+                true
+              ],
+              "inbound_reply_verified": true,
+              "loopback_listeners": [
+                "127.0.0.1:28732",
+                "[::1]:28732"
+              ],
+              "outbound_reached": [
+                true,
+                false
+              ]
+            }
+          ],
+          "draining_survives_runtime_replacement": true,
+          "duplicate_create_reuses_identity": true,
+          "network": "cidr",
+          "owned_deleted": true,
+          "reservation_survives_stop_and_runtime_replacement": true
+        }
+      ],
+      "inventory_before": [],
+      "inventory_after": [],
+      "inventory_restored": true,
+      "final_reserved_slots": 0,
+      "owned_deleted": true,
+      "public_memory_port_reservations_qualified": true
+    },
+    {
+      "consumer": "minimum",
+      "proof": "passed",
+      "without_rust": true,
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "source_archive_sha256": "b2cbd6526b7cc13629207219b9d3d2ecd1a0d5e2dd94615b144c6055ed2778ae",
+      "report_sha256": "57fb60d80f1d0c4a1bc846c155fc237e7e0b958264a0813a82641636679c4cb0",
+      "proof_tool_sha256": {
+        "native-proof.exs": "d5c77f23f1726cfbc027738d2287935189674c73f6a393cebe9fda3d2330b3bb",
+        "native_proof.py": "43fdb6e7f20bc6a05acfefde2f23bb708e5db3c92cd4509744bc1dbe0a32548d",
+        "network_fixture.py": "9eceef406d1dd803553fca477bfaa6fbb5c08beca645593548e6e791b9c53f1a",
+        "network_proof.py": "95c507c4bf511e046c02dccb5142ad8d8df53765b4376b7fcef5fdb49ad1cb48",
+        "ordinary_proof.py": "b07539d4dd07526ebbcd41810c2a33dc87b4ea7b18b6e66a57c389356e3e5b74"
+      },
+      "cases": [
+        {
+          "conflict_rolls_back_before_dispatch": true,
+          "cycles": [
+            {
+              "host_positive_controls": [
+                true,
+                true
+              ],
+              "inbound_reply_verified": true,
+              "loopback_listeners": [
+                "127.0.0.1:28732",
+                "[::1]:28732"
+              ],
+              "outbound_reached": [
+                false,
+                false
+              ]
+            },
+            {
+              "host_positive_controls": [
+                true,
+                true
+              ],
+              "inbound_reply_verified": true,
+              "loopback_listeners": [
+                "127.0.0.1:28732",
+                "[::1]:28732"
+              ],
+              "outbound_reached": [
+                false,
+                false
+              ]
+            }
+          ],
+          "draining_survives_runtime_replacement": true,
+          "duplicate_create_reuses_identity": true,
+          "network": "offline",
+          "owned_deleted": true,
+          "reservation_survives_stop_and_runtime_replacement": true
+        },
+        {
+          "conflict_rolls_back_before_dispatch": true,
+          "cycles": [
+            {
+              "host_positive_controls": [
+                true,
+                true
+              ],
+              "inbound_reply_verified": true,
+              "loopback_listeners": [
+                "127.0.0.1:28732",
+                "[::1]:28732"
+              ],
+              "outbound_reached": [
+                true,
+                false
+              ]
+            },
+            {
+              "host_positive_controls": [
+                true,
+                true
+              ],
+              "inbound_reply_verified": true,
+              "loopback_listeners": [
+                "127.0.0.1:28732",
+                "[::1]:28732"
+              ],
+              "outbound_reached": [
+                true,
+                false
+              ]
+            }
+          ],
+          "draining_survives_runtime_replacement": true,
+          "duplicate_create_reuses_identity": true,
+          "network": "cidr",
+          "owned_deleted": true,
+          "reservation_survives_stop_and_runtime_replacement": true
+        }
+      ],
+      "inventory_before": [],
+      "inventory_after": [],
+      "inventory_restored": true,
+      "final_reserved_slots": 0,
+      "owned_deleted": true,
+      "public_memory_port_reservations_qualified": true
+    }
+  ],
+  "pty_file_and_workload_evidence": "embedded-port-http-parity-linux-file-activation-2785e18.json",
+  "same_package_successful_current_minimum_campaigns": [
+    "PTY and retained binary files",
+    "startup workloads",
+    "offline/CIDR network and TCP mappings"
+  ],
+  "six_actual_consumer_runs": true,
+  "acceptance_scope": [
+    "Reachable owned host controls at 198.18.0.10 and 198.18.0.11:8088.",
+    "Offline mappings permit actual inbound replies while denying both outbound controls.",
+    "One-address CIDR permits only 198.18.0.10 while preserving inbound mappings.",
+    "Both cases check IPv4/IPv6 loopback listeners on 28732, two normal cycles and typed background service launch.",
+    "Store reservation conflict rolls back before dispatch with unchanged SDK inventory.",
+    "Reservations and draining survive stop and graceful stopped Runtime replacement; explicit versioned resume and owned deletion release all slots."
+  ],
+  "private_evidence": {
+    "archive_sha256": "54ff491611e4d3f17c02f4f3aaa403f800c586b78298a36326fea58245584cf9",
+    "archive_bytes": 91819,
+    "raw_receipts_keys_codecs_and_logs_excluded_from_git": true,
+    "native_package_and_fixture_retained_in_prior_private_archive": true
+  },
+  "lab_teardown": {
+    "all_qualification_handles_terminal": true,
+    "sdk_inventory_empty": true,
+    "native_owner_processes_absent": true,
+    "privileged_read_only_process_verification": true,
+    "forced_termination": false,
+    "crash_handling_qualified": false,
+    "normal_guest_shutdown": true,
+    "host_unit_active_state": "inactive",
+    "host_unit_result": "success",
+    "host_unit_exit_status": 0,
+    "host_unit_main_pid": 0,
+    "run_disk_and_enrolled_domain_retained": true,
+    "normal_shutdown_marker_archived": true
+  },
+  "remaining_scope": [
+    "Hostname/DNS policies and infrastructure exceptions.",
+    "OS-listener start conflicts, broader resource combinations and native PostgreSQL.",
+    "Changed macOS packages and remaining P0-P9 source, volume, saved-state, branch and upgrade acceptance."
+  ],
+  "full_parity_acceptance": "pending",
+  "public_native_branch_admission_enabled": false,
+  "native_postgresql_qualified": false,
+  "crash_handling_qualified": false,
+  "deliberate_process_interruption": false,
+  "distribution_approved": false,
+  "qualification_does_not_transfer_to_changed_bytes": true
+}

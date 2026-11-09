@@ -152,7 +152,7 @@ defmodule SmolBox.Embedded.GrowthWireTest do
              )
   end
 
-  test "optional future capability order agrees with Rust while current approval cannot activate growth" do
+  test "Linux storage approval negotiates growth without changing older or macOS descriptors" do
     hello =
       "../../native/smolbox-protocol/fixtures/hello-v2-current.json"
       |> Path.expand(__DIR__)
@@ -165,6 +165,25 @@ defmodule SmolBox.Embedded.GrowthWireTest do
     sdk = put_in(current_sdk["feature_versions"]["disk_growth"], 1)
     assert SDKIdentity.valid?(sdk)
     refute SDKIdentity.approved?(sdk, sdk["sdk_version"], sdk["source_revision"])
+    refute SDKIdentity.approved?(sdk, sdk["sdk_version"], sdk["source_revision"], :macos)
+    assert SDKIdentity.approved?(sdk, sdk["sdk_version"], sdk["source_revision"], :linux)
+
+    linux =
+      "../../native/smolbox-protocol/fixtures/hello-v2-linux-current.json"
+      |> Path.expand(__DIR__)
+      |> File.read!()
+      |> Jason.decode!()
+
+    assert {:ok, _} = Protocol.decode(Jason.encode!(linux), 2)
+    assert linux["hello"]["capabilities"] == Protocol.capabilities(linux["hello"]["sdk"])
+    assert linux["hello"]["limits"] == Protocol.limits(2, 0, linux["hello"]["sdk"])
+
+    assert SDKIdentity.approved?(
+             linux["hello"]["sdk"],
+             sdk["sdk_version"],
+             sdk["source_revision"],
+             :linux
+           )
 
     assert Enum.take(Protocol.capabilities(sdk), 3) ==
              ~w(expand_disks inspect_growth qualify_growth)

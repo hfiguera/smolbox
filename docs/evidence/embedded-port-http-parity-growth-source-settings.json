@@ -1,0 +1,121 @@
+{
+  "schema": 1,
+  "status": "growth-source-settings-wired-deterministic-checks-passed-native-acceptance-pending",
+  "implementation": {
+    "public_consumer_optional_flag": "--native-growth-settings",
+    "public_proof_optional_flag": "--settings",
+    "durable_settings_same_source_fields": true,
+    "private_owned_regular_absolute_json_max_bytes": 65536,
+    "local_default_and_catalog_preserved": true,
+    "existing_source_ids_and_registry_policy_not_replaced": true,
+    "source_and_artifact_selectors_exclusive": true,
+    "oci_network_approval_explicit": true,
+    "registry_cache_and_exchange_approvals_explicit": true,
+    "ordinary_and_without_rust_gates_retained": true,
+    "no_token_value_fields": true
+  },
+  "validation": {
+    "focused_current_passed": 47,
+    "focused_minimum_passed": 47,
+    "ci_tooling_current_passed": 45,
+    "credo_diff_new_issues": 0,
+    "cold_public_launcher_cases": [
+      {
+        "toolchain": "current",
+        "case": "legacy-local",
+        "accepted_before_inventory": true,
+        "expected_early_exit": 1,
+        "output_or_native_started": false
+      },
+      {
+        "toolchain": "current",
+        "case": "oci",
+        "accepted_before_inventory": true,
+        "expected_early_exit": 1,
+        "output_or_native_started": false
+      },
+      {
+        "toolchain": "current",
+        "case": "registry",
+        "accepted_before_inventory": true,
+        "expected_early_exit": 1,
+        "output_or_native_started": false
+      },
+      {
+        "toolchain": "current",
+        "case": "missing-network",
+        "accepted_before_inventory": false,
+        "expected_early_exit": 1,
+        "output_or_native_started": false
+      },
+      {
+        "toolchain": "current",
+        "case": "mixed-selectors",
+        "accepted_before_inventory": false,
+        "expected_early_exit": 1,
+        "output_or_native_started": false
+      },
+      {
+        "toolchain": "minimum",
+        "case": "legacy-local",
+        "accepted_before_inventory": true,
+        "expected_early_exit": 1,
+        "output_or_native_started": false
+      },
+      {
+        "toolchain": "minimum",
+        "case": "oci",
+        "accepted_before_inventory": true,
+        "expected_early_exit": 1,
+        "output_or_native_started": false
+      },
+      {
+        "toolchain": "minimum",
+        "case": "registry",
+        "accepted_before_inventory": true,
+        "expected_early_exit": 1,
+        "output_or_native_started": false
+      },
+      {
+        "toolchain": "minimum",
+        "case": "missing-network",
+        "accepted_before_inventory": false,
+        "expected_early_exit": 1,
+        "output_or_native_started": false
+      },
+      {
+        "toolchain": "minimum",
+        "case": "mixed-selectors",
+        "accepted_before_inventory": false,
+        "expected_early_exit": 1,
+        "output_or_native_started": false
+      }
+    ],
+    "cold_cases_are_pre_inventory_boundaries_only": true,
+    "durable_runtime_executed": false,
+    "sdk_or_vm_opened": false
+  },
+  "input_sha256": {
+    "examples/embedded_port/lib/growth_demo.ex": "25dc56f1b2b6c3e591720d6fd783d03ce76eb4414abed8d3d9cbc7e5d1b9957c",
+    "scripts/embedded-growth-runtime-proof.exs": "d96cc216ad95e7de76366dad215a553670a284d4fd8baa986431588d2aa7c074",
+    "examples/durable_host/scripts/embedded-growth.exs": "39337e78f2653cc24f94a0ca586a61548d41b0221c09f4e6f19899ec523c49df",
+    "dev/smolbox/ci/native_consumer.ex": "ca96125986754c6d2f0764206392b7b73d38646547265d8800496e991f46a390",
+    "dev/smolbox/ci/package.ex": "a26b42f505f054972d5b8ef49d4070b67aef28e292a5e61bfce08752b1ed6e44",
+    "test/unit/embedded_growth_example_test.exs": "60d1fffa8cb2fbc41ab7c0fd161fa42ed13e8234640e926f4a61c49cb0911889",
+    "test/ci/package_test.exs": "a575078387fc21b480ed3585aee2b8450dee6a3071f038b47aaf9912cf25b064"
+  },
+  "scope": {
+    "production_library_or_native_sdk_changed": false,
+    "live_remote_source_growth_qualified": false,
+    "past_qualification_transferred": false,
+    "parity_complete": false,
+    "crash_validation_deferred": true,
+    "crash_handling_qualified": false,
+    "distribution_approved": false
+  },
+  "remaining": [
+    "ordinary OCI and registry growth across required source/store/platform/resource combinations",
+    "revalidate preserved lab storage after external guard interruption before new native cases",
+    "all other pending P0-P9 acceptance gates"
+  ]
+}

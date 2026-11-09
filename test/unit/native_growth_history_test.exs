@@ -2,11 +2,23 @@ defmodule SmolBox.NativeGrowthHistoryTest do
   use ExUnit.Case, async: true
   alias SmolBox.Backend.{Assignment, Binding}
   alias SmolBox.Backend.{EmbeddedContext, EmbeddedGrowthObservation, EmbeddedReply}
-  alias SmolBox.Embedded.{GrowthTransition, Identity, NativeGrowth}
+
+  alias SmolBox.Embedded.{
+    Config,
+    CreationFeatures,
+    GrowthTransition,
+    HistoricalExecution,
+    Identity,
+    NativeGrowth
+  }
+
+  alias SmolBox.Runtime.Config, as: RuntimeConfig
   alias SmolBox.Runtime.{DiskExpansions, NativeRecovery, Target}
-  alias SmolBox.Store.{Codec, ExpansionOps, MachineOps}
+  alias SmolBox.Store.{Codec, ExpansionOps, MachineOps, Memory}
+  alias SmolBox.Test.EmbeddedPackage, as: Package
 
   alias SmolBox.{
+    ArtifactPreparation,
     Command,
     DiskExpansion,
     Execution,
@@ -14,7 +26,9 @@ defmodule SmolBox.NativeGrowthHistoryTest do
     Machine,
     ManagedMachine,
     ManagedMachineSpec,
-    Profile
+    NetworkPolicy,
+    Profile,
+    Source
   }
 
   defmodule QualificationPeer do
@@ -35,7 +49,7 @@ defmodule SmolBox.NativeGrowthHistoryTest do
     end
   end
 
-  defp fixture do
+  defp fixture(kind \\ :local) do
     [first, second] =
       "../../native/smolbox-protocol/fixtures/growth-transitions-v1.json"
       |> Path.expand(__DIR__)
@@ -46,13 +60,8 @@ defmodule SmolBox.NativeGrowthHistoryTest do
         proof
       end)
 
-    {:ok, profile} = Profile.new("growth")
-
-    artifact = %{
-      "id" => "fixture",
-      "sha256" => String.duplicate("d", 64),
-      "architecture" => "aarch64"
-    }
+    {artifact, network, preparation} = fixture_source(kind)
+    {:ok, profile} = Profile.new("growth", network: network)
 
     {:ok, spec} =
       ManagedMachineSpec.new(
@@ -74,6 +83,7 @@ defmodule SmolBox.NativeGrowthHistoryTest do
       memory_mb: profile.memory_mb,
       storage_gb: 1,
       overlay_gb: 1,
+      network: profile.network,
       backend_identity: %Identity{receipt: receipt}
     }
 
@@ -84,24 +94,32 @@ defmodule SmolBox.NativeGrowthHistoryTest do
         target_id: receipt["target_id"],
         generation: receipt["domain_generation"]
       },
-      creation: %{
-        "name" => receipt["name"],
-        "owner_token" => receipt["owner_token"],
-        "incarnation" => receipt["incarnation"],
-        "artifact" => %{
-          "path" => "/fixture.smolmachine",
-          "sha256" => artifact["sha256"],
-          "max_bytes" => 1024,
-          "guest_platform" => "linux/arm64"
-        },
-        "resources" => %{
-          "cpus" => profile.cpus,
-          "memory_mib" => profile.memory_mb,
-          "storage_gib" => 1,
-          "overlay_gib" => 1
-        },
-        "labels" => %{}
-      }
+      creation:
+        %{
+          "name" => receipt["name"],
+          "owner_token" => receipt["owner_token"],
+          "incarnation" => receipt["incarnation"],
+          "resources" => %{
+            "cpus" => profile.cpus,
+            "memory_mib" => profile.memory_mb,
+            "storage_gib" => 1,
+            "overlay_gib" => 1
+          },
+          "labels" => %{}
+        }
+        |> Map.put(
+          if(kind == :local, do: "artifact", else: "source"),
+          if(kind == :local,
+            do: %{
+              "path" => "/fixture.smolmachine",
+              "sha256" => artifact["sha256"],
+              "max_bytes" => 1024,
+              "guest_platform" => "linux/arm64"
+            },
+            else: artifact
+          )
+        )
+        |> CreationFeatures.attach(CreationFeatures.from_spec(spec))
     }
 
     record = %{
@@ -112,6 +130,7 @@ defmodule SmolBox.NativeGrowthHistoryTest do
         machine_name: receipt["name"],
         reservation: Profile.resources(profile),
         state: :stopped,
+        preparation: preparation,
         operation: nil,
         phase: nil,
         created_machine: created,
@@ -120,6 +139,44 @@ defmodule SmolBox.NativeGrowthHistoryTest do
 
     assert :ok = ManagedMachine.validate(record)
     {record, first, second}
+  end
+
+  defp fixture_source(:local),
+    do:
+      {%{
+         "id" => "fixture",
+         "sha256" => String.duplicate("d", 64),
+         "architecture" => "aarch64"
+       }, :offline, nil}
+
+  # These canonical protocol proofs exercise client-side source/history
+  # composition, without attesting an SDK source configuration or launching it.
+  defp fixture_source(kind) when kind in [:oci, :registry] do
+    options = [
+      id: "fixture",
+      reference: "registry.example/team/app@sha256:" <> String.duplicate("a", 64),
+      architecture: "aarch64"
+    ]
+
+    if kind == :oci do
+      {:ok, source} = Source.oci(options)
+      {:ok, network} = NetworkPolicy.new(hosts: ["registry.example"])
+      {Source.artifact(source), network, nil}
+    else
+      {:ok, source} =
+        Source.registry(
+          options ++ [content_sha256: String.duplicate("b", 64), credential_ref: "read"]
+        )
+
+      {:ok, prepared} =
+        ArtifactPreparation.from_wire(source, %{
+          "digest" => "sha256:" <> source.content_sha256,
+          "sizeBytes" => 123,
+          "alreadyCached" => false
+        })
+
+      {Source.artifact(source), :offline, prepared}
+    end
   end
 
   defp accept(record, transition, now) do
@@ -326,6 +383,109 @@ defmodule SmolBox.NativeGrowthHistoryTest do
              Codec.decode("smolbox-record-v18\0" <> :erlang.term_to_binary(grown, compressed: 9))
   end
 
+  test "OCI and prepared registry sources retain both growth links in selective v19" do
+    for kind <- [:oci, :registry] do
+      {original, first, second} = fixture(kind)
+      assert {:ok, <<"smolbox-record-v19\0", _::binary>>} = Codec.encode(original)
+      grown = original |> complete(first, 1100) |> complete(second, 1200)
+      assert grown.spec == original.spec and grown.fingerprint == original.fingerprint
+      assert grown.backend_assignment == original.backend_assignment
+      assert grown.preparation == original.preparation
+      assert grown.created_machine == original.created_machine
+      assert grown.disk_sizes == %{storage_gb: 2, overlay_gb: 3}
+      assert grown.reservation.disk_gb == 5
+      assert {:ok, %Identity{receipt: receipt}} = NativeGrowth.current_identity(grown)
+      assert receipt == second.receipt
+      assert {:ok, <<"smolbox-record-v19\0", payload::binary>> = bytes} = Codec.encode(grown)
+      assert {:ok, ^grown} = Codec.decode(bytes)
+
+      for version <- 16..18,
+          do: assert({:error, _} = Codec.decode("smolbox-record-v#{version}\0" <> payload))
+
+      crossed =
+        put_in(
+          grown.backend_assignment.creation["source"]["reference"],
+          "registry.example/foreign@sha256:" <> String.duplicate("a", 64)
+        )
+
+      assert {:error, _} = Codec.encode(crossed)
+
+      if kind == :registry do
+        crossed = %{grown.preparation | content_sha256: String.duplicate("c", 64)}
+        assert {:error, _} = Codec.encode(%{grown | preparation: crossed})
+      else
+        crossed = %{grown.observed_machine | network: :offline}
+        assert {:error, _} = Codec.encode(%{grown | observed_machine: crossed})
+      end
+    end
+  end
+
+  test "remote-source uncertain growth retains preparation and needs authenticated resolution" do
+    for kind <- [:oci, :registry] do
+      {original, first, _} = fixture(kind)
+      {_, sent} = accept(original, first, 1100)
+
+      assert {:ok, unknown} =
+               ExpansionOps.advance(
+                 sent,
+                 sent.active_expansion,
+                 :dispatching,
+                 {:unknown, %SmolBox.Error{category: :unknown, operation: :expand_disks}},
+                 1102
+               )
+
+      assert unknown.reservation.disk_gb == 3
+      assert unknown.preparation == original.preparation
+      assert unknown.backend_assignment == original.backend_assignment
+      assert {:ok, bytes} = Codec.encode(unknown)
+      assert {:ok, ^unknown} = Codec.decode(bytes)
+
+      assert {:error, _} =
+               ExpansionOps.advance(
+                 unknown,
+                 unknown.active_expansion,
+                 :unknown,
+                 {:resolve, %{original.created_machine | storage_gb: 2}},
+                 1103
+               )
+
+      assert {:ok, resolved} =
+               ExpansionOps.advance(
+                 unknown,
+                 unknown.active_expansion,
+                 :unknown,
+                 {:resolve, observed(original, first)},
+                 1103
+               )
+
+      assert resolved.preparation == original.preparation
+      assert resolved.disk_expansions["grow.1"].state == :resolved
+      assert resolved.reservation.disk_gb == 3
+      assert {:ok, bytes} = Codec.encode(resolved)
+      assert {:ok, ^resolved} = Codec.decode(bytes)
+    end
+  end
+
+  test "retained remote-source commands keep historical growth authority without another creation" do
+    for kind <- [:oci, :registry] do
+      {original, first, second} = fixture(kind)
+      before = historical_command(original, "before")
+      grown = complete(original, first, 1400)
+      between = historical_command(grown, "between")
+      final = complete(grown, second, 1500)
+      assert HistoricalExecution.matches?(before, final)
+      assert HistoricalExecution.matches?(between, final)
+      assert between.backend_assignment == original.backend_assignment
+      assert between.spec.profile == original.spec.profile
+      assert between.created_machine.backend_identity.receipt == first.receipt
+      assert {:ok, <<"smolbox-record-v19\0", _::binary>> = bytes} = Codec.encode(between)
+      assert {:ok, ^between} = Codec.decode(bytes)
+
+      stripped = put_in(between.created_machine.backend_identity.transition, nil)
+      assert {:error, _} = Codec.encode(stripped)
+    end
+  end
+
   test "foreign, missing or premature proof cannot complete growth or alter current identity" do
     {original, first, second} = fixture()
     {pending, sent} = accept(original, first, 1100)
@@ -438,6 +598,209 @@ defmodule SmolBox.NativeGrowthHistoryTest do
     assert {:error, _} = Codec.encode(stripped)
   end
 
+  defp historical_command(parent, id) do
+    {:ok, command} = Command.new(["true"])
+
+    {:ok, spec} =
+      ExecutionSpec.new(
+        scope: parent.scope,
+        id: id,
+        artifact: parent.spec.artifact,
+        profile: parent.spec.profile,
+        command: command
+      )
+
+    {:ok, fingerprint} = ExecutionSpec.fingerprint(spec, String.duplicate("k", 32))
+    {:ok, execution} = Execution.new(spec, fingerprint, 1300)
+    running = %{parent | state: :running}
+    {:ok, _, attached} = MachineOps.attach(running, execution, 1301)
+
+    historical = %{
+      attached
+      | state: :completed,
+        evidence: :exited,
+        collection: :complete,
+        cleanup: :complete,
+        result: %SmolBox.Result{exit_code: 7, stdout: <<0, 255>>, stderr: <<>>}
+    }
+
+    assert :ok = Execution.validate(historical)
+    historical
+  end
+
+  test "historical commands bind to exact material prefixes without acquiring current ownership" do
+    {original, first, second} = fixture()
+    before = historical_command(original, "before")
+    grown = complete(original, first, 1400)
+    between = historical_command(grown, "between")
+    final = complete(grown, second, 1500)
+    assert HistoricalExecution.matches?(before, final)
+    assert HistoricalExecution.matches?(between, final)
+    unknown = %{before | state: :unknown, evidence: :unknown, result: nil}
+    assert HistoricalExecution.matches?(unknown, final)
+    refute HistoricalExecution.matches?(between, original)
+    refute HistoricalExecution.matches?(historical_command(final, "future"), grown)
+
+    for invalid <- [
+          %{before | managed_machine: {"other", "vm"}},
+          %{before | worker_generation: 0},
+          %{before | cleanup: :pending},
+          %{before | reservation: Profile.resources(original.spec.profile)},
+          %{before | created_machine: %{before.created_machine | storage_gb: 2}},
+          put_in(before.backend_assignment.creation["owner_token"], String.duplicate("f", 64))
+        ] do
+      refute HistoricalExecution.matches?(invalid, final)
+    end
+
+    refute HistoricalExecution.matches?(before, %{final | active_execution: Execution.key(before)})
+
+    refute HistoricalExecution.matches?(before, %{final | disk_expansions: %{}})
+    assert before.result.exit_code == 7 and before.cleanup == :complete
+  end
+
+  test "collected history survives independent worker lease claims across normal replacements" do
+    {original, first, second} = fixture()
+    before = historical_command(original, "before-replacement")
+    grown = complete(original, first, 1400)
+    after_restart = historical_command(%{grown | worker_generation: 2}, "after-replacement")
+
+    advanced = %{complete(grown, second, 1500) | worker_generation: 3, state: :unknown}
+    assert {:ok, final, nil} = MachineOps.resolve(advanced, nil, :absent, 1600)
+
+    assert :ok = ManagedMachine.validate(final)
+
+    for historical <- [before, after_restart] do
+      assert :ok = Execution.validate(historical)
+      assert HistoricalExecution.matches?(historical, final)
+      # A collected execution may be claimed after its idle parent last was.
+      assert HistoricalExecution.matches?(%{historical | worker_generation: 4}, final)
+      refute HistoricalExecution.matches?(%{historical | worker_id: "another-worker"}, final)
+      refute HistoricalExecution.matches?(%{historical | cleanup: :pending}, final)
+    end
+  end
+
+  test "ordinary recovery inspects the grown parent while preserving historical command results" do
+    {original, first, second} = fixture()
+    before = historical_command(original, "before")
+    grown = complete(original, first, 1400)
+    between = historical_command(grown, "between")
+    between = %{between | state: :unknown, evidence: :unknown, result: nil}
+    final = %{complete(grown, second, 1500) | worker_generation: 3}
+
+    native =
+      Package.create(
+        protocol_major: 2,
+        backend: true,
+        persistent_backend: true,
+        minimum_material_revision: second.receipt["material"]["revision"]
+      )
+
+    on_exit(fn -> File.rm_rf!(native.package_path) end)
+
+    native = %{
+      native
+      | id: original.worker_id,
+        domain_generation: original.backend_assignment.binding.generation,
+        profiles: [original.spec.profile],
+        capacity: %{slots: 1, cpus: 1, memory_mb: 512, disk_gb: 8},
+        artifacts: [
+          Map.merge(
+            original.spec.artifact,
+            %{
+              "path" => original.backend_assignment.creation["artifact"]["path"],
+              "max_bytes" => 1024
+            }
+          )
+        ]
+    }
+
+    assert :ok = Config.validate(native)
+
+    File.write!(
+      Path.join(native.package_path, "vm.json"),
+      Jason.encode!(%{
+        "name" => original.machine_name,
+        "state" => "stopped",
+        "resources" => %{
+          "cpus" => final.created_machine.cpus,
+          "memory_mib" => final.created_machine.memory_mb,
+          "storage_gib" => 2,
+          "overlay_gib" => 3
+        }
+      })
+    )
+
+    store = start_supervised!(Memory)
+
+    :sys.replace_state(store, fn state ->
+      %{
+        state
+        | records: Map.new([before, between], &{Execution.key(&1), &1}),
+          machines: %{ManagedMachine.key(final) => final}
+      }
+    end)
+
+    artifacts = start_supervised!({Agent, fn -> %{} end})
+
+    {:ok, config} =
+      RuntimeConfig.new(
+        name: __MODULE__.HistoryRuntime,
+        namespace: "histmodel",
+        mode: :ephemeral,
+        store: {Memory, store},
+        artifact_store: {SmolBox.TestArtifacts, artifacts},
+        fingerprint_key: String.duplicate("k", 32),
+        workers: [],
+        poll_ms: 20
+      )
+
+    config = %{config | workers: [Target.normalize(native)]}
+
+    runtime =
+      start_supervised!(%{
+        id: __MODULE__.HistoryRuntime,
+        start: {Supervisor, :start_link, [SmolBox.Runtime, config, [name: config.name]]},
+        type: :supervisor
+      })
+
+    deadline = System.monotonic_time(:millisecond) + 10_000
+    wait_historical(runtime, deadline)
+
+    for expected <- [before, between] do
+      assert {:ok, ^expected} = Memory.fetch(store, Execution.key(expected))
+      assert HistoricalExecution.matches?(expected, final)
+    end
+
+    all_requests = Package.received(native) |> Enum.filter(&(&1["type"] == "request"))
+
+    assert Enum.all?(
+             all_requests,
+             &(&1["operation"]["operation"] in ~w(inspect health capacity readiness))
+           )
+
+    requests = Enum.filter(all_requests, &Map.has_key?(&1["operation"], "receipt"))
+
+    assert requests != []
+    assert Enum.all?(requests, &(&1["operation"]["operation"] == "inspect"))
+    assert Enum.all?(requests, &(&1["operation"]["receipt"] == second.receipt))
+
+    target = config.workers |> hd() |> Target.pin()
+    stale_reference = Target.connection(target, before)
+
+    assert {:error, %{category: :identity_conflict, evidence: :not_dispatched}} =
+             SmolBox.Backend.inspect_machine(stale_reference, before.machine_name)
+
+    assert {:ok, %{disk_gb: 5, slots: 1}} = Memory.usage(store, native.id)
+  end
+
+  defp wait_historical(runtime, deadline) do
+    unless match?({:ok, [%{status: :ready}]}, SmolBox.workers(runtime)) do
+      assert System.monotonic_time(:millisecond) < deadline
+      Process.sleep(20)
+      wait_historical(runtime, deadline)
+    end
+  end
+
   test "a fresh BEAM decodes v18 from its fixed schema vocabulary without native tooling" do
     {original, first, _} = fixture()
     grown = complete(original, first, 1100)
@@ -449,7 +812,7 @@ defmodule SmolBox.NativeGrowthHistoryTest do
     File.write!(path, bytes, [:exclusive])
     File.chmod!(path, 0o600)
     on_exit(fn -> File.rm(path) end)
-    paths = Path.wildcard(Path.expand("_build/test/lib/*/ebin"))
+    paths = Path.wildcard(Path.join(Mix.Project.build_path(), "lib/*/ebin"))
 
     code =
       ~S/[path] = System.argv(); case path |> File.read!() |> SmolBox.Store.Codec.decode() do / <>

@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "scope": "ordinary-mounted-io-through-terminal-result-diagnostics",
+  "source_commit": "1d9e1e3d54587bd6d19077445e74e12539089504",
+  "production_engine_source_commit": "655b32373b7620417014dd4127b984290845d49d",
+  "native_inputs": {
+    "files_verified": 265,
+    "archive_sha256": "a5f01d81a390d1dcbc056bfdd73dafe3fb3ea2d498114244eeee64f5fb2d3f2e",
+    "inventory_sha256": "35641cefd3f25743ed896e03f684c060edb461ba2430cc21a0204bbd05aabc6d"
+  },
+  "package_manifest_sha256": "8df2877ad25a81e7ac5b68c369886387cf56ceeca23bc248f4d42f30ea62727a",
+  "helper_sha256": "2d5a215e63c64742de22e9b27bd49482895b352cd7679729ab372a14b766db0d",
+  "witness_executable_sha256": "c43f6c6c9d9392c85c1ab36284d706da2affe3d265e602cf76f97ddfae71001c",
+  "sdk": {
+    "version": "1.22.0",
+    "revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "unmodified": true
+  },
+  "linux_build_checks": {
+    "rust_version": "1.98.1",
+    "witness_models_passed": 2,
+    "strict_all_target_clippy": "passed",
+    "optimized_witness_build": "passed"
+  },
+  "fixture_sha256": "339995f33fe84c2ed5a4e212a0acb9afab22df972bf2c2b4aa8e412ea0af5bc4",
+  "mounted_io_before_terminal": {
+    "root_and_actual_worker_uid_writes": true,
+    "readonly_seed_read_and_write_rejection": true,
+    "unrelated_uid_guest_storage_write": true,
+    "unrelated_uid_host_volume_create_expected_eperm": true,
+    "buffered_stdin": true,
+    "background_launch_ack_and_observed_bytes": true,
+    "binary_upload_and_readback_bytes": 65553,
+    "readonly_binary_read_bytes": 4096,
+    "readonly_file_write_collected_rejection": true
+  },
+  "terminal_result": {
+    "collected": true,
+    "observed_exit": null,
+    "failure": "Native",
+    "dispatch": "MayHaveDispatched",
+    "completion_marker_observed": true,
+    "output_bytes": 51,
+    "output_sha256": "0cd4c290ec0524d6d3a59c228bd188932d3e9e42d96c28b3a4ef59f2f0562f71",
+    "full_terminal_contract_passed": false
+  },
+  "ordinary_cleanup": {
+    "original_engine_retained_after_failure": true,
+    "original_machine_normally_stopped_and_deleted": true,
+    "original_volume_proofs_used_for_both_deletions": true,
+    "normal_original_owner_shutdown": true,
+    "qualification_process_terminal_exit": 1,
+    "first_phase_completion_marker_written": false,
+    "sdk_vm_records": 0,
+    "sdk_pending_create_pause_resize_rows": 0,
+    "native_owners": 0,
+    "canonical_volume_root_empty": true
+  },
+  "lab": {
+    "terminal_observed_at_utc": "2026-10-16T07:32:02Z",
+    "shutdown": "normal-guest-shutdown",
+    "state": "inactive",
+    "result": "success",
+    "exit_status": 0,
+    "main_pid": 0,
+    "normal_shutdown_marker_archived": true,
+    "enrolled_domain_and_run_disk_retained": true
+  },
+  "private_archive": {
+    "sha256": "fb9a006a68428415e6234d21132187d25ecdf1389651b70e84140f63b41e2a4f",
+    "bytes": 15120010,
+    "mode": "0600",
+    "copied_digest_verified": true,
+    "contains_original_proofs_and_bounded_failure_diagnostics": true
+  },
+  "qualification": {
+    "guest_volume_contract_passed": false,
+    "stopped_owner_replacement_guest_contract_passed": false,
+    "public_volume_admission_enabled": false,
+    "public_branch_admission_enabled": false,
+    "full_parity_complete": false,
+    "historical_qualification_transferred_to_changed_bytes": false,
+    "crash_validation_deferred": true,
+    "live_forced_termination_campaign_run": false,
+    "distribution_approved": false
+  },
+  "next_action": "Qualify the parent terminal result-drain correction with a new exact package, then complete mounted first/second-owner checks and the remaining P7-P9 acceptance gates."
+}

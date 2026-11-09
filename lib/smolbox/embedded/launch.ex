@@ -261,6 +261,7 @@ defmodule SmolBox.Embedded.Launch do
         {"job_limits", "jobs"},
         {"buffered_limits", "buffered"},
         {"log_limits", "logs"},
+        {"volume_limits", "volumes"},
         {"observation_limits", "observations"}
       ],
       fn {field, key} -> policy[field] == limits[key] end

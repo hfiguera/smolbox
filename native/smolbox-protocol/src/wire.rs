@@ -61,6 +61,7 @@ pub enum Capability {
     InspectGrowth,
     QualifyGrowth,
     TerminalOpen,
+    TerminalPreflight,
     ExecStream,
     Logs,
     ExecBackground,
@@ -378,6 +379,7 @@ impl SdkIdentity {
             ("buffered_exec", Capability::ExecBuffered),
             ("streaming_exec", Capability::ExecStream),
             ("terminals", Capability::TerminalOpen),
+            ("terminal_preflight", Capability::TerminalPreflight),
             ("disk_growth", Capability::QualifyGrowth),
             ("disk_growth", Capability::InspectGrowth),
             ("disk_growth", Capability::ExpandDisks),
@@ -418,6 +420,7 @@ impl SdkIdentity {
                     | "background_exec"
                     | "logs"
                     | "terminals"
+                    | "terminal_preflight"
                     | "volumes"
                     | "disk_growth"
                     | "checkpoints"
@@ -461,6 +464,10 @@ impl SdkIdentity {
                 || ["job_resources", "buffered_exec", "compact_creation"]
                     .iter()
                     .all(|name| self.feature_versions.get(*name) == Some(&1)),
+        )?;
+        require(
+            self.feature_versions.get("terminal_preflight") != Some(&1)
+                || self.feature_versions.get("terminals") == Some(&1),
         )?;
         require(
             self.feature_versions.get("terminals") != Some(&1)
@@ -538,6 +545,14 @@ impl Hello {
                             .sdk
                             .as_ref()
                             .is_some_and(|sdk| sdk.feature_versions.get("disk_growth") == Some(&1)),
+                )?;
+            }
+            if *capability == Capability::TerminalPreflight {
+                require(
+                    self.major == 2
+                        && self.sdk.as_ref().is_some_and(|sdk| {
+                            sdk.feature_versions.get("terminal_preflight") == Some(&1)
+                        }),
                 )?;
             }
             if *capability == Capability::TerminalOpen {
@@ -1634,6 +1649,9 @@ pub enum Operation {
         previous: crate::DiskSizes,
         quiesced: bool,
     },
+    TerminalPreflight {
+        receipt: Receipt,
+    },
     TerminalOpen {
         receipt: Receipt,
         terminal: crate::TerminalSpec,
@@ -2071,6 +2089,7 @@ impl Operation {
             Self::InspectGrowth { .. } => Capability::InspectGrowth,
             Self::QualifyGrowth { .. } => Capability::QualifyGrowth,
             Self::TerminalOpen { .. } => Capability::TerminalOpen,
+            Self::TerminalPreflight { .. } => Capability::TerminalPreflight,
             Self::Logs { .. } => Capability::Logs,
             Self::Health => Capability::Health,
             Self::Capacity => Capability::Capacity,
@@ -2163,6 +2182,7 @@ impl Operation {
             | Self::ExecBuffered { receipt, .. }
             | Self::ExecStream { receipt, .. }
             | Self::TerminalOpen { receipt, .. }
+            | Self::TerminalPreflight { receipt }
             | Self::ExecBackground { receipt, .. }
             | Self::ReadFile { receipt, .. }
             | Self::WriteFile { receipt, .. } => Some(receipt),
@@ -2512,6 +2532,10 @@ impl Operation {
             Self::ListImages { receipt } => {
                 receipt.validate_for(2)?;
                 require(budget_ms <= 30000)?;
+            }
+            Self::TerminalPreflight { receipt } => {
+                receipt.validate_for(2)?;
+                require(budget_ms <= 30_000)?;
             }
             Self::TerminalOpen { terminal, .. } => {
                 terminal.validate()?;

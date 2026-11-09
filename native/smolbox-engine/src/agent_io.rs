@@ -40,6 +40,37 @@ impl Drop for Relay {
     }
 }
 impl BoundedAgent {
+    /// Close only the observation sockets at the absolute deadline. The caller
+    /// retains job/lifecycle authority until this worker is actually collected.
+    pub(crate) fn observe_until<T>(
+        &mut self,
+        expires: std::time::Instant,
+        run: impl FnOnce(&mut smolvm::agent::AgentClient) -> Result<T>,
+    ) -> Result<T> {
+        let remaining = expires.saturating_duration_since(std::time::Instant::now());
+        if remaining.is_zero() {
+            return Err(Error::uncertain(ErrorCode::Native));
+        }
+        let stopper = self.stopper();
+        std::thread::scope(|scope| {
+            let (done, watch) = std::sync::mpsc::channel::<()>();
+            scope.spawn(move || {
+                if matches!(
+                    watch
+                        .recv_timeout(expires.saturating_duration_since(std::time::Instant::now())),
+                    Err(std::sync::mpsc::RecvTimeoutError::Timeout)
+                ) {
+                    stopper.stop();
+                }
+            });
+            let result = run(&mut self.client);
+            drop(done);
+            if std::time::Instant::now() >= expires {
+                return Err(Error::uncertain(ErrorCode::Native));
+            }
+            result
+        })
+    }
     pub(crate) fn stopper(&self) -> Stopper {
         Stopper(self._guard.sockets.clone())
     }
@@ -50,7 +81,23 @@ impl BoundedAgent {
         Self::connect_in(socket, output_bytes, Path::new("."))
     }
     pub(crate) fn connect_in(socket: &Path, output_bytes: u64, staging: &Path) -> Result<Self> {
-        Self::connect_mode(socket, output_bytes, staging, Projection::None)
+        Self::connect_mode(socket, output_bytes, staging, Projection::None, None)
+    }
+    /// Bound connection setup as well as the subsequent guarded SDK exchange.
+    /// A full upstream backlog must not strand a cancelled owner-process call.
+    pub(crate) fn connect_in_until(
+        socket: &Path,
+        output_bytes: u64,
+        staging: &Path,
+        deadline: std::time::Instant,
+    ) -> Result<Self> {
+        Self::connect_mode(
+            socket,
+            output_bytes,
+            staging,
+            Projection::None,
+            Some(deadline),
+        )
     }
     pub(crate) fn connect_images(socket: &Path) -> Result<Self> {
         Self::connect_mode(
@@ -58,19 +105,21 @@ impl BoundedAgent {
             crate::images::IMAGE_OUTPUT_BYTES,
             Path::new("."),
             Projection::Images,
+            None,
         )
     }
     pub(crate) fn connect_pull(socket: &Path) -> Result<Self> {
-        Self::connect_mode(socket, 1, Path::new("."), Projection::Pull)
+        Self::connect_mode(socket, 1, Path::new("."), Projection::Pull, None)
     }
     pub(crate) fn connect_bootstrap_launch(socket: &Path) -> Result<Self> {
-        Self::connect_mode(socket, 1, Path::new("."), Projection::BootstrapLaunch)
+        Self::connect_mode(socket, 1, Path::new("."), Projection::BootstrapLaunch, None)
     }
     fn connect_mode(
         socket: &Path,
         output_bytes: u64,
         staging: &Path,
         projection: Projection,
+        deadline: Option<std::time::Instant>,
     ) -> Result<Self> {
         if output_bytes == 0 || output_bytes > 16 * 1024 * 1024 {
             return Err(Error::before(ErrorCode::Validation));
@@ -92,7 +141,28 @@ impl BoundedAgent {
         listener
             .set_nonblocking(true)
             .map_err(|_| Error::before(ErrorCode::Io))?;
-        let upstream = UnixStream::connect(socket).map_err(|_| Error::before(ErrorCode::Native))?;
+        let upstream = match deadline {
+            Some(deadline) => {
+                let remaining = deadline.saturating_duration_since(std::time::Instant::now());
+                if remaining.is_zero() {
+                    return Err(Error::before(ErrorCode::State));
+                }
+                // Use the unmodified SDK's bounded connector; cloning its public
+                // socket into std adds no dependency or guest protocol handling.
+                let connected = smolvm::platform::uds::UdsStream::connect_timeout(
+                    socket,
+                    remaining.min(std::time::Duration::from_millis(100)),
+                )
+                .map_err(|_| Error::before(ErrorCode::Native))?;
+                UnixStream::from(
+                    connected
+                        .as_socket()
+                        .try_clone()
+                        .map_err(|_| Error::before(ErrorCode::Io))?,
+                )
+            }
+            None => UnixStream::connect(socket).map_err(|_| Error::before(ErrorCode::Native))?,
+        };
         let reply_cap = output_bytes.div_ceil(3) as usize * 4 + AGENT_REPLY_OVERHEAD;
         let relay_limit = Arc::new(AtomicBool::new(false));
         let observed_limit = relay_limit.clone();
@@ -100,7 +170,8 @@ impl BoundedAgent {
         // Accept concurrently with the public SDK socket connection.
         let accept = std::thread::spawn(
             move || -> std::io::Result<([UnixStream; 2], Vec<JoinHandle<()>>)> {
-                let deadline = std::time::Instant::now() + std::time::Duration::from_secs(1);
+                let accept_limit = std::time::Instant::now() + std::time::Duration::from_secs(1);
+                let deadline = deadline.map_or(accept_limit, |limit| limit.min(accept_limit));
                 let downstream = loop {
                     match listener.accept() {
                         Ok((stream, _)) => break stream,
@@ -137,7 +208,11 @@ impl BoundedAgent {
                 Ok(([downstream, upstream], vec![first, second]))
             },
         );
-        let client = smolvm::agent::AgentClient::connect(&endpoint);
+        let client = if deadline.is_some() {
+            smolvm::agent::AgentClient::connect_with_boot_probe_timeout(&endpoint)
+        } else {
+            smolvm::agent::AgentClient::connect(&endpoint)
+        };
         let (sockets, threads) = accept
             .join()
             .map_err(|_| Error::before(ErrorCode::Native))?
@@ -308,7 +383,8 @@ fn pump_pull(mut input: UnixStream, mut output: UnixStream, limited: Arc<AtomicB
 
 // Detached startup reports a container acknowledgment, not process Exit.
 // Charge original bytes, discard progress/diagnostics before SDK allocation,
-// and deliver only a bounded successful Completed envelope once.
+// and deliver one bounded, redacted launch outcome. Only the parent's packed
+// startup plan can accept rejection while preserving a booted VM.
 fn pump_bootstrap_launch(mut input: UnixStream, mut output: UnixStream, limited: Arc<AtomicBool>) {
     let result = (|| -> std::io::Result<()> {
         #[derive(serde::Deserialize)]
@@ -335,26 +411,35 @@ fn pump_bootstrap_launch(mut input: UnixStream, mut output: UnixStream, limited:
             if status.status == "progress" {
                 continue;
             }
-            if status.status != "completed" {
+            if !matches!(status.status, "completed" | "error") {
                 return Err(invalid());
             }
             let response: smolvm_protocol::AgentResponse =
                 serde_json::from_slice(&bytes).map_err(|_| invalid())?;
-            let smolvm_protocol::AgentResponse::Completed {
-                exit_code: 0,
-                stdout,
-                stderr,
-            } = response
-            else {
-                return Err(invalid());
-            };
-            if stdout.len() + stderr.len() > crate::bootstrap::LAUNCH_OUTPUT_BYTES as usize {
-                return Err(invalid());
-            }
-            let response = smolvm_protocol::AgentResponse::Completed {
-                exit_code: 0,
-                stdout,
-                stderr: Vec::new(),
+            let response = match response {
+                smolvm_protocol::AgentResponse::Completed {
+                    exit_code,
+                    stdout,
+                    stderr,
+                } if stdout.len() + stderr.len()
+                    <= crate::bootstrap::LAUNCH_OUTPUT_BYTES as usize =>
+                {
+                    smolvm_protocol::AgentResponse::Completed {
+                        exit_code,
+                        stdout: if exit_code == 0 { stdout } else { Vec::new() },
+                        stderr: Vec::new(),
+                    }
+                }
+                smolvm_protocol::AgentResponse::Error { message, code }
+                    if message.len() + code.as_ref().map_or(0, String::len)
+                        <= crate::bootstrap::LAUNCH_OUTPUT_BYTES as usize =>
+                {
+                    smolvm_protocol::AgentResponse::Error {
+                        message: "workload launch rejected".into(),
+                        code: None,
+                    }
+                }
+                _ => return Err(invalid()),
             };
             let bytes = serde_json::to_vec(&response).map_err(|_| invalid())?;
             output.write_all(&(bytes.len() as u32).to_be_bytes())?;
@@ -372,6 +457,71 @@ fn pump_bootstrap_launch(mut input: UnixStream, mut output: UnixStream, limited:
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn known_launch_rejection_is_redacted_and_malformed_reply_is_not_rejection() {
+        for (valid_rejection, body) in [
+            (
+                true,
+                serde_json::json!({"status":"error","message":"PRIVATE=discard","code":"PRIVATE=discard"}),
+            ),
+            (
+                true,
+                serde_json::to_value(smolvm_protocol::AgentResponse::Completed {
+                    exit_code: 7,
+                    stdout: b"PRIVATE=discard".to_vec(),
+                    stderr: vec![255],
+                })
+                .unwrap(),
+            ),
+            (
+                false,
+                serde_json::json!({"status":"completed","exit_code":7,"stdout":[80],"stderr":[255]}),
+            ),
+            (false, serde_json::json!({"status":"error"})),
+            (
+                false,
+                serde_json::json!({"status":"ok","data":{"PRIVATE":"discard"}}),
+            ),
+        ] {
+            let (mut peer, input) = UnixStream::pair().unwrap();
+            let (output, mut consumer) = UnixStream::pair().unwrap();
+            consumer
+                .set_read_timeout(Some(std::time::Duration::from_secs(2)))
+                .unwrap();
+            let flag = Arc::new(AtomicBool::new(false));
+            let thread = std::thread::spawn(move || pump_bootstrap_launch(input, output, flag));
+            let bytes = serde_json::to_vec(&body).unwrap();
+            peer.write_all(&(bytes.len() as u32).to_be_bytes()).unwrap();
+            peer.write_all(&bytes).unwrap();
+            let mut header = [0; 4];
+            if valid_rejection {
+                consumer.read_exact(&mut header).unwrap();
+                let mut projected = vec![0; u32::from_be_bytes(header) as usize];
+                consumer.read_exact(&mut projected).unwrap();
+                assert!(!String::from_utf8_lossy(&projected).contains("PRIVATE"));
+                match serde_json::from_slice::<smolvm_protocol::AgentResponse>(&projected).unwrap()
+                {
+                    smolvm_protocol::AgentResponse::Error { message, code } => {
+                        assert_eq!(message, "workload launch rejected");
+                        assert!(code.is_none());
+                    }
+                    smolvm_protocol::AgentResponse::Completed {
+                        exit_code,
+                        stdout,
+                        stderr,
+                    } => {
+                        assert_eq!(exit_code, 7);
+                        assert!(stdout.is_empty() && stderr.is_empty());
+                    }
+                    _ => panic!(),
+                }
+            } else {
+                assert_eq!(consumer.read(&mut header).unwrap(), 0);
+            }
+            thread.join().unwrap();
+        }
+    }
+
     #[test]
     fn bootstrap_relay_discards_progress_and_stderr_and_bounds_the_original_reply_bytes() {
         for oversized in [false, true] {

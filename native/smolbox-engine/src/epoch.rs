@@ -753,7 +753,9 @@ pub(crate) mod tests {
     /// Private record model, never process enrollment or guest qualification.
     pub(crate) fn complete_model(dispatch: BootDispatch) -> BootEnrollment {
         let identity = OwnerIdentity {
-            pid: dispatch.pending.owner.pid + 1_000_000,
+            // Keep non-VM actors beyond the supported OS PID ranges, including
+            // busy Linux hosts where adding one million can name a real task.
+            pid: i32::MAX - dispatch.pending.owner.pid,
             birth: 1,
             uid: dispatch.pending.owner.uid,
         };

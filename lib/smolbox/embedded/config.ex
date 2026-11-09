@@ -47,8 +47,10 @@ defmodule SmolBox.Embedded.Config do
   legacy catalogs remain valid without it. Catalog approval does not enable
   an operation absent from the approved helper. Legacy helpers still accept only
   local offline assignments. Source-only OCI catalogs require an approved
-  remote_sources descriptor; current packages do not enable this feature. `sdk_version/1` describes the
-  pinned SDK independently of the SmolBox engine version.
+  remote_sources descriptor. The Linux source policy enables remote sources and
+  images for newly rebuilt, exactly approved packages; older packages retain
+  their original surface. Ordinary public qualification remains package-specific.
+  `sdk_version/1` describes the pinned SDK independently of the SmolBox engine version.
 
   Engine `0.2.0` packages use protocol 2 and manifest schema 3. Package policy and
   Hello must agree on the exact implemented SDK feature descriptor. The store
@@ -227,7 +229,8 @@ defmodule SmolBox.Embedded.Config do
         SDKIdentity.approved?(
           sdk_identity(config),
           sdk_version(config),
-          config.package_identity["smolvm_revision"]
+          config.package_identity["smolvm_revision"],
+          config.platform
         )
 
       _ ->

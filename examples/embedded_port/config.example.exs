@@ -34,6 +34,7 @@ initialize =
     package_path: package,
     package_manifest_sha256: expected_manifest,
     package_identity: identity,
+    sdk_identity: get_in(manifest, ["policy", "sdk"]),
     domain_generation: domain["generation"],
     allow_initialize: initialize,
     platform: %{"linux" => :linux, "macos" => :macos}[identity["platform"]],

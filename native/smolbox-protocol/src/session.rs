@@ -629,6 +629,7 @@ impl Session {
             | (Operation::Capacity, Outcome::Capacity { .. })
             | (Operation::Metrics, Outcome::Metrics { .. })
             | (Operation::Readiness, Outcome::Ready)
+            | (Operation::TerminalPreflight { .. }, Outcome::Ready)
             | (Operation::Measurements { .. }, Outcome::Measurements { .. }) => {
                 check(pending.output_bytes == 0)?;
             }

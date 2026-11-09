@@ -2,7 +2,7 @@ defmodule SmolBox.Runtime.VolumeAttempt do
   @moduledoc false
   alias SmolBox.{Backend, Error, Runtime, Validation, Volume}
   alias SmolBox.Backend.{Binding, Budget, EmbeddedContext, EmbeddedVolume}
-  alias SmolBox.Embedded.VolumeAuthority
+  alias SmolBox.Embedded.{Call, VolumeAuthority}
   alias SmolBox.Runtime.{NativeAuthority, Session, Target}
 
   def run(runtime, config, %{kind: :embedded} = worker, mode, function) do
@@ -17,9 +17,24 @@ defmodule SmolBox.Runtime.VolumeAttempt do
 
     worker = Target.pin(worker)
 
-    NativeAuthority.run(Runtime.coordinator(runtime), worker.id, fn ->
-      owned(config, worker, mode, deadline, function)
-    end)
+    attempt = fn -> owned(config, worker, mode, deadline, function) end
+
+    if mode == :resolve_delete,
+      do: NativeAuthority.run(Runtime.coordinator(runtime), worker.id, attempt),
+      else:
+        NativeAuthority.operation(Runtime.coordinator(runtime), worker.id, attempt, fn ->
+          same_ready_owner?(worker, deadline)
+        end)
+  end
+
+  defp same_ready_owner?(worker, deadline) do
+    context = worker.connection.context
+
+    with {:ok, budget} <- remaining(worker.connection.budget, deadline),
+         {:ok, %{status: :ready, epoch: epoch}} <-
+           Call.health(context, %{budget | timeout_ms: min(budget.timeout_ms, 1000)}),
+         do: epoch == context.epoch,
+         else: (_ -> false)
   end
 
   defp owned(config, worker, mode, deadline, function) do
@@ -31,7 +46,7 @@ defmodule SmolBox.Runtime.VolumeAttempt do
              config.clock.now(),
              config.lease_ms
            ]),
-         :ok <- fence(worker, mode),
+         :ok <- fence(worker, mode, deadline),
          {:ok, _budget} <- remaining(worker.connection.budget, deadline),
          do: function.(worker, deadline),
          else: (
@@ -180,12 +195,16 @@ defmodule SmolBox.Runtime.VolumeAttempt do
       worker.connection.context.pinned and is_pid(worker.connection.context.server) and
         is_binary(worker.connection.context.epoch)
 
-  defp fence(worker, :resolve_delete) do
+  defp fence(worker, :resolve_delete, _deadline) do
     context = worker.connection.context
     EmbeddedContext.bridge(context).quiesce(context.server, context.epoch)
   end
 
-  defp fence(_worker, _mode), do: :ok
+  defp fence(worker, _mode, deadline) do
+    if same_ready_owner?(worker, deadline),
+      do: :ok,
+      else: error(:unknown, :not_dispatched)
+  end
 
   defp conflict,
     do: %Error{category: :identity_conflict, operation: :volume, evidence: :dispatch_uncertain}

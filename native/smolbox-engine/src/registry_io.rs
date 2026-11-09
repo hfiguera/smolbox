@@ -1,5 +1,6 @@
 //! Bounded read-only OCI image/registry sidecar metadata transport. No SDK
-//! convenience fetch, account configuration, cache writes or VM launch.
+//! convenience fetch, settings migration or VM launch. Operator credentials are
+//! operation-local and never copied into source/result identity.
 use crate::{
     Cancellation, Error, ErrorCode, ImagePullRequest, Result, VerifiedOci, OCI_METADATA_BYTES,
 };
@@ -18,6 +19,7 @@ struct Location {
     origin: Url,
     repository: String,
     digest: String,
+    credential: crate::registry_account::Credential,
 }
 impl Location {
     fn new(source: &ImagePullRequest) -> Result<Self> {
@@ -65,11 +67,34 @@ impl Location {
             origin,
             repository: repository.into(),
             digest: raw_digest.into(),
+            credential: crate::registry_account::Credential::Anonymous,
         })
+    }
+    fn with_account(
+        mut self,
+        reference: &str,
+        family: crate::registry_account::Family,
+        context: Option<crate::registry_account::Context<'_>>,
+        explicit: Option<&crate::RegistryIdentityCredential>,
+    ) -> Result<Self> {
+        if let Some(context) = context {
+            let registry = reference
+                .split('/')
+                .next()
+                .ok_or(Error::before(ErrorCode::Validation))?;
+            let selected =
+                crate::registry_account::load(registry, family, explicit.is_some(), &context)?;
+            self.origin = selected.origin;
+            self.credential = selected.credential;
+        }
+        if let Some(credential) = explicit {
+            credential.validate_registry(&self.origin)?;
+        }
+        Ok(self)
     }
     fn url(&self, kind: &str, digest: &str) -> Result<Url> {
         self.origin
-            .join(&format!("/v2/{}/{kind}/{digest}", self.repository))
+            .join(&format!("v2/{}/{kind}/{digest}", self.repository))
             .map_err(|_| Error::before(ErrorCode::Validation))
     }
 }
@@ -123,8 +148,17 @@ impl Challenge {
             && realm.host_str() == Some("auth.docker.io")
             && realm.scheme() == "https"
             && realm.port_or_known_default() == Some(443);
-        let approved = credential.is_some_and(|credential| credential.accepts(&realm));
+        let approved = credential.is_some_and(|credential| credential.accepts(&realm))
+            || (credential.is_none()
+                && location.credential.approved_realm(&location.origin, &realm));
+        let account_exchange = credential.is_none()
+            && matches!(
+                location.credential,
+                crate::registry_account::Credential::Basic { .. }
+                    | crate::registry_account::Credential::Identity { .. }
+            );
         if (!same && !docker_auth && !approved)
+            || (account_exchange && !approved)
             || !realm.username().is_empty()
             || realm.password().is_some()
             || realm.fragment().is_some()
@@ -174,11 +208,12 @@ async fn token(
     challenge: Challenge,
     cancel: &Cancellation,
     credential: Option<&crate::RegistryIdentityCredential>,
+    account: &crate::registry_account::Credential,
 ) -> Result<String> {
     if cancel.is_cancelled() {
         return Err(Error::uncertain(ErrorCode::State));
     }
-    let request = token_request(client, challenge, credential)?;
+    let request = token_request_account(client, challenge, credential, Some(account))?;
     let response = request
         .send()
         .await
@@ -187,10 +222,20 @@ async fn token(
     decode_token(&bytes)
 }
 
+#[cfg(test)]
 fn token_request(
     client: &Client,
     challenge: Challenge,
     credential: Option<&crate::RegistryIdentityCredential>,
+) -> Result<reqwest::RequestBuilder> {
+    token_request_account(client, challenge, credential, None)
+}
+
+fn token_request_account(
+    client: &Client,
+    challenge: Challenge,
+    credential: Option<&crate::RegistryIdentityCredential>,
+    account: Option<&crate::registry_account::Credential>,
 ) -> Result<reqwest::RequestBuilder> {
     if credential.is_some_and(|credential| !credential.accepts(&challenge.realm)) {
         return Err(Error::uncertain(ErrorCode::Validation));
@@ -210,6 +255,20 @@ fn token_request(
                 .map_err(|_| Error::uncertain(ErrorCode::Validation))?;
         authorization.set_sensitive(true);
         request = request.header(header::AUTHORIZATION, authorization);
+    } else if let Some(account) = account {
+        use crate::registry_account::Credential;
+        match account {
+            Credential::Identity { token, .. } => {
+                let mut value = header::HeaderValue::from_str(&format!("Bearer {token}"))
+                    .map_err(|_| Error::uncertain(ErrorCode::Validation))?;
+                value.set_sensitive(true);
+                request = request.header(header::AUTHORIZATION, value);
+            }
+            Credential::Basic { username, password } => {
+                request = request.basic_auth(username, Some(password));
+            }
+            _ => {}
+        }
     }
     Ok(request)
 }
@@ -278,11 +337,14 @@ async fn get_response_with_credential(
         return Err(Error::uncertain(ErrorCode::State));
     }
     let request = |bearer: &Option<String>| {
-        let mut request = client.get(url.clone()).header(header::ACCEPT, accept);
-        if let Some(token) = bearer {
-            request = request.bearer_auth(token);
-        }
-        request
+        registry_request(
+            client,
+            location,
+            url.clone(),
+            accept,
+            bearer.as_deref(),
+            credential,
+        )
     };
     if cancel.is_cancelled() {
         return Err(Error::uncertain(ErrorCode::State));
@@ -312,7 +374,7 @@ async fn get_response_with_credential(
     }
     .map_err(|e| Error::uncertain(e.code))?;
     drop(response);
-    *bearer = Some(token(client, challenge, cancel, credential).await?);
+    *bearer = Some(token(client, challenge, cancel, credential, &location.credential).await?);
     // One authentication retry of the identical read, not a mutation replay.
     if cancel.is_cancelled() {
         return Err(Error::uncertain(ErrorCode::State));
@@ -322,6 +384,27 @@ async fn get_response_with_credential(
         .await
         .map_err(|_| Error::uncertain(ErrorCode::Native))?;
     Ok(response)
+}
+
+fn registry_request(
+    client: &Client,
+    location: &Location,
+    url: Url,
+    accept: &'static str,
+    bearer: Option<&str>,
+    explicit: Option<&crate::RegistryIdentityCredential>,
+) -> reqwest::RequestBuilder {
+    let mut request = client.get(url).header(header::ACCEPT, accept);
+    if let Some(token) = bearer.or_else(|| {
+        if explicit.is_none() {
+            location.credential.direct_bearer()
+        } else {
+            None
+        }
+    }) {
+        request = request.bearer_auth(token);
+    }
+    request
 }
 
 fn fetch(
@@ -386,17 +469,80 @@ async fn fetch_documents(
         OCI_METADATA_BYTES, &mut bearer, cancel,
     ).await?;
     let descriptor = VerifiedOci::configuration(&source, &manifest)?;
-    let config = get(
+    let response = get_response(
         &client,
         &location,
         location.url("blobs", descriptor.digest())?,
         "application/octet-stream",
-        descriptor.size() as usize,
         &mut bearer,
         cancel,
     )
     .await?;
+    let response = follow_blob_redirect(&client, &location, response, cancel).await?;
+    let config = read_body(response, descriptor.size() as usize).await?;
     VerifiedOci::verify(source, &manifest, &config)
+}
+
+async fn follow_blob_redirect(
+    client: &Client,
+    location: &Location,
+    response: Response,
+    cancel: &Cancellation,
+) -> Result<Response> {
+    if response.status().is_redirection() {
+        let destination = blob_redirect(location, &response)?;
+        drop(response);
+        if cancel.is_cancelled() {
+            return Err(Error::uncertain(ErrorCode::State));
+        }
+        // A fresh request carries neither the registry bearer nor account
+        // credentials. The client still forbids automatic/second redirects.
+        Ok(client
+            .get(destination)
+            .header(header::ACCEPT, "application/octet-stream")
+            .send()
+            .await
+            .map_err(|_| Error::uncertain(ErrorCode::Native))?)
+    } else {
+        Ok(response)
+    }
+}
+
+fn blob_redirect(location: &Location, response: &Response) -> Result<Url> {
+    let mut destinations = response.headers().get_all(header::LOCATION).iter();
+    let destination = destinations
+        .next()
+        .and_then(|value| value.to_str().ok())
+        .ok_or(Error::uncertain(ErrorCode::Native))?;
+    if destinations.next().is_some() {
+        return Err(Error::uncertain(ErrorCode::Validation));
+    }
+    blob_destination(location, response.status(), destination)
+}
+
+fn blob_destination(location: &Location, status: StatusCode, value: &str) -> Result<Url> {
+    let invalid = || Error::uncertain(ErrorCode::Validation);
+    if !matches!(
+        status,
+        StatusCode::TEMPORARY_REDIRECT | StatusCode::PERMANENT_REDIRECT
+    ) || location.origin.as_str() != "https://registry-1.docker.io/"
+        || value.len() > CHALLENGE_BYTES
+    {
+        return Err(invalid());
+    }
+    let url = Url::parse(value).map_err(|_| invalid())?;
+    // The observed Docker Hub blob endpoint is an infrastructure alias, not
+    // permission for arbitrary docker.com subdomains or registry redirects.
+    if url.scheme() != "https"
+        || url.host_str() != Some("production.cloudfront.docker.com")
+        || url.port_or_known_default() != Some(443)
+        || !url.username().is_empty()
+        || url.password().is_some()
+        || url.fragment().is_some()
+    {
+        return Err(invalid());
+    }
+    Ok(url)
 }
 
 fn client(remaining: Duration) -> Result<Client> {
@@ -540,9 +686,25 @@ impl crate::Engine {
             .jobs
             .acquire(crate::jobs::Demand::registry_download(max_bytes)?)?;
         let domain = self.domain.clone();
+        let account = self.registry_account_enabled().then(|| self.jobs.clone());
         crate::oci_start::observe_owned(self.jobs.clone(), deadline, cancel.clone(), move || {
             let _lease = permit;
             domain.verify()?;
+            if cancel.is_cancelled() || Instant::now() >= deadline {
+                return Err(Error::before(ErrorCode::State));
+            }
+            let location = location.with_account(
+                &source.reference,
+                crate::registry_account::Family::Machines,
+                account
+                    .as_ref()
+                    .map(|pool| crate::registry_account::Context {
+                        pool,
+                        deadline,
+                        cancel: &cancel,
+                    }),
+                credential.as_ref(),
+            )?;
             let job_cancel = &cancel;
             let result = bounded(deadline, &cancel, |remaining| async move {
                 let client = client(remaining)?;
@@ -579,6 +741,8 @@ impl crate::Engine {
                         credential.as_ref(),
                     )
                     .await?;
+                    let response =
+                        follow_blob_redirect(&client, &location, response, job_cancel).await?;
                     cache_blob(response, &cache, &source, &descriptor, deadline, job_cancel)
                         .await?;
                 }
@@ -599,7 +763,8 @@ impl crate::Engine {
 
     /// Bounded manifest observation for a pinned registry sidecar. The bridge
     /// must select an approved source first. This does not prepare/cache a pack,
-    /// resolve credentials, validate its architecture or confer creation authority.
+    /// validate its architecture or confer creation authority. Credentials and
+    /// mirrors are resolved from the verified host's operation-local account view.
     pub fn prepare_registry_descriptor(
         &self,
         source: crate::RegistryArtifactSource,
@@ -624,9 +789,25 @@ impl crate::Engine {
         self.domain.verify()?;
         let permit = self.jobs.acquire(crate::jobs::Demand::oci_metadata())?;
         let domain = self.domain.clone();
+        let account = self.registry_account_enabled().then(|| self.jobs.clone());
         crate::oci_start::observe_owned(self.jobs.clone(), deadline, cancel.clone(), move || {
             let _lease = permit;
             domain.verify()?;
+            if cancel.is_cancelled() || Instant::now() >= deadline {
+                return Err(Error::before(ErrorCode::State));
+            }
+            let location = location.with_account(
+                &source.reference,
+                crate::registry_account::Family::Machines,
+                account
+                    .as_ref()
+                    .map(|pool| crate::registry_account::Context {
+                        pool,
+                        deadline,
+                        cancel: &cancel,
+                    }),
+                None,
+            )?;
             let job_cancel = &cancel;
             let descriptor = bounded(deadline, &cancel, |remaining| async move {
                 let client = client(remaining)?;
@@ -669,12 +850,25 @@ impl crate::Engine {
         self.domain.verify()?;
         let permit = self.jobs.acquire(crate::jobs::Demand::oci_metadata())?;
         let domain = self.domain.clone();
+        let account = self.registry_account_enabled().then(|| self.jobs.clone());
         crate::oci_start::observe_owned(self.jobs.clone(), deadline, cancel.clone(), move || {
             let _lease = permit;
             domain.verify()?;
             if cancel.is_cancelled() {
                 return Err(Error::before(ErrorCode::State));
             }
+            let location = location.with_account(
+                &source.reference,
+                crate::registry_account::Family::Images,
+                account
+                    .as_ref()
+                    .map(|pool| crate::registry_account::Context {
+                        pool,
+                        deadline,
+                        cancel: &cancel,
+                    }),
+                None,
+            )?;
             let verified = fetch(source, location, deadline, &cancel)?;
             domain.verify().map_err(|e| Error::uncertain(e.code))?;
             if cancel.is_cancelled() || Instant::now() >= deadline {
@@ -698,6 +892,158 @@ mod tests {
             platform: crate::oci::native_oci_platform().into(),
         }
     }
+
+    #[test]
+    fn mirror_prefix_and_account_credentials_stay_on_their_intended_requests() {
+        use crate::registry_account::Credential;
+        let client = client(Duration::from_secs(2)).unwrap();
+        let mut location = Location::new(&source("registry.example/team/app")).unwrap();
+        location.origin = Url::parse("https://mirror.example/prefix/").unwrap();
+        let url = location.url("manifests", &location.digest).unwrap();
+        assert!(url.path().starts_with("/prefix/v2/team/app/manifests/"));
+        let explicit = crate::RegistryIdentityCredential::new(
+            "explicit-private".into(),
+            "https://auth.example/token",
+        )
+        .unwrap();
+        for account in [
+            Credential::Identity {
+                token: "identity-private".into(),
+                realm: None,
+            },
+            Credential::Basic {
+                username: "user".into(),
+                password: "password-private".into(),
+            },
+            Credential::Bearer("direct-private".into()),
+        ] {
+            location.credential = account;
+            let request = registry_request(
+                &client,
+                &location,
+                url.clone(),
+                "application/json",
+                None,
+                None,
+            )
+            .build()
+            .unwrap();
+            match &location.credential {
+                Credential::Bearer(_) => {
+                    let value = &request.headers()[header::AUTHORIZATION];
+                    assert_eq!(value, "Bearer direct-private");
+                    assert!(value.is_sensitive());
+                }
+                _ => assert!(!request.headers().contains_key(header::AUTHORIZATION)),
+            }
+            let request = registry_request(
+                &client,
+                &location,
+                url.clone(),
+                "application/json",
+                None,
+                Some(&explicit),
+            )
+            .build()
+            .unwrap();
+            assert!(!request.headers().contains_key(header::AUTHORIZATION));
+            let request = registry_request(
+                &client,
+                &location,
+                url.clone(),
+                "application/json",
+                Some("exchanged-private"),
+                Some(&explicit),
+            )
+            .build()
+            .unwrap();
+            assert_eq!(
+                request.headers()[header::AUTHORIZATION],
+                "Bearer exchanged-private"
+            );
+        }
+    }
+
+    #[test]
+    fn account_exchange_guards_realms_and_sends_sensitive_auth_only_to_exchange() {
+        use crate::registry_account::Credential;
+        let client = client(Duration::from_secs(2)).unwrap();
+        let mut location = Location::new(&source("ghcr.io/team/app")).unwrap();
+        for (account, expected) in [
+            (
+                Credential::Basic {
+                    username: "user".into(),
+                    password: "pass".into(),
+                },
+                "Basic dXNlcjpwYXNz",
+            ),
+            (
+                Credential::Identity {
+                    token: "identity-private".into(),
+                    realm: Some(Url::parse("https://ghcr.io/token").unwrap()),
+                },
+                "Bearer identity-private",
+            ),
+        ] {
+            location.credential = account;
+            for unapproved in [
+                r#"Bearer realm="http://ghcr.io/token""#,
+                r#"Bearer realm="https://other.example/token""#,
+            ] {
+                assert!(Challenge::parse(unapproved, &location).is_err());
+            }
+            let challenge = Challenge::parse(
+                r#"Bearer realm="https://ghcr.io/token",scope="repository:team/app:pull""#,
+                &location,
+            )
+            .unwrap();
+            let request =
+                token_request_account(&client, challenge, None, Some(&location.credential))
+                    .unwrap()
+                    .build()
+                    .unwrap();
+            let value = &request.headers()[header::AUTHORIZATION];
+            assert_eq!(value, expected);
+            assert!(value.is_sensitive());
+            assert!(!format!("{request:?}").contains("identity-private"));
+            assert_eq!(
+                request.url().query(),
+                Some("scope=repository%3Ateam%2Fapp%3Apull")
+            );
+        }
+        location.credential = Credential::Bearer("direct-private".into());
+        let challenge =
+            Challenge::parse(r#"Bearer realm="https://ghcr.io/token""#, &location).unwrap();
+        let request = token_request_account(&client, challenge, None, Some(&location.credential))
+            .unwrap()
+            .build()
+            .unwrap();
+        assert!(!request.headers().contains_key(header::AUTHORIZATION));
+        let explicit = crate::RegistryIdentityCredential::new(
+            "explicit-private".into(),
+            "https://ghcr.io/token",
+        )
+        .unwrap();
+        let challenge = Challenge::parse_with_credential(
+            r#"Bearer realm="https://ghcr.io/token""#,
+            &location,
+            Some(&explicit),
+        )
+        .unwrap();
+        let request = token_request_account(
+            &client,
+            challenge,
+            Some(&explicit),
+            Some(&location.credential),
+        )
+        .unwrap()
+        .build()
+        .unwrap();
+        assert_eq!(
+            request.headers()[header::AUTHORIZATION],
+            "Bearer explicit-private"
+        );
+    }
     fn request(stream: &mut TcpStream) -> String {
         stream
             .set_read_timeout(Some(Duration::from_secs(3)))
@@ -710,6 +1056,38 @@ mod tests {
             bytes.push(byte[0]);
         }
         String::from_utf8(bytes).unwrap()
+    }
+
+    #[test]
+    fn docker_blob_redirect_is_exact_https_infrastructure_only() {
+        let docker = Location::new(&source("docker.io/library/alpine")).unwrap();
+        let endpoint = "https://production.cloudfront.docker.com/blob?signature=private";
+        for status in [
+            StatusCode::TEMPORARY_REDIRECT,
+            StatusCode::PERMANENT_REDIRECT,
+        ] {
+            assert_eq!(
+                blob_destination(&docker, status, endpoint)
+                    .unwrap()
+                    .as_str(),
+                endpoint
+            );
+        }
+        for endpoint in [
+            "http://production.cloudfront.docker.com/blob",
+            "https://production.cloudfront.docker.com:444/blob",
+            "https://production.cloudfront.docker.com.evil.example/blob",
+            "https://other.docker.com/blob",
+            "https://user@production.cloudfront.docker.com/blob",
+            "https://production.cloudfront.docker.com/blob#fragment",
+            "/relative",
+            "https://127.0.0.1/blob",
+        ] {
+            assert!(blob_destination(&docker, StatusCode::TEMPORARY_REDIRECT, endpoint).is_err());
+        }
+        assert!(blob_destination(&docker, StatusCode::FOUND, endpoint).is_err());
+        let other = Location::new(&source("registry.example/team/app")).unwrap();
+        assert!(blob_destination(&other, StatusCode::TEMPORARY_REDIRECT, endpoint).is_err());
     }
     fn reply(stream: &mut TcpStream, status: &str, extra: &str, bytes: &[u8]) {
         write!(
@@ -740,7 +1118,14 @@ mod tests {
             "config":{"mediaType":"application/vnd.smolmachines.machine.config.v1+json","digest":format!("sha256:{}","b".repeat(64)),"size":2},
             "layers":[{"mediaType":"application/vnd.smolmachines.smolmachine.v1","digest":format!("sha256:{content}"),"size":blob.len()}]
         })).unwrap();
-        for failure in ["error", "oversized", "short", "wrong", "chunked"] {
+        for failure in [
+            "error",
+            "oversized",
+            "short",
+            "wrong",
+            "chunked",
+            "redirect",
+        ] {
             let temp = tempfile::tempdir().unwrap();
             let cache = crate::registry_artifact::RegistryCache::open(temp.path()).unwrap();
             let listener = TcpListener::bind("127.0.0.1:0").unwrap();
@@ -762,6 +1147,7 @@ mod tests {
                         "short" => { write!(stream,"HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: {}\r\n\r\n",blob.len()).unwrap(); stream.write_all(b"short").unwrap(); },
                         "wrong" => reply(&mut stream,"200 OK","",&vec![b'x';blob.len()]),
                         "chunked" => write!(stream,"HTTP/1.1 200 OK\r\nConnection: close\r\nTransfer-Encoding: chunked\r\n\r\n10\r\n0123456789abcdef\r\n0\r\n\r\n").unwrap(),
+                        "redirect" => reply(&mut stream,"307 Temporary Redirect","Location: https://production.cloudfront.docker.com/unauthorized\r\n",b""),
                         _ => unreachable!(),
                     }
                 });
@@ -779,6 +1165,8 @@ mod tests {
                         &cancel,
                     )
                     .await?;
+                    let response =
+                        follow_blob_redirect(&client, &location, response, &cancel).await?;
                     cache_blob(response, &cache, &source, &descriptor, deadline, &cancel).await
                 });
                 assert!(result.is_err(), "{failure}");
@@ -972,6 +1360,7 @@ mod tests {
                     challenge,
                     &Cancellation::new(),
                     Some(&credential),
+                    &crate::registry_account::Credential::Anonymous,
                 )
                 .await
             }

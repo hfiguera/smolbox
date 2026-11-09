@@ -19,6 +19,22 @@ encoded as lowercase hex). Set `SMOLBOX_EMBEDDED_INITIALIZE=true` only for expli
 first enrollment. An existing domain must use its original generation; do not
 rotate it or run another SDK writer concurrently. Initialization defaults to false.
 
+The configuration verifies the approved manifest digest and explicitly approves
+its SDK descriptor. New Linux candidate builds advertise volumes and stopped
+disk growth using a
+platform-specific policy; macOS and older approved packages keep their own
+descriptors. Capability advertisement is separate from ordinary exact-package
+qualification. The latest growth descriptor still requires fresh public
+stop-grow-start qualification.
+
+The [latest scoped Linux evidence](../../docs/evidence/embedded-port-http-parity-public-volumes-40c7d3d.json)
+covers source-controlled public mounted local-container workflows with Memory
+and PostgreSQL storage on both toolchains. PostgreSQL prepare/resume uses
+separate normally exited BEAMs with stable keys and artifact storage.
+Wider source/platform/resource acceptance remains pending.
+This basic lifecycle example does not configure a volume policy or run mounts;
+see the setup guide for the additional explicit volume/root/store approvals.
+
 Validate configuration without launching the helper:
 
 ```sh
@@ -59,3 +75,169 @@ accounts or domains from the embedded helper.
 
 Live process interruption testing and native distribution signing/source delivery
 remain outside this development example. Rustler and Kubernetes are not implemented.
+
+## Ordinary mounted-volume qualification
+
+The public package consumer accepts `--native-volume` with explicit
+`--native-public`, `--without-rust` and `--native-volume-root /absolute/canonical/root`,
+alongside its usual package, artifact, domain, output and report options. It runs
+separately from terminal, network and workload campaigns. The package must declare
+Linux volume descriptor one. This source-controlled workflow adds competing
+attachment rejection to the earlier private witness and keeps the original
+Runtime/store alive on unexpected outcomes. It selects no interruption campaign.
+
+`SmolBox.Example.EmbeddedVolumes.run/3` defaults to a single Memory-backed run.
+An injected durable `store`, `mode: :durable` and stable 32-byte `fingerprint_key`
+also support `phase: :prepare` and `phase: :resume` in separate normally exited
+BEAMs. Both phases require the same explicitly configured `artifact_root`; resume
+checks an output collected before shutdown as well as retained guest data. Resume
+requires `expected_records` pointing to prepare's private
+`private-records-before-replacement.json`. That file supplies assertions only:
+backend authority always comes from the store. These new runner paths still need
+their own exact-package physical acceptance.
+
+The durable example's `scripts/embedded-volumes.exs` requires explicit
+`--ordinary --without-rust --settings /private/settings.json --phase prepare|resume
+--output /private/new-output`, plus `--expected-records` for resume. Run from the
+durable example after its existing database setup and migrations. Settings contain
+`package`, `manifest_sha256`, `artifact`, `artifact_sha256`, `domain_json`,
+`volume_root`, `partition`, `scope`, `encryption_key_file`, `fingerprint_key_file`
+and `artifact_root`. Keep the database partition, keys, scope, domain and artifact
+directory stable across the pair. Prepare intentionally retains a normally
+stopped machine and attached volume; resume verifies their original authority
+and finishes owned cleanup. Use a new scope for a subsequent completed pair.
+
+On an unresolved run, atomically publish mode-0600 `control.json` in its private
+output directory. A request such as `{"request_id":"status1","action":"status"}`
+gets a private result file. Each lowercase-alphanumeric request ID is consumed
+once. `stop_machine`, `delete_machine` and `delete_volume` also require a known
+workflow `id` and its exact inspected `version`. Mutations are never replayed by
+this receiver. `close` succeeds only after all workflow machines/volumes are
+deleted or absent and the worker has zero slot/disk reservations. Unknown outcomes
+remain retained; checkpoint files are not a store restore or adoption mechanism.
+
+Current-toolchain consumer and PostgreSQL 16.15 prepare/resume acceptance is
+recorded in the [scoped evidence](../../docs/evidence/embedded-port-http-parity-postgresql-volumes-1fd1262.json).
+The minimum PostgreSQL attempt exposes a reconciliation gate rejecting sibling
+deletion before dispatch. Positive create/delete checks now retry that admission
+only within a finite bound and after verifying no accepted intent or an exactly
+unchanged volume record. Entered/uncertain mutations, changed records and expected
+negative quota/drain cases are not retried. Physical acceptance of this latest
+guard, the minimum durable pair and the new minimum Memory consumer remain pending.
+
+
+For a separately approved Linux package declaring `disk_growth: 1`, the explicit
+public consumer campaign is `--native-public --native-growth --without-rust`
+with the usual package/fixture/domain/output arguments. It selects only the
+source-controlled `growth_demo.ex` and `growth_control.ex` workflow; do not combine
+it with the volume, terminal, network or workload campaigns. The workflow
+qualifies unmounted stopped growth, original creation authority, full disk
+reservations, duplicate/conflicting intents, drain rejection, retained binary
+data, measured workspace filesystem size and normal stopped Runtime replacement.
+The bounded filesystem probe uses POSIX shell, `df -Pk`, `awk` and `sleep`, provided
+by both the approved packed workload and BusyBox bare fixtures. It does not require
+Python, accept malformed/missing measurements, or replace measurements with the
+managed disk-size fields. A successful probe records `workspace_bytes` in its
+bounded command output. Bare boot/growth needs its own ordinary acceptance.
+The overlay is checked through physical geometry/proof and managed observations;
+this container witness does not measure a bare guest overlay filesystem.
+
+The durable launcher is
+`examples/durable_host/scripts/embedded-growth.exs`. It requires explicit
+`--ordinary --without-rust --phase prepare|resume --settings PRIVATE_JSON --output NEW_DIRECTORY`.
+Use the durable-volume settings shape with the exact approved growth package,
+a fresh scope and stable store partition, encryption/fingerprint keys and artifact
+root; no volume root is used. Resume additionally requires `--expected-records`
+pointing to prepare's private before-replacement checkpoint. That file supplies
+comparisons only; encrypted database records remain authoritative.
+
+To qualify another fixture in the same durable partition, retain the complete
+approved `artifacts` catalog in settings and select the new entry with
+`artifact_id`. Each catalog entry uses the normal native approval fields: `id`,
+`path`, `sha256`, `architecture` and `max_bytes`. Keep previous entries unchanged,
+including the original `application` approval. Multiple entries require explicit
+selection; an unknown or duplicate selected ID fails before workflow startup.
+Existing single-artifact `artifact`/`artifact_sha256` settings retain their default.
+
+The workflow module also accepts `source_id` to select one existing approved OCI
+or registry entry from `target.sources`. Keep the source catalog and any registry
+cache policy in the supplied Config. `configure(target, network: policy)` supplies
+an explicit network profile for OCI; the default remains offline. Mixing non-nil
+`artifact_id` and `source_id`, ambiguous/unknown IDs or OCI with an offline profile
+fails before output/owner startup. Existing local artifact selection is unchanged.
+Evidence keeps the chosen `creation_input`; remote manifests are not labeled as
+local `fixture_sha256` blobs.
+
+The public consumer optionally accepts `--native-growth-settings /absolute/private.json`.
+The consumer copies and hashes this owned regular file (maximum 65,536 bytes,
+no group/other permissions) with its frozen proof tooling. Omit the option for the
+existing local default. The growth proof also accepts the copied file as `--settings`.
+Its exact top-level fields are `sources`, `source_id`, `artifact_id`, `network`
+and `cache_policy`; unknown fields reject before workflow startup. For example,
+an OCI approval uses this shape (replace the sample with an approved platform
+manifest; no tag or index resolution is implied):
+
+```json
+{
+  "sources": [{
+    "kind": "oci",
+    "id": "approved-image",
+    "reference": "registry.example/team/app@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "architecture": "x86_64"
+  }],
+  "source_id": "approved-image",
+  "network": {"hosts": ["registry.example"], "cidrs": []}
+}
+```
+
+Allow the actual approved registry and layer endpoints in `network`. Registry
+artifact entries instead use `kind: "registry"` with `content_sha256` identifying
+the prepared `.smolmachine` blob, and require a `cache_policy` containing
+`max_download_bytes`, `max_cache_bytes` and `max_cache_files`. A registry entry
+may carry a safe `credential_ref`; `cache_policy.token_realms` maps those references
+to exact approved HTTPS exchange endpoints. Token values belong in the host's
+credential resolver, outside settings and evidence. Guest networking stays offline
+unless explicitly approved with `network`; host download allowance is separate.
+
+The durable settings file accepts the same five fields alongside its existing
+store/package/domain/key settings and now enforces the same private-file bound.
+Retain the complete `artifacts` catalog (or the legacy single-artifact fields)
+in both prepare and resume. For an explicitly remote-only fresh domain, supply
+`artifacts: []`. Existing typed sources are retained; settings may add approvals
+but cannot replace an existing ID or registry policy. Resume must retain the same
+source, network, cache allowances and all earlier approvals. The recorded
+[Linux OCI/Memory cases](../../docs/evidence/embedded-port-http-parity-linux-oci-growth-ff0ed3e.json)
+pass on the exact ff0ed3e/5cd0cb21 public client and e7387c9c native package on both
+toolchains. The later [remote-source cases](../../docs/evidence/embedded-port-http-parity-linux-source-growth-3cf8086.json)
+pass OCI/PostgreSQL prepare/resume on frozen ff0ed3e path source and registry/Memory
+on actual 3cf8086/9221a9cf public consumers, both current/minimum. SQL authority and
+original keys survive a normal BEAM restart; registry bearer access has exact
+single-preparation counts. Later rotated-token consumption is not qualified.
+Registry durable growth, current packed/mounted and other required combinations,
+and the remaining full-parity gates still need qualification.
+
+An unexpected result retains the original owner and private records. The growth
+control receiver accepts private once-only status/close requests and exact-version
+stop/delete for `original`. Explicit `resolve_growth` requires the known
+`first`/`second` intent, current version and `quiesced: true`; it never performs
+another resize or repairs a partial disk. Do not terminate the parked owner or
+treat caller timeout as collection. Closing checks positive owned deletion and
+zero reservations. These runners introduce no crash campaign. Ordinary acceptance
+is limited to the exact packages, sources, stores and platforms linked above;
+changed bytes and other required combinations still need their own qualification.
+
+The image and growth workflows additionally accept `stop_owned_machine`, with
+the exact current `version`. Images allow `original` or `warm`; growth allows
+only `original` in its configured scope. Both use the shared `owned_control.ex`
+implementation. Use it only for an unknown machine blocked by retained work.
+It freezes coordinator dispatch, drains the original helper epoch and sends normal stop with the saved creation receipt.
+The owner and store records stay alive. An unconfirmed stop remains uncertain;
+this action supplies no command exit and releases no reservation. Once stopped
+ownership is verified, resolve explicitly, wait for the worker to become ready,
+and submit exact-version deletion. A busy helper is never bypassed or signalled.
+This control is model-tested; ordinary live acceptance remains pending.
+
+The keeper also accepts `resolve_machine` with the original `id`, current `version`
+and explicit `quiesced: true` after the caller has established safe stopped
+ownership. It forwards the existing `Machines.resolve` API; it never replays start
+or resize, and a running/unverified machine is not resolved as stopped.

@@ -1,14 +1,36 @@
 defmodule SmolBox.Store.NativeSourceCodecTest do
   use ExUnit.Case, async: true
-  alias SmolBox.Backend.{Assignment, Binding}
-  alias SmolBox.Embedded.{Config, CreationFeatures, Identity, NativeSource, Request}
-  alias SmolBox.Runtime.{NativeSupport, Target}
+
+  alias SmolBox.Backend.{
+    Assignment,
+    Binding,
+    Budget,
+    EmbeddedContext,
+    EmbeddedOperation,
+    Reference
+  }
+
+  alias SmolBox.Embedded.{
+    Config,
+    CreationFeatures,
+    Identity,
+    ImageContract,
+    NativeSource,
+    Request,
+    SDKIdentity
+  }
+
+  alias SmolBox.Runtime.{ImageObservation, NativeSupport, Session, Target}
   alias SmolBox.Store.{Codec, CodecNativeSources, MachineOps, Memory}
   alias SmolBox.Test.EmbeddedPackage, as: Package
 
   alias SmolBox.{
+    ArtifactPreparation,
+    Error,
     Execution,
     ExecutionSpec,
+    ExecutionValidation,
+    Image,
     ImagePull,
     Machine,
     ManagedMachine,
@@ -126,6 +148,57 @@ defmodule SmolBox.Store.NativeSourceCodecTest do
       network: profile.network,
       backend_identity: %Identity{receipt: receipt, pid_identity: pid}
     }
+  end
+
+  test "native pre-dispatch rejections retain operation names accepted by the store" do
+    budget = %Budget{
+      timeout_ms: 1000,
+      max_request_bytes: 1024,
+      max_response_bytes: 1024
+    }
+
+    for {internal, persisted} <- [inspect_machine: :inspect, create_prepared: :create] do
+      assert {:error, error} = EmbeddedOperation.build(%{}, internal, [], budget)
+      assert error.operation == persisted and error.evidence == :not_dispatched
+      assert ExecutionValidation.error?(error)
+    end
+  end
+
+  test "native registry preparation survives the prepared transition and codec round trip" do
+    {source, record} = reserved(:registry)
+    record = %{record | phase: :preparing}
+
+    for cached <- [false, true] do
+      assert {:ok, prepared} =
+               ArtifactPreparation.from_wire(source, %{
+                 "digest" => "sha256:" <> source.content_sha256,
+                 "sizeBytes" => 14_952_849,
+                 "alreadyCached" => cached
+               })
+
+      assert {:ok, saved} =
+               ManagedMachine.transition(
+                 record,
+                 [preparation: prepared, phase: :prepared],
+                 record.updated_at_ms + 1
+               )
+
+      assert Assignment.record_valid?(saved)
+      assert {:ok, <<"smolbox-record-v19\0", _::binary>> = bytes} = Codec.encode(saved)
+      assert {:ok, ^saved} = Codec.decode(bytes)
+
+      for crossed <- [
+            %{prepared | content_sha256: String.duplicate("e", 64)},
+            %{prepared | manifest_sha256: String.duplicate("f", 64)},
+            %{prepared | reference: "registry.example/foreign@sha256:" <> source.sha256}
+          ] do
+        refute Assignment.record_valid?(%{saved | preparation: crossed})
+        assert {:error, _} = Codec.encode(%{saved | preparation: crossed})
+      end
+
+      {_oci, oci_record} = reserved()
+      refute Assignment.record_valid?(%{oci_record | preparation: prepared})
+    end
   end
 
   test "typed source identity is selective v19 data and cannot enter old native envelopes" do
@@ -303,6 +376,134 @@ defmodule SmolBox.Store.NativeSourceCodecTest do
     assert {:ok, <<"smolbox-record-v19\0", _::binary>> = bytes} = Codec.encode(execution)
     assert {:ok, ^execution} = Codec.decode(bytes)
     assert {:error, _} = Execution.transition(execution, [backend_assignment: nil], 1000)
+
+    sdk =
+      SDKIdentity.implemented(
+        "1.22.0",
+        "9f446ae00219148ca4a703914f44a8e2fab11655"
+      )
+      |> put_in(["feature_versions", "remote_sources"], 1)
+      |> put_in(["feature_versions", "images"], 1)
+
+    native = Package.create(protocol_major: 2, platform: :linux, sdk_identity: sdk)
+    on_exit(fn -> File.rm_rf!(native.package_path) end)
+
+    native = %{
+      native
+      | id: "worker",
+        domain_generation: record.backend_assignment.binding.generation,
+        sources: [source, another],
+        artifacts: [],
+        profiles: [record.spec.profile]
+    }
+
+    assert :ok = Config.validate(native)
+    {:ok, context} = EmbeddedContext.new(native, self())
+    {:ok, context} = EmbeddedContext.assign(context, execution)
+    assert context.managed_machine == ManagedMachine.key(machine)
+
+    assert {:ok, request, _, <<>>, nil} =
+             EmbeddedOperation.build(
+               context,
+               :pull_image,
+               [machine.machine_name, another],
+               native.budget
+             )
+
+    assert request["receipt"] == execution.created_machine.backend_identity.receipt
+    assert request["source"] == ImageContract.source(another)
+
+    assert {:error, _} =
+             EmbeddedOperation.build(
+               context,
+               :pull_image,
+               [machine.machine_name, source],
+               native.budget
+             )
+
+    exercise_runtime_pull(execution, another)
+  end
+
+  defmodule PullClock do
+    def now, do: 1000
+    def monotonic, do: 1000
+  end
+
+  defmodule PullStore do
+    def claim(store, _key, _owner, _now, _lease), do: {:ok, Agent.get(store, & &1)}
+
+    def write(store, _key, _guard, changes, now) do
+      Agent.get_and_update(store, fn record ->
+        {:ok, next} = Execution.transition(record, changes, now)
+        {{:ok, next}, next}
+      end)
+    end
+  end
+
+  defmodule PullAdapter do
+    @behaviour SmolBox.Backend
+    def supports_operation?(_, operation), do: operation == :pull_image
+    def assign(context, record), do: {:ok, Map.put(context, :record, record)}
+
+    def invoke(%{record: %Execution{} = record} = context, :pull_image, [name, source], _budget) do
+      send(context.observer, {:assigned_pull, context.owner, record, name, source})
+
+      Image.from_wire(%{
+        "reference" => source.reference,
+        "digest" => "sha256:" <> String.duplicate("b", 64),
+        "size" => 123,
+        "architecture" => "amd64",
+        "os" => "linux",
+        "layerCount" => 2
+      })
+    end
+
+    def invoke(_, _, _, _),
+      do: {:error, %Error{category: :identity_conflict, operation: :pull_image}}
+  end
+
+  defp exercise_runtime_pull(execution, source) do
+    execution = %{
+      execution
+      | state: :dispatching,
+        evidence: :dispatch_uncertain,
+        deadlines: Map.put(execution.deadlines, :execution, 5000)
+    }
+
+    assert :ok = Execution.validate(execution)
+    store = start_supervised!({Agent, fn -> execution end})
+
+    reference = %Reference{
+      kind: :embedded,
+      id: execution.worker_id,
+      adapter: PullAdapter,
+      context: %{observer: self(), owner: :pinned_original},
+      budget: %Budget{
+        timeout_ms: 1000,
+        max_request_bytes: 4096,
+        max_response_bytes: 8192
+      }
+    }
+
+    session = %Session{
+      config: %{
+        store: {PullStore, store},
+        owner: "owner",
+        clock: PullClock,
+        poll_ms: 20,
+        lease_ms: 1000
+      },
+      key: Execution.key(execution),
+      worker: %Target{kind: :embedded, id: execution.worker_id, connection: reference},
+      wall: 1000,
+      monotonic: 1000
+    }
+
+    assert {:ok, %{state: :completed, evidence: :image_pulled, result: %Image{}}} =
+             ImageObservation.run(session, execution)
+
+    name = execution.machine_name
+    assert_received {:assigned_pull, :pinned_original, ^execution, ^name, ^source}
   end
 
   for kind <- [:oci, :registry] do
@@ -379,7 +580,7 @@ defmodule SmolBox.Store.NativeSourceCodecTest do
       on_exit(fn -> File.rm(path) end)
       File.write!(path, bytes, [:exclusive])
       File.chmod!(path, 0o600)
-      paths = Path.wildcard(Path.expand("_build/test/lib/*/ebin"))
+      paths = Path.wildcard(Path.join(Mix.Project.build_path(), "lib/*/ebin"))
 
       code = ~S"""
       [path] = System.argv()

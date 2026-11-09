@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "scope": "current-and-isolated-minimum-fresh-beam-native-codec-record-tests",
+  "base_commit": "6f8d76bbf99d0017f1e84f9afeb995e431c62322",
+  "changed_test_files": {
+    "test/unit/native_branch_authority_test.exs": "d094fa929d6fa07b910d5c8ae73fd596ddcfc08334a0fe821bae757c4e83b831",
+    "test/unit/native_branch_backing_test.exs": "b24786c57a77836a0bf8806e4fab966768d6c0b55db67c73e1d7c733e8b66bb3",
+    "test/unit/native_branch_collection_test.exs": "e774ca25ec30d42ae801fd552e0b79baf1c07d29edbab99078f491d5c5ab8e26",
+    "test/unit/native_branch_deletion_action_test.exs": "d7f933ff4fb0430aeb51ae9a8bd435c6ff133054cb2e49c8b33a516daaaeedb6",
+    "test/unit/native_branch_deletion_test.exs": "a5c9499c008e02e33257d5f7e2f2c3d6563fa4568758174c4abddb2e76579673",
+    "test/unit/native_branch_release_test.exs": "d40686af8a660d3cb239b9ca5dc190b2b98be53ff3d3d54108a8a1d037df10f0",
+    "test/unit/native_branch_retirement_test.exs": "115a19cb80f7a725d60c695230a8487250b016978c7c830451afb854183cf6ac",
+    "test/unit/native_capture_cleanup_store_test.exs": "2a510d494314b899a6c7be12d9c189ccbad99d1c898dba87e812e21051397afd",
+    "test/unit/native_capture_history_test.exs": "23475c6505c78706fa11645369251e64ab7e446b76f64a8e0ec21368d9800154",
+    "test/unit/native_capture_resolution_history_test.exs": "3660bdb085828c60f1a9c127cf0f09f76f77a449913bf2518a7fbd4ff6fc315b",
+    "test/unit/native_checkpoint_codec_test.exs": "ff3e5fe36f66ffd1562b1ec18e195aa45f83ac13699791c6d8d6d6d8126d5686",
+    "test/unit/native_codec_test.exs": "5b12beb9cd35d68e0ad175ccc3d3ee4b849c8bbe7adf6d8500cb2aec8ded0032",
+    "test/unit/native_export_history_test.exs": "cd6112f142e73350548e5019cdc40f916c2d80a62097c16157d55da30d55d7a0",
+    "test/unit/native_growth_history_test.exs": "dcb52f94e736758dbb7d0a78214e1d1a0c49aae739e74a8e52b0889893f13fe1",
+    "test/unit/native_prepared_branch_retirement_test.exs": "1e44924d60854028f9d8e127709d1cbebf7c57f2b09245ed678b84fe3947ff7b",
+    "test/unit/native_released_branch_cleanup_test.exs": "2b7a5e2ede47bea645e3e18900f9cbf8c42490eb9654dbb74f39764fe0b4a130",
+    "test/unit/native_released_branch_continuation_test.exs": "42a14147c2403e102004d204ee12c4a863c80210c1dcf45357950ae8bef78c9e",
+    "test/unit/native_released_branch_deletion_test.exs": "2da778d3d4af6a4d4b9b2b4ad6352478178dd3791509d9c38554c4ef3c793e53",
+    "test/unit/native_source_codec_test.exs": "2db005e3819c3dbb9dacb305ef4c382bd18eb8de21077ab50b3f7ef6f8525e78",
+    "test/unit/native_unbooted_branch_backing_test.exs": "deeecef4f2e4c532a63f3cf04018763563f9a19eb267fdd65cc2a93de46b342e",
+    "test/unit/native_unbooted_branch_disposal_test.exs": "b3a3c1eb665c0c687a104937f2f8a73db74c0afcac2950d19360b875292d5e70",
+    "test/unit/native_unbooted_branch_retirement_test.exs": "0fc41ce1892a9a48cf24ffb3c28361551b196e55bfb808945a676790ee23bfdc",
+    "test/unit/native_volume_attachment_test.exs": "0baaf6ab67a6664e5f0e910c5f269a2045bb355c697712e2c284407cf4fcdd2c",
+    "test/unit/native_volume_codec_test.exs": "9ff86c763b9da523e7c42a3af364d3e3b5802d1125ed600272872affc325b320"
+  },
+  "build_path": "Mix.Project.build_path",
+  "hardcoded_build_directory_removed": true,
+  "runs": [
+    {
+      "mode": "current",
+      "elixir": "1.20.4",
+      "otp": "29.0.6",
+      "isolated_build_directory": false,
+      "passed": 222,
+      "runtime_and_deferred_tags_excluded": true,
+      "log_sha256": "59500b087bcd8bc198c2a89fb58ef1cc9a993a7552851af077cdaa4fc8b10319"
+    },
+    {
+      "mode": "minimum",
+      "elixir": "1.18.4",
+      "otp": "27.3.4.15",
+      "isolated_build_directory": true,
+      "passed": 222,
+      "runtime_and_deferred_tags_excluded": true,
+      "log_sha256": "0087e3720004cd5f236c048aa3262aebad824f081d567a16842b1ca0ede59f84"
+    }
+  ],
+  "sdk_owner_or_vm_opened": false,
+  "rust_on_path": false,
+  "development_formatter_nif": "existing-precompiled-cache",
+  "production_changes": false,
+  "credo": {
+    "new_findings": 0,
+    "existing_unchanged_findings": 50,
+    "repository_clean": false
+  },
+  "initial_isolated_minimum": {
+    "passed": 62,
+    "log_sha256": "3bd5a751caf236402af5e659dedf12e080025000a75dedad80ca3dab723a6690"
+  },
+  "qualification": {
+    "native_guest_behavior": "pending",
+    "fixed_linux_growth_repeat": "pending",
+    "full_http_feature_parity": false,
+    "crash_validation": "deferred",
+    "distribution_approved": false
+  }
+}

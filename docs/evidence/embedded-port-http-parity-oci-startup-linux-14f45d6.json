@@ -1,0 +1,218 @@
+{
+  "schema": 1,
+  "status": "passed-scoped-linux-configured-oci-startup",
+  "source_commit": "14f45d6208b4c24aaf89e66906974aa065c66daa",
+  "source_files_verified": 1565,
+  "sdk_version": "1.22.0",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_unmodified_before_and_after": true,
+  "rust_toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "native_manifest_sha256": "25bed0542378cda71db2e6c51d10e02c8a89239802d5930084a4fa415b6ed086",
+  "native_identity": {
+    "engine_version": "0.2.0",
+    "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+    "build_sha256": "f50e53e85875371eea36e62d3e7655536b72f291b2bc5027f2f710d69e33b7f5",
+    "assets_sha256": "64a20a93a48f11b62b74692c356dc460ce7fcf01b87be57ea5db9b5d7ea59d66",
+    "platform": "linux",
+    "architecture": "x86_64"
+  },
+  "witness_sha256": "40ac75d78ff615df566501ca86b47ef08fa8f2d59db9b6bb57e653d2170cfede",
+  "ordinary_workflow": {
+    "crash_validation_performed": false,
+    "data_retained": true,
+    "data_sha256": "5ca45c8ba181df5bc4bbb6e785039da60cd79a422d242b249630a02861b0d20c",
+    "distribution_approved": false,
+    "guest_image_inventory": true,
+    "guest_network": {
+      "cidrs": [],
+      "enabled": true,
+      "hosts": [
+        "cloudflarestorage.com",
+        "docker.com",
+        "docker.io"
+      ]
+    },
+    "managed_image_pull": true,
+    "normal_owner_shutdown": true,
+    "original_source_restart": true,
+    "owned_deleted": true,
+    "package_manifest_sha256": "25bed0542378cda71db2e6c51d10e02c8a89239802d5930084a4fa415b6ed086",
+    "public_oci_admission_enabled": false,
+    "pull_source": {
+      "platform": "linux/amd64",
+      "reference": "docker.io/library/busybox@sha256:66a6306db78bf2dbf3487f293aa8d6990d8e506fdffab9cc43fe422becf886e4"
+    },
+    "scope": "ordinary-owned-engine-oci-images",
+    "source": {
+      "platform": "linux/amd64",
+      "reference": "docker.io/library/alpine@sha256:3c81aa9a3d770b316568f4499e30461a5cd3fbd7180bd89e28e34894c7845832"
+    },
+    "startup_workload_behavior_qualified": true,
+    "startup_workload_configured": true,
+    "startup_workload_scope": "fixed explicit argv/env/workdir and image default user; observed startup counters 1 then 2",
+    "status": "passed"
+  },
+  "startup_observations": {
+    "first": {
+      "duplicate_startup_observed": false,
+      "explicit_entrypoint_cmd_env_workdir": true,
+      "image_default_user": true,
+      "observed_starts": 1
+    },
+    "restart": {
+      "duplicate_startup_observed": false,
+      "explicit_entrypoint_cmd_env_workdir": true,
+      "image_default_user": true,
+      "observed_starts": 2
+    }
+  },
+  "exit_status": 0,
+  "finished_utc": "2026-10-16T17:24:59.309486+00:00",
+  "custody": {
+    "source_commit": "14f45d6208b4c24aaf89e66906974aa065c66daa",
+    "source_files_verified": 1565,
+    "manifest_sha256": "25bed0542378cda71db2e6c51d10e02c8a89239802d5930084a4fa415b6ed086",
+    "helper_sha256": "f50e53e85875371eea36e62d3e7655536b72f291b2bc5027f2f710d69e33b7f5",
+    "example_sha256": "40ac75d78ff615df566501ca86b47ef08fa8f2d59db9b6bb57e653d2170cfede",
+    "assets_verified": 806,
+    "host_tools_verified": true,
+    "sdk_counts": {
+      "vms": 0,
+      "vm_create_reservations": 0,
+      "vm_pause_operations": 0,
+      "vm_resize_intents": 0,
+      "vm_resize_receipts": 0
+    },
+    "native_processes": [],
+    "native_zombies": [],
+    "account_lock_available": true,
+    "ordinary_oci_workflow_passed": true,
+    "normal_owner_shutdown": true,
+    "owned_deleted": true,
+    "fresh_real_account": true,
+    "crash_validation_performed": false
+  },
+  "environment": {
+    "explicitly_approved_separate_network_provisioning_vm": true,
+    "fresh_real_os_account_default_sdk_domain": true,
+    "original_sdk_state_or_receipts_copied": false,
+    "artificial_home_or_xdg_namespace": false,
+    "original_test_network_isolation_changed": false,
+    "original_run_disk_changed": false,
+    "seal_or_reset_performed": false
+  },
+  "linux_validation": {
+    "registry_cases": 12,
+    "cold_warm_corrupt_cache_cases": 1,
+    "example_models": 5,
+    "build_log_hashes": {
+      "build.log": "fd67c5509844afd79499f802224fbe30f9dc3672a5e93894a2e2f6556ab87417",
+      "registry-tests.log": "d1c827d83236458af11fad51465e7387443a8e9d8c510a92daa59a146e993562",
+      "sdk-before.log": "d72ab76a473fec0ec8090dd05aafb648f33a6601c9fed487c68e6d41e7223d94",
+      "sdk-after.log": "d72ab76a473fec0ec8090dd05aafb648f33a6601c9fed487c68e6d41e7223d94",
+      "cache-test.log": "0883c12cfa231f8d81fd8d7166b59d970f3aba38a6bd9b682bc816cf2ddb6668",
+      "examples.log": "9485fde1ceb013a2b58f6fb8ad21b7bf8d3a2a37deddd1637b64d989f1b5822d"
+    }
+  },
+  "local_validation": {
+    "registry_cases": 12,
+    "cold_warm_corrupt_cache_cases": 1,
+    "example_models": 5,
+    "strict_clippy_all_targets": true,
+    "python_tests": 47,
+    "python_expected_skips": 4,
+    "sdk_inventories_verified": true,
+    "logs_sha256": {
+      "registry": "0fa7c78fc20172c7ed9f465755decaacd59f42e30fa276d6784f649c9568343e",
+      "cache": "e4609abbe3b71f51c5004c6e2a732737e3ea85a13a3d79ae62e7bcc23842b9b4",
+      "examples": "3158d898a6da7efaeba40219fdf7fae884f5e34b309ffdec7c84b0c93ae024ce",
+      "clippy": "eecb0eb594200feadbf14c6fb36306ec8ded210b2248da5f9d271cfd67783ff1",
+      "python": "41fab7a2d00294a74120d18f60aaf6ba814cff49ce7e64e9356b75cbc8086f15",
+      "sdk": "d72ab76a473fec0ec8090dd05aafb648f33a6601c9fed487c68e6d41e7223d94",
+      "docs": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d"
+    }
+  },
+  "http_only_consumers": {
+    "current": {
+      "minimum": false,
+      "without_rust": true,
+      "platform": "macos",
+      "architecture": "arm64",
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "runtime_dependencies": [
+        "finch",
+        "hpax",
+        "jason",
+        "mime",
+        "mint",
+        "mint_web_socket",
+        "nimble_options",
+        "nimble_pool",
+        "req",
+        "telemetry"
+      ],
+      "package_sha256": "11ddb1f27f353dc27d5809708542126c387bf78f0119c62b0d9502fafc26b417",
+      "native_assets_present": false,
+      "report_sha256": "ac07939dae0338825800ecdd808816d263102e543ca379b1b7e02c1551a8d588",
+      "log_sha256": "fd165d88c259218a11eeff08a9d0b2f3ef2c72a6bc61df80f2f8be237b76ae3b"
+    },
+    "minimum": {
+      "minimum": true,
+      "without_rust": true,
+      "platform": "macos",
+      "architecture": "arm64",
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "runtime_dependencies": [
+        "finch",
+        "hpax",
+        "jason",
+        "mime",
+        "mint",
+        "mint_web_socket",
+        "nimble_options",
+        "nimble_pool",
+        "req",
+        "telemetry"
+      ],
+      "package_sha256": "11ddb1f27f353dc27d5809708542126c387bf78f0119c62b0d9502fafc26b417",
+      "native_assets_present": false,
+      "report_sha256": "b1fb4eb5dc7c3c7a73d6778e3db9e57ebc16ee19c8ebfaa4a65a79d58466bab8",
+      "log_sha256": "409068c851cbfde506d9c836d6079ecfd4013833e583f4a42df64fcc2e0f2fe8"
+    }
+  },
+  "private_archive_sha256": "4be25ad149644d4e2d962f15716111b7bffb74c300cfb56964c157e9adc6f4c6",
+  "private_archive_bytes": 170393748,
+  "private_archive_verified_locally_and_outer": true,
+  "private_archive_mode": "0600",
+  "normal_lab_shutdown": {
+    "observed_utc": "2026-10-16T17:26:25Z",
+    "active_state": "inactive",
+    "result": "success",
+    "exit_status": 0,
+    "main_pid": 0,
+    "original_run_disk_bytes": 24766644224,
+    "original_run_disk_size_and_mtime_unchanged": true,
+    "separate_provision_disk_retained": true,
+    "separate_provision_disk_bytes": 1983512576
+  },
+  "live_registry_artifact_redirect_qualified": false,
+  "current_minimum_native_consumers_qualified_on_this_package": false,
+  "public_oci_admission_enabled": false,
+  "full_parity_accepted": false,
+  "crash_validation_performed": false,
+  "distribution_approved": false,
+  "remaining": [
+    "Registry-artifact preparation/create, credential workflows and additional required registry destination handling.",
+    "Other startup inheritance/user/resource/source/platform cases and current/minimum public native consumers on changed package.",
+    "All remaining P0-P9 gates, public OCI admission and distribution review; crash validation remains deferred."
+  ],
+  "final_documentation_validation": {
+    "warnings_as_errors": true,
+    "coverage_manifest_cases": 4,
+    "logs_sha256": {
+      "docs": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+      "coverage": "7a85ef08db8fbb6c5979775cac60f5df53b66f9faa2cbd98404ace6d5fa51ab0"
+    }
+  }
+}

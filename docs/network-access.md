@@ -2,8 +2,13 @@
 
 Embedded Port now translates exact approved policies and validates recorded
 network configuration when its protocol-2 package declares `networking: 1`.
-Ordinary permitted/denied traffic qualification for the new package remains
-pending. See [Embedded Port setup](embedded-port.md) for its development status.
+An exact Linux package now passes
+[ordinary offline/CIDR traffic checks](evidence/embedded-port-http-parity-linux-network-0e35c3f.json)
+through raw Port and current/minimum public no-Rust consumers, including mapped
+inbound replies and normal restart. The checks use two independently reachable
+local TCP responders. Hostname/DNS, other traffic combinations and changed macOS
+packages remain unqualified. See [Embedded Port setup](embedded-port.md) for its
+development status.
 
 Approve specific outbound destinations when a guest needs network access.
 Offline remains the default. These policies require a supported smolvm version

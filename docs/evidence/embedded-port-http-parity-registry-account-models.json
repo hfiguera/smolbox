@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "status": "implemented-foundation-with-deterministic-models",
+  "scope": "operation-local host registry account configuration and request construction",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_modified": false,
+  "model_tests": {
+    "registry_account": 8,
+    "registry_related_total": 54,
+    "new_request_boundary_models": 2
+  },
+  "behavior": [
+    "Separate machines/images config and read-only legacy images view",
+    "SDK endpoint/mirror routing with preserved path prefixes and original credential keys",
+    "Identity then configured bearer/Basic then Docker helper/inline then anonymous precedence",
+    "Explicit identity reference overrides ambient credentials",
+    "Bounded regular-file snapshots; per-operation rotation; redacted errors and Debug",
+    "Passwords/identity tokens only on approved HTTPS exchanges; direct bearer only on registry reads",
+    "Credential-bearing headers marked sensitive; no token serialization or shared bearer cache"
+  ],
+  "source_sha256": {
+    "registry_account.rs": "72e1c5f9257e40a2a72642ab6b35c6deeba855e0b93df62df2cf2d90d511b9e8",
+    "registry_io.rs": "43275a96eea76df09766aaf3aabe3a19fd065abfc4eb7bf8e4a8e0dc6e05eb69",
+    "machine.rs": "efd6e70807e4fe7092e180fde60c45283b074edb27bb46fd5d03006a4b335c59"
+  },
+  "ordinary_authenticated_native_acceptance": false,
+  "changed_package_built_or_qualified": false,
+  "public_registry_image_admission_enabled": false,
+  "remaining_gates": [
+    "Docker helper output, descendant and resource bounds",
+    "Ordinary authenticated exchange/rotation and changed-package platform acceptance",
+    "Current/minimum public native consumers and all remaining P0-P9 acceptance requirements"
+  ],
+  "historical_anonymous_package": "25bed0542378cda71db2e6c51d10e02c8a89239802d5930084a4fa415b6ed086",
+  "historical_qualification_transferred_to_changed_source": false,
+  "crash_validation_performed": false,
+  "parity_complete": false,
+  "distribution_approved": false,
+  "checks": {
+    "rust_workspace_passed": 1104,
+    "rust_ignored": 24,
+    "clippy_workspace_all_targets_warnings_denied": true,
+    "python_checks": 47,
+    "python_expected_skips": 4,
+    "sdk_inventories_verified_unmodified": true,
+    "elixir_checks_passed": 1639,
+    "elixir_runtime_deferred_excluded": 42,
+    "parity_coverage_checks": 4,
+    "docs_warnings_as_errors": true
+  },
+  "private_log_sha256": {
+    "registry-account-combined-tests.log": "2d2e1df7bb5a5dcf0e5c76675715b61ebf2a161220b5a400d9106317886553f2",
+    "registry-account-workspace-tests.log": "2dfc3953a72add19e6407cc069ef831eba4a4ccc46796173324cc1cd775c2eba",
+    "registry-account-clippy.log": "f196c57680d87fdd6b6fc8f46002d233907c2633109de343d37b3254dee99a4e",
+    "registry-account-elixir-tests.log": "e0068475791de03d59d0ac76e07153c7d44d60e048bf541feeda2d803c9ca3bc",
+    "registry-account-python-tests.log": "50ea6243015dc2edd988a319e211ca18feab2771dc697bcd77e189e99eea6727",
+    "registry-account-bootstrap-check.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+    "registry-account-clean-check.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+    "registry-account-coverage.log": "1c618a21cda10e16b27d339ee27f68f7e4ee66e5db5d19487c6562f0c5a836d3"
+  }
+}

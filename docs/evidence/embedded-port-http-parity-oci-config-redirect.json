@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "status": "implemented-with-scoped-linux-oci-acceptance",
+  "scope": "host anonymous OCI configuration metadata only",
+  "observed_registry": "registry-1.docker.io",
+  "observed_manifest_status": 200,
+  "observed_manifest_sha256": "3c81aa9a3d770b316568f4499e30461a5cd3fbd7180bd89e28e34894c7845832",
+  "observed_configuration_status": 307,
+  "observed_configuration_destination": "production.cloudfront.docker.com",
+  "diagnostic_configuration_without_authorization_status": 200,
+  "diagnostic_configuration_sha256": "9cb701c20b595f4442ba074b2ec924f396f4c474084608116901ce3098ebfe3d",
+  "diagnostic_configuration_bytes": 611,
+  "diagnostic_configuration_digest_and_size_verified": true,
+  "failed_witness_manifest_sha256": "ed0b891f1385edfecfad9d097d5f27ba8c186196ed720eb66794349a8d895c37",
+  "sdk_vm_created_or_started": false,
+  "normal_close_unstarted": true,
+  "new_behavior": {
+    "origin": "https://registry-1.docker.io/",
+    "configuration_blob_only": true,
+    "statuses": [
+      307,
+      308
+    ],
+    "destination_host": "production.cloudfront.docker.com",
+    "https_default_port_only": true,
+    "single_location_single_hop": true,
+    "registry_authorization_forwarded": false,
+    "redirected_configuration_size_and_digest_verified": true,
+    "automatic_redirects_enabled": false,
+    "manifest_or_token_redirects_enabled": false,
+    "arbitrary_registry_redirects_enabled": false
+  },
+  "registry_models_passed": 12,
+  "model_log_sha256": "431f2e3f04cbec4c0ca46e161338ba23d2fce7b042c6688a5fc362633dd32af0",
+  "public_oci_admission_enabled": false,
+  "parity_complete": false,
+  "crash_validation_performed": false,
+  "distribution_approved": false,
+  "follow_up_evidence": "embedded-port-http-parity-oci-linux-293cd24.json"
+}
