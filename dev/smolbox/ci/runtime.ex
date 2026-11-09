@@ -5,6 +5,7 @@ defmodule SmolBox.CI.Runtime do
   @legacy_wrapper "8caeb3b6e7d834493a578b0fe8bd1e7aa02e68fba6d61bcf70fdbec41a27ce68"
   # Verified in both qualified platform archives; unknown versions fail closed.
   @wrapper_pins %{
+    "1.34.0" => "b67b25f363403e19deceb6897e5a4d94be30a079f8cb751372782f17fc99003a",
     "1.22.0" => "b67b25f363403e19deceb6897e5a4d94be30a079f8cb751372782f17fc99003a",
     "1.20.2" => @legacy_wrapper,
     "1.19.0" => @legacy_wrapper,
@@ -16,6 +17,10 @@ defmodule SmolBox.CI.Runtime do
   }
 
   @pins %{
+    {"linux", "1.34.0"} =>
+      {"x86_64", "feeb3b3627c416dd4196e054e64854e5d648ba3c100767351f212757acddd2e0"},
+    {"macos", "1.34.0"} =>
+      {"arm64", "59ee8ef426c23fde2bb003e6fe46529821234b4f4db9604fb1ff1a0bf5253a83"},
     {"linux", "1.22.0"} =>
       {"x86_64", "05c8992647761640176b4a56dbc1ea2bbc0ed07d38370a598fb9b0822fa3d31b"},
     {"macos", "1.22.0"} =>

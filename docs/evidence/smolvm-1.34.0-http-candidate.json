@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "date": "2026-11-09",
+  "campaign": "smolvm 1.34.0 HTTP worker candidate",
+  "status": "in_progress",
+  "base_commit": "abd48808019fb8762a5fa74e133b45dbc39af15f",
+  "candidate_patch_sha256": "bc25176ab129c94b4896016640119cf6fb3bf60a67c7f94e96127741e9a67d30",
+  "runtime": "1.34.0",
+  "upstream_commit": "d77eaf1c6eeff16bc8c258613746033e9bf567ca",
+  "default_runtime": "1.22.0",
+  "archive_sha256": {
+    "linux-x86_64": "89e098b1f7749c515ed95263f081c469befb0aa10b49ee589ccb3e901090608a",
+    "darwin-arm64": "92187e599f77682fc9ea6aa7f2eaf50e1cb1320baf4b508357c47aeb8b12820c"
+  },
+  "binary_sha256": {
+    "linux-x86_64": "feeb3b3627c416dd4196e054e64854e5d648ba3c100767351f212757acddd2e0",
+    "darwin-arm64": "59ee8ef426c23fde2bb003e6fe46529821234b4f4db9604fb1ff1a0bf5253a83"
+  },
+  "openapi": {
+    "linux_and_macos_match": true,
+    "sha256": "3e13bbb5ba38ef554638916a351c02945bb090d997d6383d260d48df07e192d0",
+    "paths_added_since_1_22_0": 7,
+    "paths_or_methods_removed_since_1_22_0": 0
+  },
+  "linux_x86_64": {
+    "worker": "Unprivileged physical KVM host with private state, bounded systemd units and image seeds disabled",
+    "elixir": "1.20.4",
+    "otp": "29.0.6",
+    "fixtures_sha256": {
+      "python_pack": "339995f33fe84c2ed5a4e212a0acb9afab22df972bf2c2b4aa8e412ea0af5bc4",
+      "node_pack": "272ffb24043743f6e4bd0632d21a39449427e8d02a7bf0411b6559e26179d6b8",
+      "idle_checkpoint": "cf32daf69284638aafc93158f7e6878efd181e4737accda935489a2df75db2c2"
+    },
+    "live_tests_passed": 27,
+    "suites": {
+      "ordinary_client_and_managed_runtime": 9,
+      "terminals": 3,
+      "tcp_ports_and_egress": 2,
+      "checkpoint_restore": 3,
+      "guest_files_16_mib": 1,
+      "startup_workload_and_console_logs": 1,
+      "liveness_during_streams": 1,
+      "guest_and_observer_timeouts": 1,
+      "background_launch_options": 1,
+      "security_with_1_mib_worker_file_cap": 5
+    },
+    "additional_probes": [
+      "Verified checkpoint capture through Client and accepted the actual version 4 manifest",
+      "Verified a leaf branch inherited RAM and disk markers and did not share child writes back to the source",
+      "Verified digest-pinned Alpine OCI boot and execution with the registry excluded from the guest allowlist. Guest image inventory returned empty or unavailable.",
+      "Verified actual inventory replies with active egress rules, guest disk volumes, deferred durability or UDP ports fail closed without returning partial inventory"
+    ],
+    "oci_platform_manifest": "docker.io/library/alpine@sha256:644c1ad8fc45cc581ab1b5ea7ec1bebc9b037fd4801ad697ca124deb3f9c9332",
+    "final_inventory_empty": true,
+    "qualification_workers_stopped": true,
+    "owned_vm_processes_remaining": 0
+  },
+  "deterministic": {
+    "passed": 2165,
+    "excluded": 42,
+    "max_cases": 8,
+    "seed": 573522,
+    "log_sha256": "6371e754ae471f1c3ec0017d31a409677549b057c8cf87f4ec2ac6cb21fdc5e4",
+    "elixir_1_18_4_otp_27_focused_tests_passed": 57
+  },
+  "notes": [
+    "The candidate reaped descendants after terminal disconnect and rejected FIFO reads immediately. The tests now assert those version-specific observations while preserving uncertain dispatch evidence.",
+    "The original deterministic run at max_cases 32 had three Embedded Port fixture failures. The full rerun at max_cases 8 passed. A fixture printed a broken-pipe traceback during the passing run.",
+    "macOS archive, binary signature and schema verification completed. macOS VM behavior remains untested for this candidate."
+  ],
+  "pending": [
+    "macOS Apple Silicon live worker qualification",
+    "Extended quiet commands above 300 seconds and durable PostgreSQL recovery on 1.34.0",
+    "Held branches, disk growth, managed volumes, and registry artifact warm and export coverage on 1.34.0",
+    "Embedded Port SDK migration and qualification"
+  ]
+}

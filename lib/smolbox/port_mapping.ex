@@ -56,6 +56,10 @@ defmodule SmolBox.PortMapping do
   defp wire_entry(%{"host" => host, "guest" => guest} = entry) when map_size(entry) == 2,
     do: %__MODULE__{host: host, guest: guest}
 
+  defp wire_entry(%{"host" => host, "guest" => guest, "protocol" => "tcp"} = entry)
+       when map_size(entry) == 3,
+       do: %__MODULE__{host: host, guest: guest}
+
   defp wire_entry(_entry), do: nil
 
   defp invalid, do: {:error, %Error{category: :validation, operation: :machine_spec}}

@@ -2,9 +2,9 @@ defmodule SmolBox.Machine do
   @moduledoc """
   Validated observation of a worker machine and its network policy.
 
-  Additive response fields are ignored. Safety-relevant fields must be present;
-  networking without explicit allowlists, unsupported mounts or port mappings, GPU or CUDA fail decoding and cannot be
-  treated as an owned machine observation. `created_at` has only second precision upstream and
+  Additive diagnostic fields are ignored. Unsupported network, storage, mount,
+  port or accelerator settings fail decoding and cannot be treated as an owned
+  machine observation. `created_at` has only second precision upstream and
   is not a cryptographic or immutable ownership token.
 
   Native observations carry typed receipt evidence in `backend_identity` and use
@@ -70,7 +70,8 @@ defmodule SmolBox.Machine do
          } = wire,
          states
        ) do
-    with {:ok, mounts} <- SmolBox.Mount.from_wire(wire_mounts),
+    with true <- supported_storage?(wire),
+         {:ok, mounts} <- SmolBox.Mount.from_wire(wire_mounts),
          {:ok, ports} <- SmolBox.PortMapping.from_wire(wire_ports),
          {:ok, network} <- decode_network(ports, wire),
          true <-
@@ -129,8 +130,14 @@ defmodule SmolBox.Machine do
     end
   end
 
+  defp supported_storage?(wire) do
+    wire["diskVolumes"] in [nil, []] and is_nil(wire["cacheDisk"]) and
+      wire["diskDurability"] in [nil, "full"]
+  end
+
   defp decode_network(ports, wire) do
-    with true <- port_network?(ports, wire),
+    with true <- wire["egressRules"] in [nil, []] and is_nil(wire["mediationMachineId"]),
+         true <- port_network?(ports, wire),
          {:ok, network} <- SmolBox.NetworkPolicy.from_wire(wire) do
       {:ok, network}
     else

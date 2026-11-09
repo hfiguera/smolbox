@@ -87,7 +87,7 @@ defmodule SmolBox.CheckpointArtifactTest do
     on_exit(fn -> File.rm(path) end)
     {:ok, profile} = Profile.new("test")
 
-    for version <- ["1.19.0", "1.20.2", "1.22.0"] do
+    for version <- ["1.19.0", "1.20.2", "1.22.0", "1.34.0"] do
       bytes =
         CheckpointFixture.bytes(Map.put(CheckpointFixture.manifest(), "smolvm_version", version))
 
@@ -102,6 +102,41 @@ defmodule SmolBox.CheckpointArtifactTest do
                  worker
                  | runtime_version: other
                })
+    end
+  end
+
+  test "1.34.0 captures allow disabled mediation and full durability only" do
+    path = Path.join(System.tmp_dir!(), "capture-134-#{System.unique_integer([:positive])}")
+    on_exit(fn -> File.rm(path) end)
+    {:ok, profile} = Profile.new("test")
+    worker = %{platform: :linux, architecture: "x86_64", runtime_version: "1.34.0"}
+
+    manifest =
+      CheckpointFixture.manifest()
+      |> Map.put("smolvm_version", "1.34.0")
+      |> put_in(["checkpoint", "network", "mediated_egress_required"], false)
+      |> put_in(["checkpoint", "disk_durability"], "full")
+
+    verify = fn manifest ->
+      bytes = CheckpointFixture.bytes(manifest)
+      File.write!(path, bytes)
+      CheckpointArtifact.verify(path, %{size_bytes: byte_size(bytes)}, profile, worker)
+    end
+
+    assert :ok = verify.(manifest)
+
+    for invalid <- [
+          put_in(manifest, ["checkpoint", "network", "mediated_egress_required"], true),
+          put_in(manifest, ["checkpoint", "disk_durability"], "deferred"),
+          put_in(manifest, ["checkpoint", "nested_virt"], true),
+          put_in(manifest, ["checkpoint", "host_mounts"], [%{"host_path" => "/host"}]),
+          put_in(manifest, ["checkpoint", "cache_disk"], %{"base" => "other"}),
+          put_in(manifest, ["checkpoint", "host_image"], %{"reference" => "other"}),
+          put_in(manifest, ["checkpoint", "settings"], %{"stop_on_exit" => true}),
+          put_in(manifest, ["checkpoint", "base"], %{"id" => "other"}),
+          put_in(manifest, ["checkpoint", "version"], 6)
+        ] do
+      assert {:error, %{category: :unsupported_capability}} = verify.(invalid)
     end
   end
 

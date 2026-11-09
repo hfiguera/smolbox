@@ -41,7 +41,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   `checkpoints` optionally registers `SmolBox.Checkpoint` approvals. Each binds
   an idle offline source to its exact profile, platform, architecture and declared
-  runtime (1.16.1, 1.17.0, 1.19.0, 1.20.2 or 1.22.0). `artifacts: []` is accepted when checkpoints are configured. Approval
+  runtime. `artifacts: []` is accepted when checkpoints are configured. Approval
   is supplied by the operator and is not remotely attested.
 
   `allocation_floor` is a required operator declaration with `storage_gb`,
@@ -148,7 +148,8 @@ defmodule SmolBox.Runtime.WorkerConfig do
   unique and architectures must match this worker. Construction makes no worker
   request or remote digest check. Profiles below the floor cannot support execution.
   Set `:runtime_version` to the version installed on the worker; the library does
-  not install or upgrade it. See [Supported platforms](supported-platforms.html)
+  not install or upgrade it. Explicit `"1.34.0"` selection is available for HTTP
+  worker qualification. See [Supported platforms](supported-platforms.html)
   for host prerequisites and feature limits, and [Upgrading SmolBox](upgrading.html)
   before changing an existing deployment.
   See [Getting started](getting-started.html) for a complete configuration.
@@ -192,7 +193,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   @doc "Check exact profile/artifact approval and allocation floors; this is not a health probe."
   @spec supports?(t(), ExecutionSpec.t() | SmolBox.ManagedMachineSpec.t()) :: boolean()
   def supports?(%{runtime_version: version}, %{checkpointable: true})
-      when version not in ["1.19.0", "1.20.2", "1.22.0"],
+      when version not in ["1.19.0", "1.20.2", "1.22.0", "1.34.0"],
       do: false
 
   def supports?(worker, %{artifact: %{"kind" => "checkpoint"}} = spec) do
@@ -322,7 +323,16 @@ defmodule SmolBox.Runtime.WorkerConfig do
   defp supported_runtime?(%{runtime_version: "1.14.1"}), do: true
 
   defp supported_runtime?(%{runtime_version: version, platform: platform, architecture: arch})
-       when version in ["1.14.6", "1.16.0", "1.16.1", "1.17.0", "1.19.0", "1.20.2", "1.22.0"],
+       when version in [
+              "1.14.6",
+              "1.16.0",
+              "1.16.1",
+              "1.17.0",
+              "1.19.0",
+              "1.20.2",
+              "1.22.0",
+              "1.34.0"
+            ],
        do: {platform, arch} in [{:linux, "x86_64"}, {:macos, "aarch64"}]
 
   defp supported_runtime?(_worker), do: false

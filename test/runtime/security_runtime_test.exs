@@ -172,12 +172,15 @@ defmodule SmolBox.SecurityRuntimeTest do
     bounded = %{context.client | worker: %{context.client.worker | operation_timeout_ms: 2000}}
     started = System.monotonic_time(:millisecond)
 
-    assert {:error, %Error{category: :transport}} =
+    # The candidate rejects the FIFO without opening it for a blocking read.
+    category =
+      if SmolBox.LabCandidate.runtime_version() == "1.34.0", do: :protocol, else: :transport
+
+    assert {:error, %Error{category: ^category, evidence: :dispatch_uncertain}} =
              Client.download(bounded, context.name, "/workspace/fifo", 100)
 
     assert System.monotonic_time(:millisecond) - started < 5000
-    # The selected agent opens before checking file type; a FIFO can block that
-    # guest I/O path. Stop the owned VM; the HTTP deadline is not cancellation.
+    # Older agents can still block in guest I/O after the HTTP deadline.
     assert {:ok, %Machine{state: :stopped}} = Client.stop(context.client, context.name)
   end
 

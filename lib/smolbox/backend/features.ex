@@ -13,10 +13,10 @@ defmodule SmolBox.Backend.Features do
     files: 1,
     extended_files: 1
   }
-  @current ~w(1.19.0 1.20.2 1.22.0)
-  @extended ~w(1.17.0 1.19.0 1.20.2 1.22.0)
-  @network ~w(1.16.0 1.16.1 1.17.0 1.19.0 1.20.2 1.22.0)
-  @supported ~w(1.14.1 1.14.6 1.16.0 1.16.1 1.17.0 1.19.0 1.20.2 1.22.0)
+  @current ~w(1.19.0 1.20.2 1.22.0 1.34.0)
+  @extended ~w(1.17.0 1.19.0 1.20.2 1.22.0 1.34.0)
+  @network ~w(1.16.0 1.16.1 1.17.0 1.19.0 1.20.2 1.22.0 1.34.0)
+  @supported ~w(1.14.1 1.14.6 1.16.0 1.16.1 1.17.0 1.19.0 1.20.2 1.22.0 1.34.0)
   @http_versions %{
     lifecycle: @supported,
     foreground_exec: @supported,
@@ -33,8 +33,8 @@ defmodule SmolBox.Backend.Features do
     checkpoints: @current,
     exports: @current,
     branches: @current,
-    disk_growth: ~w(1.20.2 1.22.0),
-    volumes: ~w(1.20.2 1.22.0),
+    disk_growth: ~w(1.20.2 1.22.0 1.34.0),
+    volumes: ~w(1.20.2 1.22.0 1.34.0),
     ports: @extended
   }
   @native_names Map.new(

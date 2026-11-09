@@ -56,7 +56,14 @@ defmodule SmolBox.Checkpoint do
              {:macos, "aarch64"}
            ],
          true <-
-           checkpoint.runtime_version in ["1.16.1", "1.17.0", "1.19.0", "1.20.2", "1.22.0"] and
+           checkpoint.runtime_version in [
+             "1.16.1",
+             "1.17.0",
+             "1.19.0",
+             "1.20.2",
+             "1.22.0",
+             "1.34.0"
+           ] and
              checkpoint.resume == :idle,
          :ok <- Profile.validate(checkpoint.profile),
          true <- checkpoint.profile.network == :offline,

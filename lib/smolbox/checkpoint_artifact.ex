@@ -68,10 +68,18 @@ defmodule SmolBox.CheckpointArtifact do
       empty_fields?(manifest, ["env", "secret_refs", "cmd", "user"]) and
       manifest["entrypoint"] in [nil, [], ["/bin/true"]] and
       manifest["workdir"] in [nil, "", "/"] and
-      empty_fields?(checkpoint, ["packed_layers", "workload", "credential_ca", "history"])
+      supported_checkpoint_options?(checkpoint)
   end
 
   defp supported?(_, _, _), do: false
+
+  defp supported_checkpoint_options?(checkpoint) do
+    empty_fields?(checkpoint, ~w(packed_layers workload credential_ca history host_mounts)) and
+      Enum.all?(~w(base cache_disk host_image), &is_nil(checkpoint[&1])) and
+      checkpoint["settings"] in [nil, %{}] and
+      checkpoint["disk_durability"] in [nil, "full"] and
+      checkpoint["nested_virt"] in [nil, false]
+  end
 
   defp matches?(actual, expected),
     do: Enum.all?(expected, fn {key, value} -> actual[key] == value end)
@@ -83,11 +91,12 @@ defmodule SmolBox.CheckpointArtifact do
 
   defp offline_network?(%{"enabled" => false} = network) do
     fields =
-      ~w(ports backend dns network_name guest_subnet allowed_cidrs dns_filter_hosts credential_policy credential_placeholders)
+      ~w(ports backend dns network_name guest_subnet allowed_cidrs dns_filter_hosts credential_policy credential_placeholders mediated_egress_required)
 
     Enum.all?(Map.keys(network), &(&1 in ["enabled" | fields])) and
       Enum.all?(~w(ports allowed_cidrs dns_filter_hosts), &(network[&1] in [nil, []])) and
       network["credential_placeholders"] in [nil, %{}, []] and
+      network["mediated_egress_required"] in [nil, false] and
       Enum.all?(~w(backend dns network_name guest_subnet credential_policy), &is_nil(network[&1]))
   end
 
