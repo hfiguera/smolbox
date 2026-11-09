@@ -2,6 +2,7 @@
   "schema": 1,
   "scope": "SmolBox managed HTTP backend feature parity; HTTP transports remain HTTP-specific",
   "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "candidate_sdk_revision": "d77eaf1c6eeff16bc8c258613746033e9bf567ca",
   "crash_validation_deferred": true,
   "cli_race_validation_deferred": true,
   "crash_handling_qualified": false,

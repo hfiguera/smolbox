@@ -28,10 +28,10 @@ fn verify(package: &Path, expected: &str) -> Result<serde_json::Value, Box<dyn s
     assert_eq!(digest(&package.join("package.json"))?, expected);
     let approved: serde_json::Value =
         serde_json::from_reader(File::open(package.join("package.json"))?)?;
-    assert_eq!(approved["policy"]["sdk"]["sdk_version"], "1.22.0");
+    assert_eq!(approved["policy"]["sdk"]["sdk_version"], smolvm::VERSION);
     assert_eq!(
         approved["identity"]["smolvm_revision"],
-        "9f446ae00219148ca4a703914f44a8e2fab11655"
+        smolbox_engine::SMOLVM_REVISION
     );
     assert_eq!(
         digest(&package.join("smolbox-port"))?,

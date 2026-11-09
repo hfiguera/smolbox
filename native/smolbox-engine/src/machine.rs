@@ -3629,14 +3629,14 @@ fn prepared_pack_record(
             storage_gib: Some(request.resources.storage_gib),
             overlay_gib: Some(request.resources.overlay_gib),
             network: false,
-            allowed_cidrs: Some(vec![]),
             ..VmResources::default()
         },
         image: (prepared.manifest.mode == PackMode::Container)
             .then(|| prepared.manifest.image.clone()),
         ..MachineSpec::default()
     }
-    .to_record();
+    .to_record()
+    .map_err(|_| Error::uncertain(ErrorCode::Validation))?;
     record.source_smolmachine = Some(
         prepared
             .path

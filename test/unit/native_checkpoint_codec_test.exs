@@ -27,6 +27,7 @@ defmodule SmolBox.Store.NativeCheckpointCodecTest do
         architecture: architecture,
         platform: if(architecture == "aarch64", do: :macos, else: :linux),
         path: "/operator/idle.smolcheckpoint",
+        runtime_version: "1.22.0",
         profile: profile
       )
 

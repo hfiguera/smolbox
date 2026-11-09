@@ -66,6 +66,7 @@ defmodule SmolBox.RuntimeFixture do
             architecture: "x86_64",
             platform: :linux,
             path: "/approved/idle.smolcheckpoint",
+            runtime_version: "1.22.0",
             profile: spec.profile
           )
 
@@ -100,9 +101,9 @@ defmodule SmolBox.RuntimeFixture do
           volume_policy: options[:volume_policy],
           registry_credentials: options[:registry_credentials]
         ] ++
-          case Keyword.fetch(options, :expected_runtime_version) do
-            {:ok, version} -> [runtime_version: version]
-            :error -> []
+          case Keyword.get(options, :expected_runtime_version, "1.22.0") do
+            nil -> []
+            version -> [runtime_version: version]
           end
       )
 

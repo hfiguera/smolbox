@@ -1,15 +1,14 @@
 # Embedded Port setup and operation
 
 The embedded Port bridge is available for development through the public
-`SmolBox.Runtime` API in this source checkout. There is no published native package.
-A separately approved helper runs locally under Elixir supervision. Existing HTTP
-workers can be used in the same Runtime.
-Rustler is a future additional bridge; Kubernetes is a separate future backend.
+`SmolBox.Runtime` API. A separately approved helper runs locally under Elixir
+supervision. Existing HTTP workers can be used in the same Runtime.
 
-For an HTTP-only application, install the Hex package and follow
-[Getting started](getting-started.md). Embedded development uses the helper
-build and approval steps on this page. The helper and its assets are installed
-separately from the Hex package.
+The public installer provides the attested SmolVM 1.34.0 bundle for Apple
+Silicon, Linux x86_64 and Linux ARM64. The helper and its assets install
+separately from the Elixir package. [Embedded Port quickstart](embedded-quickstart.md)
+
+For an HTTP-only application, follow the [Getting started guide](getting-started.md).
 
 HTTP feature parity is in progress. Current protocol-2 helpers advertise their
 supported features in the approved package manifest. Linux x86-64 and macOS
@@ -1165,14 +1164,9 @@ independent SDK/CLI writers and simultaneous Port/Rustler owners are unsupported
 Crash and destructive CLI-race validation remain deferred.
 
 The public development flow is covered by ordinary lifecycle qualification.
-The [clean public Runtime evidence](evidence/embedded-port-unmodified-sdk-ordinary.json)
-records platform/toolchain identities, failures and cleanup; prior patched-package
-evidence remains historical. Production crash
-qualification and distribution approval still require the
-deferred live fault gates, independent CLI races, exact binary/source and license
-delivery review, and publisher signing/provenance. No package is published by
-this implementation. The repository release gap assessment is
-`native/release-review.md`.
+The 1.34.0 prerelease passed public installer and source delivery checks on all
+three targets. Production crash and independent CLI race validation remain
+deferred. [1.34.0 qualification](evidence/smolvm-1.34.0-qualification.md)
 
 Store readers also recognize selective v19 typed native OCI and registry creation intent and
 retained image-pull records. Upgrade every reader and reservation writer before

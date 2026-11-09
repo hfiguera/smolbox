@@ -255,7 +255,7 @@ pub(crate) fn run(request: &Request, blob: &Blob, expected: &Expected) -> Result
     }
     verify_input_capacities(&material_root, &metadata.manifest, resources)?;
     let checkpoint = metadata.manifest.checkpoint.as_ref().unwrap();
-    smolvm::portable_checkpoint::install(&material_root, &metadata.target, checkpoint)
+    smolvm::portable_checkpoint::install(&material_root, &metadata.target, checkpoint, None)
         .map_err(|_| Error::uncertain(ErrorCode::Native))?;
     smolvm::portable_checkpoint::discard_transport_pack(&metadata.target)
         .map_err(|_| Error::uncertain(ErrorCode::Native))?;

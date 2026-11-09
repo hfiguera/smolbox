@@ -1,12 +1,12 @@
 {
   "schema": 2,
   "source_url": "https://github.com/smol-machines/smolvm",
-  "revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
-  "git_tree": "81265fb74951f9e35ac3942f7b18545b1de9f2d9",
-  "archive": "smolvm-9f446ae0.tar.gz",
-  "archive_sha256": "4941e7b46b45e87293b7a4a16a686bb3235192eeb644b7804dd4e71668df1d2c",
+  "revision": "d77eaf1c6eeff16bc8c258613746033e9bf567ca",
+  "git_tree": "64b8b32be3bfd8f328b016cd5a85aa9c7e34cf19",
+  "archive": "smolvm-d77eaf1c.tar.gz",
+  "archive_sha256": "0ed868a9fb68c8909ef187369ed6952983d8b98c07ad6a9d2c16906359c7d52b",
   "license": "Apache-2.0",
   "patches": [],
   "inventory": "clean-inventory.json",
-  "inventory_sha256": "d2cbd4d0dd7317229329f5cceaa134e4763d9bacbd4116d99bc706aa8c4926df"
+  "inventory_sha256": "3a6baf6a3732628b4d9e3466b3b446d5105535febf156ae042020a004ef8c334"
 }

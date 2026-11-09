@@ -96,6 +96,7 @@ impl Plan {
                 }),
             proxy: None,
             no_proxy: None,
+            cache_as: None,
         })
     }
 }

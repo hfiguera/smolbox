@@ -494,6 +494,7 @@ impl RetainedBranchPreparation {
             return Err(Error::before(ErrorCode::Ownership));
         }
         let rootfs = crate::export_source::Root::open(&rootfs_path)?;
+        crate::identity::verify_boot_rootfs(&source, &rootfs_path)?;
         let plan = Plan {
             schema: 1,
             publication: publication.clone(),

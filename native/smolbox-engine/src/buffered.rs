@@ -195,6 +195,8 @@ impl Metadata {
                     background: false,
                     s3_volumes: config.s3_volumes,
                     stop_vm_on_exit: false,
+                    stop_signal: None,
+                    stop_timeout_secs: None,
                 }
             }
         };

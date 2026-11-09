@@ -333,6 +333,7 @@ impl Engine {
             .as_ref()
             .ok_or(Error::before(ErrorCode::Unsupported))?;
         let (libraries, rootfs) = self.capture_assets()?;
+        crate::identity::verify_boot_rootfs(&before, &rootfs)?;
         let permit = self
             .jobs
             .acquire(crate::jobs::Demand::checkpoint_prepare(request.max_bytes)?)?;

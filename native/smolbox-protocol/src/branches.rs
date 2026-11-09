@@ -202,20 +202,29 @@ impl BranchIntent {
                 && self.approval.resources.disk_gb >= disks
                 && self.plan.total_additional == child.add(self.approval.resources)?,
         )?;
-        check(
-            self.request_sha256
-                == hash(&(
-                    "smolbox-initial-branch-admission-v1",
-                    "9f446ae00219148ca4a703914f44a8e2fab11655",
-                    "shared-materialized-ram",
-                    &self.source,
-                    &self.child,
-                    &self.approval,
-                    &self.plan,
-                    self.source_pid,
-                    &self.epoch,
-                ))?,
-        )
+        for revision in [
+            "d77eaf1c6eeff16bc8c258613746033e9bf567ca",
+            "9f446ae00219148ca4a703914f44a8e2fab11655",
+        ] {
+            if self.request_sha256 == self.admission_hash(revision)? {
+                return Ok(());
+            }
+        }
+        Err(InvalidMessage)
+    }
+
+    fn admission_hash(&self, revision: &str) -> Result<String, InvalidMessage> {
+        hash(&(
+            "smolbox-initial-branch-admission-v1",
+            revision,
+            "shared-materialized-ram",
+            &self.source,
+            &self.child,
+            &self.approval,
+            &self.plan,
+            self.source_pid,
+            &self.epoch,
+        ))
     }
 }
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -807,6 +816,21 @@ mod tests {
             }
         }
     }
+    #[test]
+    fn admission_accepts_both_sdk_pins_and_rejects_other_revisions() {
+        let mut intent: BranchIntent = serde_json::from_value(
+            rows()[0]["completion"]["publication"]["change"]["child_origin"]["intent"].clone(),
+        )
+        .unwrap();
+        assert!(intent.validate().is_ok());
+        intent.request_sha256 = intent
+            .admission_hash("d77eaf1c6eeff16bc8c258613746033e9bf567ca")
+            .unwrap();
+        assert!(intent.validate().is_ok());
+        intent.request_sha256 = intent.admission_hash(&"f".repeat(40)).unwrap();
+        assert!(intent.validate().is_err());
+    }
+
     #[test]
     fn valid_shape_digest_substitutions_cannot_change_source_child_or_activation_evidence() {
         for row in rows() {

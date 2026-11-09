@@ -2,7 +2,7 @@ defmodule SmolBox.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/hfiguera/smolbox"
-  @version "0.4.3"
+  @version "0.5.1-rc.1"
 
   def project do
     [
@@ -85,6 +85,8 @@ defmodule SmolBox.MixProject do
           "docs/runtime-1.19.0-qualification.md",
           "docs/runtime-1.20.2-qualification.md",
           "docs/runtime-1.22.0-qualification.md",
+          "docs/evidence/smolvm-1.34.0-qualification.md",
+          "docs/evidence/embedded-port-1.34.0-release-sources.md",
           "docs/evidence/*.json"
         ]
       ],

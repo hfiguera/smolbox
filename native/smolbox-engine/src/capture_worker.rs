@@ -177,6 +177,7 @@ pub(crate) fn run(request: &Request, blob: &Blob, expected: &Expected) -> Result
     budget.check()?;
     let options = smolvm::portable_checkpoint::CaptureOptions {
         prepared_cache_budget_bytes: Some(0),
+        host_mounts: false,
         store_dir: None,
         staging_dir: Some(staging),
         lib_dir: Some(metadata.libraries),

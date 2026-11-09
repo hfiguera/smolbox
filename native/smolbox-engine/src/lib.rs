@@ -245,7 +245,7 @@ pub use observations::{
 pub use sdk_compat::OBSERVATION_SCHEMA;
 pub use transfer_worker::run_file_worker;
 
-pub const SMOLVM_REVISION: &str = "9f446ae00219148ca4a703914f44a8e2fab11655";
+pub const SMOLVM_REVISION: &str = "d77eaf1c6eeff16bc8c258613746033e9bf567ca";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ErrorCode {

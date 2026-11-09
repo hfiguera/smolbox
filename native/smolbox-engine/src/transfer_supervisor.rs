@@ -2719,7 +2719,7 @@ mod tests {
                         stream.read_exact(&mut body).unwrap();
                         let request: Envelope<AgentRequest> = serde_json::from_slice(&body).unwrap();
                         let response = if stage == 0 {
-                            let AgentRequest::Pull { image, oci_platform, auth, proxy, no_proxy } = request.body else { panic!() };
+                            let AgentRequest::Pull { image, oci_platform, auth, proxy, no_proxy, cache_as: None } = request.body else { panic!() };
                             assert_eq!(image, expected.source.reference);
                             assert_eq!(oci_platform.as_deref(), Some(expected.source.platform.as_str()));
                             assert!(proxy.is_none() && no_proxy.is_none());
@@ -2739,6 +2739,7 @@ mod tests {
                                 image, command, env, user, workdir, persistent_overlay_id,
                                 detached, background, interactive, tty, stdin_data, timeout_ms,
                                 stop_vm_on_exit, s3_volumes, mounts, unprivileged,
+                                stop_signal: None, stop_timeout_secs: None,
                             } = request.body else { panic!() };
                             assert_eq!(image, expected.source.reference);
                             assert_eq!(command, vec!["/app", "serve"]);
@@ -2850,7 +2851,7 @@ mod tests {
                     let mut body = vec![0; u32::from_be_bytes(header) as usize];
                     stream.read_exact(&mut body).unwrap();
                     let request: Envelope<AgentRequest> = serde_json::from_slice(&body).unwrap();
-                    let AgentRequest::Pull { image, oci_platform, auth, proxy, no_proxy } = request.body else { panic!() };
+                    let AgentRequest::Pull { image, oci_platform, auth, proxy, no_proxy, cache_as: None } = request.body else { panic!() };
                     assert_eq!(image, effective);
                     assert_eq!(oci_platform.as_deref(), Some("linux/arm64"));
                     assert!(proxy.is_none() && no_proxy.is_none());
@@ -3425,7 +3426,7 @@ mod tests {
                         }
                         assert_eq!(observed, binary);
                     } else {
-                        assert!(matches!(message(&mut stream), AgentRequest::FileRead { path } if path == expected_path));
+                        assert!(matches!(message(&mut stream), AgentRequest::FileRead { path, .. } if path == expected_path));
                         if activation_case == "transfer-deadline" {
                             assert_eq!(stream.read(&mut [0; 1]).unwrap(), 0);
                             return;

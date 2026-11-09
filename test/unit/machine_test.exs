@@ -78,4 +78,52 @@ defmodule SmolBox.MachineTest do
       assert {:error, _} = Machine.from_wire(changed)
     end
   end
+
+  test "new worker settings cannot change the policy behind an approved observation" do
+    body = fixture("1.22.0/created")
+    assert {:ok, expected} = Machine.from_wire(body)
+
+    assert {:ok, ^expected} =
+             Machine.from_wire(
+               Map.merge(body, %{
+                 "egressRules" => [],
+                 "diskVolumes" => [],
+                 "diskDurability" => "full",
+                 "pressure" => %{}
+               })
+             )
+
+    for fields <- [%{"egressRules" => [%{"action" => "allow"}]}, %{"mediationMachineId" => "id"}] do
+      assert {:error, %{category: :unsupported_network_policy}} =
+               Machine.from_wire(Map.merge(body, fields))
+    end
+
+    for fields <- [
+          %{"diskVolumes" => ["/var/lib/docker"]},
+          %{"diskDurability" => "deferred"},
+          %{"cacheDisk" => %{"mountPath" => "/workspace"}}
+        ] do
+      assert {:error, %{category: :protocol}} = Machine.from_wire(Map.merge(body, fields))
+    end
+  end
+
+  test "explicit TCP observations match legacy mappings and UDP fails closed" do
+    port = %{"host" => 40_001, "guest" => 8080}
+
+    body =
+      Map.merge(fixture("1.22.0/created"), %{
+        "networkBackend" => "virtio-net",
+        "allowedHosts" => [],
+        "allowedCidrs" => [],
+        "ports" => [port]
+      })
+
+    assert {:ok, expected} = Machine.from_wire(body)
+
+    assert {:ok, ^expected} =
+             Machine.from_wire(%{body | "ports" => [Map.put(port, "protocol", "tcp")]})
+
+    assert {:error, %{category: :protocol}} =
+             Machine.from_wire(%{body | "ports" => [Map.put(port, "protocol", "udp")]})
+  end
 end

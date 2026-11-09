@@ -223,6 +223,8 @@ impl Metadata {
             background: false,
             s3_volumes: vec![],
             stop_vm_on_exit: false,
+            stop_signal: None,
+            stop_timeout_secs: None,
         }
     }
     fn remaining(&self) -> Result<std::time::Duration> {

@@ -575,7 +575,7 @@ pub(crate) mod tests {
         assert_eq!(decoded.env, vec!["SECRET=private-env-value"]);
         assert_eq!(decoded.cpus, manifest.cpus);
         assert_eq!(decoded.mem, manifest.mem);
-        assert_eq!(decoded.smolvm_version, "1.22.0");
+        assert_eq!(decoded.smolvm_version, smolvm::VERSION);
         assert_eq!(
             decoded.assets.storage_template.unwrap().path,
             "storage.ext4"

@@ -941,6 +941,7 @@ fn verify_collected(
             snapshot_dir: output.snapshot.clone(),
             clone_record: child.clone(),
             port_remaps: vec![],
+            udp_port_remaps: vec![],
             source_continues: output.source_continues,
         },
     )?;

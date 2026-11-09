@@ -69,7 +69,7 @@ defmodule SmolBox.Worker do
   | `:allow_insecure_loopback` | `false` | Explicitly permit local HTTP on `localhost`, `127.0.0.1`, or `::1` |
   | `:unix_socket` | `nil` | Absolute local socket path, at most 100 bytes, with a loopback HTTP base URL |
   | `:connect_timeout_ms` | `1000` | Connection budget |
-  | `:receive_timeout_ms` | `15_000` | Receive-idle budget (up to 86,460,000 ms); extended exec uses remaining operation budget |
+  | `:receive_timeout_ms` | `15_000` | Receive-idle budget (up to 86,460,000 ms); create, stop and extended exec use the operation budget |
   | `:pool_timeout_ms` | `5000` | Connection-pool checkout budget |
   | `:operation_timeout_ms` | `30_000` | Total client-operation budget (up to 86,460,000 ms), including streaming callbacks |
   | `:max_request_bytes` | `1_048_576` | Encoded request body cap, at most 16 MiB |

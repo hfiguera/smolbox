@@ -81,12 +81,17 @@ impl ApprovedCheckpoint {
         let network_ok = checkpoint.network.as_ref().is_some_and(|network| {
             !network.enabled
                 && network.ports.is_empty()
+                && network.udp_ports.is_empty()
                 && network.backend.is_none()
                 && network.dns.is_none()
+                && network.dns_options.is_empty()
                 && network.network_name.is_none()
                 && network.guest_subnet.is_none()
                 && network.allowed_cidrs.as_ref().is_none_or(Vec::is_empty)
                 && network.dns_filter_hosts.as_ref().is_none_or(Vec::is_empty)
+                && network.egress_rules.is_empty()
+                && !network.mediated_egress_required
+                && network.block_private.is_none()
                 && network.credential_policy.is_none()
                 && network.credential_placeholders.is_empty()
         });
@@ -111,8 +116,15 @@ impl ApprovedCheckpoint {
             || checkpoint.storage_gib != Some(self.resources.storage_gib)
             || checkpoint.overlay_gib != Some(self.resources.overlay_gib)
             || checkpoint.workload.is_some()
+            || !checkpoint.host_mounts.is_empty()
             || checkpoint.packed_layers.is_some()
+            || checkpoint.host_image.is_some()
             || checkpoint.credential_ca.is_some()
+            || checkpoint.base.is_some()
+            || checkpoint.cache_disk.is_some()
+            || checkpoint.nested_virt
+            || !checkpoint.settings.is_empty()
+            || !matches!(checkpoint.disk_durability.as_deref(), None | Some("full"))
             || !network_ok
         {
             return Err(Error::before(ErrorCode::Unsupported));
@@ -330,7 +342,8 @@ pub(crate) mod tests {
 
     pub(crate) fn payload_fixture() -> (ApprovedCheckpoint, PackManifest, Vec<(String, Vec<u8>)>) {
         let (approval, mut manifest) = fixture();
-        let rootfs = archive(&[("usr/bin/witness".into(), b"fixture".to_vec())]);
+        // The SDK recognizes a cached agent rootfs by its sbin/init entry.
+        let rootfs = archive(&[("sbin/init".into(), b"fixture".to_vec())]);
         manifest.assets.agent_rootfs = smolvm_pack::format::AssetEntry {
             path: "agent-rootfs.tar".into(),
             size: rootfs.len() as u64,

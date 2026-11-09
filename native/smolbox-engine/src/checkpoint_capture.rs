@@ -16,18 +16,22 @@ pub(crate) fn validate_pack(manifest: &PackManifest) -> Result<()> {
 }
 
 pub(crate) fn validate_record(record: &VmRecord) -> Result<Resources> {
-    smolvm::portable_checkpoint::validate_capture_profile(record)
+    smolvm::portable_checkpoint::validate_capture_profile(record, false)
         .map_err(|_| Error::before(ErrorCode::Unsupported))?;
     if record.image.is_some()
-        || record.network
+        || record.launch_network_plan().has_network()
         || !record.ports.is_empty()
+        || !record.udp_ports.is_empty()
         || !record.disks.is_empty()
+        || record.cache_disk.is_some()
+        || !record.disk_volumes.is_empty()
+        || record.disk_durability != smolvm::data::resources::DiskDurability::Full
         || record.nested_virt.unwrap_or(false)
         || record.network_backend.is_some()
-        || record
-            .allowed_cidrs
-            .as_ref()
-            .is_some_and(|values| !values.is_empty())
+        || !record.egress_rules.is_empty()
+        || !record.dns_options.is_empty()
+        || record.block_private.is_some()
+        || record.mediated_egress_required
         || record
             .dns_filter_hosts
             .as_ref()
@@ -83,12 +87,12 @@ mod tests {
                 storage_gib: Some(1),
                 overlay_gib: Some(1),
                 network: false,
-                allowed_cidrs: Some(vec![]),
                 ..Default::default()
             },
             ..Default::default()
         }
-        .to_record();
+        .to_record()
+        .unwrap();
         record.entrypoint = vec!["/bin/true".into()];
         record.cmd.clear();
         record.env.clear();
@@ -109,7 +113,7 @@ mod tests {
                 overlay_gib: 1
             }
         );
-        for case in 0..12 {
+        for case in 0..13 {
             let mut changed = source.clone();
             match case {
                 0 => changed.image = Some("container".into()),
@@ -128,6 +132,7 @@ mod tests {
                 }
                 9 => changed.credentials_supplied_by_api = true,
                 10 => changed.restart.policy = RestartPolicy::Always,
+                11 => changed.allowed_cidrs = Some(vec![]),
                 _ => changed.storage_gb = None,
             }
             assert!(validate_record(&changed).is_err(), "{case}");

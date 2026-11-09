@@ -183,6 +183,24 @@ defmodule SmolBox.ClientTest do
     assert_receive {:request, "DELETE", "/api/v1/machines/fixture", ""}
   end
 
+  test "create and stop allow a quiet worker to use the total operation budget" do
+    peer =
+      client(
+        fn conn ->
+          Process.sleep(75)
+
+          state = if String.ends_with?(conn.request_path, "/stop"), do: "stopped", else: "created"
+          TestPeer.json(conn, Map.put(fixture("created"), "state", state))
+        end,
+        receive_timeout_ms: 25,
+        operation_timeout_ms: 2000
+      )
+
+    {:ok, spec} = MachineSpec.new("fixture", "/approved/python.smolmachine")
+    assert {:ok, %{state: :created}} = Client.create(peer, spec)
+    assert {:ok, %{state: :stopped}} = Client.stop(peer, "fixture")
+  end
+
   test "checkpoint creation requires its qualified runtime before dispatch" do
     {:ok, spec} = MachineSpec.new("fixture", "/approved/idle.smolcheckpoint", source: :checkpoint)
     parent = self()

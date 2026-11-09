@@ -16,6 +16,10 @@ import time
 
 MAX_FRAME = 1024 * 1024
 MAX_CHUNK = 65536
+SDK_PINS = {
+    '1.22.0': '9f446ae00219148ca4a703914f44a8e2fab11655',
+    '1.34.0': 'd77eaf1c6eeff16bc8c258613746033e9bf567ca',
+}
 
 
 def protocol(manifest):
@@ -33,7 +37,7 @@ def protocol(manifest):
     assert policy['schema'] == 2
     assert (policy['port_protocol_major'], policy['port_protocol_minor']) == (2, 0)
     sdk = policy['sdk']
-    assert sdk['sdk_version'] == '1.22.0'
+    assert SDK_PINS.get(sdk['sdk_version']) == sdk['source_revision']
     assert sdk['source_revision'] == manifest['identity']['smolvm_revision']
     assert sdk['feature_versions']['material_proofs'] == 2
     return 2, 0

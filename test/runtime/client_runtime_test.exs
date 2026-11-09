@@ -256,7 +256,10 @@ defmodule SmolBox.ClientRuntimeTest do
     assert byte_size(bytes) > 0
     started = System.monotonic_time(:millisecond)
     assert {:ok, %Machine{state: :stopped}} = Client.stop(context.client, name)
-    assert System.monotonic_time(:millisecond) - started < 10_000
+
+    assert System.monotonic_time(:millisecond) - started <
+             SmolBox.LabCandidate.stop_observation_ms()
+
     assert {:ok, %Machine{state: :stopped}} = Client.inspect_machine(context.client, name)
     # A killed VM supplies no guaranteed per-command exit receipt.
     case Task.yield(observer, 3000) || Task.shutdown(observer, :brutal_kill) do

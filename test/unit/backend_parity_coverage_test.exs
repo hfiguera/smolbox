@@ -94,7 +94,10 @@ defmodule SmolBox.BackendParityCoverageTest do
     refute @coverage["distribution_approved"]
 
     source = @root |> Path.join("native/vendor/source.json") |> File.read!() |> Jason.decode!()
-    assert @coverage["sdk_revision"] == source["revision"]
+
+    assert Map.get(@coverage, "candidate_sdk_revision", @coverage["sdk_revision"]) ==
+             source["revision"]
+
     assert source["patches"] == []
   end
 

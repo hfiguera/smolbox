@@ -73,7 +73,13 @@ defmodule SmolBox.EmbeddedPackageActivationTest do
              native.package_identity["smolvm_revision"]
            )
 
-    current = Package.create(protocol_major: 2, sdk_identity: policy["sdk"])
+    current =
+      Package.create(
+        protocol_major: 2,
+        smolvm_revision: policy["sdk"]["source_revision"],
+        sdk_identity: policy["sdk"]
+      )
+
     on_exit(fn -> File.rm_rf!(current.package_path) end)
     assert :ok = Config.validate(current)
     assert Config.protocol_major(current) == policy["port_protocol_major"]

@@ -2,7 +2,7 @@ defmodule SmolBox.Runtime.Approvals do
   @moduledoc false
   alias SmolBox.{Checkpoint, Profile, Validation}
 
-  @artifact_versions ~w(1.19.0 1.20.2 1.22.0)
+  @artifact_versions ~w(1.19.0 1.20.2 1.22.0 1.34.0)
 
   def sources?(entries, sdk_version, architecture) do
     Validation.list?(entries, 32) and
@@ -34,7 +34,7 @@ defmodule SmolBox.Runtime.Approvals do
 
   def volume_policy?(policy, sdk_version, platform),
     do:
-      sdk_version in ~w(1.20.2 1.22.0) and platform == :linux and
+      sdk_version in ~w(1.20.2 1.22.0 1.34.0) and platform == :linux and
         SmolBox.VolumePolicy.valid?(policy)
 
   def profiles?(profiles),

@@ -13,6 +13,7 @@ defmodule SmolBox.WorkerPoolTest do
         {[runtime_version: "1.20.1"], :incompatible},
         {[runtime_version: "1.20.2"], :incompatible},
         {[runtime_version: "1.20.3"], :incompatible},
+        {[runtime_version: "1.34.0"], :incompatible},
         {[runtime_version: "1.16.0"], :incompatible},
         {[runtime_version: "1.16.1"], :incompatible},
         {[runtime_version: "1.17.0"], :incompatible},
@@ -40,9 +41,10 @@ defmodule SmolBox.WorkerPoolTest do
   end
 
   for {label, options} <- [
-        {"default 1.22.0", []},
+        {"default 1.34.0", [runtime_version: "1.34.0", expected_runtime_version: nil]},
         {"explicit 1.17.0", [runtime_version: "1.17.0", expected_runtime_version: "1.17.0"]},
         {"explicit 1.22.0", [runtime_version: "1.22.0", expected_runtime_version: "1.22.0"]},
+        {"explicit 1.34.0", [runtime_version: "1.34.0", expected_runtime_version: "1.34.0"]},
         {"explicit 1.20.2", [runtime_version: "1.20.2", expected_runtime_version: "1.20.2"]},
         {"explicit 1.19.0", [runtime_version: "1.19.0", expected_runtime_version: "1.19.0"]},
         {"explicit 1.16.1", [runtime_version: "1.16.1", expected_runtime_version: "1.16.1"]},

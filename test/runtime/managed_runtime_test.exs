@@ -197,7 +197,7 @@ defmodule SmolBox.ManagedRuntimeTest do
     assert {:ok, %Machine{state: :stopped}} =
              Client.inspect_machine(context.client, running.machine_name)
 
-    assert stopped.next_due_at_ms > System.system_time(:millisecond)
+    assert stopped.next_due_at_ms > stopped.updated_at_ms
 
     assert {:ok, %{slots: 1, cpus: 1, memory_mb: 1024, disk_gb: 30}} =
              Memory.usage(context.store, "managed")

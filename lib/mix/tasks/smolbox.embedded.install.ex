@@ -5,9 +5,11 @@ defmodule Mix.Tasks.Smolbox.Embedded.Install do
   @moduledoc """
   Installs the native bundle for a SmolBox release. This task starts no VM.
 
-      mix smolbox.embedded.install --tag v0.5.0 --install-dir /private/path
+      mix smolbox.embedded.install --install-dir /private/path
 
-  The public release path verifies the archive against a GitHub build attestation.
+  The installer selects the tag matching the installed SmolBox version and
+  verifies the archive against a GitHub build attestation. Use `--tag` to select
+  a specific release.
   For a staged local candidate, pass `--archive` and its independently approved
   `--sha256` together. The install directory must be new.
   """

@@ -18,6 +18,7 @@ defmodule SmolBox.Embedded.CheckpointContractTest do
           architecture: architecture,
           platform: platform,
           path: "/operator/idle.smolcheckpoint",
+          runtime_version: "1.22.0",
           profile: profile
         )
 

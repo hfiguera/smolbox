@@ -1,0 +1,12 @@
+github.com_docker_cli@v29.7.2+incompatible.zip	https://proxy.golang.org/github.com/docker/cli/@v/v29.7.2+incompatible.zip
+github.com_docker_docker-credential-helpers@v0.9.3.zip	https://proxy.golang.org/github.com/docker/docker-credential-helpers/@v/v0.9.3.zip
+github.com_google_go-cmp@v0.7.0.zip	https://proxy.golang.org/github.com/google/go-cmp/@v/v0.7.0.zip
+github.com_klauspost_compress@v1.19.2.zip	https://proxy.golang.org/github.com/klauspost/compress/@v/v1.19.2.zip
+github.com_opencontainers_go-digest@v1.0.0.zip	https://proxy.golang.org/github.com/opencontainers/go-digest/@v/v1.0.0.zip
+github.com_opencontainers_image-spec@v1.1.1.zip	https://proxy.golang.org/github.com/opencontainers/image-spec/@v/v1.1.1.zip
+github.com_sirupsen_logrus@v1.9.4.zip	https://proxy.golang.org/github.com/sirupsen/logrus/@v/v1.9.4.zip
+github.com_spf13_cobra@v1.10.2.zip	https://proxy.golang.org/github.com/spf13/cobra/@v/v1.10.2.zip
+github.com_spf13_pflag@v1.0.10.zip	https://proxy.golang.org/github.com/spf13/pflag/@v/v1.0.10.zip
+golang.org_x_sync@v0.22.0.zip	https://proxy.golang.org/golang.org/x/sync/@v/v0.22.0.zip
+golang.org_x_sys@v0.47.0.zip	https://proxy.golang.org/golang.org/x/sys/@v/v0.47.0.zip
+go1.26.10.src.tar.gz	https://go.dev/dl/go1.26.10.src.tar.gz

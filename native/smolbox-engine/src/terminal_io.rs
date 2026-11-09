@@ -4,11 +4,11 @@ use crate::{
     Cancellation, Error, ErrorCode, Output, Result, Stream, TerminalControl, TerminalFailure,
     TerminalOptions, TERMINAL_CHUNK_BYTES,
 };
-use smolvm::agent::{InteractiveInput, InteractiveOutput, RunConfig};
+use smolvm::agent::{interactive_input, InteractiveInput, InteractiveOutput, RunConfig};
 use std::path::PathBuf;
 use std::sync::{
     atomic::{AtomicBool, Ordering},
-    mpsc::{self, Receiver, RecvTimeoutError},
+    mpsc::{Receiver, RecvTimeoutError},
     Arc, Mutex,
 };
 use std::time::{Duration, Instant};
@@ -137,12 +137,9 @@ pub fn run_terminal_agent(
         active: now,
         close: None,
     }));
-    let (sender, receiver) = mpsc::sync_channel(2);
-    sender
-        .send(InteractiveInput::Resize {
-            cols: options.cols,
-            rows: options.rows,
-        })
+    let (sender, receiver) = interactive_input(2).map_err(|_| Error::before(ErrorCode::Native))?;
+    let input_runtime = tokio::runtime::Builder::new_current_thread()
+        .build()
         .map_err(|_| Error::before(ErrorCode::Native))?;
     let result = std::thread::scope(|scope| {
         let _finish = Finish {
@@ -153,6 +150,15 @@ pub fn run_terminal_agent(
         let finished = done.clone();
         let input_stop = agent.stopper();
         scope.spawn(move || {
+            if input_runtime
+                .block_on(sender.send(InteractiveInput::Resize {
+                    cols: options.cols,
+                    rows: options.rows,
+                }))
+                .is_err()
+            {
+                return;
+            }
             let mut total = 0u64;
             let mut closing = false;
             while !finished.load(Ordering::Acquire) {
@@ -201,7 +207,7 @@ pub fn run_terminal_agent(
                         };
                         total = next;
                         shared.lock().unwrap_or_else(|e| e.into_inner()).active = Instant::now();
-                        if sender.send(command).is_err() {
+                        if input_runtime.block_on(sender.send(command)).is_err() {
                             break;
                         }
                     }
@@ -285,6 +291,7 @@ mod tests {
     use std::io::{Read, Write};
     use std::os::unix::fs::PermissionsExt;
     use std::os::unix::net::{UnixListener, UnixStream};
+    use std::sync::mpsc;
 
     fn options() -> TerminalOptions {
         TerminalOptions {

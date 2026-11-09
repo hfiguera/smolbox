@@ -1,7 +1,12 @@
 defmodule SmolBox.LabCandidate do
   @moduledoc false
 
-  def runtime_version, do: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.22.0")
+  def runtime_version, do: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.34.0")
+
+  # SmolVM 1.34 allows up to 15 seconds for the VMM's durable exit flush.
+  def stop_observation_ms do
+    if runtime_version() == "1.34.0", do: 30_000, else: 10_000
+  end
 
   # Cold artifact creation under the one-CPU cap exceeded the fixture's former
   # 55-second receive budget. This remains within Profile's existing bounds.

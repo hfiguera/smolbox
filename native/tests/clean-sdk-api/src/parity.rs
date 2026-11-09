@@ -2,11 +2,12 @@
 //! No function in this module is invoked by the test runner. API existence is
 //! not evidence of ownership, boundedness, dispatch safety or live qualification.
 
-use smolvm::agent::{AgentClient, InteractiveInput, InteractiveOutput, RunConfig};
+use smolvm::agent::{
+    AgentClient, InteractiveInput, InteractiveInputReceiver, InteractiveOutput, RunConfig,
+};
 use smolvm::config::VmRecord;
 use smolvm::embedded::{EmbeddedRuntime, MachineSpec};
 use std::path::Path;
-use std::sync::mpsc::Receiver;
 use std::time::Duration;
 
 pub fn network_and_workload(
@@ -56,7 +57,7 @@ pub fn buffered_and_background(
 pub fn image_terminal(
     client: &mut AgentClient,
     config: RunConfig,
-    input: Receiver<InteractiveInput>,
+    input: InteractiveInputReceiver,
     output: impl FnMut(InteractiveOutput),
 ) -> smolvm::Result<i32> {
     client.run_interactive_io(config.with_stdin(None).with_tty(true), input, output)
@@ -124,6 +125,7 @@ pub fn prepare_held_child(
         &[],
         &[],
         &std::collections::BTreeMap::new(),
+        &[],
         smolvm::agent::fork::ForkSourcePolicy::PlatformDefault,
     )
 }
@@ -182,7 +184,8 @@ mod tests {
             persistent: true,
             ..MachineSpec::default()
         }
-        .to_record();
+        .to_record()
+        .unwrap();
         record.golden = Some("parent".into());
         record.fork_overlay_owner = Some("original-root".into());
         record.mounts = vec![("/approved/volume".into(), "/mnt/volumes/data".into(), true)];
@@ -207,7 +210,8 @@ mod tests {
             persistent: true,
             ..MachineSpec::default()
         }
-        .to_record();
+        .to_record()
+        .unwrap();
         let config = existing_image_command(&record, "registry.example/team/image".into());
         assert_eq!(
             config.persistent_overlay_id.as_deref(),
@@ -218,11 +222,14 @@ mod tests {
 
     #[test]
     fn mapped_ports_do_not_silently_enable_outbound_networking() {
-        let mut spec = MachineSpec::default();
+        let mut spec = MachineSpec {
+            name: "port-fixture".into(),
+            ..MachineSpec::default()
+        };
         spec.resources.network = false;
         spec.resources.allowed_cidrs = Some(Vec::new());
         mapped_ports(&mut spec, 18080, 8080);
-        let record = spec.to_record();
+        let record = spec.to_record().unwrap();
         assert_eq!(record.ports, vec![(18080, 8080)]);
         assert!(!record.network);
         assert_eq!(record.allowed_cidrs, Some(Vec::new()));

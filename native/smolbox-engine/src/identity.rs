@@ -133,10 +133,43 @@ pub(crate) fn material_value(record: &VmRecord) -> Result<serde_json::Value> {
         "pid_start_time",
         "last_exit_code",
         "init_completed",
+        "pause_reason",
+        "engine_build",
+        "agent_rootfs_digest",
+        "agent_rootfs_path",
     ] {
         fields.remove(field);
     }
+    // These 1.34.0 fields serialize their defaults. Keep existing receipt
+    // hashes for unchanged records while binding any non-default setting.
+    if fields
+        .get("disk_durability")
+        .and_then(|value| value.as_str())
+        == Some("full")
+    {
+        fields.remove("disk_durability");
+    }
+    if fields
+        .get("staged_mounts_detached_from")
+        .is_some_and(serde_json::Value::is_null)
+    {
+        fields.remove("staged_mounts_detached_from");
+    }
     Ok(value)
+}
+
+pub(crate) fn verify_boot_rootfs(record: &VmRecord, rootfs: &std::path::Path) -> Result<()> {
+    // A branch must use the same rootfs as its source. Match the digest the
+    // SDK will see for this approved directory before it can resolve any
+    // alternate path from the source record.
+    if let Some(expected) = &record.agent_rootfs_digest {
+        let observed = smolvm_pack::assets::cached_agent_rootfs_digest(rootfs)
+            .map_err(|_| Error::before(ErrorCode::Ownership))?;
+        if *expected != observed {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+    }
+    Ok(())
 }
 
 pub(crate) fn record_state(record: &VmRecord, has_dependents: bool) -> ObservedState {
@@ -180,7 +213,13 @@ mod tests {
         r.pid_start_time = Some(2);
         r.last_exit_code = Some(0);
         r.init_completed = true;
+        r.engine_build = Some("runtime-build".into());
+        r.agent_rootfs_digest = Some(format!("sha256:{}", "a".repeat(64)));
+        r.agent_rootfs_path = Some("/verified/agent-rootfs".into());
         assert_eq!(hash, material_hash(&r).unwrap());
+        r.disk_durability = smolvm::data::resources::DiskDurability::Deferred;
+        assert_ne!(hash, material_hash(&r).unwrap());
+        r.disk_durability = smolvm::data::resources::DiskDurability::Full;
         r.created_at += 1;
         assert_ne!(hash, material_hash(&r).unwrap());
         r.created_at -= 1;

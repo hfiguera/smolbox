@@ -152,11 +152,13 @@ class OrdinaryRunnerTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[1]
         hello = json.loads((root / 'smolbox-protocol/fixtures/hello-v2-volumes.json').read_bytes())['hello']
         policy = json.loads((root / 'policy.json').read_bytes())
-        current = {'schema': 3, 'identity': hello['package'], 'policy': policy}
+        current = {'schema': 3, 'identity': {**hello['package'],
+                   'smolvm_revision': policy['sdk']['source_revision']}, 'policy': policy}
         self.assertNotIn('volumes', proof.capabilities(current))
         self.assertNotIn('volumes', proof.limits(current))
         future = json.loads(json.dumps(current))
         future['policy']['sdk'] = hello['sdk']
+        future['identity'] = hello['package']
         self.assertEqual(proof.capabilities(future), hello['capabilities'])
         self.assertEqual(proof.limits(future), hello['limits'])
         future['policy']['sdk']['feature_versions']['remote_sources'] = 1
@@ -169,7 +171,8 @@ class OrdinaryRunnerTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[1]
         hello = json.loads((root / 'smolbox-protocol/fixtures/hello-v2-linux-branches-preflight.json').read_bytes())['hello']
         policy = json.loads((root / 'policy-linux.json').read_bytes())
-        manifest = {'schema': 3, 'identity': hello['package'], 'policy': policy}
+        manifest = {'schema': 3, 'identity': {**hello['package'],
+                    'smolvm_revision': policy['sdk']['source_revision']}, 'policy': policy}
         self.assertEqual(proof.capabilities(manifest), hello['capabilities'])
         exports = json.loads((root / 'smolbox-protocol/fixtures/export-limits-v1.json').read_bytes())
         self.assertEqual(proof.limits(manifest), {**hello['limits'], 'exports': exports})
@@ -184,7 +187,8 @@ class OrdinaryRunnerTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[1]
         hello = json.loads((root / 'smolbox-protocol/fixtures/hello-v2-macos-branches.json').read_bytes())['hello']
         policy = json.loads((root / 'policy.json').read_bytes())
-        manifest = {'schema': 3, 'identity': hello['package'], 'policy': policy}
+        manifest = {'schema': 3, 'identity': {**hello['package'],
+                    'smolvm_revision': policy['sdk']['source_revision']}, 'policy': policy}
         self.assertEqual(proof.capabilities(manifest), hello['capabilities'])
         exports = json.loads((root / 'smolbox-protocol/fixtures/export-limits-v1.json').read_bytes())
         self.assertEqual(proof.limits(manifest), {**hello['limits'], 'exports': exports})
@@ -204,6 +208,7 @@ class OrdinaryRunnerTests(unittest.TestCase):
         self.assertIn('prepare_artifact', proof.capabilities(manifest))
         legacy = json.loads(json.dumps(manifest))
         legacy['policy']['sdk'] = json.loads((root / 'smolbox-protocol/fixtures/hello-v2-terminal-preflight.json').read_bytes())['hello']['sdk']
+        legacy['identity']['smolvm_revision'] = legacy['policy']['sdk']['source_revision']
         for operation in ['list_images', 'pull_image', 'prepare_artifact']:
             self.assertNotIn(operation, proof.capabilities(legacy))
 
@@ -226,7 +231,8 @@ class OrdinaryRunnerTests(unittest.TestCase):
         self.assertEqual(proof.protocol({'schema': 2, 'identity': identity,
                          'policy': {'port_protocol_minor': 4}}), (1, 4))
         policy = json.loads((Path(__file__).resolve().parents[1] / 'policy.json').read_bytes())
-        current = {'schema': 3, 'identity': dict(identity, engine_version='0.2.0'), 'policy': policy}
+        current = {'schema': 3, 'identity': dict(identity, engine_version='0.2.0',
+                   smolvm_revision=policy['sdk']['source_revision']), 'policy': policy}
         self.assertEqual(proof.protocol(current), (2, 0))
         self.assertEqual(proof.config_schema(current), 2)
         ordinary.check_upgrade(current, dict(current))

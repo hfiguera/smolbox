@@ -1,5 +1,5 @@
 //! Revision-specific SDK path/schema knowledge lives here, never in a bridge.
-//! Source compatibility: 9f446ae00219148ca4a703914f44a8e2fab11655.
+//! Source compatibility: d77eaf1c6eeff16bc8c258613746033e9bf567ca.
 use crate::host::unredirected;
 use crate::{Error, ErrorCode, Result};
 use std::fs::{File, OpenOptions};

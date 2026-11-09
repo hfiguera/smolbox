@@ -1,12 +1,15 @@
 # Embedded Port release review
 
-The release inputs for the three Embedded Port targets are approved for
-candidate builds. **Binary publication remains gated** on checking the
-resulting payloads and qualifying the public install.
+The [release input catalog](release-inputs.json) pins SDK 1.34.0 for all
+three targets. The matching source and notices, attested build and public
+installer results are recorded in the
+[1.34.0 input review](../docs/evidence/embedded-port-1.34.0-release-sources.md)
+and the [qualification record](../docs/evidence/smolvm-1.34.0-qualification.md).
+The 1.22.0 evidence below applies to those earlier package identities.
 
 ## Integrity and provenance
 
-The helper uses SDK 1.22.0 revision
+The earlier approved distribution used SDK 1.22.0 revision
 `9f446ae00219148ca4a703914f44a8e2fab11655`. Bootstrap verifies the source archive,
 complete unmodified content/mode inventory and lock inputs recorded in
 `vendor/source.json`. It rejects patch lists and native Cargo source overrides.
