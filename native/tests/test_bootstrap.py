@@ -20,15 +20,16 @@ class SourceIntegrityTests(unittest.TestCase):
         self.root = Path(self.temporary.name)
         self.cargo = self.root / "Cargo.toml"
         self.cargo.write_text('''[workspace.dependencies]
-smolvm = { path = "target/upstream/smolvm", version = "=1.22.0" }
-smolvm-pack = { path = "target/upstream/smolvm/crates/smolvm-pack", version = "=1.22.0" }
-smolvm-protocol = { path = "target/upstream/smolvm/crates/smolvm-protocol", version = "=1.22.0" }
+smolvm = { path = "target/upstream/smolvm", version = "=1.34.0" }
+smolvm-pack = { path = "target/upstream/smolvm/crates/smolvm-pack", version = "=1.34.0" }
+smolvm-protocol = { path = "target/upstream/smolvm/crates/smolvm-protocol", version = "=1.34.0" }
+smolvm-registry = { path = "target/upstream/smolvm/crates/smolvm-registry", version = "=1.34.0" }
 ''')
         (self.root / "vendor").mkdir()
         self.archive = self.root / "vendor" / "source.tar.gz"
         self.make_archive("source.txt", b"original\n")
         self.manifest = {
-            "schema": 2, "revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+            "schema": 2, "revision": "d77eaf1c6eeff16bc8c258613746033e9bf567ca",
             "archive": self.archive.name, "archive_sha256": BOOTSTRAP.digest(self.archive),
             "patches": [], "inventory": "clean-inventory.json",
         }
@@ -120,7 +121,7 @@ smolvm-protocol = { path = "target/upstream/smolvm/crates/smolvm-protocol", vers
         self.cargo.write_text(original)
         crate = self.root / "bridge"
         crate.mkdir()
-        (crate / "Cargo.toml").write_text('[replace]\n"smolvm:1.22.0" = { path = "fork" }\n')
+        (crate / "Cargo.toml").write_text('[replace]\n"smolvm:1.34.0" = { path = "fork" }\n')
         with self.assertRaisesRegex(ValueError, "overrides"):
             BOOTSTRAP.bootstrap()
         (crate / "Cargo.toml").write_text('[dependencies]\nrenamed = { package = "smolvm", git = "https://example.invalid/fork" }\n')

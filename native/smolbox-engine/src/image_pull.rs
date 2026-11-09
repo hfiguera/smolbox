@@ -176,6 +176,7 @@ pub(crate) fn execute_with_registry(
             auth: None,
             proxy: None,
             no_proxy: None,
+            cache_as: None,
         },
     };
     connection

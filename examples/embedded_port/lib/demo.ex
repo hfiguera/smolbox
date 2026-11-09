@@ -28,8 +28,7 @@ defmodule SmolBox.Example.EmbeddedPort do
       artifact_store: {Directory, objects},
       fingerprint_key: key,
       workers: [target] ++ Keyword.get(options, :http_workers, []),
-      poll_ms: 50,
-      lease_ms: 1000
+      poll_ms: 50
     ]
 
     {:ok, supervisor} =

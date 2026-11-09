@@ -19,7 +19,8 @@ defmodule SmolBox.Test.EmbeddedPackage do
 
     identity = %{
       "engine_version" => if(major == 2, do: "0.2.0", else: "0.1.0"),
-      "smolvm_revision" => "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "smolvm_revision" =>
+        options[:smolvm_revision] || "9f446ae00219148ca4a703914f44a8e2fab11655",
       "source_sha256" => String.duplicate("2", 64),
       "build_sha256" => hash(File.read!(executable)),
       "assets_sha256" => String.duplicate("4", 64),

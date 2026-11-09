@@ -66,7 +66,7 @@ defmodule SmolBox.Backend.Features do
   def supports?(_invalid, _feature), do: false
 
   def native_versions(%Config{} = config) do
-    if Config.validate(config) == :ok and Config.sdk_version(config) == "1.22.0",
+    if Config.validate(config) == :ok,
       do: approved_native_versions(config),
       else: %{}
   end

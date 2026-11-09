@@ -10,6 +10,18 @@ entry=$(jq -ce --arg target "$target" '.[$target] | select(.distribution_approve
 review=$(jq -er '.source_review | select(test("^docs/[a-zA-Z0-9./_-]+\\.md$") and (contains("..") | not))' <<< "$entry")
 test -f "$review"
 
+sdk=$(python3 -c 'import tomllib; print(tomllib.load(open("native/Cargo.toml", "rb"))["workspace"]["dependencies"]["smolvm"]["version"].removeprefix("="))')
+runtime_url=$(jq -er '.runtime.url' <<< "$entry")
+case "$target" in
+  macos-aarch64) runtime_target=darwin-arm64 ;;
+  linux-aarch64) runtime_target=linux-arm64 ;;
+  linux-x86_64) runtime_target=linux-x86_64 ;;
+esac
+if [[ "$runtime_url" != "https://github.com/smol-machines/smolvm/releases/download/v$sdk/smolvm-$sdk-$runtime_target.tar.gz" ]]; then
+  echo "The approved runtime archive does not match the pinned SDK $sdk" >&2
+  exit 1
+fi
+
 stage=$(mktemp -d)
 trap 'rm -rf -- "$stage"' EXIT
 

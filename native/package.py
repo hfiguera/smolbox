@@ -169,7 +169,7 @@ def build(executable, assets, output, signing_identity=None):
         source = json.loads((ROOT / 'vendor/source.json').read_text())
         shutil.copy2(ROOT.parent / 'LICENSE', staging / 'SMOLBOX-LICENSE')
         shutil.copy2(ROOT / 'target/upstream/smolvm/LICENSE', staging / 'SMOLVM-LICENSE')
-        shutil.copy2(ROOT / 'target/upstream/smolvm/Licenses.md', staging / 'SMOLVM-LICENSES.md')
+        shutil.copy2(ROOT / 'target/upstream/smolvm/THIRD-PARTY-NOTICES.md', staging / 'SMOLVM-LICENSES.md')
         shutil.copy2(ROOT / 'vendor/source.json', staging / 'NATIVE-SOURCE.json')
         shutil.copy2(policy_path(), staging / 'SMOLBOX-POLICY.json')
         entries = inventory(staging)

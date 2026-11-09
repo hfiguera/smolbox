@@ -3,7 +3,7 @@ defmodule SmolBox.Embedded.BranchOrigin do
   alias SmolBox.Embedded.{BranchCanonical, BranchRequest, Shape}
   alias SmolBox.Validation
 
-  @sdk_revision "9f446ae00219148ca4a703914f44a8e2fab11655"
+  @sdk_revisions ~w(9f446ae00219148ca4a703914f44a8e2fab11655 d77eaf1c6eeff16bc8c258613746033e9bf567ca)
 
   def valid?(binding, child),
     do:
@@ -18,7 +18,7 @@ defmodule SmolBox.Embedded.BranchOrigin do
       BranchRequest.child?(intent["child"], intent["source"]) and
       BranchRequest.approval?(intent["approval"]) and Shape.hex?(intent["epoch"], 32) and
       pid?(intent["source_pid"]) and plan?(intent["plan"], intent["approval"]) and
-      intent["request_sha256"] == admission_digest(intent)
+      Enum.any?(@sdk_revisions, &(intent["request_sha256"] == admission_digest(intent, &1)))
   end
 
   defp child_matches?(intent, child),
@@ -57,11 +57,11 @@ defmodule SmolBox.Embedded.BranchOrigin do
       end)
   end
 
-  defp admission_digest(intent),
+  defp admission_digest(intent, revision),
     do:
       BranchCanonical.digest([
         "smolbox-initial-branch-admission-v1",
-        @sdk_revision,
+        revision,
         "shared-materialized-ram",
         BranchCanonical.ordered(intent["source"], :receipt),
         BranchCanonical.ordered(intent["child"], :child),

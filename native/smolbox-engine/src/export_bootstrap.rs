@@ -350,6 +350,7 @@ fn upload_part(
             uid: None,
             gid: None,
             total_size: bytes,
+            target: Some(smolvm_protocol::WorkloadTarget::Vm),
         },
         budget,
     )?;
@@ -1056,8 +1057,12 @@ pub(crate) mod tests {
             manifest_id.replace(':', "_")
         );
         let config_path = format!("/storage/configs/{}.json", &image.digest[7..]);
-        assert!(matches!(&requests[2], AgentRequest::FileRead { path } if path == &manifest_path));
-        assert!(matches!(&requests[3], AgentRequest::FileRead { path } if path == &config_path));
+        assert!(
+            matches!(&requests[2], AgentRequest::FileRead { path, .. } if path == &manifest_path)
+        );
+        assert!(
+            matches!(&requests[3], AgentRequest::FileRead { path, .. } if path == &config_path)
+        );
         assert!(
             matches!(&requests[4], AgentRequest::Query { image } if Some(image) == record.image.as_ref())
         );

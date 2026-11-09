@@ -41,7 +41,7 @@ def verify_dependency_configuration() -> None:
     """Native crates may not replace the verified SDK with a Cargo fork."""
     paths = [ROOT / "Cargo.toml", *ROOT.glob("*/Cargo.toml"),
              *ROOT.glob("tests/*/Cargo.toml")]
-    sdk_names = {"smolvm", "smolvm-pack", "smolvm-protocol"}
+    sdk_names = {"smolvm", "smolvm-pack", "smolvm-protocol", "smolvm-registry"}
 
     def verify_tables(value: dict, manifest_path: Path) -> None:
         for key, table in value.items():
@@ -59,7 +59,7 @@ def verify_dependency_configuration() -> None:
                     if (manifest_path.parent != ROOT / "tests/clean-sdk-api"
                             or not isinstance(dependency, dict)
                             or set(dependency) != {"path", "version"}
-                            or dependency["version"] != "=1.22.0"
+                            or dependency["version"] != "=1.34.0"
                             or (manifest_path.parent / dependency["path"]).resolve() != allowed.resolve()):
                         raise ValueError("native SDK dependency bypasses verified workspace source")
             else:
@@ -77,14 +77,15 @@ def verify_dependency_configuration() -> None:
         "smolvm": "target/upstream/smolvm",
         "smolvm-pack": "target/upstream/smolvm/crates/smolvm-pack",
         "smolvm-protocol": "target/upstream/smolvm/crates/smolvm-protocol",
+        "smolvm-registry": "target/upstream/smolvm/crates/smolvm-registry",
     }.items():
-        if dependencies.get(name) != {"path": path, "version": "=1.22.0"}:
+        if dependencies.get(name) != {"path": path, "version": "=1.34.0"}:
             raise ValueError("native SDK dependency differs from verified source pin")
 
 
 def bootstrap(check: bool = False, clean: bool = False) -> None:
     source = json.loads((ROOT / "vendor" / "source.json").read_text())
-    if source["schema"] != 2 or source["revision"] != "9f446ae00219148ca4a703914f44a8e2fab11655":
+    if source["schema"] != 2 or source["revision"] != "d77eaf1c6eeff16bc8c258613746033e9bf567ca":
         raise ValueError("unsupported native source pin")
     destination = DESTINATION.with_name("smolvm-clean") if clean else DESTINATION
     if source["patches"] != []:

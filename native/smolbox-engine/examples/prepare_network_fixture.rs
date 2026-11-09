@@ -48,7 +48,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let approved: serde_json::Value =
         serde_json::from_reader(File::open(package.join("package.json"))?)?;
     assert_eq!(approved["identity"]["platform"], "linux");
-    assert_eq!(approved["policy"]["sdk"]["sdk_version"], "1.22.0");
+    assert_eq!(approved["policy"]["sdk"]["sdk_version"], smolvm::VERSION);
     // Verify the approved input package before the SDK collector reads it.
     for asset in approved["assets"].as_array().unwrap() {
         let path = package.join(asset["path"].as_str().unwrap());

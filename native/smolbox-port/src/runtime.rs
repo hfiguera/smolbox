@@ -3920,7 +3920,7 @@ mod tests {
             source: source.clone(),
             path: "/operator/idle.smolcheckpoint".into(),
             max_bytes: 1024,
-            sdk_version: "1.22.0".into(),
+            sdk_version: smolvm::VERSION.into(),
             host_platform: "darwin/arm64".into(),
             resources: resources.clone(),
         };

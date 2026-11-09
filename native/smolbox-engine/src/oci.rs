@@ -227,12 +227,12 @@ impl VerifiedOci {
                 storage_gib: Some(resources.storage_gib),
                 overlay_gib: Some(resources.overlay_gib),
                 network: false,
-                allowed_cidrs: Some(vec![]),
                 ..Default::default()
             },
             ..Default::default()
         }
-        .to_record();
+        .to_record()
+        .map_err(|_| Error::before(ErrorCode::Validation))?;
         record.entrypoint = vec!["/bin/true".into()];
         record.cmd = Vec::new();
         record.env = Vec::new();

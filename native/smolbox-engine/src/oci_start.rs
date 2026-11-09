@@ -226,6 +226,7 @@ fn launch_features_qualified(
     mounted: bool,
     packed: bool,
 ) -> Result<LaunchFeatures> {
+    let network_device = record.network || !record.ports.is_empty();
     // This first direct-OCI path has no auxiliary device, source, restore,
     // secret resolver, shell init, or implicit lifecycle behavior. Other parity
     // combinations remain pending until their approvals/owners are integrated.
@@ -278,11 +279,10 @@ fn launch_features_qualified(
         || record.health_startup_grace_secs.is_some()
         || record.restart.policy != smolvm::config::RestartPolicy::Never
         || record.network_backend
-            != (record.network || !record.ports.is_empty())
-                .then_some(smolvm::network::NetworkBackend::VirtioNet)
-        || record.allowed_cidrs.is_none()
-        || (record.dns_filter_hosts.is_none()
-            && (!packed || record.network || !record.ports.is_empty()))
+            != network_device.then_some(smolvm::network::NetworkBackend::VirtioNet)
+        || record.allowed_cidrs.is_some() != network_device
+        || record.dns_filter_hosts.is_some() != network_device
+        || record.launch_network_plan().has_network() != network_device
     {
         return Err(Error::before(ErrorCode::Unsupported));
     }
@@ -695,15 +695,17 @@ mod tests {
         record.source_smolmachine = Some("/approved/fixture".into());
         record.network = false;
         record.network_backend = None;
-        record.allowed_cidrs = Some(vec![]);
-        record.dns_filter_hosts = Some(vec![]);
+        record.allowed_cidrs = None;
+        record.dns_filter_hosts = None;
         assert!(launch_features_qualified(&record, false, false).is_err());
         let features = launch_features_qualified(&record, false, true).unwrap();
-        assert_eq!(features.dns_filter_hosts, Some(vec![]));
+        assert_eq!(features.dns_filter_hosts, None);
         assert_eq!(features.watch_parent, Some(true));
         record.ports.push((28732, 8000));
         assert!(launch_features_qualified(&record, false, true).is_err());
         record.network_backend = Some(smolvm::network::NetworkBackend::VirtioNet);
+        record.allowed_cidrs = Some(vec![]);
+        record.dns_filter_hosts = Some(vec![]);
         assert!(launch_features_qualified(&record, false, true).is_ok());
         record.forkable = true;
         assert!(launch_features_qualified(&record, false, true).is_err());
@@ -717,17 +719,18 @@ mod tests {
             image: Some("packed-fixture:tag".into()),
             resources: smolvm::agent::VmResources {
                 network: false,
-                allowed_cidrs: Some(vec![]),
                 ..Default::default()
             },
             ..Default::default()
         }
-        .to_record();
+        .to_record()
+        .unwrap();
         record.source_smolmachine = Some("/approved/fixture".into());
         assert!(record.dns_filter_hosts.is_none());
         assert!(launch_features_qualified(&record, false, true).is_ok());
         record.ports.push((28732, 8000));
         record.network_backend = Some(smolvm::network::NetworkBackend::VirtioNet);
+        record.allowed_cidrs = Some(vec![]);
         assert!(launch_features_qualified(&record, false, true).is_err());
         record.dns_filter_hosts = Some(vec![]);
         assert!(launch_features_qualified(&record, false, true).is_ok());

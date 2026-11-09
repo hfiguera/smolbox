@@ -247,6 +247,7 @@ pub(crate) fn run(request: &Request, blob: &Blob, expected: &Expected) -> Result
         &work,
     )?
     .ok_or(Error::before(ErrorCode::Ownership))?;
+    metadata.grant.intent.verify_current_revision()?;
     metadata.grant.intent.verify_record(&before)?;
     let journal = crate::material::MaterialJournal::at(&metadata.source_directory);
     journal.authorize_branch_preparation(&metadata.grant, expected, &before)?;
@@ -292,6 +293,7 @@ pub(crate) fn run(request: &Request, blob: &Blob, expected: &Expected) -> Result
         &[],
         &[],
         &std::collections::BTreeMap::new(),
+        &[],
         smolvm::agent::fork::ForkSourcePolicy::PlatformDefault,
     )
     .map_err(|_| Error::uncertain(ErrorCode::Native))?;
@@ -387,6 +389,7 @@ pub(crate) fn verify_sdk_result(
         != Some(smolvm::agent::vm_data_dir(&before.name).join("s").as_path())
         || !prepared.source_continues
         || !prepared.port_remaps.is_empty()
+        || !prepared.udp_port_remaps.is_empty()
         || after.state != smolvm::config::RecordState::Running
         || after.pid.zip(after.pid_start_time) != Some(intent.source_pid)
     {
@@ -571,6 +574,7 @@ pub(crate) mod tests {
             snapshot_dir: smolvm::agent::vm_data_dir(&before.name).join("s/aabbccdd"),
             clone_record: child.clone(),
             port_remaps: vec![],
+            udp_port_remaps: vec![],
             source_continues: true,
         };
         verify_sdk_result(&metadata.grant.intent, &before, &after, &prepared).unwrap();

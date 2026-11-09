@@ -790,6 +790,7 @@ pub(crate) mod tests {
                         smolvm_protocol::SecretRef {
                             from_env: Some("KEY".into()),
                             from_file: None,
+                            from_keychain: None,
                         },
                     );
                 }

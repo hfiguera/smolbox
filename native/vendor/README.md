@@ -3,9 +3,9 @@
 `source.json` records the smolvm revision, full Git tree identity, archive SHA-256
 and authenticated complete content/executable-mode inventory. It declares zero
 patches. The archive was made with `git archive` from clean revision
-`9f446ae00219148ca4a703914f44a8e2fab11655` in an independent checkout. All 290
+`d77eaf1c6eeff16bc8c258613746033e9bf567ca` at tag `v1.34.0`. All 331
 exported files were compared with upstream Git blobs and modes. The full tree is
-`81265fb74951f9e35ac3942f7b18545b1de9f2d9`; this is a selected SDK export,
+`64b8b32be3bfd8f328b016cd5a85aa9c7e34cf19`; this is a selected SDK export,
 including source/crates, manifests, build script, toolchain and license documents.
 The research checkout under `external-references` is never a build input.
 

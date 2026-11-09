@@ -306,7 +306,10 @@ pub(crate) fn read_oci_metadata(
     let mut output = Vec::new();
     stream_data(
         socket,
-        &AgentRequest::FileRead { path },
+        &AgentRequest::FileRead {
+            path,
+            target: Some(smolvm_protocol::WorkloadTarget::Vm),
+        },
         &mut output,
         maximum,
         budget,

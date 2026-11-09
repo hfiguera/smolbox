@@ -168,16 +168,14 @@ impl CreationFeatures {
 
     pub(crate) fn apply(&self, record: &mut VmRecord, manifest: &PackManifest) -> Result<()> {
         self.qualify(manifest)?;
-        // A network device is required for inbound forwarding even with denied
-        // egress. Explicit empty lists survive to_record's None optimization.
+        // SmolVM enables a network device for an explicit empty egress policy.
+        // Keep that policy for inbound-only forwarding and omit it offline.
+        let network_device = self.network.enabled || !self.ports.is_empty();
         record.network = self.network.enabled;
-        record.network_backend = if self.network.enabled || !self.ports.is_empty() {
-            Some(smolvm::network::NetworkBackend::VirtioNet)
-        } else {
-            None
-        };
-        record.allowed_cidrs = Some(self.network.cidrs.clone());
-        record.dns_filter_hosts = Some(self.network.hosts.clone());
+        record.network_backend =
+            network_device.then_some(smolvm::network::NetworkBackend::VirtioNet);
+        record.allowed_cidrs = network_device.then(|| self.network.cidrs.clone());
+        record.dns_filter_hosts = network_device.then(|| self.network.hosts.clone());
         record.ports = self.ports.iter().map(|p| (p.host, p.guest)).collect();
         if let Some(workload) = &self.workload {
             let resolved = resolved_workload(workload, manifest)?;
@@ -447,11 +445,15 @@ mod tests {
     #[test]
     fn offline_forwarding_retains_empty_egress_and_neutral_boot() {
         let mut request = features();
+        let mut record = neutral();
+        request.apply(&mut record, &manifest()).unwrap();
+        assert!(!record.launch_network_plan().has_network());
+        assert!(record.allowed_cidrs.is_none() && record.dns_filter_hosts.is_none());
+
         request.ports.push(PortMapping {
             host: 8080,
             guest: 80,
         });
-        let mut record = neutral();
         request.apply(&mut record, &manifest()).unwrap();
         assert!(!record.network);
         assert_eq!(record.allowed_cidrs, Some(vec![]));

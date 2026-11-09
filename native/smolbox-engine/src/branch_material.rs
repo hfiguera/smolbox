@@ -206,6 +206,7 @@ impl BranchPublication {
                     .join(generation),
                 clone_record: raw.clone(),
                 port_remaps: vec![],
+                udp_port_remaps: vec![],
                 source_continues: true,
             },
         )?;

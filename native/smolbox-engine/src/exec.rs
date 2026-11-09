@@ -74,6 +74,7 @@ impl Command {
             workdir: self.workdir.clone(),
             user: self.user.clone(),
             timeout: Some(self.timeout),
+            stdin: None,
         }
     }
 }

@@ -3,8 +3,8 @@
   "port_protocol_major": 2,
   "port_protocol_minor": 0,
   "sdk": {
-    "sdk_version": "1.22.0",
-    "source_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "sdk_version": "1.34.0",
+    "source_revision": "d77eaf1c6eeff16bc8c258613746033e9bf567ca",
     "feature_versions": {
       "lifecycle": 1,
       "foreground_exec": 1,

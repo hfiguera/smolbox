@@ -322,7 +322,8 @@ pub fn sdk_identity() -> Result<SdkIdentity, SafeCode> {
     let sdk: SdkIdentity =
         serde_json::from_value(policy["sdk"].clone()).map_err(|_| SafeCode::Package)?;
     sdk.validate().map_err(|_| SafeCode::Package)?;
-    if sdk.sdk_version != "1.22.0" || sdk.source_revision != smolbox_engine::SMOLVM_REVISION {
+    if sdk.sdk_version != smolvm::VERSION || sdk.source_revision != smolbox_engine::SMOLVM_REVISION
+    {
         return Err(SafeCode::Package);
     }
     Ok(sdk)
@@ -935,11 +936,14 @@ mod tests {
         };
         assert!(hello.validate().is_ok());
         let sdk = sdk_identity().ok().unwrap();
-        // These captured descriptors predate export admission. Keep them as
-        // compatibility fixtures and check the additional limits separately.
-        let mut fixture_sdk = sdk.clone();
-        assert_eq!(fixture_sdk.feature_versions.remove("exports"), Some(1));
-        assert!(hello.sdk.as_deref() == Some(&fixture_sdk));
+        // Compare the feature contract with the historical 1.22.0 descriptor.
+        // The SDK pin and the later export limits are checked separately.
+        let mut fixture_features = sdk.feature_versions.clone();
+        assert_eq!(fixture_features.remove("exports"), Some(1));
+        assert_eq!(
+            hello.sdk.as_deref().unwrap().feature_versions,
+            fixture_features
+        );
         assert!(hello.capabilities == sdk.capabilities());
         let mut negotiated = smolbox_protocol::Limits::for_sdk(&sdk);
         let export_limits = serde_json::from_str(include_str!(

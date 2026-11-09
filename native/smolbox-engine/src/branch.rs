@@ -523,6 +523,25 @@ pub(crate) struct InitialBranchJournal {
     pub epoch: String,
 }
 impl InitialBranchJournal {
+    fn request_hash(&self, revision: &str) -> Result<String> {
+        revision_request_hash(
+            revision,
+            &self.source,
+            &self.child,
+            &self.approval,
+            &self.plan,
+            self.source_pid,
+            &self.epoch,
+        )
+    }
+
+    pub(crate) fn verify_current_revision(&self) -> Result<()> {
+        if self.request_sha256 != self.request_hash(crate::SMOLVM_REVISION)? {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        Ok(())
+    }
+
     pub(crate) fn validate(&self) -> Result<()> {
         self.child.validate(&self.source)?;
         self.approval.validate()?;
@@ -560,15 +579,9 @@ impl InitialBranchJournal {
             || self.approval.resources.memory_mb < ordinary.memory_mb
             || self.approval.resources.disk_gb < minimum_disk
             || self.plan.total_additional != ordinary.add(self.approval.resources)?
-            || self.request_sha256
-                != request_hash(
-                    &self.source,
-                    &self.child,
-                    &self.approval,
-                    &self.plan,
-                    self.source_pid,
-                    &self.epoch,
-                )?
+            || (self.request_sha256 != self.request_hash(crate::SMOLVM_REVISION)?
+                && self.request_sha256
+                    != self.request_hash("9f446ae00219148ca4a703914f44a8e2fab11655")?)
         {
             return Err(Error::before(ErrorCode::Ownership));
         }
@@ -628,12 +641,31 @@ fn request_hash(
     source_pid: (i32, u64),
     epoch: &str,
 ) -> Result<String> {
+    revision_request_hash(
+        crate::SMOLVM_REVISION,
+        source,
+        child,
+        approval,
+        plan,
+        source_pid,
+        epoch,
+    )
+}
+fn revision_request_hash(
+    revision: &str,
+    source: &CreationReceipt,
+    child: &BranchChildIntent,
+    approval: &BranchApproval,
+    plan: &BranchResourcePlan,
+    source_pid: (i32, u64),
+    epoch: &str,
+) -> Result<String> {
     if source_pid.0 <= 0 || source_pid.1 == 0 || !crate::domain::valid_hex(epoch, 32) {
         return Err(Error::before(ErrorCode::Validation));
     }
     crate::material::hash(&(
         "smolbox-initial-branch-admission-v1",
-        crate::SMOLVM_REVISION,
+        revision,
         "shared-materialized-ram",
         source,
         child,
@@ -1497,7 +1529,8 @@ pub(crate) mod tests {
             },
             ..Default::default()
         }
-        .to_record();
+        .to_record()
+        .unwrap();
         record.state = smolvm::config::RecordState::Running;
         record.forkable = true;
         record.entrypoint = vec!["/bin/true".into()];

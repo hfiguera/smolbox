@@ -187,6 +187,8 @@ defmodule SmolBox.Client do
   operator approvals, not remotely attested by this response.
   An enabled policy requires a 1.16.0, 1.16.1, 1.17.0, 1.19.0, 1.20.2 or 1.22.0 health observation. That preflight and the
   create request share the configured operation timeout.
+  The worker may stay silent while preparing a cold artifact. The create
+  request waits within the remaining operation budget.
   Persist intent before this call and creation evidence before further mutations.
   A lost or mismatched response can leave creation uncertain; it does not authorize
   retry or deletion by name. See `SmolBox.MachineSpec.new/3` and the
@@ -596,6 +598,9 @@ defmodule SmolBox.Client do
   request. The caller must verify the returned state and continue appropriate
   reconciliation. A failed stop can leave the machine running; it does not
   authorize discarding its disks. See [Recovery](recovery.html).
+
+  The worker may stay silent while it flushes the guest disks. The stop waits
+  within the worker's total operation budget.
   """
   @spec stop(t(), String.t()) :: {:ok, Machine.t()} | {:error, Error.t()}
   def stop(client, name), do: lifecycle(client, name, :post, "/stop", :stop)
@@ -921,7 +926,14 @@ defmodule SmolBox.Client do
       max_bytes: client.worker.max_response_bytes
     }
 
-    case client.transport.request(client.worker, request) do
+    worker = client.worker
+
+    worker =
+      if operation in [:create, :stop],
+        do: %{worker | receive_timeout_ms: worker.operation_timeout_ms},
+        else: worker
+
+    case client.transport.request(worker, request) do
       {:ok, result} -> {:ok, result}
       {:error, %Error{} = error} -> {:error, %{error | operation: operation}}
     end

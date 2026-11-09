@@ -149,7 +149,6 @@ defmodule SmolBox.Example.EmbeddedBranches do
       artifact_store: {Directory, objects},
       fingerprint_key: fingerprint,
       workers: [target],
-      lease_ms: 1000,
       poll_ms: 50
     ]
 

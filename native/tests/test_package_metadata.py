@@ -22,7 +22,7 @@ class PackageMetadataTests(unittest.TestCase):
             upstream = builder / 'target/upstream/smolvm'
             upstream.mkdir(parents=True)
             (root / 'LICENSE').write_text('application license')
-            for name in ('LICENSE', 'Licenses.md'):
+            for name in ('LICENSE', 'THIRD-PARTY-NOTICES.md'):
                 (upstream / name).write_text('upstream licenses')
             (builder / 'vendor/source.json').write_text(json.dumps({'revision': 'a' * 40}))
             (builder / 'policy.json').write_text('{}')
@@ -77,7 +77,12 @@ class PackageMetadataTests(unittest.TestCase):
         expected['volume_limits'] = hello['limits']['volumes']
         self.assertEqual(linux, expected)
         hello['sdk']['feature_versions']['exports'] = 1
-        self.assertEqual(linux['sdk'], hello['sdk'])
+        self.assertEqual(linux['sdk']['feature_versions'], hello['sdk']['feature_versions'])
+        with (package.ROOT / 'Cargo.toml').open('rb') as manifest:
+            version = package.tomllib.load(manifest)['workspace']['dependencies']['smolvm']['version']
+        source = json.loads((package.ROOT / 'vendor/source.json').read_bytes())
+        self.assertEqual(linux['sdk']['sdk_version'], version.removeprefix('='))
+        self.assertEqual(linux['sdk']['source_revision'], source['revision'])
         for system, filename in [('Linux', 'policy-linux.json'), ('Darwin', 'policy.json')]:
             with self.subTest(system=system), mock.patch.object(package.platform, 'system', return_value=system):
                 self.assertEqual(package.policy_path(), package.ROOT / filename)

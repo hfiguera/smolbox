@@ -1,6 +1,6 @@
 defmodule SmolBox.RuntimeProxy do
   @moduledoc false
-  alias SmolBox.{FaultGate, TestPeer}
+  alias SmolBox.{FaultGate, LabCandidate, TestPeer}
 
   def start(endpoint, gate) do
     counts =
@@ -18,7 +18,7 @@ defmodule SmolBox.RuntimeProxy do
 
     if command do
       Agent.update(counts, &Map.update!(&1, :exec, fn n -> n + 1 end))
-      FaultGate.hit(gate, :exec, :before)
+      FaultGate.hit(gate, :exec, :before, LabCandidate.stop_observation_ms())
       Agent.update(counts, &Map.update!(&1, :forwarded, fn n -> n + 1 end))
     end
 

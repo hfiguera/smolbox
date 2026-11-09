@@ -75,7 +75,11 @@ defmodule SmolBox.Embedded.Config do
   alias SmolBox.{Error, Profile, Validation}
   alias SmolBox.Runtime.Approvals
 
-  @revision "9f446ae00219148ca4a703914f44a8e2fab11655"
+  @legacy_revision "9f446ae00219148ca4a703914f44a8e2fab11655"
+  @sdk_versions %{
+    @legacy_revision => "1.22.0",
+    "d77eaf1c6eeff16bc8c258613746033e9bf567ca" => "1.34.0"
+  }
   @package_keys ~w(engine_version smolvm_revision source_sha256 build_sha256 assets_sha256 platform architecture)
   @artifact_keys ~w(id sha256 architecture path max_bytes)
   @required [
@@ -190,8 +194,8 @@ defmodule SmolBox.Embedded.Config do
   def executable(%__MODULE__{} = config), do: Path.join(config.package_path, "smolbox-port")
 
   @doc "Return the SDK version bound to the source revision, independently of the engine."
-  def sdk_version(%__MODULE__{package_identity: %{"smolvm_revision" => @revision}}),
-    do: "1.22.0"
+  def sdk_version(%__MODULE__{package_identity: %{"smolvm_revision" => revision}}),
+    do: Map.get(@sdk_versions, revision)
 
   def sdk_version(_unrecognized), do: nil
 
@@ -256,12 +260,15 @@ defmodule SmolBox.Embedded.Config do
         is_boolean(config.draining) and is_boolean(config.allow_initialize)
 
   defp package?(%{package_identity: package} = config) do
-    exact_keys?(package, @package_keys) and package["engine_version"] in ["0.1.0", "0.2.0"] and
-      package["smolvm_revision"] == @revision and
+    exact_keys?(package, @package_keys) and supported_sdk?(protocol_major(config), package) and
       package["platform"] == Atom.to_string(config.platform) and
       package["architecture"] == config.architecture and
       Enum.all?(~w(source_sha256 build_sha256 assets_sha256), &Validation.digest?(package[&1]))
   end
+
+  defp supported_sdk?(1, package), do: package["smolvm_revision"] == @legacy_revision
+  defp supported_sdk?(2, package), do: Map.has_key?(@sdk_versions, package["smolvm_revision"])
+  defp supported_sdk?(_protocol, _package), do: false
 
   defp catalogs?(config) do
     Validation.list?(config.artifacts, 32) and catalog_present?(config) and
