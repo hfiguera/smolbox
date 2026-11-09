@@ -1,18 +1,18 @@
 {
   "sources": {
-    "url": "https://github.com/hfiguera/smolbox/releases/download/embedded-port-inputs-v1/smolbox-embedded-sources.tar.gz",
-    "sha256": "6713a0f6ab4c20e034058a8c2a99e3fa40c50947985ce4de6519d1b6b94206a4"
+    "url": "https://github.com/hfiguera/smolbox/releases/download/embedded-port-inputs-v1.34.0/smolbox-embedded-sources.tar.gz",
+    "sha256": "b85caa7a01718ed2013dd8fe0110acf57b88ba7125744d0a78f3ddb36f4329c3"
   },
   "notices": {
-    "url": "https://github.com/hfiguera/smolbox/releases/download/embedded-port-inputs-v1/smolbox-embedded-notices.tar.gz",
-    "sha256": "641190891e0361a458b4b3480b46402f35c17597895cd0d2a52804a72d3c13f1"
+    "url": "https://github.com/hfiguera/smolbox/releases/download/embedded-port-inputs-v1.34.0/smolbox-embedded-notices.tar.gz",
+    "sha256": "aa1080a8228425c2ae853aa98c91287556859b41776f227bdbf9812ac125774f"
   },
   "macos-aarch64": {
     "distribution_approved": true,
-    "source_review": "docs/evidence/embedded-port-release-sources.md",
+    "source_review": "docs/evidence/embedded-port-1.34.0-release-sources.md",
     "runtime": {
-      "url": "https://github.com/smol-machines/smolvm/releases/download/v1.22.0/smolvm-1.22.0-darwin-arm64.tar.gz",
-      "sha256": "8e6f9d7adf9ee87afe59f8c30d81da5be0c2546f53de7275e7eea2eb39d8f186"
+      "url": "https://github.com/smol-machines/smolvm/releases/download/v1.34.0/smolvm-1.34.0-darwin-arm64.tar.gz",
+      "sha256": "92187e599f77682fc9ea6aa7f2eaf50e1cb1320baf4b508357c47aeb8b12820c"
     },
     "demo": {
       "url": "https://github.com/hfiguera/smolbox/releases/download/embedded-port-inputs-v1/demo-macos-aarch64.smolmachine",
@@ -31,10 +31,10 @@
   },
   "linux-x86_64": {
     "distribution_approved": true,
-    "source_review": "docs/evidence/embedded-port-release-sources.md",
+    "source_review": "docs/evidence/embedded-port-1.34.0-release-sources.md",
     "runtime": {
-      "url": "https://github.com/smol-machines/smolvm/releases/download/v1.22.0/smolvm-1.22.0-linux-x86_64.tar.gz",
-      "sha256": "00d2f057c963ff950846d4059af87bdddb7edf707750cdab863cb0879d6b339e"
+      "url": "https://github.com/smol-machines/smolvm/releases/download/v1.34.0/smolvm-1.34.0-linux-x86_64.tar.gz",
+      "sha256": "89e098b1f7749c515ed95263f081c469befb0aa10b49ee589ccb3e901090608a"
     },
     "demo": {
       "url": "https://github.com/hfiguera/smolbox/releases/download/embedded-port-inputs-v1/demo-linux-x86_64.smolmachine",
@@ -55,10 +55,10 @@
   },
   "linux-aarch64": {
     "distribution_approved": true,
-    "source_review": "docs/evidence/embedded-port-release-sources.md",
+    "source_review": "docs/evidence/embedded-port-1.34.0-release-sources.md",
     "runtime": {
-      "url": "https://github.com/smol-machines/smolvm/releases/download/v1.22.0/smolvm-1.22.0-linux-arm64.tar.gz",
-      "sha256": "069f34e4840313cf8fe163e0324c5f74756aa8296ee9238e46268e23ce5531a9"
+      "url": "https://github.com/smol-machines/smolvm/releases/download/v1.34.0/smolvm-1.34.0-linux-arm64.tar.gz",
+      "sha256": "5e49dc63e76d24697e29348a8dbe74fce9360a730b9872272bde3489f1c173f8"
     },
     "demo": {
       "url": "https://github.com/hfiguera/smolbox/releases/download/embedded-port-inputs-v1/demo-linux-aarch64.smolmachine",
