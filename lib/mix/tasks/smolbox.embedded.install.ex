@@ -49,8 +49,9 @@ defmodule Mix.Tasks.Smolbox.Embedded.Install do
 
     case {:os.type(), String.split(architecture, "-", parts: 2) |> hd()} do
       {{:unix, :darwin}, arch} when arch in ["arm64", "aarch64"] -> {"macos", "aarch64"}
+      {{:unix, :linux}, arch} when arch in ["arm64", "aarch64"] -> {"linux", "aarch64"}
       {{:unix, :linux}, "x86_64"} -> {"linux", "x86_64"}
-      _ -> Mix.raise("Embedded Port releases support Apple Silicon and Linux x86_64")
+      _ -> Mix.raise("Embedded Port releases support Apple Silicon, Linux x86_64 and Linux ARM64")
     end
   end
 

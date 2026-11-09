@@ -176,7 +176,7 @@ def build(executable, assets, output, signing_identity=None):
         identity = {'engine_version': ENGINE_VERSION, 'smolvm_revision': source['revision'], 'source_sha256': digest(ROOT / 'vendor/source.json'),
                     'build_sha256': digest(staging / 'smolbox-port'), 'assets_sha256': hashlib.sha256(compact(entries)).hexdigest(),
                     'platform': 'macos' if platform.system() == 'Darwin' else 'linux',
-                    'architecture': {'arm64': 'aarch64', 'x86_64': 'x86_64'}[platform.machine()]}
+                    'architecture': {'arm64': 'aarch64', 'aarch64': 'aarch64', 'x86_64': 'x86_64'}[platform.machine()]}
         manifest = {'schema': 3, 'policy': json.loads(policy_path().read_bytes()),
                     'identity': identity, 'assets': entries, 'host_tools': [{'path': str(tool), 'sha256': digest(tool)}]}
         body = compact(manifest)

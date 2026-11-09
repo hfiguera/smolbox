@@ -134,11 +134,11 @@ published by this change. Local manifest approval is not publisher authenticatio
 ## Prebuilt release procedure
 
 The manual [release workflow](../.github/workflows/smolbox-embedded-release.yml)
-builds Apple Silicon and Linux x86_64 candidates on GitHub-hosted runners. It
-requires an explicit Git tag matching the Mix package version and an approved
-entry in `native/release-inputs.json` for each target. Keep the catalog absent
-until the corresponding source, notice, and distribution review is complete.
-Each target entry uses this shape:
+builds Apple Silicon, Linux x86_64, and Linux ARM64 candidates on GitHub-hosted
+runners. It requires an explicit Git tag matching the Mix package version and
+an approved entry in `native/release-inputs.json` for each target. Keep the
+catalog absent until the corresponding source, notice, and distribution review
+is complete. Each target entry uses this shape:
 
 ```json
 {
@@ -153,11 +153,12 @@ Each target entry uses this shape:
 }
 ```
 
-Use keys `macos-aarch64` and `linux-x86_64` at the top level. The runtime input
-is a tarball with one enclosing directory containing `lib/`, `agent-rootfs/`,
-`storage-template.ext4`, and `overlay-template.ext4`. The demo input is a
-digest-pinned offline packed image for the same architecture. Review the
-contents of that image along with the runtime inputs. Record exact revisions,
+Use keys `macos-aarch64`, `linux-x86_64`, and `linux-aarch64` at the top level.
+The runtime input is a tarball with one enclosing directory containing `lib/`,
+`agent-rootfs/`, `storage-template.ext4`, and `overlay-template.ext4`. The demo
+input is a digest-pinned standalone offline `.smolmachine` with its declared
+libraries in the archive and any disk templates within the quickstart profile.
+Review the contents of that image along with the runtime inputs. Record exact revisions,
 build recipes, corresponding-source delivery, and applicable notices in the
 linked review. The builder checks that its `resize2fs` matches the reviewed
 path and digest. The installer checks the same values on the consumer host.
@@ -165,11 +166,11 @@ List the resulting supported host profiles in the release notes.
 
 1. Dispatch the workflow on the release tag through the protected
    `embedded-port-release` environment.
-2. Keep the two platform archives and their matching `.sigstore.jsonl`
+2. Keep the platform archives and their matching `.sigstore.jsonl`
    bundles together. The workflow emits candidates as run artifacts. Release
    assets use these same filenames and bytes.
-3. Qualify the release installation from a fresh standard account on both
-   platforms with current and minimum Elixir/OTP and without Rust on
+3. Qualify the release installation from a fresh standard account on each
+   target with current and minimum Elixir/OTP and without Rust on
    `PATH`. Verify the public attestation and run the offline command through
    cleanup. On macOS, leave Gatekeeper enabled and use the download method
    from the quickstart.
@@ -197,3 +198,29 @@ upstream 1.22.0 macOS archive. The packaged `libkrun.dylib` differed at the
 binary level. This comparison leaves corresponding-source and notice delivery
 open. Qualification of the tagged GitHub workflow, public attestation
 verification, and the final release assets is still pending.
+
+### Linux ARM64 Lima preview
+
+The Linux ARM64 preview ran in Ubuntu 24.04 under Lima on Apple Silicon,
+using nested KVM and Linux `6.8.0-147-generic`. The helper was built from the
+same unmodified SDK revision as the other targets. Runtime libraries and the
+agent rootfs came from the verified upstream `smolvm-1.22.0-linux-arm64.tar.gz`
+release asset. The offline Alpine fixture used the pinned OCI image and
+included the matching Linux ARM64 libraries inline. The bundle supplied the
+disk templates.
+
+| Input | SHA-256 |
+| --- | --- |
+| Upstream runtime archive | `069f34e4840313cf8fe163e0324c5f74756aa8296ee9238e46268e23ce5531a9` |
+| Alpine OCI image | `0a7ed0d449b9318548e66674610d757de19b7645759f74b587b610b59d6b43fd` |
+| Quickstart demo | `11ee6ae490cdc148d398a40aeda571c5fd2cfaf9d706faa4070741df3f08c0dd` |
+| Native manifest | `a9b6517b9176306c86e53494ba5f9c00a0c562c778461e4ad04fb6e551d9b4ee` |
+| Preview release archive | `6a05ffa4c6949ce70169221a20f8bcd29d8115f3996219bd967930de1997b368` |
+| Host `/sbin/resize2fs` | `e742981c302ad5efec590381e22910180447052f0b5eb6b999c16a4ca6da68d9` |
+
+Elixir 1.20.4 / OTP 29.0.6 and Elixir 1.18.4 / OTP 27.3.4.15 used separate
+standard accounts without Rust on `PATH`. Both installed the digest-verified
+preview archive, printed `42` in an offline guest, and released the VM and its
+reservation. Both SDK databases ended with zero VMs and create reservations.
+The evidence covers the local Embedded Port quickstart. Broader ARM64 feature
+qualification and the public release path remain separate.

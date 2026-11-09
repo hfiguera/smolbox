@@ -242,7 +242,11 @@ defmodule SmolBox.Embedded.Config do
   defp identity?(config) do
     native_id?(config.id) and absolute_path?(config.package_path) and config.package_path != "/" and
       hex?(config.domain_generation, 32) and Validation.digest?(config.package_manifest_sha256) and
-      {config.platform, config.architecture} in [{:linux, "x86_64"}, {:macos, "aarch64"}] and
+      {config.platform, config.architecture} in [
+        {:linux, "x86_64"},
+        {:linux, "aarch64"},
+        {:macos, "aarch64"}
+      ] and
       package?(config)
   end
 

@@ -31,7 +31,7 @@ defmodule SmolBox.CheckpointTest do
           [runtime_version: "1.16.0"],
           [runtime_version: "1.20.1"],
           [runtime_version: "1.20.3"],
-          [architecture: "aarch64"],
+          [architecture: "armv7l"],
           [platform: :windows],
           [path: "/tmp/a.smolmachine"],
           [path: "/tmp/../a.smolcheckpoint"],
@@ -48,6 +48,7 @@ defmodule SmolBox.CheckpointTest do
 
     assert {:error, _} = Checkpoint.new([])
     assert {:error, _} = Checkpoint.validate(%{})
+    assert {:ok, _} = approval(platform: :linux, architecture: "aarch64")
     assert {:ok, _} = approval(platform: :macos, architecture: "aarch64")
   end
 

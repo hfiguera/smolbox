@@ -4,7 +4,7 @@ set -euo pipefail
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 tag=${1:?Expected a release tag}
 target=${2:?Expected a release target}
-case "$target" in macos-aarch64|linux-x86_64) ;; *) exit 1 ;; esac
+case "$target" in macos-aarch64|linux-x86_64|linux-aarch64) ;; *) exit 1 ;; esac
 catalog=native/release-inputs.json
 entry=$(jq -ce --arg target "$target" '.[$target] | select(.distribution_approved == true)' "$catalog")
 review=$(jq -er '.source_review | select(test("^docs/[a-zA-Z0-9./_-]+\\.md$") and (contains("..") | not))' <<< "$entry")

@@ -52,6 +52,7 @@ defmodule SmolBox.Checkpoint do
          true <-
            {checkpoint.platform, checkpoint.architecture} in [
              {:linux, "x86_64"},
+             {:linux, "aarch64"},
              {:macos, "aarch64"}
            ],
          true <-

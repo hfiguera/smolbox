@@ -28,7 +28,7 @@ def build(tag, package, demo, output):
     manifest = package / 'package.json'
     identity = json.loads(manifest.read_bytes())['identity']
     target = (identity['platform'], identity['architecture'])
-    if target not in [('macos', 'aarch64'), ('linux', 'x86_64')]:
+    if target not in [('macos', 'aarch64'), ('linux', 'x86_64'), ('linux', 'aarch64')]:
         raise ValueError('unsupported native package platform')
     asset = f'smolbox-embedded-{target[0]}-{target[1]}.tar.gz'
     if output.name != asset:

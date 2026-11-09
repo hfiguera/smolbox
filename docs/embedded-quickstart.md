@@ -11,8 +11,8 @@ independently approved SHA-256 for the preview.
 
 ## Prerequisites
 
-- Elixir 1.18 or later on Apple Silicon or Linux x86_64. Linux needs read and
-  write access to `/dev/kvm`.
+- Elixir 1.18 or later on Apple Silicon, Linux x86_64, or Linux ARM64. Linux
+  needs read and write access to a working `/dev/kvm`.
 - A dedicated standard account with empty smolvm state. The helper uses the
   SDK's default data paths for that account.
 - The exact `resize2fs` recorded by the bundle. The installer checks its path

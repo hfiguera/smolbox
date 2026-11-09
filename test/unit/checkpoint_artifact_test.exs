@@ -9,11 +9,6 @@ defmodule SmolBox.CheckpointArtifactTest do
     on_exit(fn -> File.rm(path) end)
     {:ok, profile} = Profile.new("native")
 
-    bytes =
-      CheckpointFixture.bytes(Map.put(CheckpointFixture.manifest(), "smolvm_version", "1.22.0"))
-
-    File.write!(path, bytes)
-
     config =
       struct(SmolBox.Embedded.Config,
         package_identity: %{
@@ -22,15 +17,30 @@ defmodule SmolBox.CheckpointArtifactTest do
         }
       )
 
-    worker = %SmolBox.Runtime.Target{
-      kind: :embedded,
-      native_config: config,
-      platform: :linux,
-      architecture: "x86_64",
-      runtime_version: "0.2.0"
-    }
+    for {architecture, platform} <- [{"x86_64", "linux/amd64"}, {"aarch64", "linux/arm64"}] do
+      worker = %SmolBox.Runtime.Target{
+        kind: :embedded,
+        native_config: config,
+        platform: :linux,
+        architecture: architecture,
+        runtime_version: "0.2.0"
+      }
 
-    assert :ok = CheckpointArtifact.verify(path, %{size_bytes: byte_size(bytes)}, profile, worker)
+      manifest =
+        CheckpointFixture.manifest()
+        |> Map.merge(%{
+          "platform" => platform,
+          "host_platform" => platform,
+          "smolvm_version" => "1.22.0"
+        })
+        |> put_in(["checkpoint", "host_platform"], platform)
+
+      bytes = CheckpointFixture.bytes(manifest)
+      File.write!(path, bytes)
+
+      assert :ok =
+               CheckpointArtifact.verify(path, %{size_bytes: byte_size(bytes)}, profile, worker)
+    end
   end
 
   test "Mac captures distinguish Linux guest from Darwin host and accept neutral SDK metadata" do

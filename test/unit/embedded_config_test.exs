@@ -243,6 +243,47 @@ defmodule SmolBox.Embedded.ConfigTest do
     assert_invalid(Keyword.put(options(), :id, ".hidden"))
   end
 
+  test "Linux ARM64 uses the Linux descriptor and keeps checkpoint host identity distinct" do
+    options = options()
+
+    package =
+      Map.merge(options[:package_identity], %{"platform" => "linux", "engine_version" => "0.2.0"})
+
+    sdk = SDKIdentity.implemented("1.22.0", package["smolvm_revision"])
+    sdk = put_in(sdk, ["feature_versions", "checkpoints"], 1)
+    [profile] = options[:profiles]
+
+    assert {:ok, checkpoint} =
+             Checkpoint.new(
+               id: "arm-idle",
+               sha256: String.duplicate("a", 64),
+               architecture: "aarch64",
+               platform: :linux,
+               path: "/approved/arm-idle.smolcheckpoint",
+               profile: profile
+             )
+
+    options =
+      Keyword.merge(options,
+        platform: :linux,
+        package_identity: package,
+        sdk_identity: sdk,
+        checkpoints: [checkpoint]
+      )
+
+    assert {:ok, config} = Config.new(options)
+    assert :ok = config |> Target.normalize() |> Target.validate()
+
+    assert %{"approved_checkpoints" => [%{"host_platform" => "linux/arm64"}]} =
+             Launch.helper_config(config)
+
+    assert_invalid(Keyword.put(options, :checkpoints, [%{checkpoint | platform: :macos}]))
+
+    assert_invalid(
+      Keyword.put(options, :package_identity, %{package | "architecture" => "x86_64"})
+    )
+  end
+
   test "reject unsupported bridge and arbitrary domain paths before startup" do
     assert {:error, %Error{category: :unsupported_capability, evidence: :not_dispatched}} =
              Config.new(Keyword.put(options(), :bridge, :rustler))

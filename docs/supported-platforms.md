@@ -20,7 +20,9 @@ These tested pairs do not establish support for every possible Elixir/OTP pairin
 | Linux x86_64 | Native smolvm with working KVM | Access to `/dev/kvm`, the complete worker distribution, host disk tools and an image for x86_64 |
 | macOS Apple Silicon | Native Darwin ARM64 smolvm distribution | Matching agent and VMM libraries, host disk tools and an image for aarch64; a separate account or host for the demo |
 
-Linux ARM64, Windows workers and Intel macOS are outside the tested worker support.
+Linux ARM64, Windows workers and Intel macOS are outside the tested HTTP worker
+support. For the local Embedded Port preview, see the
+[Embedded Port quickstart](embedded-quickstart.md).
 The controller talks to a worker API; this table describes worker hosts, not a
 requirement that every controller run on the same host as its worker.
 
