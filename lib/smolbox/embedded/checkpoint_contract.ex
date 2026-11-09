@@ -76,7 +76,7 @@ defmodule SmolBox.Embedded.CheckpointContract do
         "path" => checkpoint.path,
         "max_bytes" => @artifact_bytes,
         "sdk_version" => checkpoint.runtime_version,
-        "host_platform" => host_platform(checkpoint),
+        "host_platform" => Checkpoint.host_platform(checkpoint),
         "resources" => %{
           "cpus" => profile.cpus,
           "memory_mib" => profile.memory_mb,
@@ -86,8 +86,4 @@ defmodule SmolBox.Embedded.CheckpointContract do
       }
     end)
   end
-
-  defp host_platform(%{platform: :linux, architecture: "x86_64"}), do: "linux/amd64"
-  defp host_platform(%{platform: :linux, architecture: "aarch64"}), do: "linux/arm64"
-  defp host_platform(%{platform: :macos, architecture: "aarch64"}), do: "darwin/arm64"
 end

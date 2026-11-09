@@ -1,6 +1,6 @@
 defmodule SmolBox.CheckpointArtifact do
   @moduledoc false
-  alias SmolBox.Error
+  alias SmolBox.{Checkpoint, Error}
   alias SmolBox.Runtime.Target
 
   # Read only the bounded manifest, never unpack assets or execute artifact code.
@@ -42,7 +42,7 @@ defmodule SmolBox.CheckpointArtifact do
 
   defp supported?(%{"checkpoint" => checkpoint} = manifest, profile, worker)
        when is_map(checkpoint) do
-    host_platform = host_platform(worker)
+    host_platform = Checkpoint.host_platform(worker)
     guest_platform = guest_platform(worker)
 
     matches?(manifest, %{
@@ -79,7 +79,7 @@ defmodule SmolBox.CheckpointArtifact do
   defp empty_fields?(map, keys), do: Enum.all?(keys, &(map[&1] in [nil, [], %{}, ""]))
 
   defp guest_platform(%{platform: :macos, architecture: "aarch64"}), do: "linux/arm64"
-  defp guest_platform(worker), do: host_platform(worker)
+  defp guest_platform(worker), do: Checkpoint.host_platform(worker)
 
   defp offline_network?(%{"enabled" => false} = network) do
     fields =
@@ -92,8 +92,4 @@ defmodule SmolBox.CheckpointArtifact do
   end
 
   defp offline_network?(_), do: false
-
-  defp host_platform(%{platform: :linux, architecture: "x86_64"}), do: "linux/amd64"
-  defp host_platform(%{platform: :linux, architecture: "aarch64"}), do: "linux/arm64"
-  defp host_platform(%{platform: :macos, architecture: "aarch64"}), do: "darwin/arm64"
 end

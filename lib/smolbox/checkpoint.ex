@@ -81,6 +81,11 @@ defmodule SmolBox.Checkpoint do
   end
 
   @doc false
+  def host_platform(%{platform: :linux, architecture: "x86_64"}), do: "linux/amd64"
+  def host_platform(%{platform: :linux, architecture: "aarch64"}), do: "linux/arm64"
+  def host_platform(%{platform: :macos, architecture: "aarch64"}), do: "darwin/arm64"
+
+  @doc false
   @spec machine(t(), String.t()) :: {:ok, MachineSpec.t()} | {:error, Error.t()}
   def machine(checkpoint, name) do
     options =
