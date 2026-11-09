@@ -47,8 +47,8 @@ defmodule SmolBox.ManagedGuestFilesTest do
     Agent.update(fixture.artifacts, &Map.put(&1, {"contract", "large"}, bytes))
     {:ok, spec} = machine_spec(fixture)
     {:ok, handle} = Machines.create(fixture.runtime, spec)
-    {:ok, created} = Machines.await(fixture.runtime, handle, 5000)
-    {:ok, _} = Machines.start(fixture.runtime, handle, created.version)
+    assert {:ok, %{state: :created}} = Machines.await(fixture.runtime, handle, 5000)
+    {:ok, _} = RuntimeFixture.request_machine(fixture.runtime, handle, &Machines.start/3)
     {:ok, running} = Machines.await(fixture.runtime, handle, 5000)
     assert running.state == :running
 
