@@ -222,7 +222,10 @@ mod tests {
 
     #[test]
     fn mapped_ports_do_not_silently_enable_outbound_networking() {
-        let mut spec = MachineSpec::default();
+        let mut spec = MachineSpec {
+            name: "port-fixture".into(),
+            ..MachineSpec::default()
+        };
         spec.resources.network = false;
         spec.resources.allowed_cidrs = Some(Vec::new());
         mapped_ports(&mut spec, 18080, 8080);
