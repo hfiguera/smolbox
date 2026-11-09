@@ -4,35 +4,21 @@ defmodule SmolBox.Embedded.NativeBranchDeletion do
     BranchCanonical,
     BranchCompletion,
     BranchDeletionResolution,
-    NativeBranchDeletionAction,
-    NativeGrowth,
+    NativeBranchDeletionState,
     NativeReleasedBranchDeletion
   }
 
-  alias SmolBox.{ManagedMachine, Validation}
+  alias SmolBox.Validation
   @enforce_keys [:version, :delete_version, :request]
   @derive {Inspect, only: [:version]}
   defstruct @enforce_keys ++ [proof: nil]
 
-  def required?(%ManagedMachine{
-        branch: %{
-          native_authority: %{completion: %BranchCompletion{}}
-        },
-        operation: :delete,
-        state: state
-      }),
-      do: state in [:unknown, :missing, :conflict]
-
-  def required?(_), do: false
+  defdelegate required?(record), to: NativeBranchDeletionState
 
   def resolvable?(record), do: eligible?(record) or NativeReleasedBranchDeletion.eligible?(record)
 
   def eligible?(record),
-    do:
-      required?(record) and held_origin?(record) and inactive?(record) and
-        match?({:delete, version} when is_integer(version) and version > 0, record.last_request) and
-        record.branch.native_authority.retirement == nil and
-        record.branch.native_authority.backing == nil
+    do: NativeBranchDeletionState.pending?(record) and held_origin?(record)
 
   defp held_origin?(%{
          branch: %{
@@ -43,12 +29,6 @@ defmodule SmolBox.Embedded.NativeBranchDeletion do
        do: true
 
   defp held_origin?(_), do: false
-
-  defp inactive?(record),
-    do:
-      record.active_execution == nil and record.active_branch == nil and
-        record.active_expansion == nil and
-        record.active_capture == nil and record.active_export == nil
 
   def intent(authority, version, delete_version, receipt) do
     digest =
@@ -90,33 +70,29 @@ defmodule SmolBox.Embedded.NativeBranchDeletion do
 
   def valid?(_, _), do: false
 
-  def record?(%{branch: %{native_authority: %{deletion: nil}}}), do: true
+  def record?(%{branch: %{native_authority: %{deletion: nil}}}, _historical?), do: true
 
   def record?(
-        %{branch: %{native_authority: %{deletion: %__MODULE__{} = saved} = authority}} = child
+        %{branch: %{native_authority: %{deletion: %__MODULE__{} = saved} = authority}} = child,
+        historical?
       ) do
-    with true <- valid?(saved, authority) and saved.version < child.version,
-         true <- child.last_request == {:delete, saved.delete_version},
-         {:ok, receipt, _, _} <- NativeGrowth.head(child),
-         true <- receipt == saved.request["child"],
-         do: state?(child, saved.proof),
-         else: (_ -> false)
+    valid?(saved, authority) and NativeBranchDeletionState.bound_record?(child, saved) and
+      if(saved.proof == nil,
+        do: eligible?(child) or historical?.(child, :held),
+        else: completed_state?(child)
+      )
   end
 
   def record?(
-        %{branch: %{native_authority: %{deletion: %NativeReleasedBranchDeletion{}}}} = child
+        %{branch: %{native_authority: %{deletion: %NativeReleasedBranchDeletion{}}}} = child,
+        historical?
       ),
-      do: NativeReleasedBranchDeletion.record?(child)
+      do: NativeReleasedBranchDeletion.record?(child, historical?)
 
-  def record?(_), do: false
-  defp state?(child, nil), do: eligible?(child) or NativeBranchDeletionAction.historical?(child)
-
-  defp state?(child, _), do: completed_state?(child)
+  def record?(_, _), do: false
 
   def completed_state?(child),
-    do:
-      child.state == :deleted and ManagedMachine.idle?(child) and child.reservation == nil and
-        child.branch.state in [:held, :retired, :closed]
+    do: NativeBranchDeletionState.completed?(child, [:held, :retired, :closed])
 
   defp version?(value), do: Validation.integer?(value, 1, 9_007_199_254_740_991)
 

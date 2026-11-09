@@ -2,7 +2,7 @@ defmodule SmolBox.Runtime.NativeUnbootedBranchRetirement do
   @moduledoc false
   alias SmolBox.{Backend, Error, ManagedMachine}
   alias SmolBox.Embedded.{NativeBranchRetirement, UnbootedBranchChildAbsence}
-  alias SmolBox.Runtime.{MachineSession, NativeResolution, Session, Target}
+  alias SmolBox.Runtime.{Deadline, MachineSession, NativeResolution, Session, Target}
 
   def run(
         _,
@@ -46,7 +46,7 @@ defmodule SmolBox.Runtime.NativeUnbootedBranchRetirement do
   end
 
   defp resolve(config, parent, child, worker, deadline) do
-    with {:ok, timeout} <- remaining(deadline),
+    with {:ok, timeout} <- Deadline.remaining(deadline, :branch),
          {:ok, proof} <- observe(config, parent, child, worker, timeout),
          do: uncertain(commit(config, child, proof, deadline))
   end
@@ -97,9 +97,9 @@ defmodule SmolBox.Runtime.NativeUnbootedBranchRetirement do
   end
 
   defp commit(config, child, proof, deadline) do
-    with {:ok, _} <- remaining(deadline),
+    with {:ok, _} <- Deadline.remaining(deadline, :branch),
          {:ok, current} <- MachineSession.claim(config, child.branch.source),
-         {:ok, _} <- remaining(deadline),
+         {:ok, _} <- Deadline.remaining(deadline, :branch),
          do:
            MachineSession.store(config, :branch_retire, [
              child.branch.source,
@@ -110,14 +110,6 @@ defmodule SmolBox.Runtime.NativeUnbootedBranchRetirement do
            ])
   end
 
-  defp remaining(deadline) do
-    timeout = deadline - now()
-    if timeout > 0, do: {:ok, timeout}, else: Session.error(:expired, :branch)
-  end
-
-  defp uncertain({:error, %Error{} = error}),
-    do: {:error, %{error | operation: :branch, evidence: :dispatch_uncertain}}
-
-  defp uncertain(result), do: result
+  defp uncertain(result), do: Error.uncertain(result, :branch)
   defp now, do: System.monotonic_time(:millisecond)
 end

@@ -76,8 +76,8 @@ defmodule SmolBox.Embedded.CaptureAbortSourceTest do
   test "aborted source qualification is bounded quarantined control with exact reply correlation" do
     for proof <- fixture("capture-abort-sources-v1.json") do
       request = request(proof)
-      assert Request.valid?(request, 30000, 2)
-      refute Request.valid?(request, 30001, 2)
+      assert Request.valid?(request, 30_000, 2)
+      refute Request.valid?(request, 30_001, 2)
       refute Request.valid?(request, 1000, 1)
       assert Request.control?(request)
       assert Request.reconciliation?(request)

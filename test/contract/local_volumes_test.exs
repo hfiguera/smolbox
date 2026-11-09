@@ -3,8 +3,8 @@ defmodule SmolBox.LocalVolumesTest do
   alias SmolBox.Store.Contract
 
   alias SmolBox.{
-    ManagedMachine,
     Machines,
+    ManagedMachine,
     ManagedMachineSpec,
     Runtime,
     RuntimeFixture,

@@ -2,7 +2,7 @@ defmodule SmolBox.Runtime.NativeBranchDeletion do
   @moduledoc false
   alias SmolBox.{Backend, ManagedMachine}
   alias SmolBox.Embedded.{BranchDeletionResolution, ReleasedBranchDeletionResolution}
-  alias SmolBox.Runtime.{MachineSession, Session, Target}
+  alias SmolBox.Runtime.{Deadline, MachineSession, Session, Target}
 
   # The public resolver already holds the captured helper/controller fence and
   # claimed the expected user version. Keep the same pin through final commit.
@@ -10,21 +10,21 @@ defmodule SmolBox.Runtime.NativeBranchDeletion do
     deadline = deadline || now() + min(Target.connection(worker).budget.timeout_ms, 30_000)
 
     with :ok <- Target.require_operation(worker, :resolve_branch_deletion),
-         {:ok, _} <- remaining(deadline),
+         {:ok, _} <- Deadline.remaining(deadline, :reconcile),
          {:ok, child} <-
            MachineSession.store(config, :branch_delete_accept, [
              ManagedMachine.key(child),
              Session.guard(child),
              config.clock.now()
            ]),
-         {:ok, timeout} <- remaining(deadline),
+         {:ok, timeout} <- Deadline.remaining(deadline, :reconcile),
          {:ok, proof}
          when is_struct(proof, BranchDeletionResolution) or
                 is_struct(proof, ReleasedBranchDeletionResolution) <-
            observe(config, child, worker, timeout),
-         {:ok, _} <- remaining(deadline),
+         {:ok, _} <- Deadline.remaining(deadline, :reconcile),
          {:ok, fresh} <- MachineSession.claim(config, ManagedMachine.key(child)),
-         {:ok, _} <- remaining(deadline),
+         {:ok, _} <- Deadline.remaining(deadline, :reconcile),
          do:
            MachineSession.store(config, :resolve, [
              ManagedMachine.key(child),
@@ -45,11 +45,6 @@ defmodule SmolBox.Runtime.NativeBranchDeletion do
     MachineSession.io(config, io_record, fn ->
       Backend.resolve_branch_deletion(reference, child)
     end)
-  end
-
-  defp remaining(deadline) do
-    timeout = deadline - now()
-    if timeout > 0, do: {:ok, timeout}, else: Session.error(:expired, :reconcile)
   end
 
   defp now, do: System.monotonic_time(:millisecond)

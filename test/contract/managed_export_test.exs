@@ -239,7 +239,7 @@ defmodule SmolBox.ManagedExportTest do
     # This simulated peer has no helper. Production operators must establish
     # this separately; an export response alone never releases its capacity.
     assert {:ok, %{state: :completed}} =
-             Exports.resolve(fixture.runtime, handle, record.version, quiesced: true)
+             resolve_current(fixture.runtime, handle, quiesced: true)
 
     assert {:ok, %{slots: 1}} = Memory.usage(fixture.store, "peer")
     assert {:ok, bytes} = Codec.encode(record)
@@ -277,10 +277,9 @@ defmodule SmolBox.ManagedExportTest do
     assert {:error, _} = Machines.resolve(runtime, machine, blocked.version, quiesced: true)
     assert {:ok, %{slots: 2}} = Memory.usage(fixture.store, "peer")
     assert Agent.get(registry, & &1.publications) == 1
-    assert {:ok, current} = Machines.inspect(runtime, machine)
 
     assert {:ok, %{state: :resolved_unknown, result: nil}} =
-             Exports.resolve(runtime, handle, current.version, quiesced: true)
+             resolve_current(runtime, handle, quiesced: true)
 
     assert {:ok, %{slots: 1}} = Memory.usage(fixture.store, "peer")
     assert count(fixture.peer, "/export") == 1
@@ -292,19 +291,15 @@ defmodule SmolBox.ManagedExportTest do
     {:ok, %{state: :unknown}} = Exports.await(fixture.runtime, handle, 5000)
     {:ok, current} = Machines.inspect(fixture.runtime, machine)
 
-    assert {:error, _} =
-             Exports.resolve(fixture.runtime, handle, current.version,
-               quiesced: true,
-               disposition: :deleted
-             )
+    assert {:error, %{category: :identity_conflict}} =
+             resolve_current(fixture.runtime, handle, quiesced: true, disposition: :deleted)
 
     assert {:ok, %{slots: 2}} = Memory.usage(fixture.store, "peer")
     # Simulate explicit operator cleanup after fencing the completed peer request.
     Agent.update(fixture.peer, &%{&1 | machines: Map.delete(&1.machines, current.machine_name)})
-    {:ok, latest} = Machines.inspect(fixture.runtime, machine)
 
     assert {:ok, %{state: :resolved_unknown}} =
-             Exports.resolve(fixture.runtime, handle, latest.version,
+             resolve_current(fixture.runtime, handle,
                quiesced: true,
                disposition: :deleted
              )
@@ -347,6 +342,19 @@ defmodule SmolBox.ManagedExportTest do
     {:ok, %{state: :stopped}} = Machines.await(fixture.runtime, machine, 5000)
     {:ok, export} = ExportSpec.new(id: "save-one", tag: "save-one", destination: destination)
     {fixture, registry, machine, export}
+  end
+
+  defp resolve_current(runtime, {scope, machine, _} = handle, options, attempts \\ 20) do
+    with {:ok, record} <- Machines.inspect(runtime, {scope, machine}) do
+      case Exports.resolve(runtime, handle, record.version, options) do
+        {:error, %{category: :stale_version, evidence: :not_dispatched}} when attempts > 0 ->
+          Process.sleep(5)
+          resolve_current(runtime, handle, options, attempts - 1)
+
+        result ->
+          result
+      end
+    end
   end
 
   defp count(peer, suffix),

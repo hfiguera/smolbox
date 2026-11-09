@@ -198,16 +198,22 @@ defmodule SmolBox.NativeBranchControlReadinessTest do
 
   defp run(f, function, operation \\ :branch_retire, deadline \\ nil) do
     disposition =
-      if operation in [
-           :branch_retire,
-           :branch_release_storage,
-           :branch_resolve_ready,
-           :resolve_branch_deletion,
-           :retire_prepared_branch
-         ],
-         do: {:ordinary_branch, operation},
-         else:
-           if(operation == :capture_complete, do: {:ordinary_capture, operation}, else: operation)
+      cond do
+        operation in [
+          :branch_retire,
+          :branch_release_storage,
+          :branch_resolve_ready,
+          :resolve_branch_deletion,
+          :retire_prepared_branch
+        ] ->
+          {:ordinary_branch, operation}
+
+        operation == :capture_complete ->
+          {:ordinary_capture, operation}
+
+        true ->
+          operation
+      end
 
     NativeResolution.run(f.config, f.host, f.record, f.target, disposition, function, deadline)
   end

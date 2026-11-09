@@ -2914,6 +2914,15 @@ mod tests {
         Ok(sdk)
     }
 
+    fn model_branch_sdk_identity() -> Result<wire::SdkIdentity, serde_json::Error> {
+        let mut sdk = model_sdk_identity()?;
+        // Branch tests opt into each capability independently of package defaults.
+        sdk.feature_versions.remove("branches");
+        sdk.feature_versions.remove("partial_collection_preflight");
+        sdk.feature_versions.remove("partial_cleanup_resolution");
+        Ok(sdk)
+    }
+
     fn hello() -> wire::Hello {
         wire::Hello {
             major: 1,
@@ -4524,7 +4533,8 @@ mod tests {
                 for policy in 0..4 {
                     let wanted: wire::BranchCreateRequest =
                         serde_json::from_value(row["request"].clone()).unwrap();
-                    let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                    let mut sdk =
+                        model_branch_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                     if policy != 0 {
                         sdk.feature_versions.insert("branches".into(), 1);
                     }
@@ -4661,7 +4671,8 @@ mod tests {
                 for policy in 0..4 {
                     let wanted: wire::BranchHeldReleaseRequest =
                         serde_json::from_value(row["request"].clone()).unwrap();
-                    let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                    let mut sdk =
+                        model_branch_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                     if policy != 0 {
                         sdk.feature_versions.insert("branches".into(), 1);
                     }
@@ -4761,7 +4772,7 @@ mod tests {
             let wanted: wire::BranchChildAbsenceRequest =
                 serde_json::from_value(row["request"].clone()).unwrap();
             for policy in 0..4 {
-                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_branch_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                 }
@@ -4848,7 +4859,7 @@ mod tests {
             let wanted: wire::BranchBackingReleaseRequest =
                 serde_json::from_value(row["request"].clone()).unwrap();
             for policy in 0..4 {
-                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_branch_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                 }
@@ -4935,7 +4946,7 @@ mod tests {
             let wanted: wire::ReleasedBranchDeletionContinuationRequest =
                 serde_json::from_value(row["request"].clone()).unwrap();
             for policy in 0..4 {
-                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_branch_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                 }
@@ -5022,7 +5033,7 @@ mod tests {
             let wanted: wire::ReleasedBranchDeletionCleanupRequest =
                 serde_json::from_value(row["request"].clone()).unwrap();
             for policy in 0..4 {
-                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_branch_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                 }
@@ -5109,7 +5120,7 @@ mod tests {
             let wanted: wire::BranchDeletionCollectionRequest =
                 serde_json::from_value(row["request"].clone()).unwrap();
             for policy in 0..4 {
-                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_branch_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                 }
@@ -5196,9 +5207,7 @@ mod tests {
             let wanted: wire::PartialBranchCollectionRequest =
                 serde_json::from_value(row["request"].clone()).unwrap();
             for policy in 0..5 {
-                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
-                sdk.feature_versions.remove("branches");
-                sdk.feature_versions.remove("partial_collection_preflight");
+                let mut sdk = model_branch_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                     if policy != 4 {
@@ -5290,7 +5299,7 @@ mod tests {
             let wanted: wire::PartialBranchCollectionRequest =
                 serde_json::from_value(row["request"].clone()).unwrap();
             for policy in 0..4 {
-                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_branch_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                 }
@@ -5378,7 +5387,8 @@ mod tests {
                 serde_json::from_value(row["request"].clone()).unwrap();
             for resolve in [false, true] {
                 for policy in 0..4 {
-                    let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                    let mut sdk =
+                        model_branch_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                     if policy != 0 {
                         sdk.feature_versions.insert("branches".into(), 1);
                     }
@@ -5506,7 +5516,7 @@ mod tests {
             let wanted: wire::PartialBranchDisposalCleanupRequest =
                 serde_json::from_value(row["request"].clone()).unwrap();
             for policy in 0..6 {
-                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_branch_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                 }
@@ -5648,7 +5658,7 @@ mod tests {
             let wanted: wire::PartialBranchDisposalRequest =
                 serde_json::from_value(row["request"].clone()).unwrap();
             for policy in 0..6 {
-                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_branch_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                 }
@@ -5773,7 +5783,7 @@ mod tests {
             let wanted: wire::PartialBranchDisposalCleanupRequest =
                 serde_json::from_value(row["request"].clone()).unwrap();
             for policy in 0..7 {
-                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_branch_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                     if policy != 6 {
@@ -5919,7 +5929,7 @@ mod tests {
             let wanted: wire::ReleasedBranchDeletionRequest =
                 serde_json::from_value(row["request"].clone()).unwrap();
             for policy in 0..4 {
-                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_branch_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                 }
@@ -6006,7 +6016,7 @@ mod tests {
             let wanted: wire::HeldBranchDeletionRequest =
                 serde_json::from_value(row["request"].clone()).unwrap();
             for policy in 0..4 {
-                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_branch_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                 }
@@ -6093,7 +6103,7 @@ mod tests {
             let wanted: wire::PartialBranchChildAbsenceRequest =
                 serde_json::from_value(row["proof"]["request"].clone()).unwrap();
             for policy in 0..5 {
-                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_branch_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                 }
@@ -6219,7 +6229,7 @@ mod tests {
             let wanted: wire::PartialBranchBackingReleaseRequest =
                 serde_json::from_value(row["request"].clone()).unwrap();
             for policy in 0..5 {
-                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_branch_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                 }
@@ -6345,7 +6355,7 @@ mod tests {
             let wanted: wire::UnbootedBranchChildAbsenceRequest =
                 serde_json::from_value(row["proof"]["request"].clone()).unwrap();
             for policy in 0..5 {
-                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_branch_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                 }
@@ -6457,7 +6467,7 @@ mod tests {
             let wanted: wire::BranchCreateRequest =
                 serde_json::from_value(row["creation"].clone()).unwrap();
             for policy in 0..5 {
-                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_branch_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                 }
@@ -6569,7 +6579,7 @@ mod tests {
             let wanted: wire::PreparedBranchRetirementRequest =
                 serde_json::from_value(row["request"].clone()).unwrap();
             for policy in 0..5 {
-                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_branch_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                 }
@@ -6662,7 +6672,8 @@ mod tests {
                 serde_json::from_value(row["request"].clone()).unwrap();
             for kind in 0..3 {
                 for policy in 0..5 {
-                    let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                    let mut sdk =
+                        model_branch_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                     if policy != 0 {
                         sdk.feature_versions.insert("branches".into(), 1);
                     }
@@ -6782,7 +6793,7 @@ mod tests {
             let wanted: wire::HeldBranchDeletionActionRequest =
                 serde_json::from_value(row["request"].clone()).unwrap();
             for policy in 0..5 {
-                let mut sdk = model_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
+                let mut sdk = model_branch_sdk_identity().unwrap_or_else(|_| panic!("SDK policy"));
                 if policy != 0 {
                     sdk.feature_versions.insert("branches".into(), 1);
                 }
@@ -6884,8 +6895,8 @@ mod tests {
             serde_json::from_value(fixture["operation"].clone()).unwrap();
         assert!(!is_observation(&operation) && !is_control(&operation));
         for enabled in [false, true] {
-            let mut sdk =
-                model_sdk_identity().unwrap_or_else(|_| panic!("invalid compiled SDK policy"));
+            let mut sdk = model_branch_sdk_identity()
+                .unwrap_or_else(|_| panic!("invalid compiled SDK policy"));
             if enabled {
                 sdk.feature_versions.insert("branches".into(), 1);
             }

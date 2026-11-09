@@ -3,7 +3,6 @@ defmodule SmolBox.Embedded.PartialBranchBackingRelease do
   alias SmolBox.Embedded.{
     BranchBackingRelease,
     BranchCanonical,
-    BranchRequest,
     PartialBranchDisposal,
     Shape
   }
@@ -29,10 +28,7 @@ defmodule SmolBox.Embedded.PartialBranchBackingRelease do
         get_in(request, ~w(disposal publication change child))
 
   defp identity?(request),
-    do:
-      BranchRequest.release?(Map.take(request, ~w(operation_id request_sha256))) and
-        request["quiesced"] == true and request["backing_removed"] == true and distinct?(request) and
-        request["request_sha256"] == request_digest(request)
+    do: BranchBackingRelease.disposal_request_identity?(request, &distinct?/1, &request_digest/1)
 
   defp head?(current, expected),
     do:
@@ -68,15 +64,8 @@ defmodule SmolBox.Embedded.PartialBranchBackingRelease do
         request["backing_removed"]
       ])
 
-  def matches?(%BranchBackingRelease{} = proof, request),
-    do: matches?(BranchBackingRelease.to_wire(proof), request)
-
   def matches?(proof, request),
-    do:
-      BranchBackingRelease.valid?(proof) and request?(request) and
-        proof["publication"] == request["disposal"]["publication"] and
-        proof["operation_id"] == request["operation_id"] and
-        proof["request_sha256"] == request["request_sha256"]
+    do: BranchBackingRelease.matches_disposal?(proof, request, &request?/1)
 
   def approval(request),
     do: get_in(request, ~w(disposal request collection_request creation approval))

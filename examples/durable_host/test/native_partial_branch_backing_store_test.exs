@@ -2,6 +2,7 @@ defmodule SmolBox.DurableHost.NativePartialBranchBackingStoreTest do
   use ExUnit.Case, async: false
   alias SmolBox.DurableHost.{Database, Repo, Store}
   alias SmolBox.ManagedMachine
+  alias SmolBox.Store.NativeBranchBackingContract
   alias SmolBox.Store.NativePartialBranchBackingContract, as: Contract
 
   setup do
@@ -32,29 +33,50 @@ defmodule SmolBox.DurableHost.NativePartialBranchBackingStoreTest do
 
       assert {:error, :modeled_rollback} =
                Repo.transact(fn ->
-                 assert {:ok, _} = Contract.accept(Store, store, source, child, 1312)
+                 assert {:ok, _} =
+                          NativeBranchBackingContract.accept(Store, store, source, child, 1312)
+
                  {:error, :modeled_rollback}
                end)
 
-      assert Contract.fetch(Store, store, source) == source
-      assert Contract.fetch(Store, store, child) == child
+      assert NativeBranchBackingContract.fetch(Store, store, source) == source
+      assert NativeBranchBackingContract.fetch(Store, store, child) == child
       assert {:ok, ^usage} = Store.usage(store, source.worker_id)
-      assert {:ok, pending} = Contract.accept(Store, store, source, child, 1312)
-      parent = Contract.fetch(Store, store, source)
+
+      assert {:ok, pending} =
+               NativeBranchBackingContract.accept(Store, store, source, child, 1312)
+
+      parent = NativeBranchBackingContract.fetch(Store, store, source)
       proof = Contract.proof(pending.branch.native_authority.backing.request)
 
       assert {:error, :modeled_rollback} =
                Repo.transact(fn ->
                  assert {:ok, _} =
-                          Contract.complete_proof(Store, store, parent, pending, proof, 1313)
+                          NativeBranchBackingContract.complete_proof(
+                            Store,
+                            store,
+                            parent,
+                            pending,
+                            proof,
+                            1313
+                          )
 
                  {:error, :modeled_rollback}
                end)
 
-      assert Contract.fetch(Store, store, source) == parent
-      assert Contract.fetch(Store, store, child) == pending
+      assert NativeBranchBackingContract.fetch(Store, store, source) == parent
+      assert NativeBranchBackingContract.fetch(Store, store, child) == pending
       assert {:ok, ^usage} = Store.usage(store, source.worker_id)
-      assert {:ok, _} = Contract.complete_proof(Store, store, parent, pending, proof, 1314)
+
+      assert {:ok, _} =
+               NativeBranchBackingContract.complete_proof(
+                 Store,
+                 store,
+                 parent,
+                 pending,
+                 proof,
+                 1314
+               )
     end
   end
 
@@ -66,18 +88,37 @@ defmodule SmolBox.DurableHost.NativePartialBranchBackingStoreTest do
     assert {:ok, current} =
              Store.machine(store, :claim, [ManagedMachine.key(source), "owner", 1312, 10_000])
 
-    assert {:error, _} = Contract.accept(Store, store, source, child, 1313)
-    assert {:ok, pending} = Contract.accept(Store, store, current, child, 1313)
-    parent = Contract.fetch(Store, store, source)
+    assert {:error, _} = NativeBranchBackingContract.accept(Store, store, source, child, 1313)
+    assert {:ok, pending} = NativeBranchBackingContract.accept(Store, store, current, child, 1313)
+    parent = NativeBranchBackingContract.fetch(Store, store, source)
     proof = Contract.proof(pending.branch.native_authority.backing.request)
 
     assert {:ok, current} =
              Store.machine(store, :claim, [ManagedMachine.key(parent), "owner", 1314, 10_000])
 
-    assert {:error, _} = Contract.complete_proof(Store, store, parent, pending, proof, 1315)
-    assert Contract.fetch(Store, store, child) == pending
+    assert {:error, _} =
+             NativeBranchBackingContract.complete_proof(
+               Store,
+               store,
+               parent,
+               pending,
+               proof,
+               1315
+             )
+
+    assert NativeBranchBackingContract.fetch(Store, store, child) == pending
     assert {:ok, ^usage} = Store.usage(store, source.worker_id)
-    assert {:ok, _} = Contract.complete_proof(Store, store, current, pending, proof, 1315)
+
+    assert {:ok, _} =
+             NativeBranchBackingContract.complete_proof(
+               Store,
+               store,
+               current,
+               pending,
+               proof,
+               1315
+             )
+
     assert {:ok, %{native_partial_branch_backings: 1} = caps} = Store.capabilities(store)
     assert caps.native_branches == 1
   end
@@ -85,19 +126,21 @@ defmodule SmolBox.DurableHost.NativePartialBranchBackingStoreTest do
   test "claims preserve accepted intent until only its exact typed acknowledgement closes backing",
        %{store: store} do
     {source, child, usage} = Contract.prepare(Store, store, :initial_release)
-    assert {:ok, pending} = Contract.accept(Store, store, source, child, 1312)
-    source = Contract.fetch(Store, store, source)
+    assert {:ok, pending} = NativeBranchBackingContract.accept(Store, store, source, child, 1312)
+    source = NativeBranchBackingContract.fetch(Store, store, source)
     saved = pending.branch.native_authority.backing
 
     assert {:ok, claimed} =
              Store.machine(store, :claim, [ManagedMachine.key(pending), "owner", 1313, 10_000])
 
-    assert {:ok, ^claimed} = Contract.accept(Store, store, source, claimed, 1314)
+    assert {:ok, ^claimed} =
+             NativeBranchBackingContract.accept(Store, store, source, claimed, 1314)
+
     assert claimed.branch.native_authority.backing == saved
     assert {:ok, ^usage} = Store.usage(store, source.worker_id)
 
     assert {:ok, _} =
-             Contract.complete_proof(
+             NativeBranchBackingContract.complete_proof(
                Store,
                store,
                source,

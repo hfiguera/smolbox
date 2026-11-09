@@ -1,7 +1,7 @@
 defmodule SmolBox.Store.NativeBranchCollectionContract do
   @moduledoc false
   import ExUnit.Assertions
-  alias SmolBox.Embedded.{BranchCanonical, BranchDeletionCollection, NativeBranchDeletionAction}
+  alias SmolBox.Embedded.{BranchDeletionCollection, NativeBranchDeletionAction}
   alias SmolBox.{ManagedMachine, Profile}
 
   alias SmolBox.Store.{
@@ -13,33 +13,7 @@ defmodule SmolBox.Store.NativeBranchCollectionContract do
     NativeReleasedBranchDeletionContract
   }
 
-  def proof(request) do
-    value = %{
-      "schema" => 1,
-      "child" => request["child"],
-      "operation_id" => request["operation_id"],
-      "request_sha256" => request["request_sha256"],
-      "completion_sha256" =>
-        BranchCanonical.digest(BranchCanonical.ordered(request["completion"], :completion)),
-      "deletion_sha256" => String.duplicate("a", 64),
-      "collection_sha256" => String.duplicate("b", 64)
-    }
-
-    value =
-      if request["release"],
-        do:
-          Map.put(
-            value,
-            "release_sha256",
-            BranchCanonical.digest(BranchCanonical.ordered(request["release"], :child_release))
-          ),
-        else: value
-
-    value = Map.put(value, "proof_sha256", BranchDeletionCollection.proof_digest(value))
-    assert {:ok, proof} = BranchDeletionCollection.from_wire(value)
-    assert BranchDeletionCollection.matches?(proof, request)
-    proof
-  end
+  defdelegate proof(request), to: NativeBranchDeletionActionContract
 
   def accept(adapter, store, child, now),
     do: NativeBranchDeletionActionContract.accept(adapter, store, child, :collect, now)

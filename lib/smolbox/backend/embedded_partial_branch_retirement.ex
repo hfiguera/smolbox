@@ -1,11 +1,11 @@
 defmodule SmolBox.Backend.EmbeddedPartialBranchRetirement do
   @moduledoc false
-  alias SmolBox.Backend.{Assignment, Budget, EmbeddedContext, EmbeddedReply, Features}
+  alias SmolBox.Backend.{Budget, EmbeddedBranchOperation}
 
   alias SmolBox.Embedded.{
     Call,
+    NativeBranchAdmission,
     NativeBranchRetirement,
-    NativeGrowth,
     PartialBranchChildAbsence,
     PartialBranchDisposal,
     Protocol
@@ -18,18 +18,15 @@ defmodule SmolBox.Backend.EmbeddedPartialBranchRetirement do
     {:ok, budget} = constrain(budget)
     deadline = now() + budget.timeout_ms
 
-    with true <-
-           EmbeddedContext.scoped?(context) and Features.supports?(context.config, :branches),
-         true <-
-           context.quiesced and
-             Assignment.approved?(child.backend_assignment, context.config, child.spec),
-         {:ok, pin_budget} <- remaining(budget, deadline, :not_dispatched),
-         do:
-           coordinate(Call.pin(context, pin_budget), parent, child, budget, &Call.run/3, deadline),
-         else: (
-           {:error, _} = error -> error
-           _ -> failure(:unsupported_capability, :not_dispatched)
-         )
+    with {:ok, pinned} <-
+           EmbeddedBranchOperation.pin(
+             context,
+             budget,
+             deadline,
+             {:branch, :not_dispatched},
+             child
+           ),
+         do: coordinate(pinned, parent, child, budget, &Call.run/3, deadline)
   end
 
   def run(_, _, _, _), do: failure(:validation, :not_dispatched)
@@ -61,21 +58,13 @@ defmodule SmolBox.Backend.EmbeddedPartialBranchRetirement do
 
   defp scope?(context, parent, child),
     do:
-      pinned?(context) and NativeBranchRetirement.pair?(parent, child) and
+      EmbeddedBranchOperation.pinned?(context) and
+        NativeBranchAdmission.retirement_pair?(parent, child) and
         match?(
           %{partial_disposal: %{proof: %PartialBranchDisposal{}}},
           child.branch.native_authority
         ) and
-        source_context?(context, parent)
-
-  defp pinned?(context),
-    do: context.pinned and context.quiesced and is_pid(context.server) and context.epoch != nil
-
-  defp source_context?(context, parent),
-    do:
-      context.spec == parent.spec and context.assignment == parent.backend_assignment and
-        context.name == parent.machine_name and context.profile == parent.spec.profile and
-        NativeGrowth.current_identity(parent) == {:ok, context.identity}
+        EmbeddedBranchOperation.source?(context, parent)
 
   defp bound?(request, context),
     do:
@@ -95,11 +84,8 @@ defmodule SmolBox.Backend.EmbeddedPartialBranchRetirement do
          else: (_ -> failure(:identity_conflict, :dispatch_uncertain))
   end
 
-  defp decode({:ok, %{"result" => "error"} = outcome, @empty, nil} = response, _, maximum) do
-    if fits?(outcome, maximum) and Protocol.valid_outcome?(outcome, 2),
-      do: EmbeddedReply.decode(nil, :branch, nil, response),
-      else: failure(:identity_conflict, :dispatch_uncertain)
-  end
+  defp decode({:ok, %{"result" => "error"}, @empty, nil} = response, _, maximum),
+    do: EmbeddedBranchOperation.error_reply(response, :branch, maximum)
 
   defp decode({:error, %Error{} = error}, _, _), do: {:error, error}
   defp decode(_, _, _), do: failure(:identity_conflict, :dispatch_uncertain)
@@ -117,13 +103,8 @@ defmodule SmolBox.Backend.EmbeddedPartialBranchRetirement do
         max_response_bytes: 60 * 1024
       )
 
-  defp remaining(budget, deadline, evidence \\ :dispatch_uncertain) do
-    timeout = deadline - now()
-
-    if timeout > 0,
-      do: constrain(%{budget | timeout_ms: min(timeout, budget.timeout_ms)}),
-      else: failure(:expired, evidence)
-  end
+  defp remaining(budget, deadline, evidence \\ :dispatch_uncertain),
+    do: EmbeddedBranchOperation.remaining(budget, deadline, {:branch, evidence})
 
   defp failure(category, evidence),
     do: {:error, %Error{category: category, operation: :branch, evidence: evidence}}

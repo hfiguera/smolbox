@@ -9,7 +9,6 @@ defmodule SmolBox.Embedded.UnbootedBranchChildAbsence do
   is neither boot completion nor disposal, dependency retirement or backing release.
   """
   alias SmolBox.Embedded.{BranchCanonical, Shape, UnbootedBranchDisposal}
-  alias SmolBox.Validation
   @enforce_keys [:schema, :request, :proof_sha256]
   @derive {Inspect, only: [:schema]}
   defstruct @enforce_keys
@@ -38,28 +37,12 @@ defmodule SmolBox.Embedded.UnbootedBranchChildAbsence do
         request["quiesced"]
       ])
 
-  def from_wire(value) do
-    if valid?(value) and not is_struct(value),
-      do:
-        {:ok,
-         struct!(
-           __MODULE__,
-           Map.new(value, fn {key, field} -> {String.to_existing_atom(key), field} end)
-         )},
-      else: :error
-  end
+  def from_wire(value), do: BranchCanonical.from_wire(value, __MODULE__)
 
   def to_wire(%__MODULE__{} = value),
-    do: Map.new(Map.from_struct(value), fn {key, field} -> {Atom.to_string(key), field} end)
+    do: BranchCanonical.wire_fields(value)
 
-  def valid?(%__MODULE__{} = value),
-    do: Validation.struct_shape?(value, __MODULE__) and valid?(to_wire(value))
-
-  def valid?(value),
-    do:
-      Shape.keys?(value, ~w(schema request proof_sha256)) and value["schema"] === 1 and
-        request?(value["request"]) and value["proof_sha256"] == proof_digest(value) and
-        byte_size(Jason.encode!(value)) <= @maximum
+  def valid?(value), do: BranchCanonical.valid_request_proof?(value, __MODULE__, @maximum)
 
   def proof_digest(value),
     do:
@@ -69,10 +52,8 @@ defmodule SmolBox.Embedded.UnbootedBranchChildAbsence do
         BranchCanonical.ordered(value["request"], :unbooted_absence_request)
       ])
 
-  def matches?(%__MODULE__{} = value, request), do: matches?(to_wire(value), request)
-
-  def matches?(value, request),
-    do: request?(request) and valid?(value) and value["request"] == request
+  def matches?(proof, request),
+    do: BranchCanonical.request_proof_matches?(proof, request, __MODULE__, &request?/1)
 
   def approval(request), do: get_in(request, ~w(disposal creation approval))
   def platform(request), do: get_in(request, ~w(disposal publication change platform))

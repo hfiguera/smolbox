@@ -62,28 +62,31 @@ defmodule SmolBox.Store.NativeBranchBackingContract do
 
   # Entirely synthetic receipt algebra, never native ownership or VM evidence.
   def proof(request) do
-    plan = get_in(request, ~w(completion publication change child_origin intent plan))
-    n = (plan["ordinary_child"]["disk_gb"] + plan["minimum_extra_disk_gb"]) * 1_073_741_824
+    proof = proof(request, request["completion"]["publication"])
+    assert BranchBackingRelease.matches?(proof, request)
+    proof
+  end
 
-    proof = %BranchBackingRelease{
+  def proof(request, publication) do
+    plan = get_in(publication, ~w(change child_origin intent plan))
+    bytes = (plan["ordinary_child"]["disk_gb"] + plan["minimum_extra_disk_gb"]) * 1_073_741_824
+
+    %BranchBackingRelease{
       schema: 1,
-      publication: request["completion"]["publication"],
+      publication: publication,
       operation_id: request["operation_id"],
       request_sha256: request["request_sha256"],
-      native_bytes: n,
+      native_bytes: bytes,
       proof_sha256:
         BranchCanonical.digest([
           "smolbox-branch-backing-release-v1",
           1,
-          BranchCanonical.ordered(request["completion"]["publication"], :publication),
+          BranchCanonical.ordered(publication, :publication),
           request["operation_id"],
           request["request_sha256"],
-          n
+          bytes
         ])
     }
-
-    assert BranchBackingRelease.matches?(proof, request)
-    proof
   end
 
   def completed(adapter, store, mode) do

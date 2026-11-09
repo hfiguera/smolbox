@@ -146,29 +146,22 @@ defmodule SmolBox.Embedded.Protocol do
     jobs = if buffered, do: Map.put(@job_limits, "metadata_bytes", 33_554_432), else: @job_limits
     values = if buffered, do: Map.put(values, "buffered", CommandPayload.limits()), else: values
 
-    values =
-      if match?(%{"feature_versions" => %{"logs" => 1}}, sdk),
-        do: Map.put(values, "logs", LogStream.limits()),
-        else: values
-
-    values =
-      if match?(%{"feature_versions" => %{"terminals" => 1}}, sdk),
-        do: Map.put(values, "terminals", TerminalContract.limits()),
-        else: values
-
-    values =
-      if match?(%{"feature_versions" => %{"exports" => 1}}, sdk),
-        do: Map.put(values, "exports", ExportContract.limits()),
-        else: values
-
-    values = volume_limits(values, sdk)
-
-    if match?(%{"feature_versions" => %{"job_resources" => 1}}, sdk),
-      do: Map.put(values, "jobs", jobs),
-      else: values
+    values
+    |> feature_limits(sdk, "logs", "logs", LogStream.limits())
+    |> feature_limits(sdk, "terminals", "terminals", TerminalContract.limits())
+    |> feature_limits(sdk, "exports", "exports", ExportContract.limits())
+    |> volume_limits(sdk)
+    |> feature_limits(sdk, "job_resources", "jobs", jobs)
   end
 
   def limits(major, minor, _sdk), do: limits(major, minor)
+
+  defp feature_limits(values, %{"feature_versions" => versions}, feature, key, limits)
+       when is_map_key(versions, feature) and :erlang.map_get(feature, versions) === 1,
+       do: Map.put(values, key, limits)
+
+  defp feature_limits(values, _sdk, _feature, _key, _limits), do: values
+
   def capabilities, do: @capabilities
 
   def capabilities(sdk) do

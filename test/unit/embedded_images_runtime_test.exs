@@ -5,10 +5,22 @@ Code.require_file("examples/embedded_port/lib/growth_demo.ex")
 
 defmodule SmolBox.EmbeddedImagesRuntimeTest do
   use ExUnit.Case, async: false
-  alias SmolBox.{Machines, ManagedMachineSpec, NetworkPolicy, Profile, Source, TestArtifacts}
-  alias SmolBox.Store.Memory
-  alias SmolBox.Test.EmbeddedPackage, as: Package
+
+  alias SmolBox.{
+    Image,
+    Machines,
+    ManagedMachineSpec,
+    NetworkPolicy,
+    Profile,
+    Source,
+    TestArtifacts
+  }
+
+  alias SmolBox.Embedded.RegistryPolicy
   alias SmolBox.Example.EmbeddedImages, as: Workflow
+  alias SmolBox.Runtime.Session
+  alias SmolBox.Store.{Codec, Memory}
+  alias SmolBox.Test.EmbeddedPackage, as: Package
 
   for kind <- [:oci, :registry] do
     test "macOS #{kind} source uses public creation, durable identity and owned cleanup" do
@@ -16,8 +28,8 @@ defmodule SmolBox.EmbeddedImagesRuntimeTest do
       kind = f.source.kind
       assert f.native.architecture == "aarch64"
       assert {:ok, machine} = Machines.inspect(f.runtime, f.key)
-      assert {:ok, bytes} = SmolBox.Store.Codec.encode(machine)
-      assert {:ok, ^machine} = SmolBox.Store.Codec.decode(bytes)
+      assert {:ok, bytes} = Codec.encode(machine)
+      assert {:ok, ^machine} = Codec.decode(bytes)
       assert machine.backend_assignment.creation["source"] == Source.artifact(f.source)
 
       if kind == :oci do
@@ -26,26 +38,25 @@ defmodule SmolBox.EmbeddedImagesRuntimeTest do
         assert {:ok, %{state: :completed, result: image}} =
                  SmolBox.await(f.runtime, execution, 5000)
 
-        assert SmolBox.Image.matches?(image, f.pull)
+        assert Image.matches?(image, f.pull)
         assert {:ok, ^execution} = Machines.pull_image(f.runtime, f.key, "pull", f.pull)
         assert Enum.count(requests(f.native), &(&1["operation"] == "pull_image")) == 1
       else
         assert %{already_cached: false} = machine.preparation
       end
 
-      assert {:ok, latest} = Machines.inspect(f.runtime, f.key)
-      assert {:ok, _} = Machines.stop(f.runtime, f.key, latest.version)
-      assert {:ok, stopped} = Machines.await(f.runtime, f.key, 5000)
-      assert {:ok, _} = Machines.delete(f.runtime, f.key, stopped.version)
+      assert {:ok, _} = lifecycle(f.runtime, f.key, :stop)
+      assert {:ok, %{state: :stopped}} = Machines.await(f.runtime, f.key, 5000)
+      assert {:ok, _} = lifecycle(f.runtime, f.key, :delete)
       assert {:ok, %{state: :deleted}} = Machines.await(f.runtime, f.key, 5000)
 
       if kind == :registry do
         assert {:ok, warm} = Machines.create(f.runtime, %{machine.spec | id: "warm"})
 
-        assert {:ok, %{state: :stopped, preparation: %{already_cached: true}} = cached} =
+        assert {:ok, %{state: :stopped, preparation: %{already_cached: true}}} =
                  Machines.await(f.runtime, warm, 5000)
 
-        assert {:ok, _} = Machines.delete(f.runtime, warm, cached.version)
+        assert {:ok, _} = lifecycle(f.runtime, warm, :delete)
         assert {:ok, %{state: :deleted}} = Machines.await(f.runtime, warm, 5000)
       end
 
@@ -57,24 +68,24 @@ defmodule SmolBox.EmbeddedImagesRuntimeTest do
     f = fixture(kind: :registry)
     {:ok, cold} = Machines.inspect(f.runtime, f.key)
     assert %{already_cached: false, size_bytes: 123} = cold.preparation
-    assert {:ok, bytes} = SmolBox.Store.Codec.encode(cold)
-    assert {:ok, ^cold} = SmolBox.Store.Codec.decode(bytes)
+    assert {:ok, bytes} = Codec.encode(cold)
+    assert {:ok, ^cold} = Codec.decode(bytes)
     assert cold.backend_assignment.creation["source"] == Source.artifact(f.source)
     assert Enum.count(requests(f.native), &(&1["operation"] == "prepare_artifact")) == 1
     assert Enum.count(requests(f.native), &(&1["operation"] == "create_registry_prepared")) == 1
 
-    {:ok, _} = Machines.stop(f.runtime, f.key, cold.version)
-    {:ok, stopped} = Machines.await(f.runtime, f.key, 5000)
-    {:ok, _} = Machines.delete(f.runtime, f.key, stopped.version)
+    {:ok, _} = lifecycle(f.runtime, f.key, :stop)
+    {:ok, %{state: :stopped}} = Machines.await(f.runtime, f.key, 5000)
+    {:ok, _} = lifecycle(f.runtime, f.key, :delete)
     assert {:ok, %{state: :deleted}} = Machines.await(f.runtime, f.key, 5000)
 
     spec = %{cold.spec | id: "warm"}
     assert {:ok, warm} = Machines.create(f.runtime, spec)
 
-    assert {:ok, %{state: :stopped, preparation: %{already_cached: true}} = cached} =
+    assert {:ok, %{state: :stopped, preparation: %{already_cached: true}}} =
              Machines.await(f.runtime, warm, 5000)
 
-    assert {:ok, _} = Machines.delete(f.runtime, warm, cached.version)
+    assert {:ok, _} = lifecycle(f.runtime, warm, :delete)
     assert {:ok, %{state: :deleted}} = Machines.await(f.runtime, warm, 5000)
     assert {:ok, %{slots: 0}} = Memory.usage(f.store, f.native.id)
     assert Enum.count(requests(f.native), &(&1["operation"] == "prepare_artifact")) == 2
@@ -89,7 +100,7 @@ defmodule SmolBox.EmbeddedImagesRuntimeTest do
     assert {:ok, _} =
              Memory.machine(f.store, :write, [
                f.key,
-               SmolBox.Runtime.Session.guard(failed),
+               Session.guard(failed),
                [next_due_at_ms: 0],
                System.system_time(:millisecond)
              ])
@@ -109,8 +120,8 @@ defmodule SmolBox.EmbeddedImagesRuntimeTest do
     assert blocked.operation == :create and blocked.phase == :uncertain
     assert blocked.last_error.evidence == :not_dispatched
     assert blocked.next_due_at_ms > System.system_time(:millisecond)
-    assert {:ok, bytes} = SmolBox.Store.Codec.encode(blocked)
-    assert {:ok, ^blocked} = SmolBox.Store.Codec.decode(bytes)
+    assert {:ok, bytes} = Codec.encode(blocked)
+    assert {:ok, ^blocked} = Codec.decode(bytes)
     assert {:ok, %{slots: 1}} = Memory.usage(f.store, f.native.id)
 
     assert {:ok, _} = resolve_owned(f.runtime, f.key, quiesced: true, disposition: :deleted)
@@ -128,7 +139,7 @@ defmodule SmolBox.EmbeddedImagesRuntimeTest do
     assert {:ok, %{state: :completed, evidence: :image_pulled, result: image}} =
              SmolBox.await(runtime, execution, 5000)
 
-    assert SmolBox.Image.matches?(image, pull)
+    assert Image.matches?(image, pull)
 
     before_retry = requests(native)
     assert Enum.count(before_retry, &(&1["operation"] == "pull_image")) == 1
@@ -190,35 +201,45 @@ defmodule SmolBox.EmbeddedImagesRuntimeTest do
              SmolBox.fetch(f.runtime, elem(execution, 0), elem(execution, 1))
 
     wait(fn -> match?({:ok, [%{status: :ready}]}, SmolBox.workers(f.runtime)) end)
-    {:ok, stopped} = Machines.inspect(f.runtime, f.key)
-    assert {:ok, _} = Machines.delete(f.runtime, f.key, stopped.version)
+    assert {:ok, _} = lifecycle(f.runtime, f.key, :delete)
     assert {:ok, %{state: :deleted}} = Machines.await(f.runtime, f.key, 5000)
   end
 
-  defp resolve_owned(runtime, key, options \\ [quiesced: true], attempts \\ 100) do
-    {:ok, record} = Machines.inspect(runtime, key)
-
-    case Machines.resolve(runtime, key, record.version, options) do
-      {:error, %{category: category, evidence: :not_dispatched}}
-      when category in [:stale_version, :admission_exhausted] and attempts > 0 ->
-        Process.sleep(10)
-        resolve_owned(runtime, key, options, attempts - 1)
-
-      result ->
-        result
-    end
+  defp resolve_owned(runtime, key, options \\ [quiesced: true]) do
+    with_current_version(runtime, key, &Machines.resolve(runtime, key, &1, options), [
+      :stale_version,
+      :admission_exhausted
+    ])
   end
 
   defp stop_owned(c, runtime, key), do: stop_owned_for(Workflow, c, runtime, key)
 
-  defp stop_owned_for(workflow, c, runtime, key, attempts \\ 100) do
+  defp stop_owned_for(workflow, c, runtime, key) do
+    with_current_version(runtime, key, &workflow.stop_owned(c, "original", &1), [
+      :stale_version,
+      :admission_exhausted
+    ])
+  end
+
+  defp lifecycle(runtime, key, operation) do
+    with_current_version(runtime, key, &apply(Machines, operation, [runtime, key, &1]), [
+      :stale_version
+    ])
+  end
+
+  # Polling can refresh the stored version between an observation and admission.
+  # Only a confirmed pre-dispatch rejection is safe to retry.
+  defp with_current_version(runtime, key, operation, retry_categories, attempts \\ 100) do
     {:ok, record} = Machines.inspect(runtime, key)
 
-    case workflow.stop_owned(c, "original", record.version) do
-      {:error, %{category: category, evidence: :not_dispatched}}
-      when category in [:stale_version, :admission_exhausted] and attempts > 0 ->
-        Process.sleep(10)
-        stop_owned_for(workflow, c, runtime, key, attempts - 1)
+    case operation.(record.version) do
+      {:error, %{category: category, evidence: :not_dispatched}} = result when attempts > 0 ->
+        if category in retry_categories do
+          Process.sleep(10)
+          with_current_version(runtime, key, operation, retry_categories, attempts - 1)
+        else
+          result
+        end
 
       result ->
         result
@@ -264,8 +285,7 @@ defmodule SmolBox.EmbeddedImagesRuntimeTest do
     assert {:ok, _} = resolve_owned(f.runtime, f.key)
     assert {:ok, %{state: :stopped, active_execution: nil}} = Machines.inspect(f.runtime, f.key)
     wait(fn -> match?({:ok, [%{status: :ready}]}, SmolBox.workers(f.runtime)) end)
-    {:ok, stopped} = Machines.inspect(f.runtime, f.key)
-    assert {:ok, _} = Machines.delete(f.runtime, f.key, stopped.version)
+    assert {:ok, _} = lifecycle(f.runtime, f.key, :delete)
     assert {:ok, %{state: :deleted}} = Machines.await(f.runtime, f.key, 5000)
     assert {:ok, %{slots: 0}} = Memory.usage(f.store, f.native.id)
   end
@@ -357,7 +377,7 @@ defmodule SmolBox.EmbeddedImagesRuntimeTest do
         profiles: [profile],
         registry_policy:
           if(options[:kind] == :registry,
-            do: %SmolBox.Embedded.RegistryPolicy{
+            do: %RegistryPolicy{
               max_download_bytes: 1000,
               max_cache_bytes: 2000,
               max_cache_files: 2
@@ -397,8 +417,8 @@ defmodule SmolBox.EmbeddedImagesRuntimeTest do
     if options[:prepare_error] do
       assert {:ok, %{state: :unknown}} = Machines.await(runtime, key, 5000)
     else
-      assert {:ok, %{state: :stopped} = machine} = Machines.await(runtime, key, 5000)
-      assert {:ok, _} = Machines.start(runtime, key, machine.version)
+      assert {:ok, %{state: :stopped}} = Machines.await(runtime, key, 5000)
+      assert {:ok, _} = lifecycle(runtime, key, :start)
       assert {:ok, %{state: :running}} = Machines.await(runtime, key, 5000)
     end
 

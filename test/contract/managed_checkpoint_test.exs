@@ -136,6 +136,19 @@ defmodule SmolBox.ManagedCheckpointTest do
     assert {:ok, ^h} = Checkpoints.capture(runtime, m, s)
   end
 
+  test "capture lookup and deduplication distinguish absent IDs from changed requests" do
+    {fixture, {scope, machine} = key, spec} = fixture()
+    handle = {scope, machine, spec.id}
+
+    assert {:error, %{category: :not_found}} = Checkpoints.fetch(fixture.runtime, handle)
+    assert {:ok, ^handle} = Checkpoints.capture(fixture.runtime, key, spec)
+
+    assert {:error, %{category: :identity_conflict}} =
+             Checkpoints.capture(fixture.runtime, key, %{spec | timeout_ms: spec.timeout_ms - 1})
+
+    assert {:ok, %{spec: ^spec}} = Checkpoints.fetch(fixture.runtime, handle)
+  end
+
   test "lost response blocks new work and is never replayed after restart" do
     {f, m, s} = fixture(capture_lost: true)
     {:ok, h} = Checkpoints.capture(f.runtime, m, s)
@@ -395,7 +408,12 @@ defmodule SmolBox.ManagedCheckpointTest do
   end
 
   defp fixture(options \\ []) do
-    root = Path.join(System.tmp_dir!(), "smolbox-capture-#{System.unique_integer([:positive])}")
+    root =
+      Path.join(
+        System.tmp_dir!(),
+        "smolbox-capture-#{Base.url_encode64(:crypto.strong_rand_bytes(12), padding: false)}"
+      )
+
     File.mkdir!(root)
     File.chmod!(root, 0o700)
     on_exit(fn -> File.rm_rf!(root) end)

@@ -1,23 +1,9 @@
 defmodule SmolBox.DurableHost.BackendStore do
   @moduledoc false
-  alias SmolBox.DurableHost.Database
-
-  alias SmolBox.Store.{
-    CodecCheckpointable,
-    CodecGrowth,
-    CodecMaterial,
-    CodecNativeCaptureAbortSources,
-    CodecNativeCaptureCleanup,
-    CodecNativeCaptureResolutions,
-    CodecNativeCaptures,
-    CodecNativeExports,
-    CodecNativeCheckpoints,
-    CodecNativeSources,
-    MachineOps,
-    RecordOps
-  }
+  alias SmolBox.Store.{MachineOps, RecordOps}
 
   if Code.ensure_loaded?(SmolBox.Store.BackendAssignments) do
+    alias SmolBox.DurableHost.Database
     alias SmolBox.Store.BackendAssignments
 
     def assignments(context, worker, cursor, limit) do
@@ -32,8 +18,22 @@ defmodule SmolBox.DurableHost.BackendStore do
 
   if Code.ensure_loaded?(SmolBox.Store.BackendBindings) do
     alias SmolBox.Backend.Binding
+    alias SmolBox.DurableHost.Database
     alias SmolBox.Error
-    alias SmolBox.Store.BackendBindings
+
+    alias SmolBox.Store.{
+      BackendBindings,
+      CodecCheckpointable,
+      CodecGrowth,
+      CodecMaterial,
+      CodecNativeCaptureAbortSources,
+      CodecNativeCaptureCleanup,
+      CodecNativeCaptureResolutions,
+      CodecNativeCaptures,
+      CodecNativeCheckpoints,
+      CodecNativeExports,
+      CodecNativeSources
+    }
 
     def capabilities(context) do
       Database.query(context, "SELECT kind,generation FROM smolbox_backend_bindings LIMIT 0", [])

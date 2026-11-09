@@ -81,7 +81,10 @@ defmodule SmolBox.EmbeddedRuntimeTest do
           operation in ["inspect", "start"],
           do: operation
 
-    assert lifecycle_requests == ["inspect", "start"]
+    # The first inspection after start reports unreachable. Lifecycle confirmation
+    # would fail on that reply, but an independent poll can still issue it.
+    assert ["inspect", "start" | _] = lifecycle_requests
+    assert Enum.count(lifecycle_requests, &(&1 == "start")) == 1
   end
 
   for {major, minor} <- [{1, 3}, {1, 4}, {2, 0}] do

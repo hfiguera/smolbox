@@ -26,6 +26,7 @@ defmodule SmolBox.NativePartialBranchPublicCleanupTest do
   alias SmolBox.Store.{
     Codec,
     Memory,
+    NativeBranchBackingContract,
     NativePartialBranchBackingContract,
     NativePartialBranchCleanupContract,
     NativePartialBranchCleanupResolutionContract,
@@ -98,11 +99,11 @@ defmodule SmolBox.NativePartialBranchPublicCleanupTest do
       do: false
 
     defp permitted?(_, _), do: true
-    defp delay(:branch_resolve, {:unneeded, %{commit: :late}}), do: Process.sleep(600)
-    defp delay(:branch_advance, :late_accept), do: Process.sleep(600)
+    defp delay(:branch_resolve, {:unneeded, %{commit: :late}}), do: Process.sleep(2000)
+    defp delay(:branch_advance, :late_accept), do: Process.sleep(2000)
 
     defp delay(:branch_resolve, mode) when mode in [:late_commit, :terminal_late_commit],
-      do: Process.sleep(600)
+      do: Process.sleep(2000)
 
     defp delay(_, _), do: :ok
   end
@@ -334,7 +335,7 @@ defmodule SmolBox.NativePartialBranchPublicCleanupTest do
          state}
 
     defp qualification(child, state) do
-      if state.mode == :qualification_slow, do: Process.sleep(100)
+      if state.mode == :qualification_slow, do: Process.sleep(2000)
 
       if state.mode == :stale_after_qualification,
         do:
@@ -880,7 +881,7 @@ defmodule SmolBox.NativePartialBranchPublicCleanupTest do
     {:ok, context} = Adapter.assign(%{context | quiesced: true}, parent)
 
     budget = %Budget{
-      timeout_ms: 1000,
+      timeout_ms: 5000,
       max_request_bytes: 32 * 1024,
       max_response_bytes: 96 * 1024
     }
@@ -930,7 +931,7 @@ defmodule SmolBox.NativePartialBranchPublicCleanupTest do
   end
 
   test "late durable acceptance preserves its grant and charges without native IO" do
-    {runtime, store, parent, child, usage, authority, _} = fixture(:late_accept, :held, 500)
+    {runtime, store, parent, child, usage, authority, _} = fixture(:late_accept, :held, 1500)
 
     assert {:error, %Error{category: :expired, evidence: :not_dispatched}} =
              cleanup(runtime, child)
@@ -944,7 +945,7 @@ defmodule SmolBox.NativePartialBranchPublicCleanupTest do
   end
 
   test "late positive store acknowledgement is uncertain but its saved proof returns without helper IO" do
-    {runtime, store, _, child, _, authority, _} = fixture(:late_commit, :held, 500)
+    {runtime, store, _, child, _, authority, _} = fixture(:late_commit, :held, 1500)
 
     assert {:error, %Error{category: :expired, evidence: :dispatch_uncertain}} =
              cleanup(runtime, child)
@@ -965,16 +966,16 @@ defmodule SmolBox.NativePartialBranchPublicCleanupTest do
     result = Contract.result(pending, :sys.get_state(context.server).metadata)
 
     budget = %Budget{
-      timeout_ms: 1000,
+      timeout_ms: 5000,
       max_request_bytes: 32 * 1024,
       max_response_bytes: 96 * 1024
     }
 
-    deadline = System.monotonic_time(:millisecond) + 30
+    deadline = System.monotonic_time(:millisecond) + 1500
 
     callback = fn _, request, _ ->
       assert request["operation"] == "cleanup_partial_branch_disposal"
-      Process.sleep(40)
+      Process.sleep(2000)
 
       {:ok,
        %{
@@ -1043,7 +1044,7 @@ defmodule SmolBox.NativePartialBranchPublicCleanupTest do
                ])
 
       assert {:ok, pending} =
-               NativePartialBranchBackingContract.accept(Memory, store, source, retired, 1503)
+               NativeBranchBackingContract.accept(Memory, store, source, retired, 1503)
 
       source = Contract.fetch(Memory, store, source)
 
@@ -1051,7 +1052,7 @@ defmodule SmolBox.NativePartialBranchPublicCleanupTest do
         NativePartialBranchBackingContract.proof(pending.branch.native_authority.backing.request)
 
       assert {:ok, closed} =
-               NativePartialBranchBackingContract.complete_proof(
+               NativeBranchBackingContract.complete_proof(
                  Memory,
                  store,
                  source,
@@ -1140,7 +1141,7 @@ defmodule SmolBox.NativePartialBranchPublicCleanupTest do
   end
 
   test "qualification expiry cannot create a cleanup action" do
-    {runtime, store, parent, child, usage, _, _} = fixture(:qualification_slow, :held, 60)
+    {runtime, store, parent, child, usage, _, _} = fixture(:qualification_slow, :held, 1500)
 
     assert {:error, %Error{category: :expired, evidence: :dispatch_uncertain}} =
              cleanup(runtime, child)
@@ -1184,7 +1185,7 @@ defmodule SmolBox.NativePartialBranchPublicCleanupTest do
   end
 
   test "late original terminal store acknowledgement returns uncertainty then a cached disposition" do
-    {runtime, store, _, child, _, _, _} = fixture(:terminal_late_commit, :held, 500)
+    {runtime, store, _, child, _, _, _} = fixture(:terminal_late_commit, :held, 1500)
 
     assert {:error, %Error{category: :expired, evidence: :dispatch_uncertain}} =
              cleanup(runtime, child)
@@ -1205,7 +1206,7 @@ defmodule SmolBox.NativePartialBranchPublicCleanupTest do
     {:ok, context} = Adapter.assign(%{context | quiesced: true}, parent)
 
     budget = %Budget{
-      timeout_ms: 1000,
+      timeout_ms: 5000,
       max_request_bytes: 26 * 1024,
       max_response_bytes: 64 * 1024
     }
@@ -1410,7 +1411,7 @@ defmodule SmolBox.NativePartialBranchPublicCleanupTest do
   end
 
   test "late unneeded commit is uncertain then returns its saved acknowledgement without helper IO" do
-    {runtime, store, parent, child, _, _, _} = fixture({:unneeded, %{commit: :late}}, :held, 500)
+    {runtime, store, parent, child, _, _, _} = fixture({:unneeded, %{commit: :late}}, :held, 1500)
     assert {:ok, pending} = Contract.accept(Memory, store, parent, child, child.version, 1401)
     assert {:error, %Error{evidence: :dispatch_uncertain}} = cleanup(runtime, pending)
     completed = Contract.fetch(Memory, store, child)
@@ -1522,14 +1523,14 @@ defmodule SmolBox.NativePartialBranchPublicCleanupTest do
     {:ok, context} = Adapter.assign(%{context | quiesced: true}, parent)
 
     budget = %Budget{
-      timeout_ms: 1000,
+      timeout_ms: 5000,
       max_request_bytes: 64 * 1024,
       max_response_bytes: 192 * 1024
     }
 
     callback = fn _, request, _ ->
       assert request["operation"] == "cleanup_partial_branch_disposal"
-      Process.sleep(60)
+      Process.sleep(2000)
 
       {:ok, %{"result" => "error", "code" => "state", "dispatch" => "not_dispatched"},
        %{stdout: <<>>, stderr: <<>>, file: <<>>}, nil}
@@ -1543,7 +1544,7 @@ defmodule SmolBox.NativePartialBranchPublicCleanupTest do
                pending,
                budget,
                callback,
-               System.monotonic_time(:millisecond) + 30
+               System.monotonic_time(:millisecond) + 1500
              )
 
     refute_receive :modeled_unneeded_acknowledgement

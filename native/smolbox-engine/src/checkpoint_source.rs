@@ -1198,6 +1198,10 @@ pub(crate) mod tests {
         assert_eq!(engine.jobs.counts(), crate::jobs::Counts::default());
     }
 
+    fn ordinary_worker_libraries(root: &Path) -> PathBuf {
+        std::env::var_os("LIBKRUN_BUNDLE").map_or_else(|| root.to_path_buf(), PathBuf::from)
+    }
+
     #[test]
     #[ignore = "requires a built helper; explicit ordinary non-VM checkpoint installation"]
     fn ordinary_worker_checkpoint_installation_commits_only_fresh_owned_material() {
@@ -1221,7 +1225,7 @@ pub(crate) mod tests {
             crate::ExecutableLocator {
                 boot: worker.clone(),
                 file_worker: worker,
-                library_directory: PathBuf::from(std::env::var_os("LIBKRUN_BUNDLE").unwrap()),
+                library_directory: ordinary_worker_libraries(&root),
             },
         )
         .unwrap();
@@ -1354,7 +1358,7 @@ pub(crate) mod tests {
                 crate::ExecutableLocator {
                     boot: worker.clone(),
                     file_worker: worker,
-                    library_directory: PathBuf::from(std::env::var_os("LIBKRUN_BUNDLE").unwrap()),
+                    library_directory: ordinary_worker_libraries(&root),
                 },
             )
             .unwrap();

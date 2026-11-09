@@ -72,23 +72,34 @@ defmodule SmolBox.DurableHost.BranchStore do
            do: BranchOps.resolve(p, c, source, observed, now)
     end
 
-    def run(context, :branch_retire, [key, guard, id, proof, now]) do
-      with {:ok, p, c} <- pair(context, key, guard, id, now),
-           do: BranchOps.retire(p, c, proof, now)
+    if function_exported?(BranchOps, :accept_backing, 5) and
+         function_exported?(BranchOps, :retire, 4) and
+         function_exported?(BranchOps, :release_storage, 4) do
+      def run(context, :branch_retire, [key, guard, id, proof, now]) do
+        with {:ok, p, c} <- pair(context, key, guard, id, now),
+             do: BranchOps.retire(p, c, proof, now)
+      end
+
+      def run(context, :branch_backing_accept, [key, guard, id, version, removed, now]) do
+        with {:ok, p, c} <- pair(context, key, guard, id, now),
+             do: BranchOps.accept_backing(p, c, version, removed, now)
+      end
+
+      def run(context, :branch_release_storage, [key, guard, id, proof, now]) do
+        with {:ok, p, c} <- pair(context, key, guard, id, now),
+             do: BranchOps.release_storage(p, c, proof, now)
+      end
+    else
+      def run(_context, operation, [_, _, _, _, _])
+          when operation in [:branch_retire, :branch_release_storage],
+          do: {:error, %SmolBox.Error{category: :unsupported_capability, operation: :store}}
+
+      def run(_context, :branch_backing_accept, [_, _, _, _, _, _]),
+        do: {:error, %SmolBox.Error{category: :unsupported_capability, operation: :store}}
     end
 
     def run(context, :branch_retire, [key, guard, id, now]) do
       with {:ok, p, c} <- pair(context, key, guard, id, now), do: BranchOps.retire(p, c, now)
-    end
-
-    def run(context, :branch_backing_accept, [key, guard, id, version, removed, now]) do
-      with {:ok, p, c} <- pair(context, key, guard, id, now),
-           do: BranchOps.accept_backing(p, c, version, removed, now)
-    end
-
-    def run(context, :branch_release_storage, [key, guard, id, proof, now]) do
-      with {:ok, p, c} <- pair(context, key, guard, id, now),
-           do: BranchOps.release_storage(p, c, proof, now)
     end
 
     def run(context, :branch_release_storage, [key, guard, id, now]) do
@@ -108,10 +119,8 @@ defmodule SmolBox.DurableHost.BranchStore do
     end
 
     defp accept_release(context, %{branch: %{native_authority: authority}} = c, version, now)
-         when not is_nil(authority) do
-      with {:ok, p} <- Database.read(context, c.branch.source, :machine),
-           do: NativeBranchReleaseOps.accept(p, c, version, now)
-    end
+         when not is_nil(authority),
+         do: native_release(context, c, :accept, [version, now])
 
     defp accept_release(_context, c, version, now),
       do: with({:ok, c} <- BranchOps.release(c, version, now), do: {:ok, nil, c})
@@ -123,13 +132,21 @@ defmodule SmolBox.DurableHost.BranchStore do
            change,
            now
          )
-         when not is_nil(authority) do
-      with {:ok, p} <- Database.read(context, c.branch.source, :machine),
-           do: NativeBranchReleaseOps.advance(p, c, expected, change, now)
-    end
+         when not is_nil(authority),
+         do: native_release(context, c, :advance, [expected, change, now])
 
     defp advance_release(_context, c, expected, change, now),
       do: with({:ok, c} <- BranchOps.release_advance(c, expected, change, now), do: {:ok, nil, c})
+
+    if Code.ensure_loaded?(NativeBranchReleaseOps) do
+      defp native_release(context, child, operation, arguments) do
+        with {:ok, parent} <- Database.read(context, child.branch.source, :machine),
+             do: apply(NativeBranchReleaseOps, operation, [parent, child | arguments])
+      end
+    else
+      defp native_release(_context, _child, _operation, _arguments),
+        do: {:error, %SmolBox.Error{category: :unsupported_capability, operation: :store}}
+    end
 
     defp pair(context, key, guard, id, now) do
       with {:ok, p} <- Database.guarded_machine(context, key, guard, now),

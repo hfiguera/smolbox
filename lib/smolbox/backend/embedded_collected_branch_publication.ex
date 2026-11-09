@@ -12,6 +12,7 @@ defmodule SmolBox.Backend.EmbeddedCollectedBranchPublication do
   alias SmolBox.Embedded.{
     BranchPublication,
     Call,
+    NativeBranchAdmission,
     NativeCollectedBranchPublication,
     NativeCollectedBranchPublicationResult,
     NativeGrowth,
@@ -79,7 +80,7 @@ defmodule SmolBox.Backend.EmbeddedCollectedBranchPublication do
 
   defp scope?(context, parent, child),
     do:
-      pinned?(context) and NativeCollectedBranchPublication.pending?(parent, child) and
+      pinned?(context) and NativeBranchAdmission.collected_publication_pending?(parent, child) and
         source_context?(context, parent) and pending_action?(context, child)
 
   defp pinned?(context),

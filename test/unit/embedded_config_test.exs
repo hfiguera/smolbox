@@ -1,7 +1,7 @@
 defmodule SmolBox.Embedded.ConfigTest do
   use ExUnit.Case, async: true
-  alias SmolBox.Embedded.{Config, Health, Launch, Limits, Protocol, RegistryPolicy, SDKIdentity}
   alias SmolBox.{Checkpoint, Error, Profile, Source}
+  alias SmolBox.Embedded.{Config, Health, Launch, Limits, Protocol, RegistryPolicy, SDKIdentity}
   alias SmolBox.Runtime.Target
 
   defp options do

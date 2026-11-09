@@ -2,14 +2,12 @@ defmodule SmolBox.Embedded.NativePartialBranchCollection do
   @moduledoc false
   alias SmolBox.Embedded.{
     BranchCanonical,
-    NativeBranchBacking,
-    NativeBranchRetirement,
     NativeCollectedBranchPublication,
-    PartialBranchChildAbsence,
+    NativePartialBranchHistory,
     PartialBranchCollection
   }
 
-  alias SmolBox.{ManagedMachine, Profile, Validation}
+  alias SmolBox.{ManagedMachine, ManagedMachineState, Profile, Validation}
   @enforce_keys [:version, :request, :platform]
   @derive {Inspect, only: [:version]}
   defstruct @enforce_keys ++ [proof: nil, completion_version: nil]
@@ -44,25 +42,10 @@ defmodule SmolBox.Embedded.NativePartialBranchCollection do
         Enum.all?(
           ~w(completion prepared_retirement disposal release deletion delete_continuation delete_cleanup delete_collection)a,
           &(Map.fetch!(authority, &1) == nil)
-        ) and retirement?(authority) and
+        ) and NativePartialBranchHistory.retirement?(authority) and
         completion?(saved)
 
   def valid?(_, _), do: false
-  defp retirement?(%{retirement: nil, backing: nil}), do: true
-
-  defp retirement?(
-         %{retirement: %NativeBranchRetirement{proof: %PartialBranchChildAbsence{}} = saved} =
-           authority
-       ),
-       do: NativeBranchRetirement.valid?(saved, authority) and backing?(authority)
-
-  defp retirement?(_), do: false
-  defp backing?(%{backing: nil}), do: true
-
-  defp backing?(%{backing: %NativeBranchBacking{} = saved} = authority),
-    do: NativeBranchBacking.valid?(saved, authority)
-
-  defp backing?(_), do: false
 
   defp completion?(%{proof: nil, completion_version: nil}), do: true
 
@@ -73,7 +56,8 @@ defmodule SmolBox.Embedded.NativePartialBranchCollection do
         Validation.integer?(saved.completion_version, saved.version + 1, 9_007_199_254_740_991)
 
   def eligible?(
-        %ManagedMachine{
+        %{
+          __struct__: ManagedMachine,
           branch: %{
             state: :unknown,
             native_authority: %{
@@ -94,14 +78,6 @@ defmodule SmolBox.Embedded.NativePartialBranchCollection do
 
   def eligible?(_), do: false
 
-  def pending?(parent, child) do
-    with :ok <- ManagedMachine.validate(parent),
-         :ok <- ManagedMachine.validate(child),
-         true <- eligible?(child),
-         do: source_pending?(parent, child),
-         else: (_ -> false)
-  end
-
   def source_pending?(parent, child) do
     parent.active_branch == child.id and parent.operation == :branch and
       parent.branch_children[child.id] == false and same_worker_source?(parent, child) and
@@ -112,7 +88,7 @@ defmodule SmolBox.Embedded.NativePartialBranchCollection do
     do:
       parent.worker_id == child.worker_id and
         parent.worker_generation == child.worker_generation and
-        child.branch.source == ManagedMachine.key(parent)
+        child.branch.source == ManagedMachineState.key(parent)
 
   def record?(%{branch: %{native_authority: %{partial_collection: nil}}}), do: true
 
@@ -130,20 +106,8 @@ defmodule SmolBox.Embedded.NativePartialBranchCollection do
   defp collection_state?(child, authority),
     do:
       eligible?(child) or
-        is_struct(authority.partial_disposal, SmolBox.Embedded.NativePartialBranchDisposal)
-
-  def preserved?(nil, nil, _), do: true
-
-  def preserved?(
-        nil,
-        %__MODULE__{version: version, proof: nil, completion_version: nil},
-        version
-      ),
-      do: true
-
-  def preserved?(%__MODULE__{proof: nil} = before, %__MODULE__{} = after_action, _),
-    do: %{after_action | proof: nil, completion_version: nil} == before
-
-  def preserved?(%__MODULE__{} = saved, saved, _), do: true
-  def preserved?(_, _, _), do: false
+        match?(
+          %{__struct__: SmolBox.Embedded.NativePartialBranchDisposal},
+          authority.partial_disposal
+        )
 end

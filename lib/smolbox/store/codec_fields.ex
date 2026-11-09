@@ -1,7 +1,19 @@
 defmodule SmolBox.Store.CodecFields do
   @moduledoc false
 
+  def any_value?(map, predicate), do: any_entry?(:maps.next(:maps.iterator(map)), predicate)
+
+  defp any_entry?({_, value, iterator}, predicate),
+    do: predicate.(value) or any_entry?(:maps.next(iterator), predicate)
+
+  defp any_entry?(:none, _predicate), do: false
+
   # Legacy envelopes must omit new defaults exactly, even when nil or empty.
+  def transform_optional(record, defaults, mode, required?) do
+    if required?.(record), do: raise(ArgumentError)
+    transform(record, defaults, mode)
+  end
+
   def transform(term, defaults, operation) when is_map(term) do
     fields = Map.get(defaults, Map.get(term, :__struct__), [])
     upgraded = Enum.reduce(fields, term, &field(&2, &1, operation))

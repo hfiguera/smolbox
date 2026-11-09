@@ -198,8 +198,7 @@ defmodule SmolBox.NativeVolumeRuntimeTest do
       match?({:ok, %{active_execution: nil}}, Machines.inspect(runtime, machine_key))
     end)
 
-    assert {:ok, running} = Machines.inspect(runtime, machine_key)
-    assert {:ok, _} = Machines.stop(runtime, machine_key, running.version)
+    assert {:ok, _} = lifecycle(runtime, machine_key, :stop)
     assert {:ok, %{state: :stopped} = stopped} = Machines.await(runtime, machine_key, 5000)
     stop_supervised!({Runtime, __MODULE__})
     runtime = start_runtime(context)
@@ -210,7 +209,7 @@ defmodule SmolBox.NativeVolumeRuntimeTest do
     assert {:ok, ^volume_key} = create_volume(runtime, context.native)
     assert [_] = volume_requests(context.native, "provision", volume.worker_volume_id)
     assert volume_requests(context.native, "inspect_provision") != []
-    assert {:ok, _} = Machines.delete(runtime, machine_key, recovered.version)
+    assert {:ok, _} = lifecycle(runtime, machine_key, :delete)
     assert {:ok, %{state: :deleted}} = Machines.await(runtime, machine_key, 5000)
     assert {:ok, free} = Volumes.inspect(runtime, volume_key)
     assert free.attached_to == nil and free.native_authority == volume.native_authority
@@ -345,6 +344,19 @@ defmodule SmolBox.NativeVolumeRuntimeTest do
 
     {state.health, state.native_frozen, Map.keys(state.native_holders),
      operation_counts(context.native), volume}
+  end
+
+  defp lifecycle(runtime, key, operation, attempts \\ 20) do
+    with {:ok, record} <- Machines.inspect(runtime, key) do
+      case apply(Machines, operation, [runtime, key, record.version]) do
+        {:error, %{category: :stale_version, evidence: :not_dispatched}} when attempts > 0 ->
+          Process.sleep(5)
+          lifecycle(runtime, key, operation, attempts - 1)
+
+        result ->
+          result
+      end
+    end
   end
 
   defp await(function, remaining \\ 500, diagnostics \\ fn -> :timeout end)

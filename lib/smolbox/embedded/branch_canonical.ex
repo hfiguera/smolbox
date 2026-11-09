@@ -1,6 +1,60 @@
 defmodule SmolBox.Embedded.BranchCanonical do
   @moduledoc false
   alias SmolBox.Embedded.Shape
+  alias SmolBox.Validation
+
+  @transition_fields ~w(schema previous receipt change)
+
+  def transition_from_wire(value, module) do
+    if Shape.keys?(value, @transition_fields) and module.valid?(value) do
+      {:ok, wire_struct(value, module)}
+    else
+      :error
+    end
+  end
+
+  def from_wire(value, module) do
+    if not is_struct(value) and module.valid?(value),
+      do: {:ok, wire_struct(value, module)},
+      else: :error
+  end
+
+  def wire_struct(value, module),
+    do:
+      struct!(
+        module,
+        Map.new(value, fn {key, field} -> {String.to_existing_atom(key), field} end)
+      )
+
+  def wire_fields(value),
+    do: Map.new(Map.from_struct(value), fn {key, field} -> {Atom.to_string(key), field} end)
+
+  def optional_release_fields(value) do
+    fields = wire_fields(value)
+    if value.release == nil, do: Map.delete(fields, "release"), else: fields
+  end
+
+  def valid_request_proof?(%{__struct__: module} = value, module, maximum),
+    do:
+      Validation.struct_shape?(value, module) and
+        valid_request_proof?(module.to_wire(value), module, maximum)
+
+  def valid_request_proof?(value, module, maximum),
+    do:
+      Shape.keys?(value, ~w(schema request proof_sha256)) and value["schema"] === 1 and
+        module.request?(value["request"]) and value["proof_sha256"] == module.proof_digest(value) and
+        byte_size(Jason.encode!(value)) <= maximum
+
+  def request_proof_matches?(proof, request, module, request?) do
+    value = if is_struct(proof, module), do: module.to_wire(proof), else: proof
+    module.valid?(value) and request?.(request) and value["request"] == request
+  end
+
+  def transition_shape?(value),
+    do:
+      Shape.keys?(value, @transition_fields) and value["schema"] === 1 and
+        Shape.receipt?(value["previous"], 2) and Shape.receipt?(value["receipt"], 2) and
+        origin(value["previous"]) == origin(value["receipt"])
 
   # Explicit serde struct order, including required nulls. These hashes check
   # history/correlation; they never grant SDK ownership or manager enrollment.
@@ -114,6 +168,15 @@ defmodule SmolBox.Embedded.BranchCanonical do
       value |> Jason.encode!() |> then(&:crypto.hash(:sha256, &1)) |> Base.encode16(case: :lower)
 
   def origin(receipt), do: Map.delete(receipt, "material")
+
+  def current_head?(current, expected),
+    do:
+      Shape.receipt?(current, 2) and current["material"] != nil and
+        origin(current) == origin(expected) and
+        current["material"]["revision"] >= expected["material"]["revision"] and
+        (current["material"]["revision"] != expected["material"]["revision"] or
+           current["material"] == expected["material"]) and
+        (current["material"]["revision"] != 0 or root?(current))
 
   def root?(receipt),
     do:

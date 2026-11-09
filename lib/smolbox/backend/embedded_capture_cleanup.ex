@@ -51,17 +51,22 @@ defmodule SmolBox.Backend.EmbeddedCaptureCleanup do
         send,
         deadline
       ) do
-    with {:ok, budget} <- remaining(budget, deadline),
-         result = send.(request(capture, previous, :cleaned), budget),
-         do: finish(context, capture, previous, result, budget, deadline, send)
+    with {:ok, budget} <- remaining(budget, deadline) do
+      result = send.(request(capture, previous, :cleaned), budget)
+      finish(context, capture, previous, result, budget, deadline, send)
+    end
   end
 
   def prepare(context, capture, budget) do
+    if EmbeddedContext.scoped?(context) and Features.supports?(context.config, :checkpoints),
+      do: prepare_capture(context, capture, budget),
+      else: failure(:unsupported_capability, :not_dispatched)
+  end
+
+  def prepare_capture(context, capture, budget) do
     with :ok <- CheckpointCapture.validate(capture),
          true <-
            capture.state in [:completed, :resolved_unknown] and capture.released_at_ms == nil,
-         true <-
-           EmbeddedContext.scoped?(context) and Features.supports?(context.config, :checkpoints),
          true <-
            capture.machine == {context.spec.scope, context.spec.id} and
              context.spec.checkpointable,
@@ -98,9 +103,10 @@ defmodule SmolBox.Backend.EmbeddedCaptureCleanup do
          send
        )
        when map_size(outcome) == 3 and output == %{stdout: <<>>, stderr: <<>>, file: <<>>} do
-    with {:ok, budget} <- remaining(budget, deadline),
-         result = send.(request(capture, previous, :aborted), budget),
-         do: decode(context, capture, previous, :aborted, result)
+    with {:ok, budget} <- remaining(budget, deadline) do
+      result = send.(request(capture, previous, :aborted), budget)
+      decode(context, capture, previous, :aborted, result)
+    end
   end
 
   defp finish(context, capture, previous, result, _budget, _deadline, _send),

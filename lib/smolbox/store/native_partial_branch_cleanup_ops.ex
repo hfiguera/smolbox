@@ -1,11 +1,11 @@
 defmodule SmolBox.Store.NativePartialBranchCleanupOps do
   @moduledoc false
-  alias SmolBox.Embedded.{NativePartialBranchCleanup, NativePartialBranchDisposal}
+  alias SmolBox.Embedded.{NativeBranchAdmission, NativePartialBranchCleanup}
   alias SmolBox.{Error, ManagedMachine, Validation}
 
   def accept(parent, child, version, platform, now) do
     with true <- Validation.timestamp?(now),
-         true <- NativePartialBranchDisposal.pending?(parent, child),
+         true <- NativeBranchAdmission.partial_disposal_pending?(parent, child),
          disposal when not is_nil(disposal) <- child.branch.native_authority.partial_disposal,
          true <- disposal.proof == nil and disposal.platform == platform,
          saved = disposal.cleanup,

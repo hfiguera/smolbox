@@ -10,6 +10,32 @@ defmodule SmolBox.Runtime.MachineSession do
   def claim(config, key),
     do: store(config, :claim, [key, config.owner, config.clock.now(), config.lease_ms])
 
+  def advance_unknown_branch(config, parent, child, change),
+    do:
+      store(config, :branch_advance, [
+        ManagedMachine.key(parent),
+        Session.guard(parent),
+        child.id,
+        :unknown,
+        change,
+        config.clock.now()
+      ])
+
+  def commit_branch_result(config, child, result, deadline) do
+    with {:ok, _} <- Deadline.remaining(deadline, :branch),
+         {:ok, parent} <- claim(config, child.branch.source),
+         {:ok, _} <- Deadline.remaining(deadline, :branch) do
+      store(config, :branch_resolve, [
+        child.branch.source,
+        Session.guard(parent),
+        child.id,
+        result.source,
+        result,
+        config.clock.now()
+      ])
+    end
+  end
+
   def write(config, record, changes),
     do:
       store(config, :write, [

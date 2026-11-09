@@ -1,7 +1,7 @@
 defmodule SmolBox.Embedded.CheckpointContractTest do
   use ExUnit.Case, async: true
-  alias SmolBox.{Checkpoint, Profile}
   alias SmolBox.Backend.EmbeddedReply
+  alias SmolBox.{Checkpoint, Profile}
   alias SmolBox.Embedded.{Channel, CheckpointContract, Config, Launch, Request, SDKIdentity}
 
   test "operator approval binds capture platform, version and allocations separately from request" do

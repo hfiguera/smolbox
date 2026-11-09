@@ -1,6 +1,7 @@
 defmodule SmolBox.Runtime.NativeResolution do
   @moduledoc false
   alias SmolBox.Backend.{Budget, EmbeddedContext}
+  alias SmolBox.{CheckpointCapture, Error, ManagedMachine}
 
   alias SmolBox.Embedded.{
     BranchCompletion,
@@ -12,7 +13,6 @@ defmodule SmolBox.Runtime.NativeResolution do
     NativePreparedBranchRetirement
   }
 
-  alias SmolBox.{CheckpointCapture, Error, ManagedMachine}
   alias SmolBox.Runtime.{NativeAuthority, Session, Target}
 
   def run(config, coordinator, record, target, disposition, function, deadline \\ nil)

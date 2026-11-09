@@ -6,13 +6,14 @@ defmodule SmolBox.Embedded.NativePartialBranchDisposal do
     NativeBranchRetirement,
     NativePartialBranchCleanup,
     NativePartialBranchCollection,
+    NativePartialBranchHistory,
     NativeUnbootedBranchDisposal,
     PartialBranchChildAbsence,
     PartialBranchCollection,
     PartialBranchDisposal
   }
 
-  alias SmolBox.{ManagedMachine, Profile, Validation}
+  alias SmolBox.{ManagedMachine, ManagedMachineState, Profile, Validation}
   @enforce_keys [:version, :request, :platform]
   @derive {Inspect, only: [:version, :platform]}
   defstruct @enforce_keys ++ [proof: nil, completion_version: nil, cleanup: nil]
@@ -53,7 +54,7 @@ defmodule SmolBox.Embedded.NativePartialBranchDisposal do
         ) and
         saved.platform == authority.partial_collection.platform and
         action?(saved, authority) and completion?(saved) and cleanup?(saved, authority) and
-        retirement?(authority)
+        NativePartialBranchHistory.retirement?(authority)
 
   def valid?(_, _), do: false
 
@@ -72,22 +73,6 @@ defmodule SmolBox.Embedded.NativePartialBranchDisposal do
   defp cleanup?(%{cleanup: saved} = disposal, authority),
     do: NativePartialBranchCleanup.valid?(saved, %{authority | partial_disposal: disposal})
 
-  defp retirement?(%{retirement: nil, backing: nil}), do: true
-
-  defp retirement?(
-         %{retirement: %NativeBranchRetirement{proof: %PartialBranchChildAbsence{}} = saved} =
-           authority
-       ),
-       do: NativeBranchRetirement.valid?(saved, authority) and backing?(authority)
-
-  defp retirement?(_), do: false
-  defp backing?(%{backing: nil}), do: true
-
-  defp backing?(%{backing: %NativeBranchBacking{} = saved} = authority),
-    do: NativeBranchBacking.valid?(saved, authority)
-
-  defp backing?(_), do: false
-
   defp collection?(
          %{partial_collection: %NativePartialBranchCollection{proof: proof} = saved} = a
        ),
@@ -104,25 +89,19 @@ defmodule SmolBox.Embedded.NativePartialBranchDisposal do
 
   defp completion?(_), do: false
 
-  def eligible?(%ManagedMachine{branch: %{state: state, native_authority: authority}} = child),
-    do:
-      state in [:unknown, :disposal_pending, :disposal_cleanup_pending] and collection?(authority) and
-        child.state == :unknown and child.operation == :branch_child and
-        child.reservation == Profile.resources(child.spec.profile) and
-        child.reserved_ports == [] and child.created_machine == nil and
-        child.observed_machine == nil and child.absence_at_ms == nil
+  def eligible?(
+        %{__struct__: ManagedMachine, branch: %{state: state, native_authority: authority}} =
+          child
+      ),
+      do:
+        state in [:unknown, :disposal_pending, :disposal_cleanup_pending] and
+          collection?(authority) and
+          child.state == :unknown and child.operation == :branch_child and
+          child.reservation == Profile.resources(child.spec.profile) and
+          child.reserved_ports == [] and child.created_machine == nil and
+          child.observed_machine == nil and child.absence_at_ms == nil
 
   def eligible?(_), do: false
-
-  def pending?(parent, child) do
-    with :ok <- ManagedMachine.validate(parent),
-         :ok <- ManagedMachine.validate(child),
-         true <- eligible?(child) do
-      NativePartialBranchCollection.source_pending?(parent, child)
-    else
-      _ -> false
-    end
-  end
 
   def record?(%{branch: %{native_authority: %{partial_disposal: nil}}}), do: true
 
@@ -151,7 +130,8 @@ defmodule SmolBox.Embedded.NativePartialBranchDisposal do
 
   defp deleted_projection?(child),
     do:
-      child.state == :deleted and disposed_state?(child.branch) and ManagedMachine.idle?(child) and
+      child.state == :deleted and disposed_state?(child.branch) and
+        ManagedMachineState.idle?(child) and
         child.reservation == nil and child.reserved_ports == [] and child.absence_at_ms != nil and
         child.created_machine == nil and child.observed_machine == nil
 

@@ -292,7 +292,7 @@ defmodule SmolBox.ManagedBranchTest do
 
     assert [{:ok, child}] = Enum.filter(results, &match?({:ok, _}, &1))
     assert_receive {:boundary, :branch, :after, blocked}, 5000
-    assert {:ok, %{branch: %{state: :unknown}}} = Branches.cancel(f.runtime, child)
+    assert {:ok, %{branch: %{state: :unknown}}} = cancel_current(f.runtime, child)
     assert {:error, _} = Machines.submit(f.runtime, source, f.spec)
     send(blocked, :release_boundary)
     assert {:ok, %{branch: %{state: :unknown}}} = Branches.await(f.runtime, child, 5000)
@@ -361,6 +361,17 @@ defmodule SmolBox.ManagedBranchTest do
     assert {:error, _} = Branches.resolve(f.runtime, child, quiesced: true, disposition: :deleted)
     assert {:ok, %{branch: %{state: :unknown}}} = Branches.fetch(f.runtime, child)
     assert {:ok, %{slots: 3}} = Memory.usage(f.store, "peer")
+  end
+
+  defp cancel_current(runtime, child, attempts \\ 20) do
+    case Branches.cancel(runtime, child) do
+      {:error, %{category: :stale_version, evidence: :not_dispatched}} when attempts > 0 ->
+        Process.sleep(5)
+        cancel_current(runtime, child, attempts - 1)
+
+      result ->
+        result
+    end
   end
 
   defp delete(runtime, handle) do

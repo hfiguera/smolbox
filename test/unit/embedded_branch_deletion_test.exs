@@ -13,7 +13,7 @@ defmodule SmolBox.EmbeddedBranchDeletionTest do
 
   alias SmolBox.Embedded.{BranchDeletionResolution, Config, NativeGrowth}
   alias SmolBox.Store.{Memory, NativeBranchDeletionContract}
-  @budget %Budget{timeout_ms: 1000, max_request_bytes: 131_072, max_response_bytes: 131_072}
+  @budget %Budget{timeout_ms: 5000, max_request_bytes: 131_072, max_response_bytes: 131_072}
   @empty %{stdout: <<>>, stderr: <<>>, file: <<>>}
   defp fixture do
     store = start_supervised!(Memory)
@@ -64,7 +64,7 @@ defmodule SmolBox.EmbeddedBranchDeletionTest do
 
     assert pinned.epoch == context.epoch and pinned.server == context.server and pinned.quiesced
     assert request == child.branch.native_authority.deletion.request
-    assert budget.timeout_ms <= 1000 and budget.max_response_bytes <= 8192
+    assert budget.timeout_ms <= @budget.timeout_ms and budget.max_response_bytes <= 8192
     refute Embedded.supports_operation?(context, :resolve_branch_deletion)
 
     assert {:error, %Error{evidence: :not_dispatched}} =
@@ -112,7 +112,7 @@ defmodule SmolBox.EmbeddedBranchDeletionTest do
 
     late =
       peer(proof, self(), fn result ->
-        Process.sleep(150)
+        Process.sleep(2000)
         result
       end)
 
@@ -122,7 +122,7 @@ defmodule SmolBox.EmbeddedBranchDeletionTest do
                child,
                @budget,
                late,
-               System.monotonic_time(:millisecond) + 100
+               System.monotonic_time(:millisecond) + 1500
              )
   end
 

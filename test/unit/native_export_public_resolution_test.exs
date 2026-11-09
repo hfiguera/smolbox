@@ -2,9 +2,9 @@ defmodule SmolBox.NativeExportPublicResolutionTest do
   use ExUnit.Case, async: true
   alias SmolBox.Backend.{Budget, EmbeddedContext, Reference}
   alias SmolBox.Embedded.{Config, ExportStageCleanup}
+  alias SmolBox.{ExportDestination, ExportReceipt, ExportResult, Exports, ManagedMachine}
   alias SmolBox.Runtime.{Coordinator, Target, WorkSupervisor}
   alias SmolBox.Store.{Contract, Memory, NativeExportContract}
-  alias SmolBox.{ExportDestination, ExportReceipt, ExportResult, Exports, ManagedMachine}
 
   defmodule Clock do
     def now, do: 1104
@@ -185,7 +185,7 @@ defmodule SmolBox.NativeExportPublicResolutionTest do
       budget: %Budget{
         timeout_ms: options[:timeout_ms] || 1000,
         max_request_bytes: 1_048_576,
-        max_response_bytes: 16384
+        max_response_bytes: 16_384
       }
     }
 
@@ -195,7 +195,7 @@ defmodule SmolBox.NativeExportPublicResolutionTest do
       workers: [%Target{kind: :embedded, id: record.worker_id, connection: reference}],
       owner: "owner",
       clock: Clock,
-      lease_ms: 10000,
+      lease_ms: 10_000,
       poll_ms: 20
     }
 
