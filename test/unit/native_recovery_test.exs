@@ -50,7 +50,7 @@ defmodule SmolBox.NativeRecoveryTest do
 
   setup do
     native = Package.create(backend: true, persistent_backend: true)
-    on_exit(fn -> File.rm_rf!(native.package_path) end)
+    on_exit(fn -> Package.remove!(native) end)
     store = start_supervised!(Memory)
     artifacts = start_supervised!({Agent, fn -> %{{"contract", "input"} => <<0, 255>>} end})
 
