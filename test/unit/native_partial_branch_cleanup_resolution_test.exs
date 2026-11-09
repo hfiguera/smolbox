@@ -125,6 +125,9 @@ defmodule SmolBox.NativePartialBranchCleanupResolutionTest do
 
     assert {:ok, <<"smolbox-record-v49", 0, payload::binary>> = bytes} = Codec.encode(child)
 
+    old = update_in(child.branch.native_authority, &Map.delete(&1, :collected_publication))
+    assert bytes == "smolbox-record-v49" <> <<0>> <> :erlang.term_to_binary(old)
+
     for version <- 1..48,
         do: assert({:error, _} = Codec.decode("smolbox-record-v#{version}" <> <<0>> <> payload))
 
@@ -162,7 +165,12 @@ defmodule SmolBox.NativePartialBranchCleanupResolutionTest do
           &Map.delete(&1, :unneeded)
         )
 
-      assert :erlang.binary_to_term(payload) == expected
+      assert :erlang.binary_to_term(payload) ==
+               update_in(
+                 expected.branch.native_authority,
+                 &Map.delete(&1, :collected_publication)
+               )
+
       assert {:ok, ^record} = Codec.decode(bytes)
 
       assert {:error, _} =
@@ -174,7 +182,7 @@ defmodule SmolBox.NativePartialBranchCleanupResolutionTest do
     assert {:ok, %{native_partial_branch_cleanup_resolutions: 1} = caps} =
              Memory.capabilities(start_supervised!(Memory, id: :marker))
 
-    refute Map.has_key?(caps, :native_branches)
+    assert caps.native_branches == 1
   end
 
   test "fresh normal BEAM readers load v49 without native assets or atom warmup" do

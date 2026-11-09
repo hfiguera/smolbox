@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "status": "implemented-and-model-verified-live-qualification-pending",
+  "source_base_commit": "bd67096a8c613ad009a629c982efd509e7baaab0",
+  "source_inputs_sha256": {
+    "lib/smolbox/embedded/sdk_identity.ex": "34a0034182f068e4dc7a654847d5c519eff170fd1854a1cf110d3e95358ff203",
+    "native/policy.json": "0b5ce0a9a91d5540cb053e071c096cfe4fe4fd6066c12a3a912cb8a17f2896b2",
+    "native/policy-linux.json": "75f5ed91ea91ee1665675c428141f56866cbd84ea9fb636bd98b9bb313e33067",
+    "native/smolbox-port/src/package.rs": "1e561084b47fe6520420fcaff59c193268c830c5c514d49496b69f7fa8eeec69",
+    "native/smolbox-protocol/fixtures/hello-v2-macos-images.json": "12321df4f36a4997ff63bfa9c7d66b049c989a8815a1eab54a6b625ede1ec97e",
+    "examples/embedded_port/lib/images_demo.ex": "59329e84c676fe0b80133c6ef81bde8ad56b572e87cf4182cdcce6aaac05172d"
+  },
+  "sdk": {
+    "version": "1.22.0",
+    "revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "regular_and_clean_sources_verified_unmodified": true
+  },
+  "changes": [
+    "Explicit macOS remote_sources/images SDK admission with all required dependencies",
+    "Matching compiled macOS package policy and separate current Hello fixture",
+    "Ordinary public image runner supports Linux/macOS and matches source architecture"
+  ],
+  "compatibility": {
+    "older_descriptors_unchanged": true,
+    "unscoped_optional_source_approval_rejected": true,
+    "missing_reader_and_atomic_store_markers_rejected_before_enrollment": true,
+    "linux_policy_unchanged": true
+  },
+  "public_port_peer_models": {
+    "platform": "macos-aarch64",
+    "actual_vm": false,
+    "oci_creation_and_start": true,
+    "image_pull_and_duplicate_reuse": true,
+    "registry_cold_warm_preparation": true,
+    "codec_roundtrip": true,
+    "owned_deletion_and_zero_reserved_slots": true,
+    "wrong_source_architecture_rejected_before_dispatch": true
+  },
+  "validation": {
+    "current_elixir": "1.20.4/OTP 29.0.6",
+    "current_source_admission_tests_passed": 91,
+    "current_http_contracts_passed": 411,
+    "minimum_elixir": "1.18.4/OTP 27.3.4.15",
+    "minimum_source_admission_tests_passed": 91,
+    "minimum_dependency_versions_qualified": false,
+    "rust_protocol_contracts_passed": 60,
+    "rust_package_models_passed": 12,
+    "rust_package_explicit_fixture_ignored": 1,
+    "python_package_and_runner_models_passed": 20
+  },
+  "development_package": {
+    "manifest_sha256": "1a8e644f66511c60c9aabc7fc3815bf2600857a18f821621a2b717a77ca723e4",
+    "identity": {
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "fe85a410e809d526b8ec391b5d4ae9ed23aa9bd156924e40cf22059aa0362569",
+      "assets_sha256": "4b33d1a5047a0acb6310182838bb6ba4f09770bddefb2bf102566b208b722cae",
+      "platform": "macos",
+      "architecture": "aarch64"
+    },
+    "stages": [
+      {
+        "stage": "build-helper",
+        "exit_code": 0,
+        "log_sha256": "05efc559291b8f4af17689504a142ed3e38447f27d441208d852b7fafbc1d0c1"
+      },
+      {
+        "stage": "package",
+        "exit_code": 0,
+        "log_sha256": "d44fbbb85b5306ef4194b64f9354a294c1883dd7f2a5f31e1355a0984bcf107f"
+      },
+      {
+        "stage": "signature",
+        "exit_code": 0,
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "stage": "sdk-final",
+        "exit_code": 0,
+        "log_sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+      },
+      {
+        "stage": "clean-sdk-final",
+        "exit_code": 0,
+        "log_sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+      }
+    ],
+    "original_input_assets_verified_unchanged": 809,
+    "private_library_copy_used_for_build": true,
+    "development_signature_verified": true
+  },
+  "remaining": {
+    "macos_live_source_and_image_campaign": true,
+    "macos_unadmitted_features": [
+      "checkpoints",
+      "branches",
+      "exports"
+    ],
+    "linux_unadmitted_features": [
+      "exports"
+    ],
+    "full_parity_acceptance": true
+  },
+  "private_log_sha256": {
+    "current-http-and-source-tests.log": "02bdafb97a193dc7b07823a0f810a50e2afbf6ce159f2823106c9a5eb26504f2",
+    "minimum-elixir-tests-absolute.log": "07d4f78ca046ea28388b798e7841c5c937c59e655feaf052940399d4ebd5cdd4",
+    "package-tests.log": "3f5b0d38cb09ffd81a25d823b81555fbc3b760dde67e3ccb9fa6e843b3f86f5d",
+    "runner-tests.log": "04936c98f68cc756dc9df161d1fe387995d4cd4ca480ca5d8bfa95f2c93a22c3"
+  },
+  "live_native_owner_or_vm_opened": false,
+  "parity_complete": false,
+  "crash_validation_deferred": true,
+  "crash_handling_qualified": false,
+  "distribution_approved": false
+}

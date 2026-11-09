@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "status": "ordinary-cancellation-retained-uncertainty-ready-recovery-unqualified-source-gate-corrected-in-models",
+  "ordinary_case": {
+    "source_commit": "ebc6e775080db5a1195086b1c46767b237005b79",
+    "hex_archive_sha256": "7b9038ccddc2073dab2f66558adb7faba525ddacb3e66712afc783d0cd41002b",
+    "source_archive_sha256": "0a6e29350e95e7fe62991d28dcbb55d7418f9aa65c5ff7a844e76d984a50ce4a",
+    "native_source_commit": "41cc8a6c2d54ddcfbb130768dda0690cb1be0333",
+    "native_manifest_sha256": "7b6cfae8a0140babab03f821c56406b018be97e52994bc4cb74d3d9791ebfc39",
+    "native_helper_sha256": "e3fbda886c3129f798dc2668781014204b7c6a1090129ae82ac265def2176ce1",
+    "linux_x86_64_local_bare_memory_current_toolchain": true,
+    "installed_consumer_without_rust": true,
+    "minimum_ordinary_campaign_not_started": true,
+    "initial_runtime_configuration_rejection_before_sdk_vm_work": true,
+    "separately_recorded_corrected_environment_attempt": true,
+    "source_started_and_child_requested_with_hold_true": true,
+    "public_cancel_from_managed_dispatching_retains_unknown_and_all_resources": true,
+    "worker_drained_before_recovery_attempt": true,
+    "original_ready_recovery_rejection": {
+      "category": "admission_exhausted",
+      "evidence": "not_dispatched",
+      "root_cause_unresolved": true
+    },
+    "managed_original_completion_not_recorded": true,
+    "subsequent_sibling_and_cleanup_lifecycle_not_qualified": true,
+    "two_rejected_normal_shutdown_requests_then_original_protocol_shutdown_completed": true,
+    "direct_process_signals_used": false,
+    "retained_sdk_counts": {
+      "vms": 2,
+      "vm_create_reservations": 0,
+      "vm_pause_operations": 0,
+      "vm_resize_intents": 0,
+      "vm_resize_receipts": 0
+    },
+    "source_files_verified": 1799,
+    "native_assets_verified": 806,
+    "source_library_assets_host_tools_domain_keys_verified": true,
+    "no_native_beam_processes_remaining": true,
+    "account_lock_available": true,
+    "capacity_released": false,
+    "archived_authority_restored_or_replayed": false,
+    "archive": {
+      "sha256": "98bc79e82d04b9e6fe958758e9e35d4cec1639b7eb10948c8ad685877d451eb5",
+      "bytes": 379669398,
+      "members": 11190,
+      "sdk_backup_sha256": "cdb5ca0d617dc879036b347cf5842558ce3d9779e3dd29c61cec277f132db91a",
+      "stale_socket_metadata_preserved": 5,
+      "verified_on_guest_outer_and_mac": true,
+      "full_copies_retained_on_guest_and_outer": true,
+      "mac_streamed_and_retained_compact_metadata": true
+    },
+    "record_readers": {
+      "current": {
+        "records": 15,
+        "checkpoints": 5,
+        "managed_source_and_child_unknown": true,
+        "completion_absent": true,
+        "source_dependency_unretired": true,
+        "all_recorded_ordinary_and_extra_resources_retained": {
+          "slots": 3,
+          "cpus": 3,
+          "memory_mb": 1920,
+          "disk_gb": 9
+        },
+        "authority_restored_or_replayed": false,
+        "sdk_or_vm_started": false
+      },
+      "minimum": {
+        "records": 15,
+        "checkpoints": 5,
+        "managed_source_and_child_unknown": true,
+        "completion_absent": true,
+        "source_dependency_unretired": true,
+        "all_recorded_ordinary_and_extra_resources_retained": {
+          "slots": 3,
+          "cpus": 3,
+          "memory_mb": 1920,
+          "disk_gb": 9
+        },
+        "authority_restored_or_replayed": false,
+        "sdk_or_vm_started": false
+      }
+    },
+    "workflow_sha256": "b0d51e7070905df87f8e0b1f8a0f63b4ac1cc410f7b7e905db58497fdaf2d81b"
+  },
+  "separate_source_gate_correction": {
+    "base_commit": "ebc6e775080db5a1195086b1c46767b237005b79",
+    "files_sha256": {
+      "lib/smolbox/embedded/request.ex": "50ee2163da4a7f8a3f8bf5827f0494305345edb45cd23003711652926b1ccd2a",
+      "test/unit/embedded_branch_preflight_test.exs": "be3f3116bb8369f848c7a2bf08ce83c901f5510a5c206478e3ec260ca6fd7955"
+    },
+    "actual_call_gate_reproduced_before_fix": true,
+    "before_fix_models_failed": 2,
+    "before_fix_model_count": 6,
+    "fully_validated_finite_major_two_branch_preflight_admitted_while_reconciling": true,
+    "quarantined_control_admission_still_false": true,
+    "invalid_receipts_and_extra_fields_still_rejected": true,
+    "native_work_resource_budgets_and_ownership_checks_unchanged": true,
+    "not_proven_to_explain_the_ordinary_native_admission_rejection": true,
+    "new_native_acceptance_required": true
+  },
+  "validation": {
+    "focused_models_per_toolchain": 71,
+    "selected_models_per_toolchain": 940,
+    "http_branch_and_coverage_checks_per_toolchain": 32,
+    "full_http_contracts_on_parent_recovery_correction_per_toolchain": 411,
+    "postgresql_contracts_on_parent_recovery_correction_per_toolchain": 180,
+    "strict_credo_findings": 67,
+    "new_credo_findings": 0,
+    "native_sdk_helper_assets_and_store_codecs_unchanged": true
+  },
+  "qualification": {
+    "ordinary_ready_and_partial_recovery_still_pending": true,
+    "all_full_parity_rows_pending": true,
+    "full_http_parity_complete": false,
+    "crash_validation_deferred": true,
+    "crash_handling_qualified": false,
+    "distribution_approved": false
+  }
+}

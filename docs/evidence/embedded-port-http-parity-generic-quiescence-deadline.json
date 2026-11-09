@@ -1,0 +1,211 @@
+{
+  "schema": 1,
+  "status": "current-automatic-unbooted-memory-lifecycle-pass-minimum-generic-quiescence-gap-model-corrected-fresh-library-acceptance-pending",
+  "base_source_commit": "a5f19f3c7208c462e66b017b4b809bdfa2960592",
+  "frozen_hex_archive_sha256": "f1beffbe5c22badc7a94e3779610a888ecc31f24461f7a375bdfec4c181f0e6a",
+  "frozen_source_archive_sha256": "a16e5f87389ab3fe7b25972a3767ebfc3f1bdb8a3c0adb5430ec4473a78696fd",
+  "native_manifest_sha256": "e82508e5d78fa4882c1cfae1c12f658b368d96cb638dba6fa74c19bcc0878ec8",
+  "helper_sha256": "3f72b406c28de87a6b767c7d07809d5da3e6204a47d5265fc048ff5379549307",
+  "sdk_source_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_unmodified": true,
+  "changed_source_files": {
+    "lib/smolbox/runtime/native_branch_deletion_action.ex": "039452291856e00624f331149da532e1ee75c6f0aef4b9c680a1c7451ce82bfe",
+    "lib/smolbox/runtime/native_collected_branch_publication.ex": "1c460fd937bd12c2c423950138ba45507ed4565a252607332bea28bd19ba6543",
+    "lib/smolbox/runtime/native_deleted_branch_resolution.ex": "d7d5171c4331c4bb1e3d3fd46392a0b92703ba37dc6bb1fb9d32f620c338c4a7",
+    "lib/smolbox/runtime/native_partial_branch_cleanup.ex": "3d002cf35ac6fa988e57087ecbc82463fd66a05cd45054155d83d7213c630b74",
+    "lib/smolbox/runtime/native_partial_branch_collection.ex": "9316dc771db74bc912e3ef83314574526a762c1d2d627fda722d888e97f224fa",
+    "lib/smolbox/runtime/native_partial_branch_disposal.ex": "a5acbb7c8f85f9feb15267d42f14a450dfa48e3712f4444aa07c6cee530c7748",
+    "lib/smolbox/runtime/native_partial_branch_retirement.ex": "4cc05cadd1ce1a8b910e7ef4cd5c1fb7fbcc5495190c4b6717da4635dba6c8af",
+    "lib/smolbox/runtime/native_prepared_branch_retirement.ex": "3a3a7f7b09f54706f8e3d0463beee881c1322e4efefe8c4e70282f55663a4a03",
+    "lib/smolbox/runtime/native_resolution.ex": "2c01dccbe03870f091a2f1021e32eb3b1057441c17c15098590c0e9bf9d1c385",
+    "lib/smolbox/runtime/native_unbooted_branch_retirement.ex": "b3b0229187b9366ef1bbda1766ea0fbedfc584fa863fadb0e52abdc47b96c6e8",
+    "test/unit/branch_public_authority_test.exs": "92787543377eb236d9155b86b2995aa5940fa806185dc9d8cacfc99f0e7a41ab",
+    "test/unit/native_branch_control_readiness_test.exs": "92b3b84571d92f8c6220933961f6a79e5ccf56744488f492f943b2ed39cd87fc"
+  },
+  "native_engine_bridge_protocol_and_codecs_changed": false,
+  "cases": {
+    "current": {
+      "source_commit": "a5f19f3c7208c462e66b017b4b809bdfa2960592",
+      "consumer_without_rust": true,
+      "source_files_verified": 1808,
+      "assets_verified": 806,
+      "source_library_assets_host_tools_domain_keys_verified": true,
+      "normal_original_owner_shutdown": true,
+      "native_beam_sql_kvm_inventories_empty": true,
+      "account_lock_available": true,
+      "sdk_counts": {
+        "vms": 0,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0
+      },
+      "archive_sha256": "e2784fa8416d7f4a82b3e563c0b5323fccd9938bf68c7c38bf5e924efdcdf314",
+      "archive_bytes": 379761006,
+      "archive_members": 11207,
+      "sdk_backup_sha256": "097916ab399cb2e77206c953367942f84f968a2914861c15e16557896764be88",
+      "full_archive_and_sdk_backup_verified_guest_outer_mac_stream": true,
+      "compact_metadata_verified": 27,
+      "codec_readers": {
+        "current": {
+          "checkpoints": 5,
+          "decoded_records": 15,
+          "log_sha256": "dbc38865e8873564252b91ea4ff3d3e697c4a9dae72a3a15832c0bd1d9493351"
+        },
+        "minimum": {
+          "checkpoints": 5,
+          "decoded_records": 15,
+          "log_sha256": "dbc38865e8873564252b91ea4ff3d3e697c4a9dae72a3a15832c0bd1d9493351"
+        }
+      },
+      "authority_not_restored_or_replayed": true,
+      "full_automatic_harness_pass": true,
+      "exit_status": 0,
+      "ordinary_scope": "Linux local-bare Memory one-second branch deadline",
+      "actual_family": "unbooted_disposal",
+      "collected_publication_disposal_retirement_and_backing_acknowledged": true,
+      "source_and_child_deleted": true,
+      "final_reserved_resources": {
+        "slots": 0,
+        "cpus": 0,
+        "memory_mb": 0,
+        "disk_gb": 0
+      },
+      "vm_caches_empty": true,
+      "manual_continuation_required": false
+    },
+    "minimum": {
+      "source_commit": "a5f19f3c7208c462e66b017b4b809bdfa2960592",
+      "consumer_without_rust": true,
+      "source_files_verified": 1808,
+      "assets_verified": 806,
+      "source_library_assets_host_tools_domain_keys_verified": true,
+      "normal_original_owner_shutdown": true,
+      "native_beam_sql_kvm_inventories_empty": true,
+      "account_lock_available": true,
+      "sdk_counts": {
+        "vms": 2,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0
+      },
+      "archive_sha256": "2771c3d09bf834f14952b1c27a503f83555222042a99f2a93c017b9be5639940",
+      "archive_bytes": 379785481,
+      "archive_members": 11250,
+      "sdk_backup_sha256": "54550acc0b657bd5fc1e4b2aaebdc958a7ef1804d42b14c30f8b1b67d5918976",
+      "full_archive_and_sdk_backup_verified_guest_outer_mac_stream": true,
+      "compact_metadata_verified": 24,
+      "codec_readers": {
+        "current": {
+          "checkpoints": 3,
+          "decoded_records": 9,
+          "log_sha256": "08a3e5e0c840ba5329b64f32da68ee5cb0f75d810c8a04ae64ca52c6553f3161"
+        },
+        "minimum": {
+          "checkpoints": 3,
+          "decoded_records": 9,
+          "log_sha256": "08a3e5e0c840ba5329b64f32da68ee5cb0f75d810c8a04ae64ca52c6553f3161"
+        }
+      },
+      "authority_not_restored_or_replayed": true,
+      "full_automatic_harness_pass": false,
+      "exit_status": 1,
+      "observed_failure": "admission_exhausted / embedded / not_dispatched at publish_collected",
+      "public_collected_publication_and_followup_proofs_unacknowledged": true,
+      "retained_sdk_states": [
+        "created / no PID",
+        "running / stale PID after positive collection"
+      ],
+      "retained_resources": {
+        "slots": 3,
+        "cpus": 3,
+        "memory_mb": 1920,
+        "disk_gb": 9
+      },
+      "source_child_and_backing_disks_retained": true,
+      "socket_metadata_preserved": 3,
+      "preinstalled_retained_shutdown_acknowledged": true
+    }
+  },
+  "correction": {
+    "generic_resolution_uses_existing_bounded_quiescence_wait": true,
+    "original_authority_barrier_pinned_owner_and_epoch_preserved": true,
+    "wait_only_for_admission_exhausted_not_dispatched_before_callback": true,
+    "no_callback_or_sdk_operation_replay": true,
+    "expiry_and_uncertainty_cannot_enter_or_reactivate_work": true,
+    "generic_resolution_stays_frozen_without_readiness_promotion": true,
+    "deadline_rechecked_before_lease_and_before_callback": true,
+    "all_audited_native_resolution_call_sites": 12,
+    "newly_threaded_existing_deadlines": 10,
+    "existing_deadlines_not_refreshed": true,
+    "legacy_coordination_peer_operation_acquisition_added_without_inventing_completed_scan": true
+  },
+  "validation": {
+    "red_generic_models": {
+      "passed": 29,
+      "failed": 5,
+      "log_sha256": "7844aab3ad42eea2ebac7d82fcbea6a58def29b3c085cd6a384aa3b06d0efd2a"
+    },
+    "initial_broad_suite": {
+      "passed": 982,
+      "failed": 1,
+      "failure": "legacy coordination peer lacked native_acquire_operation; SDK behavior was not exercised"
+    },
+    "current": {
+      "branch_unit_documentation_coverage_checks_passed": 983,
+      "runtime_cases_excluded": 3,
+      "http_contracts_passed": 411,
+      "checks": [
+        {
+          "stage": "unit",
+          "exit_status": 0,
+          "log_sha256": "992ae4b743806e3fb0ebee2ceb6e74a08581d69a2b2868a9ff2d5cfae81e03ed"
+        },
+        {
+          "stage": "http",
+          "exit_status": 0,
+          "log_sha256": "b38e277daf2a869ce87523e09dc629034f14f7b6c9e444459e648b9c11e250cb"
+        }
+      ],
+      "strict_compile_exit_status": 0
+    },
+    "minimum": {
+      "branch_unit_documentation_coverage_checks_passed": 983,
+      "runtime_cases_excluded": 3,
+      "http_contracts_passed": 411,
+      "checks": [
+        {
+          "stage": "unit",
+          "exit_status": 0,
+          "log_sha256": "aed1c2e6cbc6aa1d529e2749bf1b5a3cf840d0f315688d0d7330eedd2235993f"
+        },
+        {
+          "stage": "http",
+          "exit_status": 0,
+          "log_sha256": "a28229c2ebb2586221c06b6c943d310d95701d9a45e094d4fc4b7a113490f609"
+        }
+      ],
+      "strict_compile_exit_status": 0
+    },
+    "credo": {
+      "findings": 67,
+      "new_issue_keys_excluding_coordinates": 0,
+      "exit_status": 14,
+      "log_sha256": "4900a57dfc25487bbb533b4b46806c50c947652634c99fa5634eb210083646fa"
+    },
+    "deadline_call_site_audit_sha256": "5af65c45bc6fbeccbcb706cf96e78cfaff1b40cf5bec77fb5af9847c8e4cdac2"
+  },
+  "remaining": [
+    "Fresh current/minimum installed consumers on corrected library in a new ordinary lab boot",
+    "Encrypted PostgreSQL unbooted histories and remaining partial/handoff combinations",
+    "Other source/platform/resource/upgrade and P0\u2013P9 acceptance gates"
+  ],
+  "fresh_library_ordinary_acceptance_pending": true,
+  "full_parity_rows_closed": 0,
+  "full_http_parity_complete": false,
+  "crash_validation_deferred": true,
+  "crash_handling_qualified": false,
+  "distribution_approved": false,
+  "lab_unchanged_runtime_guard_after_all_qualification_owners_normally_closed": true
+}

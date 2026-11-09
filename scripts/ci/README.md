@@ -136,12 +136,26 @@ absent from PATH. This copies the public Runtime example into the fresh consumer
 records its source hashes, checks the native inventory before/after, and verifies
 owned deletion. `--minimum` selects the minimum dependency/toolchain lane.
 `--native-public` and the internal `--native-ordinary` mode are mutually exclusive.
+The separate `--native-public --native-branches` campaign requires the same
+package/domain/fixture/output options and a Linux helper advertising checkpoints
+and branches. It checks two local-bare children, held release and deduplication,
+disk/RAM independence, cold restart, draining/capacity rejection, child deletion,
+paired dependency retirement and retained backing release to zero reservations.
+It uses real store capabilities and keeps the original owner/store on failure.
+Private once-only controls allow explicit cleanup and protocol shutdown while
+preserving disks; no signal, adoption or replay is available. This campaign cannot
+combine with image, growth, volume, terminal, network or workload campaigns.
+Preparation and model checks do not establish ordinary consumer acceptance.
+
 The separate `--native-images --native-images-settings /private/settings.json`
 campaign requires `--native-public`, a fresh output path and the ordinary native
 package/domain/fixture options. It cannot combine with terminal, network, workload,
 growth or volume campaigns. Settings must be an owned private regular file of at
 most 64 KiB. The runner copies and hashes them before native dispatch. They contain
 source approvals and limits only; registry credential fields are rejected.
+The runner accepts Linux x86_64 and macOS ARM64 packages that explicitly advertise
+`remote_sources` and `images`; all sources must match the package architecture.
+Runner/model support does not qualify an untested platform/package combination.
 
 For OCI, settings contain `source` and `pull_source` objects with `kind: "oci"`,
 `id`, `reference` and `architecture`, plus an explicit `network` with `hosts` and

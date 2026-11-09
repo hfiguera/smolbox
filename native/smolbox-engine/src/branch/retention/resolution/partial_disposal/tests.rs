@@ -65,6 +65,9 @@ impl Model {
         );
         let lifecycle = Lifecycle::at(&plan.child.path);
         lifecycle.prepare(&plan).unwrap();
+        // Production retires collected preparation spools before entering boot.
+        // Keep this booted model distinct from the retained unbooted model.
+        drop(original.entry().work.lock().unwrap().collected.take());
         let dispatch = epoch.begin_boot(&original.child.name).unwrap();
         lifecycle.enter(&plan, &dispatch, &epoch).unwrap();
         let boot = dispatch.intent();
@@ -468,6 +471,45 @@ fn request_ids_quiescence_hashes_and_proof_substitution_are_strict() {
     let mut value = serde_json::to_value(&proof).unwrap();
     value["child_absent"] = serde_json::json!(true);
     assert!(serde_json::from_value::<PartialBranchDisposal>(value).is_err());
+}
+
+#[test]
+fn original_boot_tracking_survives_candidate_inspection_and_retires_after_exact_collection_proof() {
+    for mode in 0..4 {
+        let model = Model::new(mode);
+        let engine = &model.original.engine;
+        let handle = model.plan.publication.child();
+        let journal = model.plan.child.path.join("smolbox.branch-start-v1.json");
+        let before = std::fs::read(&journal).unwrap();
+        let counts = model.original.counts();
+        // Match production's pre-SDK shutdown registration; the original
+        // enrollment and protected lifecycle remain separate requirements.
+        engine.track_handle(handle).unwrap();
+        assert!(engine.require_unhanded_branch_child(&handle.name).is_err());
+        engine.require_original_branch_handle(handle).unwrap();
+        Lifecycle::at(&model.plan.child.path)
+            .inspect_partial_collection(
+                &model.plan,
+                &model.intent.request.collection_request,
+                &model.enrollment,
+            )
+            .unwrap();
+        assert_eq!(std::fs::read(&journal).unwrap(), before);
+        // This inert model has already published a synthetic original actor
+        // collection. Inspection alone did not remove shutdown tracking.
+        assert!(engine.require_unhanded_branch_child(&handle.name).is_err());
+        model
+            .intent
+            .request
+            .collection_request
+            .matches(&model.intent.request.collection)
+            .unwrap();
+        engine.retire_collected_branch_handle(handle).unwrap();
+        engine.require_unhanded_branch_child(&handle.name).unwrap();
+        assert_eq!(model.original.counts(), counts);
+        assert_eq!(std::fs::read(&journal).unwrap(), before);
+        assert!(model.plan.child.path.exists() && model.plan.snapshot.path.exists());
+    }
 }
 
 #[test]

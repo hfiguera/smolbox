@@ -294,7 +294,8 @@ defmodule SmolBox.Store do
   Preserve source material/history, child creation/current material and all extra
   backing charges. Bare absence, a deleted state or host assertion cannot replace
   this proof. Selective v32 readers and all paired writers must upgrade together;
-  current stores still do not advertise the complete `native_branches: 1` marker.
+  the complete `native_branches: 1` marker additionally requires all later native
+  release, publication, disposal, cleanup and backing readers and paired writers.
 
   Expansion acceptance atomically deduplicates operation identity, validates the
   machine version and exclusion, reserves disk growth, and enforces durable drain.
@@ -503,6 +504,22 @@ defmodule SmolBox.Store do
   bounded optional history lookup and fresh source observation. Missing history
   cannot authorize removal. Ordinary package qualification and other partial
   states remain required; this store marker enables no native branch capability.
+
+  Original collected material publication uses paired `:branch_advance` actions
+  `{:accept_collected_publication, child_version, platform}` and
+  `{:complete_collected_publication, NativeCollectedBranchPublicationResult}`.
+  Save the exact full creation/quiescence request before any native IO. Completion
+  binds the accepted/current child version, platform, typed publication and a
+  separate fresh source observation. Atomically append source material history
+  and the child acknowledgement; preserve unknown states, active dependency,
+  ordinary capacity and every backing charge. Later ready/disposal resolution
+  must consume that exact publication without appending a second history link.
+  Selective v50 and `native_collected_branch_publications: 1` require reader-first
+  upgrades. All older envelopes omit/restore the new nil default exactly. This
+  store marker enables no branches. `SmolBox.Branches.publish_collected/4` now
+  coordinates acceptance, explicit original-owner publication, fresh source
+  observation and paired completion under one controller/helper fence. Ordinary
+  SDK/package qualification and public native branch admission remain separate.
 
   Prepared-only creation resolution uses the distinct
   `SmolBox.Embedded.NativePreparedBranchRetirementResult` in the child observation

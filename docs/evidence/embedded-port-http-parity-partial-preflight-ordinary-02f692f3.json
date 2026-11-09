@@ -1,0 +1,238 @@
+{
+  "schema": 1,
+  "status": "ordinary-negative-admission-boundaries-preserved-positive-recovery-pending",
+  "tested_source_commit": "02f692f3e97bcf9f9837c599c57c5534340130ce",
+  "tested_hex_sha256": "5f25fdb675d4bb549e9e49d6f4a24fa246378be59c50cda6a0e13e72f4a7211c",
+  "tested_manifest_sha256": "587e2ae5795d616fed940438c7ca24506349d7317e1d039289f6b6f8739b1001",
+  "tested_helper_sha256": "736f6522be5d842eeece964f93d6f0d1f71fb8d9fd78765bcbeedf830c632565",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_unmodified": true,
+  "lanes": [
+    {
+      "lane": "current-1000ms",
+      "qualified": false,
+      "original_caller_deadline_ms": 1000,
+      "first_candidate_rejection": {
+        "category": "unknown",
+        "operation": "branch",
+        "evidence": "not_dispatched"
+      },
+      "partial_collection_intent_saved": false,
+      "original_publication_pending_without_ack": true,
+      "failure_stage": "publish_original_material",
+      "resource_charge": {
+        "slots": 3,
+        "cpus": 3,
+        "memory_mb": 1920,
+        "disk_gb": 9
+      },
+      "sdk_counts": {
+        "vms": 2,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0
+      },
+      "actual_encrypted_postgresql_readonly_matches_shutdown": true,
+      "normal_native_and_postgresql_shutdown": true,
+      "remaining_account_processes": 0,
+      "account_lock_available": true,
+      "authority_reopened_or_mutation_replayed": false,
+      "archive_sha256": "dc2c894c3d119e5a72ae0c4d8625c8656c37ee2d5d5a11af8be00d4a5f2d7ca9",
+      "archive_bytes": 388097403,
+      "archive_members": 12647,
+      "sdk_backup_sha256": "5e5483eac5f691609b9b9b36ab6c344e0a88df6f2b2f469e913bae24c468674c",
+      "sql_backup_sha256": "2c74d8fc03bbc4d085c6b39afff00954ea086673cd7e5ab7a60a9cc11850ba8b",
+      "cold_postgresql_files_verified": 1322,
+      "compact_members_verified": 44,
+      "archive_verified_on_guest_outer_and_mac": true,
+      "codec": {
+        "checkpoints": 4,
+        "decoded_records": 15,
+        "read_only_sql_matches_shutdown": true,
+        "partial_collection_saved": false,
+        "all_resources_charged": true,
+        "original_creation_unchanged": true,
+        "roundtrips": true,
+        "runtime_sdk_or_vm_owner_started": false
+      }
+    },
+    {
+      "lane": "minimum-1500ms",
+      "qualified": false,
+      "original_caller_deadline_ms": 1500,
+      "first_candidate_rejection": {
+        "category": "identity_conflict",
+        "evidence": "not_dispatched",
+        "operation": "branch"
+      },
+      "partial_collection_intent_saved": false,
+      "original_publication_pending_without_ack": true,
+      "failure_stage": "publish_original_material",
+      "resource_charge": {
+        "slots": 3,
+        "cpus": 3,
+        "memory_mb": 1920,
+        "disk_gb": 9
+      },
+      "sdk_counts": {
+        "vms": 2,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0
+      },
+      "actual_encrypted_postgresql_readonly_matches_shutdown": true,
+      "normal_native_and_postgresql_shutdown": true,
+      "remaining_account_processes": 0,
+      "account_lock_available": true,
+      "authority_reopened_or_mutation_replayed": false,
+      "archive_sha256": "c7390c4b815f7dbe6a8bf0e759f6e87f68e906f33214c63f2c4584b5c3df14ac",
+      "archive_bytes": 387541640,
+      "archive_members": 12672,
+      "sdk_backup_sha256": "58b2285e5fd822cec414ae730e0628d3338b89183c1bec516ed7f656efa6905f",
+      "sql_backup_sha256": "c971dafa0f23098459e0ce02d2691d29ed6d31ebfa0a2b6fc25ab70d96d1f05a",
+      "cold_postgresql_files_verified": 1321,
+      "compact_members_verified": 39,
+      "archive_verified_on_guest_outer_and_mac": true,
+      "codec": {
+        "checkpoints": 4,
+        "decoded_records": 15,
+        "read_only_sql_matches_shutdown": true,
+        "partial_collection_saved": false,
+        "all_resources_charged": true,
+        "original_creation_unchanged": true,
+        "roundtrips": true,
+        "runtime_sdk_or_vm_owner_started": false
+      }
+    },
+    {
+      "lane": "current-1500ms-bounded-candidate-poll",
+      "qualified": false,
+      "original_caller_deadline_ms": 1500,
+      "first_candidate_rejection": {
+        "category": "identity_conflict",
+        "operation": "branch",
+        "evidence": "not_dispatched"
+      },
+      "partial_collection_intent_saved": false,
+      "original_publication_pending_without_ack": true,
+      "failure_stage": "publish_original_material",
+      "resource_charge": {
+        "slots": 3,
+        "cpus": 3,
+        "memory_mb": 1920,
+        "disk_gb": 9
+      },
+      "sdk_counts": {
+        "vms": 2,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0
+      },
+      "actual_encrypted_postgresql_readonly_matches_shutdown": true,
+      "normal_native_and_postgresql_shutdown": true,
+      "remaining_account_processes": 0,
+      "account_lock_available": true,
+      "authority_reopened_or_mutation_replayed": false,
+      "archive_sha256": "7e77566d753233a704f74458bb9b5ccba455c8f8a266325d7c4030fcf1dc39b7",
+      "archive_bytes": 388045144,
+      "archive_members": 12670,
+      "sdk_backup_sha256": "59d7b1618429d541b95526341a65045fe8ebcc63c320103b32a7d8b81df3929c",
+      "sql_backup_sha256": "ca5c0f4621cd5dfccc7a17331596d522e700eb201bf03ec0dd2ffd48a1765f9e",
+      "cold_postgresql_files_verified": 1322,
+      "compact_members_verified": 66,
+      "archive_verified_on_guest_outer_and_mac": true,
+      "codec": {
+        "checkpoints": 20,
+        "decoded_records": 63,
+        "read_only_sql_matches_shutdown": true,
+        "partial_collection_saved": false,
+        "all_resources_charged": true,
+        "original_creation_unchanged": true,
+        "roundtrips": true,
+        "runtime_sdk_or_vm_owner_started": false
+      }
+    },
+    {
+      "lane": "minimum-1500ms-bounded-poll-and-readonly-diagnostic",
+      "qualified": false,
+      "original_caller_deadline_ms": 1500,
+      "first_candidate_rejection": {
+        "category": "stale_version",
+        "evidence": "not_dispatched",
+        "operation": "branch"
+      },
+      "partial_collection_intent_saved": false,
+      "original_publication_pending_without_ack": true,
+      "failure_stage": "publish_original_material",
+      "resource_charge": {
+        "slots": 3,
+        "cpus": 3,
+        "memory_mb": 1920,
+        "disk_gb": 9
+      },
+      "sdk_counts": {
+        "vms": 2,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0
+      },
+      "actual_encrypted_postgresql_readonly_matches_shutdown": true,
+      "normal_native_and_postgresql_shutdown": true,
+      "remaining_account_processes": 0,
+      "account_lock_available": true,
+      "authority_reopened_or_mutation_replayed": false,
+      "archive_sha256": "06f426b3fbf170e3619a103c54641b627c089947d9ef7e46cf48065d2f6406db",
+      "archive_bytes": 389173957,
+      "archive_members": 12704,
+      "sdk_backup_sha256": "e1bb4ae0ed1c7d217e60076d132931630b1af80dded0f23667ffe99b635c94be",
+      "sql_backup_sha256": "7ce86c93b8b7dc3e4f9f6c4ff8f53c432ea0223647574ad5da23b40344605d64",
+      "cold_postgresql_files_verified": 1322,
+      "compact_members_verified": 69,
+      "archive_verified_on_guest_outer_and_mac": true,
+      "codec": {
+        "checkpoints": 20,
+        "decoded_records": 63,
+        "read_only_sql_matches_shutdown": true,
+        "partial_collection_saved": false,
+        "all_resources_charged": true,
+        "original_creation_unchanged": true,
+        "roundtrips": true,
+        "runtime_sdk_or_vm_owner_started": false
+      }
+    }
+  ],
+  "readonly_diagnostic": {
+    "all_elixir_scope_checks_passed": true,
+    "native_response": {
+      "code": "ownership",
+      "dispatch": "not_dispatched"
+    },
+    "preserved_minimum_request_protocol_and_engine_validation_and_digests_pass": true,
+    "exclusive_failed_native_guard_observed": false
+  },
+  "codec_current_and_minimum": {
+    "cases_each": 4,
+    "checkpoints_each": 48,
+    "records_decoded_and_roundtripped_each_including_postclose_sql": 156,
+    "authority_restored": false
+  },
+  "older_pid_specific_witness_approval": {
+    "named_witness_absent_at_current_boot": true,
+    "signal_sent": false,
+    "approval_transferred_to_another_process": false
+  },
+  "normal_lab_window": {
+    "prior_native_and_sql_owners_normally_closed_before_poweroff": true,
+    "cold_baseline_and_provision_images_copied_and_checksum_verified_under_exclusive_lock": true,
+    "original_run_image_metadata_unchanged": true,
+    "runtime_guard_or_network_restrictions_changed": false
+  },
+  "full_parity_gates_closed": 0,
+  "crash_validation": "deferred; no campaign run",
+  "macos_native_qualification": "pending; existing custody untouched",
+  "distribution_approval": "separate"
+}

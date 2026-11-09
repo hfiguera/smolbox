@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "status": "original-collected-publication-models-passed-live-unqualified",
+  "source_base_commit": "795f321e2426d46f487896182a21f6e5a1a3dc56",
+  "source_files_sha256": {
+    "native/smolbox-engine/src/branch/creation.rs": "dac286fbe0a02eb82a960a980c6a52ae8359f608ab06b36120f6c61f70121060",
+    "native/smolbox-engine/src/branch/retention.rs": "e2e6e6b5f91d81c964eb6335036e1768bf010d81bf5e33804747fe590a987b18",
+    "native/smolbox-engine/src/branch/retention/resolution/publication.rs": "ee42d73ce8c7f830c44520cad2c0b12b086c44aa7308686923cb0725a3eb0435",
+    "native/smolbox-engine/src/branch/retention/resolution/publication/tests.rs": "c78bd58166801c5be48b585f972292cd32b54e709c735c4098dc8d242c1ead1b",
+    "native/smolbox-engine/examples/branch_proof/recovery.rs": "543c2f8142e075d92ae2886acb68c80468e9c2565700c519c89146a1fa44fd13"
+  },
+  "controls": {
+    "exact_original_creation_including_activation_choice": true,
+    "verified_collected_output_and_pending_publication_required": true,
+    "fresh_captured_control_deadline_at_most_30_seconds": true,
+    "no_fork_boot_initialization_activation_or_delete_replay": true,
+    "raw_or_exact_pending_owned_row_only": true,
+    "marker_and_child_journal_resume_only_original_publication": true,
+    "original_active_worker_blocks_publication": true,
+    "original_source_child_gates_work_and_backing_retained": true,
+    "late_acknowledgement_stays_uncertain_with_protected_result": true,
+    "completed_publication_is_historical_not_ready": true,
+    "publication_alone_never_attests_activation": true,
+    "witness_retains_publication_and_receipts_before_evidence_io": true,
+    "witness_child_state_stays_unknown_until_separate_disposal": true,
+    "missing_original_registry_never_reconstructed_from_published_material": true
+  },
+  "validation": {
+    "host": "Darwin/arm64",
+    "new_publication_models_passed": 6,
+    "branch_models_passed": 380,
+    "existing_ignored_branch_case_not_run": 1,
+    "runtime_boot_models_passed": 19,
+    "sdk_compatibility_models_passed": 16,
+    "witness_models_passed": 13,
+    "native_python_cases": 51,
+    "native_python_skipped": 4,
+    "strict_all_target_clippy": true,
+    "sdk_unmodified": true,
+    "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "logs_sha256": {
+      "models": "5c245f5f5fd3559d0ff1fcf304376dbdf0909ab6dd0ff56f75ad81ba61f8ee0c",
+      "branch": "f22ae826b1d9b96b7ce9c301a44590527f3f3fc3051f5044e5a73960bbe97ba9",
+      "runtime": "cd6249d5ff6559fd228976c7bbd024a03aa5223b0504387dbdd37ee29e0a0550",
+      "sdk-compat": "0127119294dd40f81052d9e0f62dcf4fa45665db4fd9a4411a5fad3c5a39d5b2",
+      "witness": "7c5c0439c868018ac9e567dce6ce5da95cdb6b166b746a69c6e334fb0156482b",
+      "tooling": "4a903eb8274ff2a17f5b36af873cd599d14f844b4441278b05ae23ec7507dc9e",
+      "clippy": "24824910a6fb7369ecb643549cda087b500931f1c09fd2abad3ebc8e51e3a9ff",
+      "sdk": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "inventory-current": "0eb32f6b09fff0884bf6855fddc552f5c17c9503a4f5980777f917f9d7345682",
+      "inventory-minimum": "f28a29dc209c860c6166cc800c4a23da3a450adb61b716e828328917cd63f8b7",
+      "docs": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+      "docs-links": "2977ff71930dc7c0c0758e26d2a31102384e27693707da347f9b51505f31e155"
+    },
+    "current_inventory_contracts_passed": 4,
+    "minimum_inventory_contracts_passed": 4,
+    "documentation_build_and_links": true
+  },
+  "qualification": {
+    "live_recovery_of_this_control": false,
+    "changed_linux_package": false,
+    "framed_port_routing": false,
+    "public_store_integration": false,
+    "current_minimum_public_consumers": false,
+    "public_native_branch_admission": false,
+    "all_60_full_parity_operations_pending": true,
+    "crash_validation_performed": false,
+    "distribution_approved": false
+  }
+}

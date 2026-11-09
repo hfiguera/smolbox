@@ -648,6 +648,41 @@ impl RetainedBranchPreparation {
     /// readiness, release or permission to retire its source dependency.
     pub fn publish_material(&self, engine: &Engine) -> Result<crate::BranchPublication> {
         let entry = self.entry(engine)?;
+        self.publish_material_with_budget(engine, &entry.ownership.intent.guard.budget)
+    }
+    pub(super) fn publish_material_with_budget(
+        &self,
+        engine: &Engine,
+        budget: &ReadBudget,
+    ) -> Result<crate::BranchPublication> {
+        self.publish_material_checked(
+            engine,
+            budget,
+            || engine.binding().validate(),
+            |intent, source, child, budget| {
+                engine.branch_source_authority(
+                    &intent.source,
+                    intent.source_pid,
+                    source,
+                    child,
+                    budget,
+                )
+            },
+        )
+    }
+    fn publish_material_checked(
+        &self,
+        engine: &Engine,
+        budget: &ReadBudget,
+        binding: impl Fn() -> Result<()>,
+        source_authority: impl Fn(
+            &InitialBranchJournal,
+            &smolvm::config::VmRecord,
+            &smolvm::config::VmRecord,
+            &ReadBudget,
+        ) -> Result<crate::capture_resolution::SourceAuthority>,
+    ) -> Result<crate::BranchPublication> {
+        let entry = self.entry(engine)?;
         let original = &entry.ownership.intent;
         let intent = &original.intent;
         let journal = crate::material::MaterialJournal::at(original.guard.source_root.path());
@@ -655,6 +690,9 @@ impl RetainedBranchPreparation {
             .work
             .try_lock()
             .map_err(|_| Error::before(ErrorCode::Conflict))?;
+        if work.worker.upgrade().is_some() {
+            return Err(Error::before(ErrorCode::Conflict));
+        }
         if !matches!(work.phase, Phase::Verified | Phase::Published) {
             return Err(Error::before(ErrorCode::State));
         }
@@ -676,8 +714,7 @@ impl RetainedBranchPreparation {
             if work.phase != Phase::Verified {
                 return Err(Error::before(ErrorCode::State));
             }
-            engine.binding().validate()?;
-            let budget = &original.guard.budget;
+            binding()?;
             budget.check()?;
             if engine.observation_epoch().as_deref() != Some(intent.epoch.as_str()) {
                 return Err(Error::before(ErrorCode::Ownership));
@@ -751,13 +788,7 @@ impl RetainedBranchPreparation {
                     }
                 }
             }
-            let authority = engine.branch_source_authority(
-                &intent.source,
-                intent.source_pid,
-                &source,
-                &child,
-                budget,
-            )?;
+            let authority = source_authority(intent, &source, &child, budget)?;
             if !authority.running() {
                 return Err(Error::before(ErrorCode::Ownership));
             }
@@ -813,13 +844,7 @@ impl RetainedBranchPreparation {
             let source = engine
                 .observation_record(&intent.source.name, budget)?
                 .ok_or(Error::uncertain(ErrorCode::Ownership))?;
-            let authority = engine.branch_source_authority(
-                &intent.source,
-                intent.source_pid,
-                &source,
-                &child,
-                budget,
-            )?;
+            let authority = source_authority(intent, &source, &child, budget)?;
             budget.check().map_err(|e| Error::uncertain(e.code))?;
             original
                 .guard
@@ -1072,6 +1097,24 @@ mod tests {
         crate::branch_worker::Metadata,
         RetainedBranchPreparation,
     ) {
+        fixture_bound_with_budget(
+            bound,
+            ReadBudget::for_checkpoint_work(
+                Duration::from_secs(60),
+                crate::Cancellation::default(),
+            )
+            .unwrap(),
+        )
+    }
+    pub(super) fn fixture_bound_with_budget(
+        bound: bool,
+        budget: ReadBudget,
+    ) -> (
+        tempfile::TempDir,
+        Engine,
+        crate::branch_worker::Metadata,
+        RetainedBranchPreparation,
+    ) {
         let (temp, metadata, expected) = crate::branch_worker::tests::fixture();
         let root = temp.path().canonicalize().unwrap();
         let engine = crate::machine::tests::test_engine(&root);
@@ -1128,11 +1171,7 @@ mod tests {
             source_root: crate::export_source::Root::open(&metadata.source_directory).unwrap(),
             source_pid: intent.source_pid,
             epoch: intent.epoch.clone(),
-            budget: ReadBudget::for_checkpoint_work(
-                Duration::from_secs(60),
-                crate::Cancellation::default(),
-            )
-            .unwrap(),
+            budget,
             _gates: gates,
             _job: job,
             domain: engine.domain.clone(),

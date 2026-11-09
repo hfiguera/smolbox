@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "status": "original-start-fixed-terminal-open-failed",
+  "source_commit": "fdd6e698476e3fd36e515434bff822a0a8810f5f",
+  "manifest_sha256": "a0f102fa19888d985d18938d3f0f6c53ec95bbaad4d71f4950324471f45b0cb7",
+  "helper_sha256": "d97851523298c5e1602939031c5d5de0a268aaef5245b63ae54ece30faaa80fe",
+  "hex_sha256": "50eeb8a09c2bd46f6eee59c5e634f8bd18fc562a8ed83fe6cb576d8e311075bd",
+  "fresh_standard_account": true,
+  "isolated_uid": 503,
+  "assets_verified": 809,
+  "source_files_verified": 1842,
+  "enrollment_normal_shutdown_passed": true,
+  "public_current_consumer": {
+    "disposable_completed_with_exit_7": true,
+    "disposable_collection_and_cleanup_complete": true,
+    "disposable_reservation_released": true,
+    "retained_machine_created_and_start_reached_terminal_step": true,
+    "terminal_open_returned_unknown": true,
+    "remaining_lifecycle_checks_not_reached": true,
+    "minimum_not_started": true,
+    "safe_record_summary": [
+      {
+        "id": "disposable",
+        "state": "completed",
+        "cleanup": "complete",
+        "errors": [],
+        "exit_code": 7,
+        "collection": "complete",
+        "reservation_held": false
+      },
+      {
+        "id": "terminal",
+        "state": "unknown",
+        "cleanup": "failed",
+        "errors": [
+          {
+            "category": "unknown",
+            "operation": "terminal",
+            "evidence": "unknown"
+          }
+        ],
+        "exit_code": null,
+        "collection": "pending",
+        "reservation_held": false
+      },
+      {
+        "id": "retained",
+        "state": "unknown",
+        "cleanup": null,
+        "errors": [],
+        "exit_code": null,
+        "collection": null,
+        "reservation_held": true
+      }
+    ]
+  },
+  "terminal_defect": "The terminal worker passes its absolute staging directory to the same relay, bypassing the short relative endpoint used by other workers. Its supervisor already fixes CWD to that private staging directory.",
+  "preservation": {
+    "original_failed_v1_domain_untouched": true,
+    "new_v2_failed_authority_not_reopened_or_replayed": true,
+    "native_processes_remaining": false,
+    "sdk_rows": 1,
+    "sdk_vm_state": "stopped/no PID",
+    "native_account_lock_available": true,
+    "private_snapshot_files_hashed": 845,
+    "force_signal_sent": false
+  },
+  "full_current_minimum_native_acceptance_claimed": false,
+  "full_feature_parity_claimed": false,
+  "crash_validation_deferred": true,
+  "distribution_approved": false,
+  "private_evidence_sha256": {
+    "custody.json": "170038679d850ea609b83297b577c3726843d72d68cd1a9088ab540772e2aec7",
+    "decoded-summary.json": "40c947e4898e57b0328af40e67709afc9afd50ca87d9cbebe5eb72929cc587fb",
+    "current-native.log": "aa7c39be24c2656bbea35360e273e0a30f84185b91b5a760e3cc8248977d54b3",
+    "current-consumer.log": "556c8451bbd4abb4fc3320b9ed997e1883d708a45eafe158175f40df2931e0bb"
+  }
+}

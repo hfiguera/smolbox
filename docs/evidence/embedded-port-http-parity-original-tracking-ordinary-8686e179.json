@@ -1,0 +1,193 @@
+{
+  "schema": 1,
+  "status": "current-public-unbooted-disposal-passed-minimum-publication-failed-partial-target-unqualified",
+  "source_commit": "8686e179ceb4232774d97552fa09602fa9d7eaa8",
+  "hex_sha256": "b8d349cdbea0d4f007ed0426c50ff03024524be0c618e9d1bbd47f6c8152b2b5",
+  "manifest_sha256": "acf8cbdaa1d1c0897735b633b9848fea62427b6731cfd1631e03e873c21eb2ed",
+  "helper_sha256": "8ca58cf6dcc5dc075dcc4daa39052734a65b56ca81d98bab0e1fb09f88d7c76c",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_unmodified": true,
+  "cases": {
+    "current": {
+      "toolchain": {
+        "elixir": "1.20.4",
+        "otp": "29.0.6"
+      },
+      "request_timeout_ms": 1500,
+      "read_only_candidate_window_ms": 5000,
+      "installed_consumer_without_rust": true,
+      "strict_compile_and_cold_caller_checks_passed": true,
+      "source_files_verified": 1823,
+      "installed_package_files_verified": 635,
+      "assets_verified": 806,
+      "domain_keys_host_tools_and_frozen_workflow_verified": true,
+      "normal_original_native_and_postgresql_shutdown": true,
+      "remaining_account_processes": 0,
+      "native_account_lock_available": true,
+      "sdk_counts": {
+        "vms": 0,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0
+      },
+      "archive_sha256": "c58d30130484f850eaded07bd64291926b6f8da150cfb55de09256d94afaa7ec",
+      "archive_bytes": 389239441,
+      "archive_members": 12654,
+      "sdk_backup_sha256": "968aa558a0dad00ff9492dabe8994da32792c9d41dcd1a4b19ff14811113ff50",
+      "logical_sql_backup_sha256": "4fd2554a9d4ebac3c130fc5858c429080830ec7a4245822e368f17d694c2c271",
+      "compact_files_verified_against_full_archive": 120,
+      "cold_postgresql_files_verified": 1317,
+      "full_archive_and_backups_verified_guest_outer_mac": true,
+      "full_archive_retained_on_mac": false,
+      "authority_restored_or_replayed": false,
+      "public_pipeline_exit_status": 0,
+      "actual_recovery_family": "unbooted_disposal",
+      "partial_target_exercised": false,
+      "owned_cleanup": true,
+      "normal_beam_durable_readback_records": 3,
+      "saved_backing_acknowledgements_without_worker": 1,
+      "final_resources": {
+        "slots": 0,
+        "cpus": 0,
+        "memory_mb": 0,
+        "disk_gb": 0
+      },
+      "vm_caches_empty": true,
+      "sql_resource_projection_zero_and_payloads_encrypted": true,
+      "custody_verified_after_host_storage_recovery": true
+    },
+    "minimum": {
+      "toolchain": {
+        "elixir": "1.18.4",
+        "otp": "27.3.4.15"
+      },
+      "request_timeout_ms": 1500,
+      "read_only_candidate_window_ms": 5000,
+      "installed_consumer_without_rust": true,
+      "strict_compile_and_cold_caller_checks_passed": true,
+      "source_files_verified": 1823,
+      "installed_package_files_verified": 635,
+      "assets_verified": 806,
+      "domain_keys_host_tools_and_frozen_workflow_verified": true,
+      "normal_original_native_and_postgresql_shutdown": true,
+      "remaining_account_processes": 0,
+      "native_account_lock_available": true,
+      "sdk_counts": {
+        "vms": 2,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0
+      },
+      "archive_sha256": "ebe73e6fa81840d8dfca8e8dc4139931a8253bf49d4c122200b495fb9de90f6e",
+      "archive_bytes": 388078689,
+      "archive_members": 12690,
+      "sdk_backup_sha256": "1c435113590e36fe00f64779c6db291e7300eafec979b4eb6b7aaa371d5dc434",
+      "logical_sql_backup_sha256": "3d63f31865e02184a96ffd715f4d4883ff290b45059007ea64a9116b5523292c",
+      "compact_files_verified_against_full_archive": 106,
+      "cold_postgresql_files_verified": 1322,
+      "full_archive_and_backups_verified_guest_outer_mac": true,
+      "full_archive_retained_on_mac": false,
+      "authority_restored_or_replayed": false,
+      "public_pipeline_exit_status": 1,
+      "failure_stage": "publish_original_material",
+      "first_candidate_rejection": {
+        "category": "unknown",
+        "evidence": "not_dispatched",
+        "operation": "branch"
+      },
+      "partial_collection_saved": false,
+      "original_publication_pending_without_ack": true,
+      "retained_resources": {
+        "slots": 3,
+        "cpus": 3,
+        "memory_mb": 1920,
+        "disk_gb": 9
+      },
+      "vm_disks_and_records_retained": true,
+      "actual_postclose_readonly_sql_matches_checkpoint": true,
+      "disposal_absence_or_resource_release_proven": false
+    }
+  },
+  "codec_readers": [
+    {
+      "lane": "current",
+      "checkpoints": 19,
+      "checkpoint_records_decoded_and_roundtripped": 57,
+      "additional_postclose_sql_records": 0,
+      "original_creation_unchanged": true,
+      "partial_collection_saved": false,
+      "exact_completed_zero_usage_or_failed_charge_retention": true,
+      "runtime_sdk_or_vm_owner_started": false,
+      "reader_minimum": false
+    },
+    {
+      "lane": "minimum",
+      "checkpoints": 17,
+      "checkpoint_records_decoded_and_roundtripped": 51,
+      "additional_postclose_sql_records": 3,
+      "original_creation_unchanged": true,
+      "partial_collection_saved": false,
+      "exact_completed_zero_usage_or_failed_charge_retention": true,
+      "runtime_sdk_or_vm_owner_started": false,
+      "reader_minimum": false
+    },
+    {
+      "lane": "current",
+      "checkpoints": 19,
+      "checkpoint_records_decoded_and_roundtripped": 57,
+      "additional_postclose_sql_records": 0,
+      "original_creation_unchanged": true,
+      "partial_collection_saved": false,
+      "exact_completed_zero_usage_or_failed_charge_retention": true,
+      "runtime_sdk_or_vm_owner_started": false,
+      "reader_minimum": true
+    },
+    {
+      "lane": "minimum",
+      "checkpoints": 17,
+      "checkpoint_records_decoded_and_roundtripped": 51,
+      "additional_postclose_sql_records": 3,
+      "original_creation_unchanged": true,
+      "partial_collection_saved": false,
+      "exact_completed_zero_usage_or_failed_charge_retention": true,
+      "runtime_sdk_or_vm_owner_started": false,
+      "reader_minimum": true
+    }
+  ],
+  "source_of_failed_native_rejection_exclusively_observed": false,
+  "native_partial_collection_qualified": false,
+  "unplanned_host_storage_incident": {
+    "host_lab_filesystem_full_paused_qemu": true,
+    "current_public_pipeline_had_reported_normal_completion_before_pause": true,
+    "minimum_consumer_started_after_resume": true,
+    "static_historical_archives_relocated": 25,
+    "archive_bytes_verified_and_relocated": 7386647438,
+    "original_archive_bytes_mode_owner_group_and_mtime_preserved": true,
+    "vm_image_metadata_unchanged_during_relocation": true,
+    "same_original_vm_resumed": true,
+    "lab_runtime_guard_changed": false,
+    "network_isolation_changed": false,
+    "SDK_mutation_or_consumer_restarted_to_recover_incident": false,
+    "incident_is_crash_qualification": false
+  },
+  "full_parity_gates_closed": 0,
+  "full_http_parity_complete": false,
+  "remaining": [
+    "Positive ordinary partial collection/publication/disposal on current and minimum toolchains",
+    "Remaining P0\u2013P9 source/platform/resource/upgrade requirements"
+  ],
+  "crash_validation_deferred": true,
+  "distribution_approved": false,
+  "private_evidence_sha256": {
+    "custody-success.py": "4d881a93a9343c6f90c9c80d2a519f3426724b8c44759630a27047430f461e69",
+    "preserve-success.py": "06999f5557a04b30fd61723d8ad5af858dde712be7e186ecc9d0adab3eb65566",
+    "collect-native-cases.py": "0137a13b38432afcea5edf5ffe537d782668ec54849583a48d5298833ef118ff",
+    "verify-native-stream.py": "a9b34f00ed64b383c833de4a01959dc2915423561d2cf874d833852ae4cd2f82",
+    "read-native-cases.exs": "9f957e5166dbcd7a89298f7b4b3ac6e0c9f6d6475097f25886ca9f56bfe19811",
+    "native-codec-results.json": "4afd11cf31e7d1a5a0fdc7c6614db13e1439299874a6d42f5ecb955aef5cea72",
+    "host-archive-relocation.json": "d7c805902db8f43732f7761d04843c55e5512f609d4d95783928a759325413d1",
+    "host-normal-resume.json": "bbf801182a5eb0b6ec986786c144b2ea92c423c30650206243d2c8af8ec7b7a9"
+  }
+}

@@ -194,6 +194,8 @@ defmodule SmolBox.Store.Memory do
           managed_images: 1,
           managed_exports: 1,
           managed_checkpoints: 1,
+          native_branches: 1,
+          native_collected_branch_publications: 1,
           native_partial_branch_collections: 1,
           native_partial_branch_disposals: 1,
           native_partial_branch_retirements: 1,

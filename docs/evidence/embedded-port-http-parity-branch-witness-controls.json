@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "status": "ordinary-witness-original-context-controls-models-passed-live-unqualified",
+  "source_base_commit": "a60e94922bf2a7838bb6dfedb42b39882952993b",
+  "source_files_sha256": {
+    "native/smolbox-engine/examples/branch-guest-proof.rs": "edf708f0dbcd93d011948fb640942277eb3d7c765b69b4ead2d18e98226f4531",
+    "native/smolbox-engine/examples/branch_proof/recovery.rs": "bbafd61f06fbcfc3ba003decad7909329d04fac3717a7222ab6d2099db8516aa",
+    "native/smolbox-engine/examples/proof_support/mod.rs": "49f4d9e6bfeceb7fcdc6ce495d987fd5d358acb0bb2f67ce2f59ab6873b0d401",
+    "native/smolbox-engine/src/branch/retention/resolution.rs": "27c9e6d77e626ceb444c781a47d66198fc66585caa6643a517758d378c2bb8be",
+    "native/smolbox-engine/src/branch/retention/resolution/partial_disposal.rs": "de8d15bd648e33193755ee97cf003f9cc4584946bc0b66ab6d7e741fb1db5496",
+    "native/smolbox-engine/src/branch/retention/resolution/disposal.rs": "178b4da68dce1584039b9325802cdd746dc1f65b528bdd00626d17b5a07ef087",
+    "native/smolbox-engine/src/branch/prepared_retirement.rs": "aba2c5f9b1d91047475e1286339a8c9f367cd80bcc3d8070628ec9d50756f092",
+    "native/smolbox-engine/src/branch_held_release.rs": "155e9e14084331c432185008f092728e86c31893ef7508a6ddb6559d01d0bef3"
+  },
+  "controls": {
+    "original_ready_result_plus_fresh_running_observations": true,
+    "original_saved_held_release_lookup_without_activation_replay": true,
+    "positive_original_prepared_retirement_not_empty_namespace_authority": true,
+    "original_unbooted_disposal_and_separate_observation": true,
+    "opaque_original_partial_collection_before_disposal": true,
+    "exact_partial_disposal_and_separate_observation": true,
+    "explicit_residual_cleanup_not_sdk_delete_retry": true,
+    "actual_cleanup_and_unnecessary_cleanup_are_distinct_no_fallback_lookups": true,
+    "accepted_cleanup_requires_typed_ack_before_backing_or_close": true,
+    "protected_original_disposal_handoff_before_local_deleted_state": true,
+    "absence_and_backing_preserve_actual_completed_unbooted_or_partial_origin": true,
+    "source_cleanup_cannot_discard_unresolved_entered_child_context": true,
+    "wrong_kind_phase_routing_refuses_before_accepting_new_request": true,
+    "phase_observations_are_never_authority": true,
+    "no_saved_file_adoption_manager_reconstruction_or_forced_exit": true,
+    "production_library_bridge_sdk_or_public_capability_changes": false
+  },
+  "validation": {
+    "host": "Darwin/arm64",
+    "witness_models_passed": 12,
+    "new_witness_models": 6,
+    "native_branch_models_passed": 374,
+    "existing_ignored_branch_model_not_run": 1,
+    "python_tooling_cases_run": 51,
+    "python_expected_skips": 4,
+    "all_target_clippy_deny_warnings": true,
+    "scoped_rustfmt": true,
+    "shell_syntax": true,
+    "verified_unmodified_sdk": "1.22.0",
+    "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "current_parity_inventory_contracts_passed": 4,
+    "minimum_parity_inventory_contracts_passed": 4,
+    "documentation_warnings_as_errors": true,
+    "local_documentation_pages_checked": 176
+  },
+  "qualification": {
+    "live_sdk_or_vm_run": false,
+    "ordinary_live_control_recovery": false,
+    "new_linux_package_qualified": false,
+    "public_no_rust_consumers": false,
+    "full_parity_complete": false,
+    "public_native_branch_admission": false,
+    "crash_validation_deferred": true,
+    "distribution_approved": false
+  },
+  "private_log_sha256": {
+    "clippy.log": "9f581bad565528e2e9c709b971c5bdb09212e5ac2ed734e271a46d4d1463cc9a",
+    "core-branch-models.log": "3c8392942697bc7da7760e07a07779cfcadae34ef5088c7ad40e7bca71a29647",
+    "current-coverage.log": "1c9721c2bef2f23705723477d07745754e15268381378612b5553ce6f6a082c6",
+    "doc-links.log": "2977ff71930dc7c0c0758e26d2a31102384e27693707da347f9b51505f31e155",
+    "docs.log": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+    "minimum-coverage.log": "0bdb57492d82cf44b4b4e3d888b7d98ef5618a4f5dbb2ae4fbc7cc96b74463e6",
+    "native-tooling.log": "319eee124af197d83c7eb20c0e4cb0883c9d367f0cb1e90855cacbdc513803dc",
+    "rust-format.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sdk-check.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+    "shell-syntax.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "witness-models.log": "7b024eef5384895bc4d925c53024b119e127ca0d838f704575d783a283a4204e"
+  },
+  "remaining": [
+    "Build Linux witness and helper from one frozen verified source and record exact pair",
+    "Ordinary two-child SDK workflow and cleanup/recovery acceptance in a fresh approved offline domain",
+    "Unknown source creation, missing enrollment/original context or unsupported lifecycle outcomes retain authority; never infer cleanup from namespace absence",
+    "Framed Port, paired durable dependency retirement, current/minimum public consumers and every other required P0-P9 gate"
+  ]
+}

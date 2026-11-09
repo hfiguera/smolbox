@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "scope": "native-side protocol-two original collected branch material publication control",
+  "source_base_commit": "050b351aa01f2d703cb39464c1c766db0ed9bf64",
+  "source_files_sha256": {
+    "native/smolbox-protocol/src/branches.rs": "0133b84b5916a27d9d2d62eb96b2731bc817a498ffa93c0d4b783832fddb72d9",
+    "native/smolbox-protocol/src/session.rs": "d48cd50011a1b753e8165f81580d4b3a4114e4b115e100d3f1c1395b87db1471",
+    "native/smolbox-protocol/src/wire.rs": "e328174dcddc5c2717bfe11296b3e8e5a5d7c47771c161e94d8b7568413c14b8",
+    "native/smolbox-port/src/adapter.rs": "ae632894cd678a6f062a952ea1503412b0f7a92f853c50a961e7d0c2c304b2d9",
+    "native/smolbox-port/src/runtime.rs": "6293e998dfff4af9ba5c138ca457d385acc459755e344017a2fc1f75571aeb42",
+    "native/smolbox-port/src/output.rs": "c316b14ac699bcd24dcbad08b7aab79211d4dcd5a9962c6f84ccee3d17e854d4"
+  },
+  "operation": "publish_collected_branch_material",
+  "result": "collected_branch_material_published",
+  "authority": {
+    "requires_protocol_major": 2,
+    "requires_branch_feature_and_exact_immutable_catalog": true,
+    "requires_create_capability": true,
+    "quiesced_required": true,
+    "maximum_request_creation_bytes": 16384,
+    "maximum_publication_bytes": 65536,
+    "maximum_control_budget_ms": 30000,
+    "one_captured_deadline_covers_selection_and_publication": true,
+    "requires_original_engine_registry_full_frozen_creation": true,
+    "missing_original_context_rejects_without_sdk_or_file_adoption": true,
+    "source_child_approval_platform_and_original_epoch_correlated": true,
+    "initial_activation_stays_bound_in_original_registry": true,
+    "publication_does_not_attest_activation_or_child_readiness": true,
+    "zero_stream_output_required": true,
+    "no_fork_boot_initialization_release_or_deletion_replay": true,
+    "no_capacity_dependency_or_backing_release": true,
+    "late_result_remains_uncertain": true,
+    "uses_existing_bounded_branch_control_output": true,
+    "quarantined_work_does_not_block_this_fenced_control": true
+  },
+  "validation": {
+    "host": "Darwin/arm64",
+    "protocol_unit_checks": 101,
+    "protocol_contract_checks": 59,
+    "helper_unit_checks": 90,
+    "existing_ignored_helper_cases_not_selected": 2,
+    "new_protocol_checks": 2,
+    "new_framed_peer_scenarios": 8,
+    "peer_policy_modes": [
+      "disabled-feature",
+      "missing-catalog",
+      "mismatched-catalog",
+      "exact-catalog"
+    ],
+    "peer_is_in_process_and_uses_synthetic_canonical_fixtures": true,
+    "stalled_writer_preserves_two_observer_replies_and_bounded_proof_capacity": true,
+    "strict_all_target_clippy": true,
+    "scoped_format_check": true,
+    "sdk_unmodified": true,
+    "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "logs_sha256": {
+      "port-corrected": "64f079553efdf988ddbe43542ce9ecb0c815e8db743a7cfc936e7b5932a98940",
+      "clippy": "7a31935169188b232e679f80b4d3ee50739ad3ef95d9d531b14b78a8cb877e2d",
+      "sdk": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "sdk-clean": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "format": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "protocol": "17d8f6cccbf00a0a48822673746283fe011f6f5efcb2a4df512eb78be256b32b",
+      "docs": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+      "docs-links": "2977ff71930dc7c0c0758e26d2a31102384e27693707da347f9b51505f31e155"
+    },
+    "documentation_build_and_links": true
+  },
+  "qualification": {
+    "live_sdk_recovery_of_this_control": false,
+    "changed_package_ordinary_vm_acceptance": false,
+    "elixir_request_reply_routing": false,
+    "public_store_continuation": false,
+    "installed_consumers": false,
+    "public_native_branch_admission": false,
+    "full_parity_complete": false,
+    "crash_validation_performed": false,
+    "distribution_approved": false
+  }
+}

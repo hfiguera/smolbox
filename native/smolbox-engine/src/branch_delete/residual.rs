@@ -182,7 +182,7 @@ fn child_root(intent: &Intent) -> Result<crate::export_source::Root> {
     if identity(&root)? != (intent.plan.child.device, intent.plan.child.inode) {
         return Err(Error::before(ErrorCode::Ownership));
     }
-    crate::sdk_compat::branch_deletion_cache(&intent.plan.child.path)?;
+    crate::sdk_compat::stopped_branch_deletion_cache(&intent.plan.child.path)?;
     Ok(root)
 }
 fn absent_path(path: &std::path::Path) -> bool {

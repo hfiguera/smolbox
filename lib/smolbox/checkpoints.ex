@@ -127,6 +127,8 @@ defmodule SmolBox.Checkpoints do
   an expired lease alone cannot establish quiescence. Unknown results stay unknown;
   no output file is adopted. Source ownership is verified before unlocking it.
   Embedded resolution freezes target dispatch and serializes against recovery.
+  Normal captured completion preserves a previously ready scan only after its
+  exact committed result, same helper epoch and worker lease are verified again.
   Exact completed or previously resolved native evidence is observed first;
   without it, exact pre-entry abort requires distinct unchanged-source qualification,
   while an entered capture requires explicit material qualification.
@@ -142,7 +144,7 @@ defmodule SmolBox.Checkpoints do
              options[:quiesced] == true,
          disposition = Keyword.get(options, :disposition, :present),
          true <- disposition in [:present, :deleted],
-         {:ok, _} <- fetch(runtime, handle),
+         {:ok, capture} <- fetch(runtime, handle),
          {:ok, config} <- configuration(runtime),
          {:ok, m} <- MachineSession.store(config, :fetch, [{scope, machine}]),
          {:ok, worker} <- MachineSession.worker(config, m) do
@@ -151,7 +153,10 @@ defmodule SmolBox.Checkpoints do
         Runtime.coordinator(runtime),
         m,
         worker,
-        disposition,
+        if(disposition == :present and capture.state == :captured,
+          do: {:ordinary_capture, :capture_complete},
+          else: disposition
+        ),
         fn pinned ->
           resolve_record(config, {scope, machine}, id, version, pinned, disposition)
         end

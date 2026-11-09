@@ -5,7 +5,9 @@ defmodule SmolBox.NativePartialBranchPublicDisposalTest do
   alias SmolBox.Backend.{Budget, EmbeddedContext, EmbeddedPartialBranchDisposal, Reference}
 
   alias SmolBox.Embedded.{
+    BranchPublication,
     Config,
+    NativeCollectedBranchPublicationResult,
     NativeGrowth,
     PartialBranchDisposal
   }
@@ -343,6 +345,24 @@ defmodule SmolBox.NativePartialBranchPublicDisposalTest do
      usage}
   end
 
+  defp prepare_fixture(store, :published, material) do
+    alias SmolBox.Store.NativeCollectedBranchPublicationContract, as: Publication
+    {parent, child, metadata, usage} = Contract.prepare(Memory, store, material)
+    assert {:ok, pending} = Publication.accept(Memory, store, parent, child, child.version, 1110)
+    parent = Publication.fetch(Memory, store, parent)
+    {:ok, proof} = BranchPublication.from_wire(metadata.publication)
+
+    result = %NativeCollectedBranchPublicationResult{
+      version: pending.version,
+      platform: "macos",
+      source: metadata.source,
+      proof: proof
+    }
+
+    assert {:ok, published} = Publication.finish(Memory, store, parent, pending, result, 1111)
+    {Publication.fetch(Memory, store, parent), published, metadata, usage}
+  end
+
   defp prepare_fixture(store, _, material), do: Contract.prepare(Memory, store, material)
 
   defp dispose(runtime, child, version \\ nil),
@@ -361,6 +381,15 @@ defmodule SmolBox.NativePartialBranchPublicDisposalTest do
     after
       0 -> Enum.reverse(acc)
     end
+  end
+
+  test "partial disposal consumes a stored publication and records no duplicate source history" do
+    {runtime, store, parent, child, _, _, _} = fixture(:published)
+    assert {:ok, disposed} = dispose(runtime, child)
+    assert disposed.branch.state == :disposed and disposed.reservation == nil
+
+    assert Contract.fetch(Memory, store, parent).native_branch_history ==
+             parent.native_branch_history
   end
 
   for material <- [:held, :pre_release, :initial_release, :explicit_release] do

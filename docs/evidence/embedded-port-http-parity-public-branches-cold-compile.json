@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "scope": "Cold compilation of the installed public branch workflow",
+  "source_parent_commit": "15534dd33db97c852a4b9a60d5eeb858f68ef562",
+  "ordinary_current_consumer_attempt": {
+    "native_source_commit": "41cc8a6c2d54ddcfbb130768dda0690cb1be0333",
+    "manifest_sha256": "7b6cfae8a0140babab03f821c56406b018be97e52994bc4cb74d3d9791ebfc39",
+    "hex_archive_sha256": "e67c94340e551881fe8fce3bd5355aa60138a22632233a07253af173e2020e5a",
+    "exit_status": 1,
+    "rejected_boundary": "strict cold ParallelCompiler diagnostics: separated shape?/2 clauses produced a warning",
+    "runtime_output_created": false,
+    "runtime_or_vm_started": false,
+    "sdk_tables_all_empty": true,
+    "native_and_beam_processes_empty": true,
+    "account_lock_free": true,
+    "no_signals_sent": true
+  },
+  "correction": "Keep shape?/2 fallback grouped before helper functions; validate both workflow modules with strict compiler diagnostics in a fresh BEAM.",
+  "validation": {
+    "example_control_and_cold_compile_models_per_toolchain": 7,
+    "logs_sha256": {
+      "current-cold-compile-final-v2": "a9d0ceabdb831fc73f7c197aa77544e5e01fc84a9157306d481440f69d5d0849",
+      "minimum-cold-compile-final-v2": "a99183d1fde5ea57d3e7c9bc0c6fcb023365288e03e708d1795e871a1d1ba5aa"
+    },
+    "fresh_beam_compiles_without_sdk_or_vm": true
+  },
+  "source_files_sha256": {
+    "examples/embedded_port/lib/branch_control.ex": "832edc2691e44955381a7a0a1ddf60589ba2fe5a266a2cfc45daf6172927eeb1",
+    "test/unit/embedded_branch_example_test.exs": "11edb434f9775ce1a394b4b16c8505555fb2fc83f36fcbe275ca9648be117b1a"
+  },
+  "qualification": {
+    "ordinary_public_branch_workflow_qualified": false,
+    "crash_validation_performed": false,
+    "full_parity_complete": false,
+    "distribution_approved": false
+  }
+}

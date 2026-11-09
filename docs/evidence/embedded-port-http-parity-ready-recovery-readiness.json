@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "status": "model-confirmed-original-ready-recovery-scan-correction",
+  "source_base_commit": "c782eba",
+  "files_sha256": {
+    "lib/smolbox/runtime/native_resolution.ex": "40487c87e5370c746672abe63274bf3fe1b210e3a2f9a934f21f168bb97b7541",
+    "lib/smolbox/runtime/native_ready_branch_resolution.ex": "ed8243c701fefccf11537953b3bd03a5deeb580c40743feb7ec581edb1b26d77",
+    "lib/smolbox/embedded/bridge.ex": "8ec62be4253b3e470ca83d2adef2ccf49db59e02ed45c4b0d48e1c2b62ace581",
+    "test/unit/native_ready_branch_public_resolution_test.exs": "9783846213a952c1d07529e8a7ee25fa8fad8031eada3f199951e81b454e3e1a",
+    "test/unit/native_branch_control_readiness_test.exs": "2ba52af681494f5530b9587a7924f15bb7495e358f5d913a268580638891ae84",
+    "test/unit/native_branch_public_deletion_test.exs": "90ac332676ead4621931f845bcc5da3e74eda6011e2a9a086d6a6026caaf273a"
+  },
+  "problem": {
+    "held_and_ready_recovery_committed_valid_completion_but_left_completed_scan_frozen": true,
+    "generic_recovery_could_then_downgrade_running_source_and_siblings": true,
+    "regression_models_before_fix_failed": 2,
+    "before_fix_focused_tests": 23,
+    "live_fault_reproduction": false
+  },
+  "correction": {
+    "only_explicit_original_ready_completion_path_may_retain_completed_scan": true,
+    "public_cancel_then_explicit_keep_resolution_modeled": true,
+    "prior_completed_scan_and_same_healthy_owner_required": true,
+    "typed_validated_child_matches_parent_worker_original_epoch": true,
+    "paired_store_commit_required_before_reactivation": true,
+    "worker_lease_generation_preserved_and_renewed": true,
+    "one_captured_deadline_covers_quiescence_observation_commit_and_activation": true,
+    "material_only_untyped_failed_uncertain_and_partial_results_cannot_activate": true,
+    "incomplete_scan_and_changed_epoch_cannot_activate": true,
+    "persisted_draining_preserved": true,
+    "saved_result_survives_failed_activation": true,
+    "generic_startup_and_partial_disposal_recovery_unchanged": true
+  },
+  "validation": {
+    "selected_models_per_toolchain": 937,
+    "http_contracts_per_toolchain": 411,
+    "encrypted_postgresql_contracts_per_toolchain": 180,
+    "focused_readiness_and_public_recovery_models": 61,
+    "new_models": 14,
+    "current_toolchain": {
+      "elixir": "1.20.4",
+      "otp": "29.0.6"
+    },
+    "minimum_toolchain": {
+      "elixir": "1.18.4-otp-27",
+      "otp": "27.3.4.15"
+    },
+    "postgresql_final_partition_rows": 0,
+    "postgresql_final_other_clients": 0,
+    "postgresql_normal_smart_shutdown": true,
+    "strict_credo_findings": 67,
+    "new_credo_findings": 0,
+    "full_and_independent_clean_sdk_verified": true,
+    "private_ordinary_cancellation_harness_cold_compiles_on_both_toolchains": true,
+    "existing_deadline_test_setup_budget_widened_and_acceptance_entry_asserted": true,
+    "native_sdk_helper_assets_and_codecs_unchanged": true
+  },
+  "qualification": {
+    "ordinary_corrected_package_cancellation_and_recovery_acceptance_pending": true,
+    "all_full_parity_rows_pending": true,
+    "full_http_parity_complete": false,
+    "crash_validation_deferred": true,
+    "crash_handling_qualified": false,
+    "distribution_approved": false
+  }
+}

@@ -149,6 +149,7 @@ fn branch_terminal(message: &ServerMessage) -> bool {
         message,
         ServerMessage::Terminal {
             outcome: smolbox_protocol::Outcome::BranchCreated { .. }
+                | smolbox_protocol::Outcome::CollectedBranchMaterialPublished { .. }
                 | smolbox_protocol::Outcome::BranchCompletionPresence { .. }
                 | smolbox_protocol::Outcome::HeldBranchReleased { .. }
                 | smolbox_protocol::Outcome::HeldBranchReleasePresence { .. }
@@ -165,6 +166,7 @@ fn branch_terminal(message: &ServerMessage) -> bool {
                 | smolbox_protocol::Outcome::PartialBranchDisposalCleaned { .. }
                 | smolbox_protocol::Outcome::PartialBranchCleanupUnneeded { .. }
                 | smolbox_protocol::Outcome::PartialBranchCollected { .. }
+                | smolbox_protocol::Outcome::PartialBranchCollectionCandidate { .. }
                 | smolbox_protocol::Outcome::BranchDeletionCollected { .. }
                 | smolbox_protocol::Outcome::ReleasedBranchDeletionCleaned { .. }
                 | smolbox_protocol::Outcome::ReleasedBranchDeletionResolved { .. }
@@ -636,48 +638,55 @@ mod tests {
             "../../smolbox-protocol/fixtures/branch-creation-v1.json"
         ))
         .unwrap();
-        let branch = || ServerMessage::Terminal {
-            epoch: "ab".repeat(16),
-            id: 1,
-            sequence: 1,
-            outcome: smolbox_protocol::Outcome::BranchCreated {
-                completion: Box::new(
-                    serde_json::from_value(rows[1]["completion"].clone()).unwrap(),
-                ),
+        let completion: smolbox_protocol::BranchCompletion =
+            serde_json::from_value(rows[1]["completion"].clone()).unwrap();
+        for outcome in [
+            smolbox_protocol::Outcome::BranchCreated {
+                completion: Box::new(completion.clone()),
             },
-        };
-        let (output, receiver) = Output::new();
-        // The ordinary control route must not gain an unbounded proof payload.
-        assert!(output.send(0, || Ok(branch())).is_err());
-        assert!(output.send_branch_terminal(|| Ok(accepted())).is_err());
-        // Fill the unchanged event byte allowance with maximum-size chunks.
-        while output
-            .send(65536, || {
-                Ok(ServerMessage::Event {
-                    epoch: "ab".repeat(16),
-                    id: 1,
-                    sequence: 1,
-                    event: Event {
-                        stream: Stream::Stdout,
-                        data_base64: encode_chunk(&vec![0; 65536]).unwrap(),
-                    },
+            smolbox_protocol::Outcome::CollectedBranchMaterialPublished {
+                publication: Box::new(completion.publication),
+            },
+        ] {
+            let branch = || ServerMessage::Terminal {
+                epoch: "ab".repeat(16),
+                id: 1,
+                sequence: 1,
+                outcome: outcome.clone(),
+            };
+            let (output, receiver) = Output::new();
+            // The ordinary control route must not gain an unbounded proof payload.
+            assert!(output.send(0, || Ok(branch())).is_err());
+            assert!(output.send_branch_terminal(|| Ok(accepted())).is_err());
+            // Fill the unchanged event byte allowance with maximum-size chunks.
+            while output
+                .send(65536, || {
+                    Ok(ServerMessage::Event {
+                        epoch: "ab".repeat(16),
+                        id: 1,
+                        sequence: 1,
+                        event: Event {
+                            stream: Stream::Stdout,
+                            data_base64: encode_chunk(&vec![0; 65536]).unwrap(),
+                        },
+                    })
                 })
-            })
-            .is_ok()
-        {}
-        for _ in 0..CONTROL_FRAMES - 2 {
+                .is_ok()
+            {}
+            for _ in 0..CONTROL_FRAMES - 2 {
+                output.send_branch_terminal(|| Ok(branch())).unwrap();
+            }
+            // Two ordinary observer replies still fit alongside the large proofs.
+            output.send(0, || Ok(accepted())).unwrap();
+            output.send(0, || Ok(accepted())).unwrap();
+            assert!(output
+                .send_branch_terminal(|| panic!("sequence advanced without capacity"))
+                .is_err());
+            while let Ok(frame) = receiver.try_recv() {
+                output.complete(&frame);
+            }
+            assert_eq!(output.usage.lock().unwrap().encoded, 0);
             output.send_branch_terminal(|| Ok(branch())).unwrap();
         }
-        // Two ordinary observer replies still fit alongside the large proofs.
-        output.send(0, || Ok(accepted())).unwrap();
-        output.send(0, || Ok(accepted())).unwrap();
-        assert!(output
-            .send_branch_terminal(|| panic!("sequence advanced without capacity"))
-            .is_err());
-        while let Ok(frame) = receiver.try_recv() {
-            output.complete(&frame);
-        }
-        assert_eq!(output.usage.lock().unwrap().encoded, 0);
-        output.send_branch_terminal(|| Ok(branch())).unwrap();
     }
 }

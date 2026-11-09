@@ -5,6 +5,7 @@ defmodule SmolBox.DurableHost.BranchStore do
 
     alias SmolBox.Store.{
       BranchOps,
+      CodecNativeCollectedBranchPublications,
       CodecNativePartialBranchBackings,
       CodecNativePartialBranchCleanupResolutions,
       CodecNativePartialBranchCleanups,
@@ -17,20 +18,29 @@ defmodule SmolBox.DurableHost.BranchStore do
     def capabilities do
       supported = %{managed_branches: 1}
 
-      Enum.reduce(
-        [
-          {:native_partial_branch_collections, CodecNativePartialBranchCollections},
-          {:native_partial_branch_disposals, CodecNativePartialBranchDisposals},
-          {:native_partial_branch_retirements, CodecNativePartialBranchRetirements},
-          {:native_partial_branch_backings, CodecNativePartialBranchBackings},
-          {:native_partial_branch_cleanups, CodecNativePartialBranchCleanups},
-          {:native_partial_branch_cleanup_resolutions, CodecNativePartialBranchCleanupResolutions}
-        ],
-        supported,
-        fn {marker, reader}, acc ->
-          if Code.ensure_loaded?(reader), do: Map.put(acc, marker, reader.reader()), else: acc
-        end
-      )
+      readers = [
+        {:native_collected_branch_publications, CodecNativeCollectedBranchPublications},
+        {:native_partial_branch_collections, CodecNativePartialBranchCollections},
+        {:native_partial_branch_disposals, CodecNativePartialBranchDisposals},
+        {:native_partial_branch_retirements, CodecNativePartialBranchRetirements},
+        {:native_partial_branch_backings, CodecNativePartialBranchBackings},
+        {:native_partial_branch_cleanups, CodecNativePartialBranchCleanups},
+        {:native_partial_branch_cleanup_resolutions, CodecNativePartialBranchCleanupResolutions}
+      ]
+
+      supported =
+        Enum.reduce(
+          readers,
+          supported,
+          fn {marker, reader}, acc ->
+            if Code.ensure_loaded?(reader), do: Map.put(acc, marker, reader.reader()), else: acc
+          end
+        )
+
+      if Code.ensure_loaded?(NativeBranchReleaseOps) and
+           Enum.all?(readers, fn {marker, _reader} -> supported[marker] == 1 end),
+         do: Map.put(supported, :native_branches, 1),
+         else: supported
     end
 
     def run(context, :branch_accept, [key, spec, fingerprint, name, capacity, now]) do

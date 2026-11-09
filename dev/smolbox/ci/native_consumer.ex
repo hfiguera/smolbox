@@ -6,6 +6,8 @@ defmodule SmolBox.CI.NativeConsumer do
   @native_options ~w(native_package native_fixture native_sha256 native_domain_json native_output)a
 
   def validate_options!(options) do
+    validate_checkpoints!(options)
+    validate_branches!(options)
     validate_images!(options)
     validate_growth!(options)
     validate_volume!(options)
@@ -141,6 +143,8 @@ defmodule SmolBox.CI.NativeConsumer do
     verify_network(evidence, options)
     verify_workload(evidence, options)
     verify_images(evidence, options)
+    verify_branches(evidence, options)
+    verify_checkpoints(evidence, options)
 
     %{
       scope: scope(options),
@@ -148,6 +152,99 @@ defmodule SmolBox.CI.NativeConsumer do
       proof_tool_sha256: hashes,
       evidence: evidence
     }
+  end
+
+  defp validate_checkpoints!(options) do
+    if options[:native_checkpoints] do
+      Util.ensure!(
+        options[:native_public] == true,
+        "--native-checkpoints requires explicit --native-public"
+      )
+
+      Util.ensure!(
+        !Enum.any?(
+          ~w(native_branches native_images native_growth native_volume native_terminal native_network native_workload)a,
+          &options[&1]
+        ),
+        "native checkpoint and other campaigns must run separately"
+      )
+
+      Util.ensure!(
+        is_binary(options[:native_checkpoint_seed]) and
+          File.regular?(options[:native_checkpoint_seed]) and
+          is_binary(options[:native_checkpoint_seed_sha256]) and
+          Regex.match?(~r/\A[0-9a-f]{64}\z/, options[:native_checkpoint_seed_sha256]),
+        "native checkpoints require an approved seed path and SHA-256"
+      )
+    end
+  end
+
+  defp verify_checkpoints(evidence, options) do
+    if options[:native_checkpoints] do
+      expected = %{
+        "campaign" => "ordinary-public-native-checkpoints",
+        "store_mode" => "ephemeral",
+        "capture_source_continues" => true,
+        "duplicate_capture_retained" => true,
+        "stopped_runtime_replacement" => true,
+        "ram_and_disk_restored" => true,
+        "independent_restores" => 2,
+        "cold_restart_does_not_restore_ram" => true,
+        "captured_bytes_unchanged" => true,
+        "capture_artifact_removed" => true,
+        "native_capture_cleanup" => true,
+        "codec_roundtrips" => true,
+        "final_reserved_slots" => 0,
+        "final_reserved_disk_gb" => 0
+      }
+
+      Util.ensure!(
+        Enum.all?(expected, fn {key, value} -> evidence[key] == value end),
+        "native consumer did not qualify the requested public checkpoint lifecycle"
+      )
+    end
+  end
+
+  defp validate_branches!(options) do
+    if options[:native_branches] do
+      Util.ensure!(
+        options[:native_public] == true,
+        "--native-branches requires explicit --native-public"
+      )
+
+      Util.ensure!(
+        !Enum.any?(
+          ~w(native_checkpoints native_images native_growth native_volume native_terminal native_network native_workload)a,
+          &options[&1]
+        ),
+        "native branch and other campaigns must run separately"
+      )
+    end
+  end
+
+  defp verify_branches(evidence, options) do
+    if options[:native_branches] do
+      expected = %{
+        "campaign" => "ordinary-public-native-branches",
+        "store_mode" => "ephemeral",
+        "source_and_two_children_independent" => true,
+        "held_release" => true,
+        "duplicate_release_retained" => true,
+        "cold_restart_does_not_restore_ram" => true,
+        "source_dependencies_retired" => 2,
+        "native_backing_acknowledgements" => 2,
+        "branch_budget_rejected_before_dispatch" => true,
+        "drain_rejected_new_branch" => true,
+        "codec_roundtrips" => true,
+        "final_reserved_slots" => 0,
+        "final_reserved_disk_gb" => 0
+      }
+
+      Util.ensure!(
+        Enum.all?(expected, fn {key, value} -> evidence[key] == value end),
+        "native consumer did not qualify the requested public branch lifecycle and backing accounting"
+      )
+    end
   end
 
   @doc false
@@ -387,7 +484,25 @@ defmodule SmolBox.CI.NativeConsumer do
 
   defp mode_arguments(options) do
     ordinary =
-      if options[:native_ordinary] || options[:native_growth], do: ["--ordinary"], else: []
+      if Enum.any?(
+           ~w(native_ordinary native_growth native_branches native_checkpoints)a,
+           &options[&1]
+         ),
+         do: ["--ordinary"],
+         else: []
+
+    ordinary =
+      ordinary ++
+        if(options[:native_checkpoints],
+          do: [
+            "--checkpoints",
+            "--checkpoint-seed",
+            Path.expand(options[:native_checkpoint_seed]),
+            "--checkpoint-seed-sha256",
+            options[:native_checkpoint_seed_sha256]
+          ],
+          else: []
+        )
 
     terminal = if options[:native_terminal], do: ["--terminal"], else: []
 
@@ -540,7 +655,7 @@ defmodule SmolBox.CI.NativeConsumer do
   defp preserve_retained(_result, _log_path), do: :ok
 
   defp proof_files(consumer, tooling, options) do
-    script = proof_script(options)
+    {script, support_kind, names} = proof_selection(options)
 
     files = [
       {"scripts/#{script}", Path.join(consumer, "native-proof.exs")},
@@ -554,69 +669,44 @@ defmodule SmolBox.CI.NativeConsumer do
         do: [{"scripts/#{support}", Path.join(consumer, support)} | files],
         else: files
 
-    proof_support(files, tooling, options)
+    files ++ proof_support(tooling, support_kind, names)
   end
 
-  defp proof_script(options) do
+  defp proof_selection(options) do
     cond do
-      options[:native_images] -> "embedded-images-runtime-proof.exs"
-      options[:native_growth] -> "embedded-growth-runtime-proof.exs"
-      options[:native_volume] -> "embedded-volume-runtime-proof.exs"
-      options[:native_network] || options[:native_workload] -> "embedded-network-proof.exs"
-      options[:native_public] -> "embedded-runtime-proof.exs"
-      true -> "embedded-port-proof.exs"
-    end
-  end
+      Enum.any?([:native_branches, :native_checkpoints], &options[&1]) ->
+        {"embedded-branches-runtime-proof.exs", :example, ~w(branch_demo.ex branch_control.ex)}
 
-  defp proof_support(files, tooling, options) do
-    cond do
       options[:native_images] ->
-        files ++
-          Enum.map(~w(images_demo.ex images_control.ex owned_control.ex), fn name ->
-            {"examples/embedded_port/lib/#{name}", Path.join(tooling, name)}
-          end) ++
-          [
-            {"examples/embedded_port/config.example.exs",
-             Path.join(tooling, "config.example.exs")}
-          ]
+        {"embedded-images-runtime-proof.exs", :example,
+         ~w(images_demo.ex images_control.ex owned_control.ex)}
 
       options[:native_growth] ->
-        files ++
-          Enum.map(~w(growth_demo.ex growth_control.ex owned_control.ex), fn name ->
-            {"examples/embedded_port/lib/#{name}", Path.join(tooling, name)}
-          end) ++
-          [
-            {"examples/embedded_port/config.example.exs",
-             Path.join(tooling, "config.example.exs")}
-          ]
+        {"embedded-growth-runtime-proof.exs", :example,
+         ~w(growth_demo.ex growth_control.ex owned_control.ex)}
 
       options[:native_volume] ->
-        files ++
-          Enum.map(~w(volume_demo.ex volume_control.ex), fn name ->
-            {"examples/embedded_port/lib/#{name}", Path.join(tooling, name)}
-          end) ++
-          [
-            {"examples/embedded_port/config.example.exs",
-             Path.join(tooling, "config.example.exs")}
-          ]
+        {"embedded-volume-runtime-proof.exs", :example, ~w(volume_demo.ex volume_control.ex)}
 
-      options[:native_network] || options[:native_workload] ->
-        files ++
-          Enum.map(~w(ordinary_proof network_fixture network_proof), fn name ->
-            {"native/smolbox-port/tests/#{name}.py", Path.join(tooling, "#{name}.py")}
-          end)
+      Enum.any?([:native_network, :native_workload], &options[&1]) ->
+        {"embedded-network-proof.exs", :native,
+         ~w(ordinary_proof.py network_fixture.py network_proof.py)}
 
       options[:native_public] ->
-        files ++
-          [
-            {"examples/embedded_port/lib/demo.ex", Path.join(tooling, "demo.ex")},
-            {"examples/embedded_port/config.example.exs",
-             Path.join(tooling, "config.example.exs")}
-          ]
+        {"embedded-runtime-proof.exs", :example, ["demo.ex"]}
 
       true ->
-        files
+        {"embedded-port-proof.exs", :native, []}
     end
+  end
+
+  defp proof_support(tooling, :example, names) do
+    Enum.map(names, &{"examples/embedded_port/lib/#{&1}", Path.join(tooling, &1)}) ++
+      [{"examples/embedded_port/config.example.exs", Path.join(tooling, "config.example.exs")}]
+  end
+
+  defp proof_support(tooling, :native, names) do
+    Enum.map(names, &{"native/smolbox-port/tests/#{&1}", Path.join(tooling, &1)})
   end
 
   defp scope(options) do

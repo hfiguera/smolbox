@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "status": "preserved-ordinary-macos-branch-deletion-failure",
+  "source_commit": "9600f9691c624ef2a16737b6543de38a38d58465",
+  "manifest_sha256": "894fa8dc0893f18a2dd6bdf85b919a7272d494acd274fb7f7236e13fa9497cc0",
+  "helper_sha256": "678242271b7efba196e5e726b562a4b5c109462308ae9e76f9b7608c673d44a5",
+  "sdk": {
+    "version": "1.22.0",
+    "revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "unmodified": true
+  },
+  "consumer": {
+    "platform": "macos",
+    "architecture": "aarch64",
+    "standard_uid": 504,
+    "toolchain": "Elixir 1.20.4 / OTP 29.0.6",
+    "rust_on_path": false,
+    "public_runtime": true
+  },
+  "positive_scope": [
+    "source and two sibling RAM/disk independence",
+    "held release and duplicate release",
+    "budget and draining rejection",
+    "one child cold restart retained disk and did not restore captured RAM",
+    "source and other child remained independent after cold restart"
+  ],
+  "failure": {
+    "machine": "first child",
+    "operation": "delete",
+    "category": "identity_conflict",
+    "management_state": "unknown",
+    "journal_phase": "collected",
+    "sdk_delete_entered": false,
+    "child_sdk_state": "stopped",
+    "child_pid": null,
+    "observed_private_cache": [
+      "agent-rootfs",
+      "agent-rootfs.tar",
+      "layers (empty)",
+      "overlay.raw",
+      "storage.ext4",
+      ".smolvm-extracted (empty)"
+    ],
+    "diagnosis": "The stopped-child cache predicate rejected the populated private bare extraction created by cold restart."
+  },
+  "ordinary_cleanup": {
+    "original_keeper_shutdown_acknowledged": true,
+    "all_native_vm_beam_processes_absent": true,
+    "account_lock_available": true,
+    "forced_termination": false,
+    "sdk_rows_and_disks_retained": true,
+    "sdk_namespace_quarantined": true,
+    "authority_reopened": false,
+    "mutation_replay": false
+  },
+  "stopped_custody": {
+    "entries": 2907,
+    "nonregular_objects_recorded_and_skipped": 7,
+    "inventory_sha256": "43c42060e0f4db4d4af8674c0adc43f32935af37e80cae885314e8d520e38f51",
+    "every_regular_copy_verified": true,
+    "original_metadata_recorded": true,
+    "original_files_preserved": true
+  },
+  "codec_readers": {
+    "each_toolchain_records": 42,
+    "semantic_roundtrip": true,
+    "envelope_versions_preserved": true,
+    "versions": [
+      "smolbox-record-v23",
+      "smolbox-record-v29",
+      "smolbox-record-v30",
+      "smolbox-record-v31"
+    ],
+    "restored_as_authority": false
+  },
+  "correction": {
+    "source_commit": "f1af384dc7a82a3dcb79bee12c533a1baa4f7620",
+    "accept_only_owned_pinned_bare_layout": true,
+    "mount_image_mount_state_leases_unknown_entries_rejected": true,
+    "unbooted_and_partial_guards_unchanged": true,
+    "example_backing_check_uses_sdk_macos_cache": true,
+    "keeper_exposes_existing_explicit_deletion_apis": true,
+    "sdk_models_passed": 18,
+    "deletion_models_passed": 75,
+    "current_keeper_consumer_tests_passed": 31,
+    "minimum_keeper_consumer_tests_passed": 31,
+    "live_corrected_helper_acceptance": "current/minimum scoped ordinary branches pass; see embedded-port-http-parity-macos-public-branches-f1af384d.json"
+  },
+  "parity_complete": false,
+  "crash_validation_deferred": true,
+  "crash_handling_qualified": false,
+  "distribution_approved": false
+}

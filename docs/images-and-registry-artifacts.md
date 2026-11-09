@@ -22,6 +22,18 @@ scopes; no full-parity or distribution claim follows from these checks.
 Local embedded worker checks also cover guest credentials over private IPC;
 guest credential VM/package acceptance remains pending.
 Approving a source catalog does not enable an absent package capability.
+
+The [f1f250d3 macOS package](evidence/embedded-port-http-parity-macos-public-sources-f1f250d3.json)
+also passes current/minimum public consumers without Rust. Its exact
+1a8e644f/fe85a410 package covers digest-pinned ARM64 OCI creation, configured
+startup/restart, image pull/list and duplicate reuse, plus offline bare registry
+cold/warm creation and imported-pull rejection. Both source kinds preserve binary
+files and immutable creation through normal stopped Runtime replacement, then
+delete their owned machines. All SDK tables end empty and no native owner remains.
+The registry fixture is anonymous and local; authenticated/guest-credential,
+durable-store and broader resource combinations remain required. These results
+do not establish full HTTP parity or distribution approval.
+
 The three operations have different storage and authentication boundaries:
 
 | Operation | Where the content is fetched | Identity |

@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "status": "example-cleanup-admission-and-deadline-model-corrected-fresh-ordinary-acceptance-pending",
+  "base_source_commit": "3575912",
+  "changed_source_files": {
+    "examples/embedded_port/lib/branch_control.ex": "59b14a8122b59fc61b09c1cef2d524ee835d5739edf9370107493eaa88f9054d",
+    "examples/embedded_port/lib/branch_demo.ex": "e6dc37a2ff52261845e6a2064f069be843327d89c0a0073e8fb8389b661aeabf",
+    "examples/embedded_port/lib/owned_control.ex": "23804fe75d06cd92f08ca17615ad5627c2d012286aa729fc8a53b0c3861f8eb8",
+    "test/unit/embedded_branch_example_test.exs": "8f5c8e6e90ed5ed181f0d2555ba51c582ce003b9d6a35996a3185202a7a619ac",
+    "test/unit/embedded_owned_control_test.exs": "bc7a03b614d61c4cad7851448eaac2dc31d115591eca1dfbb57d49e1d73e3a88"
+  },
+  "observed_case_evidence": "embedded-port-http-parity-unbooted-linux-ac4bf45.json",
+  "scope": {
+    "library_native_engine_sdk_protocol_and_codecs_changed": false,
+    "example_control_and_tests_only": true,
+    "no_active_owner_hot_loaded": true,
+    "original_failed_cases_and_disks_preserved": true
+  },
+  "corrections": {
+    "normal_close_waits_only_on_reconcile_admission_exhausted_not_dispatched": true,
+    "original_owner_and_epoch_captured_once": true,
+    "entered_callback_results_tagged_and_never_retried": true,
+    "one_close_deadline_bounds_admission_and_channel_drain": true,
+    "owned_stop_quiescence_waits_only_on_known_busy_not_dispatched": true,
+    "quiescence_keeps_original_authority_barrier_and_pinned_epoch": true,
+    "captured_stop_deadline_limits_pin_quiescence_activation_stop_health_and_fence": true,
+    "successful_stop_followup_failure_remains_dispatch_uncertain": true,
+    "expired_pre_dispatch_stop_cannot_enter_backend": true,
+    "controller_fixed_action_clauses_preserve_original_id_version_attestations_and_once_only_guards": true
+  },
+  "validation": {
+    "before_correction": {
+      "valid_model_run_passed": 11,
+      "failed": 3,
+      "failures": [
+        "one-shot normal close rejects busy admission",
+        "expired close enters callback",
+        "busy admission does not wait within captured deadline"
+      ],
+      "log_sha256": "f1d4e74a1e887dbcde7f63252cc3506a9de78d8aff321272e566c50908230f86"
+    },
+    "current": {
+      "passed": 30,
+      "doctests": 4,
+      "tests": 26,
+      "includes_fresh_beam_example_compile": true,
+      "log_sha256": "75e7d9267f042786a0a6323c0f669341c12acf4b2ed4502cd06407743959dbb7"
+    },
+    "minimum": {
+      "passed": 30,
+      "doctests": 4,
+      "tests": 26,
+      "includes_fresh_beam_example_compile": true,
+      "log_sha256": "aa36d0fe52193962f02fa3201f6fd1a5259364ab006afb75ad4912392b327274"
+    },
+    "credo": {
+      "exit_status": 14,
+      "findings": 67,
+      "new_issue_keys_excluding_coordinates": 0,
+      "baseline_log_sha256": "4900a57dfc25487bbb533b4b46806c50c947652634c99fa5634eb210083646fa",
+      "current_log_sha256": "4900a57dfc25487bbb533b4b46806c50c947652634c99fa5634eb210083646fa"
+    },
+    "live_vm_sdk_or_owner_fault_models_run": false
+  },
+  "ordinary_acceptance_after_correction_pending": true,
+  "full_parity_rows_closed": 0,
+  "full_http_parity_complete": false,
+  "crash_validation_deferred": true,
+  "crash_handling_qualified": false,
+  "distribution_approved": false
+}

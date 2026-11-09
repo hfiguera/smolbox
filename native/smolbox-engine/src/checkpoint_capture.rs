@@ -59,6 +59,17 @@ pub(crate) fn validate_record(record: &VmRecord) -> Result<Resources> {
     Ok(resources)
 }
 
+/// SDK 1.22 records a pack dependency for every source_smolmachine, including
+/// bare packs without OCI layers. That output violates the self-contained
+/// checkpoint contract. Branching still accepts its separate bare-pack profile.
+pub(crate) fn validate_portable_record(record: &VmRecord) -> Result<Resources> {
+    let resources = validate_record(record)?;
+    if record.source_smolmachine.is_some() || record.source_registry_ref.is_some() {
+        return Err(Error::before(ErrorCode::Unsupported));
+    }
+    Ok(resources)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -121,6 +132,20 @@ mod tests {
             }
             assert!(validate_record(&changed).is_err(), "{case}");
         }
+    }
+
+    #[test]
+    fn portable_capture_excludes_sdk_pack_dependencies_before_entry_but_branches_remain_eligible() {
+        let mut source = record();
+        assert!(validate_portable_record(&source).is_ok());
+        source.source_smolmachine = Some("/approved/bare.smolmachine".into());
+        assert!(validate_record(&source).is_ok());
+        let error = validate_portable_record(&source).unwrap_err();
+        assert_eq!(error.code, ErrorCode::Unsupported);
+        assert_eq!(error.dispatch, crate::Dispatch::NotDispatched);
+        source.source_smolmachine = None;
+        source.source_registry_ref = Some("registry.example/pack".into());
+        assert!(validate_portable_record(&source).is_err());
     }
 
     #[test]

@@ -5,7 +5,7 @@ defmodule SmolBox.Embedded.NativeBranchAdmission do
   alias SmolBox.Embedded.{
     NativeBranchBacking,
     NativeBranchRetirement,
-    NativeGrowth,
+    NativeCollectedBranchPublication,
     NativePartialBranchCollection,
     NativePartialBranchDisposal,
     NativeUnbootedBranchDisposal,
@@ -17,6 +17,7 @@ defmodule SmolBox.Embedded.NativeBranchAdmission do
           branch: %{
             state: :unknown,
             native_authority: %{
+              collected_publication: nil,
               completion: nil,
               prepared_retirement: nil,
               partial_collection: nil
@@ -39,22 +40,11 @@ defmodule SmolBox.Embedded.NativeBranchAdmission do
         parent.worker_generation == child.worker_generation and
         child.branch.source == ManagedMachine.key(parent)
 
-  def disposal_pending?(parent, child) do
-    with :ok <- ManagedMachine.validate(parent),
-         :ok <- ManagedMachine.validate(child),
-         true <- NativeUnbootedBranchDisposal.eligible?(child),
-         {:ok, receipt, _, _} <- NativeGrowth.head(parent) do
-      parent.active_branch == child.id and parent.operation == :branch and
-        parent.branch_children[child.id] == false and
-        not Map.has_key?(parent.native_branch_history, child.id) and
-        parent.worker_id == child.worker_id and
-        parent.worker_generation == child.worker_generation and
-        child.branch.source == ManagedMachine.key(parent) and
-        receipt == child.branch.native_authority.request["source"]
-    else
-      _ -> false
-    end
-  end
+  def disposal_pending?(parent, child),
+    do: partial_pending?(parent, child, &NativeUnbootedBranchDisposal.eligible?/1)
+
+  def collected_publication_pending?(parent, child),
+    do: partial_pending?(parent, child, &NativeCollectedBranchPublication.eligible?/1)
 
   def partial_collection_pending?(parent, child),
     do: partial_pending?(parent, child, &NativePartialBranchCollection.eligible?/1)
@@ -109,11 +99,10 @@ defmodule SmolBox.Embedded.NativeBranchAdmission do
            UnbootedBranchDisposalCandidate.matches?(
              candidate,
              child.branch.native_authority.request
-           ),
-         {:ok, receipt, _, _} <- NativeGrowth.head(parent) do
+           ) do
       intent = get_in(candidate.publication, ~w(change child_origin intent))
 
-      candidate.publication["previous"] == receipt and
+      NativeCollectedBranchPublication.publication_pending?(parent, child, candidate.publication) and
         intent["epoch"] == epoch and candidate.publication["change"]["platform"] == platform and
         intent["source_pid"] == child.branch.source_machine.backend_identity.pid_identity and
         NativeUnbootedBranchDisposal.plan?(candidate, child.spec.profile)

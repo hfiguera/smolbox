@@ -1,0 +1,349 @@
+{
+  "schema": 1,
+  "status": "encrypted-uncertain-histories-pass-both-worker-free-readers-live-unbooted-postgresql-disposal-not-qualified",
+  "source_commit": "d1bba15c0ae7d7cd2784ac7187ad0f696a7cc8c1",
+  "hex_archive_sha256": "3b256131e57e3a1a3aa9bfe041ca0a21c49ecf0a36c4fe98c359260a01b306af",
+  "native_manifest_sha256": "e82508e5d78fa4882c1cfae1c12f658b368d96cb638dba6fa74c19bcc0878ec8",
+  "helper_sha256": "3f72b406c28de87a6b767c7d07809d5da3e6204a47d5265fc048ff5379549307",
+  "sdk_source_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_unmodified": true,
+  "cases": {
+    "current": {
+      "installed_hex_consumer_without_rust": true,
+      "toolchain": "current",
+      "store": "encrypted PostgreSQL",
+      "ordinary_branch_api_timeout_ms": 1000,
+      "automatic_native_disposal_harness_exit_status": 1,
+      "native_unbooted_disposal_qualified": false,
+      "initial_failure_stage": "publish_collected",
+      "initial_failure_has_no_exclusive_native_cause_diagnosis": true,
+      "publication_intent_retained_without_proof": true,
+      "explicit_original_context_publication_attempt_returned_unknown_branch_not_dispatched": true,
+      "source_child_sdk_rows_and_disks_retained": true,
+      "sdk_counts": {
+        "vms": 2,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0
+      },
+      "sdk_states": {
+        "created": 1,
+        "running": 1
+      },
+      "retained_resources": {
+        "slots": 3,
+        "cpus": 3,
+        "memory_mb": 1920,
+        "disk_gb": 9
+      },
+      "normal_original_owner_shutdown": true,
+      "postgresql_smart_shutdown": true,
+      "native_beam_sql_inventories_empty": true,
+      "account_lock_available": true,
+      "authority_restored_or_replayed": false,
+      "archive_sha256": "7cf51bc1546067177b95d5113d272b6b322a0616cea99794f2e835d15bbc24ee",
+      "archive_bytes": 387487578,
+      "archive_members": 12661,
+      "sdk_backup_sha256": "614c4fa2e16f74175ca99fbc23e0e46355fc31f93ffbf473cad3749772d4966a",
+      "cold_postgresql_files_verified": 1318,
+      "full_archive_and_cold_sql_and_sdk_backup_verified_guest_outer_mac_stream": true,
+      "codec_readers": {
+        "current": {
+          "checkpoints": 3,
+          "decoded_records": 9,
+          "same_original_request": true,
+          "all_resources_retained": true,
+          "unacknowledged_publication_never_promoted": true,
+          "no_absence_retirement_or_backing_proof": true,
+          "codec_round_trips": true,
+          "sdk_or_vm_started": false,
+          "authority_restored_or_replayed": false,
+          "log_sha256": "4792f5635c960642b1bc2fe3d920b279c6098197097f02309195a91714ead33a"
+        },
+        "minimum": {
+          "checkpoints": 3,
+          "decoded_records": 9,
+          "same_original_request": true,
+          "all_resources_retained": true,
+          "unacknowledged_publication_never_promoted": true,
+          "no_absence_retirement_or_backing_proof": true,
+          "codec_round_trips": true,
+          "sdk_or_vm_started": false,
+          "authority_restored_or_replayed": false,
+          "log_sha256": "4792f5635c960642b1bc2fe3d920b279c6098197097f02309195a91714ead33a"
+        }
+      },
+      "durable_readback": {
+        "separate_normal_beams": 2,
+        "original_and_opposite_toolchain_readers": {
+          "uncertain": {
+            "unknown_records_and_all_reservations_retained": true,
+            "original_minimum": false,
+            "reader_minimum": true,
+            "same_library_and_hex_version": true,
+            "native_workers": 0,
+            "records_equal": 3,
+            "saved_backing_acknowledgements_without_worker": 0,
+            "logical_backup_sha256": "4e7260e8a1f805186ef5cf9324198e00552468aad84463d007778b77777366fd",
+            "normal_sql_restart_and_shutdown": true,
+            "without_rust": true,
+            "crash_handling_qualified": false
+          },
+          "uncertain-same": {
+            "unknown_records_and_all_reservations_retained": true,
+            "original_minimum": false,
+            "reader_minimum": false,
+            "same_library_and_hex_version": true,
+            "native_workers": 0,
+            "records_equal": 3,
+            "saved_backing_acknowledgements_without_worker": 0,
+            "logical_backup_sha256": "5432427b748629aa719ad070ce0f7694d5d28ae5b2c38f9e33f3b0adce0ca5a0",
+            "normal_sql_restart_and_shutdown": true,
+            "without_rust": true,
+            "crash_handling_qualified": false
+          }
+        },
+        "records_equal_per_reader": 3,
+        "native_workers": 0,
+        "uncertain_intents_and_all_resource_projections_preserved": true,
+        "sql_payloads_encrypted": true,
+        "source_files_verified": 1809,
+        "assets_verified": 806,
+        "source_library_assets_host_tools_domain_keys_verified": true,
+        "readback_delta_archive_sha256": "2571276c85913ef3936dd54837adaf1a6f07c73103dacd1c35744a82f8ff4e77",
+        "readback_delta_bytes": 8533997,
+        "readback_delta_members": 1470,
+        "base_full_archive_retained_unchanged": true,
+        "cold_database_files_verified": 1317,
+        "all_compact_metadata_verified": 115,
+        "same_sdk_backup_sha256": "614c4fa2e16f74175ca99fbc23e0e46355fc31f93ffbf473cad3749772d4966a",
+        "base_delta_sdk_and_every_cold_database_file_verified_guest_outer_mac_stream": true,
+        "full_archive_retained_on_mac": false,
+        "native_authority_reopened": false
+      },
+      "observed_retained_output_spool": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "read_only_original_process_observation": true,
+        "no_native_phase_inferred_from_spool_or_sdk_inventory": true
+      },
+      "workflow_files_sha256": {
+        "compile-unbooted-pg.exs": "75679a93911a6cf671a88109924a8746905db96ba3685f1810298f32b131a460",
+        "launch-unbooted-pg.py": "194153f0691502c008e8fca6331bcd6d902a8f6859a64d0847c1bb353e1253ed",
+        "read-unbooted-pg.exs": "187bc5cf935a988f9aee45ff266f3a8cff327a63d03c0c085478c351a2bd086f",
+        "run-unbooted-pg.py": "5e4dfd137271d8ed3ff1b7a9ce2d4b10af773347c9d350e50a54bde85d5c54c3",
+        "unbooted-pg-proof.exs": "ce8317698422d27b78f9d157a438a0e06302b5991cc4fea732dd09148f75a815"
+      }
+    },
+    "minimum": {
+      "installed_hex_consumer_without_rust": true,
+      "toolchain": "minimum",
+      "store": "encrypted PostgreSQL",
+      "ordinary_branch_api_timeout_ms": 1000,
+      "automatic_native_disposal_harness_exit_status": 1,
+      "native_unbooted_disposal_qualified": false,
+      "initial_failure_stage": "read_only_child_gate",
+      "initial_failure_has_no_exclusive_native_cause_diagnosis": true,
+      "publication_intent_retained_without_proof": true,
+      "explicit_original_context_publication_attempt_returned_unknown_branch_not_dispatched": true,
+      "source_child_sdk_rows_and_disks_retained": true,
+      "sdk_counts": {
+        "vms": 2,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0
+      },
+      "sdk_states": {
+        "created": 1,
+        "running": 1
+      },
+      "retained_resources": {
+        "slots": 3,
+        "cpus": 3,
+        "memory_mb": 1920,
+        "disk_gb": 9
+      },
+      "normal_original_owner_shutdown": true,
+      "postgresql_smart_shutdown": true,
+      "native_beam_sql_inventories_empty": true,
+      "account_lock_available": true,
+      "authority_restored_or_replayed": false,
+      "archive_sha256": "f70730e1167bd14a98f4c52501bb8212f9d5a05fe102c819ed2fa1919357bdc8",
+      "archive_bytes": 387426169,
+      "archive_members": 12673,
+      "sdk_backup_sha256": "1e0a316b65a9453781ce1bea7f4c89bdd8328d45fddd07337685c01415065436",
+      "cold_postgresql_files_verified": 1320,
+      "full_archive_and_cold_sql_and_sdk_backup_verified_guest_outer_mac_stream": true,
+      "codec_readers": {
+        "current": {
+          "checkpoints": 3,
+          "decoded_records": 9,
+          "same_original_request": true,
+          "all_resources_retained": true,
+          "unacknowledged_publication_never_promoted": true,
+          "no_absence_retirement_or_backing_proof": true,
+          "codec_round_trips": true,
+          "sdk_or_vm_started": false,
+          "authority_restored_or_replayed": false,
+          "log_sha256": "4792f5635c960642b1bc2fe3d920b279c6098197097f02309195a91714ead33a"
+        },
+        "minimum": {
+          "checkpoints": 3,
+          "decoded_records": 9,
+          "same_original_request": true,
+          "all_resources_retained": true,
+          "unacknowledged_publication_never_promoted": true,
+          "no_absence_retirement_or_backing_proof": true,
+          "codec_round_trips": true,
+          "sdk_or_vm_started": false,
+          "authority_restored_or_replayed": false,
+          "log_sha256": "4792f5635c960642b1bc2fe3d920b279c6098197097f02309195a91714ead33a"
+        }
+      },
+      "durable_readback": {
+        "separate_normal_beams": 2,
+        "original_and_opposite_toolchain_readers": {
+          "uncertain": {
+            "unknown_records_and_all_reservations_retained": true,
+            "original_minimum": true,
+            "reader_minimum": false,
+            "same_library_and_hex_version": true,
+            "native_workers": 0,
+            "records_equal": 3,
+            "saved_backing_acknowledgements_without_worker": 0,
+            "logical_backup_sha256": "a26059b132574db1251fd74d381c5f8081c977a923df2ca1a7397da933ac092a",
+            "normal_sql_restart_and_shutdown": true,
+            "without_rust": true,
+            "crash_handling_qualified": false
+          },
+          "uncertain-same": {
+            "unknown_records_and_all_reservations_retained": true,
+            "original_minimum": true,
+            "reader_minimum": true,
+            "same_library_and_hex_version": true,
+            "native_workers": 0,
+            "records_equal": 3,
+            "saved_backing_acknowledgements_without_worker": 0,
+            "logical_backup_sha256": "fb093f19050e4b2546cc3e3a44d74b187136e736771974efe75c753f2887624a",
+            "normal_sql_restart_and_shutdown": true,
+            "without_rust": true,
+            "crash_handling_qualified": false
+          }
+        },
+        "records_equal_per_reader": 3,
+        "native_workers": 0,
+        "uncertain_intents_and_all_resource_projections_preserved": true,
+        "sql_payloads_encrypted": true,
+        "source_files_verified": 1809,
+        "assets_verified": 806,
+        "source_library_assets_host_tools_domain_keys_verified": true,
+        "readback_delta_archive_sha256": "c582abadc4b8c270752fedf8cf83e227e8ec8971ac18828853e49f45a4c2ba2b",
+        "readback_delta_bytes": 8285170,
+        "readback_delta_members": 1466,
+        "base_full_archive_retained_unchanged": true,
+        "cold_database_files_verified": 1319,
+        "all_compact_metadata_verified": 110,
+        "same_sdk_backup_sha256": "1e0a316b65a9453781ce1bea7f4c89bdd8328d45fddd07337685c01415065436",
+        "base_delta_sdk_and_every_cold_database_file_verified_guest_outer_mac_stream": true,
+        "full_archive_retained_on_mac": false,
+        "native_authority_reopened": false
+      },
+      "workflow_files_sha256": {
+        "compile-unbooted-pg.exs": "75679a93911a6cf671a88109924a8746905db96ba3685f1810298f32b131a460",
+        "launch-unbooted-pg.py": "194153f0691502c008e8fca6331bcd6d902a8f6859a64d0847c1bb353e1253ed",
+        "read-unbooted-pg.exs": "187bc5cf935a988f9aee45ff266f3a8cff327a63d03c0c085478c351a2bd086f",
+        "run-unbooted-pg.py": "5e4dfd137271d8ed3ff1b7a9ce2d4b10af773347c9d350e50a54bde85d5c54c3",
+        "unbooted-pg-proof.exs": "ce8317698422d27b78f9d157a438a0e06302b5991cc4fea732dd09148f75a815"
+      }
+    },
+    "current-retry": {
+      "installed_hex_consumer_without_rust": true,
+      "toolchain": "current",
+      "store": "encrypted PostgreSQL",
+      "ordinary_branch_api_timeout_ms": 1000,
+      "automatic_native_disposal_harness_exit_status": 1,
+      "native_unbooted_disposal_qualified": false,
+      "initial_failure_stage": "read_only_child_gate",
+      "initial_failure_has_no_exclusive_native_cause_diagnosis": true,
+      "publication_intent_retained_without_proof": false,
+      "explicit_original_context_publication_attempt_returned_unknown_branch_not_dispatched": false,
+      "source_child_sdk_rows_and_disks_retained": true,
+      "sdk_counts": {
+        "vms": 2,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0
+      },
+      "sdk_states": {
+        "created": 1,
+        "running": 1
+      },
+      "retained_resources": {
+        "slots": 3,
+        "cpus": 3,
+        "memory_mb": 1920,
+        "disk_gb": 9
+      },
+      "normal_original_owner_shutdown": true,
+      "postgresql_smart_shutdown": true,
+      "native_beam_sql_inventories_empty": true,
+      "account_lock_available": true,
+      "authority_restored_or_replayed": false,
+      "archive_sha256": "e4468b3a8dc707b3088d126a7a3cf27ad196335513e16f40c5f62f20c2efd347",
+      "archive_bytes": 387209884,
+      "archive_members": 12612,
+      "sdk_backup_sha256": "741912c4a15d627f7d011a6b9fa52fdb6324789ae54bbe77ce678f0009573d46",
+      "cold_postgresql_files_verified": 1318,
+      "full_archive_and_cold_sql_and_sdk_backup_verified_guest_outer_mac_stream": true,
+      "codec_readers": {
+        "current": {
+          "checkpoints": 3,
+          "decoded_records": 9,
+          "same_original_request": true,
+          "all_resources_retained": true,
+          "unacknowledged_publication_never_promoted": true,
+          "no_absence_retirement_or_backing_proof": true,
+          "codec_round_trips": true,
+          "sdk_or_vm_started": false,
+          "authority_restored_or_replayed": false,
+          "log_sha256": "4792f5635c960642b1bc2fe3d920b279c6098197097f02309195a91714ead33a"
+        },
+        "minimum": {
+          "checkpoints": 3,
+          "decoded_records": 9,
+          "same_original_request": true,
+          "all_resources_retained": true,
+          "unacknowledged_publication_never_promoted": true,
+          "no_absence_retirement_or_backing_proof": true,
+          "codec_round_trips": true,
+          "sdk_or_vm_started": false,
+          "authority_restored_or_replayed": false,
+          "log_sha256": "4792f5635c960642b1bc2fe3d920b279c6098197097f02309195a91714ead33a"
+        }
+      },
+      "workflow_files_sha256": {
+        "run-unbooted-pg.py": "77c3dfd81764d484e02b0889b847c0a281a38d0936b61fe9eaf8eb6b55c89fa7",
+        "read-unbooted-pg.exs": "187bc5cf935a988f9aee45ff266f3a8cff327a63d03c0c085478c351a2bd086f",
+        "compile-unbooted-pg.exs": "75679a93911a6cf671a88109924a8746905db96ba3685f1810298f32b131a460",
+        "unbooted-pg-proof.exs": "ce8317698422d27b78f9d157a438a0e06302b5991cc4fea732dd09148f75a815",
+        "launch-unbooted-pg.py": "194153f0691502c008e8fca6331bcd6d902a8f6859a64d0847c1bb353e1253ed"
+      }
+    }
+  },
+  "all_three_original_native_owners_and_sql_servers_closed_before_unchanged_lab_runtime_guard": true,
+  "ordinary_unknown_retention_and_encrypted_worker_free_readback_qualified_for_recorded_cases": true,
+  "live_postgresql_unbooted_disposal_retirement_and_backing_release_still_required": true,
+  "remaining": [
+    "Ordinary encrypted PostgreSQL unbooted disposal, retirement, source cleanup and backing release with valid original proofs",
+    "Other required partial/source/platform/resource/upgrade combinations and final P0\u2013P9 audit"
+  ],
+  "full_parity_rows_closed": 0,
+  "full_http_parity_complete": false,
+  "crash_validation_deferred": true,
+  "crash_handling_qualified": false,
+  "distribution_approved": false,
+  "source_archive_sha256": "26412313af48c105c22f6683de780ecb82cbb48972066971e3e6725f6b85c086"
+}

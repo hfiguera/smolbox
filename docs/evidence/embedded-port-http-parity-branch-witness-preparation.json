@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "status": "ordinary-branch-witness-prepared-live-path-unqualified",
+  "source_base_commit": "7019706c504c01842c7530806d215e44c0751598",
+  "source_files_sha256": {
+    "native/smolbox-engine/examples/branch-guest-proof.rs": "bc374f2338447dbac34e4678b29c2f609285a9470a1342638b8109840a52ff6e",
+    "native/smolbox-engine/examples/proof_support/mod.rs": "49f4d9e6bfeceb7fcdc6ce495d987fd5d358acb0bb2f67ce2f59ab6873b0d401",
+    "native/check.sh": "3ee314c52c2865a53659802c9338edda467157c2f5cd8aaafddd78474eee3362",
+    "native/tests/test_deferred_selection.py": "b9d9c4529d9f46d0b8fc352e66bfd3c721d40941cce02ac2eb938baf21728560"
+  },
+  "runner": {
+    "platform": "Linux x86_64",
+    "entrypoint": "branch-guest-proof ordinary SETTINGS_JSON OUTPUT",
+    "fixed_source": {
+      "cpus": 1,
+      "memory_mib": 512,
+      "storage_gib": 1,
+      "overlay_gib": 1,
+      "checkpointable": true,
+      "network": "offline",
+      "source": "approved local bare"
+    },
+    "planned_ordinary_workflow": [
+      "Prepare source disk/RAM state and SDK branch-ready helper",
+      "Create an initially released child and a held sibling",
+      "Verify held/source stop refusal before dispatch",
+      "Explicitly release held child and verify independent source/child disk and RAM changes",
+      "Normal first-child stop/start preserves disk without restoring captured RAM",
+      "Delete first child and qualify original absence while source remains blocked by second child",
+      "Delete second child, qualify original absence and delete source",
+      "Verify original backing paths absent and obtain separate exact backing acknowledgements",
+      "Normal engine shutdown with empty SDK inventory"
+    ],
+    "package_and_witness_executable_digests_recorded_separately": true,
+    "returned_original_facts_retained_before_fallible_evidence_write": true,
+    "failed_live_work_retains_original_engine": true,
+    "bounded_private_normal_control_socket": true,
+    "unknown_lifecycle_cannot_replay": true,
+    "positive_not_dispatched_refusal_preserves_previous_known_state": true,
+    "known_completed_child_absence_and_backing_controls": true,
+    "unentered_child_requires_no_invented_deletion": true,
+    "partial_creations_require_separate_original_context_resolution_controls": true,
+    "no_sdk_manager_reconstruction_cli_fallback_http_facade_or_forced_exit": true,
+    "default_native_check_runs_only_pure_example_harness": true,
+    "production_library_or_bridge_changes": false
+  },
+  "validation": {
+    "host_system": "Darwin",
+    "host_architecture": "arm64",
+    "rust_input_state_request_models_passed": 6,
+    "python_native_tooling_tests_run": 51,
+    "python_native_tooling_tests_skipped": 4,
+    "reviewed_default_selection_guard_passed": true,
+    "all_target_clippy_deny_warnings": true,
+    "scoped_rustfmt_check": true,
+    "shell_syntax_check": true,
+    "verified_unmodified_sdk": "1.22.0",
+    "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "current_parity_inventory_tests_passed": 4,
+    "minimum_parity_inventory_tests_passed": 4,
+    "docs_warnings_as_errors": true,
+    "local_documentation_pages_checked": 176
+  },
+  "qualification": {
+    "live_sdk_or_vm_run": false,
+    "linux_witness_built_or_run": false,
+    "ordinary_vm_sibling_independence": false,
+    "port_routing": false,
+    "durable_dependency_retirement": false,
+    "new_native_package_qualified": false,
+    "current_minimum_native_public_consumers": false,
+    "full_parity_complete": false,
+    "public_native_branch_admission": false,
+    "crash_validation_deferred": true,
+    "distribution_approved": false
+  },
+  "private_log_sha256": {
+    "clippy.log": "34426221b3ba4849f84258e5dab4d4b4c5be7e463d576475acf6f843a75b9121",
+    "current-coverage.log": "8055549ef66b866522342f03a6f510d1f2a78b35aa67fdda9f14393e06b49492",
+    "doc-links-final.log": "2977ff71930dc7c0c0758e26d2a31102384e27693707da347f9b51505f31e155",
+    "doc-links.log": "2977ff71930dc7c0c0758e26d2a31102384e27693707da347f9b51505f31e155",
+    "docs-final.log": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+    "docs.log": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+    "minimum-coverage.log": "3cd0a45b6c226f89b41008517b94108168f97ef7a14580d6d74a1447d8f11d8a",
+    "native-tooling.log": "b552ea5ad47dc78e457e4beb2ae278f0cef694a4a26529d728d848f92a5edb27",
+    "rust-format.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sdk-check.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+    "shell-syntax.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "witness-models.log": "ca678db07add084a8567db6f37fc7086028b83f06cebdc1e63b88b92a20feb9b"
+  },
+  "remaining": [
+    "Build exact Linux witness/helper package from the same frozen verified source and record both identities",
+    "Finish normal controls for partial original creation outcomes before live branch acceptance",
+    "Run ordinary two-child SDK campaign in an approved dedicated offline account/domain",
+    "Complete Port and paired-store public workflow/current-minimum no-Rust consumers, other required source/platform/resource combinations and remaining P0-P9 gates"
+  ]
+}

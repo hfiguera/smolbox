@@ -1,0 +1,195 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "scope": "original-manager collection distinguishes persisted PID from same-engine runtime boot ownership",
+  "ordinary_linux_attempt": {
+    "source_commit": "050b351aa01f2d703cb39464c1c766db0ed9bf64",
+    "manifest_sha256": "3d5e4a881813beaf456f9c55918b054fade1f55af8b6c27a1f7bb219e0c8abfd",
+    "helper_sha256": "f893ef77ce94b72de0ed45896662dad041bba8bad46bf85d0e7a720a0375cdbb",
+    "witness_sha256": "3f7362e5e27eff54a39432b6f5e3371322b8fe127496dbc5fec7768c7fc3b28a",
+    "source_files_verified": 1754,
+    "source_mode_policy": "Git archive modes retained in inventory; extracted modes independently checked after Python data-filter normalization",
+    "assets_verified": 806,
+    "host_tools_verified": true,
+    "fresh_account_and_normal_enrollment_close": true,
+    "frozen_build_all_stages_passed": true,
+    "source_preflight_and_both_children_created": true,
+    "explicit_held_release": true,
+    "source_and_two_children_disk_and_ram_independent": true,
+    "failure": "first child normal stop: native Ownership (NotDispatched)",
+    "original_owner_states": [
+      "running",
+      "running",
+      "running"
+    ],
+    "normal_stop_restart_and_deletion_unqualified": true,
+    "diagnosis": "EmbeddedRuntime.pid falls back to the persisted row, so the original running branch manager is rejected as a competing runtime handle before reaching disk-path collection"
+  },
+  "fix": {
+    "source_base_commit": "4b58dd3",
+    "source_files_sha256": {
+      "native/smolbox-engine/src/machine.rs": "1256c4b68cdcb903568a91a7218a916d95f2fc58e73313090147de797b401870",
+      "native/smolbox-engine/src/branch_owned.rs": "b72ded90e70b7f33963800faa86d997424923756e031b41cb9df31801cdaac57",
+      "native/smolbox-engine/src/branch_owned/collection.rs": "9a28656391819adf7202c0007387a0c4055550987d0a531e5577e60f735aca2f",
+      "native/smolbox-engine/src/branch_owned/collection/tests.rs": "7ac33226a4ad337897ef9391344fcf51228bd2860c979efce42b3569522b31a4",
+      "native/smolbox-engine/src/branch/retention/boot.rs": "b5fcb2f3e59e98857fe2bf6906a547a0c85e265d332e9fe016e6f6f1738747f5",
+      "native/smolbox-engine/src/branch_delete.rs": "0ac89d11d92414bdd3e82c0fea02f2b280615bb76b956521807c9ea22f127d1d"
+    },
+    "runtime_boot_registry_shared_with_original_context": true,
+    "registry_pointer_bound_at_context_install_and_selection": true,
+    "pending_same_name_runtime_boot_blocks_before_sdk_entry": true,
+    "original_manager_map_pid_birth_and_epoch_checks_retained": true,
+    "child_gate_retained_through_collection": true,
+    "async_deletion_rechecks_same_registry": true,
+    "no_cached_runtime_owner_inferred_from_database_pid": true,
+    "no_sdk_patch_or_manager_reconstruction": true,
+    "no_public_data_wire_codec_or_capability_changes": true
+  },
+  "validation": {
+    "private_pid_vs_registry_regression_passed": true,
+    "host": "Darwin/arm64",
+    "engine_units_passed": 1048,
+    "existing_ignored_engine_cases_not_selected": 22,
+    "strict_all_target_clippy": true,
+    "scoped_format_check": true,
+    "sdk_unmodified": true,
+    "documentation_build_and_links": true,
+    "logs_sha256": {
+      "engine": "98122f425e81dc7209e0f0045b59345b6bf91da887ef44d08642e3c232ead93c",
+      "clippy": "e4db2888767b5c46eeffe88166509ec0593f89f26807eeeefdf07d7a450bccb1",
+      "sdk": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "sdk-clean": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "format": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "docs": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+      "docs-links": "2977ff71930dc7c0c0758e26d2a31102384e27693707da347f9b51505f31e155"
+    }
+  },
+  "preservation": {
+    "archive_sha256": "4d301eae30effcd9a0944fa95e0ec15b228a68895fec2f5369d83213944ae6e4",
+    "bytes": 160260878,
+    "members": 3889,
+    "tar_exit_status": 0,
+    "verified_locally_and_outer": true,
+    "cold_consistency_qualified": false,
+    "three_parked_owners_retained_pending_scoped_cleanup_approval": true,
+    "original_run_image_stats_unchanged_at": "2026-10-17T08:15:36Z"
+  },
+  "remaining": {
+    "changed_engine_ordinary_vm_acceptance": false,
+    "normal_child_restart_deletion_and_backing_acceptance": false,
+    "elixir_publication_request_reply_routing": false,
+    "durable_public_continuation_and_consumers": false,
+    "public_native_branch_admission": false,
+    "full_parity_complete": false,
+    "crash_validation_performed": false,
+    "distribution_approved": false,
+    "qcow_aware_deletion_continuation_locator_review_pending": true
+  },
+  "linux_build": {
+    "source_commit": "ef2be77372fef3447d183fdc60a373ec3e992821",
+    "source_archive_sha256": "f9ae5cf5018215ad76e6d04696e54c212b79ceb74c0f1da5402ff1e07be676b2",
+    "source_files_verified": 1756,
+    "manifest_sha256": "fe9ec113aaf1904969f99a1ad33f32421532ee80226a7b59997f9fd583c481ba",
+    "helper_sha256": "5d164a01b6d1943418c4af452afcec81e13c913ba6f245b1505c5e23fcd9720c",
+    "witness_sha256": "d7a98a6f059dc2574bfa35f90a97bd97ad269972c14801a6d5bee984bfca79ef",
+    "assets": 806,
+    "rust_toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+    "clippy_toolchain": "clippy 0.1.92 (ded5c06cf2 2025-12-08)",
+    "sdk_unmodified_before_after": true,
+    "stages": [
+      {
+        "name": "toolchain",
+        "exit_status": 0,
+        "log_sha256": "2073de5abf149185c2f4d7473dc833bc921b99135560d24ae7b2293f33a9c376"
+      },
+      {
+        "name": "sdk-before",
+        "exit_status": 0,
+        "log_sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+      },
+      {
+        "name": "sdk-clean-before",
+        "exit_status": 0,
+        "log_sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+      },
+      {
+        "name": "clippy-toolchain",
+        "exit_status": 0,
+        "log_sha256": "301d7b95e4b79bba0c58aeac9c313e46fc7bc1373970c5599f003a75dc41c5a7"
+      },
+      {
+        "name": "clippy",
+        "exit_status": 0,
+        "log_sha256": "85900f8f0bce31b3b78256ad54f4dd3b3cfcc6fba92c870943d1c39b7fbaae64"
+      },
+      {
+        "name": "build-helper",
+        "exit_status": 0,
+        "log_sha256": "012bfbe769b191c23c1470e5d0675f2d7fe9ccd2295f7dcd13ec5f79017a1be2"
+      },
+      {
+        "name": "build-witness",
+        "exit_status": 0,
+        "log_sha256": "210057af22dda63e225ef2816783c61d4003ff3a730939e21f24a115da8fed83"
+      },
+      {
+        "name": "witness-models",
+        "exit_status": 0,
+        "log_sha256": "7859a9f12387c8897cc5ac4349ce402f41706234dcfdcbdd25d820b40e59fa59"
+      },
+      {
+        "name": "native-tooling",
+        "exit_status": 0,
+        "log_sha256": "88f80005a7fcc00f77f22bb8b35bac0120b173fb72c3dc8150b6cb85e7f09a06"
+      },
+      {
+        "name": "epoch-models",
+        "exit_status": 0,
+        "log_sha256": "3dc9fdded7c5d81188fc9ff99445f061a1acf8ca5ab33f5254f63364826afd12"
+      },
+      {
+        "name": "runtime-models",
+        "exit_status": 0,
+        "log_sha256": "a63e5319cec9de8adf8ba30f9cab58b4bb45ca2197caa2108cded105543079bc"
+      },
+      {
+        "name": "branch-models",
+        "exit_status": 0,
+        "log_sha256": "a0e7086b3a58ab6f9e902816e13212478510321084f84c94130eea2b3f0a7ab2"
+      },
+      {
+        "name": "capture-models",
+        "exit_status": 0,
+        "log_sha256": "2a4a4713f3b2bf67838959afcb790afc5c8d43b0fef483d60ce6047ba9e2727b"
+      },
+      {
+        "name": "sdk-compat-models",
+        "exit_status": 0,
+        "log_sha256": "ed7890932d4868089cd4311c78a28bf75da0bf7432f2f2d7721deb2bdf9620b4"
+      },
+      {
+        "name": "protocol-models",
+        "exit_status": 0,
+        "log_sha256": "1071f7237743a3ed9bd12ebd325d52ab3d413db0357258739e4f8d6dde89c652"
+      },
+      {
+        "name": "package",
+        "exit_status": 0,
+        "log_sha256": "7c6f3dc917b84958ce97463533612638a83cb5b3f98a92a1303cc478facc66e8"
+      },
+      {
+        "name": "sdk-after",
+        "exit_status": 0,
+        "log_sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+      },
+      {
+        "name": "sdk-clean-after",
+        "exit_status": 0,
+        "log_sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+      }
+    ],
+    "ordinary_vm_acceptance": false,
+    "later_manager_locator_changes_not_in_this_package": true
+  },
+  "subsequent_lab_window": "Existing provision service timed out at 08:33 UTC; original cleanup scope is obsolete. See lab-runtime-limit-oct17 evidence."
+}

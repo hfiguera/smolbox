@@ -28,9 +28,17 @@ defmodule SmolBox.Runtime.NativeUnbootedBranchRetirement do
          :ok <- Target.require_operation(worker, :retire_unbooted_branch) do
       deadline = now() + min(Target.connection(worker).budget.timeout_ms, 30_000)
 
-      NativeResolution.run(config, coordinator, parent, worker, :branch_retire, fn pinned ->
-        resolve(config, parent, child, pinned, deadline)
-      end)
+      NativeResolution.run(
+        config,
+        coordinator,
+        parent,
+        worker,
+        :branch_retire,
+        fn pinned ->
+          resolve(config, parent, child, pinned, deadline)
+        end,
+        deadline
+      )
     else
       false -> Session.error(:unsupported_capability, :branch)
       error -> error

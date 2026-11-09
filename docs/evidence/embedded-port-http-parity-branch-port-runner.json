@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "scope": "Linux saved-state Port descriptor and explicit ordinary two-child branch qualification runner",
+  "source_base_commit": "89f078135ae7ce81a46f5a6cc4ebcf20a983f54b",
+  "source_files_sha256": {
+    "native/policy-linux.json": "63b46c2434b204af6fe5f52baee4ff2b74654dc8e6e6cdbe191ad64ca9ef4163",
+    "native/smolbox-port/src/package.rs": "984d958b06e27ee4499072824e6acdae9f1a35b3d75437a86846f95ed812549b",
+    "native/smolbox-port/tests/native_proof.py": "c314b466b6ce8b08cc762b7f1cb98a63196a06a671197965a0b30a527ff29a00",
+    "native/smolbox-port/tests/branch_proof.py": "ae5ee50bb397d970d79c1570cdd757ac5b7c6b964c00d8a48bc07eef9a878739",
+    "native/smolbox-protocol/src/lib.rs": "551bd29772d54736dbd1f54f71db4f2134196199da475f5b7ae880d0397545f6",
+    "native/smolbox-protocol/fixtures/hello-v2-linux-branches.json": "c08d7a0d7381659fc62ab662d88690471ffa3b508b5d262b9a5dc6f6c7fc0668",
+    "native/tests/test_branch_runner.py": "841deb0cb17132f18ec53415d68cc4117ae80e718077ff7766c4b18e3d054325",
+    "native/tests/test_ordinary_runner.py": "19e0f277ef8cfbf25471d51f6a0cff92a604724e2fd7a1f2743bfccd2fb5b68a",
+    "native/tests/test_package_metadata.py": "9051776b6d9a9912a3e441854ffc8a29635a6e07b39296562b11e72350140f73",
+    "test/unit/embedded_package_activation_test.exs": "cb61160e655df95a0a0f0acbb3ddb2a5a3d858b7d6d82331a0b64d2d5a581239"
+  },
+  "contract": {
+    "linux_native_descriptor_checkpoints_and_branches": 1,
+    "older_fixtures_package_pins_and_macos_descriptor_preserved": true,
+    "same_protocol_major_minor": [
+      2,
+      0
+    ],
+    "no_new_capability_bit_or_limits_shape": true,
+    "exact_operator_package_artifact_and_branch_catalog_required": true,
+    "public_elixir_sdk_approval_not_enabled": true,
+    "public_native_store_marker_not_enabled": true,
+    "partial_cleanup_resolution_not_advertised": true,
+    "explicit_ordinary_cli_only": true,
+    "original_helper_receipts_and_frozen_requests_retained_in_memory_on_failure": true,
+    "diagnostic_and_control_errors_do_not_retire_live_owner": true,
+    "unresolved_wire_cursor_blocks_fresh_quiesced_controls": true,
+    "positive_original_ready_release_or_deletion_continuation_controls_without_replay": true,
+    "explicit_normal_shutdown_preserves_disks_and_grants_no_absence_or_capacity": true,
+    "one_transport_observation_deadline_across_acceptance_and_all_frames": true,
+    "frame_header_and_body_share_one_deadline": true,
+    "native_request_budget_unchanged_transport_grace_seconds": 5,
+    "bare_command_user_none_and_root_workdir": true,
+    "engine_and_sdk_sources_unchanged": true,
+    "no_cli_fallback_local_http_server_or_process_signals": true
+  },
+  "validation": {
+    "protocol_models_passed": [
+      102,
+      59
+    ],
+    "branch_framing_models_passed": 17,
+    "package_policy_model_passed": 1,
+    "python_models_run": 63,
+    "python_existing_skips": 4,
+    "current_minimum_admission_checks_each": 10,
+    "current_minimum_cold_candidate_rejection_without_native_io": true,
+    "strict_all_target_clippy": true,
+    "scoped_format_check": true,
+    "sdk_full_and_clean_verification": true,
+    "credo_baseline_findings": 67,
+    "credo_exit_status": 14,
+    "new_changed_line_credo_findings": 0,
+    "logs_sha256": {
+      "protocol": "6e3b5313f44c4646cbcb1b94545c901e00c448d3239d4208a7c18f5be2e9e889",
+      "package-model": "3e95aafd5e1b266ec255cc5f71ad3bbd215254e22a1c59be87d0a5469541e0e5",
+      "branch-framing": "341fbdead73113e8d388c88d51554a54e02a3f0b2f13bbb7158419043ce91cfd",
+      "clippy": "62a3332ddda8ce3ced8fa0d49948e9eeea04d120c38a926e94311e70cce8ed62",
+      "format": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "python": "9535c2c36ef1426746955f5ec2b835234efed7278840cba3105b5a2d31b22750",
+      "sdk": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "sdk-clean": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "python-final": "2de1cf52f3a61f31b14baca418a945e61ff32078dd236e8518ed0ceb50bfbe2e",
+      "current-admission": "cf61f2f960072b63d345817ebad94c0042f17ead63179e95dd744e5dc8e6a3ef",
+      "minimum-admission": "7cc24d68c01a49266365560997a1d50e6d8280a3d39e3a4e3f73a6f855332d75",
+      "current-admission-fixed": "3550afb88c19e41f7ca8c7806c7695a8375f190a459196c12cd41bd065e95fdf",
+      "minimum-admission-fixed": "6bdaddb740c5045eaa5e20dd8d7fdb71fc00138b6576232d36f719d92586f642",
+      "docs-final": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+      "doc-links-final": "fe7e86509e4e55bfacafbae259d53fb8b130721b7e8d9250576f81d31fb0aa5a"
+    },
+    "documentation_build_and_links": true
+  },
+  "qualification": {
+    "new_exact_package_built_or_run": true,
+    "ordinary_port_branch_lifecycle": false,
+    "ordinary_public_store_consumers": false,
+    "public_runtime_branch_admission": false,
+    "full_parity_complete": false,
+    "all_full_parity_rows_pending": true,
+    "crash_validation_performed": false,
+    "distribution_approved": false
+  },
+  "remaining": [
+    "The exact 9c00605 ordinary Port attempt failed at preflight before child dispatch; rebuild/rerun the explicit-configuration producer correction.",
+    "Public Elixir SDK/store admission and live Memory/PostgreSQL branch consumers, current/minimum installed no-Rust acceptance.",
+    "Remaining P0-P9 gates; crash validation stays deferred and distribution approval separate."
+  ],
+  "ordinary_attempt_evidence": "embedded-port-http-parity-branch-preflight-explicit.json"
+}

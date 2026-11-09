@@ -57,7 +57,7 @@ defmodule SmolBox.DurableHost.NativePartialBranchRetirementStoreTest do
     assert {:ok, ^usage} = Store.usage(store, parent.worker_id)
     assert {:ok, _} = Contract.advance(Store, store, source, child, proof, 1202)
     assert {:ok, %{native_partial_branch_retirements: 1} = caps} = Store.capabilities(store)
-    refute Map.has_key?(caps, :native_branches)
+    assert caps.native_branches == 1
   end
 
   test "stale child proof rejects and fresh observation remains required", %{store: store} do

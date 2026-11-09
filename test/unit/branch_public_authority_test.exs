@@ -32,6 +32,15 @@ defmodule SmolBox.BranchPublicAuthorityTest do
       {:reply, result, state}
     end
 
+    # This legacy coordination model has no completed native recovery scan.
+    # Preserve acquisition/commit ownership without inventing readiness.
+    def handle_call({:native_acquire_operation, id}, from, state) do
+      case handle_call({:native_acquire, id}, from, state) do
+        {:reply, :ok, next} -> {:reply, {:ok, false}, next}
+        result -> result
+      end
+    end
+
     def handle_call({:native_release, id}, {caller, _}, state) do
       Agent.update(state.authority, fn {^id, ^caller} -> nil end)
       {:reply, :ok, state}

@@ -75,6 +75,27 @@ defmodule SmolBox.ManagedBranchTest do
     assert count(f.peer, "/branches") == 0
   end
 
+  test "persisted worker draining rejects a branch before acceptance or HTTP dispatch" do
+    {f, source, spec} = fixture()
+    assert {:ok, usage} = Memory.usage(f.store, "peer")
+    assert :ok = SmolBox.drain_worker(f.runtime, "peer")
+
+    assert {:error,
+            %{
+              category: :admission_exhausted,
+              operation: :worker_control,
+              evidence: :not_dispatched
+            }} =
+             Branches.create(f.runtime, source, spec)
+
+    assert {:ok, ^usage} = Memory.usage(f.store, "peer")
+
+    assert {:error, %{category: :not_found}} =
+             Machines.inspect(f.runtime, {elem(source, 0), spec.id})
+
+    assert count(f.peer, "/branches") == 0
+  end
+
   test "children are durable managed machines with retained source dependencies" do
     {f, source, spec} = fixture()
     assert {:ok, child} = Branches.create(f.runtime, source, spec)

@@ -1,6 +1,6 @@
 defmodule SmolBox.Embedded.BranchPublication do
   @moduledoc false
-  alias SmolBox.Embedded.{BranchCanonical, BranchOrigin, Shape}
+  alias SmolBox.Embedded.{BranchCanonical, BranchOrigin, BranchRequest, Shape}
   alias SmolBox.Validation
 
   @hashes ~w(previous_growth_sha256 growth_sha256 previous_capture_sha256 capture_sha256)
@@ -21,6 +21,18 @@ defmodule SmolBox.Embedded.BranchPublication do
       change?(value["change"]) and
       value["previous"] == value["change"]["child_origin"]["intent"]["source"] and
       transition?(value)
+  end
+
+  # Material publication does not attest initial activation or child readiness.
+  # The native owner separately matches the full frozen creation in its registry.
+  def matches?(%__MODULE__{} = publication, request),
+    do: matches?(to_wire(publication), request)
+
+  def matches?(publication, request) do
+    valid?(publication) and BranchRequest.valid?(request) and
+      publication["previous"] == request["source"] and
+      get_in(publication, ~w(change child_origin intent child)) == request["child"] and
+      get_in(publication, ~w(change child_origin intent approval)) == request["approval"]
   end
 
   defp change?(change),

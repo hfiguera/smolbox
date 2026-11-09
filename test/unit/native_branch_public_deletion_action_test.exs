@@ -402,6 +402,8 @@ defmodule SmolBox.NativeBranchPublicDeletionActionTest do
 
       assert {:error, %Error{evidence: :not_dispatched}} = execute(runtime, child, action)
       saved = NativeBranchDeletionContract.fetch(Memory, store, child)
+      assert_receive {:store_operation, :branch_delete_action_accept, true}
+      assert ActionContract.saved(saved, action) != nil
       assert ActionContract.saved(saved, action).proof == nil
       assert {:ok, ^usage} = Memory.usage(store, parent.worker_id)
       assert GenServer.call(peer, :calls) == 0
@@ -415,6 +417,7 @@ defmodule SmolBox.NativeBranchPublicDeletionActionTest do
         fixture(action, budget: 1500, delay: 2000)
 
       assert {:error, %Error{evidence: :dispatch_uncertain}} = execute(runtime, child, action)
+      assert_receive {:proof, true, true, _, true, true}
       saved = NativeBranchDeletionContract.fetch(Memory, store, child)
       assert ActionContract.saved(saved, action).proof == nil
       assert {:ok, ^usage} = Memory.usage(store, parent.worker_id)

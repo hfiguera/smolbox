@@ -20,11 +20,22 @@ defmodule SmolBox.Runtime.NativeAuthority do
   # recovery of its siblings. Restore only the readiness captured atomically
   # before acquisition, after the caller verifies that same healthy owner.
   def operation(coordinator, id, function, same_ready_owner?) do
+    operation(coordinator, id, fn was_ready ->
+      result = function.()
+      {result, was_ready and same_ready_owner?.()}
+    end)
+  end
+
+  # A control that temporarily quiesces its bridge needs the atomic prior scan
+  # state before deciding whether it may reactivate that same owner. The callback
+  # returns the operation result and its independently checked readiness; it
+  # cannot promote a scan that was incomplete at acquisition.
+  def operation(coordinator, id, function) do
     with {:ok, was_ready} <- GenServer.call(coordinator, {:native_acquire_operation, id}) do
       try do
-        result = function.()
+        {result, same_ready_owner?} = function.(was_ready)
 
-        if was_ready and same_ready_owner?.(),
+        if was_ready and same_ready_owner? == true,
           do: GenServer.call(coordinator, {:native_ready, id})
 
         result

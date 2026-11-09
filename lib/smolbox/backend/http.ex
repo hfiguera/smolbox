@@ -32,6 +32,8 @@ defmodule SmolBox.Backend.HTTP do
         :resolve_unbooted_branch_disposal,
         :release_branch_backing,
         :resolve_branch_deletion,
+        :publish_collected_branch_material,
+        :inspect_partial_branch_collection,
         :collect_partial_branch,
         :dispose_partial_branch,
         :resolve_partial_branch_disposal,

@@ -887,3 +887,21 @@ target for qualification; public embedded admission remains disabled. Use its
 explicit stages and authentic full receipts or verified intent-bound absence to
 dispose of interrupted fixtures. Out-of-band replies used for fixture maintenance
 are never adopted into the durable record; uncertain work is never replayed.
+
+The embedded collected-publication store boundary uses selective v50 and the
+`native_collected_branch_publications: 1` reader/projector marker. Upgrade every
+controller before writing it. Acceptance saves full creation/quiescence, platform
+and child version. The encrypted paired transaction requires the typed material
+publication and a separate fresh source observation, advances source history once,
+and retains both unknown states and every ordinary/dependency/backing charge.
+Later ready/disposal completion must match the saved publication. Earlier records
+keep their prior envelopes and omit the new nil default. This marker does not
+activate native branch dispatch or establish package qualification.
+
+`SmolBox.Branches.publish_collected/4` uses this paired contract under the
+original controller/helper fence. It requires an expected child version and
+`quiesced: true`, sharing one at-most-30-second deadline and aggregate 24/84-KiB
+input/output allowance through native publication and fresh source observation.
+Saved acknowledgements return without helper IO after later ready/disposal
+completion. The example's callback/SQL models do not qualify a native package;
+public native branch admission remains disabled.

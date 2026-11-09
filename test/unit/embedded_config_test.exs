@@ -90,7 +90,7 @@ defmodule SmolBox.Embedded.ConfigTest do
     assert_invalid(Keyword.put(options(), :sources, [%{source | architecture: "x86_64"}]))
   end
 
-  test "registry policy maps only future approved source capability into helper config" do
+  test "registry policy is required by an explicitly approved remote source descriptor" do
     {:ok, source} =
       Source.registry(
         id: "registry",
@@ -109,10 +109,11 @@ defmodule SmolBox.Embedded.ConfigTest do
     package = Map.put(dormant.package_identity, "engine_version", "0.2.0")
     sdk = SDKIdentity.implemented("1.22.0", package["smolvm_revision"])
     sdk = put_in(sdk, ["feature_versions", "remote_sources"], 1)
-    future = %{dormant | package_identity: package, sdk_identity: sdk}
-    assert {:error, _} = Config.validate(future)
-    assert {:error, _} = Config.validate(%{future | artifacts: []})
-    assert [approval] = Launch.helper_config(future)["approved_registry_sources"]
+    approved = %{dormant | package_identity: package, sdk_identity: sdk}
+    assert :ok = Config.validate(approved)
+    assert :ok = Config.validate(%{approved | artifacts: []})
+    assert {:error, _} = Config.validate(%{approved | registry_policy: nil})
+    assert [approval] = Launch.helper_config(approved)["approved_registry_sources"]
     assert approval["source"]["content_sha256"] == source.content_sha256
     assert approval["cache_policy"] == %{"max_bytes" => 4096, "max_files" => 2}
     refute Map.has_key?(approval, "identity_token")

@@ -42,12 +42,13 @@ defmodule SmolBox.CheckpointArtifact do
 
   defp supported?(%{"checkpoint" => checkpoint} = manifest, profile, worker)
        when is_map(checkpoint) do
-    platform = platform(worker)
+    host_platform = host_platform(worker)
+    guest_platform = guest_platform(worker)
 
     matches?(manifest, %{
       "mode" => "vm",
-      "platform" => platform,
-      "host_platform" => platform,
+      "platform" => guest_platform,
+      "host_platform" => host_platform,
       "smolvm_version" => Target.sdk_version(worker),
       "network" => false,
       "gpu" => false,
@@ -57,14 +58,16 @@ defmodule SmolBox.CheckpointArtifact do
         "version" => 4,
         "runtime_abi" => "libkrun-portable-snapshot-v1",
         "device_profile" => "smolvm-basic-v1",
-        "host_platform" => platform,
+        "host_platform" => host_platform,
         "cpus" => profile.cpus,
         "memory_mib" => profile.memory_mb,
         "storage_gib" => profile.storage_gb,
         "overlay_gib" => profile.overlay_gb,
-        "payload" => "assets",
-        "network" => %{"enabled" => false}
-      }) and empty_fields?(manifest, ["env", "secret_refs", "entrypoint", "cmd", "workdir"]) and
+        "payload" => "assets"
+      }) and offline_network?(checkpoint["network"]) and
+      empty_fields?(manifest, ["env", "secret_refs", "cmd", "user"]) and
+      manifest["entrypoint"] in [nil, [], ["/bin/true"]] and
+      manifest["workdir"] in [nil, "", "/"] and
       empty_fields?(checkpoint, ["packed_layers", "workload", "credential_ca", "history"])
   end
 
@@ -75,6 +78,21 @@ defmodule SmolBox.CheckpointArtifact do
 
   defp empty_fields?(map, keys), do: Enum.all?(keys, &(map[&1] in [nil, [], %{}, ""]))
 
-  defp platform(%{platform: :linux, architecture: "x86_64"}), do: "linux/amd64"
-  defp platform(%{platform: :macos, architecture: "aarch64"}), do: "darwin/arm64"
+  defp guest_platform(%{platform: :macos, architecture: "aarch64"}), do: "linux/arm64"
+  defp guest_platform(worker), do: host_platform(worker)
+
+  defp offline_network?(%{"enabled" => false} = network) do
+    fields =
+      ~w(ports backend dns network_name guest_subnet allowed_cidrs dns_filter_hosts credential_policy credential_placeholders)
+
+    Enum.all?(Map.keys(network), &(&1 in ["enabled" | fields])) and
+      Enum.all?(~w(ports allowed_cidrs dns_filter_hosts), &(network[&1] in [nil, []])) and
+      network["credential_placeholders"] in [nil, %{}, []] and
+      Enum.all?(~w(backend dns network_name guest_subnet credential_policy), &is_nil(network[&1]))
+  end
+
+  defp offline_network?(_), do: false
+
+  defp host_platform(%{platform: :linux, architecture: "x86_64"}), do: "linux/amd64"
+  defp host_platform(%{platform: :macos, architecture: "aarch64"}), do: "darwin/arm64"
 end

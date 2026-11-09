@@ -261,6 +261,7 @@ defmodule SmolBox.NativePreparedBranchRetirementTest do
       update_in(
         child.branch.native_authority,
         &(&1
+          |> Map.delete(:collected_publication)
           |> Map.delete(:partial_collection)
           |> Map.delete(:partial_disposal)
           |> Map.delete(:prepared_retirement)

@@ -20,6 +20,37 @@ with patch.dict(sys.modules, {'native_proof': proof}):
 
 
 class OrdinaryRunnerTests(unittest.TestCase):
+    def test_request_observation_uses_one_budget_for_acceptance_and_terminal(self):
+        port = proof.Port.__new__(proof.Port)
+        port.next_id = 0
+        port.hello = {'epoch': 'a' * 32}
+        port.send = Mock()
+        port.receive = Mock(side_effect=[
+            {'type': 'accepted', 'epoch': 'a' * 32, 'id': 1, 'sequence': 0},
+            {'type': 'terminal', 'epoch': 'a' * 32, 'id': 1, 'sequence': 1,
+             'outcome': {'result': 'qualified'}}])
+        with patch.object(proof.time, 'monotonic', side_effect=[100, 100.25, 140]):
+            self.assertEqual(port.call({'operation': 'model'}, budget=120000),
+                             ({'result': 'qualified'}, []))
+        self.assertEqual([c.args[0] for c in port.receive.call_args_list], [124.75, 85])
+
+    def test_request_and_frame_readers_never_refresh_an_expired_deadline(self):
+        port = proof.Port.__new__(proof.Port)
+        port.next_id = 0
+        port.hello = {'epoch': 'a' * 32}
+        port.send = Mock()
+        port.receive = Mock()
+        with patch.object(proof.time, 'monotonic', side_effect=[100, 106]):
+            with self.assertRaisesRegex(AssertionError, 'observation deadline'):
+                port.call({'operation': 'model'}, budget=1000)
+        port.receive.assert_not_called()
+        del port.receive
+        port.exact = Mock(return_value=b'\x00\x00\x00\x02')
+        with patch.object(proof.time, 'monotonic', side_effect=[100, 102]):
+            with self.assertRaisesRegex(AssertionError, 'frame deadline'):
+                port.receive(timeout=1)
+        port.exact.assert_called_once_with(4, 1)
+
     def test_terminal_preflight_requires_exact_nonstreaming_unmutated_evidence(self):
         receipt = {'name': 'owned-model'}
         port = Mock()
@@ -132,11 +163,11 @@ class OrdinaryRunnerTests(unittest.TestCase):
         capabilities = proof.capabilities(future)
         self.assertIn('prepare_artifact', capabilities)
         self.assertLess(capabilities.index('prepare_artifact'), capabilities.index('volumes'))
-        self.assertNotIn('prepare_artifact', proof.capabilities(current))
+        self.assertIn('prepare_artifact', proof.capabilities(current))
 
-    def test_linux_package_policy_advertises_exact_storage_handshake(self):
+    def test_linux_package_policy_advertises_exact_saved_state_handshake(self):
         root = Path(__file__).resolve().parents[1]
-        hello = json.loads((root / 'smolbox-protocol/fixtures/hello-v2-linux-images.json').read_bytes())['hello']
+        hello = json.loads((root / 'smolbox-protocol/fixtures/hello-v2-linux-branches-preflight.json').read_bytes())['hello']
         policy = json.loads((root / 'policy-linux.json').read_bytes())
         manifest = {'schema': 3, 'identity': hello['package'], 'policy': policy}
         self.assertEqual(proof.capabilities(manifest), hello['capabilities'])
@@ -144,11 +175,13 @@ class OrdinaryRunnerTests(unittest.TestCase):
         self.assertEqual(policy['volume_limits'], hello['limits']['volumes'])
         self.assertEqual(proof.capabilities(manifest)[:5],
                          ['list_images', 'pull_image', 'expand_disks', 'inspect_growth', 'qualify_growth'])
-        self.assertNotIn('branches', policy['sdk']['feature_versions'])
+        self.assertEqual(policy['sdk']['feature_versions']['branches'], 1)
+        self.assertEqual(policy['sdk']['feature_versions']['checkpoints'], 1)
+        self.assertNotIn('partial_cleanup_resolution', policy['sdk']['feature_versions'])
 
     def test_current_handshake_matches_shared_fixture_and_older_descriptors_stay_smaller(self):
         root = Path(__file__).resolve().parents[1]
-        hello = json.loads((root / 'smolbox-protocol/fixtures/hello-v2-terminal-preflight.json').read_bytes())['hello']
+        hello = json.loads((root / 'smolbox-protocol/fixtures/hello-v2-macos-branches.json').read_bytes())['hello']
         policy = json.loads((root / 'policy.json').read_bytes())
         manifest = {'schema': 3, 'identity': hello['package'], 'policy': policy}
         self.assertEqual(proof.capabilities(manifest), hello['capabilities'])
@@ -160,12 +193,16 @@ class OrdinaryRunnerTests(unittest.TestCase):
         self.assertNotIn('jobs', proof.limits(older))
         future = json.loads(json.dumps(manifest))
         future['policy']['sdk']['feature_versions']['disk_growth'] = 1
-        self.assertEqual(proof.capabilities(future)[:3], ['expand_disks', 'inspect_growth', 'qualify_growth'])
+        self.assertEqual(proof.capabilities(future)[:5],
+                         ['list_images', 'pull_image', 'expand_disks', 'inspect_growth', 'qualify_growth'])
         self.assertNotIn('expand_disks', proof.capabilities(manifest))
-        future['policy']['sdk']['feature_versions']['images'] = 1
-        self.assertEqual(proof.capabilities(future)[0], 'list_images')
-        self.assertEqual(len(proof.capabilities(future)), 27)
-        self.assertNotIn('list_images', proof.capabilities(manifest))
+        self.assertIn('list_images', proof.capabilities(manifest))
+        self.assertIn('pull_image', proof.capabilities(manifest))
+        self.assertIn('prepare_artifact', proof.capabilities(manifest))
+        legacy = json.loads(json.dumps(manifest))
+        legacy['policy']['sdk'] = json.loads((root / 'smolbox-protocol/fixtures/hello-v2-terminal-preflight.json').read_bytes())['hello']['sdk']
+        for operation in ['list_images', 'pull_image', 'prepare_artifact']:
+            self.assertNotIn(operation, proof.capabilities(legacy))
 
     def test_preflight_does_not_reinterpret_older_terminal_descriptors(self):
         root = Path(__file__).resolve().parents[1]
@@ -236,14 +273,31 @@ class OrdinaryRunnerTests(unittest.TestCase):
             process.wait.return_value = 2  # Normal preflight rejection.
             with patch.dict(proof.os.environ, {'LD_PRELOAD': '/fixture/injected', 'DYLD_INSERT_LIBRARIES': '/fixture/injected'}), \
                     patch.object(proof.subprocess, 'Popen', return_value=process) as spawn, \
-                    patch.object(proof.Port, 'receive', return_value={'type': 'invalid'}):
+                    patch.object(proof.Port, 'receive', return_value={'type': 'invalid'}) as receive:
                 with self.assertRaisesRegex(AssertionError, 'package not ready'):
                     proof.Port(Path(temporary), Path(temporary) / 'config',
                                Path(temporary) / 'helper.stderr')
             self.assertNotIn('LD_PRELOAD', spawn.call_args.kwargs['env'])
             self.assertNotIn('DYLD_INSERT_LIBRARIES', spawn.call_args.kwargs['env'])
+            receive.assert_called_once_with(120)
             process.stdin.close.assert_called_once()
             process.wait.assert_called_once_with(timeout=10)
+            process.kill.assert_not_called()
+            process.terminate.assert_not_called()
+
+    def test_unresolved_collection_preserves_the_startup_failure(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            process = Mock()
+            process.pid = 123
+            process.wait.side_effect = subprocess.TimeoutExpired('helper', 10)
+            with patch.object(proof.subprocess, 'Popen', return_value=process), \
+                    patch.object(proof.Port, 'receive', side_effect=AssertionError('frame deadline')):
+                with self.assertRaisesRegex(AssertionError, 'frame deadline') as failure:
+                    proof.Port(Path(temporary), Path(temporary) / 'config',
+                               Path(temporary) / 'helper.stderr')
+            self.assertIsInstance(failure.exception.__cause__, RuntimeError)
+            self.assertIn('preserve authority', str(failure.exception.__cause__))
+            process.stdin.close.assert_called_once()
             process.kill.assert_not_called()
             process.terminate.assert_not_called()
 

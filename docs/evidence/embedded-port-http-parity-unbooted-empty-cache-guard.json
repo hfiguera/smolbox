@@ -1,0 +1,268 @@
+{
+  "schema": 1,
+  "status": "model-corrected-unbooted-empty-shared-cache-guard-ordinary-corrected-package-acceptance-pending",
+  "base_source_commit": "d16427704dff0ff9412f2206fe994e5a06b5b979",
+  "changed_native_files": {
+    "native/smolbox-engine/src/sdk_compat.rs": "980d2b22807c1b103727a26a83359af5bd20fe5545e880e54a6327abb095250b",
+    "native/smolbox-engine/src/branch/retention/resolution/disposal/tests.rs": "5e165b254524719ec988fb95a083e58f40401bef1fc3242dc1f9ad80fb939ef4",
+    "native/smolbox-engine/src/branch/retention/resolution/disposal/tests/candidate.rs": "30c2d7c1c2567af1259f35094dba7cc5527768a08c5b83d51b2643d138b71db0"
+  },
+  "observed_original_native_source_commit": "41cc8a6c2d54ddcfbb130768dda0690cb1be0333",
+  "observed_original_native_manifest_sha256": "7b6cfae8a0140babab03f821c56406b018be97e52994bc4cb74d3d9791ebfc39",
+  "observed_original_helper_sha256": "e3fbda886c3129f798dc2668781014204b7c6a1090129ae82ac265def2176ce1",
+  "sdk_source_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_unmodified": true,
+  "ordinary_scope": {
+    "platform": "linux",
+    "architecture": "x86_64",
+    "source": "approved-local-bare",
+    "store": "memory",
+    "request_timeout_ms": 1000,
+    "request_deadline_only_no_native_pause_or_fault_injection": true
+  },
+  "cases": {
+    "current": {
+      "qualified": false,
+      "source_commit": "d16427704dff0ff9412f2206fe994e5a06b5b979",
+      "hex_archive_sha256": "1c8c74bf7c137be75b79c016a9bfbe86370587e669a252d9582fccd10a1ab619",
+      "workflow_sha256": "70672e41376fbd46fe582ddf9dd6cdc72fd6959e4dafc098cdf91df537738174",
+      "source_files_verified": 1803,
+      "assets_verified": 806,
+      "source_library_assets_tools_domain_keys_verified": true,
+      "normal_original_owner_shutdown": true,
+      "native_beam_sql_and_kvm_inventories_empty": true,
+      "account_lock_available": true,
+      "sdk_rows_and_disks_retained": 2,
+      "source_sdk_running_projection_retained_after_positive_process_collection": true,
+      "retained_reservations": {
+        "slots": 3,
+        "cpus": 3,
+        "memory_mb": 1920,
+        "disk_gb": 9
+      },
+      "archive_sha256": "f773c08b546cff45fc1299bb43253720d6e593205ea92fd2b25bff4c5d3839a3",
+      "archive_bytes": 379691366,
+      "archive_members": 11181,
+      "sdk_backup_sha256": "2bd849d9dc6e4bc0bf023d76de172027d27db47d18d6057b43b72eb242655db4",
+      "socket_metadata_preserved": 3,
+      "full_archive_verified_on_guest_outer_and_mac_stream": true,
+      "compact_metadata_verified": 33,
+      "codec_readers": {
+        "current": {
+          "checkpoints": 5,
+          "decoded_records": 15,
+          "valid_records_roundtrip_and_unchanged_resources": true
+        },
+        "minimum": {
+          "checkpoints": 5,
+          "decoded_records": 15,
+          "valid_records_roundtrip_and_unchanged_resources": true
+        }
+      },
+      "authority_not_restored_or_replayed": true,
+      "failure": "partial collection selected before the native phase was established; accepted collection remains pending without proof",
+      "normal_shutdown_requests": 3,
+      "normal_shutdown_first_two_rejected_without_detailed_reason": true
+    },
+    "minimum": {
+      "qualified": false,
+      "source_commit": "d16427704dff0ff9412f2206fe994e5a06b5b979",
+      "hex_archive_sha256": "1c8c74bf7c137be75b79c016a9bfbe86370587e669a252d9582fccd10a1ab619",
+      "workflow_sha256": "ea7e9d628e6809062ae242694d2248261967b9d26b05cae86cc7b9e77a12cfd4",
+      "source_files_verified": 1803,
+      "assets_verified": 806,
+      "source_library_assets_tools_domain_keys_verified": true,
+      "normal_original_owner_shutdown": true,
+      "native_beam_sql_and_kvm_inventories_empty": true,
+      "account_lock_available": true,
+      "sdk_rows_and_disks_retained": 2,
+      "source_sdk_running_projection_retained_after_positive_process_collection": true,
+      "retained_reservations": {
+        "slots": 3,
+        "cpus": 3,
+        "memory_mb": 1920,
+        "disk_gb": 9
+      },
+      "archive_sha256": "e5540f54b9e4ad881c7e0a0a5a01be0310d6bc073d710fe800c776f3755979e2",
+      "archive_bytes": 379750626,
+      "archive_members": 11208,
+      "sdk_backup_sha256": "3fe99527c78c01ceedd845aed990944294af17552b1f4328ad2410724b357ab8",
+      "socket_metadata_preserved": 3,
+      "full_archive_verified_on_guest_outer_and_mac_stream": true,
+      "compact_metadata_verified": 31,
+      "codec_readers": {
+        "current": {
+          "checkpoints": 4,
+          "decoded_records": 12,
+          "valid_records_roundtrip_and_unchanged_resources": true
+        },
+        "minimum": {
+          "checkpoints": 4,
+          "decoded_records": 12,
+          "valid_records_roundtrip_and_unchanged_resources": true
+        }
+      },
+      "authority_not_restored_or_replayed": true,
+      "failure": "original collected publication succeeds; unbooted deleted resolution rejects identity_conflict/not_dispatched before disposal acceptance",
+      "original_publication_proof_and_source_history_persisted": true,
+      "collection_or_disposal_not_accepted": true,
+      "sdk_child_created_without_pid": true,
+      "owned_empty_private_pack_verified_in_full_archive": true,
+      "cold_library_scope_and_request_validation_passed": true,
+      "normal_shutdown_requests": 1
+    }
+  },
+  "cause_and_correction": {
+    "sdk_copy_shared_pack_lease_creates_empty_private_clone_cache": true,
+    "sdk_force_detach_skips_symlinks_and_has_no_mount_or_lease_to_process_in_empty_cache": true,
+    "old_native_cache_guard_rejects_all_private_directories": true,
+    "corrected_guard_accepts_only_absent_shared_link_or_owned_safe_empty_directory": true,
+    "nonempty_unsafe_and_regular_file_caches_still_rejected": true,
+    "candidate_and_disposal_ownership_epoch_collection_and_absence_guards_unchanged": true,
+    "cache_predicate_alone_grants_no_ownership_or_release": true,
+    "live_rejection_fully_resolved_by_new_package_not_yet_proven": true
+  },
+  "regressions_before_correction": {
+    "passed": 47,
+    "failed": 2,
+    "failing_models": [
+      "sdk_compat::tests::branch_deletion_accepts_only_absent_shared_or_owned_empty_cache",
+      "branch::retention::resolution::disposal::tests::candidate::original_unbooted_candidate_accepts_only_the_empty_private_shared_pack_cache"
+    ],
+    "log_sha256": "e616c2e78816120806973a4c315a48299c78cb2239339cdf8a16b2c23f08b25f"
+  },
+  "checks_after_correction": [
+    {
+      "name": "cache",
+      "exit_status": 0,
+      "sha256": "efd0b1cf6c172442bd085e2d21df4e507db6e72bf92eb5284a7d5dba7241a8e0",
+      "summaries": [
+        "test result: ok. 49 passed; 0 failed; 0 ignored; 0 measured; 1030 filtered out; finished in 8.23s"
+      ]
+    },
+    {
+      "name": "branch",
+      "exit_status": 0,
+      "sha256": "e05bbec46dc5185c148eded0b8199cd46a312f05036f6bd8b07fcf6cee0ff1bf",
+      "summaries": [
+        "test result: ok. 390 passed; 0 failed; 1 ignored; 0 measured; 688 filtered out; finished in 75.95s"
+      ]
+    },
+    {
+      "name": "sdk-compat",
+      "exit_status": 0,
+      "sha256": "f02ab86a2dbf043e4791a85c49759faa2e265743f319c91a3e7ff14a8eeb6a46",
+      "summaries": [
+        "test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 1062 filtered out; finished in 0.77s"
+      ]
+    },
+    {
+      "name": "protocol",
+      "exit_status": 0,
+      "sha256": "c8cb62c140683f8f714786a13d4acf17f653c62b948e746bd41b2a7989e6a138",
+      "summaries": [
+        "test result: ok. 102 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.93s",
+        "test result: ok. 59 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s",
+        "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "name": "clippy",
+      "exit_status": 0,
+      "sha256": "ef4ae3077ffa28728901d69adf80a349a4910b5db4a5f5cfd8578edb96bc2304",
+      "summaries": []
+    },
+    {
+      "name": "sdk-after",
+      "exit_status": 0,
+      "sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "summaries": []
+    },
+    {
+      "name": "sdk-clean-after",
+      "exit_status": 0,
+      "sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "summaries": []
+    }
+  ],
+  "ignored_branch_models": [
+    "test transfer_supervisor::tests::ordinary_branch_worker_rejects_unentered_fixture_and_collects_original_leases ... ignored, requires a built helper; explicit ordinary non-VM branch namespace rejection"
+  ],
+  "http_contracts_per_toolchain": 411,
+  "elixir_library_wire_codec_and_upstream_sdk_sources_changed": false,
+  "shared_engine_change_reusable_by_future_rustler": true,
+  "remaining": {
+    "rebuilt_helper_ordinary_current_minimum_unbooted_disposal_retirement_backing_acceptance": true,
+    "other_partial_and_handoff_histories": true,
+    "durable_upgrade_and_remaining_source_platform_resource_acceptance": true,
+    "all_full_parity_rows_pending": true
+  },
+  "full_http_parity_complete": false,
+  "crash_validation_deferred": true,
+  "crash_handling_qualified": false,
+  "distribution_approved": false,
+  "rebuilt_linux_candidate": {
+    "manifest_sha256": "c63ee793b86fb68facb7e4be5582d0cf70570b4170c4f7dd19e902ad4de735d6",
+    "helper_sha256": "8d1c31817367aa288b600bdeb11d0ef5bc8a95aaec3a3b8bcea0396eebbd9a59",
+    "assets": 806,
+    "rust_toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+    "native_source_files": {
+      "native/smolbox-engine/src/sdk_compat.rs": "980d2b22807c1b103727a26a83359af5bd20fe5545e880e54a6327abb095250b",
+      "native/smolbox-engine/src/branch/retention/resolution/disposal/tests.rs": "5e165b254524719ec988fb95a083e58f40401bef1fc3242dc1f9ad80fb939ef4",
+      "native/smolbox-engine/src/branch/retention/resolution/disposal/tests/candidate.rs": "30c2d7c1c2567af1259f35094dba7cc5527768a08c5b83d51b2643d138b71db0"
+    },
+    "sdk_unmodified_before_after": true,
+    "checks": [
+      {
+        "name": "toolchain",
+        "exit_status": 0,
+        "sha256": "2073de5abf149185c2f4d7473dc833bc921b99135560d24ae7b2293f33a9c376",
+        "summaries": []
+      },
+      {
+        "name": "sdk-before",
+        "exit_status": 0,
+        "sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+        "summaries": []
+      },
+      {
+        "name": "build-helper",
+        "exit_status": 0,
+        "sha256": "36ab75ca4fd705b0e5ed6804feb5bcc07cee9acab7882223be0e328f628ce151",
+        "summaries": []
+      },
+      {
+        "name": "port-branch",
+        "exit_status": 0,
+        "sha256": "ec386b553f490752c5ac71ac75fb8b07db42702f44d1ebe36382bc615ab0901b",
+        "summaries": [
+          "test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 75 filtered out; finished in 4.19s"
+        ]
+      },
+      {
+        "name": "package",
+        "exit_status": 0,
+        "sha256": "6288f3e24ceaca69f7e3f2da6c3f1e5cb4e528876fdb2c027f04f1d728c30189",
+        "summaries": []
+      },
+      {
+        "name": "sdk-after",
+        "exit_status": 0,
+        "sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+        "summaries": []
+      }
+    ],
+    "ordinary_acceptance_pending": true
+  },
+  "explicit_built_helper_non_vm_worker_check": {
+    "exit_status": 0,
+    "selector": "transfer_supervisor::tests::ordinary_branch_worker_rejects_unentered_fixture_and_collects_original_leases",
+    "helper_sha256": "8d1c31817367aa288b600bdeb11d0ef5bc8a95aaec3a3b8bcea0396eebbd9a59",
+    "manifest_sha256": "c63ee793b86fb68facb7e4be5582d0cf70570b4170c4f7dd19e902ad4de735d6",
+    "private_unentered_namespace_rejection_only": true,
+    "sdk_open_or_fork_or_vm_entry": false,
+    "forced_child_termination": false,
+    "log_sha256": "aca4652e14b3cc23d8fa6e0944254673de676b18b46dc65bcfe156a9200b98f9",
+    "utc": "2026-10-17T15:00:42.521397+00:00"
+  }
+}

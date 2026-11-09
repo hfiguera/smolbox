@@ -7,6 +7,7 @@ defmodule SmolBox.Embedded.Protocol do
     BranchDeletionCollection,
     BranchDeletionContinuation,
     BranchDeletionResolution,
+    BranchPublication,
     BranchReleaseTransition,
     CaptureAbortSourceQualification,
     CaptureResolutionTransition,
@@ -27,6 +28,7 @@ defmodule SmolBox.Embedded.Protocol do
     PartialBranchChildAbsence,
     PartialBranchCleanupCandidate,
     PartialBranchCollection,
+    PartialBranchCollectionCandidate,
     PartialBranchDisposal,
     PartialBranchDisposalCleanup,
     PartialBranchDisposalCleanupUnneeded,
@@ -379,6 +381,18 @@ defmodule SmolBox.Embedded.Protocol do
            (major == 2 and event["stream"] in ~w(log terminal checkpoint))) and
         match?({:ok, _bytes}, Shape.chunk(event["data_base64"]))
 
+  defp outcome?(
+         %{"result" => "collected_branch_material_published", "publication" => publication} =
+           outcome,
+         2
+       ) do
+    with true <- Shape.keys?(outcome, ~w(result publication)),
+         true <- BranchPublication.valid?(publication),
+         {:ok, bytes} <- Jason.encode(publication),
+         do: byte_size(bytes) <= 65_536,
+         else: (_ -> false)
+  end
+
   defp outcome?(%{"result" => "partial_branch_child_absent", "proof" => proof} = outcome, 2),
     do: Shape.keys?(outcome, ~w(result proof)) and PartialBranchChildAbsence.valid?(proof)
 
@@ -443,6 +457,14 @@ defmodule SmolBox.Embedded.Protocol do
 
   defp outcome?(%{"result" => "partial_branch_disposed", "proof" => proof} = outcome, 2),
     do: Shape.keys?(outcome, ~w(result proof)) and PartialBranchDisposal.valid?(proof)
+
+  defp outcome?(
+         %{"result" => "partial_branch_collection_candidate", "candidate" => candidate} = outcome,
+         2
+       ),
+       do:
+         Shape.keys?(outcome, ~w(result candidate)) and
+           PartialBranchCollectionCandidate.valid?(candidate)
 
   defp outcome?(
          %{"result" => "partial_branch_collected", "proof" => proof, "platform" => platform} =

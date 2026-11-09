@@ -846,7 +846,7 @@ impl CollectedDeletion<'_> {
             return Err(Error::uncertain(ErrorCode::Ownership));
         }
         stopped_record(&intent, &row, &collection, self.budget)?;
-        crate::sdk_compat::branch_deletion_cache(&intent.plan.child.path)?;
+        crate::sdk_compat::stopped_branch_deletion_cache(&intent.plan.child.path)?;
         // Runtime deletion reads SDK dependencies. Recheck bounded inventory
         // under this fresh cleanup budget before entering that convenience API.
         if !crate::sdk_compat::source_dependents(
@@ -1214,12 +1214,12 @@ impl Application {
         let intent = state.intent.clone();
         let name = &intent.receipt().name;
         let (entered, _) = self.journal.read()?;
-        if entered.intent != intent
-            || entered.phase != Phase::Collecting
-            || self.context._runtime.pid(name).is_some()
-        {
+        if entered.intent != intent || entered.phase != Phase::Collecting {
             return Err(Error::uncertain(ErrorCode::Ownership));
         }
+        self.context
+            .require_no_runtime_boot()
+            .map_err(|e| Error::uncertain(e.code))?;
         self.context.plan.verify()?;
         self.budget.check().map_err(|e| Error::uncertain(e.code))?;
         let current =

@@ -158,7 +158,7 @@ pub(crate) fn run(request: &Request, blob: &Blob, expected: &Expected) -> Result
         &metadata.request,
         &before,
     )?;
-    let resources = crate::checkpoint_capture::validate_record(&before)?;
+    let resources = crate::checkpoint_capture::validate_portable_record(&before)?;
     if !smolvm::process::is_alive(source_pid.0)
         || smolvm::process::process_start_time(source_pid.0) != Some(source_pid.1)
     {

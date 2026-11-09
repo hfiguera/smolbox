@@ -38,6 +38,44 @@ fn hello() -> Hello {
 }
 
 #[test]
+fn macos_image_descriptor_extends_only_the_explicit_source_and_image_surface() {
+    let ServerMessage::Hello { hello: current } =
+        serde_json::from_str(include_str!("../fixtures/hello-v2-macos-images.json")).unwrap()
+    else {
+        unreachable!()
+    };
+    let ServerMessage::Hello { hello: previous } =
+        serde_json::from_str(include_str!("../fixtures/hello-v2-terminal-preflight.json")).unwrap()
+    else {
+        unreachable!()
+    };
+    current.validate().unwrap();
+    previous.validate().unwrap();
+    assert_eq!(current.package.platform, "macos");
+    assert_eq!(current.package.architecture, "aarch64");
+    assert!(current.capabilities == current.sdk.as_ref().unwrap().capabilities());
+    assert!(current.limits == previous.limits);
+    let mut sdk = current.sdk.as_deref().unwrap().clone();
+    sdk.feature_versions.remove("remote_sources");
+    sdk.feature_versions.remove("images");
+    assert!(&sdk == previous.sdk.as_deref().unwrap());
+    let additional: Vec<_> = current
+        .capabilities
+        .iter()
+        .filter(|capability| !previous.capabilities.contains(capability))
+        .copied()
+        .collect();
+    assert!(
+        additional
+            == vec![
+                Capability::ListImages,
+                Capability::PullImage,
+                Capability::PrepareArtifact
+            ]
+    );
+}
+
+#[test]
 fn linux_image_descriptor_preserves_the_previous_platform_contract() {
     let current: ServerMessage =
         serde_json::from_str(include_str!("../fixtures/hello-v2-linux-images.json")).unwrap();

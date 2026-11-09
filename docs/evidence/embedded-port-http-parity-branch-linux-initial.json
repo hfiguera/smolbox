@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "scope": "ordinary Linux local-bare branch witness initial attempt",
+  "source_commit": "c99db18f35b0d7e41ed429b0e743c42a1b71b27a",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "package_manifest_sha256": "8c7030d6977226a6fe816aacdf1acfe9be0cd8896f4e626fd6693c7b9456cdbe",
+  "helper_sha256": "17b7fccd57b8187fa439c579112b47cdd438675ef5be0201086e6352c700f7b4",
+  "witness_sha256": "6832ee9211af1b8996c30134b4778b3e2f211bb1b0502ce0d6f5d0c8389c252e",
+  "source_files_verified": 1747,
+  "assets_verified": 806,
+  "build": {
+    "helper_release": true,
+    "witness_release": true,
+    "strict_all_target_clippy": true,
+    "witness_models_passed": 12,
+    "python_cases_run": 51,
+    "python_cases_skipped": 4,
+    "sdk_unmodified_before_after": true,
+    "rust_toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+    "clippy_toolchain": "clippy 0.1.92 (ded5c06cf2 2025-12-08)"
+  },
+  "ordinary_run": {
+    "status": "failed",
+    "source_created_and_start_returned": true,
+    "failed_before_first_child_request": true,
+    "error": "native State (NotDispatched)",
+    "exact_failing_step_not_recorded": true,
+    "child_creation_qualified": false,
+    "normal_original_source_deletion_and_owner_shutdown": true,
+    "final_sdk_table_counts": {
+      "vms": 0,
+      "vm_create_reservations": 0,
+      "vm_pause_operations": 0,
+      "vm_resize_intents": 0,
+      "vm_resize_receipts": 0
+    },
+    "account_lock_free": true,
+    "process_termination_signal_sent": false,
+    "archive_sha256": "cd9a0e0b68baf0450460d0434f9da45f6ba1acda8987fcab4dcaa418bf6c9615",
+    "archive_bytes": 129366269,
+    "archive_verified_locally": true
+  },
+  "branch_vm_qualification": false,
+  "public_native_branch_admission": false,
+  "full_parity_complete": false,
+  "crash_validation_performed": false,
+  "distribution_approved": false
+}

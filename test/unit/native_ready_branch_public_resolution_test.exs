@@ -13,7 +13,7 @@ defmodule SmolBox.NativeReadyBranchPublicResolutionTest do
 
   alias SmolBox.Embedded.{BranchCompletion, Config, NativeGrowth}
 
-  alias SmolBox.Runtime.{Coordinator, Target, WorkSupervisor}
+  alias SmolBox.Runtime.{Coordinator, NativeAuthority, Target, WorkSupervisor}
   alias SmolBox.Store.{Codec, Memory, NativeBranchContract}
 
   alias NativeBranchContract, as: Contract
@@ -29,20 +29,22 @@ defmodule SmolBox.NativeReadyBranchPublicResolutionTest do
     def init(state), do: {:ok, state}
     def handle_call(:config, _, state), do: {:reply, {:ok, state.config}, state}
 
-    def handle_call({:native_acquire, id}, {caller, _}, state) do
-      reply =
-        Agent.get_and_update(state.authority, fn
-          nil -> {:ok, {id, caller}}
-          held -> {{:error, %Error{category: :admission_exhausted, operation: :embedded}}, held}
-        end)
+    def handle_call({operation, id} = message, {caller, _} = from, state)
+        when operation in [:native_acquire, :native_acquire_operation] do
+      {:reply, result, next} = Coordinator.handle_call(message, from, state)
 
-      {:reply, reply, state}
+      if result == :ok or match?({:ok, _}, result),
+        do: Agent.update(state.authority, fn nil -> {id, caller} end)
+
+      {:reply, result, next}
     end
 
-    def handle_call({:native_release, id}, {caller, _}, state) do
+    def handle_call({:native_release, id} = message, {caller, _} = from, state) do
       Agent.update(state.authority, fn {^id, ^caller} -> nil end)
-      {:reply, :ok, state}
+      Coordinator.handle_call(message, from, state)
     end
+
+    def handle_call(message, from, state), do: Coordinator.handle_call(message, from, state)
   end
 
   defmodule Store do
@@ -74,6 +76,25 @@ defmodule SmolBox.NativeReadyBranchPublicResolutionTest do
     def start_link(state), do: GenServer.start_link(__MODULE__, state)
     def init(state), do: {:ok, state}
 
+    def handle_call(:health, _, state) do
+      {:reply,
+       {:ok,
+        %{
+          status: if(state.frozen, do: :reconciling, else: :ready),
+          epoch: state.epoch,
+          target_id: state.config.id,
+          generation: state.config.domain_generation,
+          package_identity: state.config.package_identity,
+          package_manifest_sha256: state.config.package_manifest_sha256
+        }}, state}
+    end
+
+    def handle_call({:activate, binding, epoch}, _, state) do
+      true = binding == Config.domain_binding(state.config) and epoch == state.epoch
+      send(state.observer, :activated_original_owner)
+      {:reply, :ok, %{state | frozen: false}}
+    end
+
     def handle_call({:quiesce, epoch}, _, state) do
       result =
         if state.mode != :busy and epoch == state.epoch,
@@ -95,6 +116,12 @@ defmodule SmolBox.NativeReadyBranchPublicResolutionTest do
 
       if state.mode == :late, do: Process.sleep(2000)
       state = if state.mode == :lost_once, do: %{state | mode: :normal}, else: state
+
+      state =
+        if state.mode == :new_epoch_after_child and operation["operation"] == "inspect",
+          do: %{state | epoch: String.duplicate("f", 32)},
+          else: state
+
       {:reply, response, state}
     end
 
@@ -155,6 +182,18 @@ defmodule SmolBox.NativeReadyBranchPublicResolutionTest do
       }
 
       case {mode, side} do
+        {:source_admission, :source} ->
+          {:error,
+           %Error{
+             category: :admission_exhausted,
+             operation: :embedded,
+             evidence: :not_dispatched
+           }}
+
+        {:child_admission, :child} ->
+          {:ok, %{"result" => "error", "code" => "overload", "dispatch" => "not_dispatched"},
+           empty(), nil}
+
         {:missing_source, :source} ->
           {:error, %Error{category: :not_found, operation: :branch}}
 
@@ -219,7 +258,27 @@ defmodule SmolBox.NativeReadyBranchPublicResolutionTest do
       do: GenServer.call(context.server, {:observe, context, operation, budget})
   end
 
-  defp fixture(mode \\ :normal, hold \\ true) do
+  defp publish_fixture(store, parent, child, completion, :published) do
+    alias SmolBox.Store.NativeCollectedBranchPublicationContract, as: Publication
+    assert {:ok, pending} = Publication.accept(Memory, store, parent, child, child.version, 1103)
+    parent = Publication.fetch(Memory, store, parent)
+
+    assert {:ok, published} =
+             Publication.finish(
+               Memory,
+               store,
+               parent,
+               pending,
+               Publication.result(pending, completion),
+               1104
+             )
+
+    {Publication.fetch(Memory, store, parent), published}
+  end
+
+  defp publish_fixture(_, parent, child, _, _), do: {parent, child}
+
+  defp fixture(mode \\ :normal, hold \\ true, options \\ []) do
     store = start_supervised!(Memory)
     {parent, child, result} = Contract.prepare(Memory, store, hold)
 
@@ -228,21 +287,48 @@ defmodule SmolBox.NativeReadyBranchPublicResolutionTest do
 
     parent = fetch(store, parent)
 
-    assert {:ok, child} =
-             Contract.advance(Memory, store, parent, child, :dispatching, :unknown, 1102)
+    child = fetch(store, child)
+
+    child =
+      if options[:cancel] do
+        child
+      else
+        assert {:ok, unknown} =
+                 Contract.advance(Memory, store, parent, child, :dispatching, :unknown, 1102)
+
+        unknown
+      end
 
     parent = fetch(store, parent)
+    {parent, child} = publish_fixture(store, parent, child, result, mode)
     {:ok, usage} = Memory.usage(store, parent.worker_id)
     epoch = get_in(result.completion.publication, ~w(change child_origin intent epoch))
     authority = start_supervised!({Agent, fn -> nil end})
 
+    native =
+      struct(Config,
+        platform: :macos,
+        id: parent.worker_id,
+        domain_generation: parent.backend_assignment.binding.generation,
+        package_identity: %{"model" => "original"},
+        package_manifest_sha256: String.duplicate("1", 64)
+      )
+
     peer =
       start_supervised!(
-        {Peer, %{observer: self(), epoch: epoch, frozen: false, mode: mode, result: result}}
+        {Peer,
+         %{
+           observer: self(),
+           config: native,
+           epoch: epoch,
+           frozen: false,
+           mode: mode,
+           result: result
+         }}
       )
 
     context = %EmbeddedContext{
-      config: struct(Config, platform: :macos),
+      config: native,
       server: peer,
       pinned: true,
       epoch: if(mode == :stale_epoch, do: String.duplicate("0", 32), else: epoch)
@@ -264,6 +350,7 @@ defmodule SmolBox.NativeReadyBranchPublicResolutionTest do
       kind: :embedded,
       id: parent.worker_id,
       connection: reference,
+      domain_binding: Config.domain_binding(native),
       draining: mode == :draining
     }
 
@@ -277,9 +364,21 @@ defmodule SmolBox.NativeReadyBranchPublicResolutionTest do
       poll_ms: 20
     }
 
+    frozen = if options[:ready], do: MapSet.new(), else: MapSet.new([parent.worker_id])
+
     host = %{
       id: Coordinator,
-      start: {Host, :start_link, [%{config: config, authority: authority}]}
+      start:
+        {Host, :start_link,
+         [
+           %{
+             config: config,
+             authority: authority,
+             task_targets: %{},
+             native_holders: %{},
+             native_frozen: frozen
+           }
+         ]}
     }
 
     work = %{
@@ -305,6 +404,100 @@ defmodule SmolBox.NativeReadyBranchPublicResolutionTest do
 
   defp resolve(runtime, child),
     do: Branches.resolve(runtime, ManagedMachine.key(child), quiesced: true, disposition: :keep)
+
+  for hold <- [true, false] do
+    test "held=#{hold} original completion recovery retains a completed healthy scan" do
+      {runtime, store, parent, child, result, usage, _, worker} =
+        fixture(:normal, unquote(hold), ready: true, cancel: true)
+
+      coordinator = SmolBox.Runtime.coordinator(runtime)
+      assert NativeAuthority.available?(coordinator, worker.id)
+      assert child.branch.state == :dispatching
+      assert {:ok, cancelled} = Branches.cancel(runtime, ManagedMachine.key(child))
+      assert cancelled.branch.state == :unknown and cancelled.state == :unknown
+      assert fetch(store, parent).state == :unknown
+      assert fetch(store, parent).active_branch == child.id
+      assert {:ok, ^usage} = Memory.usage(store, worker.id)
+      assert {:ok, saved} = resolve(runtime, child)
+      assert saved.branch.native_authority.completion == result.completion
+      assert saved.branch.state == if(unquote(hold), do: :held, else: :ready)
+      assert fetch(store, parent).state == :running
+      assert {:ok, ^usage} = Memory.usage(store, worker.id)
+      assert NativeAuthority.activity(coordinator, worker.id) == %{ready: true, held: false}
+      assert_received :activated_original_owner
+    end
+  end
+
+  test "a previously incomplete scan remains fenced after confirmed ready-result recovery" do
+    {runtime, _, _, child, _, _, _, worker} = fixture()
+    assert {:ok, _} = resolve(runtime, child)
+    refute NativeAuthority.available?(SmolBox.Runtime.coordinator(runtime), worker.id)
+    refute_received :activated_original_owner
+  end
+
+  test "an epoch change after positive observation preserves the committed result without activation" do
+    {runtime, store, parent, child, _, _, _, worker} =
+      fixture(:new_epoch_after_child, true, ready: true)
+
+    assert {:ok, saved} = resolve(runtime, child)
+    assert saved.branch.state == :held and fetch(store, parent).state == :running
+    refute NativeAuthority.available?(SmolBox.Runtime.coordinator(runtime), worker.id)
+    refute_received :activated_original_owner
+  end
+
+  for mode <- [
+        :missing,
+        :wrong_proof,
+        :missing_source,
+        :missing_child,
+        :store_failure,
+        :stale_commit
+      ] do
+    test "#{mode} cannot restore a formerly healthy scan without confirmed paired recovery" do
+      {runtime, store, parent, child, _, usage, _, worker} =
+        fixture(unquote(mode), true, ready: true)
+
+      assert {:error, _} = resolve(runtime, child)
+      assert fetch(store, parent).active_branch == child.id
+      assert fetch(store, child).branch.state == :unknown
+      assert {:ok, ^usage} = Memory.usage(store, worker.id)
+      refute NativeAuthority.available?(SmolBox.Runtime.coordinator(runtime), worker.id)
+      refute_received :activated_original_owner
+    end
+  end
+
+  test "confirmed original-result recovery preserves persisted worker draining" do
+    {runtime, store, _, child, _, _, _, worker} = fixture(:draining, true, ready: true)
+    assert {:ok, control} = Memory.worker_control(store, worker.id)
+
+    assert {:ok, draining} =
+             Memory.set_worker_mode(store, worker.id, :draining, control.version, Clock.now())
+
+    assert {:ok, _} = resolve(runtime, child)
+    assert NativeAuthority.available?(SmolBox.Runtime.coordinator(runtime), worker.id)
+    assert {:ok, ^draining} = Memory.worker_control(store, worker.id)
+  end
+
+  for hold <- [true, false] do
+    test "held=#{hold} ready resolution consumes the stored material publication exactly once" do
+      {runtime, store, parent, child, _, _, _, _} = fixture(:published, unquote(hold))
+      assert {:ok, ready} = resolve(runtime, child)
+      assert ready.branch.state == if(unquote(hold), do: :held, else: :ready)
+      assert fetch(store, parent).native_branch_history == parent.native_branch_history
+
+      assert ready.branch.native_authority.collected_publication ==
+               child.branch.native_authority.collected_publication
+
+      saved = ready.branch.native_authority.collected_publication
+
+      for version <- [saved.version, saved.completion_version, ready.version] do
+        assert {:ok, ^ready} =
+                 Branches.publish_collected(runtime, ManagedMachine.key(ready), version,
+                   quiesced: true
+                 )
+      end
+    end
+  end
 
   for hold <- [true, false] do
     test "held=#{hold} kept resolution retains one owner and commits only original completion plus current positives" do
@@ -391,6 +584,50 @@ defmodule SmolBox.NativeReadyBranchPublicResolutionTest do
     assert {:ok, _} = resolve(runtime, fetch(store, child))
     assert_receive {:observe, true, true, _, _, second, _}
     assert first == second
+  end
+
+  for mode <- [:source_admission, :child_admission] do
+    test "#{mode} after original completion retains uncertain records charges and the recovery fence" do
+      {runtime, store, parent, child, _, usage, authority, worker} =
+        fixture(unquote(mode), true, ready: true)
+
+      assert NativeAuthority.available?(SmolBox.Runtime.coordinator(runtime), worker.id)
+
+      assert {:error,
+              %Error{
+                category: :admission_exhausted,
+                operation: :branch,
+                evidence: :dispatch_uncertain
+              }} = resolve(runtime, child)
+
+      assert fetch(store, child) == child
+      # The original source claim renews before recovery; its content stays intact.
+      claim_fields = [
+        :version,
+        :updated_at_ms,
+        :claim_owner,
+        :claim_until_ms,
+        :generation,
+        :worker_generation
+      ]
+
+      assert Map.drop(fetch(store, parent), claim_fields) == Map.drop(parent, claim_fields)
+      assert {:ok, ^usage} = Memory.usage(store, parent.worker_id)
+      assert Agent.get(authority, & &1) == nil
+      refute NativeAuthority.available?(SmolBox.Runtime.coordinator(runtime), worker.id)
+      refute_receive {:store_resolution, _}
+      refute_receive :activated_original_owner
+
+      assert_receive {:observe, true, true, _, _,
+                      %{"operation" => "resolve_ready_branch_completion"}, _}
+
+      assert_receive {:observe, true, true, _, _, %{"operation" => "branch_preflight"}, _}
+
+      if unquote(mode == :child_admission),
+        do: assert_receive({:observe, true, true, _, _, %{"operation" => "inspect"}, _})
+
+      refute_receive {:observe, _, _, _, _, _, _}
+    end
   end
 
   test "draining keeps explicit result recovery available" do

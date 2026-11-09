@@ -3,7 +3,7 @@ defmodule SmolBox.NativePartialBranchPublicCollectionTest do
   alias SmolBox.{Branches, Error, ManagedMachine}
 
   alias SmolBox.Backend.{Budget, EmbeddedContext, EmbeddedPartialBranchCollection, Reference}
-  alias SmolBox.Embedded.{Config, NativeGrowth, PartialBranchCollection}
+  alias SmolBox.Embedded.{BranchCanonical, Config, NativeGrowth, PartialBranchCollection}
   alias SmolBox.Runtime.{Coordinator, Target, WorkSupervisor}
   alias SmolBox.Store.{Codec, Memory, NativePartialBranchCollectionContract}
 
@@ -75,6 +75,34 @@ defmodule SmolBox.NativePartialBranchPublicCollectionTest do
       {:reply, result, %{state | frozen: result == :ok}}
     end
 
+    def handle_call({:candidate, context, request, budget, child}, _, state) do
+      send(state.observer, {:candidate_call, state.frozen, context.quiesced, request, budget})
+      r = request["request"]
+
+      candidate = %{
+        "schema" => 1,
+        "creation_sha256" =>
+          BranchCanonical.digest(BranchCanonical.ordered(r["creation"], :creation_request)),
+        "operation_id" => r["operation_id"],
+        "request_sha256" => r["request_sha256"],
+        "epoch" =>
+          if(state.mode == :candidate_epoch, do: String.duplicate("f", 32), else: state.epoch),
+        "platform" => "macos"
+      }
+
+      if state.mode == :candidate_stale do
+        {:ok, _} =
+          Memory.machine(state.store, :claim, [ManagedMachine.key(child), "owner", 1400, 10_000])
+      end
+
+      outcome =
+        if state.mode == :candidate_rejected,
+          do: %{"result" => "error", "code" => "state", "dispatch" => "not_dispatched"},
+          else: %{"result" => "partial_branch_collection_candidate", "candidate" => candidate}
+
+      {:reply, {:ok, outcome, %{stdout: <<>>, stderr: <<>>, file: <<>>}, nil}, state}
+    end
+
     def handle_call({:call, context, request, budget, child}, _, state) do
       send(state.observer, {:native_call, state.frozen, context.quiesced, request, budget})
 
@@ -125,6 +153,13 @@ defmodule SmolBox.NativePartialBranchPublicCollectionTest do
 
   defmodule Adapter do
     @behaviour SmolBox.Backend
+    def supports_operation?(context, :inspect_partial_branch_collection),
+      do:
+        get_in(
+          context.config.sdk_identity || %{},
+          ~w(feature_versions partial_collection_preflight)
+        ) == 1
+
     def supports_operation?(_, operation), do: operation == :collect_partial_branch
     def pin(context, _), do: {:ok, context}
 
@@ -143,6 +178,18 @@ defmodule SmolBox.NativePartialBranchPublicCollectionTest do
            history: history
        }}
     end
+
+    def invoke(context, :inspect_partial_branch_collection, [parent, child], budget),
+      do:
+        EmbeddedPartialBranchCollection.coordinate_candidate(
+          context,
+          parent,
+          child,
+          budget,
+          fn ctx, request, b ->
+            GenServer.call(ctx.server, {:candidate, ctx, request, b, child})
+          end
+        )
 
     def invoke(context, :collect_partial_branch, [parent, child], budget),
       do:
@@ -165,7 +212,15 @@ defmodule SmolBox.NativePartialBranchPublicCollectionTest do
       )
 
     context = %EmbeddedContext{
-      config: struct(Config, platform: :macos),
+      config:
+        struct(Config,
+          platform: :macos,
+          sdk_identity:
+            if(mode == :legacy_no_preflight,
+              do: nil,
+              else: %{"feature_versions" => %{"partial_collection_preflight" => 1}}
+            )
+        ),
       server: peer,
       pinned: true,
       epoch: if(mode == :stale_epoch, do: String.duplicate("0", 32), else: epoch)
@@ -231,6 +286,47 @@ defmodule SmolBox.NativePartialBranchPublicCollectionTest do
     end
   end
 
+  defp candidate_calls(acc \\ []) do
+    receive do
+      {:candidate_call, _, _, _, _} = call -> candidate_calls([call | acc])
+    after
+      0 -> Enum.reverse(acc)
+    end
+  end
+
+  for mode <- [:candidate_rejected, :candidate_epoch, :candidate_stale, :legacy_no_preflight] do
+    test "#{mode} never saves fresh collection intent or dispatches collection" do
+      {runtime, store, parent, child, usage, _, _} = fixture(unquote(mode))
+      assert {:error, _} = collect(runtime, child)
+
+      assert Contract.fetch(Memory, store, child).branch.native_authority.partial_collection ==
+               nil
+
+      assert {:ok, ^usage} = Memory.usage(store, parent.worker_id)
+      assert calls() == []
+
+      if unquote(mode) == :candidate_stale do
+        # The final atomic version guard rejects a race after inspection.
+        assert_receive {:store_write, :accept_partial_collection, true}
+      else
+        refute_receive {:store_write, :accept_partial_collection, _}
+      end
+
+      refute_receive {:store_write, :complete_partial_collection, _}
+    end
+  end
+
+  test "an immutable saved request resumes on an older helper without fresh preflight" do
+    {runtime, store, parent, child, usage, _, _} = fixture(:legacy_no_preflight)
+    assert {:ok, pending} = Contract.accept(Memory, store, parent, child, child.version, 1103)
+    request = pending.branch.native_authority.partial_collection.request
+    assert {:ok, completed} = collect(runtime, pending)
+    assert completed.branch.native_authority.partial_collection.request == request
+    assert candidate_calls() == []
+    assert [_] = calls()
+    assert {:ok, ^usage} = Memory.usage(store, parent.worker_id)
+  end
+
   for hold <- [true, false] do
     test "held=#{hold} collection is fenced durable and retains every reservation and unknown creation" do
       {runtime, store, parent, child, usage, authority, context} = fixture(:normal, unquote(hold))
@@ -238,7 +334,11 @@ defmodule SmolBox.NativePartialBranchPublicCollectionTest do
       assert_receive {:quiesce, :ok}
       assert_receive {:store_write, :accept_partial_collection, true}
       assert_receive {:store_write, :complete_partial_collection, true}
+      assert [{:candidate_call, true, true, prospective, candidate_budget}] = candidate_calls()
       assert [{:native_call, true, true, request, budget}] = calls()
+      assert prospective["operation"] == "inspect_partial_branch_collection"
+      assert prospective["request"] == request["request"]
+      assert candidate_budget.timeout_ms <= 5000
       saved = collected.branch.native_authority.partial_collection
       assert request == %{"operation" => "collect_partial_branch", "request" => saved.request}
       assert saved.proof != nil and saved.platform == "macos"
@@ -337,8 +437,7 @@ defmodule SmolBox.NativePartialBranchPublicCollectionTest do
     assert {:error, %Error{category: :output_limit, evidence: :not_dispatched}} =
              collect(runtime, child)
 
-    assert Contract.fetch(Memory, store, child).branch.native_authority.partial_collection.proof ==
-             nil
+    assert Contract.fetch(Memory, store, child).branch.native_authority.partial_collection == nil
 
     assert calls() == []
     assert {:ok, ^usage} = Memory.usage(store, parent.worker_id)

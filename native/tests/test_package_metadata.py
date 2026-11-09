@@ -65,12 +65,15 @@ class PackageMetadataTests(unittest.TestCase):
     def test_platform_policy_matches_exact_shared_descriptor_and_linux_storage_delta(self):
         common = json.loads((package.ROOT / 'policy.json').read_bytes())
         linux = json.loads((package.ROOT / 'policy-linux.json').read_bytes())
-        hello = json.loads((package.ROOT / 'smolbox-protocol/fixtures/hello-v2-linux-images.json').read_bytes())['hello']
+        hello = json.loads((package.ROOT / 'smolbox-protocol/fixtures/hello-v2-linux-branches-preflight.json').read_bytes())['hello']
         expected = json.loads(json.dumps(common))
+        self.assertEqual(common['sdk']['feature_versions']['remote_sources'], 1)
+        self.assertEqual(common['sdk']['feature_versions']['images'], 1)
         expected['sdk']['feature_versions']['volumes'] = 1
         expected['sdk']['feature_versions']['disk_growth'] = 1
-        expected['sdk']['feature_versions']['remote_sources'] = 1
-        expected['sdk']['feature_versions']['images'] = 1
+        expected['sdk']['feature_versions']['checkpoints'] = 1
+        expected['sdk']['feature_versions']['branches'] = 1
+        expected['sdk']['feature_versions']['partial_collection_preflight'] = 1
         expected['volume_limits'] = hello['limits']['volumes']
         self.assertEqual(linux, expected)
         self.assertEqual(linux['sdk'], hello['sdk'])

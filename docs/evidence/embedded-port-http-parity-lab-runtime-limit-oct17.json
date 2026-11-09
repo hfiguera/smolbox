@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "scope": "external provisioning VM runtime-limit interruption; preservation only",
+  "observed_utc": "2026-10-17T08:34:03.253913+00:00",
+  "configured_runtime_limit": "2h",
+  "service_result": "timeout",
+  "service_state": "failed",
+  "service_main_pid": 0,
+  "service_restart_count": 0,
+  "agent_changed_runtime_limit": false,
+  "agent_sent_termination_signals": false,
+  "last_observed_original_owner_count": 3,
+  "pending_pid_cleanup_scope_obsolete": true,
+  "old_pid_scope_must_never_be_reused_in_a_restarted_vm": true,
+  "archives_reverified_locally_and_outer": [
+    {
+      "sha256": "6d464c36a835d4933d09316cfb817bf0738010c1a588c664914cfd1fafaeb604",
+      "bytes": 159968463
+    },
+    {
+      "sha256": "ce7b21ec7995c0e3aef70b49c134bec54a4c59e2c3f9114d3a9191204b6ec24d",
+      "bytes": 160249192
+    },
+    {
+      "sha256": "4d301eae30effcd9a0944fa95e0ec15b228a68895fec2f5369d83213944ae6e4",
+      "bytes": 160260878
+    }
+  ],
+  "archives_taken_with_vms_running": true,
+  "cold_sdk_consistency_qualified": false,
+  "provision_disk_retained": true,
+  "original_run_image_size_mtime_device_inode_unchanged": true,
+  "original_owner_collection_or_reaping_qualified": false,
+  "old_workflows_replayed_or_adopted": false,
+  "crash_validation_performed": false,
+  "full_parity_complete": false,
+  "distribution_approved": false
+}

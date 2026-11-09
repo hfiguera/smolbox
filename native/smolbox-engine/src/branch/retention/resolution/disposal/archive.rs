@@ -100,7 +100,6 @@ impl RetainedBranchResolution {
             .try_lock()
             .map_err(|_| Error::before(ErrorCode::Conflict))?;
         if Arc::strong_count(&entry) != 2
-            || Arc::strong_count(&entry.ownership) != 1
             || !entries
                 .get(&self.original.key)
                 .is_some_and(|stored| Arc::ptr_eq(stored, &entry))
@@ -108,7 +107,7 @@ impl RetainedBranchResolution {
         {
             return Err(Error::before(ErrorCode::Conflict));
         }
-        let work = entry
+        let mut work = entry
             .work
             .try_lock()
             .map_err(|_| Error::before(ErrorCode::Conflict))?;
@@ -137,6 +136,15 @@ impl RetainedBranchResolution {
             ._job
             .check_disposed_branch_handoff()?;
         self.budget.check()?;
+        // The synchronized disposal now carries the original preparation and
+        // publication evidence. Collected IPC output still retains its worker's
+        // ownership lease; retire only those spools before requiring unique
+        // ownership for the accounting transfer. The entry, gates, snapshot and
+        // full job charge remain retained if a different owner blocks handoff.
+        drop(work.collected.take());
+        if Arc::strong_count(&entry.ownership) != 1 {
+            return Err(Error::before(ErrorCode::Conflict));
+        }
         drop(work);
         // No further native effect occurs. Conversion either retains the whole
         // original entry or transfers every backing byte to its archive owner.

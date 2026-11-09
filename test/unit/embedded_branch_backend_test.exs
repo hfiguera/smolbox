@@ -506,6 +506,63 @@ defmodule SmolBox.EmbeddedBranchBackendTest do
     end
   end
 
+  for {operation, mode} <- [
+        {:branch_create, :branch_create},
+        {:branch_release, :branch_release},
+        {:branch_create, :branch_lookup_creation},
+        {:branch_release, :branch_lookup_release}
+      ] do
+    test "#{mode} keeps the whole branch uncertain when a later observation is not dispatched" do
+      operation = unquote(operation)
+      mode = unquote(mode)
+      {store, context, parent, child, result} = fixture(operation)
+
+      child =
+        if unquote(mode in [:branch_lookup_creation, :branch_lookup_release]) do
+          {:ok, unknown} = uncertain(operation, store, parent, child)
+          unknown
+        else
+          child
+        end
+
+      assert {:ok, parent} = Memory.machine(store, :fetch, [ManagedMachine.key(parent)])
+      assert {:ok, usage} = Memory.usage(store, parent.worker_id)
+
+      for rejected <- ~w(branch_preflight inspect),
+          response <- [
+            {:error,
+             %Error{
+               category: :admission_exhausted,
+               operation: :embedded,
+               evidence: :not_dispatched
+             }},
+            {:ok, %{"result" => "error", "code" => "overload", "dispatch" => "not_dispatched"},
+             @empty, nil}
+          ] do
+        callback =
+          peer(mode, result, fn request, success ->
+            if request["operation"] == rejected, do: response, else: success
+          end)
+
+        assert {:error,
+                %Error{
+                  category: :admission_exhausted,
+                  operation: :branch,
+                  evidence: :dispatch_uncertain
+                }} =
+                 EmbeddedBranch.coordinate(context, mode, parent, child, @budget, callback)
+
+        assert_receive {:called, _, _, _}
+        assert_receive {:called, _, %{"operation" => "branch_preflight"}, _}
+        if rejected == "inspect", do: assert_receive({:called, _, %{"operation" => "inspect"}, _})
+        refute_receive {:called, _, _, _}
+        assert {:ok, ^child} = Memory.machine(store, :fetch, [ManagedMachine.key(child)])
+        assert {:ok, ^parent} = Memory.machine(store, :fetch, [ManagedMachine.key(parent)])
+        assert {:ok, ^usage} = Memory.usage(store, parent.worker_id)
+      end
+    end
+  end
+
   test "current public admission remains closed and branch assignments cannot fall back to fresh creation" do
     {_, context, parent, child, _} = fixture(:branch_create)
     refute Embedded.supports_operation?(context, :branch_create)

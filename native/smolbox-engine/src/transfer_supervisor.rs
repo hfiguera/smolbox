@@ -214,6 +214,41 @@ pub(crate) struct Collected {
     termination_requested: bool,
 }
 impl Collected {
+    /// Inert private row/file projection. It runs no worker and is unavailable
+    /// in production; callers must not attribute SDK collection to this model.
+    #[cfg(test)]
+    pub(crate) fn model_branch_projection(prepared: Prepared) -> Self {
+        Self::model_branch_projection_with_leases(prepared, Box::new(()))
+    }
+    #[cfg(test)]
+    pub(crate) fn model_branch_projection_with_leases(
+        prepared: Prepared,
+        leases: Box<dyn Send>,
+    ) -> Self {
+        Self {
+            converted: None,
+            captured: None,
+            branch_prepared: None,
+            bootstrapped: None,
+            pulled: None,
+            installed: None,
+            materialized: None,
+            grown: None,
+            stream: None,
+            command: None,
+            launched: None,
+            outcome: FileOutcome {
+                completion: crate::FileCompletion::Completed,
+                dispatch: crate::Dispatch::MayHaveDispatched,
+                observed_bytes: 0,
+                native_acknowledged: true,
+            },
+            prepared,
+            _leases: leases,
+            worker_ready: false,
+            termination_requested: false,
+        }
+    }
     pub(crate) fn verify_conversion(
         &mut self,
         budget: &crate::ReadBudget,
@@ -1291,13 +1326,33 @@ impl TransferSupervisor {
                 .is_some_and(|pipe| set_nonblocking(pipe.as_raw_fd()).is_ok());
         let enrolled = self.epoch.as_ref().is_none_or(|epoch| {
             birth.is_some_and(|birth| {
+                let child = OwnerIdentity {
+                    pid: owned.child.id() as i32,
+                    birth,
+                    uid: self.owner.uid,
+                };
+                if matches!(
+                    owned.prepared.request.kind,
+                    Kind::CheckpointMaterialize { .. }
+                ) {
+                    return owned
+                        .prepared
+                        .request
+                        .staging
+                        .parent()
+                        .is_some_and(|stage| {
+                            epoch
+                                .register_checkpoint_materialize(
+                                    child,
+                                    &owned.prepared.request.operation,
+                                    stage,
+                                )
+                                .is_ok()
+                        });
+                }
                 epoch
                     .register_transfer(
-                        OwnerIdentity {
-                            pid: owned.child.id() as i32,
-                            birth,
-                            uid: self.owner.uid,
-                        },
+                        child,
                         &owned.prepared.request.operation,
                         owned
                             .prepared

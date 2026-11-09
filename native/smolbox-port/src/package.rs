@@ -925,9 +925,9 @@ mod tests {
         );
         assert!(sdk_identity().is_ok());
         let fixture_bytes = if cfg!(target_os = "linux") {
-            include_str!("../../smolbox-protocol/fixtures/hello-v2-linux-images.json")
+            include_str!("../../smolbox-protocol/fixtures/hello-v2-linux-branches-preflight.json")
         } else {
-            include_str!("../../smolbox-protocol/fixtures/hello-v2-terminal-preflight.json")
+            include_str!("../../smolbox-protocol/fixtures/hello-v2-macos-branches.json")
         };
         let fixture: smolbox_protocol::ServerMessage = serde_json::from_str(fixture_bytes).unwrap();
         let smolbox_protocol::ServerMessage::Hello { hello } = fixture else {

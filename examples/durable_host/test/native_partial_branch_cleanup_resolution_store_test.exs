@@ -100,7 +100,7 @@ defmodule SmolBox.DurableHost.NativePartialBranchCleanupResolutionStoreTest do
     assert {:ok, %{native_partial_branch_cleanup_resolutions: 1} = caps} =
              Store.capabilities(store)
 
-    refute Map.has_key?(caps, :native_branches)
+    assert caps.native_branches == 1
   end
 
   for provenance <- ["deleted", "resolved_absent"] do

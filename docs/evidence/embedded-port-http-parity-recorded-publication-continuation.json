@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "status": "shared-engine-recorded-publication-continuation-models-passed-native-package-qualification-pending",
+  "base_commit": "a4c8b54",
+  "sdk_source_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_unmodified": true,
+  "bridge_independent_shared_engine": true,
+  "reproduction": {
+    "before_fix": "exact recorded publication rejected with state/not_dispatched after inactive later phase",
+    "fixture": "inert original registry, SQLite records, protected material journal and resource leases; no live SDK or VM",
+    "earlier_failed_postgresql_cause_established": false
+  },
+  "behavior": {
+    "inactive_phases": [
+      "BootEntered",
+      "Booted",
+      "IdentityEntered",
+      "IdentityReady",
+      "ReleaseEntered",
+      "Released"
+    ],
+    "exact_recorded_publication_only": true,
+    "original_epoch_borrow_domain_creation_request_and_budget_required": true,
+    "active_work_rejected": true,
+    "missing_history_rejected": true,
+    "expired_or_cancelled_control_rejected": true,
+    "lost_original_registry_rejected": true,
+    "publisher_callback_reentered": false,
+    "phase_regressed": false,
+    "sdk_work_reentered": false,
+    "manager_adopted": false,
+    "resources_released": false,
+    "readiness_granted": false
+  },
+  "checks": {
+    "publication_models_passed": 9,
+    "branch_models_passed": 221,
+    "clippy_workspace_all_targets_no_deps": true,
+    "unmodified_sdk_regular_and_clean_checks": true,
+    "documentation_and_coverage_current_passed": 7,
+    "documentation_and_coverage_minimum_passed": 7,
+    "public_collected_publication_contracts_current_passed": 40,
+    "exdoc_warnings_as_errors_and_local_links_pages": 177,
+    "sdk_dependency_warning": "Unmodified smolvm emits a Rust 1.99 AtomicUsize.fetch_update deprecation warning; owned workspace Clippy exits zero.",
+    "rust_workspace_lib_bins_contract_passed": 1312,
+    "rust_workspace_lib_bins_contract_ignored": 24,
+    "http_current_passed": 411,
+    "http_minimum_passed": 411
+  },
+  "log_sha256": {
+    "cached-publication-red.log": "2cab0ae73699560e93180da8485fe246d6d2cf11ea25294f6a7fe9691b24d5ff",
+    "cached-publication-green.log": "143b5438f37de7b911a6d6474dc7e5b0766ca11569d1e72a3d30fd99aec8c075",
+    "cached-publication-branches.log": "93d057a8c77562b178e85b64ac911402331eaa38b213636e36fbd48d3a252f7e",
+    "cached-publication-clippy.log": "e7a2494900b449cfc72e2e2c9ed683a41af29547c6be94a29b3f297f7bcb9a67",
+    "cached-publication-source-check.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+    "cached-publication-clean-source-check.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+    "cached-publication-current-docs-tests.log": "36e202ad7a0d4b952d11e9fd7d869d8cc054a2b89d148ed10887c804117af6a0",
+    "cached-publication-minimum-docs-tests.log": "f28c6955f7b7f2dd846129ad1a1232f20b057ab0065a2353771d0251fb6920af",
+    "cached-publication-public-contracts.log": "58455771000399165002436d19853bec108cc3be83379106b9d2cdecb6daa8c6",
+    "cached-publication-docs.log": "2685e6b37d98831478f9f025c988041fc9239895ce883eeb37e8d019683bdf33",
+    "cached-publication-workspace.log": "6905452fb1018e522be854ed6620b9e0daa0cfb67fc9a56c8d298f23dfd5d7a2",
+    "http-current.log": "76054d957d3942ae9c417d7e29f5ab9f75d6ec870a6b6a9cfdbb377eb7725191",
+    "http-minimum.log": "849dc6cdc59943261532a0e7db0239507bc2553158b3a4eeb76f54a52633d5b1"
+  },
+  "native_changed_package_required": true,
+  "historical_native_manifest_e82508e5_qualification_transferred": false,
+  "remaining": [
+    "Fresh frozen native package and ordinary current/minimum native qualification",
+    "Valid original proof paths for live PostgreSQL unbooted and partial cases",
+    "Remaining P0\u2013P9 source/platform/resource/upgrade acceptance"
+  ],
+  "full_parity_rows_closed": 0,
+  "full_http_parity_complete": false,
+  "crash_validation_deferred": true,
+  "crash_handling_qualified": false,
+  "distribution_approved": false,
+  "implementation_commit": "06ba0d0e2ef4579b9a6e685fa664ee649e8919fb"
+}

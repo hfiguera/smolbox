@@ -82,6 +82,36 @@ defmodule SmolBox.CI.PackageTest do
     NativeConsumer.validate_options!([])
   end
 
+  test "checkpoint consumers require explicit public mode and a separate ordinary campaign" do
+    assert_raise ArgumentError, ~r/native-checkpoints requires explicit --native-public/, fn ->
+      NativeConsumer.validate_options!(native_checkpoints: true)
+    end
+
+    for other <-
+          ~w(native_branches native_images native_growth native_volume native_terminal native_network native_workload)a do
+      assert_raise ArgumentError, ~r/must run separately/, fn ->
+        NativeConsumer.validate_options!(
+          [native_checkpoints: true, native_public: true] ++ [{other, true}]
+        )
+      end
+    end
+  end
+
+  test "branch consumers require explicit public mode and a separate ordinary campaign" do
+    assert_raise ArgumentError, ~r/native-branches requires explicit --native-public/, fn ->
+      NativeConsumer.validate_options!(native_branches: true)
+    end
+
+    for other <-
+          ~w(native_checkpoints native_images native_growth native_volume native_terminal native_network native_workload)a do
+      assert_raise ArgumentError, ~r/must run separately/, fn ->
+        NativeConsumer.validate_options!(
+          [native_branches: true, native_public: true] ++ [{other, true}]
+        )
+      end
+    end
+  end
+
   test "image consumers require explicit separate public mode and bounded private settings" do
     assert_raise ArgumentError, ~r/requires explicit --native-public/, fn ->
       NativeConsumer.validate_options!(native_images: true)

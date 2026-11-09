@@ -1,0 +1,193 @@
+{
+  "schema": 1,
+  "status": "scoped-native-unbooted-disposal-and-retirement-both-toolchains-current-backing-closeout-with-explicit-normal-close-minimum-source-cleanup-pending",
+  "source_commit": "ac4bf459c8875004040b25c1983ab0f15ea8ddb4",
+  "hex_archive_sha256": "553c0001d50153f85d0974252f748cc1bd720f28dd4a86e76f93a00c3178bfe8",
+  "source_archive_sha256": "832020aa31b56cccfb19bdcc428053be6e7f68c824460c4bca3abfcc70cc3bf0",
+  "native_manifest_sha256": "e82508e5d78fa4882c1cfae1c12f658b368d96cb638dba6fa74c19bcc0878ec8",
+  "helper_sha256": "3f72b406c28de87a6b767c7d07809d5da3e6204a47d5265fc048ff5379549307",
+  "sdk_source_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_unmodified": true,
+  "compiled_native_source_file_hashes_match_frozen_archive": 336,
+  "build_source_mode_differences_limited_to_group_write_removed": true,
+  "ordinary_scope": {
+    "platform": "linux",
+    "architecture": "x86_64",
+    "source": "approved-local-bare",
+    "store": "memory",
+    "request_timeout_ms": 1000,
+    "native_phase_pause_fault_injection_or_process_signals": false,
+    "consumers_without_rust": true,
+    "workflow_sha256": "ea7e9d628e6809062ae242694d2248261967b9d26b05cae86cc7b9e77a12cfd4"
+  },
+  "native_package_checks": [
+    {
+      "name": "toolchain",
+      "exit_status": 0,
+      "sha256": "2073de5abf149185c2f4d7473dc833bc921b99135560d24ae7b2293f33a9c376",
+      "summaries": []
+    },
+    {
+      "name": "sdk-before",
+      "exit_status": 0,
+      "sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "summaries": []
+    },
+    {
+      "name": "build-helper",
+      "exit_status": 0,
+      "sha256": "b2f7cd3ca721a32c2661992aae556e50dd08a5ac124461472b4948cb466af5c6",
+      "summaries": []
+    },
+    {
+      "name": "port-branch",
+      "exit_status": 0,
+      "sha256": "72fb4f94cd1cf1f1dbbfde8a91dd092dc1d2d1f8e515c430450ff1303400b7f6",
+      "summaries": [
+        "test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 75 filtered out; finished in 4.15s"
+      ]
+    },
+    {
+      "name": "package",
+      "exit_status": 0,
+      "sha256": "65e53ed77c290a3616b5411143517ae0492186d27fb4cbb41e2c1a17b27d100b",
+      "summaries": []
+    },
+    {
+      "name": "sdk-after",
+      "exit_status": 0,
+      "sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "summaries": []
+    }
+  ],
+  "exact_ordinary_unentered_non_vm_worker_check": {
+    "exit_status": 0,
+    "selector": "transfer_supervisor::tests::ordinary_branch_worker_rejects_unentered_fixture_and_collects_original_leases",
+    "log_sha256": "b2e5d2674fde049b16d8253b0b503fd81aa2ef1639793c39e6dcbb39181ffc49",
+    "summaries": [
+      "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1080 filtered out; finished in 2.50s"
+    ],
+    "inert_unentered_fixture": true,
+    "sdk_open_or_fork_or_vm_entry": false,
+    "forced_termination": false
+  },
+  "cases": {
+    "current": {
+      "toolchain": "Elixir 1.20.4 / OTP 29.0.6",
+      "initial_harness_exit_status": 1,
+      "full_automatic_harness_pass": false,
+      "original_collected_publication_acknowledged": true,
+      "typed_unbooted_disposal_and_retirement_acknowledged": true,
+      "normal_original_owner_shutdown": true,
+      "source_files_verified": 1805,
+      "assets_verified": 806,
+      "source_library_assets_tools_domain_keys_verified": true,
+      "native_beam_sql_kvm_inventories_empty": true,
+      "account_lock_available": true,
+      "sdk_counts": {
+        "vms": 0,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0
+      },
+      "archive_sha256": "1db8ac5e33d9e1a3de2fbd5dcdab4e180a9761d4d71fb7b3b006985597cc3a29",
+      "archive_bytes": 379750630,
+      "archive_members": 11206,
+      "sdk_backup_sha256": "6e09662c01a7d90219f9a54d9794f57274dc30f41246b9d8ef7bdd00d6e61c7e",
+      "full_archive_and_sdk_backup_verified_guest_outer_mac_stream": true,
+      "compact_metadata_verified": 31,
+      "codec_readers": {
+        "current": {
+          "checkpoints": 6,
+          "decoded_records": 18,
+          "log_sha256": "281ed630efc9cb8db5c95b2d6a9b21e4a6c30b539db1cee375acb0fa5dee522e"
+        },
+        "minimum": {
+          "checkpoints": 6,
+          "decoded_records": 18,
+          "log_sha256": "281ed630efc9cb8db5c95b2d6a9b21e4a6c30b539db1cee375acb0fa5dee522e"
+        }
+      },
+      "failed_authority_not_reopened": true,
+      "source_deleted": true,
+      "typed_backing_release_acknowledged": true,
+      "final_reserved_resources": {
+        "slots": 0,
+        "cpus": 0,
+        "memory_mb": 0,
+        "disk_gb": 0
+      },
+      "ordinary_lifecycle_complete_with_explicit_normal_close": true,
+      "initial_normal_close_rejected_without_detailed_reason": true,
+      "preinstalled_close_control_acknowledged": true,
+      "explicit_close_control_requests": 1,
+      "clean_vm_caches": true
+    },
+    "minimum": {
+      "toolchain": "Elixir 1.18.4 / OTP 27.3.4.15",
+      "initial_harness_exit_status": 1,
+      "full_automatic_harness_pass": false,
+      "original_collected_publication_acknowledged": true,
+      "typed_unbooted_disposal_and_retirement_acknowledged": true,
+      "normal_original_owner_shutdown": true,
+      "source_files_verified": 1805,
+      "assets_verified": 806,
+      "source_library_assets_tools_domain_keys_verified": true,
+      "native_beam_sql_kvm_inventories_empty": true,
+      "account_lock_available": true,
+      "sdk_counts": {
+        "vms": 1,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0
+      },
+      "archive_sha256": "38c33152a9eb477370943ebf017e13af317e5af1b7b4a21506a92062ada8268e",
+      "archive_bytes": 379788982,
+      "archive_members": 11239,
+      "sdk_backup_sha256": "32e4249182ab2f41222ee8a7fa44e7434adcb2e28f094eea8719847de79f2320",
+      "full_archive_and_sdk_backup_verified_guest_outer_mac_stream": true,
+      "compact_metadata_verified": 34,
+      "codec_readers": {
+        "current": {
+          "checkpoints": 6,
+          "decoded_records": 18,
+          "log_sha256": "4be6cbd6ce989808bee6917e2bf46c6549f2ff4555a0cb8a551e3e442484540d"
+        },
+        "minimum": {
+          "checkpoints": 6,
+          "decoded_records": 18,
+          "log_sha256": "4be6cbd6ce989808bee6917e2bf46c6549f2ff4555a0cb8a551e3e442484540d"
+        }
+      },
+      "failed_authority_not_reopened": true,
+      "source_deleted": false,
+      "typed_backing_release_acknowledged": false,
+      "source_cleanup_returned": "admission_exhausted / embedded / not_dispatched",
+      "source_cleanup_exact_native_phase_not_established": true,
+      "remaining_reserved_resources": {
+        "slots": 2,
+        "cpus": 2,
+        "memory_mb": 1280,
+        "disk_gb": 7
+      },
+      "retained_sdk_state": "stopped / no PID after normal shutdown",
+      "source_and_backing_disks_retained": true,
+      "preinstalled_retained_shutdown_acknowledged": true,
+      "socket_metadata_preserved": 2
+    }
+  },
+  "full_parity_rows_closed": 0,
+  "full_http_parity_complete": false,
+  "crash_validation_deferred": true,
+  "crash_handling_qualified": false,
+  "distribution_approved": false,
+  "pushed_or_published": false,
+  "remaining": [
+    "Automatic current/minimum source cleanup and normal-close acceptance",
+    "Other partial and handoff histories, encrypted PostgreSQL unbooted disposal",
+    "Other source/platform/resource and upgrade combinations",
+    "Full P0\u2013P9 parity audit"
+  ]
+}

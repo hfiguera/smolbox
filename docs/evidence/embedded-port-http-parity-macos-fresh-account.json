@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "status": "account-preflight-passed-initial-enrollment-observation-failed",
+  "frozen_source_commit": "766b3a111eb07bf885641a20b6bb826b6cf39668",
+  "package_manifest_sha256": "947ad46c11c0f0768712b77a8f126a142747ce22cad9cbc2c2430353e2cef61e",
+  "helper_sha256": "407bcee7bb54123083690fe52dcd917047f2c038894db882b70f069b7a40cfb5",
+  "account_preflight": {
+    "actual_uid": 502,
+    "standard_account": true,
+    "administrator": false,
+    "passwd_home_matches": true,
+    "package_assets_verified": 809,
+    "source_files_verified": 1834,
+    "current_toolchain": "Elixir 1.20.4 / OTP 29.0.6",
+    "minimum_toolchain": "Elixir 1.18.4 / OTP 27.3.4.15",
+    "rust_on_consumer_path": false,
+    "sdk_defaults_absent_before_first_launch": true
+  },
+  "initial_enrollment_observation": {
+    "harness_startup_budget_seconds": 60,
+    "normal_collection_budget_seconds": 10,
+    "collection_unresolved_at_deadline": true,
+    "original_startup_exception_masked": true,
+    "exact_startup_cause_proven": false,
+    "helper_later_absent_without_signal": true,
+    "native_lock_available": true,
+    "original_binding_verified": true,
+    "all_ten_sdk_tables_empty": true,
+    "vm_cache_absent": true,
+    "cold_snapshot_preserved": true,
+    "wire_work_request_sent": false,
+    "public_vm_consumer_started": false,
+    "authority_reset_or_generation_change": false
+  },
+  "runner_correction": {
+    "startup_budget_seconds": 120,
+    "matches_public_broker_default": true,
+    "startup_cause_preserved_if_collection_unresolved": true,
+    "forced_termination_added": false,
+    "deterministic_runner_tests_passed": 17
+  },
+  "continuation": "Separate ordinary public consumer uses original enrolled binding with initialization disabled; outcome recorded separately. No accepted work is replayed.",
+  "ordinary_native_acceptance_claimed": false,
+  "full_feature_parity_claimed": false,
+  "crash_validation_deferred": true,
+  "distribution_approved": false,
+  "private_evidence_sha256": {
+    "mac-account-preflight.json": "18c9620f9fc0dfc1f0e79c1136fa4ab7e3235f0121b924bc16347d57aa924a99",
+    "mac-qualification-status.json": "e02cc12fc79310719a47a1451daadddc6d16d309fb009eb26a0bffe09104e36d",
+    "mac-enrollment-failure/custody.json": "bf8af1516e69bd1f6d7c7b75d664ac56e9988773dcc67f29c09c1013ca421daa",
+    "mac-enrollment-failure/driver.log": "f342a0d6ccfc3cbd1100d736d738136779a92d967770d3f45d528f8fbb326ebc",
+    "mac-enrollment-failure/enrollment.stderr": "b449fa5a01a06f40809096cc8d8300242b200a8561b53802f48100404f92465b",
+    "mac-enrollment-failure/enrollment.stderr.retained.json": "988e386ade9b49212de7102ca9a2725cab7580eab88b5d16d68656144b81918c"
+  }
+}

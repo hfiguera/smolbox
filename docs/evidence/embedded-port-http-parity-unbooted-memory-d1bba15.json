@@ -1,0 +1,205 @@
+{
+  "schema": 1,
+  "status": "linux-current-minimum-automatic-unbooted-memory-lifecycle-passed",
+  "source_commit": "d1bba15c0ae7d7cd2784ac7187ad0f696a7cc8c1",
+  "hex_archive_sha256": "3b256131e57e3a1a3aa9bfe041ca0a21c49ecf0a36c4fe98c359260a01b306af",
+  "source_archive_sha256": "26412313af48c105c22f6683de780ecb82cbb48972066971e3e6725f6b85c086",
+  "native_manifest_sha256": "e82508e5d78fa4882c1cfae1c12f658b368d96cb638dba6fa74c19bcc0878ec8",
+  "helper_sha256": "3f72b406c28de87a6b767c7d07809d5da3e6204a47d5265fc048ff5379549307",
+  "sdk_source_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_unmodified": true,
+  "native_inputs_content_bound_to_frozen_source": 336,
+  "native_build_source_archive_mode_difference": "non-executable source 0644 versus frozen archive 0664; content and executable bits match",
+  "workflow_sha256": "ea7e9d628e6809062ae242694d2248261967b9d26b05cae86cc7b9e77a12cfd4",
+  "cases": {
+    "current": {
+      "platform": "Linux x86_64",
+      "store": "Memory",
+      "installed_hex_consumer_without_rust": true,
+      "toolchain": {
+        "elixir": "1.20.4",
+        "otp": "29.0.6"
+      },
+      "exit_status": 0,
+      "full_automatic_harness_pass": true,
+      "manual_continuation_required": false,
+      "ordinary_scope": "local-bare, one-second branch API deadline, original collected publication, unbooted disposal, dependency retirement, source cleanup and backing release",
+      "final_reserved_resources": {
+        "slots": 0,
+        "cpus": 0,
+        "memory_mb": 0,
+        "disk_gb": 0
+      },
+      "source_and_child_deleted": true,
+      "original_owner_normal_shutdown": true,
+      "source_files_verified": 1809,
+      "assets_verified": 806,
+      "source_library_assets_host_tools_domain_keys_verified": true,
+      "native_beam_sql_kvm_inventories_empty": true,
+      "account_lock_available": true,
+      "vm_caches_empty": true,
+      "sdk_counts": {
+        "vms": 0,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0
+      },
+      "checkpoints": {
+        "private-records-completed.json": {
+          "sha256": "f70464df4a3bfaf445388ffea1299a70bdc27089c0f544873cf47430e3cd09b2",
+          "records": 3
+        },
+        "private-records-deadline.json": {
+          "sha256": "8f7395bb4ed4e632aa849c28e29ec4cb31f65300e09de9ea3bd5a052ec635d60",
+          "records": 3
+        },
+        "private-records-disposed.json": {
+          "sha256": "62bbe2ef87d3eafc7079a373d3a9eace676fd14d53182b4f924f19ad1ee70d4c",
+          "records": 3
+        },
+        "private-records-published.json": {
+          "sha256": "7e1a79f7932d38e42ed3973da3163cdec95ac356f85d0349a17868ade90f91a3",
+          "records": 3
+        },
+        "private-records-retired.json": {
+          "sha256": "39d02687039d1e27d6ccc5bffc83576550bebc8c6d363b7b5620c9bd27b8145c",
+          "records": 3
+        }
+      },
+      "codec_readers": {
+        "current": {
+          "checkpoints": 5,
+          "decoded_records": 15,
+          "same_original_request": true,
+          "original_collected_publication_preserved": true,
+          "typed_unbooted_disposal_retirement_backing_validated": true,
+          "initial_charges_retained_until_proof": true,
+          "final_resources_zero": true,
+          "sdk_or_vm_started": false,
+          "authority_restored_or_replayed": false,
+          "log_sha256": "dbc38865e8873564252b91ea4ff3d3e697c4a9dae72a3a15832c0bd1d9493351"
+        },
+        "minimum": {
+          "checkpoints": 5,
+          "decoded_records": 15,
+          "same_original_request": true,
+          "original_collected_publication_preserved": true,
+          "typed_unbooted_disposal_retirement_backing_validated": true,
+          "initial_charges_retained_until_proof": true,
+          "final_resources_zero": true,
+          "sdk_or_vm_started": false,
+          "authority_restored_or_replayed": false,
+          "log_sha256": "dbc38865e8873564252b91ea4ff3d3e697c4a9dae72a3a15832c0bd1d9493351"
+        }
+      },
+      "archive_sha256": "15409398017406a87870e00834d6fb3308b976860800b15f3b662236cc060781",
+      "archive_bytes": 379773485,
+      "archive_members": 11210,
+      "sdk_backup_sha256": "228a5415e2b7f8419a25e7e07b893df6d26f7db5f56aaa83a847c2d5db71959c",
+      "compact_metadata_verified": 28,
+      "full_archive_and_sdk_backup_verified_guest_outer_mac_stream": true,
+      "full_archive_retained_on_mac": false,
+      "authority_restored_or_replayed": false
+    },
+    "minimum": {
+      "platform": "Linux x86_64",
+      "store": "Memory",
+      "installed_hex_consumer_without_rust": true,
+      "toolchain": {
+        "elixir": "1.18.4",
+        "otp": "27.3.4.15"
+      },
+      "exit_status": 0,
+      "full_automatic_harness_pass": true,
+      "manual_continuation_required": false,
+      "ordinary_scope": "local-bare, one-second branch API deadline, original collected publication, unbooted disposal, dependency retirement, source cleanup and backing release",
+      "final_reserved_resources": {
+        "slots": 0,
+        "cpus": 0,
+        "memory_mb": 0,
+        "disk_gb": 0
+      },
+      "source_and_child_deleted": true,
+      "original_owner_normal_shutdown": true,
+      "source_files_verified": 1809,
+      "assets_verified": 806,
+      "source_library_assets_host_tools_domain_keys_verified": true,
+      "native_beam_sql_kvm_inventories_empty": true,
+      "account_lock_available": true,
+      "vm_caches_empty": true,
+      "sdk_counts": {
+        "vms": 0,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0
+      },
+      "checkpoints": {
+        "private-records-completed.json": {
+          "sha256": "b7a9ee38b845728dba91abb8a4582ee8b583ed4b97d83c3b97e8a18ee382b18c",
+          "records": 3
+        },
+        "private-records-deadline.json": {
+          "sha256": "07a8b797f538964b3ddc06a90102352e84073daddf6ddd1ff9691fe6c44b63a5",
+          "records": 3
+        },
+        "private-records-disposed.json": {
+          "sha256": "f3961fdfa4b4030685618131afec5905d4596aea7b00030c5553ac2ff32eaf10",
+          "records": 3
+        },
+        "private-records-published.json": {
+          "sha256": "bf7e7a1f55b9b5f697417787ce07f04ae2007411cfa189bb6c4d9f3cb8cdba3f",
+          "records": 3
+        },
+        "private-records-retired.json": {
+          "sha256": "7f3fba322cafc27358e4863f211b6386ef9459d0a6eaa765334623bd2511fa69",
+          "records": 3
+        }
+      },
+      "codec_readers": {
+        "current": {
+          "checkpoints": 5,
+          "decoded_records": 15,
+          "same_original_request": true,
+          "original_collected_publication_preserved": true,
+          "typed_unbooted_disposal_retirement_backing_validated": true,
+          "initial_charges_retained_until_proof": true,
+          "final_resources_zero": true,
+          "sdk_or_vm_started": false,
+          "authority_restored_or_replayed": false,
+          "log_sha256": "dbc38865e8873564252b91ea4ff3d3e697c4a9dae72a3a15832c0bd1d9493351"
+        },
+        "minimum": {
+          "checkpoints": 5,
+          "decoded_records": 15,
+          "same_original_request": true,
+          "original_collected_publication_preserved": true,
+          "typed_unbooted_disposal_retirement_backing_validated": true,
+          "initial_charges_retained_until_proof": true,
+          "final_resources_zero": true,
+          "sdk_or_vm_started": false,
+          "authority_restored_or_replayed": false,
+          "log_sha256": "dbc38865e8873564252b91ea4ff3d3e697c4a9dae72a3a15832c0bd1d9493351"
+        }
+      },
+      "archive_sha256": "bf0bc7bea4bb55bf040650f79a6ded97abfef14f4d632316b86cf3eddfe5feaa",
+      "archive_bytes": 379967348,
+      "archive_members": 11226,
+      "sdk_backup_sha256": "09eccfee007266e14f416ec10154fc59a35d9ca1e4b940443c9c67aae065cd9b",
+      "compact_metadata_verified": 29,
+      "full_archive_and_sdk_backup_verified_guest_outer_mac_stream": true,
+      "full_archive_retained_on_mac": false,
+      "authority_restored_or_replayed": false
+    }
+  },
+  "remaining": [
+    "Encrypted PostgreSQL unbooted histories and other required partial/handoff combinations",
+    "Remaining source/platform/resource/upgrade acceptance and final P0\u2013P9 audit"
+  ],
+  "full_parity_rows_closed": 0,
+  "full_http_parity_complete": false,
+  "crash_validation_deferred": true,
+  "crash_handling_qualified": false,
+  "distribution_approved": false
+}

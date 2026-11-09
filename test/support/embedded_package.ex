@@ -168,6 +168,7 @@ defmodule SmolBox.Test.EmbeddedPackage do
       "minimum_material_revision" => Keyword.get(options, :minimum_material_revision, 0),
       "pull_error" => Keyword.get(options, :pull_error, false),
       "prepare_error" => Keyword.get(options, :prepare_error, false),
+      "capture_transition" => options[:capture_transition],
       "stop_no_change" => Keyword.get(options, :stop_no_change, false)
     }
     |> Map.merge(volume_metadata(options))

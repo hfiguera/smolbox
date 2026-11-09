@@ -141,7 +141,9 @@ class Port:
         self.process = subprocess.Popen([str(package / 'smolbox-port'), '--config', str(config)], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=self.errors, env=environment)
         self.next_id = 0
         try:
-            frame = self.receive(60)
+            # Match the public broker's default handshake budget. A fresh
+            # account must prepare the approved templates before its hello.
+            frame = self.receive(120)
             assert frame['type'] == 'hello' and frame['hello']['preflight']['status'] == 'ready', 'package not ready'
             self.hello = frame['hello']
             expected_config = json.loads(Path(config).read_bytes())
@@ -158,8 +160,13 @@ class Port:
             assert self.hello['capabilities'] == capabilities(expected_manifest), 'wrong capabilities'
             assert self.hello['limits'] == limits(expected_manifest), 'unexpected effective limits'
             self.send({'type': 'approve', 'hello': self.hello})
-        except BaseException:
-            self.graceful_exit()
+        except BaseException as startup_error:
+            try:
+                self.graceful_exit()
+            except BaseException as collection_error:
+                # Preserve the startup cause even when normal collection is
+                # unresolved; neither outcome authorizes forced termination.
+                raise startup_error from collection_error
             raise
 
     def exact(self, size, timeout):
@@ -174,9 +181,12 @@ class Port:
         return bytes(data)
 
     def receive(self, timeout=30):
+        deadline = time.monotonic() + timeout
         size = struct.unpack('>I', self.exact(4, timeout))[0]
         assert 0 < size <= MAX_FRAME, 'bad helper length'
-        return json.loads(self.exact(size, timeout))
+        remaining = deadline - time.monotonic()
+        assert remaining > 0, 'frame deadline'
+        return json.loads(self.exact(size, remaining))
 
     def send(self, message):
         body = json.dumps(message, separators=(',', ':')).encode()
@@ -185,11 +195,21 @@ class Port:
         self.process.stdin.flush()
 
     def call(self, operation, budget=30000, upload=None):
+        # Observe long approved checkpoint work without an accidental 30-second
+        # reader timeout. One deadline covers acceptance and all event frames;
+        # the fixed grace permits the helper's bounded cancellation/terminal.
+        deadline = time.monotonic() + budget / 1000 + 5
+
+        def receive():
+            remaining = deadline - time.monotonic()
+            assert remaining > 0, 'request observation deadline'
+            return self.receive(remaining)
+
         self.next_id += 1
         request_id = self.next_id
         epoch = self.hello['epoch']
         self.send({'type': 'request', 'epoch': epoch, 'id': request_id, 'budget_ms': budget, 'initial_credit': 262144, 'initial_event_credit': 64, 'operation': operation})
-        accepted = self.receive()
+        accepted = receive()
         assert accepted['epoch'] == epoch and accepted['id'] == request_id and accepted['sequence'] == 0, 'wrong acceptance'
         if accepted['type'] == 'terminal':
             return accepted['outcome'], []
@@ -200,7 +220,7 @@ class Port:
                 self.send({'type': 'upload', 'epoch': epoch, 'id': request_id, 'offset': offset, 'data_base64': base64.b64encode(chunk).decode()})
         events, sequence = [], 1
         while True:
-            frame = self.receive()
+            frame = receive()
             assert frame['epoch'] == epoch and frame['id'] == request_id and frame['sequence'] == sequence, 'bad correlation or sequence'
             sequence += 1
             if frame['type'] == 'terminal':

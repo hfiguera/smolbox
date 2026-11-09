@@ -298,13 +298,13 @@ defmodule SmolBox.Store.NativeCheckpointCodecTest do
     def machine(_store, _operation, _arguments), do: raise("must not mutate")
   end
 
-  test "future checkpoint descriptors require source, capture and resolution readers before enrollment" do
+  test "optional checkpoint descriptors require source, capture and resolution readers before enrollment" do
     store = start_supervised!(Memory)
     config = Package.create(protocol_major: 2)
     on_exit(fn -> File.rm_rf!(config.package_path) end)
     sdk = put_in(Config.sdk_identity(config)["feature_versions"]["checkpoints"], 1)
     config = %{config | sdk_identity: sdk}
-    assert {:error, _} = Config.validate(config)
+    assert :ok = Config.validate(config)
     target = %Target{kind: :embedded, native_config: config}
 
     for marker <- [

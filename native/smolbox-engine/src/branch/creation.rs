@@ -19,6 +19,18 @@ impl std::fmt::Debug for BranchCreateRequest {
     }
 }
 impl BranchCreateRequest {
+    /// Correlate source, child and approval material only. Publication attests
+    /// neither boot/readiness nor the initial activation's completion. The live
+    /// retained owner still binds the full frozen creation, including activation.
+    pub fn matches_publication(&self, publication: &crate::BranchPublication) -> Result<()> {
+        self.validate_declaration()?;
+        publication.validate()?;
+        publication
+            .change
+            .child_origin
+            .intent
+            .matches_creation(self)
+    }
     pub(super) fn validate(&self, engine: &Engine) -> Result<()> {
         self.source.validate(engine.binding())?;
         self.validate_declaration()

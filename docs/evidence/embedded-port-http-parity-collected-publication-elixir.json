@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "scope": "Elixir protocol/channel validation for original collected branch material publication",
+  "source_base_commit": "fa48c445f7cc856fd7109fcfc611e8b71856a741",
+  "source_files_sha256": {
+    "lib/smolbox/embedded/branch_publication.ex": "a274d172d30861b17d249ffb7c33e514c271333f753be9d7aec0bbdacb8dca27",
+    "lib/smolbox/embedded/channel.ex": "d31f985bbdb4092e8b2ebf00f8bd057e1ff7a145a941ea90a6d4fd0285a47b02",
+    "lib/smolbox/embedded/port.ex": "140f7582a5ffc7eb592559e493c0c6aa1bbd67f0e76bd757f700bb071d7dc084",
+    "lib/smolbox/embedded/protocol.ex": "8607a6302c644476b73961fe2f02d4f8024d31c45f8e1093243614b028e23ff2",
+    "lib/smolbox/embedded/request.ex": "6fc7582062b3e0187cc488d0f228d5bfa8a4c12e2a3fee267c37183029583e5c",
+    "test/unit/embedded_collected_branch_publication_test.exs": "accc8d07115dfb3e98e8f6a3408da40645461e672c9ae855f142a9d15198ff8a",
+    "test/unit/embedded_branch_creation_test.exs": "b931bb7ffaf89459014296c83a6c1f43140ae8fe7e43e626004e8b02823f4c88",
+    "test/unit/embedded_port_test.exs": "05ccea1bc9d7004d76e9662fdddbe213f08cf5c8d157f4549b4fa92be6dac105"
+  },
+  "contract": {
+    "operation": "publish_collected_branch_material",
+    "result": "collected_branch_material_published",
+    "protocol_major": 2,
+    "explicit_quiescence_required": true,
+    "maximum_control_budget_ms": 30000,
+    "maximum_creation_bytes": 16384,
+    "maximum_publication_bytes": 65536,
+    "source_child_approval_platform_and_epoch_bound": true,
+    "unavailable_channel_allows_this_valid_fenced_control": true,
+    "not_a_read_only_observation": true,
+    "no_stream_output": true,
+    "material_reply_never_attests_activation_or_readiness": true,
+    "current_package_rejects_before_native_io_even_with_catalog": true,
+    "no_backend_operation_codec_store_or_admission_change": true
+  },
+  "validation": {
+    "current_toolchain": "Elixir 1.20.4 / OTP 29.0.6",
+    "minimum_toolchain": "Elixir 1.18.4 / OTP 27.3.4.15",
+    "wire_and_channel_checks_per_toolchain": 22,
+    "legacy_protocol_checks_per_toolchain": 9,
+    "cold_dispatch_rejection_checks_per_toolchain": 1,
+    "other_port_cases_excluded_by_line_selection": 19,
+    "new_wire_contract_tests": 4,
+    "synthetic_canonical_rust_fixture_used": true,
+    "existing_catalog_fixture_atom_load_order_dependency_removed": true,
+    "scoped_format_check": true,
+    "credo_existing_issues": 67,
+    "credo_exit_status": 14,
+    "new_changed_line_credo_findings": 0,
+    "logs_sha256": {
+      "current-wire": "e4133ab16aa37ce57af553a9768b0152b2e7d5d0653eeb17d53c441b532d0264",
+      "current-admission": "1f99e382a9221e4ebb4ddbb5ea2bc329f39f7d174f903150ddcb71a94af6e0e3",
+      "minimum-wire": "146940fe068be4a1937af1947509e80189719430aeddd3fbc7f464e75f8de04c",
+      "minimum-admission": "80ea8bbafca05917480cfa64d9c3eb55e5dd1634f40357c4e64239ff859b2da6",
+      "current-protocol": "f749e99211efec84bc0ccadd3fbe2d8eb1a44e2a612fd6ce6f9195bae709b780",
+      "minimum-protocol": "949c5be862e0238415c154e6a53432d462bfd5ab52beea0efe4c8c687686cff7",
+      "docs": "5fef54fb065693cfa7b3b98e993d1ad42c8f708129af7cc0c273c82ded294e23",
+      "docs-links": "2977ff71930dc7c0c0758e26d2a31102384e27693707da347f9b51505f31e155"
+    },
+    "documentation_build_and_links": true
+  },
+  "qualification": {
+    "backend_runtime_store_public_continuation": false,
+    "installed_consumers": false,
+    "live_sdk_recovery_qualified": false,
+    "public_native_branch_admission": false,
+    "full_parity_complete": false,
+    "crash_validation_performed": false,
+    "distribution_approved": false
+  }
+}

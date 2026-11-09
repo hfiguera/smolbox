@@ -24,7 +24,7 @@ defmodule SmolBox.Embedded.NativePreparedBranchRetirement do
     do:
       valid?(saved) and saved.request == request(authority) and
         Enum.all?(
-          ~w(completion release retirement backing deletion delete_continuation delete_cleanup delete_collection)a,
+          ~w(collected_publication completion release retirement backing deletion delete_continuation delete_cleanup delete_collection)a,
           &(Map.fetch!(authority, &1) == nil)
         )
 

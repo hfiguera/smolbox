@@ -1,5 +1,32 @@
 //! Original context facts only; no SDK entry, VM, owner loss or native cleanup.
 use super::*;
+
+#[test]
+fn original_unbooted_candidate_accepts_only_the_empty_private_shared_pack_cache() {
+    let model = Model::new();
+    let counts = model.counts();
+    let pack = model.engine.vm_directory(&model.child.name).join("pack");
+    std::fs::create_dir(&pack).unwrap();
+    std::fs::set_permissions(&pack, std::fs::Permissions::from_mode(0o700)).unwrap();
+    let candidate = probe(&model).unwrap();
+    assert!(candidate.creation == model.resolution.creation);
+    assert_eq!(model.counts(), counts);
+    assert!(pack.is_dir());
+    assert!(
+        Ledger::new(model.engine.domain.clone(), &candidate.creation)
+            .unwrap()
+            .read()
+            .unwrap()
+            .is_none()
+    );
+
+    let marker = pack.join("volume-or-lease");
+    std::fs::write(&marker, b"retain").unwrap();
+    assert!(probe(&model).is_err());
+    assert_eq!(std::fs::read(&marker).unwrap(), b"retain");
+    assert_eq!(model.counts(), counts);
+}
+
 fn probe(model: &Model) -> Result<UnbootedBranchDisposalCandidate> {
     model
         .resolution

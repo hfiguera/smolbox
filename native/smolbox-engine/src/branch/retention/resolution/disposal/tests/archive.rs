@@ -77,6 +77,75 @@ fn exact_disposal_retires_only_transient_work_and_preserves_backing_and_publicat
     assert!(model.resolution.state_checked(&model.engine).is_err());
 }
 #[test]
+fn collected_worker_ownership_is_preserved_until_the_exact_disposal_is_synchronized() {
+    let mut model = Model::new();
+    let mut proof = model.run(false, |_| model.delete_projection()).unwrap();
+    let original = Arc::downgrade(model.entry());
+    let spool = model
+        .entry()
+        .work
+        .lock()
+        .unwrap()
+        .collected
+        .as_ref()
+        .unwrap()
+        .prepared
+        .spool
+        .path
+        .clone();
+    let counts = model.counts();
+    drop(model.entry.take());
+    proof.completion = UnbootedBranchDisposalCompletion::ResolvedAbsent;
+    proof.proof_sha256 = proof.digest().unwrap();
+    proof.validate().unwrap();
+    assert_eq!(
+        model
+            .resolution
+            .archive_checked(&model.engine, &proof)
+            .unwrap_err()
+            .code,
+        ErrorCode::Ownership
+    );
+    let entry = original.upgrade().unwrap();
+    assert!(entry.work.lock().unwrap().collected.is_some());
+    assert_eq!(Arc::strong_count(&entry.ownership), 2);
+    assert!(spool.exists());
+    assert_eq!(model.counts(), counts);
+    assert!(historical(&model).unwrap().is_none());
+}
+#[test]
+fn a_different_owner_still_blocks_handoff_after_collected_spools_retire() {
+    let mut model = Model::new();
+    let proof = model.run(false, |_| model.delete_projection()).unwrap();
+    let different_owner = model.entry().ownership.clone();
+    let counts = model.counts();
+    drop(model.entry.take());
+    assert_eq!(
+        model
+            .resolution
+            .archive_checked(&model.engine, &proof)
+            .unwrap_err()
+            .code,
+        ErrorCode::Conflict
+    );
+    assert_eq!(model.counts(), counts);
+    assert!(historical(&model).unwrap().is_none());
+    assert_eq!(
+        model.engine.branch_retention.entries.lock().unwrap().len(),
+        1
+    );
+    drop(different_owner);
+    model
+        .resolution
+        .archive_checked(&model.engine, &proof)
+        .unwrap();
+    assert_eq!(
+        model.counts().checkpoint_material,
+        counts.checkpoint_material
+    );
+    assert!(historical(&model).unwrap() == Some(proof));
+}
+#[test]
 fn additional_original_owners_block_handoff_and_retry_after_they_retire_keeps_exact_charge() {
     let mut model = Model::new();
     let proof = model.run(false, |_| model.delete_projection()).unwrap();

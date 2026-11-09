@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "scope": "Normal Port shutdown drain in the ordinary public branch workflow",
+  "source_parent_commit": "3f4f9e7125e1cd215e4219dd6467bf235fff604a",
+  "identified_before_any_new_public_sdk_or_vm_run": true,
+  "boundary": "Port.shutdown closes request admission and reports unavailable while normal protocol shutdown drains; workflow must await stopped rather than ending supervision at unavailable.",
+  "implementation": {
+    "accepts_closing_and_unavailable_only_until_one_absolute_deadline": true,
+    "stopped_required_before_supervision_stop": true,
+    "ready_quarantined_and_expired_do_not_authorize_stop": true,
+    "no_signal_restart_adoption_or_replay": true
+  },
+  "source_files_sha256": {
+    "examples/embedded_port/lib/branch_demo.ex": "f9c422072da692ca3d699ebe244f15f60cf8de884e16538262aa08b369df88dd",
+    "test/unit/embedded_branch_example_test.exs": "9940e589c601653974d8558c89020a00c6c1835c3cad6848525747b728b76bb1"
+  },
+  "validation": {
+    "pure_example_and_control_checks_per_toolchain": 6,
+    "current_and_minimum_models_use_agent_peer_not_sdk_or_vm": true,
+    "http_contracts_per_toolchain": 410,
+    "current_http_max_cases": 8,
+    "minimum_http_max_cases": 4,
+    "http_runtime_and_deferred_crash_excluded": true,
+    "logs_sha256": {
+      "current-shutdown-final": "d494fdc88307ffcf9d404d15044c041dfc7f6e5d0ef5345a1406c4e399608599",
+      "minimum-shutdown-final": "f9ad0af989b0d2e24ebac0f6519ae8b009db57ad8dd357dfc16f47e8ab25fb5d",
+      "current-http": "1277e573cd536c1428c060df0f4ef459c7227e1d4f3454bdd2e74420fe4d9b92",
+      "minimum-http": "3e7a8ae190310fa5728c96354e97c87fa33d1afa73ecec60adee34ec98350fd1"
+    }
+  },
+  "qualification": {
+    "new_public_source_ordinary_consumer_qualified": false,
+    "crash_validation_performed": false,
+    "full_parity_complete": false,
+    "distribution_approved": false
+  }
+}

@@ -1,0 +1,126 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "scope": "Linux public checkpoint/branch admission and ordinary installed-consumer preparation",
+  "source_parent_commit": "60a4cdfad6ac5864d0abe192f732d7e68740812b",
+  "source_files_sha256": {
+    "dev/smolbox/ci/native_consumer.ex": "ec586758b305141a4cb88ff57cf68626f630cd6e8381c9fd8ff26dffe383318e",
+    "dev/smolbox/ci/package.ex": "560058bc0c3ea37019f8b3d64ea6efabd8fb7557be0f3c9ad68871587987b837",
+    "examples/durable_host/test/native_collected_branch_publication_store_test.exs": "3105a41ef7212566a900a96ea571d9b0deaa325c920cf6c6ee3b554a9922ba0c",
+    "examples/durable_host/test/native_partial_branch_backing_store_test.exs": "a9b6bbdf871c638993e901da5e1a7ddb3dede737e09a763cc7d84bae277ade3d",
+    "examples/durable_host/test/native_partial_branch_cleanup_resolution_store_test.exs": "2746dd119127c71c6d267f5a90ae6d10629f0037a8302e2b68d32828de6da1af",
+    "examples/durable_host/test/native_partial_branch_cleanup_store_test.exs": "9e37e0899211b6b4bfe94f9673470423c8fb9808c4cdad65c93594bbdc4a1e8e",
+    "examples/durable_host/test/native_partial_branch_collection_store_test.exs": "204ea57e9c1890e99905cdace47ad35293ceb22e9e31b174014a52464c671af1",
+    "examples/durable_host/test/native_partial_branch_disposal_store_test.exs": "3fb0f695dd719c6b85cb43ae8c62dd6e8ffbbd5a11f1a79b5578fb2aa857dbbe",
+    "examples/durable_host/test/native_partial_branch_retirement_store_test.exs": "9028b4ed7024ac50751a39d1faccc078b6cb278e3903dd29a5c925bf16823b69",
+    "examples/embedded_port/lib/branch_control.ex": "7ec56e381bfd4ade05bdaf49c4a47d16814387eec04fc3df76f527124ee04ff0",
+    "examples/embedded_port/lib/branch_demo.ex": "f1bd5929db437cf4f16b6f54a63471fe5d6e8c03ac5fbe3193fddedc4a517729",
+    "examples/support/store/branch_store.ex": "f7a9c2f9c71760019aa2aa174c6a96797e4a88af8b4a09deb35d91d64ab67629",
+    "lib/smolbox/embedded/sdk_identity.ex": "394dfb29901f7d8bfe12dce77dfc0f513a6f041c0edebcb0711ef9c1b87c6f76",
+    "lib/smolbox/store.ex": "0034bfd580274e877210d5d301db5390cf6ab2ec70b74ce3aaf3385d48706b40",
+    "lib/smolbox/store/memory.ex": "4c2e20757dbbb72d1589546f9d244c77571751fb8a57e7b6525ff2df343f8fcf",
+    "scripts/embedded-branches-runtime-proof.exs": "56200f1950ed877fb9b595fff0469c324e78c15d9f472573b1b25338bcfda0ff",
+    "test/ci/package_test.exs": "01144aa5a9301b469073dfcbcc8495861a7597530df189fde987be6e9e985697",
+    "test/unit/embedded_branch_example_test.exs": "9f425b8a75d9025ee8c474ba502e3f5cf05fd7ee8ceb8c5331d28e1a808cc9de",
+    "test/unit/embedded_package_activation_test.exs": "6ead9b8d406a3e1d5da19ea462fcd86223af2395c41ddbe6d8b7461e92e36b21",
+    "test/unit/native_collected_branch_publication_test.exs": "b5046eba5ab935a8becf927848e7ab393c51c1c7dd0e9b3f6fb65fbef1955023",
+    "test/unit/native_partial_branch_cleanup_resolution_test.exs": "b45fcbf7dc9b639b0033d301b510db22c9cfd7cb767576c34d2829b05980b9e4",
+    "test/unit/native_partial_branch_cleanup_test.exs": "e58b8ea0125d955be08baef8e18f380c6ad414f82318413e56d64aea3869e2a7",
+    "test/unit/native_partial_branch_disposal_test.exs": "970d4a5483b559bd84521f36dacedaa7c38e8753dc8c90f20656cceb88b7834e"
+  },
+  "implementation": {
+    "explicit_linux_sdk_checkpoints_and_branches": true,
+    "macos_descriptor_unchanged": true,
+    "exports_descriptor_still_unapproved": true,
+    "optional_partial_cleanup_resolution_descriptor_still_unapproved": true,
+    "existing_package_descriptors_and_pins_unchanged": true,
+    "real_memory_native_branches_marker": 1,
+    "real_postgresql_native_branches_marker_requires_all_reader_versions_and_release_writer": true,
+    "runtime_requires_every_individual_branch_store_marker": true,
+    "no_proof_only_store_capability_wrapper": true,
+    "source_profile": {
+      "cpus": 1,
+      "memory_mb": 512,
+      "host_overhead_mb": 128,
+      "storage_gb": 1,
+      "overlay_gb": 1
+    },
+    "extra_policy": {
+      "slots": 1,
+      "cpus": 1,
+      "memory_mb": 640,
+      "disk_gb": 5
+    },
+    "total_worker_capacity": {
+      "slots": 5,
+      "cpus": 5,
+      "memory_mb": 3200,
+      "disk_gb": 16
+    },
+    "ordinary_workflow": [
+      "source checkpointable create/start/setup",
+      "ready and held children with deduplicated creates",
+      "draining and combined capacity rejection",
+      "disk and RAM sibling independence",
+      "explicit held release and original-version deduplication",
+      "normal stop and cold restart without RAM restore",
+      "all child deletes with retained extra accounting",
+      "paired source-dependency retirement",
+      "source delete and positive known backing namespace absence",
+      "two native backing acknowledgements and zero final reservations",
+      "real codec roundtrips and private checkpoints"
+    ],
+    "failure_controls": "bounded private once-only original handles; positive quiescence/removal attestations; no signals, adoption or mutation replay",
+    "normal_shutdown": "original pinned owner/epoch, protocol shutdown inside native authority barrier, stopped status before supervision stops; retained shutdown first saves records",
+    "consumer_option": "--native-public --native-branches --without-rust",
+    "consumer_campaign_is_explicit_ordinary_and_separate": true
+  },
+  "validation": {
+    "branch_backend_codec_checks_per_toolchain": 939,
+    "real_encrypted_postgresql_checks_per_toolchain": 180,
+    "postgres_final_partitions": 0,
+    "postgres_final_other_database_clients": 0,
+    "postgres_normal_smart_shutdown": true,
+    "focused_final_control_models_per_toolchain": 4,
+    "ci_models": 46,
+    "credo_total": 67,
+    "credo_baseline_total": 67,
+    "new_example_or_control_findings": 0,
+    "sdk_full_and_clean_verification": true,
+    "http_regression_after_changes": "running; to be recorded independently",
+    "logs_sha256": {
+      "current-branch-contracts": "28bbf61986f2276fdcc70cc283bc5f4ff1e918e404cc8d412025c397318000d7",
+      "minimum-branch-contracts": "c0e4affdfb54e056d32dc3a67cb612a49d9b2d8653cb7c0c28bcb6ba54a753ab",
+      "current-postgres": "24131e8f57027d6ed297b17e17b96577d53ab55941d1d2d499d20f0c5dbb6d99",
+      "minimum-postgres": "9f2444f1ed400942f52b11fb8342e7915a2185b930b9467a2fa32a1b5714cb44",
+      "ci": "aae593f10750b82bf9ab0c01809a9efb533652cdc502d00fd087a3a59fa20796",
+      "example-final": "e59970af83c284b23f6fdb82b074b3f202b420c38bdd2d4e446af157a39f4e9a",
+      "minimum-example-final": "1c43f7b28e1598c27920c1962713a92a14a2ca0c5b3b8e5b7fe717ce2b5a6656",
+      "compile": "aaf3aa0b3540a9cb9e79911476ee96af0664f3466d1eaa8e3381039c4cd785bc"
+    },
+    "credo_log_sha256": "6f5a5eeec66bd90a55fc87fde1f23a74f97ee7d83183801a8b6c03247ec3496c",
+    "documentation_build_and_local_links": true,
+    "documentation_logs_sha256": {
+      "docs-final": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+      "doc-links-final": "fe7e86509e4e55bfacafbae259d53fb8b130721b7e8d9250576f81d31fb0aa5a"
+    },
+    "new_credo_findings_against_baseline": 0,
+    "credo_scope_sha256": "4f8f7607b703d2108b53ce01fec2135edf002a0a8f2c55209b8d6e14ddfe28ec"
+  },
+  "qualification": {
+    "new_public_source_live_native_workflow_run": false,
+    "ordinary_public_memory_consumer_qualified": false,
+    "ordinary_public_postgresql_consumer_qualified": false,
+    "installed_current_minimum_branch_consumers": false,
+    "public_native_branch_development_admission_enabled": true,
+    "all_full_parity_rows_pending": true,
+    "full_parity_complete": false,
+    "crash_validation_performed": false,
+    "distribution_approved": false
+  },
+  "next_acceptance": [
+    "Freeze new Elixir source and run installed current/minimum public branch consumers without Rust against an exact qualified Linux native package.",
+    "Verify public paired source retirement and backing release in real Memory and durable PostgreSQL workflows.",
+    "Complete remaining original-owner partial/uncertain recovery controls and P0-P9 gates with crash validation still deferred."
+  ]
+}

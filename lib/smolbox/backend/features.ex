@@ -41,6 +41,7 @@ defmodule SmolBox.Backend.Features do
                   [
                     :material_proofs,
                     :partial_cleanup_resolution,
+                    :partial_collection_preflight,
                     :observability,
                     :compact_creation,
                     :job_resources,

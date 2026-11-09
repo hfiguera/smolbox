@@ -81,6 +81,30 @@ impl CollectionRecord {
     }
 }
 impl Lifecycle {
+    /// Inspect the same original plan/enrollment/request without registering a
+    /// cleanup fence, synchronizing a proof or changing lifecycle phase.
+    pub(crate) fn inspect_partial_collection(
+        &self,
+        plan: &Plan,
+        request: &PartialBranchCollectionRequest,
+        enrollment: &crate::epoch::BootEnrollment,
+    ) -> Result<bool> {
+        request.validate()?;
+        plan.verify()?;
+        plan.publication
+            .change
+            .child_origin
+            .intent
+            .matches_creation(&request.creation)?;
+        let (journal, _) = self.read()?;
+        if journal.plan != *plan || !phase_matches(&journal.phase, enrollment) {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        if let Some(record) = &journal.collection {
+            record.matches(request, enrollment)?;
+        }
+        Ok(journal.collection.is_some())
+    }
     pub(crate) fn partial_collection_started(&self) -> Result<bool> {
         Ok(self.read()?.0.collection.is_some())
     }
@@ -221,6 +245,83 @@ mod tests {
         };
         request.request_sha256 = request.digest().unwrap();
         request
+    }
+
+    #[test]
+    fn eligibility_inspection_never_registers_collection_or_changes_phase_rows_or_charges() {
+        // Synthetic enrollment beyond the OS PID range; no SDK or VM operation.
+        let model = crate::branch_boot::tests::identity_model(true);
+        let lifecycle = Lifecycle::at(&model.plan.child.path);
+        let request = request(&model.plan);
+        let path = model.plan.child.path.join(FILE_NAME);
+        let before = std::fs::read(&path).unwrap();
+        let counts = model.engine.jobs.counts();
+        let rows = || {
+            serde_json::to_vec(&[
+                model
+                    .engine
+                    .db
+                    .get_vm(&request.creation.source.name)
+                    .unwrap(),
+                model
+                    .engine
+                    .db
+                    .get_vm(&request.creation.child.name)
+                    .unwrap(),
+            ])
+            .unwrap()
+        };
+        let original = rows();
+        assert!(!lifecycle
+            .inspect_partial_collection(&model.plan, &request, &model.enrollment)
+            .unwrap());
+        assert_eq!(std::fs::read(&path).unwrap(), before);
+        assert_eq!(rows(), original);
+        assert_eq!(model.engine.jobs.counts(), counts);
+        assert!(!lifecycle.partial_collection_started().unwrap());
+        assert!(model.engine.owned_managers.lock().unwrap().is_empty());
+
+        lifecycle
+            .begin_partial_collection(&model.plan, &request, &model.enrollment)
+            .unwrap();
+        let saved = std::fs::read(&path).unwrap();
+        assert!(lifecycle
+            .inspect_partial_collection(&model.plan, &request, &model.enrollment)
+            .unwrap());
+        let mut crossed = request.clone();
+        crossed.operation_id = "another-collection".into();
+        crossed.request_sha256 = crossed.digest().unwrap();
+        assert!(lifecycle
+            .inspect_partial_collection(&model.plan, &crossed, &model.enrollment)
+            .is_err());
+        assert_eq!(std::fs::read(&path).unwrap(), saved);
+        assert_eq!(rows(), original);
+        assert_eq!(model.engine.jobs.counts(), counts);
+    }
+
+    #[test]
+    fn eligibility_refuses_unentered_phase_without_saving_a_collection() {
+        let model = crate::branch_boot::tests::identity_model(true);
+        let lifecycle = Lifecycle::at(&model.plan.child.path);
+        let request = request(&model.plan);
+        let (_, version) = lifecycle.read().unwrap();
+        lifecycle
+            .write(
+                &Journal {
+                    plan: model.plan.clone(),
+                    phase: Phase::Prepared,
+                    collection: None,
+                },
+                Some(version),
+            )
+            .unwrap();
+        let path = model.plan.child.path.join(FILE_NAME);
+        let before = std::fs::read(&path).unwrap();
+        assert!(lifecycle
+            .inspect_partial_collection(&model.plan, &request, &model.enrollment)
+            .is_err());
+        assert_eq!(std::fs::read(&path).unwrap(), before);
+        assert!(!lifecycle.partial_collection_started().unwrap());
     }
 
     #[test]

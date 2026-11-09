@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "status": "inactive-compiler-objects-preserved-offhost-and-local-copies-evicted",
+  "scope": "Inactive compiler object cache preservation to free macOS build space; no native feature qualification.",
+  "files_preserved_and_evicted": 19296,
+  "logical_bytes": 3838805560,
+  "archive_sha256": "878d13729c19dd2291ecd1422f6dd034318de63147bbff9a44250bbd8a7bbc08",
+  "archive_bytes": 647130896,
+  "every_file_bytes_mode_owner_group_mtime_verified_before_eviction": true,
+  "originals_rehashed_and_open_file_check_repeated_before_eviction": true,
+  "mac_free_bytes_at_completion": 6831190016,
+  "sdk_namespaces_source_assets_and_approved_executables_untouched": true,
+  "native_owner_or_vm_started": false,
+  "crash_qualification_claimed": false
+}

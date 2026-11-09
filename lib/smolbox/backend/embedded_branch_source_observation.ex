@@ -52,18 +52,45 @@ defmodule SmolBox.Backend.EmbeddedBranchSourceObservation do
 
   def promote(context, proof) do
     with true <- epoch?(proof, context),
-         true <- proof.publication["previous"] == context.identity.receipt,
          {:ok, publication} <- BranchPublication.from_wire(proof.publication),
-         history = (context.history || []) ++ [publication],
-         identity = %Identity{
-           receipt: publication.receipt,
-           transition: publication,
-           material_history: history
-         },
-         true <- Identity.valid?(identity),
-         do: {:ok, %{context | identity: identity, history: history}},
+         do: promote_publication(context, publication),
          else: (_ -> failure(:identity_conflict, :dispatch_uncertain))
   end
+
+  def promote_publication(context, %BranchPublication{} = publication) do
+    history = context.history || []
+
+    cond do
+      not BranchPublication.valid?(publication) ->
+        failure(:identity_conflict, :dispatch_uncertain)
+
+      context.identity.receipt == publication.previous ->
+        history = history ++ [publication]
+
+        identity = %Identity{
+          receipt: publication.receipt,
+          transition: publication,
+          material_history: history
+        }
+
+        if Identity.valid?(identity),
+          do: {:ok, %{context | identity: identity, history: history}},
+          else: failure(:identity_conflict, :dispatch_uncertain)
+
+      current_publication?(context, publication, history) ->
+        {:ok, context}
+
+      true ->
+        failure(:identity_conflict, :dispatch_uncertain)
+    end
+  end
+
+  defp current_publication?(context, publication, history),
+    do:
+      context.identity.receipt == publication.receipt and
+        context.identity.transition == publication and
+        context.identity.material_history == history and
+        List.last(history) == publication and Identity.valid?(context.identity)
 
   defp remaining(budget, deadline),
     do: EmbeddedBranchOperation.remaining(budget, deadline, {:branch, :not_dispatched})

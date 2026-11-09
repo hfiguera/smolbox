@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "scope": "SQLite-managed native observations and private interprocess writer regression",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "ordinary_checkpoint": {
+    "source_commit": "b16c806ad41a35d88234c9ec5de5e4db6663f3e8",
+    "native_manifest_sha256": "4ed73cf689a6bd304a1aec4ff3ce5ce79737a37887b68a46f60b768ef55714b4",
+    "helper_sha256": "7bec8e7e0bcc4bd1a37a481aa3ce4f2a2aa5bc42eb08b16736ec601bec1feea8",
+    "witness_sha256": "ebe375a890394da31a3f143294d7e772c0d3230920c9a56115b451b480ca20f8",
+    "source_running_and_branch_preflight_passed": true,
+    "first_preparation_collected_and_verified": true,
+    "material_publication_error": "Database (MayHaveDispatched)",
+    "child_vm_boot_entered": false,
+    "original_owner_retained": true,
+    "publication_continuation_missing_from_existing_witness_controls": true,
+    "cleanup_approval_pending_at_checkpoint": true,
+    "private_archive_sha256": "6d464c36a835d4933d09316cfb817bf0738010c1a588c664914cfd1fafaeb604",
+    "private_archive_bytes": 159968463,
+    "archive_verified_locally_and_outer": true,
+    "live_disk_archive_is_not_cold_consistency_qualification": true
+  },
+  "observation_fix": {
+    "raw_main_database_file_descriptors_removed": true,
+    "sqlite_connection_retains_inode": true,
+    "path_uid_mode_device_inode_and_no_redirect_checks_retained": true,
+    "main_connection_filename_matches_binding": true,
+    "sqlite_fcntl_has_moved_checked_before_and_after_query_and_rollback": true,
+    "unsupported_or_moved_connections_reject_without_fallback": true,
+    "query_only_no_mutex_no_follow_progress_and_deadline_guards_retained": true,
+    "sdk_source_modified": false
+  },
+  "regression": {
+    "private_database_only": true,
+    "no_runtime_or_vm_constructed": true,
+    "normal_external_writer_exit": true,
+    "before": "cached SDK write followed by native observation failed with Database (NotDispatched)",
+    "after": "same cached SDK writer and native observation succeed",
+    "path_swap_and_unrelated_connection_rejected": true,
+    "sdk_compatibility_models_passed": 16,
+    "branch_models_passed": 374,
+    "existing_ignored_branch_case_not_run": 1,
+    "capture_models_passed": 66,
+    "strict_all_target_clippy": true,
+    "sdk_unmodified": true,
+    "logs_sha256": {
+      "before": "2b4090b85429fdc6239a45cf37816cb50a37b0f6a6d890f2b7610e20e85da9c4",
+      "after": "0322340aea9c11b0216b8632aa031fca9e522b7818cd392685650a2ee529fca2",
+      "after-all": "a9e9027fa7fcc8ac8f8e5778b86834fc25d05de6997ca2c644251603846f0660",
+      "sdk-compat": "77bc70e396831475851aafbd6e021ff8cccd8415a9da501ebf9c303ac643d148",
+      "branch": "d894e1754fc45c8d6bc00f56f2293cb0afa084b66e2d0a917f70e12c18096f58",
+      "capture": "543c8d6b061f3676aac2fe28c4b7ab21818ca92cca0308a4de63656b6e51678c",
+      "clippy": "a5d4b24e0ab6e57d82cb715a3ae02787403584660e22ea7d48f53920dbe68004",
+      "sdk": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+    },
+    "documentation_build_and_links": true
+  },
+  "references": [
+    "https://www.sqlite.org/howtocorrupt.html#_posix_advisory_locks_canceled_by_a_separate_thread_doing_close_",
+    "https://www.sqlite.org/c3ref/c_fcntl_begin_atomic_write.html#sqlitefcntlhasmoved"
+  ],
+  "changed_package_ordinary_vm_qualification": false,
+  "public_native_branch_admission": false,
+  "full_parity_complete": false,
+  "crash_validation_performed": false,
+  "distribution_approved": false
+}

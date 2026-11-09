@@ -326,6 +326,7 @@ defmodule SmolBox.NativeBranchPublicDeletionTest do
       fixture(budget: 1500, accept_delay: 2000)
 
     assert {:error, _} = resolve(runtime, child)
+    assert_received {:store_operation, :branch_delete_accept, true}
     saved = NativeBranchDeletionContract.fetch(Memory, store, child)
     assert saved.branch.native_authority.deletion.proof == nil
     assert {:ok, ^usage} = Memory.usage(store, parent.worker_id)

@@ -6,6 +6,7 @@ defmodule SmolBox.Store.NativeBranchOps do
     BranchPublication,
     NativeBranchAuthority,
     NativeBranchResult,
+    NativeCollectedBranchPublication,
     NativeGrowth
   }
 
@@ -117,9 +118,8 @@ defmodule SmolBox.Store.NativeBranchOps do
          true <- completion_pending?(parent, child),
          true <- within_budget?(child, expected, now),
          true <- NativeBranchResult.bound?(result, parent, child),
-         {:ok, receipt, _, _} <- NativeGrowth.head(parent),
          {:ok, proof} <- BranchPublication.from_wire(result.completion.publication),
-         true <- receipt == proof.previous,
+         true <- NativeCollectedBranchPublication.publication_pending?(parent, child, proof),
          {:ok, parent} <-
            ManagedMachine.update(
              parent,

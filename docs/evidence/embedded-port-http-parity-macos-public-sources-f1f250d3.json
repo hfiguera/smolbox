@@ -1,0 +1,250 @@
+{
+  "schema": 1,
+  "status": "scoped-ordinary-macos-public-source-and-image-acceptance",
+  "source_commit": "f1f250d33183ae1fb8e0c5d414c5b968325bcfd7",
+  "source_archive_sha256": "b8212eba126047dc8cf760e000663adc95dd8118e35ea4f27378f3b6a8eb72b7",
+  "source_files": 1847,
+  "native_inputs_verified": 340,
+  "hex_sha256": "5624338500dfab38d1c5606b234ba704da1b17d3f2b37d3df43a3e47d2cec569",
+  "manifest_sha256": "1a8e644f66511c60c9aabc7fc3815bf2600857a18f821621a2b717a77ca723e4",
+  "helper_sha256": "fe85a410e809d526b8ec391b5d4ae9ed23aa9bd156924e40cf22059aa0362569",
+  "account": {
+    "uid": 504,
+    "standard_account": true,
+    "genuine_default_home": true,
+    "existing_healthy_binding_retained": true,
+    "failed_authority_restored": false
+  },
+  "sdk": {
+    "version": "1.22.0",
+    "revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source_unmodified": true
+  },
+  "cases": [
+    {
+      "source_kind": "oci",
+      "toolchain": "current",
+      "toolchain_version": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "installed_files_verified": 656,
+      "proof_tools_verified": 7,
+      "without_rust": true,
+      "consumer_report_sha256": "7cc050d0e53b53e85386229a81641231d1cb18b56f42f70e89a618419ebd0cc8",
+      "owned_deleted": true,
+      "final_reserved_slots": 0,
+      "retained_binary_bytes": 65537,
+      "retained_binary_sha256": "f6b82df7d28d7ebac8601da4c154ce0d5389b929901075bbbeec3003e37e12b4",
+      "stopped_runtime_replacement": true,
+      "immutable_creation_retained": true,
+      "image_operations": {
+        "approved_pull_observed": true,
+        "creation_source_unchanged": true,
+        "duplicate_pull_reused": true,
+        "inventory_observed": true
+      },
+      "cold_warm_registry": false,
+      "configured_startup": true,
+      "startup_counts": [
+        1,
+        2
+      ]
+    },
+    {
+      "source_kind": "oci",
+      "toolchain": "minimum",
+      "toolchain_version": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "installed_files_verified": 656,
+      "proof_tools_verified": 7,
+      "without_rust": true,
+      "consumer_report_sha256": "a6867a3c2ab18f666f09c864c04699c740b4df7574296842021cbc88fc0f1f41",
+      "owned_deleted": true,
+      "final_reserved_slots": 0,
+      "retained_binary_bytes": 65537,
+      "retained_binary_sha256": "f6b82df7d28d7ebac8601da4c154ce0d5389b929901075bbbeec3003e37e12b4",
+      "stopped_runtime_replacement": true,
+      "immutable_creation_retained": true,
+      "image_operations": {
+        "approved_pull_observed": true,
+        "creation_source_unchanged": true,
+        "duplicate_pull_reused": true,
+        "inventory_observed": true
+      },
+      "cold_warm_registry": false,
+      "configured_startup": true,
+      "startup_counts": [
+        1,
+        2
+      ],
+      "minimum_dependencies": {
+        "jason": "1.4.0",
+        "mint": "1.11.0",
+        "mint_web_socket": "1.0.6",
+        "nimble_options": "1.1.0",
+        "req": "0.7.4",
+        "telemetry": "1.3.0"
+      }
+    },
+    {
+      "source_kind": "registry",
+      "toolchain": "current",
+      "toolchain_version": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "installed_files_verified": 656,
+      "proof_tools_verified": 7,
+      "without_rust": true,
+      "consumer_report_sha256": "586466a88612c3b5e25c4c2be87d1d48e67d4aa6ba6d534dd63aff8236bdac3c",
+      "owned_deleted": true,
+      "final_reserved_slots": 0,
+      "retained_binary_bytes": 65537,
+      "retained_binary_sha256": "f6b82df7d28d7ebac8601da4c154ce0d5389b929901075bbbeec3003e37e12b4",
+      "stopped_runtime_replacement": true,
+      "immutable_creation_retained": true,
+      "image_operations": {
+        "imported_pull_rejected": true,
+        "inventory_observed": true
+      },
+      "cold_warm_registry": true,
+      "configured_startup": false,
+      "startup_counts": [],
+      "fixture": {
+        "counts": {
+          "manifest": 2,
+          "blob": 1,
+          "other": 0,
+          "authorization_present": 0,
+          "stream_errors": 0
+        },
+        "expected": {
+          "manifest": 2,
+          "blob": 1,
+          "other": 0,
+          "authorization_present": 0,
+          "stream_errors": 0
+        },
+        "artifact_unchanged": true,
+        "normal_fixture_shutdown": true,
+        "forced_termination": false
+      }
+    },
+    {
+      "source_kind": "registry",
+      "toolchain": "minimum",
+      "toolchain_version": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "installed_files_verified": 656,
+      "proof_tools_verified": 7,
+      "without_rust": true,
+      "consumer_report_sha256": "597ccb3162d2978db391d94809846705a1f77eb2ce70ae5677fa018199ab2dd0",
+      "owned_deleted": true,
+      "final_reserved_slots": 0,
+      "retained_binary_bytes": 65537,
+      "retained_binary_sha256": "f6b82df7d28d7ebac8601da4c154ce0d5389b929901075bbbeec3003e37e12b4",
+      "stopped_runtime_replacement": true,
+      "immutable_creation_retained": true,
+      "image_operations": {
+        "imported_pull_rejected": true,
+        "inventory_observed": true
+      },
+      "cold_warm_registry": true,
+      "configured_startup": false,
+      "startup_counts": [],
+      "minimum_dependencies": {
+        "jason": "1.4.0",
+        "mint": "1.11.0",
+        "mint_web_socket": "1.0.6",
+        "nimble_options": "1.1.0",
+        "req": "0.7.4",
+        "telemetry": "1.3.0"
+      },
+      "fixture": {
+        "counts": {
+          "manifest": 2,
+          "blob": 1,
+          "other": 0,
+          "authorization_present": 0,
+          "stream_errors": 0
+        },
+        "expected": {
+          "manifest": 2,
+          "blob": 1,
+          "other": 0,
+          "authorization_present": 0,
+          "stream_errors": 0
+        },
+        "artifact_unchanged": true,
+        "normal_fixture_shutdown": true,
+        "forced_termination": false
+      }
+    }
+  ],
+  "final_cleanup": {
+    "sdk_table_counts": {
+      "vms": 0,
+      "vm_create_reservations": 0,
+      "vm_pause_operations": 0,
+      "config": 0,
+      "vm_resize_intents": 0,
+      "vm_resize_receipts": 0,
+      "fork_pools": 0,
+      "fork_pool_snapshots": 0,
+      "fork_pool_slots": 0,
+      "fork_leases": 0
+    },
+    "native_processes": [],
+    "account_lock_available": true,
+    "package_assets_verified": 809,
+    "all_four_public_source_consumers_passed": true,
+    "crash_validation_deferred": true,
+    "forced_termination": false,
+    "failed_disks_and_records_preserved": true,
+    "registry_fixtures_closed_normally": true
+  },
+  "archives": {
+    "oci": {
+      "members": 29,
+      "sha256": "1fa34a3972b9ce62c010024734fff3f396217b08a8d8a4acc296a0313a0c9d65",
+      "bytes": 583680,
+      "verified": true
+    },
+    "registry": {
+      "members": 34,
+      "bytes": 604160,
+      "sha256": "d91c9c1fdb5329072ddce616bd8450bd7017c556989a8548f2a2fff1a436fe8f",
+      "verified": true
+    }
+  },
+  "codec_readers": {
+    "current_and_minimum_each_read": 24,
+    "oci_records_per_dataset": 7,
+    "registry_records_per_dataset": 5,
+    "versions": [
+      "smolbox-record-v19"
+    ],
+    "semantic_roundtrip": true,
+    "envelope_version_preserved": true,
+    "raw_originals_preserved": true,
+    "records_restored_as_authority": false
+  },
+  "preserved_negative_setups": [
+    {
+      "cause": "The initial guest egress policy omitted the observed Docker blob CDN hostname.",
+      "observed_denial": "production.cloudfront.docker.com",
+      "outcome": "Uncertain start retained its original owner; ordinary owned stop, explicit resolution, deletion and normal close all completed.",
+      "stopped_custody_entries_verified": 39,
+      "skipped_nonregular_sockets_recorded": 3,
+      "forced_termination": false
+    },
+    {
+      "cause": "An identical package was copied to a different install path while verified template references retained the original path.",
+      "outcome": "Readiness rejected before machine creation; empty store and SDK inventory; normal close completed.",
+      "template_reference_files_edited": false
+    }
+  ],
+  "remaining": [
+    "macOS authenticated/guest-credential and broader source/resource/store combinations",
+    "macOS checkpoint/branch admission and ordinary acceptance",
+    "exports admission and ordinary acceptance on both platforms",
+    "remaining Linux final-package and shared P0-P9 gates"
+  ],
+  "parity_complete": false,
+  "crash_validation_deferred": true,
+  "crash_handling_qualified": false,
+  "distribution_approved": false
+}

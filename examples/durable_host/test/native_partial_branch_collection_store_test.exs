@@ -104,6 +104,6 @@ defmodule SmolBox.DurableHost.NativePartialBranchCollectionStoreTest do
     assert {:ok, %{native_partial_branch_collections: 1} = capabilities} =
              Store.capabilities(store)
 
-    refute Map.has_key?(capabilities, :native_branches)
+    assert capabilities.native_branches == 1
   end
 end

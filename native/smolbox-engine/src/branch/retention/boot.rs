@@ -10,6 +10,7 @@ mod collection;
 
 pub(super) struct OwnedBoot {
     manager: Arc<Mutex<AgentManager>>,
+    manager_paths: crate::branch_owned::ManagerPaths,
     plan: Plan,
     returned: Option<ReturnedBoot>,
     identity_sha256: Option<String>,
@@ -356,13 +357,22 @@ impl RetainedBranchPreparation {
         {
             return Err(Error::uncertain(ErrorCode::Ownership));
         }
+        let manager_paths = {
+            let manager = boot
+                .manager
+                .try_lock()
+                .map_err(|_| Error::before(ErrorCode::Conflict))?;
+            crate::branch_owned::ManagerPaths::capture(&boot.plan, &manager)?
+        };
         let context = Arc::new(crate::branch_owned::Context {
             manager: boot.manager.clone(),
             plan: boot.plan.clone(),
+            manager_paths,
             enrollment: enrollment.clone(),
             identity_sha256: identity_sha256.clone(),
             release: Mutex::new(None),
             deletion: Mutex::new(None),
+            runtime_boots: engine.runtime_boots.clone(),
             _runtime: original.guard._runtime.clone(),
             _domain: original.guard.domain.clone(),
         });
@@ -539,19 +549,21 @@ impl RetainedBranchPreparation {
             AgentManager::new_named(&record.name, &plan.rootfs.path, storage_disk, overlay_disk)
                 .map_err(|_| Error::before(ErrorCode::Native))?,
         ));
-        if manager
-            .lock()
-            .map_err(|_| Error::before(ErrorCode::Native))?
-            .child_pid()
-            .is_some()
-        {
-            return Err(Error::before(ErrorCode::Ownership));
-        }
+        let manager_paths = {
+            let held = manager
+                .lock()
+                .map_err(|_| Error::before(ErrorCode::Native))?;
+            if held.child_pid().is_some() {
+                return Err(Error::before(ErrorCode::Ownership));
+            }
+            crate::branch_owned::ManagerPaths::capture(&plan, &held)?
+        };
         // Its protected publication now contains all required preparation
         // evidence. Only these collected IPC spools may retire before boot.
         work.collected.take();
         work.boot = Some(OwnedBoot {
             manager: manager.clone(),
+            manager_paths,
             plan: plan.clone(),
             returned: None,
             identity_sha256: None,

@@ -150,13 +150,13 @@ status endpoint that proves a delayed request cannot still complete.
 )
 ```
 
-Keeping a child requires a previously persisted creation response and matching
+For HTTP, keeping a child requires a previously persisted creation response and matching
 source and child incarnation evidence. Upstream's public machine observation does
 not expose immutable lineage or an ownership token. SmolBox binds a successful
 response to its recorded source request and random child name; exclusive ownership
 of that namespace is required. It never adopts an unknown child by name alone.
 
-If the creation response was lost, establish quiescence, identify and explicitly
+For HTTP, if the creation response was lost, establish quiescence, identify and explicitly
 remove the owned worker child through operator procedures, then resolve with
 `disposition: :deleted`. SmolBox verifies absence. It does not delete an unverified
 machine automatically. Worker unavailability is never absence. If both source and
@@ -164,12 +164,47 @@ child disappeared, resolution marks the source missing and retains its reservati
 retire child dependencies before explicitly resolving the source deletion through
 `Machines.resolve/4`.
 
+The embedded backend can also recover a completion retained by the original
+helper when the managed creation response was not committed. It requires the
+exact saved creation request, the same original owner/epoch, fresh source and
+child observations and a paired store commit. It never adopts a child from an
+SDK row or matching name. The [f56c2e3 Linux Memory case](evidence/embedded-port-http-parity-public-memory-cancel-recovery-f56c2e3.json)
+passes public cancellation followed by explicit held-result recovery, preserved
+draining, subsequent sibling use and owned cleanup on both installed toolchains.
+The [corresponding PostgreSQL case](evidence/embedded-port-http-parity-public-postgresql-cancel-recovery-f56c2e3.json)
+now passes on both installed toolchains with fresh encrypted databases, the same
+completed-result recovery and owned cleanup. Separate BEAMs on both toolchains
+read all 13 final encrypted records and both backing acknowledgements without
+native workers. Both readers validate five checkpoints (45 records) per dataset.
+These cases do not identify every internal native cancellation phase. Other
+partial phases, platforms and upgrades remain pending. Crash validation is deferred.
+
 **For the HTTP backend, an uncertain release cannot be resolved as kept.** Upstream can clear its held
 flag before guest activation completes, so that flag does not prove successful
 release. Fence old requests, explicitly remove the child and resolve its absence.
 Never replay release or start a replacement under the same identity.
 
 ## Delete, retire dependencies, release backing capacity
+
+Embedded completed-child retirement and backing controls preserve an already
+completed recovery scan only for the same healthy original helper epoch and
+worker lease generation. The authority barrier spans quiescence, acknowledgement
+and bounded reactivation. Failed reactivation leaves dispatch fenced while
+preserving a committed acknowledgement. Worker draining remains unchanged;
+incomplete startup and partial/unbooted cleanup retain conservative recovery.
+When a prior Port record is still draining, ordinary controls wait for quiescence
+within the same captured deadline and native authority barrier. Only a known
+busy/not-dispatched fence reply can be retried; native work and uncertain bridge
+replies are never replayed. The
+[drain correction](evidence/embedded-port-http-parity-branch-quiescence-drain.json)
+has source/model coverage; changed-source installed acceptance remains required.
+The [correction evidence](evidence/embedded-port-http-parity-branch-control-readiness.json)
+covers models and store contracts. The subsequent
+[9470074 Linux local-bare Memory campaign](evidence/embedded-port-http-parity-public-branches-9470074.json)
+passes both installed current/minimum consumers. The subsequent
+[c5f9fde PostgreSQL case](evidence/embedded-port-http-parity-public-postgresql-branches-c5f9fde.json)
+also passes the completed lifecycle and encrypted historical readback with both
+toolchains. Partial recovery and other required combinations remain unqualified.
 
 1. Delete each child with the existing versioned `Machines.delete/3` operation and
    wait for verified deletion.
@@ -220,14 +255,57 @@ from before feature use after worker effects are quiescent. Never strip history 
 make an old reader accept it. Custom stores must implement the full normative
 `SmolBox.Store` contract before advertising the capability.
 
-Embedded Port branch support is still under implementation and public admission
-remains disabled. Each child's dependency and backing allowance has an independent
+Embedded Port accepts approved Linux checkpoint/branch descriptors only with
+complete native store readers and paired resource writers. Memory and the
+PostgreSQL example advertise `native_branches: 1`; the linked Linux local-bare
+Memory and PostgreSQL public campaigns above have current/minimum ordinary acceptance. Other
+platforms and optional cleanup-resolution remain gated. Each child's dependency
+and backing allowance has an independent
 lifetime: cleaning up one sibling does not unblock source lifecycle while another
 dependency remains, or release another child's backing. The paired-store sibling
 contracts cover these accounting boundaries; ordinary VM independence and exact
 package qualification remain required. The
 [sibling accounting evidence](evidence/embedded-port-http-parity-branch-siblings.json)
 records the validated scope.
+
+The following native integration notes record successive codec and recovery
+checkpoints. Statements that admission was disabled describe those earlier
+snapshots; current admission and qualification are scoped above.
+
+For an ordinary encrypted PostgreSQL campaign, the durable example provides
+`examples/durable_host/scripts/embedded-branches.exs`. Use a fresh account/domain,
+the approved Linux bare artifact/package, the example's configured database and
+a toolchain PATH without Cargo or rustc. Its private settings JSON supplies
+`package`, `manifest_sha256`, `domain_json`, `artifact`, `artifact_sha256`, `scope`,
+`partition`, `encryption_key_file` and `fingerprint_key_file`; both key files hold
+32 bytes. Keep the same keys and partition for readback. Migrate the example's
+database before the first phase.
+
+```sh
+cd examples/durable_host
+MIX_ENV=prod mix run scripts/embedded-branches.exs --ordinary --without-rust \
+  --phase exercise --settings /private/branches/settings.json \
+  --output /private/branches/exercise
+```
+
+After this process exits successfully and its ordinary native shutdown completes,
+start a separate BEAM to compare every saved final machine/command record through
+the public read APIs and read both completed backing acknowledgements:
+
+```sh
+MIX_ENV=prod mix run scripts/embedded-branches.exs --ordinary --without-rust \
+  --phase readback --settings /private/branches/settings.json \
+  --expected-records /private/branches/exercise/private-records-completed.json \
+  --output /private/branches/readback
+```
+
+Readback configures no workers and cannot launch SDK work. It preserves durable
+records and checks zero reservations. An exercise failure retains its original
+Runtime/store for explicit inspection and cleanup; never start another exercise
+or readback to bypass that state. The linked c5f9fde campaign now qualifies this
+exact Linux local-bare workflow, including both encrypted cross-toolchain readers
+with the same library version. It does not qualify library rollback or other
+source/platform/partial-recovery combinations. It selects no crash validation.
 
 Its frozen child assignments and source dependency/history
 records use **codec v30**, including original completion, immutable child root and
@@ -614,6 +692,47 @@ acknowledgements remain readable using the saved acceptance/completion or curren
 version, including after retirement/backing closure, without helper IO. Ordinary
 package qualification and the other partial SDK phases remain open; public native
 branch admission stays disabled.
+
+The paired store boundary also represents original collected material publication
+separately from child completion. Acceptance freezes the full creation request,
+including any initial release, explicit quiescence, platform and child version.
+A typed publication plus a separate fresh source observation advances source
+material history once. Both managed states remain unknown, the source stays
+locked to the active branch, and all ordinary capacity, dependencies and backing
+remain charged. Later ready or disposal proofs must match that same publication.
+Selective codec v50 retains the action and acknowledgement; earlier envelopes
+omit/restore exactly `collected_publication: nil`. Upgrade every reader and
+projection writer before advertising `native_collected_branch_publications: 1`.
+That marker adds no native feature. `SmolBox.Branches.publish_collected/4` now
+coordinates the explicit action with the expected child version and exactly
+`quiesced: true`. Acceptance, publication, fresh source observation and paired
+commit share the original controller/helper fence and one deadline of at most
+30 seconds. Each attempt has at most 24 KiB input / 84 KiB output; the publication
+exchange consumes those totals before observation. Late or malformed replies,
+wrong epoch/platform/PID, missing observations and store failures retain the
+accepted request and every charge. Explicit retries use that same frozen request
+against the retained original owner; no fork, boot, initialization or deletion
+is replayed. Already saved acknowledgements return without helper IO, including
+after later ready/disposal completion. Later ready and disposal controls consume
+the exact stored material history once. Known publication skips prepared-only
+retirement and still requires positive original unbooted-disposal selection;
+publication alone grants no disposal authority. Ordinary package/platform/source
+qualification and installed consumers remain required; public native branching
+is disabled.
+
+For an original collected preparation that never entered child boot, publish its
+collected material before requesting deleted resolution. Select partial collection
+only after establishing the original boot/initialization phase; managed `unknown`
+alone does not establish that phase. An inapplicable collection can leave its
+accepted managed intent pending without a native proof, with every charge retained.
+
+The native [shared-cache correction](evidence/embedded-port-http-parity-unbooted-empty-cache-guard.json)
+also permits the owned, empty private `pack` directory produced by SDK shared-pack
+lease copying. The SDK has no layers mount or lease to process in that empty
+directory. Nonempty/unsafe directories still reject, and cache shape supplies no
+ownership, collection or absence proof. Corrected-package ordinary acceptance
+remains required; the recorded failed owners closed normally with all charges
+and SDK rows preserved.
 
 A separate engine/Port `qualify_partial_branch_child_absence` observation is now
 implemented for the positively disposed original child. It requires the exact

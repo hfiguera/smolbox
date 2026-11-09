@@ -81,14 +81,85 @@ defmodule SmolBox.EmbeddedPackageActivationTest do
     assert Features.native_versions(current).material_proofs == 2
 
     for feature <-
-          ~w(networking ports workloads background_exec logs streaming_exec terminals terminal_preflight)a do
+          ~w(networking ports workloads background_exec logs streaming_exec terminals terminal_preflight remote_sources images)a do
       assert Features.supports?(current, feature)
     end
 
-    for feature <- ~w(remote_sources images
-                       volumes disk_growth checkpoints exports branches)a do
+    for feature <- ~w(volumes disk_growth exports)a do
       refute Features.supports?(current, feature)
     end
+  end
+
+  test "macOS sources and images require explicit platform and exact package approval" do
+    sdk =
+      "native/smolbox-protocol/fixtures/hello-v2-macos-images.json"
+      |> File.read!()
+      |> Jason.decode!()
+      |> get_in(~w(hello sdk))
+
+    assert SDKIdentity.approved?(sdk, "1.22.0", sdk["source_revision"], :macos)
+    refute SDKIdentity.approved?(sdk, "1.22.0", sdk["source_revision"])
+    refute SDKIdentity.approved?(sdk, "1.22.0", sdk["source_revision"], :unknown)
+
+    candidate = Package.create(protocol_major: 2, platform: :macos, sdk_identity: sdk)
+    on_exit(fn -> File.rm_rf!(candidate.package_path) end)
+    assert :ok = Config.validate(candidate)
+    assert Features.supports?(candidate, :remote_sources)
+    assert Features.supports?(candidate, :images)
+    assert Package.received(candidate) == []
+
+    for feature <- ~w(volumes disk_growth exports),
+        do:
+          refute(
+            SDKIdentity.approved?(
+              put_in(sdk, ["feature_versions", feature], 1),
+              "1.22.0",
+              sdk["source_revision"],
+              :macos
+            )
+          )
+
+    for dependency <- ~w(job_resources buffered_exec compact_creation) do
+      incomplete = update_in(sdk["feature_versions"], &Map.delete(&1, dependency))
+      refute SDKIdentity.approved?(incomplete, "1.22.0", sdk["source_revision"], :macos)
+    end
+
+    older = update_in(sdk["feature_versions"], &Map.drop(&1, ~w(remote_sources images)))
+    assert SDKIdentity.approved?(older, "1.22.0", sdk["source_revision"], :macos)
+    refute Features.supports?(%{candidate | sdk_identity: older}, :remote_sources)
+    refute Features.supports?(%{candidate | sdk_identity: older}, :images)
+  end
+
+  test "macOS saved state requires an explicit approved descriptor and retains older surfaces" do
+    hello =
+      "native/smolbox-protocol/fixtures/hello-v2-macos-branches.json"
+      |> File.read!()
+      |> Jason.decode!()
+      |> Map.fetch!("hello")
+
+    sdk = hello["sdk"]
+    assert SDKIdentity.approved?(sdk, "1.22.0", sdk["source_revision"], :macos)
+    refute SDKIdentity.approved?(sdk, "1.22.0", sdk["source_revision"])
+    native = Package.create(protocol_major: 2, platform: :macos, sdk_identity: sdk)
+    on_exit(fn -> File.rm_rf!(native.package_path) end)
+    assert :ok = Config.validate(native)
+
+    for feature <- [:checkpoints, :branches, :partial_collection_preflight],
+        do: assert(Features.supports?(native, feature))
+
+    assert Package.received(native) == []
+
+    older =
+      update_in(
+        sdk["feature_versions"],
+        &Map.drop(&1, ~w(checkpoints branches partial_collection_preflight))
+      )
+
+    assert SDKIdentity.approved?(older, "1.22.0", sdk["source_revision"], :macos)
+    refute Features.supports?(%{native | sdk_identity: older}, :checkpoints)
+    refute Features.supports?(%{native | sdk_identity: older}, :branches)
+    invalid = update_in(sdk["feature_versions"], &Map.delete(&1, "branches"))
+    refute SDKIdentity.approved?(invalid, "1.22.0", sdk["source_revision"], :macos)
   end
 
   test "approved protocol selects the private config schema before opening a helper", %{
@@ -103,6 +174,41 @@ defmodule SmolBox.EmbeddedPackageActivationTest do
     assert config["publish_address"] == "127.0.0.1"
     assert config["package_manifest_sha256"] == native.package_manifest_sha256
     assert Package.received(native) == []
+  end
+
+  test "Linux Port branches require explicit platform and complete real store admission" do
+    sdk =
+      "native/smolbox-protocol/fixtures/hello-v2-linux-branches.json"
+      |> File.read!()
+      |> Jason.decode!()
+      |> get_in(~w(hello sdk))
+
+    assert SDKIdentity.valid?(sdk)
+    assert SDKIdentity.approved?(sdk, "1.22.0", sdk["source_revision"], :linux)
+    refute SDKIdentity.approved?(sdk, "1.22.0", sdk["source_revision"], :macos)
+    candidate = Package.create(protocol_major: 2, platform: :linux, sdk_identity: sdk)
+    on_exit(fn -> File.rm_rf!(candidate.package_path) end)
+    assert :ok = Config.validate(candidate)
+    assert Package.received(candidate) == []
+    store = start_supervised!(Memory)
+    assert {:ok, supported} = Memory.capabilities(store)
+    assert supported.native_branches == 1
+
+    refute SDKIdentity.approved?(sdk, "1.22.0", sdk["source_revision"])
+
+    refute SDKIdentity.approved?(
+             put_in(sdk, ["feature_versions", "partial_cleanup_resolution"], 1),
+             "1.22.0",
+             sdk["source_revision"],
+             :linux
+           )
+
+    refute SDKIdentity.approved?(
+             put_in(sdk, ["feature_versions", "exports"], 1),
+             "1.22.0",
+             sdk["source_revision"],
+             :linux
+           )
   end
 
   test "Linux image descriptor requires exact package approval and retains older surfaces" do

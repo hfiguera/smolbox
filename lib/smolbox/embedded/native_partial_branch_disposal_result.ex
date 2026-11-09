@@ -5,7 +5,7 @@ defmodule SmolBox.Embedded.NativePartialBranchDisposalResult do
   """
   alias SmolBox.Embedded.{
     Identity,
-    NativeGrowth,
+    NativeCollectedBranchPublication,
     NativePartialBranchDisposal,
     NativeUnbootedBranchDisposal,
     NativeUnbootedBranchDisposalResult,
@@ -46,10 +46,9 @@ defmodule SmolBox.Embedded.NativePartialBranchDisposalResult do
          true <- is_struct(saved, NativePartialBranchDisposal) and saved.proof == nil,
          true <- NativePartialBranchDisposal.valid?(saved, child.branch.native_authority),
          true <- PartialBranchDisposal.matches?(proof, saved.request),
-         true <- proof.publication["change"]["platform"] == saved.platform,
-         {:ok, receipt, _, _} <- NativeGrowth.head(parent) do
+         true <- proof.publication["change"]["platform"] == saved.platform do
       child.branch.source == ManagedMachine.key(parent) and
-        receipt == proof.publication["previous"] and
+        NativeCollectedBranchPublication.publication_pending?(parent, child, proof.publication) and
         Identity.valid?(identity) and identity.receipt == proof.publication["receipt"] and
         NativeUnbootedBranchDisposalResult.source_matches?(
           result.source,

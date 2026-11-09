@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "status": "stale-linux-policy-fixture-corrected-fresh-package-required",
+  "failed_build_source_commit": "f11194ca6471c5ba03a62821c027be555565324c",
+  "failed_build_source_archive_sha256": "5759eac14f85a75cb57b6c52346395e839f083c7bdd2583c42aad3797f95d592",
+  "helper_compile_succeeded": true,
+  "unpackaged_helper_sha256": "2655ed9b95ad43b354580d47e05acd113095908b0939754c4dbbf79545aecbc5",
+  "failed_stage": "workspace-models",
+  "linux_engine_tests_passed": 1068,
+  "linux_engine_tests_ignored": 22,
+  "linux_port_tests_passed": 90,
+  "linux_port_tests_failed": 1,
+  "linux_port_tests_ignored": 2,
+  "failure": "Current Linux SDK policy has partial_collection_preflight:1; the selected legacy fixture omits it.",
+  "source_and_sdk_unmodified_after_failed_models": true,
+  "failed_logs_and_checks_verified_on_mac": true,
+  "native_owner_or_vm_started": false,
+  "correction": {
+    "new_current_fixture": "native/smolbox-protocol/fixtures/hello-v2-linux-branches-preflight.json",
+    "new_current_fixture_sha256": "0bb593e3fd597a0cacb66e89148c35ec6338f1ab0b57a6b3b6bcfd620b042199",
+    "legacy_fixture_preserved": "native/smolbox-protocol/fixtures/hello-v2-linux-branches.json",
+    "legacy_fixture_sha256": "c08d7a0d7381659fc62ab662d88690471ffa3b508b5d262b9a5dc6f6c7fc0668",
+    "production_policy_or_capabilities_changed": false,
+    "exact_policy_assertion_retained": true,
+    "optional_feature_changes_neither_capabilities_nor_limits": true
+  },
+  "checks": {
+    "protocol_tests": 104,
+    "protocol_contracts": 59,
+    "python_package_metadata_tests": 3,
+    "python_ordinary_runner_tests": 16,
+    "focused_macos_package_policy_test": 1,
+    "clippy_protocol_port_all_targets_passed": true,
+    "current_elixir_focused": {
+      "doctests": 4,
+      "tests": 25,
+      "failures": 0
+    },
+    "minimum_elixir_focused": {
+      "doctests": 4,
+      "tests": 25,
+      "failures": 0
+    }
+  },
+  "fresh_helper_build_and_ordinary_acceptance_required": true,
+  "full_http_parity_complete": false,
+  "crash_validation_deferred": true,
+  "distribution_approved": false,
+  "private_evidence_sha256": {
+    "failed-build-compact.tar": "d61df2df5688f6bc2897cd92a3b9382d6c6b1b3165efebc4fbeacb83a6037169",
+    "current-fixture-protocol-fixed.log": "54c9a7587d8a2fdbdafa7c17df964943bf00f5dc563f706490fca13a2d932204",
+    "current-fixture-package-test.log": "5cd256593d086841031c786b8d846b04b8b19664aa1fbf0ab59066f4e288a183",
+    "current-fixture-clippy.log": "7adef2225efdf0e873605d158975c419e7bedf086b9a8a2983dc0cf417abf94f"
+  }
+}

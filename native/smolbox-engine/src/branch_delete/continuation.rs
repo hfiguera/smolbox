@@ -112,28 +112,15 @@ impl Retained {
     }
 }
 pub(super) fn manager_is_original(context: &Context) -> Result<()> {
+    context.require_no_runtime_boot()?;
     let manager = context
         .manager
         .try_lock()
         .map_err(|_| Error::before(ErrorCode::Conflict))?;
-    let name = &context.plan.publication.child().name;
-    if manager.name() != Some(name.as_str())
-        || manager
-            .child_pid()
-            .is_some_and(|pid| pid != context.enrollment.child().pid)
-        || manager.storage_path()
-            != context
-                .plan
-                .child
-                .path
-                .join(smolvm::storage::STORAGE_DISK_FILENAME)
-        || manager.overlay_path()
-            != context
-                .plan
-                .child
-                .path
-                .join(smolvm::storage::OVERLAY_DISK_FILENAME)
-        || context._runtime.pid(name).is_some()
+    context.manager_paths.verify(&context.plan, &manager)?;
+    if manager
+        .child_pid()
+        .is_some_and(|pid| pid != context.enrollment.child().pid)
     {
         return Err(Error::before(ErrorCode::Ownership));
     }
@@ -879,6 +866,53 @@ mod tests {
         assert!(state.leases.is_some() && state.completion.is_none());
     }
     #[test]
+    fn collected_and_continued_delete_accept_empty_cold_restart_cache_without_source_changes() {
+        use std::os::unix::fs::PermissionsExt;
+        for continued in [false, true] {
+            let (model, epoch, intent, journal) = fixture();
+            let mut state = retained(&model, &intent);
+            journal.enter(&intent).unwrap();
+            canonical(&model, &epoch, &intent);
+            let collection = epoch
+                .collect_enrolled(&intent.receipt().name, &model.enrollment)
+                .unwrap();
+            let phase = if continued {
+                let request = request();
+                state.continuation = Some(request.clone());
+                journal
+                    .begin_finishing(&intent, &request, &collection, &budget())
+                    .unwrap();
+                Phase::Finishing
+            } else {
+                journal.collected(&intent, &collection).unwrap();
+                Phase::Collected
+            };
+            let pack = intent.plan.child.path.join("pack");
+            std::fs::create_dir(&pack).unwrap();
+            std::fs::set_permissions(&pack, std::fs::Permissions::from_mode(0o700)).unwrap();
+            let source_marker = model.plan.source.path.join("source-marker");
+            std::fs::write(&source_marker, b"source remains").unwrap();
+            let called = Cell::new(0);
+            CollectedDeletion {
+                journal: &journal,
+                authority: authority(&model, &epoch),
+                budget: &budget(),
+            }
+            .finish(&mut state, phase, || {
+                called.set(called.get() + 1);
+                model.engine.db.remove_vm(&intent.receipt().name).unwrap();
+                std::fs::remove_dir_all(&intent.plan.child.path).unwrap();
+                Ok(())
+            })
+            .unwrap();
+            assert_eq!(called.get(), 1);
+            assert!(journal.read().unwrap().0.phase == Phase::Deleted);
+            assert!(matches!(state.completion, Some(Completion::Deleted)));
+            assert_eq!(std::fs::read(&source_marker).unwrap(), b"source remains");
+            assert!(model.plan.snapshot.path.exists());
+        }
+    }
+    #[test]
     fn final_delete_excludes_private_pack_mounts_and_never_follows_a_source_cache_link() {
         let (model, epoch, intent, journal) = fixture();
         let mut state = retained(&model, &intent);
@@ -894,6 +928,8 @@ mod tests {
             .unwrap();
         let pack = intent.plan.child.path.join("pack");
         std::fs::create_dir(&pack).unwrap();
+        let private_mount = pack.join("private-volume");
+        std::fs::write(&private_mount, b"must not enter SDK volume cleanup").unwrap();
         let budget = budget();
         let finish = CollectedDeletion {
             journal: &journal,
@@ -906,6 +942,11 @@ mod tests {
             ))
             .is_err());
         assert!(journal.read().unwrap().0.phase == Phase::Finishing);
+        assert_eq!(
+            std::fs::read(&private_mount).unwrap(),
+            b"must not enter SDK volume cleanup"
+        );
+        std::fs::remove_file(&private_mount).unwrap();
         std::fs::remove_dir(&pack).unwrap();
         let source_cache = tempfile::tempdir().unwrap();
         let marker = source_cache.path().join("retained-source-marker");

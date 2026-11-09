@@ -59,41 +59,45 @@ impl MachineConfiguration {
             || !record.ports.is_empty()
             || !record.mounts.is_empty()
             || !record.staged_mounts.is_empty())
-        .then(|| {
-            Box::new(Self {
-                network: NetworkPolicy {
-                    enabled: record.network,
-                    hosts: record.dns_filter_hosts.clone().unwrap_or_default(),
-                    cidrs: record.allowed_cidrs.clone().unwrap_or_default(),
-                },
-                ports: record
-                    .ports
-                    .iter()
-                    .map(|&(host, guest)| PortMapping { host, guest })
-                    .collect(),
-                backend: record.network_backend.map(|value| value.as_str().into()),
-                mounts: record
-                    .mounts
-                    .iter()
-                    .map(|(source, target, readonly)| ObservedMount {
-                        source: source.clone(),
-                        target: target.clone(),
-                        readonly: *readonly,
-                        staged: false,
-                    })
-                    .chain(
-                        record
-                            .staged_mounts
-                            .iter()
-                            .map(|(_, source, target)| ObservedMount {
-                                source: source.clone(),
-                                target: target.clone(),
-                                readonly: false,
-                                staged: true,
-                            }),
-                    )
-                    .collect(),
-            })
+        .then(|| Self::observe_explicit(record))
+    }
+
+    // Qualification must report verified defaults explicitly. Ordinary legacy
+    // observations keep omitting an all-default offline configuration above.
+    pub(crate) fn observe_explicit(record: &VmRecord) -> Box<Self> {
+        Box::new(Self {
+            network: NetworkPolicy {
+                enabled: record.network,
+                hosts: record.dns_filter_hosts.clone().unwrap_or_default(),
+                cidrs: record.allowed_cidrs.clone().unwrap_or_default(),
+            },
+            ports: record
+                .ports
+                .iter()
+                .map(|&(host, guest)| PortMapping { host, guest })
+                .collect(),
+            backend: record.network_backend.map(|value| value.as_str().into()),
+            mounts: record
+                .mounts
+                .iter()
+                .map(|(source, target, readonly)| ObservedMount {
+                    source: source.clone(),
+                    target: target.clone(),
+                    readonly: *readonly,
+                    staged: false,
+                })
+                .chain(
+                    record
+                        .staged_mounts
+                        .iter()
+                        .map(|(_, source, target)| ObservedMount {
+                            source: source.clone(),
+                            target: target.clone(),
+                            readonly: false,
+                            staged: true,
+                        }),
+                )
+                .collect(),
         })
     }
 }
@@ -354,6 +358,29 @@ fn canonical_address(ip: IpAddr) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn explicit_offline_configuration_keeps_ordinary_default_observations_compatible() {
+        let mut record = VmRecord::new("bare-source".into(), 1, 512, vec![], vec![], false);
+        assert!(MachineConfiguration::observe(&record).is_none());
+        let explicit = MachineConfiguration::observe_explicit(&record);
+        assert!(!explicit.network.enabled);
+        assert!(explicit.network.hosts.is_empty() && explicit.network.cidrs.is_empty());
+        assert!(explicit.ports.is_empty() && explicit.mounts.is_empty());
+        assert!(explicit.backend.is_none());
+        record.network = true;
+        assert!(
+            MachineConfiguration::observe_explicit(&record)
+                .network
+                .enabled
+        );
+        assert!(
+            MachineConfiguration::observe(&record)
+                .unwrap()
+                .network
+                .enabled
+        );
+    }
 
     fn features() -> CreationFeatures {
         CreationFeatures {

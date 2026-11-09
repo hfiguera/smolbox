@@ -1,0 +1,251 @@
+{
+  "schema": 1,
+  "date": "2026-10-17",
+  "scope": "Ordinary shared-engine Linux x86_64 local-bare source and two-child branch lifecycle",
+  "source_commit": "845a37b4d099a8d760e629f16533b74f8a0e77f6",
+  "package": {
+    "source_archive_sha256": "279b43629b8e855ab3b1d47fa22fffedd682b406ed984921fdd4e09feb08f7f8",
+    "source_files_verified": 1774,
+    "manifest_sha256": "e55695a6f7543cd1f857d96c3cf1c81f96a691c69975932fc279fa19ff20b0d5",
+    "helper_sha256": "0d064031745f467277c6508c5c430be2ca4d68cbb180d7e4d057ba10d328fa7e",
+    "witness_sha256": "3b96d144866591b19d410c7afcf81e02c2d8d978f7f01868c2084549d96d434c",
+    "assets": 806,
+    "rust_toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)",
+    "clippy_toolchain": "clippy 0.1.92 (ded5c06cf2 2025-12-08)",
+    "sdk_unmodified_before_after": true
+  },
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+  "ordinary_evidence": {
+    "cold_restart_does_not_restore_ram": true,
+    "crash_validation_performed": false,
+    "distribution_approved": false,
+    "durable_dependency_retirement_qualified": false,
+    "held_release": true,
+    "native_backing_acknowledgements": 2,
+    "normal_child_restart": true,
+    "normal_owner_shutdown": true,
+    "owned_child_absence_proofs": 2,
+    "owned_deleted": true,
+    "package_manifest_sha256": "e55695a6f7543cd1f857d96c3cf1c81f96a691c69975932fc279fa19ff20b0d5",
+    "port_branch_routing_qualified": false,
+    "public_consumer_qualified": false,
+    "public_native_branch_admission_enabled": false,
+    "scope": "ordinary-shared-engine-branches-linux-local-bare",
+    "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source_and_two_children_independent": true,
+    "status": "passed",
+    "witness_executable_sha256": "3b96d144866591b19d410c7afcf81e02c2d8d978f7f01868c2084549d96d434c"
+  },
+  "final_custody": {
+    "sdk_counts": {
+      "vms": 0,
+      "vm_create_reservations": 0,
+      "vm_pause_operations": 0,
+      "vm_resize_intents": 0,
+      "vm_resize_receipts": 0
+    },
+    "native_processes_and_zombies": [],
+    "kvm_processes": [],
+    "account_lock_free": true,
+    "vm_directories_empty": true,
+    "source_files_verified": 1774,
+    "assets_verified": 806,
+    "host_tools_unchanged": true,
+    "domain_unchanged": true,
+    "fixture_unchanged": true,
+    "normal_proof_exit_status": 0,
+    "other_failed_accounts_not_adopted_or_cleaned_by_this_run": true
+  },
+  "validation": {
+    "linux_epoch_models_passed": 7,
+    "linux_existing_ignored_epoch_fixture_not_selected": 1,
+    "linux_runtime_boot_models_passed": 20,
+    "linux_branch_models_passed": 388,
+    "linux_existing_ignored_branch_fixture_not_selected": 1,
+    "linux_capture_models_passed": 67,
+    "linux_sdk_compat_models_passed": 17,
+    "linux_protocol_models_passed": [
+      101,
+      59
+    ],
+    "linux_witness_models_passed": 13,
+    "native_python_tooling_cases": 51,
+    "native_python_tooling_skipped": 4,
+    "strict_linux_all_target_clippy": true,
+    "sdk_full_and_clean_checks_before_after": true,
+    "http_contracts": [
+      {
+        "name": "current-http",
+        "toolchain": "Elixir 1.20.4 / OTP 29.0.6",
+        "checks_passed": 410,
+        "runtime_and_deferred_crash_excluded": true,
+        "exit_status": 0,
+        "log_sha256": "90c4e045c32a6e1bd8c5171f111ef9a540f211801cc7f6346c02f070e6fee1e2"
+      },
+      {
+        "name": "minimum-http",
+        "toolchain": "Elixir 1.18.4 / OTP 27.3.4.15",
+        "checks_passed": 410,
+        "runtime_and_deferred_crash_excluded": true,
+        "exit_status": 0,
+        "log_sha256": "433487b11b5a05541aac7bf674dd9029abc9693857d35052f35f5e145b7d4505"
+      }
+    ],
+    "build_stages": [
+      {
+        "name": "toolchain",
+        "exit_status": 0,
+        "log_sha256": "2073de5abf149185c2f4d7473dc833bc921b99135560d24ae7b2293f33a9c376"
+      },
+      {
+        "name": "sdk-before",
+        "exit_status": 0,
+        "log_sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+      },
+      {
+        "name": "sdk-clean-before",
+        "exit_status": 0,
+        "log_sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+      },
+      {
+        "name": "clippy-toolchain",
+        "exit_status": 0,
+        "log_sha256": "301d7b95e4b79bba0c58aeac9c313e46fc7bc1373970c5599f003a75dc41c5a7"
+      },
+      {
+        "name": "clippy",
+        "exit_status": 0,
+        "log_sha256": "8ce371b468d20b56bb78ed43bfc3c075e44464ffa9fe3c4a82a8f7ee699170a9"
+      },
+      {
+        "name": "build-helper",
+        "exit_status": 0,
+        "log_sha256": "8ce876c2ccda15a38fcddf3365ae55edfdb5d673f56f3a960abfa9119b748277"
+      },
+      {
+        "name": "build-witness",
+        "exit_status": 0,
+        "log_sha256": "8360172768ef2c9e15ac1023b11a651de85290c4b35a09fb907d7610d05d4595"
+      },
+      {
+        "name": "witness-models",
+        "exit_status": 0,
+        "log_sha256": "aa954349a4c6768d4c4d7695876af15b7905bb4dbffe5a99366038c384b235f4"
+      },
+      {
+        "name": "native-tooling",
+        "exit_status": 0,
+        "log_sha256": "bd23aadb8b42ce0b95e47c0e31226930c89905a3bdbb9aba3280cccee96b85d5"
+      },
+      {
+        "name": "epoch-models",
+        "exit_status": 0,
+        "log_sha256": "f8ff3e1cd4e716257fc8ab1619020e9bff7d8a4d39a5b09e2591416fdd4e09ba"
+      },
+      {
+        "name": "runtime-models",
+        "exit_status": 0,
+        "log_sha256": "2cf4e314c87d8ca17702ba6f12f15afa2c4d3350e641a86b2fc5f28b0c167d69"
+      },
+      {
+        "name": "branch-models",
+        "exit_status": 0,
+        "log_sha256": "fef510cc1a0d1fd715ff8a065ad8b37468058f77f9ed24a1035e592e0d058ab5"
+      },
+      {
+        "name": "capture-models",
+        "exit_status": 0,
+        "log_sha256": "bef3464c439ec3c9441af319b8758883bdd89b72df3883116c5b921066312041"
+      },
+      {
+        "name": "sdk-compat-models",
+        "exit_status": 0,
+        "log_sha256": "c81cf2d0a338b5803c6664703b4f84e955ea975c220513ef5402eb086e1dbfab"
+      },
+      {
+        "name": "protocol-models",
+        "exit_status": 0,
+        "log_sha256": "72b9b801ab6fe78983ee0b22653cd3d1d0fce8003d4b48fcae1bf57adc520859"
+      },
+      {
+        "name": "package",
+        "exit_status": 0,
+        "log_sha256": "a80cf23289e8a385a3a808235cad07025b014ee08e0ceb890db99dc98243b5d9"
+      },
+      {
+        "name": "sdk-after",
+        "exit_status": 0,
+        "log_sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+      },
+      {
+        "name": "sdk-clean-after",
+        "exit_status": 0,
+        "log_sha256": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571"
+      }
+    ],
+    "proof_and_custody_sha256": {
+      "preflight": "e79680713a188279bb9dd388340ee7c5ea291b040cf5b31dea8ad26f0c8448e3",
+      "proof": "6abb05f3d0305b1eea56fcf148e0a1e5922185a6018dfaf5bf8de535415d806d",
+      "exit": "cf4622fd916f70fb5cea94f5583b3ac50fcc5b1e52a83f1c1432b96609dc5f10",
+      "custody": "a03df6e1feb089e37274701352d1892529e1a26427cb359deccc9be408834f57"
+    },
+    "actual_native_proofs_accepted_by_current_and_minimum_elixir": {
+      "per_toolchain": 7,
+      "groups": {
+        "completion": 2,
+        "absence": 2,
+        "backing": 2,
+        "release": 1
+      },
+      "checks": [
+        "strict from_wire",
+        "typed validity",
+        "exact to_wire and JSON roundtrip",
+        "original request match and canonical proof digests"
+      ],
+      "read_only_no_sdk_or_vm_start": true,
+      "not_port_or_store_lifecycle_acceptance": true,
+      "private_input_sha256": "e884c362e10d8b22e2495ae2bb399c7a2fc3af76ad6205d3c056f8ce051bd54f",
+      "logs_sha256": {
+        "current-actual-proofs": "1628c2d63bd137b97d5f0a0cf2a5787d1e7d969e1654732ae3e76f9fcbec4ae3",
+        "minimum-actual-proofs": "1628c2d63bd137b97d5f0a0cf2a5787d1e7d969e1654732ae3e76f9fcbec4ae3"
+      }
+    },
+    "documentation_build_and_links": true,
+    "documentation_logs_sha256": {
+      "docs-ordinary-final": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+      "doc-links-ordinary-final": "fe7e86509e4e55bfacafbae259d53fb8b130721b7e8d9250576f81d31fb0aa5a"
+    }
+  },
+  "private_archive": {
+    "archive_sha256": "8b278ad4be29c6a0761b7703a686a936aa155e5eebc1a32ad6dd6aab4b273da9",
+    "bytes": 160304493,
+    "members": 3861,
+    "tar_exit_status": 0,
+    "after_normal_shutdown_and_verified_empty_inventories": true,
+    "sdk_database_source_unchanged_during_readonly_backup": true,
+    "sdk_backup_sha256": "4b8658fbfc4cb0ee43692fd45a8cffec03e5167aace013444747b81989a8e5c5",
+    "authority_restored_or_replayed": false,
+    "finished_utc": "2026-10-17T09:48:20.496350+00:00",
+    "verified_on_guest_outer_host_and_mac": true,
+    "restore_or_mutation_replay_performed": false
+  },
+  "qualification": {
+    "ordinary_exact_package_shared_engine_linux_local_bare_two_child_lifecycle": true,
+    "original_owner_partial_or_uncertain_recovery_qualified": false,
+    "port_branch_routing_qualified": false,
+    "durable_branch_lifecycle_qualified": false,
+    "installed_current_minimum_branch_consumers": false,
+    "public_native_branch_admission": false,
+    "all_full_parity_rows_pending": true,
+    "full_parity_complete": false,
+    "crash_validation_performed": false,
+    "distribution_approved": false
+  },
+  "remaining": [
+    "Ordinary original-owner uncertainty/partial recovery acceptance through the supported explicit controls.",
+    "Framed Port and public coordinator/store branch workflows, durable dependency/backing retirement and installed current/minimum consumers.",
+    "Remaining P0-P9 source/platform/resource, upgrade and public-setup acceptance; crash validation remains deferred and distribution approval separate."
+  ]
+}

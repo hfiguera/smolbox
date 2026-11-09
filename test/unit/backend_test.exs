@@ -111,6 +111,7 @@ defmodule SmolBox.BackendTest do
     {:ok, client} = Client.new(worker, transport: CaptureTransport)
 
     for operation <- [
+          :publish_collected_branch_material,
           :collect_partial_branch,
           :dispose_partial_branch,
           :resolve_partial_branch_disposal,

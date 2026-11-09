@@ -237,7 +237,78 @@ ownership is verified, resolve explicitly, wait for the worker to become ready,
 and submit exact-version deletion. A busy helper is never bypassed or signalled.
 This control is model-tested; ordinary live acceptance remains pending.
 
+The branch example's private control receiver also exposes the existing
+`collect_partial`, `publish_collected`, `dispose_partial` and `cleanup_partial`
+APIs. It also accepts `resolve_deleted`, forwarding
+`Branches.resolve(..., quiesced: true, disposition: :deleted)` for the same
+original child. Each request needs a unique `request_id`, the original child ID
+(`first` or `held`), its current `version`, and `quiesced: true`. Use a status request to
+read the version before issuing an action. The Runtime still checks the saved
+authority, current branch phase and native proofs; collection or publication
+alone does not release reservations. Deleted resolution requires the existing
+native phase/ownership proofs and positive original-disposal or absence evidence;
+it never derives ownership from an SDK name or current inventory. Rejections
+include category, operation and dispatch evidence. No process-signalling or supplied path/PID commands are
+accepted. These control routes are model-tested; ordinary partial-recovery
+qualification remains pending. See [managed branches](../../docs/managed-branches.md).
+
 The keeper also accepts `resolve_machine` with the original `id`, current `version`
 and explicit `quiesced: true` after the caller has established safe stopped
 ownership. It forwards the existing `Machines.resolve` API; it never replays start
 or resize, and a running/unverified machine is not resolved as stopped.
+
+### Ordinary macOS saved-state consumers
+
+Explicit current macOS packages advertise `checkpoints: 1`, `branches: 1` and
+`partial_collection_preflight: 1`. Older approved packages keep their smaller
+feature surface. Bare sources must satisfy the same idle/offline restrictions
+as the HTTP backend; container artifacts are unsuitable for these workflows.
+
+Use the public package consumer's separate `--native-branches` or
+`--native-checkpoints` campaign with `--native-public --without-rust` and the
+usual approved package, bare fixture, digest, domain and fresh output arguments.
+The checkpoint campaign captures RAM/disks, confirms quiescence, stops the source,
+normally replaces Runtime while retaining Memory, registers the exact captured
+approval and checks two independent restores. It explicitly removes capture bytes
+and releases native staging/accounting after deleting all machines. The branch
+campaign checks sibling isolation, held release, cold restart, admission/drain
+and paired backing release. Neither campaign interrupts an owner.
+
+Failures retain the original Runtime/store and private control receiver. The
+checkpoint receiver accepts `resolve_capture` (`quiesced: true`) and
+`release_capture` (`artifacts_removed: true`) only for `source` and its fixed
+`prepared` capture, with the current machine version and unique request ID.
+These controls do not assert quiescence or remove artifacts on the host's behalf.
+The [scoped current/minimum Mac branch consumers](../../docs/evidence/embedded-port-http-parity-macos-public-branches-f1af384d.json)
+pass these ordinary branch checks on manifest 8bb60295/helper 09ea5c46.
+The [later current/minimum checkpoint and branch consumers](../../docs/evidence/embedded-port-http-parity-macos-public-saved-state-f8f8156e.json)
+pass basic-seed capture, continued source state, two independent restores, normal
+stopped Runtime replacement, cold restart and complete owned/artifact cleanup on
+manifest b7851d7e with the corrected f8f8156e Elixir package.
+Wider parity gates remain open; crash validation stays deferred.
+
+Future branch keepers also expose the existing `Machines.collect_deletion`,
+`continue_deletion` and `cleanup_deletion` APIs under those exact action names,
+with a child ID, current version and `quiesced: true`. These are distinct accepted
+requests; an entered SDK deletion is never replayed. Updating these source files
+does not change an already running keeper.
+
+The checkpoint consumer additionally requires `--native-checkpoint-seed` and
+`--native-checkpoint-seed-sha256`, naming an explicitly prepared dependency-free
+`.smolcheckpoint`. It keeps the seed approved during normal Runtime replacement.
+SDK 1.22 records a pack reference even when a `.smolmachine` contains a bare VM;
+that source remains eligible for branching, but cannot produce a self-contained
+portable capture. Native capture preflight rejects it before SDK entry.
+
+`native/smolbox-engine/examples/prepare_checkpoint_fixture.rs` is an opt-in input
+preparation tool for a fresh dedicated account, using ordinary unmodified SDK
+create/start/capture/stop/delete APIs. It is never included in the consumer
+package or used as a backend fallback. Fixture preparation is separate from
+public Port acceptance; crash validation remains deferred.
+
+On macOS the preparer uses the SDK's sparse raw-disk seeding API and makes only
+its newly cloned private disks owner-writable before boot. Read-only input
+templates and the approved package retain their bytes and permissions. Its report
+requires a basic device profile, no packed dependency, normal stop/deletion and
+empty SDK inventory; a failed preparation retains its original SDK Runtime for
+explicit same-owner cleanup.
