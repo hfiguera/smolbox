@@ -342,7 +342,8 @@ pub(crate) mod tests {
 
     pub(crate) fn payload_fixture() -> (ApprovedCheckpoint, PackManifest, Vec<(String, Vec<u8>)>) {
         let (approval, mut manifest) = fixture();
-        let rootfs = archive(&[("usr/bin/witness".into(), b"fixture".to_vec())]);
+        // The SDK recognizes a cached agent rootfs by its sbin/init entry.
+        let rootfs = archive(&[("sbin/init".into(), b"fixture".to_vec())]);
         manifest.assets.agent_rootfs = smolvm_pack::format::AssetEntry {
             path: "agent-rootfs.tar".into(),
             size: rootfs.len() as u64,
