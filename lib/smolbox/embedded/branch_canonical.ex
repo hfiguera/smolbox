@@ -6,14 +6,26 @@ defmodule SmolBox.Embedded.BranchCanonical do
 
   def transition_from_wire(value, module) do
     if Shape.keys?(value, @transition_fields) and module.valid?(value) do
-      fields = Map.new(value, fn {key, field} -> {String.to_existing_atom(key), field} end)
-      {:ok, struct!(module, fields)}
+      {:ok, wire_struct(value, module)}
     else
       :error
     end
   end
 
-  def transition_wire(value),
+  def from_wire(value, module) do
+    if not is_struct(value) and module.valid?(value),
+      do: {:ok, wire_struct(value, module)},
+      else: :error
+  end
+
+  def wire_struct(value, module),
+    do:
+      struct!(
+        module,
+        Map.new(value, fn {key, field} -> {String.to_existing_atom(key), field} end)
+      )
+
+  def wire_fields(value),
     do: Map.new(Map.from_struct(value), fn {key, field} -> {Atom.to_string(key), field} end)
 
   def transition_shape?(value),
@@ -32,6 +44,28 @@ defmodule SmolBox.Embedded.BranchCanonical do
     resources: {~w(slots cpus memory_mb disk_gb), %{}},
     approval: {~w(id host_overhead_mb resources), %{"resources" => :resources}},
     child: {~w(operation_id name owner_token incarnation idle hold), %{}},
+    creation_request:
+      {~w(source child approval initial_release),
+       %{
+         "source" => :receipt,
+         "child" => :child,
+         "approval" => :approval,
+         "initial_release" => :release_request
+       }},
+    initial_retirement: {~w(schema intent proof_sha256), %{"intent" => :intent}},
+    unbooted_absence_request:
+      {~w(disposal operation_id request_sha256 quiesced), %{"disposal" => :unbooted_disposal}},
+    unbooted_disposal_candidate:
+      {~w(schema creation publication preparation_sha256 proof_sha256),
+       %{"creation" => :creation_request, "publication" => :publication}},
+    unbooted_disposal_intent: {~w(operation_id request_sha256 quiesced), %{}},
+    unbooted_disposal:
+      {~w(schema completion creation request publication disposal_sha256 proof_sha256),
+       %{
+         "creation" => :creation_request,
+         "request" => :unbooted_disposal_intent,
+         "publication" => :publication
+       }},
     release_request: {~w(operation_id request_sha256), %{}},
     plan:
       {~w(ordinary_child total_additional minimum_extra_memory_mb minimum_extra_disk_gb),
@@ -50,7 +84,22 @@ defmodule SmolBox.Embedded.BranchCanonical do
        %{"child_origin" => :binding, "child" => :receipt}},
     release_change:
       {~w(request binding identity_sha256 boot_sha256 mode activation_token invariant_sha256),
-       %{"request" => :release_request, "binding" => :binding}}
+       %{"request" => :release_request, "binding" => :binding}},
+    publication:
+      {~w(schema previous receipt change),
+       %{"previous" => :receipt, "receipt" => :receipt, "change" => :source_change}},
+    child_release:
+      {~w(schema previous receipt change),
+       %{"previous" => :receipt, "receipt" => :receipt, "change" => :release_change}},
+    completion:
+      {~w(schema publication child identity_sha256 held release),
+       %{"publication" => :publication, "child" => :receipt, "release" => :child_release}},
+    deletion_collection_grant:
+      {~w(child operation_id request_sha256 completion_sha256 release_sha256 deletion_sha256),
+       %{"child" => :receipt}},
+    child_absence_request:
+      {~w(completion child operation_id request_sha256 quiesced),
+       %{"completion" => :completion, "child" => :receipt}}
   }
 
   def keys?(value, type), do: Shape.keys?(value, elem(Map.fetch!(@schemas, type), 0))
@@ -77,6 +126,15 @@ defmodule SmolBox.Embedded.BranchCanonical do
       value |> Jason.encode!() |> then(&:crypto.hash(:sha256, &1)) |> Base.encode16(case: :lower)
 
   def origin(receipt), do: Map.delete(receipt, "material")
+
+  def current_head?(current, expected),
+    do:
+      Shape.receipt?(current, 2) and current["material"] != nil and
+        origin(current) == origin(expected) and
+        current["material"]["revision"] >= expected["material"]["revision"] and
+        (current["material"]["revision"] != expected["material"]["revision"] or
+           current["material"] == expected["material"]) and
+        (current["material"]["revision"] != 0 or root?(current))
 
   def root?(receipt),
     do:

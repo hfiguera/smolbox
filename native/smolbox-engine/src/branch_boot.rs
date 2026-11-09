@@ -242,6 +242,29 @@ impl Lifecycle {
             directory: directory.into(),
         }
     }
+    /// Missing boot intent or an exact prepared-only plan never authorizes
+    /// collection. Disposal must additionally retain its original no-boot owner.
+    pub(crate) fn unentered(
+        &self,
+        publication: &BranchPublication,
+        child: &crate::export_source::Root,
+    ) -> Result<()> {
+        child.verify()?;
+        if child.path() != self.directory {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        match self.read() {
+            Err(error) if error.code == ErrorCode::NotFound => Ok(()),
+            Ok((journal, _))
+                if journal.plan.publication == *publication
+                    && journal.plan.child == Directory::capture(child)?
+                    && matches!(journal.phase, Phase::Prepared) =>
+            {
+                Ok(())
+            }
+            _ => Err(Error::before(ErrorCode::Ownership)),
+        }
+    }
     pub(crate) fn prepare(&self, plan: &Plan) -> Result<()> {
         plan.verify()?;
         if plan.child.path != self.directory {

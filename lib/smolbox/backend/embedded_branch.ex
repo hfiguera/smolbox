@@ -19,11 +19,18 @@ defmodule SmolBox.Backend.EmbeddedBranch do
   alias SmolBox.{Error, ManagedMachine}
 
   @empty %{stdout: <<>>, stderr: <<>>, file: <<>>}
+  # Bounds one request envelope and the accepted/terminal envelope pair. The
+  # protocol contract checks maximum-width IDs, sequences, credit and epochs.
+  @wire_allowance 1024
 
   def run(context, operation, arguments, budget) do
     {:ok, budget} =
       Budget.constrain(budget,
-        timeout_ms: if(operation == :branch_inspect_child, do: 30_000, else: 900_000)
+        timeout_ms:
+          if(operation in [:branch_inspect_child, :resolve_ready_branch],
+            do: 30_000,
+            else: 900_000
+          )
       )
 
     deadline = now() + budget.timeout_ms
@@ -49,6 +56,10 @@ defmodule SmolBox.Backend.EmbeddedBranch do
     if source_context?(context, parent), do: records, else: :error
   end
 
+  defp records(context, :resolve_ready_branch, [parent, _] = records) do
+    if source_context?(context, parent), do: records, else: :error
+  end
+
   defp records(context, :branch_release, [child]), do: [context, child]
 
   defp records(context, :branch_inspect_child, [child, held]) do
@@ -60,40 +71,34 @@ defmodule SmolBox.Backend.EmbeddedBranch do
   defp mode(:branch_inspect_child, %{branch: %{native_authority: %{release: nil}}}),
     do: :branch_lookup_creation
 
+  defp mode(:resolve_ready_branch, _), do: :branch_resolve_creation
+
   defp mode(:branch_inspect_child, _), do: :branch_lookup_release
   defp mode(operation, _), do: operation
 
   # Transport-independent sequence used by run/4 after policy/pin approval.
   # A semantic peer can exercise it without enabling an unqualified SDK feature.
   def coordinate(context, operation, parent, child, budget, call, deadline \\ nil) do
+    budget = recovery_budget(operation, budget)
     deadline = deadline || now() + budget.timeout_ms
 
     with true <- pinned?(context) and scope?(context, operation, parent, child),
          {:ok, request} <- request(operation, child),
-         {:ok, transfer_budget} <- remaining(budget, deadline),
-         {:ok, evidence} <- proof(operation, child, call.(context, request, transfer_budget)),
+         {:ok, response, budget} <- exchange(context, request, budget, call, deadline),
+         {:ok, evidence} <- proof(operation, child, response),
          {:ok, source_context, child_context} <- promote(context, operation, child, evidence),
-         {:ok, source_budget} <- observation_budget(budget, deadline),
          source_request = %{
            "operation" => "branch_preflight",
            "receipt" => source_context.identity.receipt
          },
-         {:ok, source} <-
-           observe(
-             source_context,
-             :branch_source,
-             source_request,
-             call.(source_context, source_request, source_budget)
-           ),
-         {:ok, child_budget} <- observation_budget(budget, deadline),
+         {:ok, source_response, budget} <-
+           exchange(source_context, source_request, budget, call, deadline, 16_384),
+         {:ok, source} <- observe(source_context, :branch_source, source_request, source_response),
          child_request = %{"operation" => "inspect", "receipt" => child_context.identity.receipt},
+         {:ok, child_response, budget} <-
+           exchange(child_context, child_request, budget, call, deadline, 16_384),
          {:ok, observed} <-
-           observe(
-             child_context,
-             :inspect_machine,
-             child_request,
-             call.(child_context, child_request, child_budget)
-           ),
+           observe(child_context, :inspect_machine, child_request, child_response),
          {:ok, _} <- remaining(budget, deadline) do
       result(operation, parent, child, evidence, source, observed)
     else
@@ -113,6 +118,17 @@ defmodule SmolBox.Backend.EmbeddedBranch do
           %{
             "operation" => "release_held_branch",
             "request" => HeldBranchReleaseRequest.from_authority(authority)
+          }}
+
+  defp request(:branch_resolve_creation, %{
+         branch: %{state: :unknown, native_authority: authority}
+       }),
+       do:
+         {:ok,
+          %{
+            "operation" => "resolve_ready_branch_completion",
+            "request" => authority.request,
+            "quiesced" => true
           }}
 
   defp request(:branch_lookup_creation, %{branch: %{state: :unknown, native_authority: authority}}),
@@ -142,6 +158,13 @@ defmodule SmolBox.Backend.EmbeddedBranch do
       child.branch.source == ManagedMachine.key(parent) and
       child.branch.native_authority.request["source"] == context.identity.receipt and
       parent.active_branch == child.id and child.branch.state == :dispatching
+  end
+
+  defp scope?(context, :branch_resolve_creation, parent, child) do
+    context.quiesced and ManagedMachine.validate(parent) == :ok and
+      source_context?(context, parent) and parent.active_branch == child.id and
+      parent.worker_id == child.worker_id and parent.worker_generation == child.worker_generation and
+      scope?(context, :branch_lookup_creation, parent, child)
   end
 
   defp scope?(context, :branch_release, _parent, child) do
@@ -187,7 +210,7 @@ defmodule SmolBox.Backend.EmbeddedBranch do
          child,
          {:ok, %{"result" => kind, "completion" => wire} = outcome, @empty, nil}
        )
-       when operation in [:branch_create, :branch_lookup_creation] do
+       when operation in [:branch_create, :branch_lookup_creation, :branch_resolve_creation] do
     with true <- kind == result_kind(operation) and Protocol.valid_outcome?(outcome, 2),
          {:ok, proof} <- BranchCompletion.from_wire(wire),
          true <- BranchCompletion.matches?(wire, child.branch.native_authority.request),
@@ -218,18 +241,21 @@ defmodule SmolBox.Backend.EmbeddedBranch do
       else: failure(:identity_conflict, :dispatch_uncertain)
   end
 
-  defp proof(_, _, {:error, %Error{} = error}), do: {:error, %{error | operation: :branch}}
   defp proof(_, _, _), do: failure(:identity_conflict, :dispatch_uncertain)
 
   defp result_kind(:branch_create), do: "branch_created"
   defp result_kind(:branch_release), do: "held_branch_released"
+  defp result_kind(:branch_resolve_creation), do: "branch_completion_presence"
   defp result_kind(:branch_lookup_creation), do: "branch_completion_presence"
   defp result_kind(:branch_lookup_release), do: "held_branch_release_presence"
 
   defp promote(context, operation, child, proof)
-       when operation in [:branch_create, :branch_lookup_creation] do
+       when operation in [:branch_create, :branch_lookup_creation, :branch_resolve_creation] do
     with true <-
            proof.publication["change"]["platform"] == Atom.to_string(context.config.platform),
+         true <-
+           operation != :branch_resolve_creation or
+             get_in(proof.publication, ~w(change child_origin intent epoch)) == context.epoch,
          {:ok, publication} <- BranchPublication.from_wire(proof.publication),
          history = (context.history || []) ++ [publication],
          source_identity = %Identity{
@@ -280,7 +306,9 @@ defmodule SmolBox.Backend.EmbeddedBranch do
         growth: nil,
         capture: nil,
         export: nil,
-        managed_machine: nil
+        managed_machine: nil,
+        branch_retirement: nil,
+        branch_deletion: nil
     }
 
   defp observe(context, operation, request, {:ok, outcome, @empty, nil} = result) do
@@ -289,11 +317,10 @@ defmodule SmolBox.Backend.EmbeddedBranch do
       else: failure(:identity_conflict, :dispatch_uncertain)
   end
 
-  defp observe(_, _, _, {:error, %Error{} = error}), do: {:error, %{error | operation: :branch}}
   defp observe(_, _, _, _), do: failure(:identity_conflict, :dispatch_uncertain)
 
   defp result(operation, parent, child, proof, source, observed)
-       when operation in [:branch_create, :branch_lookup_creation] do
+       when operation in [:branch_create, :branch_lookup_creation, :branch_resolve_creation] do
     result = %NativeBranchResult{completion: proof, source: source, child: observed}
 
     if NativeBranchResult.bound?(result, parent, child),
@@ -313,10 +340,64 @@ defmodule SmolBox.Backend.EmbeddedBranch do
   defp history_or_nil([]), do: nil
   defp history_or_nil(history), do: history
 
-  defp observation_budget(budget, deadline) do
-    with {:ok, budget} <- remaining(budget, deadline),
-         do: Budget.constrain(budget, timeout_ms: 30_000, max_response_bytes: 16_384)
+  # Each successful reply consumes encoded payload plus conservative framing
+  # before another stage. A lost/error reply ends the sequence.
+  defp exchange(context, request, budget, call, deadline, output_limit \\ 68 * 1024) do
+    with :ok <- transfer_available(budget),
+         {:ok, stage} <- remaining(budget, deadline),
+         {:ok, stage} <- transfer_budget(stage, request, output_limit),
+         :ok <- fits_transfer(request, stage.max_request_bytes),
+         {:ok, outcome, @empty, nil} = response <- call.(context, request, stage),
+         :ok <- fits_transfer(outcome, stage.max_response_bytes),
+         {:ok, _} <- remaining(stage, deadline) do
+      {:ok, response,
+       %{
+         budget
+         | max_request_bytes:
+             budget.max_request_bytes - byte_size(Jason.encode!(request)) - @wire_allowance,
+           max_response_bytes:
+             budget.max_response_bytes - byte_size(Jason.encode!(outcome)) - @wire_allowance
+       }}
+    else
+      {:error, %Error{} = error} -> {:error, error}
+      _ -> failure(:identity_conflict, :dispatch_uncertain)
+    end
   end
+
+  defp transfer_available(budget),
+    do:
+      if(
+        budget.max_request_bytes > @wire_allowance and budget.max_response_bytes > @wire_allowance,
+        do: :ok,
+        else: failure(:output_limit, :dispatch_uncertain)
+      )
+
+  defp fits_transfer(value, maximum),
+    do:
+      if(byte_size(Jason.encode!(value)) + @wire_allowance <= maximum,
+        do: :ok,
+        else: failure(:output_limit, :dispatch_uncertain)
+      )
+
+  defp transfer_budget(budget, %{"operation" => name}, maximum)
+       when name in ~w(branch_preflight inspect),
+       do: Budget.constrain(budget, timeout_ms: 30_000, max_response_bytes: maximum)
+
+  defp transfer_budget(budget, _, maximum),
+    do: Budget.constrain(budget, max_response_bytes: maximum)
+
+  defp recovery_budget(:branch_resolve_creation, budget) do
+    {:ok, budget} =
+      Budget.constrain(budget,
+        timeout_ms: 30_000,
+        max_request_bytes: 28 * 1024,
+        max_response_bytes: 100 * 1024
+      )
+
+    budget
+  end
+
+  defp recovery_budget(_, budget), do: budget
 
   defp remaining(budget, deadline) do
     timeout = deadline - now()

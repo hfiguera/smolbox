@@ -1,8 +1,23 @@
 defmodule SmolBox.Store.BranchOps do
   @moduledoc "Atomic source/child transactions; adapters serialize both identities and worker capacity."
   alias SmolBox.{Branch, BranchSpec, Error, Machine, ManagedMachine, Validation}
-  alias SmolBox.Embedded.{NativeBranchReleaseResult, NativeBranchResult}
-  alias SmolBox.Store.{NativeBranchOps, NativeBranchReleaseOps, RecordOps}
+
+  alias SmolBox.Embedded.{
+    NativeBranchReleaseResult,
+    NativeBranchResult,
+    NativePreparedBranchRetirementResult,
+    NativeUnbootedBranchDisposalResult
+  }
+
+  alias SmolBox.Store.{
+    NativeBranchBackingOps,
+    NativeBranchOps,
+    NativeBranchReleaseOps,
+    NativeBranchRetirementOps,
+    NativePreparedBranchRetirementOps,
+    NativeUnbootedBranchDisposalOps,
+    RecordOps
+  }
 
   def accept(
         %{backend_assignment: %{version: 2}} = parent,
@@ -101,6 +116,9 @@ defmodule SmolBox.Store.BranchOps do
          else: (_ -> error(:stale_version))
   end
 
+  defp create_step(p, c, {:accept_unbooted_disposal, version}, now),
+    do: NativeUnbootedBranchDisposalOps.accept(p, c, version, now)
+
   defp create_step(p, c, :dispatching, now) when c.branch.state == :accepted,
     do: save(p, c, :dispatching, %{phase: :dispatching}, now)
 
@@ -183,6 +201,12 @@ defmodule SmolBox.Store.BranchOps do
         now
       )
       when not is_nil(authority), do: NativeBranchOps.resolve(p, c, result, now)
+
+  def resolve(p, c, source, %NativePreparedBranchRetirementResult{source: source} = result, now),
+    do: NativePreparedBranchRetirementOps.resolve(p, c, result, now)
+
+  def resolve(p, c, source, %NativeUnbootedBranchDisposalResult{source: source} = result, now),
+    do: NativeUnbootedBranchDisposalOps.resolve(p, c, result, now)
 
   def resolve(_p, %{branch: %{native_authority: authority}}, _source, _child_observation, _now)
       when not is_nil(authority), do: error(:unsupported_capability)
@@ -308,6 +332,12 @@ defmodule SmolBox.Store.BranchOps do
 
   defp release_step(_, _, _), do: error(:stale_version)
 
+  def accept_backing(parent, child, version, removed, now),
+    do: NativeBranchBackingOps.accept(parent, child, version, removed, now)
+
+  def release_storage(parent, child, proof, now),
+    do: NativeBranchBackingOps.complete(parent, child, proof, now)
+
   def release_storage(_p, %{branch: %{native_authority: authority}}, _now)
       when not is_nil(authority), do: error(:unsupported_capability)
 
@@ -317,6 +347,9 @@ defmodule SmolBox.Store.BranchOps do
          do: update(c, :closed, %{}, now),
          else: (_ -> error(:identity_conflict))
   end
+
+  def retire(parent, child, proof, now),
+    do: NativeBranchRetirementOps.retire(parent, child, proof, now)
 
   def retire(_p, %{branch: %{native_authority: authority}}, _now)
       when not is_nil(authority), do: error(:unsupported_capability)

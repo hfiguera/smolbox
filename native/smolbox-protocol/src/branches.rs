@@ -157,7 +157,7 @@ pub struct BranchIntent {
     pub epoch: String,
 }
 impl BranchIntent {
-    fn validate(&self) -> Result<(), InvalidMessage> {
+    pub(crate) fn validate(&self) -> Result<(), InvalidMessage> {
         self.source.validate_for(2)?;
         self.child.validate(&self.source)?;
         self.approval.validate()?;
@@ -483,6 +483,159 @@ mod tests {
     use crate::*;
     fn rows() -> Vec<serde_json::Value> {
         serde_json::from_str(include_str!("../fixtures/branch-creation-v1.json")).unwrap()
+    }
+    fn ready_session(
+        row: &serde_json::Value,
+        epoch: Option<String>,
+        platform: Option<String>,
+    ) -> Session {
+        let value: serde_json::Value =
+            serde_json::from_str(include_str!("../fixtures/hello-v2.json")).unwrap();
+        let ServerMessage::Hello { hello } = ServerMessage::decode(value).unwrap() else {
+            panic!()
+        };
+        let mut h = *hello;
+        h.epoch = epoch.unwrap_or_else(|| {
+            row["completion"]["publication"]["change"]["child_origin"]["intent"]["epoch"]
+                .as_str()
+                .unwrap()
+                .into()
+        });
+        if let Some(platform) = platform {
+            h.package.platform = platform;
+        }
+        let sdk = h.sdk.as_mut().unwrap();
+        sdk.feature_versions.insert("branches".into(), 1);
+        h.limits = Limits::for_sdk(sdk);
+        let mut session = Session::new(h.clone()).unwrap();
+        session.approve(&h).unwrap();
+        let operation = Operation::ResolveReadyBranchCompletion {
+            request: Box::new(serde_json::from_value(row["request"].clone()).unwrap()),
+            quiesced: true,
+        };
+        let response = session
+            .admit(ClientMessage::Request {
+                epoch: h.epoch,
+                id: 1,
+                budget_ms: 30000,
+                initial_credit: INITIAL_CREDIT_BYTES,
+                initial_event_credit: INITIAL_CREDIT_EVENTS,
+                operation,
+            })
+            .unwrap();
+        assert!(matches!(response, ServerMessage::Accepted { .. }));
+        session
+    }
+    #[test]
+    fn explicit_ready_handoff_has_exact_finite_fenced_protocol_two_authority() {
+        for row in rows() {
+            let request: BranchCreateRequest =
+                serde_json::from_value(row["request"].clone()).unwrap();
+            let operation = Operation::ResolveReadyBranchCompletion {
+                request: Box::new(request.clone()),
+                quiesced: true,
+            };
+            operation.validate(30000).unwrap();
+            // Conservative bridge accounting reserves 1024 bytes per request
+            // and per accepted/terminal envelope pair, independent of payload.
+            let epoch = "f".repeat(32);
+            let request_message = ClientMessage::Request {
+                epoch: epoch.clone(),
+                id: u64::MAX,
+                budget_ms: 30000,
+                initial_credit: u64::MAX,
+                initial_event_credit: u64::MAX,
+                operation: operation.clone(),
+            };
+            assert!(
+                serde_json::to_vec(&request_message).unwrap().len()
+                    - serde_json::to_vec(&operation).unwrap().len()
+                    <= 1024
+            );
+            let outcome = Outcome::BranchCompletionPresence {
+                completion: Some(Box::new(
+                    serde_json::from_value(row["completion"].clone()).unwrap(),
+                )),
+            };
+            let accepted = ServerMessage::Accepted {
+                epoch: epoch.clone(),
+                id: u64::MAX,
+                sequence: u64::MAX,
+            };
+            let terminal = ServerMessage::Terminal {
+                epoch,
+                id: u64::MAX,
+                sequence: u64::MAX,
+                outcome: outcome.clone(),
+            };
+            assert!(
+                serde_json::to_vec(&accepted).unwrap().len()
+                    + serde_json::to_vec(&terminal).unwrap().len()
+                    - serde_json::to_vec(&outcome).unwrap().len()
+                    <= 1024
+            );
+
+            assert!(operation.validate(30001).is_err());
+            assert!(operation.requires_branches());
+            assert!(operation.capability() == Capability::Inspect);
+            assert!(operation.receipt() == Some(&request.source));
+            assert!(operation.branch_request() == Some(&request));
+            let unfenced = Operation::ResolveReadyBranchCompletion {
+                request: Box::new(request),
+                quiesced: false,
+            };
+            assert!(unfenced.validate(1).is_err());
+            let mut value = serde_json::to_value(&operation).unwrap();
+            value["path"] = serde_json::json!("/foreign");
+            assert!(serde_json::from_value::<Operation>(value).is_err());
+        }
+    }
+    #[test]
+    fn explicit_ready_result_correlates_original_creation_and_allows_no_output() {
+        for row in rows() {
+            let completion: BranchCompletion =
+                serde_json::from_value(row["completion"].clone()).unwrap();
+            let mut session = ready_session(&row, None, None);
+            assert!(session.event(1, Stream::Stdout, b"extra").is_err());
+            session
+                .terminal(
+                    1,
+                    Outcome::BranchCompletionPresence {
+                        completion: Some(Box::new(completion)),
+                    },
+                )
+                .unwrap();
+            ready_session(&row, None, None)
+                .terminal(1, Outcome::BranchCompletionPresence { completion: None })
+                .unwrap();
+        }
+    }
+    #[test]
+    fn explicit_ready_result_rejects_crossed_creation_platform_and_original_epoch() {
+        for row in rows() {
+            let completion: BranchCompletion =
+                serde_json::from_value(row["completion"].clone()).unwrap();
+            for (epoch, platform) in [(Some("e".repeat(32)), None), (None, Some("linux".into()))] {
+                assert!(ready_session(&row, epoch, platform)
+                    .terminal(
+                        1,
+                        Outcome::BranchCompletionPresence {
+                            completion: Some(Box::new(completion.clone()))
+                        }
+                    )
+                    .is_err());
+            }
+            let mut changed = row.clone();
+            changed["request"]["approval"]["resources"]["disk_gb"] = serde_json::json!(9999);
+            assert!(ready_session(&changed, None, None)
+                .terminal(
+                    1,
+                    Outcome::BranchCompletionPresence {
+                        completion: Some(Box::new(completion))
+                    }
+                )
+                .is_err());
+        }
     }
     #[test]
     fn creation_contract_binds_both_modes_and_rejects_changed_plan_or_activation() {

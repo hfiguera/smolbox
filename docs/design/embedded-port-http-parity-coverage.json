@@ -497,7 +497,7 @@
       ],
       "contract": "branches",
       "http_supported": true,
-      "port_operation_supported": false,
+      "port_operation_supported": true,
       "parity_status": "pending",
       "acceptance": [
         "branches:validation-and-dispatch",
@@ -536,12 +536,177 @@
       ]
     },
     {
+      "name": "resolve_ready_branch",
+      "arities": [
+        3
+      ],
+      "contract": "branches",
+      "http_supported": false,
+      "port_operation_supported": true,
+      "parity_status": "pending",
+      "acceptance": [
+        "branches:validation-and-dispatch",
+        "branches:ordinary-public-behavior",
+        "branches:durable-accounting-and-no-replay"
+      ]
+    },
+    {
       "name": "branch_release",
       "arities": [
         2
       ],
       "contract": "branches",
       "http_supported": true,
+      "port_operation_supported": true,
+      "parity_status": "pending",
+      "acceptance": [
+        "branches:validation-and-dispatch",
+        "branches:ordinary-public-behavior",
+        "branches:durable-accounting-and-no-replay"
+      ]
+    },
+    {
+      "name": "retire_prepared_branch",
+      "arities": [
+        3
+      ],
+      "contract": "branches",
+      "http_supported": false,
+      "port_operation_supported": true,
+      "parity_status": "pending",
+      "acceptance": [
+        "branches:validation-and-dispatch",
+        "branches:ordinary-public-behavior",
+        "branches:durable-accounting-and-no-replay"
+      ]
+    },
+    {
+      "name": "retire_unbooted_branch",
+      "arities": [
+        3
+      ],
+      "contract": "branches",
+      "http_supported": false,
+      "port_operation_supported": true,
+      "parity_status": "pending",
+      "acceptance": [
+        "branches:validation-and-dispatch",
+        "branches:ordinary-public-behavior",
+        "branches:durable-accounting-and-no-replay"
+      ]
+    },
+    {
+      "name": "inspect_unbooted_branch_disposal",
+      "arities": [
+        3
+      ],
+      "contract": "branches",
+      "http_supported": false,
+      "port_operation_supported": true,
+      "parity_status": "pending",
+      "acceptance": [
+        "branches:validation-and-dispatch",
+        "branches:ordinary-public-behavior",
+        "branches:durable-accounting-and-no-replay"
+      ]
+    },
+    {
+      "name": "dispose_unbooted_branch",
+      "arities": [
+        3
+      ],
+      "contract": "branches",
+      "http_supported": false,
+      "port_operation_supported": true,
+      "parity_status": "pending",
+      "acceptance": [
+        "branches:validation-and-dispatch",
+        "branches:ordinary-public-behavior",
+        "branches:durable-accounting-and-no-replay"
+      ]
+    },
+    {
+      "name": "resolve_unbooted_branch_disposal",
+      "arities": [
+        3
+      ],
+      "contract": "branches",
+      "http_supported": false,
+      "port_operation_supported": true,
+      "parity_status": "pending",
+      "acceptance": [
+        "branches:validation-and-dispatch",
+        "branches:ordinary-public-behavior",
+        "branches:durable-accounting-and-no-replay"
+      ]
+    },
+    {
+      "name": "release_branch_backing",
+      "arities": [
+        4
+      ],
+      "contract": "branches",
+      "http_supported": false,
+      "port_operation_supported": true,
+      "parity_status": "pending",
+      "acceptance": [
+        "branches:validation-and-dispatch",
+        "branches:ordinary-public-behavior",
+        "branches:durable-accounting-and-no-replay"
+      ]
+    },
+    {
+      "name": "resolve_branch_deletion",
+      "arities": [
+        2
+      ],
+      "contract": "branches",
+      "http_supported": false,
+      "port_operation_supported": true,
+      "parity_status": "pending",
+      "acceptance": [
+        "branches:validation-and-dispatch",
+        "branches:ordinary-public-behavior",
+        "branches:durable-accounting-and-no-replay"
+      ]
+    },
+    {
+      "name": "continue_branch_deletion",
+      "arities": [
+        2
+      ],
+      "contract": "branches",
+      "http_supported": false,
+      "port_operation_supported": true,
+      "parity_status": "pending",
+      "acceptance": [
+        "branches:validation-and-dispatch",
+        "branches:ordinary-public-behavior",
+        "branches:durable-accounting-and-no-replay"
+      ]
+    },
+    {
+      "name": "collect_branch_deletion",
+      "arities": [
+        2
+      ],
+      "contract": "branches",
+      "http_supported": false,
+      "port_operation_supported": true,
+      "parity_status": "pending",
+      "acceptance": [
+        "branches:validation-and-dispatch",
+        "branches:ordinary-public-behavior",
+        "branches:durable-accounting-and-no-replay"
+      ]
+    },
+    {
+      "name": "cleanup_branch_deletion",
+      "arities": [
+        2
+      ],
+      "contract": "branches",
+      "http_supported": false,
       "port_operation_supported": true,
       "parity_status": "pending",
       "acceptance": [
@@ -1053,7 +1218,97 @@
         "lib/smolbox/backend/embedded_branch.ex",
         "test/unit/embedded_branch_backend_test.exs",
         "lib/smolbox/runtime/native_support.ex",
-        "test/unit/native_material_support_test.exs"
+        "test/unit/native_material_support_test.exs",
+        "native/smolbox-engine/src/branch_absence.rs",
+        "native/smolbox-protocol/src/branch_absence.rs",
+        "native/smolbox-protocol/fixtures/branch-child-absence-v1.json",
+        "lib/smolbox/embedded/branch_child_absence.ex",
+        "test/unit/embedded_branch_absence_test.exs",
+        "lib/smolbox/embedded/native_branch_retirement.ex",
+        "lib/smolbox/store/native_branch_retirement_ops.ex",
+        "lib/smolbox/store/codec_native_branch_retirements.ex",
+        "lib/smolbox/backend/embedded_branch_retirement.ex",
+        "test/support/store/native_branch_retirement_contract.ex",
+        "test/unit/native_branch_retirement_test.exs",
+        "test/unit/native_branch_public_retirement_test.exs",
+        "test/unit/embedded_branch_retirement_test.exs",
+        "native/smolbox-engine/src/branch_backing.rs",
+        "native/smolbox-protocol/src/branch_backing.rs",
+        "native/smolbox-protocol/fixtures/branch-backing-release-v1.json",
+        "lib/smolbox/embedded/branch_backing_release.ex",
+        "lib/smolbox/embedded/native_branch_backing.ex",
+        "lib/smolbox/store/native_branch_backing_ops.ex",
+        "lib/smolbox/store/codec_native_branch_backings.ex",
+        "lib/smolbox/backend/embedded_branch_backing.ex",
+        "lib/smolbox/runtime/native_branch_backing.ex",
+        "test/support/store/native_branch_backing_contract.ex",
+        "test/unit/native_branch_backing_test.exs",
+        "test/unit/embedded_branch_backing_release_test.exs",
+        "test/unit/embedded_branch_backing_test.exs",
+        "test/unit/native_branch_public_backing_test.exs",
+        "native/smolbox-engine/src/branch_delete_request.rs",
+        "native/smolbox-protocol/src/held_branch_deletion.rs",
+        "native/smolbox-protocol/fixtures/held-branch-deletion-v1.json",
+        "lib/smolbox/embedded/branch_deletion_resolution.ex",
+        "test/unit/embedded_held_branch_deletion_test.exs",
+        "lib/smolbox/embedded/native_branch_deletion.ex",
+        "lib/smolbox/store/native_branch_deletion_ops.ex",
+        "lib/smolbox/store/codec_native_branch_deletions.ex",
+        "lib/smolbox/backend/embedded_branch_deletion.ex",
+        "lib/smolbox/runtime/native_branch_deletion.ex",
+        "test/support/store/native_branch_deletion_contract.ex",
+        "test/unit/native_branch_deletion_test.exs",
+        "test/unit/embedded_branch_deletion_test.exs",
+        "test/unit/native_branch_public_deletion_test.exs",
+        "native/smolbox-engine/src/branch_delete_action.rs",
+        "native/smolbox-protocol/src/held_branch_deletion_action.rs",
+        "native/smolbox-protocol/fixtures/held-branch-deletion-action-v1.json",
+        "lib/smolbox/embedded/branch_deletion_continuation.ex",
+        "lib/smolbox/embedded/held_branch_deletion_action.ex",
+        "test/unit/embedded_held_branch_deletion_action_test.exs",
+        "lib/smolbox/embedded/native_branch_deletion_action.ex",
+        "lib/smolbox/store/native_branch_deletion_action_ops.ex",
+        "lib/smolbox/store/codec_native_branch_deletion_actions.ex",
+        "test/support/store/native_branch_deletion_action_contract.ex",
+        "test/unit/native_branch_deletion_action_test.exs",
+        "lib/smolbox/backend/embedded_branch_deletion_action.ex",
+        "lib/smolbox/runtime/native_branch_deletion_action.ex",
+        "test/unit/embedded_branch_deletion_action_test.exs",
+        "test/unit/native_branch_public_deletion_action_test.exs",
+        "native/smolbox-engine/src/branch/prepared_retirement.rs",
+        "native/smolbox-protocol/fixtures/prepared-branch-retirement-v1.json",
+        "native/smolbox-protocol/src/prepared_branch_retirement.rs",
+        "lib/smolbox/embedded/prepared_branch_retirement.ex",
+        "test/unit/embedded_prepared_branch_retirement_test.exs",
+        "lib/smolbox/embedded/native_prepared_branch_retirement.ex",
+        "lib/smolbox/embedded/native_prepared_branch_retirement_result.ex",
+        "lib/smolbox/store/native_prepared_branch_retirement_ops.ex",
+        "lib/smolbox/store/codec_native_prepared_branch_retirements.ex",
+        "test/support/store/native_prepared_branch_retirement_contract.ex",
+        "test/unit/native_prepared_branch_retirement_test.exs",
+        "lib/smolbox/backend/embedded_prepared_branch_retirement.ex",
+        "lib/smolbox/runtime/native_prepared_branch_retirement.ex",
+        "test/unit/native_prepared_branch_public_retirement_test.exs",
+        "native/smolbox-engine/src/branch/retention/resolution.rs",
+        "native/smolbox-engine/src/branch/retention/resolution/disposal.rs",
+        "native/smolbox-engine/src/branch/retention/resolution/disposal/ledger.rs",
+        "native/smolbox-engine/src/branch/retention/resolution/disposal/tests.rs",
+        "native/smolbox-engine/src/branch/retention/resolution/disposal/archive.rs",
+        "native/smolbox-engine/src/branch/retention/resolution/disposal/tests/archive.rs",
+        "native/smolbox-engine/src/branch_backing/unbooted.rs",
+        "native/smolbox-engine/src/branch/retention/resolution/disposal/archive/backing.rs",
+        "native/smolbox-engine/src/branch/retention/resolution/disposal/tests/backing.rs",
+        "native/smolbox-protocol/src/unbooted_branch.rs",
+        "native/smolbox-protocol/fixtures/unbooted-branch-disposal-v1.json",
+        "lib/smolbox/embedded/unbooted_branch_disposal.ex",
+        "lib/smolbox/embedded/unbooted_branch_backing_release.ex",
+        "test/unit/embedded_unbooted_branch_test.exs",
+        "lib/smolbox/embedded/native_unbooted_branch_disposal.ex",
+        "lib/smolbox/embedded/native_unbooted_branch_disposal_result.ex",
+        "lib/smolbox/store/native_unbooted_branch_disposal_ops.ex",
+        "lib/smolbox/store/codec_native_unbooted_branch_disposals.ex",
+        "test/support/store/native_unbooted_branch_disposal_contract.ex",
+        "test/unit/native_unbooted_branch_disposal_test.exs"
       ]
     },
     {

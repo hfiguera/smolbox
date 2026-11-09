@@ -72,6 +72,17 @@ impl Retained {
         self.result = Some(result.clone());
         Ok(Some(result))
     }
+    pub(crate) fn deletion_ready(&self, release: &BranchReleaseTransition) -> Result<()> {
+        if self.worker.upgrade().is_some()
+            || self.leases.is_some()
+            || self.result.as_ref() != Some(release)
+            || self.intent.transition != *release
+            || self.request != release.change.request
+        {
+            return Err(Error::before(ErrorCode::Conflict));
+        }
+        Ok(())
+    }
     fn retire_after_promotion(&mut self, result: &BranchReleaseTransition) -> Result<()> {
         if self.worker.upgrade().is_some() || self.result.as_ref() != Some(result) {
             return Err(Error::uncertain(ErrorCode::State));
@@ -369,6 +380,33 @@ mod tests {
     use crate::branch_boot::tests::{identity_model, IdentityModel};
     use crate::material::MaterialJournal;
 
+    #[test]
+    fn deletion_requires_collected_completed_release_and_retired_transient_work() {
+        let (model, mut state) = entered();
+        let release = material_complete(&model, &state);
+        assert!(state.deletion_ready(&release).is_err());
+        Lifecycle::at(&model.plan.child.path)
+            .released(&model.plan, &state.intent, &model.enrollment)
+            .unwrap();
+        let result = state
+            .completed(
+                &model.plan,
+                &model.enrollment,
+                &release.previous,
+                &request(),
+            )
+            .unwrap()
+            .unwrap();
+        assert!(state.deletion_ready(&release).is_err());
+        state.retire_after_promotion(&result).unwrap();
+        state.deletion_ready(&release).unwrap();
+        let mut crossed = release.clone();
+        crossed.change.request.operation_id = "other-release".into();
+        assert!(state.deletion_ready(&crossed).is_err());
+        let active = Arc::new(());
+        state.worker = Arc::downgrade(&active);
+        assert!(state.deletion_ready(&release).is_err());
+    }
     #[test]
     fn checked_completion_binds_original_plan_identity_and_source_before_dispatch() {
         let model = identity_model(true);

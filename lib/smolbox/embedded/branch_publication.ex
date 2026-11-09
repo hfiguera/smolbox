@@ -11,7 +11,7 @@ defmodule SmolBox.Embedded.BranchPublication do
   def from_wire(value), do: BranchCanonical.transition_from_wire(value, __MODULE__)
 
   def to_wire(%__MODULE__{} = value),
-    do: BranchCanonical.transition_wire(value)
+    do: BranchCanonical.wire_fields(value)
 
   def valid?(%__MODULE__{} = value),
     do: Validation.struct_shape?(value, __MODULE__) and valid?(to_wire(value))

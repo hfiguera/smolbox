@@ -37,6 +37,11 @@ defmodule SmolBox.Runtime.NativeResolution do
              config.clock.now(),
              config.lease_ms
            ]),
-         do: function.(target)
+         do: function.(quiesced(target))
   end
+
+  defp quiesced(%{connection: %{context: %EmbeddedContext{} = context} = reference} = target),
+    do: %{target | connection: %{reference | context: %{context | quiesced: true}}}
+
+  defp quiesced(target), do: target
 end

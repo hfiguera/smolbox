@@ -1,7 +1,20 @@
 defmodule SmolBox.Backend.EmbeddedContext do
   @moduledoc false
   alias SmolBox.Backend.{Assignment, Features}
-  alias SmolBox.Embedded.{Config, Identity, NativeGrowth, Port, Request, Shape}
+
+  alias SmolBox.Embedded.{
+    BranchCompletion,
+    Config,
+    Identity,
+    MaterialHistory,
+    NativeBranchDeletion,
+    NativeBranchRetirement,
+    NativeGrowth,
+    Port,
+    Request,
+    Shape
+  }
+
   alias SmolBox.{Error, Execution, ManagedMachine, Volume}
 
   @enforce_keys [:config, :server]
@@ -15,6 +28,9 @@ defmodule SmolBox.Backend.EmbeddedContext do
     :name,
     :spec,
     :epoch,
+    branch_retirement: nil,
+    branch_deletion: nil,
+    quiesced: false,
     growth: nil,
     capture: nil,
     export: nil,
@@ -46,6 +62,8 @@ defmodule SmolBox.Backend.EmbeddedContext do
              capture: nil,
              export: nil,
              history: nil,
+             branch_retirement: nil,
+             branch_deletion: nil,
              managed_machine: nil
          }},
       else: error()
@@ -71,6 +89,8 @@ defmodule SmolBox.Backend.EmbeddedContext do
            capture: capture_intent(record),
            export: export_intent(record),
            history: material_history(record),
+           branch_retirement: branch_retirement_intent(record),
+           branch_deletion: if(NativeBranchDeletion.resolvable?(record), do: record),
            profile: record.spec.profile,
            spec: record.spec,
            managed_machine: Map.get(record, :managed_machine),
@@ -92,6 +112,13 @@ defmodule SmolBox.Backend.EmbeddedContext do
 
   defp export_intent(_), do: nil
 
+  def branch_retirement_intent(
+        %ManagedMachine{branch: %{native_authority: %{completion: %BranchCompletion{}}}} = record
+      ),
+      do: if(NativeBranchRetirement.eligible?(record), do: record)
+
+  def branch_retirement_intent(_), do: nil
+
   def scoped?(%__MODULE__{} = context),
     do:
       context.volume == nil and
@@ -105,15 +132,44 @@ defmodule SmolBox.Backend.EmbeddedContext do
         context.profile == context.spec.profile and
         context.name == context.assignment.creation["name"] and
         (context.identity == nil or Identity.matches?(context.identity, context.assignment)) and
-        growth_scope?(context)
+        intent_scopes?(context)
 
   def scoped?(_context), do: false
+
+  defp intent_scopes?(context),
+    do: growth_scope?(context) and retirement_scope?(context) and deletion_scope?(context)
+
+  defp deletion_scope?(%{branch_deletion: nil}), do: true
+  defp deletion_scope?(context), do: branch_deletion_scope?(context)
+
+  defp retirement_scope?(%{branch_retirement: nil}), do: true
+  defp retirement_scope?(context), do: branch_retirement_scope?(context)
+
+  def branch_deletion_scope?(%{branch_deletion: %ManagedMachine{} = child} = context),
+    do:
+      ManagedMachine.validate(child) == :ok and NativeBranchDeletion.resolvable?(child) and
+        branch_scope?(context, child)
+
+  def branch_deletion_scope?(_), do: false
+
+  def branch_retirement_scope?(%{branch_retirement: %ManagedMachine{} = child} = context),
+    do:
+      ManagedMachine.validate(child) == :ok and branch_retirement_intent(child) == child and
+        branch_scope?(context, child)
+
+  def branch_retirement_scope?(_), do: false
+
+  defp branch_scope?(context, child),
+    do:
+      child.spec == context.spec and child.backend_assignment == context.assignment and
+        child.machine_name == context.name and child.spec.profile == context.profile and
+        NativeGrowth.current_identity(child) == {:ok, context.identity}
 
   def volume_scoped?(%__MODULE__{volume: %Volume{} = volume} = context),
     do:
       volume_approved?(volume, context.config) and
         Enum.all?(
-          ~w(assignment identity profile name spec growth capture export history managed_machine)a,
+          ~w(assignment identity profile name spec growth capture export history managed_machine branch_retirement branch_deletion)a,
           &(Map.fetch!(context, &1) == nil)
         )
 
@@ -132,6 +188,23 @@ defmodule SmolBox.Backend.EmbeddedContext do
 
   def receipt(%__MODULE__{identity: %Identity{} = identity}), do: {:ok, identity.receipt}
   def receipt(_context), do: error()
+
+  def resources(%__MODULE__{
+        identity: %Identity{material_history: [first | _] = history, receipt: receipt} = identity,
+        assignment: assignment
+      }) do
+    initial = assignment.creation["resources"]
+
+    with true <- Identity.valid?(identity),
+         {:ok, ^receipt, sizes} <-
+           MaterialHistory.chain(
+             history,
+             first.previous,
+             Map.take(initial, ~w(storage_gib overlay_gib))
+           ),
+         do: Map.merge(initial, sizes),
+         else: (_ -> raise %Error{category: :identity_conflict, operation: :backend})
+  end
 
   def resources(%__MODULE__{identity: %Identity{transition: transition}, assignment: assignment})
       when not is_nil(transition),

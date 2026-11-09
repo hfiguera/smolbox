@@ -31,6 +31,17 @@ fn creation_read_budget(
     )
 }
 
+// Acquisition/preflight failures stay NotDispatched. Only actual SDK entry
+// changes error evidence; late return keeps uncertainty and retained ownership.
+fn lifecycle_sdk_call(
+    budget: &crate::ReadBudget,
+    call: impl FnOnce() -> smolvm::Result<()>,
+) -> Result<()> {
+    budget.check()?;
+    call().map_err(|_| Error::uncertain(ErrorCode::Native))?;
+    budget.check().map_err(|e| Error::uncertain(e.code))
+}
+
 #[derive(Clone)]
 pub struct CreateRequest {
     pub name: String,
@@ -155,6 +166,7 @@ pub struct Engine {
     // Keep the actual SDK manager alive; dropping it would stop its VMM.
     pub(crate) owned_managers: Mutex<BTreeMap<String, Arc<Mutex<AgentManager>>>>,
     branch_owners: Mutex<BTreeMap<String, Arc<crate::branch_owned::Context>>>,
+    pub(crate) runtime_boots: crate::runtime_boot::Registry,
     pub(crate) domain: Arc<DomainGuard>,
     pub(crate) transfers: Option<TransferSupervisor>,
     pub(crate) jobs: crate::jobs::JobPool,
@@ -599,6 +611,7 @@ impl Engine {
             capture_sources: Mutex::new(BTreeMap::new()),
             owned_managers: Mutex::new(BTreeMap::new()),
             branch_owners: Mutex::new(BTreeMap::new()),
+            runtime_boots: crate::runtime_boot::Registry::default(),
             domain,
             transfers: None,
             jobs,
@@ -1828,6 +1841,17 @@ impl Engine {
 
     /// Read-only: no connect-or-start, materializing manager or inventory adoption.
     pub fn inspect(&self, receipt: &CreationReceipt) -> Result<Observation> {
+        self.inspect_under(
+            receipt,
+            &crate::ReadBudget::new(std::time::Duration::from_secs(30), Cancellation::default())?,
+        )
+    }
+    pub(crate) fn inspect_under(
+        &self,
+        receipt: &CreationReceipt,
+        budget: &crate::ReadBudget,
+    ) -> Result<Observation> {
+        budget.check()?;
         self.verify_database_identity()?;
         receipt.validate(&self.binding)?;
         let Some(record) = self
@@ -1848,6 +1872,7 @@ impl Engine {
                 .runtime_pid(&receipt.name)
                 .is_some_and(smolvm::process::is_alive)
                 || self.owned_manager_busy(&receipt.name)?;
+            budget.check()?;
             return Ok(Observation {
                 state: if storage_present || child_present {
                     ObservedState::IdentityUnknown
@@ -1864,8 +1889,8 @@ impl Engine {
             .db
             .dependent_clones(&receipt.name)
             .map_err(|_| Error::before(ErrorCode::Database))?;
-        let checkpoint_budget =
-            crate::ReadBudget::new(std::time::Duration::from_secs(30), Cancellation::default())?;
+        budget.check()?;
+        let checkpoint_budget = budget;
         let directory = self.vm_directory(&receipt.name);
         let continuing = !dependents.is_empty()
             && self.original_continuing_source(receipt, &record)?
@@ -1874,7 +1899,7 @@ impl Engine {
                 &dependents,
                 &self.binding.database,
                 self.database_identity,
-                &checkpoint_budget,
+                checkpoint_budget,
             )?;
         let mut state = record_state(&record, !dependents.is_empty() && !continuing);
         let uncertain =
@@ -1884,7 +1909,7 @@ impl Engine {
                 crate::checkpoint_lifecycle::Lifecycle::at(&directory).uncertain(
                     receipt,
                     &record,
-                    &checkpoint_budget,
+                    checkpoint_budget,
                 )?
             };
         if uncertain {
@@ -1899,6 +1924,7 @@ impl Engine {
             state = ObservedState::IdentityUnknown;
         }
         if state == ObservedState::Running {
+            budget.check()?;
             let socket = self.vm_directory(&receipt.name).join("agent.sock");
             if AgentClient::connect_for_state_probe(socket)
                 .and_then(|mut client| client.ping())
@@ -1911,6 +1937,7 @@ impl Engine {
                 state = ObservedState::IdentityUnknown;
             }
         }
+        budget.check()?;
         Ok(Observation {
             state,
             configuration: crate::MachineConfiguration::observe(&record),
@@ -2467,6 +2494,18 @@ impl Engine {
                 &creation_read_budget(deadline, cancel)?,
             )?;
         }
+        if let Some(owned) = self.runtime_boots.get(receipt)? {
+            let cleanup = match budget {
+                Some((deadline, cancel)) => creation_read_budget(deadline, cancel)?,
+                None => crate::ReadBudget::new(
+                    std::time::Duration::from_secs(30),
+                    Cancellation::default(),
+                )?,
+            };
+            self.stop_runtime_boot(receipt, &expected, &owned, &cleanup)?;
+            self.finish_stop_result(receipt, &cleanup, self.inspect_under(receipt, &cleanup))?;
+        }
+        let record = self.record(receipt)?;
         let lifecycle =
             crate::checkpoint_lifecycle::Lifecycle::at(&self.vm_directory(&receipt.name));
         let checkpoint_budget = match budget {
@@ -2489,9 +2528,20 @@ impl Engine {
             } else {
                 lifecycle.prepare(receipt, &record, &checkpoint_budget)?
             };
-        self.track_handle(receipt)?;
         check()?;
-        let dispatch = boot.begin_boot(&receipt.name)?;
+        let owned_boot = self.runtime_boots.reserve(receipt, &self.jobs)?;
+        self.track_handle(receipt)?;
+        if let Err(error) = check() {
+            self.runtime_boots.retire(&owned_boot)?;
+            return Err(error);
+        }
+        let dispatch = match boot.begin_boot(&receipt.name) {
+            Ok(dispatch) => dispatch,
+            Err(error) => {
+                self.runtime_boots.retire(&owned_boot)?;
+                return Err(error);
+            }
+        };
         let checkpoint_start = match checkpoint_start {
             Some(permit) => {
                 let mut nonce = [0; 16];
@@ -2501,9 +2551,10 @@ impl Engine {
             None => None,
         };
         let result = self.runtime.start_machine(&receipt.name);
-        dispatch
-            .finish(self.runtime.pid(&receipt.name))
+        let enrollment = dispatch
+            .finish_enrollment(self.runtime.pid(&receipt.name))
             .map_err(|error| Error::uncertain(error.code))?;
+        owned_boot.enroll(enrollment, boot)?;
         result.map_err(|error| Error::uncertain(crate::sdk_compat::launch_error(&error)))?;
         if record.forkable {
             let running = self
@@ -2551,6 +2602,26 @@ impl Engine {
     }
 
     pub fn stop(&self, receipt: &CreationReceipt) -> Result<Observation> {
+        self.stop_with_budget(
+            receipt,
+            &crate::ReadBudget::new(std::time::Duration::from_secs(30), Cancellation::default())?,
+        )
+    }
+    /// One caller deadline/cancellation token covers preflight, SDK collection
+    /// and final observation. Late SDK return never grants a stopped result.
+    pub fn stop_with_budget(
+        &self,
+        receipt: &CreationReceipt,
+        budget: &crate::ReadBudget,
+    ) -> Result<Observation> {
+        budget.check()?;
+        if budget
+            .deadline
+            .saturating_duration_since(std::time::Instant::now())
+            > std::time::Duration::from_secs(30)
+        {
+            return Err(Error::before(ErrorCode::Validation));
+        }
         let gate = self.gate(&receipt.name)?;
         let _guard = gate
             .try_lock()
@@ -2558,19 +2629,17 @@ impl Engine {
         if self.record(receipt)?.forkpoint_held {
             return Err(Error::before(ErrorCode::State));
         }
-        let mut expected = self.inspect(receipt)?;
+        let mut expected = self.inspect_under(receipt, budget)?;
         if expected.state == ObservedState::IdentityUnknown {
-            if self.stop_entered_capture(receipt)? {
-                return self.inspect(receipt);
+            if self.stop_entered_capture(receipt, budget)? {
+                return self
+                    .inspect_under(receipt, budget)
+                    .map_err(|e| Error::uncertain(e.code));
             }
             let record = self.record(receipt)?;
-            let budget = crate::ReadBudget::new(
-                std::time::Duration::from_secs(30),
-                Cancellation::default(),
-            )?;
             let entered = record.labels.contains_key("smolbox.checkpoint-sha256")
                 && crate::checkpoint_lifecycle::Lifecycle::at(&self.vm_directory(&receipt.name))
-                    .uncertain(receipt, &record, &budget)?;
+                    .uncertain(receipt, &record, budget)?;
             let tracked = self
                 .owned_handles
                 .lock()
@@ -2603,46 +2672,82 @@ impl Engine {
                     .lock()
                     .map_err(|_| Error::before(ErrorCode::Native))?
                     .contains_key(&receipt.name)
+                    && !self.runtime_boots.contains(&receipt.name)?
                 {
-                    return self.inspect(receipt);
+                    return self.inspect_under(receipt, budget);
                 }
             }
             ObservedState::Running => {}
             _ => return Err(Error::before(ErrorCode::State)),
         }
-        self.coordinated_lifecycle(receipt, &expected, || {
+        let original = self
+            .branch_owners
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?
+            .get(&receipt.name)
+            .cloned();
+        budget.check()?;
+        if let Some(context) = original {
+            self.stop_original_branch(receipt, &expected, &context, budget)?;
+        } else if let Some(owned) = self.runtime_boots.get(receipt)? {
+            self.stop_runtime_boot(receipt, &expected, &owned, budget)?;
+        } else {
+            self.verify_lifecycle_preconditions(receipt, &expected)?;
             let manager = self
                 .owned_managers
                 .lock()
-                .map_err(|_| smolvm::Error::config("stop", "native manager unavailable"))?
+                .map_err(|_| Error::before(ErrorCode::Native))?
                 .get(&receipt.name)
                 .cloned();
             if let Some(manager) = manager {
-                // The direct manager path does not take the SDK runtime's
-                // source flock. Keep source/dependency serialization here.
-                let _source = self
-                    .source_lease(receipt)
-                    .map_err(|_| smolvm::Error::config("stop", "native source unavailable"))?;
+                // Direct manager stop does not take the SDK source flock.
+                let _source = self.source_lease(receipt)?;
                 let manager = manager
                     .try_lock()
-                    .map_err(|_| smolvm::Error::config("stop", "native startup still active"))?;
-                manager.stop()?;
-                self.db
-                    .update_vm(&receipt.name, |record| {
-                        record.state = smolvm::config::RecordState::Stopped;
-                        record.pid = None;
-                        record.pid_start_time = None;
-                    })?
-                    .ok_or_else(|| smolvm::Error::vm_not_found(&receipt.name))?;
-                Ok(())
+                    .map_err(|_| Error::before(ErrorCode::Conflict))?;
+                self.coordinated_lifecycle(receipt, &expected, budget, || {
+                    manager.stop()?;
+                    self.db
+                        .update_vm(&receipt.name, |row| {
+                            row.state = smolvm::config::RecordState::Stopped;
+                            row.pid = None;
+                            row.pid_start_time = None;
+                        })?
+                        .ok_or_else(|| smolvm::Error::vm_not_found(&receipt.name))?;
+                    Ok(())
+                })?;
             } else {
-                self.runtime.stop_machine(&receipt.name)
+                self.coordinated_lifecycle(receipt, &expected, budget, || {
+                    self.runtime.stop_machine(&receipt.name)
+                })?;
             }
-        })?;
-        let observation = self
-            .inspect(receipt)
-            .map_err(|error| Error::uncertain(error.code))?;
+        }
+        self.finish_stop_result(receipt, budget, self.inspect_under(receipt, budget))
+    }
+    fn finish_stop_result(
+        &self,
+        receipt: &CreationReceipt,
+        budget: &crate::ReadBudget,
+        result: Result<Observation>,
+    ) -> Result<Observation> {
+        let observation = result.map_err(|e| Error::uncertain(e.code))?;
+        budget.check().map_err(|e| Error::uncertain(e.code))?;
         if observation.state == ObservedState::Stopped {
+            let owned = self
+                .runtime_boots
+                .get(receipt)
+                .map_err(|e| Error::uncertain(e.code))?;
+            if let Some(owned) = &owned {
+                owned
+                    .collected(
+                        receipt,
+                        self.collection_epoch()
+                            .map_err(|e| Error::uncertain(e.code))?,
+                        budget,
+                    )
+                    .map_err(|e| Error::uncertain(e.code))?;
+            }
+            budget.check().map_err(|e| Error::uncertain(e.code))?;
             self.owned_managers
                 .lock()
                 .map_err(|_| Error::uncertain(ErrorCode::Native))?
@@ -2659,7 +2764,13 @@ impl Engine {
                 .lock()
                 .map_err(|_| Error::uncertain(ErrorCode::Native))?
                 .remove(&receipt.name);
+            if let Some(owned) = owned {
+                self.runtime_boots
+                    .retire(&owned)
+                    .map_err(|e| Error::uncertain(e.code))?;
+            }
         }
+        budget.check().map_err(|e| Error::uncertain(e.code))?;
         Ok(observation)
     }
 
@@ -2677,24 +2788,29 @@ impl Engine {
     ) -> Result<Observation> {
         budget.check()?;
         receipt.validate(self.binding())?;
-        let original_held_child = self
+        let original = self
             .branch_owners
             .lock()
             .map_err(|_| Error::before(ErrorCode::Native))?
             .get(&receipt.name)
-            .is_some_and(|context| {
-                context.plan.publication.child() == receipt
-                    && context
-                        .plan
-                        .publication
-                        .change
-                        .child_origin
-                        .intent
-                        .child
-                        .hold
-            });
-        if original_held_child {
-            return self.delete_held_branch(receipt, budget);
+            .cloned();
+        if let Some(original) = original {
+            if original.plan.publication.child() == receipt
+                && original
+                    .plan
+                    .publication
+                    .change
+                    .child_origin
+                    .intent
+                    .child
+                    .hold
+            {
+                return self.delete_held_branch(receipt, budget);
+            }
+            return self.delete_released_branch(receipt, budget);
+        }
+        if self.retained_released_deletion_head(receipt, budget)? {
+            return self.delete_released_branch(receipt, budget);
         }
         let gate = self.gate(&receipt.name)?;
         let _guard = gate
@@ -2704,7 +2820,17 @@ impl Engine {
         // or unknown PID through the upstream recovery convenience path.
         let expected = self.inspect(receipt)?;
         match expected.state {
-            ObservedState::Missing => return self.inspect(receipt),
+            ObservedState::Missing => {
+                if let Some(owned) = self.runtime_boots.get(receipt)? {
+                    owned.collected(receipt, self.collection_epoch()?, budget)?;
+                    self.runtime_boots.retire(&owned)?;
+                    self.owned_handles
+                        .lock()
+                        .map_err(|_| Error::before(ErrorCode::Native))?
+                        .remove(&receipt.name);
+                }
+                return self.inspect(receipt);
+            }
             ObservedState::Stopped => {}
             _ => return Err(Error::before(ErrorCode::State)),
         }
@@ -2717,13 +2843,31 @@ impl Engine {
         self.authorize_capture_staging_deletion(receipt, budget)?;
         self.verify_lifecycle_preconditions(receipt, &expected)?;
         budget.check()?;
-        self.runtime
-            .delete_machine(&receipt.name)
-            .map_err(|_| Error::uncertain(ErrorCode::Native))?;
+        if let Some(owned) = self.runtime_boots.get(receipt)? {
+            owned.verify_before(receipt, &self.record(receipt)?)?;
+            owned.call(
+                receipt,
+                self.collection_epoch()?,
+                self.runtime.pid(&receipt.name),
+                budget,
+                || {
+                    self.runtime
+                        .delete_machine(&receipt.name)
+                        .map_err(|_| Error::uncertain(ErrorCode::Native))
+                },
+            )?;
+        } else {
+            self.runtime
+                .delete_machine(&receipt.name)
+                .map_err(|_| Error::uncertain(ErrorCode::Native))?;
+        }
         let observation = self
             .inspect(receipt)
             .map_err(|error| Error::uncertain(error.code))?;
         if observation.state == ObservedState::Missing {
+            if let Some(owned) = self.runtime_boots.get(receipt)? {
+                self.runtime_boots.retire(&owned)?;
+            }
             self.owned_managers
                 .lock()
                 .map_err(|_| Error::uncertain(ErrorCode::Native))?
@@ -2740,7 +2884,12 @@ impl Engine {
         Ok(observation)
     }
 
-    fn stop_entered_capture(&self, receipt: &CreationReceipt) -> Result<bool> {
+    fn stop_entered_capture(
+        &self,
+        receipt: &CreationReceipt,
+        budget: &crate::ReadBudget,
+    ) -> Result<bool> {
+        budget.check()?;
         if receipt.material.is_none() {
             return Ok(false);
         }
@@ -2782,9 +2931,21 @@ impl Engine {
         {
             return Err(Error::before(ErrorCode::Ownership));
         }
-        self.runtime
-            .stop_machine(&receipt.name)
-            .map_err(|_| Error::uncertain(ErrorCode::Native))?;
+        if let Some(owned) = self.runtime_boots.get(receipt)? {
+            owned.call(
+                receipt,
+                self.collection_epoch()?,
+                self.runtime.pid(&receipt.name),
+                budget,
+                || {
+                    self.runtime
+                        .stop_machine(&receipt.name)
+                        .map_err(|_| Error::uncertain(ErrorCode::Native))
+                },
+            )?;
+        } else {
+            lifecycle_sdk_call(budget, || self.runtime.stop_machine(&receipt.name))?;
+        }
         let after = self
             .db
             .get_vm(&receipt.name)
@@ -2795,6 +2956,10 @@ impl Engine {
             || self.runtime.pid(&receipt.name).is_some()
         {
             return Err(Error::uncertain(ErrorCode::Ownership));
+        }
+        budget.check().map_err(|e| Error::uncertain(e.code))?;
+        if let Some(owned) = self.runtime_boots.get(receipt)? {
+            self.runtime_boots.retire(&owned)?;
         }
         self.owned_handles
             .lock()
@@ -2812,10 +2977,12 @@ impl Engine {
         &self,
         receipt: &CreationReceipt,
         expected: &Observation,
+        budget: &crate::ReadBudget,
         action: impl FnOnce() -> smolvm::Result<()>,
     ) -> Result<()> {
+        budget.check()?;
         self.verify_lifecycle_preconditions(receipt, expected)?;
-        action().map_err(|_| Error::uncertain(ErrorCode::Native))
+        lifecycle_sdk_call(budget, action)
     }
 
     pub(crate) fn verify_lifecycle_preconditions(
@@ -3144,6 +3311,31 @@ impl Engine {
                 .map_err(|_| Error::before(ErrorCode::Native))?
                 .get(&receipt.name)
                 .is_some_and(|manager| Arc::ptr_eq(manager, &context.manager))
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        Ok(())
+    }
+    /// A retired original manager cannot borrow a current runtime/handle owner.
+    /// Keep this map order consistent with branch installation/retirement.
+    pub(crate) fn require_no_active_branch_handles(&self, receipt: &CreationReceipt) -> Result<()> {
+        let handles = self
+            .owned_handles
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        let owners = self
+            .branch_owners
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        let managers = self
+            .owned_managers
+            .lock()
+            .map_err(|_| Error::before(ErrorCode::Native))?;
+        if handles.contains_key(&receipt.name)
+            || self.runtime_boots.contains(&receipt.name)?
+            || owners.contains_key(&receipt.name)
+            || managers.contains_key(&receipt.name)
+            || self.runtime.pid(&receipt.name).is_some()
         {
             return Err(Error::before(ErrorCode::Ownership));
         }
@@ -4166,6 +4358,7 @@ pub(crate) mod tests {
             capture_sources: Mutex::new(BTreeMap::new()),
             owned_managers: Mutex::new(BTreeMap::new()),
             branch_owners: Mutex::new(BTreeMap::new()),
+            runtime_boots: crate::runtime_boot::Registry::default(),
             domain,
             transfers: None,
             jobs,
@@ -5218,7 +5411,7 @@ pub(crate) mod tests {
         assert_eq!(engine.jobs.counts(), crate::jobs::Counts::default());
     }
 
-    fn install_record(engine: &Engine) -> CreationReceipt {
+    pub(crate) fn install_record(engine: &Engine) -> CreationReceipt {
         install_named_record(engine, "owned")
     }
 
@@ -6690,7 +6883,7 @@ pub(crate) mod tests {
         let gate = engine.gate(&receipt.name).unwrap();
         let _lease = gate.try_lock().unwrap();
         let error = engine
-            .coordinated_lifecycle(&receipt, &expected, || {
+            .coordinated_lifecycle(&receipt, &expected, &read_budget(), || {
                 panic!("failed receipt reached SDK mutation")
             })
             .unwrap_err();
@@ -6712,7 +6905,7 @@ pub(crate) mod tests {
         let gate = engine.gate(&receipt.name).unwrap();
         let _lease = gate.try_lock().unwrap();
         let error = engine
-            .coordinated_lifecycle(&receipt, &expected, || {
+            .coordinated_lifecycle(&receipt, &expected, &read_budget(), || {
                 // Model the SDK taking its own source lock; no VM or SDK mutation.
                 let _source =
                     crate::sdk_compat::source_lease(&engine.binding.vm_root, &receipt.name)
@@ -6741,7 +6934,7 @@ pub(crate) mod tests {
         let record = engine.db.get_vm(&receipt.name).unwrap().unwrap();
         assert!(receipt.matches(&record).unwrap());
         let error = engine
-            .coordinated_lifecycle(&receipt, &expected, || {
+            .coordinated_lifecycle(&receipt, &expected, &read_budget(), || {
                 panic!("changed state reached SDK deletion")
             })
             .unwrap_err();
@@ -6970,3 +7163,6 @@ mod export_asset_catalog_tests {
         assert_eq!(engine.jobs.counts(), crate::jobs::Counts::default());
     }
 }
+
+#[cfg(test)]
+mod stop_budget_tests;

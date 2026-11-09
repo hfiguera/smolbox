@@ -6,10 +6,32 @@
 
 mod agent_io;
 mod branch;
+mod branch_absence;
+pub use branch_absence::{
+    BranchChildAbsence, BranchChildAbsenceRequest, UnbootedBranchChildAbsence,
+    UnbootedBranchChildAbsenceRequest, BRANCH_ABSENCE_BYTES, UNBOOTED_BRANCH_ABSENCE_BYTES,
+};
+mod branch_backing;
+pub use branch_backing::{
+    BranchBackingReleaseRequest, UnbootedBranchBackingReleaseRequest, BRANCH_BACKING_PROOF_BYTES,
+    BRANCH_BACKING_REQUEST_BYTES,
+};
 mod branch_agent;
 mod branch_boot;
+mod branch_delete_action;
+pub use branch_delete_action::{HeldBranchDeletionAction, HeldBranchDeletionActionRequest};
+mod branch_delete_request;
+pub use branch_delete_request::{
+    HeldBranchDeletionRequest, HELD_BRANCH_DELETION_PROOF_BYTES, HELD_BRANCH_DELETION_REQUEST_BYTES,
+};
 mod branch_delete;
-pub use branch_delete::BranchDeletionResolution;
+pub use branch_delete::{
+    BranchDeletionCollection, BranchDeletionCollectionRequest, BranchDeletionContinuation,
+    BranchDeletionResolution, ReleasedBranchDeletionCleanupRequest,
+    ReleasedBranchDeletionContinuation, ReleasedBranchDeletionContinuationRequest,
+    ReleasedBranchDeletionRequest, ReleasedBranchDeletionResolution,
+    RELEASED_BRANCH_DELETION_PROOF_BYTES, RELEASED_BRANCH_DELETION_REQUEST_BYTES,
+};
 mod branch_held_release;
 mod branch_identity;
 mod branch_material;
@@ -21,8 +43,11 @@ mod branch_worker;
 pub use branch::{
     BranchApproval, BranchBackingRelease, BranchBootIdentity, BranchChildIntent,
     BranchCreateRequest, BranchGuestIdentity, BranchPreparationState, BranchResourcePlan,
-    BranchResources, InitialBranchRetirement, PreparedBranchIntent, PreparedBranchWorker,
-    PreparedInitialBranch, RetainedBranchPreparation,
+    BranchResources, InitialBranchRetirement, PreparedBranchIntent, PreparedBranchRetirement,
+    PreparedBranchRetirementRequest, PreparedBranchWorker, PreparedInitialBranch,
+    RetainedBranchPreparation, RetainedBranchResolution, UnbootedBranchDisposal,
+    UnbootedBranchDisposalCandidate, UnbootedBranchDisposalCompletion,
+    UnbootedBranchDisposalRequest, PREPARED_BRANCH_RETIREMENT_BYTES,
 };
 pub use branch_material::{BranchPublication, BranchSourceChange};
 mod bootstrap;
@@ -60,6 +85,7 @@ mod domain;
 mod epoch;
 mod exec;
 mod export_assets;
+mod runtime_boot;
 pub use export_assets::{
     ApprovedExportAsset, ApprovedExportAssets, EXPORT_ASSET_FILE_BYTES, EXPORT_ASSET_TOTAL_BYTES,
 };

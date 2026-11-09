@@ -11,7 +11,7 @@ defmodule SmolBox.ManagedMachine do
   alias SmolBox.{Error, Machine, ManagedMachineSpec, Validation}
 
   alias SmolBox.Backend.Assignment
-  alias SmolBox.Embedded.{NativeBranchAuthority, NativeBranchHistory, NativeCapture}
+  alias SmolBox.Embedded.{NativeBranchAuthority, NativeCapture}
   alias SmolBox.Store.RecordOps
 
   alias SmolBox.Store.VolumeAttachments
@@ -115,7 +115,7 @@ defmodule SmolBox.ManagedMachine do
   def new(_spec, _fingerprint, _now), do: invalid()
 
   @spec key(t()) :: key()
-  def key(record), do: {record.scope, record.id}
+  def key(record), do: SmolBox.ManagedMachineState.key(record)
 
   @spec validate(term()) :: :ok | {:error, Error.t()}
   def validate(%__MODULE__{} = record) do
@@ -127,7 +127,7 @@ defmodule SmolBox.ManagedMachine do
              Assignment.record_valid?(record) and
              SmolBox.Export.history_valid?(record) and
              NativeCapture.history_valid?(record) and
-             NativeBranchHistory.record?(record) and
+             NativeBranchAuthority.history_valid?(record) and
              SmolBox.Branch.valid_machine?(record) do
       :ok
     else
@@ -182,8 +182,7 @@ defmodule SmolBox.ManagedMachine do
   end
 
   @doc false
-  def idle?(record),
-    do: record.active_execution == nil and record.operation == nil and record.phase == nil
+  defdelegate idle?(record), to: SmolBox.ManagedMachineState
 
   @doc false
   def due?(record, now),

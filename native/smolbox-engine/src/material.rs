@@ -685,6 +685,31 @@ impl MaterialJournal {
         }
         intent.verify_record(record)
     }
+    // Bind a host creation request to a protected native declaration before
+    // selecting its private admission digest. None grants no absence authority.
+    pub(crate) fn prepared_branch_request(
+        &self,
+        request: &crate::BranchCreateRequest,
+    ) -> Result<Option<String>> {
+        let (journal, _) = self.load()?;
+        check_origin(&journal.origin, &request.source)?;
+        if let Some(proof) = journal
+            .initial_branch_retirements
+            .as_deref()
+            .unwrap_or(&[])
+            .iter()
+            .find(|proof| proof.child().operation_id == request.child.operation_id)
+        {
+            proof.matches_creation(request)?;
+            return Ok(Some(proof.request_sha256().into()));
+        }
+        if let Some(intent) = journal.initial_branch {
+            intent.matches_creation(request)?;
+            return Ok(Some(intent.request_sha256));
+        }
+        Ok(None)
+    }
+
     pub(crate) fn pending_initial_branch(
         &self,
         source: &CreationReceipt,
@@ -2160,6 +2185,11 @@ mod tests {
         let (directory, journal, source, record) = capture_fixture();
         let intent = crate::branch::tests::initial_journal(&source, &record);
         journal.prepare_initial_branch(&intent, &record).unwrap();
+        let checked = crate::branch::prepared_retirement::tests::request(&intent);
+        assert_eq!(
+            journal.prepared_branch_request(&checked.creation).unwrap(),
+            Some(intent.request_sha256.clone())
+        );
         let info = std::fs::metadata(directory.path()).unwrap();
         let grant = crate::branch_worker::Grant {
             intent: intent.clone(),
@@ -2189,6 +2219,11 @@ mod tests {
         journal
             .enter_branch_preparation(&grant, &expected, &record)
             .unwrap();
+        assert!(journal
+            .prepared_branch_request(&checked.creation)
+            .unwrap()
+            .is_none());
+
         journal
             .authorize_branch_preparation(&grant, &expected, &record)
             .unwrap();

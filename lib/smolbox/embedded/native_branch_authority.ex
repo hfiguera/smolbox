@@ -6,18 +6,38 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
     BranchCanonical,
     BranchCompletion,
     BranchCreation,
-    BranchReleaseTransition,
     BranchRequest,
     Identity
   }
 
-  alias SmolBox.Embedded.NativeBranchRelease
+  alias SmolBox.Embedded.{
+    NativeBranchBacking,
+    NativeBranchDeletion,
+    NativeBranchDeletionAction,
+    NativeBranchHistory,
+    NativeBranchRelease,
+    NativeBranchRetirement,
+    NativePreparedBranchRetirement,
+    NativeUnbootedBranchDisposal
+  }
 
   alias SmolBox.{Branch, BranchSpec, Profile, Validation}
 
   @enforce_keys [:source, :request, :fingerprint]
   @derive {Inspect, only: []}
-  defstruct @enforce_keys ++ [completion: nil, release: nil]
+  defstruct @enforce_keys ++
+              [
+                prepared_retirement: nil,
+                disposal: nil,
+                completion: nil,
+                release: nil,
+                retirement: nil,
+                backing: nil,
+                deletion: nil,
+                delete_continuation: nil,
+                delete_cleanup: nil,
+                delete_collection: nil
+              ]
 
   def new(parent, spec, fingerprint, name, profile) do
     source = parent.observed_machine
@@ -70,15 +90,33 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
       Validation.struct_shape?(authority, __MODULE__) and
         source_key?(authority.source) and Validation.digest?(authority.fingerprint) and
         BranchRequest.valid?(authority.request) and
-        (authority.completion == nil or
-           (BranchCompletion.valid?(authority.completion) and
-              BranchCompletion.matches?(
-                BranchCompletion.to_wire(authority.completion),
-                authority.request
-              ))) and
-        (authority.release == nil or NativeBranchRelease.valid?(authority.release, authority))
+        completion?(authority) and optional_proofs?(authority) and
+        NativeBranchDeletionAction.authority?(authority)
 
   def valid?(_), do: false
+
+  defp completion?(authority),
+    do:
+      authority.completion == nil or
+        (BranchCompletion.valid?(authority.completion) and
+           BranchCompletion.matches?(
+             BranchCompletion.to_wire(authority.completion),
+             authority.request
+           ))
+
+  defp optional_proofs?(authority),
+    do:
+      Enum.all?(
+        [
+          {authority.prepared_retirement, NativePreparedBranchRetirement},
+          {authority.disposal, NativeUnbootedBranchDisposal},
+          {authority.release, NativeBranchRelease},
+          {authority.retirement, NativeBranchRetirement},
+          {authority.backing, NativeBranchBacking},
+          {authority.deletion, NativeBranchDeletion}
+        ],
+        fn {proof, module} -> proof == nil or module.valid?(proof, authority) end
+      )
 
   def assignment_fields(%__MODULE__{} = authority, artifact, profile),
     do: %{
@@ -90,6 +128,29 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
       },
       creation: BranchCreation.from_request(authority.request, artifact, profile)
     }
+
+  def history_valid?(%{backend_assignment: nil} = record),
+    do:
+      Map.get(record, :native_branch_history, %{}) == %{} and
+        (Map.get(record, :branch) == nil or
+           match?(%{__struct__: Branch, native_authority: nil}, Map.get(record, :branch)))
+
+  def history_valid?(%{backend_assignment: %{version: 2}, branch: %{}} = record),
+    do: record.native_branch_history == %{} and child?(record)
+
+  def history_valid?(%{backend_assignment: %{version: 2}, branch: nil} = record),
+    do: NativeBranchHistory.source?(record)
+
+  def history_valid?(%{backend_assignment: %{version: 2}} = record),
+    do:
+      not BranchCreation.valid?(record.backend_assignment.creation) or
+        (Map.get(record, :managed_machine) != nil and BranchCreation.command?(record))
+
+  def history_valid?(record),
+    do:
+      Map.get(record, :native_branch_history, %{}) == %{} and
+        Map.get(record, :branch_children, %{}) == %{} and Map.get(record, :branch) == nil and
+        Map.get(record, :active_branch) == nil
 
   def child?(
         %{
@@ -110,7 +171,7 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
       child.id == request["child"]["operation_id"] and
       Map.from_struct(assignment) == assignment_fields(authority, child.spec.artifact, profile) and
       source?(branch.source_machine, request["source"], profile) and
-      completion_record?(child, authority.completion)
+      proof_records?(child, authority.completion)
   end
 
   def child?(_), do: false
@@ -125,7 +186,7 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
           {original.source, original.request, original.fingerprint} ==
             {saved.source, saved.request, saved.fingerprint} and
           (original.completion == nil or original.completion == saved.completion) and
-          NativeBranchRelease.preserved?(original.release, saved.release)
+          proofs_preserved?(original, saved, record, next)
 
       _ ->
         false
@@ -134,27 +195,74 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
 
   def preserved?(_, _), do: true
 
+  defp proof_records?(child, completion),
+    do:
+      completion_record?(child, completion) and NativePreparedBranchRetirement.record?(child) and
+        NativeUnbootedBranchDisposal.record?(child) and
+        NativeBranchRetirement.record?(child) and
+        NativeBranchBacking.record?(child) and
+        NativeBranchDeletion.record?(child, &NativeBranchDeletionAction.historical?/2) and
+        NativeBranchDeletionAction.record?(child)
+
+  defp proofs_preserved?(original, saved, record, next),
+    do:
+      NativePreparedBranchRetirement.preserved?(
+        original.prepared_retirement,
+        saved.prepared_retirement,
+        record.version
+      ) and
+        NativeUnbootedBranchDisposal.preserved?(original.disposal, saved.disposal, record.version) and
+        NativeBranchRelease.preserved?(original.release, saved.release) and
+        NativeBranchRetirement.preserved?(original.retirement, saved.retirement, record.version) and
+        NativeBranchBacking.preserved?(original.backing, saved.backing, record.version) and
+        NativeBranchDeletion.preserved?(original.deletion, saved.deletion, record.version) and
+        NativeBranchDeletionAction.preserved?(original, saved, record.version) and
+        deletion_authorized?(record, next) and closure_authorized?(record.branch, next.branch)
+
+  defp deletion_authorized?(record, %{state: :deleted} = next),
+    do:
+      not NativeBranchDeletion.required?(record) or
+        NativeBranchDeletion.acknowledged?(next.branch.native_authority) or
+        NativeBranchDeletionAction.acknowledged?(next.branch.native_authority)
+
+  defp deletion_authorized?(_, _), do: true
+
+  defp closure_authorized?(%{state: before}, %{state: :closed, native_authority: authority})
+       when before != :closed,
+       do:
+         match?(
+           %NativeBranchBacking{proof: %SmolBox.Embedded.BranchBackingRelease{}},
+           authority.backing
+         ) or match?(%NativePreparedBranchRetirement{}, authority.prepared_retirement)
+
+  defp closure_authorized?(_, _), do: true
+
   def root(%__MODULE__{completion: %BranchCompletion{} = completion}),
     do: %Identity{receipt: completion.publication["change"]["child"]}
 
-  def transitions(%{
-        branch: %{native_authority: %__MODULE__{release: %NativeBranchRelease{transition: proof}}}
-      })
-      when not is_nil(proof), do: {:ok, [proof]}
-
-  def transitions(%{
-        branch: %{native_authority: %__MODULE__{completion: %BranchCompletion{release: release}}}
-      })
-      when not is_nil(release) do
-    with {:ok, proof} <- BranchReleaseTransition.from_wire(release), do: {:ok, [proof]}
-  end
-
-  def transitions(_), do: {:ok, []}
+  defdelegate transitions(record), to: NativeBranchHistory, as: :release_transitions
 
   defp completion_record?(child, nil),
     do:
       child.created_machine == nil and child.observed_machine == nil and
-        child.branch.state in [:accepted, :dispatching, :unknown, :failed, :cancelled, :resolved]
+        ((child.branch.state in [
+            :disposal_pending,
+            :disposed,
+            :retired,
+            :backing_pending,
+            :closed
+          ] and
+            child.branch.native_authority.disposal != nil) or
+           child.branch.state in [
+             :accepted,
+             :dispatching,
+             :unknown,
+             :failed,
+             :cancelled,
+             :resolved
+           ] or
+           (child.branch.state == :closed and
+              child.branch.native_authority.prepared_retirement != nil))
 
   defp completion_record?(child, completion) do
     with %SmolBox.Machine{} = created <- child.created_machine,

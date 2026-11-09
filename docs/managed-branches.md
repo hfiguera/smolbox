@@ -249,6 +249,97 @@ reader and paired resource writer must support the native lifecycle and advertis
 intentionally do not advertise the native marker. Routing and codec contracts do
 not establish SDK release, cleanup or ordinary platform qualification.
 
+Native dependency retirement now consumes that fenced child-absence proof in
+one source/child transaction. The child must already be durably deleted. The exact
+request binds its saved completion/head, fingerprint and observed child version;
+a changed child version invalidates a result even while the source guard is valid.
+The helper fence remains held through proof collection and final store commit.
+Success marks only the matching source dependency retired and preserves material,
+creation history and every extra backing charge. Bare absence or an SDK row alone
+cannot substitute. An identical completed retirement remains idempotent.
+
+The retained proof and original child version selectively use **codec v32**.
+Earlier v30/v31 bytes retain their envelopes and acquire an empty retirement field
+on read. Earlier experimental retirement states remain readable but cannot supply
+the new evidence; explicit ratification requires fresh fenced proof. Upgrade all
+readers and paired resource writers together before native activation. Ordinary
+backing-release qualification, remaining partial/absent creation resolution and
+normal replacement qualification remain pending. Public native admission is still disabled.
+
+Original held-child deletion also retains independent observational, continuation
+and residual-cleanup requests. `Machines.resolve/4` confirms absence without
+sending SDK delete or file cleanup. Explicit `Machines.continue_deletion/4` can
+finish only an unentered final SDK delete after original collection;
+`Machines.cleanup_deletion/4` removes residual original files after SDK
+row/reservation absence and sends no SDK shutdown/delete. Both require
+`quiesced: true`, the current inspected version and the retained original helper
+context. An entered SDK delete never replays. Requests and typed acknowledgements
+use **codec v35**; earlier codec bytes retain their shape. Upgrade every reader
+and resource projection writer before activation.
+
+Each public action keeps the original helper/controller fence through durable
+acceptance, bounded IO and final guarded commit. Explicit retries keep the accepted
+request. A saved matching acknowledgement returns without contacting a helper;
+missing or late evidence retains the child slot. Another action's incomplete
+request remains history after completion and cannot be reused for fresh IO.
+Success releases only ordinary child capacity. Dependency retirement and backing
+release remain separate. Native branch admission stays disabled until the
+remaining lifecycle and ordinary qualification requirements are satisfied.
+
+Original published children that never entered boot have a separate disposal
+path. `Branches.resolve/3` with `disposition: :deleted` requires the retained original context
+and a positive typed candidate before accepting disposal; it never invents a
+Machine or boot completion. Disposal intent/result uses **codec v37**. After
+fresh fenced absence, `Branches.retire/3` saves its distinct proof in **codec v38**
+and retires only the source dependency. Extra backing stays charged.
+
+After source deletion, retirement of every dependency and host-confirmed file
+removal, `Branches.release_storage/3` accepts a stable original-disposal request in
+**codec v39**. The original source scope and helper/controller fence cover
+acceptance, bounded native accounting acknowledgement and paired closure. A
+`:backing_pending` child retains its full extra allowance until that exact typed
+acknowledgement is saved. Missing replies and failed commits preserve the request;
+explicit retries use the same identity, and saved completion returns without
+helper IO. The call performs no filesystem deletion. Disposal and retirement
+history remain immutable after closure. Every shared reader and resource writer
+must support v37–v39 before future activation; native branch admission remains
+disabled pending the remaining lifecycle and ordinary platform qualification.
+
+The shared engine's ordinary delete path now also handles an originally
+handed-off released child. Its exact completed initial/explicit release, original
+manager/enrollment and current owned head must qualify before collection and SDK
+deletion. A separate native protected journal schema records this origin; legacy
+held recovery cannot consume it. Source/snapshot backing and its allowance remain
+retained. This path still needs ordinary SDK/platform qualification.
+
+An uncertain released-child delete currently requires a distinct native recovery
+proof that is still under implementation. `Machines.resolve/4` rejects that case
+before helper fencing; generic namespace absence and held-only proof cannot free
+its reservation. Restarted and pre-handoff child deletion also remain pending.
+These boundaries do not enable public native branch admission.
+
+For initial creation uncertainty, explicit kept resolution can finish the
+handoff of already completed original initialization/release:
+
+```elixir
+{:ok, kept} = SmolBox.Branches.resolve(runtime, child_handle,
+  quiesced: true,
+  disposition: :keep
+)
+```
+
+The original manager, enrollment, protected completion and frozen creation must
+still qualify under the original helper. One finite deadline and helper/controller
+fence cover native handoff, fresh source/child observations and the paired commit.
+Boot, initialization and activation never replay. Missing/late/mismatched evidence
+or a failed commit retains uncertainty, source exclusion and all reservations.
+Explicit retry uses the same creation identity, draining allows recovery, and an
+already saved kept result returns without helper IO. The child keeps an immutable
+creation root separately from its current observation. Existing codec v30 covers
+this completion; no new schema or SQL migration is needed. Ordinary SDK/platform
+qualification and other partial/deletion paths remain pending, so native branch
+admission stays disabled.
+
 See the [durable example](https://github.com/hfiguera/smolbox/tree/main/examples/durable_host#managed-branches)
 for separate-process creation, restart, isolation, held release and cleanup. The
 [Linux evidence](evidence/managed-branches-linux.json) distinguishes real worker
@@ -257,3 +348,100 @@ qualification is implied.
 
 See [Supported platforms](supported-platforms.md) for current worker selection
 and [Testing reports](testing.md) for recorded checks and their limits.
+
+
+Released-child deletion now has a distinct checked native absence proof and Port
+exchange for both initial and explicit release. It requires original retained
+completion/deletion context and positive original collection plus SDK namespace
+absence; it performs no SDK deletion or file removal. Public deleted resolution
+now persists a distinct released intent before native IO and consumes its exact
+proof under the same helper/controller fence. Selective codec v40 freezes claimed
+record/delete versions, original completion, release and current head. Resolution
+releases only the ordinary child reservation; source dependencies and backing
+require their separate cleanup. Missing, bare, held-only or mismatched evidence
+keeps uncertainty and its reservations. The shared engine and Port also have a
+distinct continuation for an originally collected child's unentered final delete;
+entered SDK deletion never replays. Public continue_deletion now freezes a distinct released grant before IO and
+consumes its exact SDK-success acknowledgement under one helper/controller fence.
+Selective codec v41 preserves the grant and original delete version across retries;
+absence resolution keeps a pending continuation without claiming SDK success.
+Only the ordinary child reservation retires. The shared engine and Port also
+provide residual cleanup after original collection and SDK namespace absence,
+preserving source/backing and link targets without SDK deletion replay. Its
+separate recorded grant bounds partial cleanup and retains metadata through
+quarantine. Public `cleanup_deletion` now saves a distinct released cleanup grant
+before native IO, under the same captured helper/controller fence through guarded
+completion. Selective codec v42 preserves that request and its typed absence proof.
+Cleanup, observation and SDK continuation retain separate requests; completing any
+one preserves the others as pending history. Only the ordinary child reservation
+retires; dependency and backing closure remain separate. Upgrade every shared reader
+and resource projector before using v42. Older envelopes reject it, and records
+without this grant keep their earlier encodings. Restarted/pre-handoff deletion
+and ordinary SDK/platform qualification remain pending.
+Native branch admission and ordinary SDK/platform qualification remain pending;
+crash validation stays deferred.
+
+
+Normal stop of an original released child now uses the same original-manager
+collector as explicit deletion. A pending SDK stop entry keeps collection fenced
+until the call returns, and only positive collection permits acknowledging the
+exact stopped row and retiring its active manager handle. SDK errors, changed rows
+or incomplete collection retain uncertainty. Protected release/material history
+remains available for ordinary restart; source dependencies and backing stay
+reserved. This is an implementation foundation with deterministic checks; native
+branch activation and ordinary stop/restart/delete qualification remain pending.
+
+
+A normally stopped child at its exact original released material head now returns
+to the protected branch deletion path when the same helper still retains its
+original completion and collected manager context. This also covers that unchanged
+head after an ordinarily completed restart and stop. No active handle/manager,
+canonical stopped state, current epoch quiescence and positive original collection
+are required before the delete intent is entered. Final SDK deletion, explicit
+continuation, absence resolution and residual cleanup use the existing journals
+and proofs, retaining source dependency and backing charges separately. A stopped
+row alone cannot provide this authority. Later material heads, active handles and
+replacement helpers keep their existing lifecycle behavior; complete recovery for
+those paths and pre-handoff deletion remain pending. These deterministic contracts
+do not qualify live stop/restart/delete or enable native branch admission.
+
+
+Ordinary SDK starts now retain their returned boot enrollment and finite metadata
+charge in the current helper. Stop also cleans up an already exited child instead
+of treating a missing direct-manager entry as sufficient completion. SDK stop and
+ordinary deletion keep collection fenced until the call returns, then require
+positive collection; unknown results retain their original authority and charge.
+A later start first cleans the previous returned boot under the same ownership
+checks. This preserves the path from normal restart/stop to protected original-head
+deletion. Native branch activation and live lifecycle qualification remain pending;
+no boot ownership is reconstructed from SDK inventory or a replacement helper.
+
+
+Embedded stop now carries the remaining caller deadline and cancellation through
+preflight, read-only observations, original/current boot collection and final
+acknowledgement. Expiry before SDK entry prevents dispatch; expiry after entry
+keeps the result uncertain. A failed final observation retains the current boot
+slot and active handle so an explicit retry can complete cleanup. A later bridge
+timeout still cannot convert completed local collection into a public stopped
+acknowledgement. The existing error vocabulary, VM storage and separate backing
+charges remain unchanged. Ordinary package/platform qualification is still pending.
+
+
+The separate original-child collection control is exposed as
+`SmolBox.Machines.collect_deletion(runtime, child_handle, version, quiesced: true)`.
+It requires the inspected version and retained original helper/completion/boot
+context. The controller holds the helper fence while saving the exact independent
+request, calling Port and committing its typed acknowledgement. A matching saved
+acknowledgement returns without helper IO; retries retain the original request.
+This proves historical collection only. Deletion stays uncertain, every ordinary
+child/dependency/backing reservation remains charged, and SDK rows, readiness and
+namespace absence gain no authority. Use `continue_deletion/4` separately for the
+unentered final SDK delete; an entered SDK delete never replays.
+
+The independent collection history uses **codec v43**. Earlier records retain their
+exact envelopes/bytes, with a nil collection default on read. Upgrade all readers
+and resource projection writers before activation. An additional 128-KiB native
+metadata reservation is retained before original deletion entry so collection
+control remains available during quarantine. Ordinary SDK/platform qualification
+remains pending; native branch admission stays disabled and crash validation is
+deferred.

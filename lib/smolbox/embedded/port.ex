@@ -5,6 +5,10 @@ defmodule SmolBox.Embedded.Port do
   alias SmolBox.Backend.{Budget, Features}
 
   alias SmolBox.Embedded.{
+    BranchBackingRelease,
+    BranchChildAbsence,
+    BranchDeletionCollection,
+    BranchDeletionResolution,
     BranchRequest,
     Channel,
     CheckpointContract,
@@ -14,6 +18,7 @@ defmodule SmolBox.Embedded.Port do
     CreationPayload,
     ExportContract,
     Frame,
+    HeldBranchDeletionAction,
     HeldBranchReleaseRequest,
     ImageContract,
     JSON,
@@ -21,11 +26,18 @@ defmodule SmolBox.Embedded.Port do
     MountContract,
     NativeSource,
     Outbox,
+    PreparedBranchRetirement,
     Protocol,
     RegistryContract,
+    ReleasedBranchDeletionCleanup,
+    ReleasedBranchDeletionContinuation,
+    ReleasedBranchDeletionResolution,
     Request,
     Shape,
     TerminalContract,
+    UnbootedBranchBackingRelease,
+    UnbootedBranchChildAbsence,
+    UnbootedBranchDisposal,
     VolumeContract
   }
 
@@ -575,6 +587,22 @@ defmodule SmolBox.Embedded.Port do
       CheckpointContract.opt_in_approved?(config, Map.get(request, "create", request)) and
         operation_approved?(config, request)
 
+  defp operation_approved?(config, %{
+         "operation" => "qualify_unbooted_branch_child_absence",
+         "request" => request
+       }),
+       do:
+         Features.supports?(config, :branches) and
+           UnbootedBranchChildAbsence.approval(request) in BranchRequest.approvals(config)
+
+  defp operation_approved?(config, %{
+         "operation" => "inspect_unbooted_branch_disposal",
+         "request" => request
+       }),
+       do:
+         Features.supports?(config, :branches) and
+           request["approval"] in BranchRequest.approvals(config)
+
   defp operation_approved?(config, %{"operation" => name})
        when name in ~w(qualify_export admit_export export_machine inspect_export cleanup_export_staging),
        do: Features.supports?(config, :exports)
@@ -679,6 +707,90 @@ defmodule SmolBox.Embedded.Port do
        when name in ~w(start_checkpointable checkpoint_preflight inspect_capture inspect_capture_resolution resolve_capture cleanup_capture_staging abort_capture_staging qualify_aborted_capture_source capture_checkpoint),
        do: Features.supports?(config, :checkpoints)
 
+  defp operation_approved?(config, %{"operation" => name, "request" => request})
+       when name in ~w(dispose_unbooted_branch resolve_unbooted_branch_disposal),
+       do:
+         Features.supports?(config, :branches) and
+           UnbootedBranchDisposal.approval(request) in BranchRequest.approvals(config)
+
+  defp operation_approved?(config, %{
+         "operation" => "release_unbooted_branch_backing",
+         "request" => request
+       }),
+       do:
+         Features.supports?(config, :branches) and
+           UnbootedBranchBackingRelease.approval(request) in BranchRequest.approvals(config)
+
+  defp operation_approved?(config, %{
+         "operation" => "retire_prepared_branch",
+         "request" => request
+       }),
+       do:
+         Features.supports?(config, :branches) and
+           PreparedBranchRetirement.approval(request) in BranchRequest.approvals(config)
+
+  defp operation_approved?(config, %{"operation" => name, "request" => request})
+       when name in ~w(continue_held_branch_deletion cleanup_held_branch_deletion),
+       do:
+         Features.supports?(config, :branches) and
+           HeldBranchDeletionAction.approval(request) in BranchRequest.approvals(config)
+
+  defp operation_approved?(config, %{
+         "operation" => "continue_released_branch_deletion",
+         "request" => request
+       }),
+       do:
+         Features.supports?(config, :branches) and
+           ReleasedBranchDeletionContinuation.approval(request) in BranchRequest.approvals(config)
+
+  defp operation_approved?(config, %{
+         "operation" => "cleanup_released_branch_deletion",
+         "request" => request
+       }),
+       do:
+         Features.supports?(config, :branches) and
+           ReleasedBranchDeletionCleanup.approval(request) in BranchRequest.approvals(config)
+
+  defp operation_approved?(config, %{
+         "operation" => "collect_branch_deletion",
+         "request" => request
+       }),
+       do:
+         Features.supports?(config, :branches) and
+           BranchDeletionCollection.approval(request) in BranchRequest.approvals(config)
+
+  defp operation_approved?(config, %{
+         "operation" => "resolve_released_branch_deletion",
+         "request" => request
+       }),
+       do:
+         Features.supports?(config, :branches) and
+           ReleasedBranchDeletionResolution.approval(request) in BranchRequest.approvals(config)
+
+  defp operation_approved?(config, %{
+         "operation" => "resolve_held_branch_deletion",
+         "request" => request
+       }),
+       do:
+         Features.supports?(config, :branches) and
+           BranchDeletionResolution.approval(request) in BranchRequest.approvals(config)
+
+  defp operation_approved?(config, %{
+         "operation" => "release_branch_backing",
+         "request" => request
+       }),
+       do:
+         Features.supports?(config, :branches) and
+           BranchBackingRelease.approval(request) in BranchRequest.approvals(config)
+
+  defp operation_approved?(config, %{
+         "operation" => "qualify_branch_child_absence",
+         "request" => request
+       }),
+       do:
+         Features.supports?(config, :branches) and
+           BranchChildAbsence.approval(request) in BranchRequest.approvals(config)
+
   defp operation_approved?(config, %{"operation" => "branch_preflight"}),
     do: Features.supports?(config, :branches)
 
@@ -689,7 +801,7 @@ defmodule SmolBox.Embedded.Port do
            HeldBranchReleaseRequest.approval(request) in BranchRequest.approvals(config)
 
   defp operation_approved?(config, %{"operation" => name, "request" => request})
-       when name in ~w(create_branch inspect_branch_completion),
+       when name in ~w(create_branch inspect_branch_completion resolve_ready_branch_completion),
        do:
          Features.supports?(config, :branches) and
            request["approval"] in BranchRequest.approvals(config)

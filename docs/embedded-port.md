@@ -43,7 +43,169 @@ Typed native branch material links carried by attached commands selectively use
 store schema v29. Readers must retain the complete source-publication or child-
 release chain; older envelopes reject those links. Existing branchless records
 keep their earlier bytes. This reader foundation does not enable branch admission
-or establish the source/child transaction and platform qualification gates.
+or establish platform qualification. Native creation authority uses selective
+v30, explicit held release v31 and completed-child dependency retirement v32.
+Memory and PostgreSQL retain original completion, independent child material and
+retirement proof in paired transactions; every extra backing charge remains until
+the separate backing-release boundary completes.
+
+The development backing-release protocol now binds the original completion,
+expected source/child heads and explicit host backing-removal confirmation to one
+request. Only the retained original native context and its protected ledger can
+acknowledge that charge. It performs no disk deletion. A missing reply cannot
+release public capacity, and helper replacement cannot recreate the original
+authority. Stores now save request acceptance and acknowledgement using selective
+v33, preserving all charges while pending and closing the extra reservation only
+with matching proof. Every reader and paired resource writer must upgrade before
+activation. Public `Branches.release_storage/3` now saves that request under the
+native authority fence before dispatch, retaining the same helper/epoch through
+the guarded acknowledgement commit. Missing replies keep the request and charge;
+an explicit retry uses the saved request. A completed acknowledgement can be read
+idempotently without another helper call. HTTP retains its existing absence path.
+Ordinary qualification and the remaining branch lifecycle gates stay pending;
+native branch admission stays disabled.
+
+Held-child deletion also has a development absence-resolution request bound to
+its original completion and root receipt. It requires explicit fencing and the
+retained original deletion context; it sends no SDK delete or filesystem cleanup.
+The proof resolves neither a source dependency nor retained backing by itself.
+Managed request/version retention now uses selective v34. Public
+`Machines.resolve(..., disposition: :deleted)` freezes the request before helper
+IO and keeps the native authority fence through guarded proof retention. Claims
+and explicit retries preserve that request. The source dependency and extra
+backing remain charged. This integration does not enable native admission or
+authorize a retry of an uncertain SDK operation; explicit continuation/residual
+cleanup and ordinary qualification remain separate requirements.
+
+Development transport also distinguishes explicit deletion continuation from
+residual-file cleanup. Both require the original completed context, caller fencing,
+exact action-bound request and branch approval. Continuation acknowledges the
+protected completed SDK delete step; cleanup can remove only retained original
+residuals after row/reservation absence. Neither releases dependency or persistent
+backing. Managed continuation and cleanup acceptance now freeze independent requests
+and typed acknowledgements under selective codec v35. Memory and PostgreSQL retain
+other pending requests as history while releasing only the ordinary child slot.
+Every reader and resource writer must upgrade before native activation.
+`Machines.continue_deletion/4` and `Machines.cleanup_deletion/4` now route these
+explicit actions under the original helper/controller fence. Both require the
+current inspected version and `quiesced: true`; retries retain the accepted request.
+A matching saved acknowledgement returns without another helper call. Failed or
+late evidence retains the child slot. These actions are not sent by
+`Machines.resolve`, and they do not enable public branch admission or establish
+package qualification.
+
+The shared engine also has a checked request/proof boundary for retiring a known
+prepared-only branch declaration. It matches protected source/child/approval
+history before selecting the native admission digest; caller-supplied inventory
+or PID/epoch values cannot replace that history. The result attests no SDK entry,
+child disposal, activation or entered backing release. Missing or entered state
+remains unresolved. The development Port operation now carries a required typed
+acknowledgement with independent Rust/Elixir validation, exact immutable branch
+approval, source-domain binding and zero output. It uses the reserved control lane
+and existing finite terminal storage. Selective codec v36 now retains the original
+request and typed retirement on source and child. An atomic store transaction
+requires the current child version and a fresh observation of the unchanged source
+head before closing the never-created child and releasing its pre-entry charges.
+The retirement stays outside material history and its operation ID cannot be reused.
+Memory/PostgreSQL share the contract; earlier record bytes remain unchanged.
+Upgrade every reader and resource projector before activation. Explicit
+`Branches.resolve(..., quiesced: true, disposition: :deleted)` now consumes that
+proof under the original helper/controller fence through final paired commit. The
+backend requires fresh unchanged source observation and shares a single deadline
+and aggregate JSON payload budget across retirement and inspection. Saved
+acknowledgements return without helper IO. Missing/entered proof, stale versions
+or post-proof failure leave reservations retained. Native-only
+`retire_prepared_branch/3` is recovery plumbing for this existing public API; HTTP
+rejects it. Public native branch admission and package qualification stay pending.
+
+The shared engine now also freezes the full original creation request before
+SDK entry and can exclusively borrow a matching retained entered job for later
+resolution. It preserves the original runtime, gates, manager and backing, and
+requires the same helper epoch plus finite deadline and explicit quiescence.
+Phase lookup alone grants no absence, readiness or capacity release. For an exact
+published child that never entered boot, separate protocol-two
+`dispose_unbooted_branch` and `resolve_unbooted_branch_disposal` requests now carry
+full frozen creation and explicit quiescence. The shared engine uses only its
+original context; resolution never replays SDK deletion. A required typed result
+distinguishes SDK success from later observed absence. Exact terminal handoff can
+retire transient work during quarantine while retaining backing and fenced work
+admission. The source publication and snapshot remain retained.
+
+A read-only protocol-two `inspect_unbooted_branch_disposal` probe can now select
+only an exact original published job with no boot, active worker or entered
+disposal grant. It requires quiescence, the complete frozen creation request and
+the original helper epoch, source authority and material. Its required candidate
+binds the actual source publication and original preparation digest. Candidate
+hashes grant no ownership, readiness, absence or release authority; actual disposal
+must independently recheck its accepted request. The controller must obtain positive
+evidence before accepting entered disposal: a prepared-retirement error alone is
+not selection evidence. The source-scoped backend and public controller now
+consume the candidate under the same pinned helper/controller fence through
+acceptance, disposal and guarded completion. Prepared-only retirement stays
+available. Retrying accepted disposal first observes its original ledger; if no
+result is available, the same saved request may be offered to native one-shot
+dispatch, whose protected entered grant independently refuses SDK replay.
+
+Separate `release_unbooted_branch_backing` binds that original disposal, saved
+source tombstone head, exact child root and host removal confirmation. The native
+engine checks original actor collection and both namespaces' row/reservation/
+directory absence before acknowledging only the original charge. These messages
+use immutable branch approvals, bounded control admission, zero output and
+reserved branch-terminal storage. Rust and Elixir check full request, domain and
+platform correlation independently. No boot completion or guest identity is
+fabricated. Native-only backend operations inspect_unbooted_branch_disposal/3,
+dispose_unbooted_branch/3 and resolve_unbooted_branch_disposal/3 bind this route;
+HTTP rejects them. The public controller and backend share a finite deadline and
+conservatively charge each stage's offered transfer allowance, including failed
+replies. Required proof plus a fresh observation of the actual source publication
+permit paired completion. Backing closure and ordinary platform qualification
+remain required. Public native branch admission stays
+disabled; this recovery route enables no feature by itself.
+
+Fresh child absence for that original disposed job has its own protocol-two
+`qualify_unbooted_branch_child_absence` request and typed result. It requires the
+original archive/runtime/domain/ledger and child epoch quiescence, then checks
+current SDK row, reservation and directory absence twice. The source may remain
+running. Request/result correlation binds the complete disposal, distinct intent,
+original epoch/platform/domain and exact branch approval. Both payloads are
+bounded to 68 KiB, work to 30 seconds, with reserved control/terminal storage and
+no output streams. This observation creates no manager or boot completion and
+releases no dependency or backing by itself. The public/store retirement route
+below consumes it; public native branch admission remains disabled.
+
+Durable entered-disposal bookkeeping now uses selective codec v37. Before SDK
+dispatch, the paired source/child transaction saves an exact version-bound request
+and `:disposal_pending` state, retaining every charge. Exact native completion and
+a fresh source observation then append the real source publication, preserve the
+proof and mark the never-booted child `:disposed`/deleted. Its ordinary reservation
+retires; extra backing and the source dependency remain. No child `Machine` or
+`BranchCompletion` is fabricated. New state markers reject older-envelope
+downgrades even if the new authority field is stripped; earlier records omit the
+new nil default exactly. Upgrade every reader and resource projector first.
+Memory/PostgreSQL paired and rollback contracts plus fresh-BEAM decoding cover
+this store boundary. Public disposal routing is implemented; backing closure
+and ordinary qualification remain required. No native branch capability is enabled.
+
+Original disposed-child dependency retirement now selectively uses **codec v38**.
+`Branches.retire(..., quiesced: true)` obtains fresh typed absence through the
+source-scoped native-only `retire_unbooted_branch/3` backend operation, then keeps
+the original helper/controller fence through the guarded paired store write.
+Fingerprint, child version and full saved disposal bind a distinct canonical
+request. The child becomes `:retired` without a Machine or boot completion; the
+source's dependency flag becomes true, permitting normal source lifecycle work.
+Every extra backing charge remains. Wrong/missing/late proof, stale child versions
+and a failed store write preserve the dependency and charges. Repeated completed
+retirement returns its saved record without helper IO; a fresh observation after a
+stale claim uses that current child version and never replays disposal.
+
+Upgrade every reader and resource projector before activation. V37 disposal-only
+and earlier records retain their exact encodings; old envelopes reject v38
+retirement, including stripped downgrades. Fresh BEAM readers need no native
+assets. Memory/PostgreSQL share the paired contract and PostgreSQL rollback
+preserves source, child, encrypted payloads and projections together. HTTP and
+completed-child retirement keep their existing routes. Backing closure for this
+origin still needs implementation; the completed-child backing path rejects it
+safely even after source deletion. Public native branch admission remains disabled.
 
 The migration to an unmodified SDK has removed the five active downstream patches
 while keeping this architecture. Repository design and implementation notes are

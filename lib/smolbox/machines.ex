@@ -13,6 +13,10 @@ defmodule SmolBox.Machines do
   Stop and delete reject active commands, including unresolved unknown commands.
   All APIs require host authorization for the scope; handles are not credentials.
   """
+  alias SmolBox.Embedded.NativeBranchDeletion
+  alias SmolBox.Runtime.NativeBranchDeletion, as: NativeBranchDeletionRuntime
+  alias SmolBox.Runtime.NativeBranchDeletionAction
+
   alias SmolBox.Runtime.DiskExpansions
   alias SmolBox.Runtime.ExecutionSupport
 
@@ -434,6 +438,14 @@ defmodule SmolBox.Machines do
   deleted resolution after the original creation intent is verified absent.
   Present material remains unverified and reserved. Neither resolution nor
   subsequent reconciliation invents Exit or reclaims completed command history.
+
+  An uncertain original native held-child delete uses its retained deletion
+  context and a durably frozen request to confirm absence. The exact proof is
+  retained with selective store codec v34. This releases only the child's ordinary
+  reservation; source dependency and extra backing require separate branch APIs.
+  It sends no SDK delete or filesystem cleanup. Remaining material cannot be
+  resolved as absent, and a lost proof leaves the request and reservation intact
+  for an explicit retry with the current management version.
   """
   def resolve(runtime, handle, version, options) do
     with true <-
@@ -443,7 +455,14 @@ defmodule SmolBox.Machines do
          :ok <- key(handle),
          {:ok, config} <- config(runtime),
          {:ok, record} <- Machines.store(config, :fetch, [handle]),
-         {:ok, worker} <- Machines.worker(config, record) do
+         {:ok, worker} <- Machines.worker(config, record),
+         :ok <- resolution_support(worker, record, disposition) do
+      deadline =
+        if disposition == :deleted and NativeBranchDeletion.required?(record),
+          do:
+            System.monotonic_time(:millisecond) +
+              min(Target.connection(worker).budget.timeout_ms, 30_000)
+
       NativeResolution.run(
         config,
         Runtime.coordinator(runtime),
@@ -451,7 +470,7 @@ defmodule SmolBox.Machines do
         worker,
         disposition,
         fn pinned ->
-          resolve_record(config, handle, version, pinned, disposition)
+          resolve_record(config, handle, version, pinned, disposition, deadline)
         end
       )
     else
@@ -460,7 +479,82 @@ defmodule SmolBox.Machines do
     end
   end
 
-  defp resolve_record(config, handle, version, worker, disposition) do
+  @doc """
+  Collect the original child of an uncertain embedded branch-child deletion.
+
+  Requires `quiesced: true`, the inspected management version and the retained
+  original helper/completion/boot context. Acceptance freezes an independent
+  request before helper IO; retries retain it. A matching saved acknowledgement
+  returns without helper IO. This records historical collection only: deletion
+  remains uncertain and every child/dependency/backing reservation stays charged.
+  Use `continue_deletion/4` separately to finish an unentered final SDK deletion.
+  An entered SDK deletion never replays. HTTP targets and restarted children do
+  not support this operation. Native branch admission remains disabled pending
+  ordinary qualification; crash validation remains deferred.
+  """
+  @spec collect_deletion(SmolBox.runtime(), handle(), pos_integer(), keyword()) ::
+          {:ok, ManagedMachine.t()} | {:error, Error.t()}
+  def collect_deletion(runtime, handle, version, options),
+    do: deletion_action(runtime, handle, version, options, :collect)
+
+  @doc """
+  Continue an uncertain original embedded branch-child deletion after quiescence.
+
+  Requires `quiesced: true` and the inspected management version. The original
+  helper must retain the returned delete worker, collected child and exact original
+  completion, with the original release for a released child. Only the unfinished
+  final SDK delete step may continue; an entered SDK delete never replays. Acceptance freezes the request before helper IO and
+  retries retain it. A missing acknowledgement keeps the child reservation.
+  A matching saved acknowledgement returns without helper IO. This releases only
+  ordinary child capacity; source dependency and extra backing stay reserved.
+  HTTP targets and restarted children do not support this operation. Public native
+  branch admission remains disabled pending qualification.
+  """
+  @spec continue_deletion(SmolBox.runtime(), handle(), pos_integer(), keyword()) ::
+          {:ok, ManagedMachine.t()} | {:error, Error.t()}
+  def continue_deletion(runtime, handle, version, options),
+    do: deletion_action(runtime, handle, version, options, :continue)
+
+  @doc """
+  Remove residual files from an uncertain original embedded branch-child deletion.
+
+  Requires `quiesced: true`, the inspected management version and the retained
+  original helper context. Positive original-child collection and SDK row/reservation
+  absence precede bounded removal through the pinned original directory authority.
+  Held and initially/explicitly released children use distinct accepted grants.
+  It sends no SDK shutdown/delete. Acceptance freezes a separate cleanup request;
+  explicit retries retain it. Missing acknowledgement preserves the child slot.
+  A matching saved acknowledgement returns without helper IO. Source dependencies
+  and persistent backing require separate branch retirement/release APIs.
+  HTTP targets and restarted children do not support this operation. Public native
+  branch admission remains disabled pending qualification.
+  """
+  @spec cleanup_deletion(SmolBox.runtime(), handle(), pos_integer(), keyword()) ::
+          {:ok, ManagedMachine.t()} | {:error, Error.t()}
+  def cleanup_deletion(runtime, handle, version, options),
+    do: deletion_action(runtime, handle, version, options, :cleanup)
+
+  defp deletion_action(runtime, handle, version, options, action) do
+    with true <- Validation.keys?(options, [:quiesced]) and options[:quiesced] == true,
+         true <- Validation.integer?(version, 1, 9_007_199_254_740_991),
+         :ok <- key(handle),
+         {:ok, config} <- config(runtime),
+         {:ok, record} <- Machines.store(config, :fetch, [handle]),
+         do:
+           NativeBranchDeletionAction.run(
+             config,
+             Runtime.coordinator(runtime),
+             record,
+             version,
+             action
+           ),
+         else: (
+           false -> Session.error(:validation, :reconcile)
+           error -> error
+         )
+  end
+
+  defp resolve_record(config, handle, version, worker, disposition, deadline) do
     with {:ok, current} <-
            Machines.store(config, :claim_version, [
              handle,
@@ -470,19 +564,50 @@ defmodule SmolBox.Machines do
              config.lease_ms
            ]),
          :ok <- Machines.port_support(config, current.spec.ports),
-         observation =
-           Machines.io(config, %{current | operation_deadline_ms: nil}, fn ->
-             resolution_inspect(worker, current)
-           end),
-         {:ok, observed} <- resolution_observation(observation, disposition),
-         {:ok, fresh} <- Machines.claim(config, handle) do
-      Machines.store(config, :resolve, [
-        handle,
-        Session.guard(fresh),
-        observed,
-        config.clock.now()
-      ])
+         do: resolve_current(config, current, worker, disposition, deadline)
+  end
+
+  defp resolution_support(worker, record, :deleted) do
+    cond do
+      not NativeBranchDeletion.required?(record) ->
+        :ok
+
+      NativeBranchDeletion.resolvable?(record) ->
+        Target.require_operation(worker, :resolve_branch_deletion)
+
+      true ->
+        Session.error(:unsupported_capability, :reconcile)
     end
+  end
+
+  defp resolution_support(_, _, _), do: :ok
+
+  defp resolve_current(config, current, worker, :deleted, deadline) do
+    if NativeBranchDeletion.required?(current),
+      do: NativeBranchDeletionRuntime.run(config, current, worker, deadline),
+      else: resolve_observed(config, current, worker, :deleted)
+  end
+
+  defp resolve_current(config, current, worker, disposition, _deadline),
+    do: resolve_observed(config, current, worker, disposition)
+
+  defp resolve_observed(config, current, worker, disposition) do
+    handle = ManagedMachine.key(current)
+
+    observation =
+      Machines.io(config, %{current | operation_deadline_ms: nil}, fn ->
+        resolution_inspect(worker, current)
+      end)
+
+    with {:ok, observed} <- resolution_observation(observation, disposition),
+         {:ok, fresh} <- Machines.claim(config, handle),
+         do:
+           Machines.store(config, :resolve, [
+             handle,
+             Session.guard(fresh),
+             observed,
+             config.clock.now()
+           ])
   end
 
   defp resolution_inspect(%{kind: :embedded} = worker, %{created_machine: nil} = record),

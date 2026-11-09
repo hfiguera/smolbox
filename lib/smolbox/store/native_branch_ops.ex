@@ -100,10 +100,11 @@ defmodule SmolBox.Store.NativeBranchOps do
   end
 
   defp unused?(parent, id) do
-    case NativeGrowth.transitions(parent) do
-      {:ok, history} -> Enum.all?(history, &(&1.receipt["material"]["operation_id"] != id))
-      _ -> false
-    end
+    not Map.has_key?(parent.native_branch_history, id) and
+      case NativeGrowth.transitions(parent) do
+        {:ok, history} -> Enum.all?(history, &(&1.receipt["material"]["operation_id"] != id))
+        _ -> false
+      end
   end
 
   def complete(parent, child, result, now), do: commit(parent, child, result, :dispatching, now)

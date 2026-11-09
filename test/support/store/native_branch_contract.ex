@@ -185,17 +185,10 @@ defmodule SmolBox.Store.NativeBranchContract do
     result
   end
 
-  defp publication(template, request) do
-    intent = template["change"]["child_origin"]["intent"]
-
-    intent = %{
-      intent
-      | "source" => request["source"],
-        "child" => request["child"],
-        "approval" => request["approval"]
-    }
-
-    digest =
+  def rehash_intent(intent) do
+    Map.put(
+      intent,
+      "request_sha256",
       BranchCanonical.digest([
         "smolbox-initial-branch-admission-v1",
         "9f446ae00219148ca4a703914f44a8e2fab11655",
@@ -207,8 +200,20 @@ defmodule SmolBox.Store.NativeBranchContract do
         intent["source_pid"],
         intent["epoch"]
       ])
+    )
+  end
 
-    intent = %{intent | "request_sha256" => digest}
+  defp publication(template, request) do
+    intent = template["change"]["child_origin"]["intent"]
+
+    intent = %{
+      intent
+      | "source" => request["source"],
+        "child" => request["child"],
+        "approval" => request["approval"]
+    }
+
+    intent = rehash_intent(intent)
 
     root =
       template["change"]["child"]
@@ -235,7 +240,7 @@ defmodule SmolBox.Store.NativeBranchContract do
       request["source"]["material"]
       | "revision" => request["source"]["material"]["revision"] + 1,
         "operation_id" => request["child"]["operation_id"],
-        "request_sha256" => digest
+        "request_sha256" => intent["request_sha256"]
     }
 
     material = %{

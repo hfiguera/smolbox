@@ -1,5 +1,5 @@
-//! Explicit deletion of a completed original held child. Collection is distinct
-//! from deletion; neither retires the source's backing/dependency reservation.
+//! Explicit deletion of a completed original held or released child. Collection
+//! is distinct from deletion; neither retires backing/dependency reservations.
 use crate::branch_owned::Context;
 use crate::{
     CreationReceipt, Engine, Error, ErrorCode, Observation, ObservedState, ReadBudget, Result,
@@ -9,13 +9,25 @@ use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
 use std::os::unix::fs::{MetadataExt, OpenOptionsExt, PermissionsExt};
 use std::sync::{Arc, Weak};
+mod collected;
+mod collection;
+pub use collection::{BranchDeletionCollection, BranchDeletionCollectionRequest};
 mod continuation;
+mod released;
+pub(crate) use released::release_ready;
+pub use released::{
+    ReleasedBranchDeletionCleanupRequest, ReleasedBranchDeletionContinuation,
+    ReleasedBranchDeletionContinuationRequest, ReleasedBranchDeletionRequest,
+    ReleasedBranchDeletionResolution, RELEASED_BRANCH_DELETION_PROOF_BYTES,
+    RELEASED_BRANCH_DELETION_REQUEST_BYTES,
+};
 mod residual;
 
 const LEGACY_BYTES: u64 = 64 * 1024;
 // A schema-two result adds bounded request/proof metadata to an accepted legacy
 // intent. Keep legacy records at their original limit, including on read.
-const MAX_BYTES: u64 = 80 * 1024;
+const LEGACY_EXTENDED_BYTES: u64 = 80 * 1024;
+const MAX_BYTES: u64 = 160 * 1024;
 type Version = crate::checkpoint_materialize::FileVersion;
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -25,15 +37,16 @@ struct Intent {
     child: crate::OwnerIdentity,
     identity_sha256: String,
     nonce: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    release: Option<crate::BranchReleaseTransition>,
 }
 impl Intent {
     fn validate(&self) -> Result<()> {
         self.plan.validate()?;
         let binding = &self.plan.publication.change.child_origin;
-        if !binding.intent.child.hold
-            || !self
-                .boot
-                .matches(&binding.intent.child.name, &binding.intent.epoch)
+        if !self
+            .boot
+            .matches(&binding.intent.child.name, &binding.intent.epoch)
             || self.child.pid <= 0
             || self.child.birth == 0
             || self.child.uid != unsafe { libc::geteuid() }
@@ -42,10 +55,33 @@ impl Intent {
         {
             return Err(Error::before(ErrorCode::Ownership));
         }
-        Ok(())
+        match &self.release {
+            None if binding.intent.child.hold => Ok(()),
+            Some(release) => {
+                release.validate()?;
+                if release.previous != *self.plan.publication.child()
+                    || release.change.binding != *binding
+                    || release.change.identity_sha256 != self.identity_sha256
+                    || release.change.boot_sha256 != crate::material::hash(&self.boot)?
+                {
+                    return Err(Error::before(ErrorCode::Ownership));
+                }
+                Ok(())
+            }
+            None => Err(Error::before(ErrorCode::Ownership)),
+        }
     }
     fn receipt(&self) -> &CreationReceipt {
-        self.plan.publication.child()
+        self.release
+            .as_ref()
+            .map_or_else(|| self.plan.publication.child(), |release| &release.receipt)
+    }
+    fn require_held(&self) -> Result<()> {
+        if self.release.is_none() && self.plan.publication.change.child_origin.intent.child.hold {
+            Ok(())
+        } else {
+            Err(Error::before(ErrorCode::Unsupported))
+        }
     }
     fn collected(&self, proof: &crate::epoch::BootCollection) -> Result<()> {
         if proof.intent() != &self.boot || proof.child() != self.child {
@@ -84,7 +120,12 @@ fn deletion_digest(intent: &Intent, continuation: Option<&ContinuationRequest>) 
     match continuation {
         None => crate::material::hash(intent),
         Some(request) => {
-            crate::material::hash(&("smolbox-held-delete-continuation-v1", intent, request))
+            let domain = if intent.release.is_some() {
+                "smolbox-released-delete-continuation-v1"
+            } else {
+                "smolbox-held-delete-continuation-v1"
+            };
+            crate::material::hash(&(domain, intent, request))
         }
     }
 }
@@ -123,6 +164,10 @@ impl BranchDeletionResolution {
             || !crate::domain::valid_hex(&self.request_sha256, 64)
             || !crate::domain::valid_hex(&self.deletion_sha256, 64)
             || self.proof_sha256 != self.digest()?
+            || serde_json::to_vec(self)
+                .map_err(|_| Error::before(ErrorCode::Io))?
+                .len()
+                > crate::HELD_BRANCH_DELETION_PROOF_BYTES
         {
             return Err(Error::before(ErrorCode::Ownership));
         }
@@ -160,6 +205,79 @@ impl BranchDeletionResolution {
         self.operation_id == operation_id && self.request_sha256 == request_sha256
     }
 }
+/// Acknowledgement of the original collected child's completed deletion continuation.
+/// The caller must retain this separately from backing/dependency retirement.
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct BranchDeletionContinuation {
+    pub schema: u8,
+    pub child: CreationReceipt,
+    pub operation_id: String,
+    pub request_sha256: String,
+    pub deletion_sha256: String,
+    pub proof_sha256: String,
+}
+impl std::fmt::Debug for BranchDeletionContinuation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("BranchDeletionContinuation")
+            .field("schema", &self.schema)
+            .finish_non_exhaustive()
+    }
+}
+impl BranchDeletionContinuation {
+    pub fn validate(&self) -> Result<()> {
+        let mut origin = self.child.clone();
+        origin.material = None;
+        if self.schema != 1
+            || !crate::domain::valid_id(&self.child.target_id)
+            || !crate::domain::valid_id(&self.child.name)
+            || !crate::domain::valid_hex(&self.child.domain_generation, 32)
+            || !crate::domain::valid_hex(&self.child.owner_token, 64)
+            || !crate::domain::valid_hex(&self.child.incarnation, 32)
+            || !crate::domain::valid_hex(&self.child.material_sha256, 64)
+            || self.child.material.as_ref() != Some(&crate::material::root_proof(&origin)?)
+            || !crate::domain::valid_id(&self.operation_id)
+            || !crate::domain::valid_hex(&self.request_sha256, 64)
+            || !crate::domain::valid_hex(&self.deletion_sha256, 64)
+            || self.proof_sha256 != self.digest()?
+            || serde_json::to_vec(self)
+                .map_err(|_| Error::before(ErrorCode::Io))?
+                .len()
+                > crate::HELD_BRANCH_DELETION_PROOF_BYTES
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        Ok(())
+    }
+    fn digest(&self) -> Result<String> {
+        crate::material::hash(&(
+            "smolbox-held-child-delete-continuation-proof-v1",
+            self.schema,
+            &self.child,
+            &self.operation_id,
+            &self.request_sha256,
+            &self.deletion_sha256,
+        ))
+    }
+    fn issue(
+        intent: &Intent,
+        operation_id: &str,
+        request_sha256: &str,
+        continuation: Option<&ContinuationRequest>,
+    ) -> Result<Self> {
+        let mut proof = Self {
+            schema: 1,
+            child: intent.receipt().clone(),
+            operation_id: operation_id.into(),
+            request_sha256: request_sha256.into(),
+            deletion_sha256: deletion_digest(intent, continuation)?,
+            proof_sha256: String::new(),
+        };
+        proof.proof_sha256 = proof.digest()?;
+        proof.validate()?;
+        Ok(proof)
+    }
+}
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Record {
@@ -170,10 +288,59 @@ struct Record {
     resolution: Option<BranchDeletionResolution>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     continuation: Option<ContinuationRequest>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    released_resolution: Option<ReleasedBranchDeletionResolution>,
 }
 impl Record {
     fn validate(&self) -> Result<()> {
         self.intent.validate()?;
+        if self.intent.release.is_some() {
+            if self.schema == 6 {
+                let request = self
+                    .continuation
+                    .as_ref()
+                    .ok_or(Error::before(ErrorCode::Ownership))?;
+                request.validate()?;
+                if self.resolution.is_some() {
+                    return Err(Error::before(ErrorCode::Ownership));
+                }
+                return match (&self.phase, &self.released_resolution) {
+                    (Phase::Finishing | Phase::Deleting | Phase::Deleted, None) => Ok(()),
+                    (Phase::ResolvedAbsent, Some(proof)) => {
+                        proof.validate_for_intent(&self.intent, Some(request))
+                    }
+                    _ => Err(Error::before(ErrorCode::Ownership)),
+                };
+            }
+            if self.schema == 5 && self.phase == Phase::ResolvedAbsent {
+                let proof = self
+                    .released_resolution
+                    .as_ref()
+                    .ok_or(Error::before(ErrorCode::Ownership))?;
+                proof.validate_for_intent(&self.intent, None)?;
+                return if self.resolution.is_none() && self.continuation.is_none() {
+                    Ok(())
+                } else {
+                    Err(Error::before(ErrorCode::Ownership))
+                };
+            }
+            return if self.schema == 4
+                && matches!(
+                    self.phase,
+                    Phase::Collecting | Phase::Collected | Phase::Deleting | Phase::Deleted
+                )
+                && self.resolution.is_none()
+                && self.continuation.is_none()
+                && self.released_resolution.is_none()
+            {
+                Ok(())
+            } else {
+                Err(Error::before(ErrorCode::Ownership))
+            };
+        }
+        if self.released_resolution.is_some() {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
         match (
             self.schema,
             self.phase,
@@ -212,12 +379,15 @@ struct Journal {
     path: std::path::PathBuf,
 }
 trait ProtectedRecord: Serialize + serde::de::DeserializeOwned {
+    const MAX_RECORD_BYTES: u64 = MAX_BYTES;
     fn validate_for(&self, journal: &Journal, bytes: u64) -> Result<()>;
 }
 impl ProtectedRecord for Record {
     fn validate_for(&self, journal: &Journal, bytes: u64) -> Result<()> {
         self.validate()?;
-        if self.schema == 1 && bytes > LEGACY_BYTES {
+        if (self.schema == 1 && bytes > LEGACY_BYTES)
+            || (self.schema < 4 && bytes > LEGACY_EXTENDED_BYTES)
+        {
             return Err(Error::before(ErrorCode::Admission));
         }
         if Journal::new(journal.domain.clone(), self.intent.receipt())?.path != journal.path {
@@ -228,7 +398,15 @@ impl ProtectedRecord for Record {
 }
 impl Journal {
     fn new(domain: Arc<crate::domain::DomainGuard>, receipt: &CreationReceipt) -> Result<Self> {
-        let key = crate::material::hash(&("smolbox-held-child-delete-v1", receipt))?;
+        let mut origin = receipt.clone();
+        origin.material = None;
+        let hash_domain =
+            if receipt.material.as_ref() == Some(&crate::material::root_proof(&origin)?) {
+                "smolbox-held-child-delete-v1"
+            } else {
+                "smolbox-released-child-delete-v1"
+            };
+        let key = crate::material::hash(&(hash_domain, receipt))?;
         let path = domain.directory.join(format!("branch-delete-{key}.json"));
         Ok(Self { domain, path })
     }
@@ -247,17 +425,17 @@ impl Journal {
             || info.nlink() != 1
             || info.uid() != unsafe { libc::geteuid() }
             || info.mode() & 0o777 != 0o600
-            || info.len() > MAX_BYTES
+            || info.len() > T::MAX_RECORD_BYTES
         {
             return Err(Error::before(ErrorCode::Ownership));
         }
         let version = Version::of(&info);
         let mut bytes = Vec::new();
         std::io::Read::by_ref(&mut file)
-            .take(MAX_BYTES + 1)
+            .take(T::MAX_RECORD_BYTES + 1)
             .read_to_end(&mut bytes)
             .map_err(|_| Error::before(ErrorCode::Io))?;
-        if bytes.len() as u64 > MAX_BYTES {
+        if bytes.len() as u64 > T::MAX_RECORD_BYTES {
             return Err(Error::before(ErrorCode::Admission));
         }
         let record: T =
@@ -284,7 +462,7 @@ impl Journal {
     ) -> Result<()> {
         self.domain.verify()?;
         let bytes = serde_json::to_vec(record).map_err(|_| Error::before(ErrorCode::Io))?;
-        if bytes.len() as u64 > MAX_BYTES {
+        if bytes.len() as u64 > T::MAX_RECORD_BYTES {
             return Err(Error::before(ErrorCode::Admission));
         }
         record.validate_for(self, bytes.len() as u64)?;
@@ -314,11 +492,12 @@ impl Journal {
     fn enter(&self, intent: &Intent) -> Result<()> {
         self.write(
             &Record {
-                schema: 1,
+                schema: if intent.release.is_some() { 4 } else { 1 },
                 intent: intent.clone(),
                 phase: Phase::Collecting,
                 resolution: None,
                 continuation: None,
+                released_resolution: None,
             },
             None,
         )
@@ -358,6 +537,7 @@ impl Journal {
         absence: &Absence,
         budget: &ReadBudget,
     ) -> Result<BranchDeletionResolution> {
+        intent.require_held()?;
         let (mut record, version) = self.read()?;
         if record.intent != *intent
             || !matches!(
@@ -433,11 +613,16 @@ pub(crate) struct Retained {
     completion: Option<Completion>,
     continuation: Option<ContinuationRequest>,
     cleanup: Option<ContinuationRequest>,
+    collection: Option<collection::RetainedCollection>,
     _metadata: crate::jobs::BranchBackingLease,
+    _release_metadata: Option<crate::jobs::BranchBackingLease>,
+    _cleanup_metadata: Option<crate::jobs::BranchBackingLease>,
+    _collection_metadata: crate::jobs::BranchBackingLease,
 }
 enum Completion {
     Deleted,
     Resolved(Box<BranchDeletionResolution>),
+    ReleasedResolved(Box<ReleasedBranchDeletionResolution>),
 }
 impl Retained {
     fn import_completion(&mut self, record: Record) -> Result<bool> {
@@ -446,9 +631,12 @@ impl Retained {
         }
         let completion = match record.phase {
             Phase::Deleted => Some(Completion::Deleted),
-            Phase::ResolvedAbsent => record
-                .resolution
-                .map(|proof| Completion::Resolved(Box::new(proof))),
+            Phase::ResolvedAbsent => match record.released_resolution {
+                Some(proof) => Some(Completion::ReleasedResolved(Box::new(proof))),
+                None => record
+                    .resolution
+                    .map(|proof| Completion::Resolved(Box::new(proof))),
+            },
             _ => None,
         };
         if completion.is_none() {
@@ -457,6 +645,8 @@ impl Retained {
         if let Some(request) = &self.cleanup {
             if !matches!(&completion, Some(Completion::Resolved(proof))
                 if proof.matches_request(&request.operation_id, &request.request_sha256))
+                && !matches!(&completion, Some(Completion::ReleasedResolved(proof))
+                    if proof.matches_request(&request.operation_id, &request.request_sha256))
             {
                 return Err(Error::before(ErrorCode::Conflict));
             }
@@ -580,6 +770,20 @@ fn stopped_record(
 ) -> Result<smolvm::config::VmRecord> {
     budget.check()?;
     intent.collected(collection)?;
+    verify_original_record(intent, record, budget)?;
+    let mut stopped = record.clone();
+    stopped.state = smolvm::config::RecordState::Stopped;
+    stopped.pid = None;
+    stopped.pid_start_time = None;
+    budget.check()?;
+    Ok(stopped)
+}
+fn verify_original_record(
+    intent: &Intent,
+    record: &smolvm::config::VmRecord,
+    budget: &ReadBudget,
+) -> Result<()> {
+    budget.check()?;
     intent.plan.verify()?;
     let allowed = match record.state {
         smolvm::config::RecordState::Running => {
@@ -590,19 +794,20 @@ fn stopped_record(
         }
         _ => false,
     };
-    if !allowed || !record.forkpoint_held || !intent.receipt().matches(record)? {
+    if !allowed
+        || record.forkpoint_held != intent.release.is_none()
+        || !intent.receipt().matches(record)?
+    {
         return Err(Error::before(ErrorCode::Ownership));
     }
     crate::machine::verify_branch_marker(intent.receipt(), &intent.plan.child.path)?;
     let material = crate::material::MaterialJournal::at(&intent.plan.child.path);
     material.verify(intent.receipt())?;
     material.verify_branch_child(intent.receipt(), record)?;
-    let mut stopped = record.clone();
-    stopped.state = smolvm::config::RecordState::Stopped;
-    stopped.pid = None;
-    stopped.pid_start_time = None;
-    budget.check()?;
-    Ok(stopped)
+    if let Some(release) = &intent.release {
+        release.verify_record(record)?;
+    }
+    budget.check()
 }
 /// One final deletion step, shared by ordinary deletion and explicit continued
 /// cleanup. Tests supply private row/file results; only the controller supplies SDK.
@@ -693,6 +898,23 @@ impl Engine {
         quiesced: bool,
         budget: &ReadBudget,
     ) -> Result<BranchDeletionResolution> {
+        self.resolve_held_branch_deletion_with_completion(
+            child,
+            (operation_id, request_sha256),
+            quiesced,
+            None,
+            budget,
+        )
+    }
+    pub(crate) fn resolve_held_branch_deletion_with_completion(
+        &self,
+        child: &CreationReceipt,
+        request: (&str, &str),
+        quiesced: bool,
+        expected: Option<&crate::BranchCompletion>,
+        budget: &ReadBudget,
+    ) -> Result<BranchDeletionResolution> {
+        let (operation_id, request_sha256) = request;
         if !quiesced
             || !crate::domain::valid_id(operation_id)
             || !crate::domain::valid_hex(request_sha256, 64)
@@ -705,12 +927,19 @@ impl Engine {
             .jobs
             .acquire(crate::jobs::Demand::material_resolution())?;
         let context = self.retained_branch_context(child)?;
+        if let Some(expected) = expected {
+            let original = self.branch_retention.completed_context_exact(expected)?;
+            if !Arc::ptr_eq(&original, &context) {
+                return Err(Error::before(ErrorCode::Ownership));
+            }
+        }
         let journal = Journal::new(self.domain.clone(), child)?;
         let mut retained = context
             .deletion
             .try_lock()
             .map_err(|_| Error::before(ErrorCode::Conflict))?;
         let state = retained.as_mut().ok_or(Error::before(ErrorCode::State))?;
+        state.intent.require_held()?;
         let proof =
             match state.recorded_resolution(&journal, child, operation_id, request_sha256)? {
                 Some(proof) => proof,
@@ -766,7 +995,28 @@ impl Engine {
         child: &CreationReceipt,
         budget: &ReadBudget,
     ) -> Result<Observation> {
+        self.delete_original_branch(child, budget, true)
+    }
+    /// Delete a handed-off released child under retained original completion.
+    /// A normally retired manager requires canonical stopped state and positive
+    /// original epoch collection. Replacement helper owners stay separate.
+    pub fn delete_released_branch(
+        &self,
+        child: &CreationReceipt,
+        budget: &ReadBudget,
+    ) -> Result<Observation> {
+        self.delete_original_branch(child, budget, false)
+    }
+    fn delete_original_branch(
+        &self,
+        child: &CreationReceipt,
+        budget: &ReadBudget,
+        held: bool,
+    ) -> Result<Observation> {
         let context = self.retained_branch_context(child)?;
+        if (child == context.plan.publication.child()) != held {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
         let journal = Journal::new(self.domain.clone(), child)?;
         if self.known_branch_deletion(&context, &journal, child)? {
             return Ok(missing());
@@ -774,43 +1024,52 @@ impl Engine {
         budget.check()?;
         self.binding().validate()?;
         self.verify_database_identity()?;
-        self.original_branch_manager(child, &context)?;
+        self.branch_deletion_owner(child, &context, held)?;
         let work = self.jobs.acquire(crate::jobs::Demand::branch_delete())?;
         let metadata = self.jobs.branch_result_metadata()?;
+        // Collection recovery must remain available under quarantine, without
+        // asking the ordinary metadata pool for capacity after SDK entry.
+        let collection_metadata = self.jobs.branch_result_metadata()?;
+        let release_metadata = if held {
+            None
+        } else {
+            Some(self.jobs.branch_result_metadata()?)
+        };
+        // Reserve the independent released cleanup ledger before uncertainty:
+        // ordinary metadata admission is unavailable while quarantined.
+        let cleanup_metadata = if held {
+            None
+        } else {
+            Some(self.jobs.branch_result_metadata()?)
+        };
         let source_name = &context.plan.publication.previous.name;
         let source_gate = self.gate(source_name)?;
         let child_gate = self.gate(&child.name)?;
         let gates = crate::gate::lock_pair((source_name, &source_gate), (&child.name, &child_gate))
             .map_err(|_| Error::before(ErrorCode::Conflict))?;
-        self.original_branch_manager(child, &context)?;
+        let original_manager = self.branch_deletion_owner(child, &context, held)?;
         let source = self.source_lease(child)?;
         let epoch = self.boot_epoch()?.clone();
         context.plan.verify()?;
-        if context
-            .release
-            .try_lock()
-            .map_err(|_| Error::before(ErrorCode::Conflict))?
-            .is_some()
-        {
-            return Err(Error::before(ErrorCode::Conflict));
-        }
-        let (held_receipt, held, release) = crate::branch_boot::Lifecycle::at(
+        let (expected, actual_held, release) = crate::branch_boot::Lifecycle::at(
             &context.plan.child.path,
         )
         .finish_record(&context.plan, &context.enrollment, &context.identity_sha256)?;
+        if actual_held != held || child != &expected {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        released::release_ready(&context, release.as_ref())?;
         let before = self
             .observation_record(&child.name, budget)?
             .ok_or(Error::before(ErrorCode::Ownership))?;
         self.verify_record(child, &before)?;
-        if child != &held_receipt
-            || !held
-            || release.is_some()
-            || !before.forkpoint_held
-            || before.pid.zip(before.pid_start_time)
-                != Some((
-                    context.enrollment.child().pid,
-                    context.enrollment.child().birth,
-                ))
+        if before.forkpoint_held != held
+            || (original_manager
+                && before.pid.zip(before.pid_start_time)
+                    != Some((
+                        context.enrollment.child().pid,
+                        context.enrollment.child().birth,
+                    )))
             || !epoch.bound_to(self.binding())
             || !context
                 .enrollment
@@ -834,8 +1093,22 @@ impl Engine {
             child: context.enrollment.child(),
             identity_sha256: context.identity_sha256.clone(),
             nonce: hex::encode(nonce),
+            release,
         };
         intent.validate()?;
+        if !original_manager {
+            collected::collected_before(
+                &intent,
+                &before,
+                ResolutionAuthority {
+                    epoch: &epoch,
+                    enrollment: &context.enrollment,
+                    database: &self.binding().database,
+                    identity: self.database_identity,
+                },
+                budget,
+            )?;
+        }
         let active = Arc::new(());
         let pinned_root = crate::export_source::Root::open(&context.plan.child.path)?;
         if crate::branch_boot::Directory::capture(&pinned_root)? != context.plan.child {
@@ -862,7 +1135,11 @@ impl Engine {
                 completion: None,
                 continuation: None,
                 cleanup: None,
+                collection: None,
                 _metadata: metadata,
+                _release_metadata: release_metadata,
+                _cleanup_metadata: cleanup_metadata,
+                _collection_metadata: collection_metadata,
             }));
         }
         journal
@@ -952,60 +1229,10 @@ impl Application {
         if crate::material::hash(&current)? != before_sha256 {
             return Err(Error::uncertain(ErrorCode::Ownership));
         }
-        let manager = self
+        let collection = self
             .context
-            .manager
-            .try_lock()
-            .map_err(|_| Error::uncertain(ErrorCode::Conflict))?;
-        if manager.name() != Some(name.as_str())
-            || manager
-                .child_pid()
-                .is_some_and(|pid| pid != intent.child.pid)
-            || manager.storage_path()
-                != intent
-                    .plan
-                    .child
-                    .path
-                    .join(smolvm::storage::STORAGE_DISK_FILENAME)
-            || manager.overlay_path()
-                != intent
-                    .plan
-                    .child
-                    .path
-                    .join(smolvm::storage::OVERLAY_DISK_FILENAME)
-        {
-            return Err(Error::uncertain(ErrorCode::Ownership));
-        }
-        let collection = match self.epoch.collect_enrolled(name, &self.context.enrollment) {
-            Ok(proof) => {
-                manager.mark_stopped();
-                proof
-            }
-            Err(error) if error.code == ErrorCode::Conflict => {
-                if manager.child_pid() != Some(intent.child.pid)
-                    || smolvm::process::process_start_time(intent.child.pid)
-                        != Some(intent.child.birth)
-                    || !smolvm::process::is_alive(intent.child.pid)
-                {
-                    return Err(Error::uncertain(ErrorCode::Ownership));
-                }
-                let dispatch = self
-                    .epoch
-                    .begin_collection(name, &self.context.enrollment)?;
-                let result = manager.stop();
-                dispatch
-                    .sdk_returned()
-                    .map_err(|e| Error::uncertain(e.code))?;
-                result.map_err(|_| Error::uncertain(ErrorCode::Native))?;
-                if manager.child_pid().is_some() {
-                    return Err(Error::uncertain(ErrorCode::Ownership));
-                }
-                self.epoch
-                    .collect_enrolled(name, &self.context.enrollment)?
-            }
-            Err(error) => return Err(Error::uncertain(error.code)),
-        };
-        drop(manager);
+            .collect_original(&self.epoch, &self.budget)
+            .map_err(|e| Error::uncertain(e.code))?;
         self.journal.collected(&intent, &collection)?;
         let mut changed = false;
         self.db
@@ -1085,6 +1312,7 @@ mod tests {
             child: model.enrollment.child(),
             identity_sha256: model.identity_sha256.clone(),
             nonce: "a".repeat(32),
+            release: None,
         };
         let journal = Journal::new(model.engine.domain.clone(), intent.receipt()).unwrap();
         (model, epoch, intent, journal)
@@ -1104,6 +1332,7 @@ mod tests {
             completion: None,
             continuation: None,
             cleanup: None,
+            collection: None,
             leases: Some(Leases {
                 _root: crate::export_source::Root::open(&intent.plan.child.path).unwrap(),
                 _gates: crate::gate::lock_pair(
@@ -1125,6 +1354,17 @@ mod tests {
                     .unwrap(),
             }),
             _metadata: model.engine.jobs.branch_result_metadata().unwrap(),
+            _collection_metadata: model.engine.jobs.branch_result_metadata().unwrap(),
+            _release_metadata: if intent.release.is_some() {
+                Some(model.engine.jobs.branch_result_metadata().unwrap())
+            } else {
+                None
+            },
+            _cleanup_metadata: if intent.release.is_some() {
+                Some(model.engine.jobs.branch_result_metadata().unwrap())
+            } else {
+                None
+            },
         }
     }
     pub(super) fn authority<'a>(
@@ -1319,7 +1559,7 @@ mod tests {
         assert_eq!(pool.counts().checkpoint_material, 7 << 30);
         assert_eq!(
             pool.counts().branch_metadata,
-            2 * crate::jobs::BRANCH_BACKING_METADATA
+            3 * crate::jobs::BRANCH_BACKING_METADATA
         );
         assert!(!pool.available()); // Resolving this child never unquarantines unrelated authority.
         let bytes = std::fs::read(&journal.path).unwrap();
@@ -1544,7 +1784,11 @@ mod tests {
             completion: None,
             continuation: None,
             cleanup: None,
+            collection: None,
             _metadata: model.engine.jobs.branch_result_metadata().unwrap(),
+            _release_metadata: None,
+            _cleanup_metadata: None,
+            _collection_metadata: model.engine.jobs.branch_result_metadata().unwrap(),
         };
         journal.enter(&intent).unwrap();
         let counts = model.engine.jobs.counts();
@@ -1618,7 +1862,11 @@ mod tests {
             completion: None,
             continuation: None,
             cleanup: None,
+            collection: None,
             _metadata: model.engine.jobs.branch_result_metadata().unwrap(),
+            _release_metadata: None,
+            _cleanup_metadata: None,
+            _collection_metadata: model.engine.jobs.branch_result_metadata().unwrap(),
         };
         let before = std::fs::read(&journal.path).unwrap();
         for _ in 0..2 {
@@ -1630,7 +1878,7 @@ mod tests {
         assert_eq!(std::fs::read(&journal.path).unwrap(), before);
         assert_eq!(
             model.engine.jobs.counts().branch_metadata,
-            crate::jobs::BRANCH_BACKING_METADATA
+            2 * crate::jobs::BRANCH_BACKING_METADATA
         );
         assert_eq!(model.engine.jobs.counts().work, 0);
         // Cached exact original result survives later ordinary file retirement.

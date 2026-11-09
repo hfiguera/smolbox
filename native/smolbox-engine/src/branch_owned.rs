@@ -1,6 +1,7 @@
 //! Original completed-child context. A receipt or SDK row cannot construct it.
 use crate::{BranchPublication, CreationReceipt, Error, ErrorCode, Result};
 use std::sync::{Arc, Mutex};
+mod collection;
 
 pub(crate) struct Context {
     // Drop the child's actual manager before its original source/runtime/domain.

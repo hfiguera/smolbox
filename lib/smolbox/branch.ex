@@ -23,6 +23,9 @@ defmodule SmolBox.Branch do
           | :release_dispatching
           | :released
           | :unknown
+          | :disposal_pending
+          | :disposed
+          | :backing_pending
           | :resolved
           | :failed
           | :cancelled
@@ -48,6 +51,9 @@ defmodule SmolBox.Branch do
     :release_dispatching,
     :released,
     :unknown,
+    :disposal_pending,
+    :disposed,
+    :backing_pending,
     :resolved,
     :failed,
     :cancelled,
@@ -63,19 +69,37 @@ defmodule SmolBox.Branch do
          true <-
            b.native_authority == nil or
              NativeBranchAuthority.valid?(b.native_authority),
-         true <- b.state in @states,
+         true <- b.state in @states and disposal_state?(b),
          true <- Validation.timestamp?(b.accepted_at_ms) and Validation.timestamp?(b.deadline_ms),
          true <- b.deadline_ms >= b.accepted_at_ms + b.spec.timeout_ms,
          true <-
            b.release_version == nil or
              Validation.integer?(b.release_version, 1, 9_007_199_254_740_991),
          true <- b.retired_at_ms == nil or Validation.timestamp?(b.retired_at_ms),
-         true <- b.state in [:retired, :closed] == (b.retired_at_ms != nil),
+         true <- b.state in [:retired, :backing_pending, :closed] == (b.retired_at_ms != nil),
          do: :ok,
          else: (_ -> invalid())
   end
 
   def validate(_), do: invalid()
+
+  defp disposal_state?(%{
+         state: state,
+         native_authority: %{disposal: %SmolBox.Embedded.NativeUnbootedBranchDisposal{}}
+       })
+       when state in [:disposal_pending, :disposed], do: true
+
+  defp disposal_state?(%{
+         state: :backing_pending,
+         native_authority: %{
+           disposal: %SmolBox.Embedded.NativeUnbootedBranchDisposal{},
+           backing: %SmolBox.Embedded.NativeBranchBacking{}
+         }
+       }),
+       do: true
+
+  defp disposal_state?(%{state: state}),
+    do: state not in [:disposal_pending, :disposed, :backing_pending]
 
   @doc false
   def valid_machine?(m) do
@@ -123,7 +147,7 @@ defmodule SmolBox.Branch do
   defp phase?(%{branch: %{state: state}} = m) when state in [:accepted, :dispatching, :observed],
     do: m.operation == :branch_child and m.state == :creating and m.active_execution == nil
 
-  defp phase?(%{branch: %{state: :unknown}} = m),
+  defp phase?(%{branch: %{state: state}} = m) when state in [:unknown, :disposal_pending],
     do:
       m.operation in [:branch_child, :branch_release] and m.state == :unknown and
         m.active_execution == nil
@@ -133,7 +157,16 @@ defmodule SmolBox.Branch do
        do: m.operation == :branch_release and m.active_execution == nil
 
   defp phase?(%{branch: %{state: state}} = m)
-       when state in [:failed, :cancelled, :resolved, :retired, :closed], do: m.state == :deleted
+       when state in [
+              :failed,
+              :cancelled,
+              :resolved,
+              :disposed,
+              :retired,
+              :backing_pending,
+              :closed
+            ],
+       do: m.state == :deleted
 
   defp phase?(%{branch: %{state: :held}, active_execution: execution}), do: execution == nil
   defp phase?(_), do: true

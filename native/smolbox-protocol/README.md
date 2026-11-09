@@ -43,6 +43,40 @@ original material hash. Legacy serialization omits the new fields exactly.
 Session admission and terminal creation checks reject receipt/protocol mixing
 before native dispatch. Schema validity is not native journal authority.
 
+The development `release_branch_backing` operation requires `branches: 1`, the
+exact approved branch policy and original completion, expected source/child
+tombstone heads, `quiesced: true` and `backing_removed: true`. A canonical digest
+binds the full request. Its accounting mutation uses reserved control admission
+with a 30-second maximum budget; requests cap at 80 KiB. Required nonnullable
+`branch_backing_released` proof caps at 68 KiB and binds the publication, request
+and exact original native charge. It uses the bounded 72-KiB branch terminal
+allowance, emits no streams and remains available when ordinary work admission
+is unavailable. The original completed context and protected ledger must still
+exist; replacement cannot reconstruct them. Expected heads correlate with durable
+caller state rather than proving that removed material existed. Stores must save
+the exact request before dispatch and retain public backing charges until the
+matching acknowledgement commits. Selective store codec v33 and paired
+Memory/PostgreSQL transactions now retain the request before dispatch and close
+only with that acknowledgement. Public backend/Runtime routing now carries the
+saved request through one captured helper/epoch and authority fence to guarded
+closure; a missing reply retains the request and charge for explicit retry.
+Native feature admission and ordinary qualification remain separate gates.
+
+The development `resolve_held_branch_deletion` control request binds the original
+held completion/root receipt, a distinct operation and canonical digest, and
+explicit quiescence. It requires the exact branch approval, domain and package
+platform, and has a 30-second budget and 68-KiB request cap. Required nonnullable
+`held_branch_deletion_resolved` proof is capped at four KiB, emits no streams and
+uses the existing bounded branch terminal allowance. This operation can record
+positive absence only from the retained original deletion context, returned
+worker and original collection. It never dispatches SDK shutdown/delete or
+filesystem cleanup. It can retire original transient work, but releases no
+dependency or persistent backing. A plain missing observation or nullable proof
+cannot substitute. Managed intent/version and proof retention now use codec v34,
+and public deleted resolution carries native fencing through final store commit.
+Source dependency and backing remain charged. Public native branch admission
+stays disabled pending the remaining lifecycle and qualification requirements.
+
 Packages declaring SDK feature `observability: 1` additionally negotiate six
 capabilities and an exact `limits.observations` object. Health, capacity,
 metrics and readiness are streamless; measurements require a matching versioned
@@ -353,3 +387,61 @@ majors, wrong/crossed results, geometry/proof mismatches and duplicates reject.
 Qualification remains subject to work admission/fences even after an explicit
 owner quiesce; it is not a quarantined observation. Public setup/qualification
 acceptance and crash qualification remain separate gates.
+
+
+### Original unbooted-disposal selection
+
+Unadvertised protocol-two `inspect_unbooted_branch_disposal {request, quiesced}`
+uses the full BranchCreateRequest, quiesced:true, exact branch catalog approval,
+source domain/receipt and Inspect capability. Its budget is at most 30 seconds
+and creation JSON at most 16 KiB. It uses reserved observation/control admission
+including while ordinary admission is unavailable. The native adapter can only
+borrow the matching original retained resolution context; it neither enrolls a
+replacement manager nor invokes SDK work.
+
+Only a Published original child with no boot, worker or entered disposal grant,
+positive original source authority and exact source/child journals and material
+can return `{result: "unbooted_branch_disposal_candidate", candidate}`. The
+required nonnullable candidate binds schema 1, full creation (including an unused
+initial-release choice), actual source publication and original preparation
+metadata digest. Its domain-separated canonical hash is correlation, never
+ownership or disposal authority. Candidate JSON is capped at 32 KiB; its terminal
+uses reserved branch capacity and permits no stream/upload. Both peers reject
+crossed full creation, platform or original helper epoch. Missing evidence never
+authorizes entered disposal. Fresh selection cannot substitute for observing a
+previously accepted disposal; actual disposal rechecks its original request and
+context independently. Backend/Runtime routing and ordinary package qualification
+remain pending. No public branch capability is enabled by these messages.
+
+
+### Original unbooted-child absence
+
+Unadvertised protocol-two `qualify_unbooted_branch_child_absence {request}` uses
+`{disposal, operation_id, request_sha256, quiesced:true}`. The full original
+UnbootedBranchDisposal preserves SDK-success versus resolved-absence provenance,
+complete frozen creation and actual source publication. A distinct operation ID
+and canonical domain-separated digest bind this fresh observation. No child
+Machine or BranchCompletion is synthesized. The required nonnullable outcome is
+`{result:"unbooted_branch_child_absent", proof}`, whose schema/request/hash binds
+that exact request. Each request/proof is bounded to 68 KiB and work to 30 seconds.
+
+The original helper epoch, package platform, source domain, branch feature/catalog
+and Inspect capability must match before native admission. The native adapter can
+only inspect the exact original disposed archive and synchronized protected
+ledger, checking original runtime/domain and child epoch quiescence. It checks
+SDK row, creation reservation and original no-follow directory absence both before
+and after issuing proof. The source may still run. Recreated rows/reservations/
+directories, redirects, crossed authority, stale epoch, busy gates/control or an
+expired/cancelled budget cannot become absence or cause cleanup.
+
+This read-only control observation remains available while ordinary admission is
+unavailable, with reserved branch-terminal capacity and no streams/uploads. Both
+wire peers require exact request/platform/original-epoch correlation. It retires
+neither dependency nor backing, invokes no SDK mutation and enrolls no manager or
+boot owner. Public/store retirement now consumes this distinct proof with
+fingerprint/current-child-version correlation and original helper/controller
+fencing through paired commit. Selective codec v38 preserves the immutable
+historical disposal and retirement without any Machine or boot completion.
+Only the dependency flag retires; every backing charge remains. Host backing
+closure and ordinary SDK/platform qualification remain required. No native
+branch capability is enabled here.

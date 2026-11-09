@@ -166,6 +166,25 @@ can resolve missing creation evidence. An ordinary 404 cannot: an old create
 request might still be in flight. Neither inventory nor a matching name authorizes
 adoption. A worker/store outage is an error, never absence.
 
+Original embedded held-child deletion has two separate recovery calls:
+`Machines.continue_deletion(runtime, handle, version, quiesced: true)` can complete
+an unfinished final SDK delete step after original-child collection;
+`Machines.cleanup_deletion(runtime, handle, version, quiesced: true)` removes
+residual original files only after SDK row/reservation absence. Both require the
+retained original helper context and the current inspected management version.
+An entered SDK delete never replays, and cleanup sends no SDK shutdown/delete.
+`Machines.resolve/4` continues to send neither action.
+
+Each action saves its exact request before helper IO and keeps it across claims
+and explicit retries. After a failed call, refetch and pass the current version;
+this reuses the saved native request. A matching saved acknowledgement returns
+without contacting a helper. Missing, late or mismatched evidence keeps the child
+reservation. Success releases only ordinary child capacity: source dependency and
+extra backing need separate branch retirement/release. HTTP and released/restarted
+children reject these native-only calls. This development integration remains
+behind the branch gate; public native branch admission stays disabled pending
+remaining lifecycle and ordinary qualification requirements.
+
 Machines are local to their assigned worker. Durable records recover management;
 they do not back up disks, restore lost files, migrate guests, or transparently
 replace missing machines. Maintain worker storage and backups separately.

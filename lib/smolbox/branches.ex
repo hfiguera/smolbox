@@ -20,7 +20,17 @@ defmodule SmolBox.Branches do
   }
 
   alias SmolBox.Runtime.Branches, as: BranchRuntime
-  alias SmolBox.Runtime.{BranchObservation, MachineSession, NativeResolution, Session}
+
+  alias SmolBox.Runtime.{
+    BranchObservation,
+    MachineSession,
+    NativeBranchBacking,
+    NativeDeletedBranchResolution,
+    NativeReadyBranchResolution,
+    NativeResolution,
+    NativeUnbootedBranchRetirement,
+    Session
+  }
 
   @spec create(SmolBox.runtime(), ManagedMachine.key(), BranchSpec.t()) ::
           {:ok, ManagedMachine.key()} | {:error, Error.t()}
@@ -149,9 +159,20 @@ defmodule SmolBox.Branches do
   @doc """
   Resolve creation after fencing prior requests and confirming worker quiescence.
   `disposition: :keep` needs recorded creation evidence and matching source/child
-  observations. Without it, only verified child absence can resolve the request.
+  observations. Embedded initial creation may explicitly hand off an already
+  completed original initialization/release under a fresh finite deadline; it
+  never replays boot, initialization or activation. Without that original result,
+  only verified child absence can resolve the request.
   Uncertain release cannot be inferred from the held flag; delete the child before
-  using `disposition: :deleted`. Never replays or adopts a child by name.
+  using `disposition: :deleted`. Embedded resolution can also consume protected
+  pre-SDK retirement proof for a never-created child with an unchanged source
+  head. An exact original published child that never entered boot can instead be
+  selected by positive native evidence, accept a durable disposal request, and
+  complete with typed disposal proof plus a fresh source observation. The same
+  helper/controller fence covers selection, acceptance and final paired commit.
+  Retried accepted intent preserves its original identity and observes completion
+  before offering any still-unentered one-shot dispatch. Never replays SDK deletion
+  or adopts a child by name.
   """
   @spec resolve(SmolBox.runtime(), ManagedMachine.key(), keyword()) ::
           {:ok, ManagedMachine.t()} | {:error, Error.t()}
@@ -162,16 +183,32 @@ defmodule SmolBox.Branches do
          true <- disposition in [:keep, :deleted],
          {:ok, config} <- config(runtime),
          {:ok, child} <- fetch(runtime, handle),
-         {:ok, parent} <- MachineSession.claim(config, child.branch.source),
-         {:ok, worker} <- MachineSession.worker(config, parent),
-         do:
-           explicit(config, runtime, parent, child, worker, :branch_resolve, fn pinned ->
-             BranchObservation.resolution(pinned, parent, child, disposition)
-           end),
+         do: resolve_child(config, runtime, child, disposition),
          else: (
            false -> Session.error(:validation, :branch)
            error -> error
          )
+  end
+
+  defp resolve_child(config, runtime, %{branch: %{native_authority: authority}} = child, :deleted)
+       when not is_nil(authority),
+       do: NativeDeletedBranchResolution.run(config, Runtime.coordinator(runtime), child)
+
+  defp resolve_child(
+         config,
+         runtime,
+         %{branch: %{native_authority: %{disposal: nil, release: nil}}} = child,
+         :keep
+       ),
+       do: NativeReadyBranchResolution.run(config, Runtime.coordinator(runtime), child)
+
+  defp resolve_child(config, runtime, child, disposition) do
+    with {:ok, parent} <- MachineSession.claim(config, child.branch.source),
+         {:ok, worker} <- MachineSession.worker(config, parent),
+         do:
+           explicit(config, runtime, parent, child, worker, :branch_resolve, fn pinned ->
+             BranchObservation.resolution(pinned, parent, child, disposition)
+           end)
   end
 
   @doc """
@@ -185,16 +222,31 @@ defmodule SmolBox.Branches do
     with true <- options == [quiesced: true],
          {:ok, config} <- config(runtime),
          {:ok, child} <- fetch(runtime, handle),
-         {:ok, parent} <- MachineSession.claim(config, child.branch.source),
-         {:ok, worker} <- MachineSession.worker(config, parent),
-         do:
-           explicit(config, runtime, parent, child, worker, :branch_retire, fn pinned ->
-             BranchObservation.retirement(pinned, child)
-           end),
+         do: retire_child(config, runtime, child),
          else: (
            false -> Session.error(:validation, :branch)
            error -> error
          )
+  end
+
+  defp retire_child(
+         config,
+         runtime,
+         %{
+           branch: %{
+             native_authority: %{disposal: %{proof: %SmolBox.Embedded.UnbootedBranchDisposal{}}}
+           }
+         } = child
+       ),
+       do: NativeUnbootedBranchRetirement.run(config, Runtime.coordinator(runtime), child)
+
+  defp retire_child(config, runtime, child) do
+    with {:ok, parent} <- MachineSession.claim(config, child.branch.source),
+         {:ok, worker} <- MachineSession.worker(config, parent),
+         do:
+           explicit(config, runtime, parent, child, worker, :branch_retire, fn pinned ->
+             BranchObservation.retirement(pinned, child)
+           end)
   end
 
   @doc "Release backing allowance only after source deletion and host-confirmed removal of retained files."
@@ -204,16 +256,24 @@ defmodule SmolBox.Branches do
     with true <- options == [backing_removed: true],
          {:ok, config} <- config(runtime),
          {:ok, child} <- fetch(runtime, handle),
-         {:ok, parent} <- MachineSession.claim(config, child.branch.source),
-         {:ok, worker} <- MachineSession.worker(config, parent),
-         do:
-           explicit(config, runtime, parent, child, worker, :branch_release_storage, fn pinned ->
-             BranchObservation.storage_release(pinned, parent, child)
-           end),
+         do: release_backing(config, runtime, child),
          else: (
            false -> Session.error(:validation, :branch)
            error -> error
          )
+  end
+
+  defp release_backing(config, runtime, %{branch: %{native_authority: authority}} = child)
+       when not is_nil(authority),
+       do: NativeBranchBacking.run(config, Runtime.coordinator(runtime), child)
+
+  defp release_backing(config, runtime, child) do
+    with {:ok, parent} <- MachineSession.claim(config, child.branch.source),
+         {:ok, worker} <- MachineSession.worker(config, parent),
+         do:
+           explicit(config, runtime, parent, child, worker, :branch_release_storage, fn pinned ->
+             BranchObservation.storage_release(pinned, parent, child)
+           end)
   end
 
   defp explicit(config, runtime, parent, child, worker, operation, observe) do

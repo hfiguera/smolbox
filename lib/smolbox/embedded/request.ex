@@ -1,18 +1,31 @@
 defmodule SmolBox.Embedded.Request do
   @moduledoc false
   alias SmolBox.Embedded.{
+    BranchBackingRelease,
+    BranchChildAbsence,
+    BranchDeletionCollection,
+    BranchDeletionResolution,
     BranchRequest,
     CaptureTransition,
     CheckpointContract,
     CreationFeatures,
     ExportContract,
+    HeldBranchDeletionAction,
     HeldBranchReleaseRequest,
     ImageContract,
     MountContract,
     NativeSource,
+    PreparedBranchRetirement,
     RegistryContract,
+    ReleasedBranchDeletionCleanup,
+    ReleasedBranchDeletionContinuation,
+    ReleasedBranchDeletionResolution,
     Shape,
     TerminalContract,
+    UnbootedBranchBackingRelease,
+    UnbootedBranchChildAbsence,
+    UnbootedBranchDisposal,
+    UnbootedBranchDisposalCandidate,
     VolumeContract
   }
 
@@ -20,20 +33,66 @@ defmodule SmolBox.Embedded.Request do
 
   @lifecycle ~w(inspect start stop delete)
 
+  def observation?(%{"operation" => "qualify_unbooted_branch_child_absence"} = request),
+    do: valid?(request, 1, 2)
+
   def observation?(%{"operation" => "volume", "request" => request}),
     do: VolumeContract.observation?(request)
 
   def observation?(%{"operation" => name}),
     do:
-      name in ~w(health capacity metrics readiness list measurements inspect_export inspect_growth inspect_capture inspect_capture_resolution inspect_oci_creation inspect_registry_creation inspect_checkpoint_creation checkpoint_preflight inspect_branch_completion qualify_held_branch_release)
+      name in ~w(health capacity metrics readiness list measurements inspect_export inspect_growth inspect_capture inspect_capture_resolution inspect_oci_creation inspect_registry_creation inspect_checkpoint_creation checkpoint_preflight inspect_branch_completion qualify_held_branch_release qualify_branch_child_absence)
 
   def observation?(_request), do: false
+
+  def control?(%{"operation" => name} = request)
+      when name in ~w(resolve_ready_branch_completion inspect_unbooted_branch_disposal dispose_unbooted_branch resolve_unbooted_branch_disposal release_unbooted_branch_backing),
+      do: valid?(request, 1, 2)
+
+  def control?(%{"operation" => "retire_prepared_branch"} = request),
+    do: valid?(request, 1, 2)
+
+  def control?(%{"operation" => name} = request)
+      when name in ~w(continue_held_branch_deletion cleanup_held_branch_deletion),
+      do: valid?(request, 1, 2)
+
+  def control?(%{"operation" => "continue_released_branch_deletion"} = request),
+    do: valid?(request, 1, 2)
+
+  def control?(%{"operation" => "cleanup_released_branch_deletion"} = request),
+    do: valid?(request, 1, 2)
+
+  def control?(%{"operation" => "collect_branch_deletion"} = request),
+    do: valid?(request, 1, 2)
+
+  def control?(%{"operation" => "resolve_released_branch_deletion"} = request),
+    do: valid?(request, 1, 2)
+
+  def control?(%{"operation" => "resolve_held_branch_deletion"} = request),
+    do: valid?(request, 1, 2)
+
+  def control?(%{"operation" => "release_branch_backing"} = request),
+    do: valid?(request, 1, 2)
 
   def control?(%{"operation" => name, "quiesced" => true} = request)
       when name in ~w(cleanup_export_staging resolve_capture cleanup_capture_staging abort_capture_staging qualify_aborted_capture_source),
       do: valid?(request, 1, 2)
 
   def control?(request), do: observation?(request)
+
+  def reconciliation?(%{"operation" => "qualify_unbooted_branch_child_absence"} = request),
+    do: valid?(request, 1, 2)
+
+  def reconciliation?(%{"operation" => name} = request)
+      when name in ~w(resolve_ready_branch_completion inspect_unbooted_branch_disposal dispose_unbooted_branch resolve_unbooted_branch_disposal release_unbooted_branch_backing),
+      do: valid?(request, 1, 2)
+
+  def reconciliation?(%{"operation" => "retire_prepared_branch"} = request),
+    do: valid?(request, 1, 2)
+
+  def reconciliation?(%{"operation" => name} = request)
+      when name in ~w(continue_held_branch_deletion cleanup_held_branch_deletion),
+      do: valid?(request, 1, 2)
 
   def reconciliation?(
         %{
@@ -44,6 +103,24 @@ defmodule SmolBox.Embedded.Request do
       when action in ~w(resolve_deletion abort_staging),
       do: valid?(request, 1, 2)
 
+  def reconciliation?(%{"operation" => "continue_released_branch_deletion"} = request),
+    do: valid?(request, 1, 2)
+
+  def reconciliation?(%{"operation" => "cleanup_released_branch_deletion"} = request),
+    do: valid?(request, 1, 2)
+
+  def reconciliation?(%{"operation" => "collect_branch_deletion"} = request),
+    do: valid?(request, 1, 2)
+
+  def reconciliation?(%{"operation" => "resolve_released_branch_deletion"} = request),
+    do: valid?(request, 1, 2)
+
+  def reconciliation?(%{"operation" => "resolve_held_branch_deletion"} = request),
+    do: valid?(request, 1, 2)
+
+  def reconciliation?(%{"operation" => "release_branch_backing"} = request),
+    do: valid?(request, 1, 2)
+
   def reconciliation?(%{"operation" => "volume"} = request), do: observation?(request)
 
   def reconciliation?(%{"operation" => name, "quiesced" => true} = request)
@@ -52,7 +129,7 @@ defmodule SmolBox.Embedded.Request do
 
   def reconciliation?(%{"operation" => name}),
     do:
-      name in ~w(inspect_export inspect inspect_creation inspect_oci_creation inspect_registry_creation inspect_checkpoint_creation inspect_growth inspect_capture inspect_capture_resolution qualify_growth inspect_branch_completion qualify_held_branch_release)
+      name in ~w(inspect_export inspect inspect_creation inspect_oci_creation inspect_registry_creation inspect_checkpoint_creation inspect_growth inspect_capture inspect_capture_resolution qualify_growth inspect_branch_completion qualify_held_branch_release qualify_branch_child_absence)
 
   def reconciliation?(_request), do: false
 
@@ -63,9 +140,26 @@ defmodule SmolBox.Embedded.Request do
 
   def command_valid?(command), do: command?(command)
 
+  def receipt(%{"operation" => "qualify_unbooted_branch_child_absence", "request" => request}),
+    do: get_in(request, ~w(disposal creation source))
+
   def receipt(%{"operation" => name, "request" => request})
-      when name in ~w(create_branch inspect_branch_completion release_held_branch qualify_held_branch_release),
+      when name in ~w(dispose_unbooted_branch resolve_unbooted_branch_disposal),
+      do: get_in(request, ~w(creation source))
+
+  def receipt(%{"operation" => "release_unbooted_branch_backing", "request" => request}),
+    do: request["child"]
+
+  def receipt(%{"operation" => "retire_prepared_branch", "request" => request}),
+    do: get_in(request, ~w(creation source))
+
+  def receipt(%{"operation" => name, "request" => request})
+      when name in ~w(resolve_ready_branch_completion inspect_unbooted_branch_disposal create_branch inspect_branch_completion release_held_branch qualify_held_branch_release),
       do: request["source"]
+
+  def receipt(%{"operation" => name, "request" => request})
+      when name in ~w(qualify_branch_child_absence release_branch_backing collect_branch_deletion cleanup_released_branch_deletion continue_released_branch_deletion resolve_released_branch_deletion resolve_held_branch_deletion continue_held_branch_deletion cleanup_held_branch_deletion),
+      do: request["child"]
 
   def receipt(operation), do: operation["receipt"]
 
@@ -96,12 +190,145 @@ defmodule SmolBox.Embedded.Request do
       end)
   end
 
+  defp operation?(
+         %{"operation" => "qualify_unbooted_branch_child_absence", "request" => request} =
+           operation,
+         budget,
+         2
+       ),
+       do:
+         Shape.keys?(operation, ~w(operation request)) and
+           UnbootedBranchChildAbsence.request?(request) and budget <= 30_000
+
+  defp operation?(
+         %{
+           "operation" => "inspect_unbooted_branch_disposal",
+           "request" => request,
+           "quiesced" => true
+         } = operation,
+         budget,
+         2
+       ),
+       do:
+         Shape.keys?(operation, ~w(operation request quiesced)) and
+           UnbootedBranchDisposalCandidate.request?(request) and budget <= 30_000
+
+  defp operation?(%{"operation" => name, "request" => request} = operation, budget, 2)
+       when name in ~w(dispose_unbooted_branch resolve_unbooted_branch_disposal),
+       do:
+         Shape.keys?(operation, ~w(operation request)) and
+           UnbootedBranchDisposal.request?(request) and budget <= 30_000
+
+  defp operation?(
+         %{"operation" => "release_unbooted_branch_backing", "request" => request} = operation,
+         budget,
+         2
+       ),
+       do:
+         Shape.keys?(operation, ~w(operation request)) and
+           UnbootedBranchBackingRelease.request?(request) and budget <= 30_000
+
+  defp operation?(
+         %{"operation" => "retire_prepared_branch", "request" => request} = operation,
+         budget,
+         2
+       ),
+       do:
+         Shape.keys?(operation, ~w(operation request)) and
+           PreparedBranchRetirement.request?(request) and budget <= 30_000
+
+  defp operation?(%{"operation" => name, "request" => request} = operation, budget, 2)
+       when name in ~w(continue_held_branch_deletion cleanup_held_branch_deletion),
+       do:
+         Shape.keys?(operation, ~w(operation request)) and
+           HeldBranchDeletionAction.request?(
+             request,
+             if(name == "continue_held_branch_deletion", do: "continue", else: "cleanup")
+           ) and budget <= 30_000
+
+  defp operation?(
+         %{"operation" => "continue_released_branch_deletion", "request" => request} = operation,
+         budget,
+         2
+       ),
+       do:
+         Shape.keys?(operation, ~w(operation request)) and
+           ReleasedBranchDeletionContinuation.request?(request) and budget <= 30_000
+
+  defp operation?(
+         %{"operation" => "cleanup_released_branch_deletion", "request" => request} = operation,
+         budget,
+         2
+       ),
+       do:
+         Shape.keys?(operation, ~w(operation request)) and
+           ReleasedBranchDeletionCleanup.request?(request) and budget <= 30_000
+
+  defp operation?(
+         %{"operation" => "collect_branch_deletion", "request" => request} = operation,
+         budget,
+         2
+       ),
+       do:
+         Shape.keys?(operation, ~w(operation request)) and
+           BranchDeletionCollection.request?(request) and budget <= 30_000
+
+  defp operation?(
+         %{"operation" => "resolve_released_branch_deletion", "request" => request} = operation,
+         budget,
+         2
+       ),
+       do:
+         Shape.keys?(operation, ~w(operation request)) and
+           ReleasedBranchDeletionResolution.request?(request) and budget <= 30_000
+
+  defp operation?(
+         %{"operation" => "resolve_held_branch_deletion", "request" => request} = operation,
+         budget,
+         2
+       ),
+       do:
+         Shape.keys?(operation, ~w(operation request)) and
+           BranchDeletionResolution.request?(request) and budget <= 30_000
+
+  defp operation?(
+         %{"operation" => "release_branch_backing", "request" => request} = operation,
+         budget,
+         2
+       ),
+       do:
+         Shape.keys?(operation, ~w(operation request)) and BranchBackingRelease.request?(request) and
+           budget <= 30_000
+
+  defp operation?(
+         %{"operation" => "qualify_branch_child_absence", "request" => request} = operation,
+         budget,
+         2
+       ),
+       do:
+         Shape.keys?(operation, ~w(operation request)) and BranchChildAbsence.request?(request) and
+           budget <= 30_000
+
   defp operation?(%{"operation" => name} = operation, budget, 2)
        when name in ~w(release_held_branch qualify_held_branch_release),
        do:
          Shape.keys?(operation, ~w(operation request)) and
            HeldBranchReleaseRequest.valid?(operation["request"]) and
            budget <= if(name == "release_held_branch", do: 900_000, else: 30_000)
+
+  defp operation?(
+         %{
+           "operation" => "resolve_ready_branch_completion",
+           "request" => request,
+           "quiesced" => true
+         } = operation,
+         budget,
+         2
+       ),
+       do:
+         Shape.keys?(operation, ~w(operation request quiesced)) and
+           BranchRequest.valid?(request) and byte_size(Jason.encode!(request)) <= 16 * 1024 and
+           budget <= 30_000
 
   defp operation?(%{"operation" => name} = operation, budget, 2)
        when name in ~w(create_branch inspect_branch_completion),

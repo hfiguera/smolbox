@@ -19,11 +19,22 @@ impl std::fmt::Debug for BranchCreateRequest {
     }
 }
 impl BranchCreateRequest {
-    fn validate(&self, engine: &Engine) -> Result<()> {
+    pub(super) fn validate(&self, engine: &Engine) -> Result<()> {
         self.source.validate(engine.binding())?;
+        self.validate_declaration()
+    }
+    pub(super) fn validate_declaration(&self) -> Result<()> {
         self.child.validate(&self.source)?;
         self.approval.validate()?;
-        if self.source.material.is_none() || self.child.owner_token == self.source.owner_token {
+        let material = self
+            .source
+            .material
+            .as_ref()
+            .ok_or(Error::before(ErrorCode::Validation))?;
+        material.validate()?;
+        if self.child.owner_token == self.source.owner_token
+            || (material.revision == 0 && material.record_sha256 != self.source.material_sha256)
+        {
             return Err(Error::before(ErrorCode::Validation));
         }
         match (self.child.hold, &self.initial_release) {
@@ -38,7 +49,7 @@ impl BranchCreateRequest {
             _ => Err(Error::before(ErrorCode::Validation)),
         }
     }
-    fn matches(&self, completion: &crate::BranchCompletion) -> Result<()> {
+    pub(super) fn matches(&self, completion: &crate::BranchCompletion) -> Result<()> {
         completion.validate()?;
         let intent = &completion.publication.change.child_origin.intent;
         if completion.publication.previous != self.source
@@ -130,7 +141,7 @@ impl Engine {
             let retained = prepared
                 .persist_intent(self)?
                 .prepare_sdk_worker(self)?
-                .retain(self)?;
+                .retain_creation(self, request)?;
             retained.prepare_fork(self)?;
             // Initialization publishes material and boots only this original
             // retained child. It never falls back to a convenience SDK fork.

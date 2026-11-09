@@ -126,11 +126,16 @@ impl Session {
                 Some(SafeCode::Unsupported)
             } else if operation.receipt().is_some_and(|r| {
                 !r.matches_domain(&self.hello.domain) || r.validate_for(self.hello.major).is_err()
-            }) || operation.held_branch_request().is_some_and(|request| {
-                request.completion.publication.change.platform != self.hello.package.platform
-            }) || operation.creation_mounts().is_some_and(|mounts| {
-                crate::VolumeMount::bound(mounts, &self.hello.domain).is_err()
-            }) {
+            }) || operation
+                .branch_platform()
+                .is_some_and(|platform| platform != self.hello.package.platform)
+                || operation.creation_mounts().is_some_and(|mounts| {
+                    crate::VolumeMount::bound(mounts, &self.hello.domain).is_err()
+                })
+                || operation
+                    .branch_epoch()
+                    .is_some_and(|epoch| epoch != self.hello.epoch)
+            {
                 Some(SafeCode::Ownership)
             } else if self.pending.len() >= MAX_IN_FLIGHT {
                 Some(SafeCode::Overload)
@@ -706,6 +711,150 @@ impl Session {
                 )?;
             }
             (
+                Operation::InspectUnbootedBranchDisposal { request, .. },
+                Outcome::UnbootedBranchDisposalCandidate { candidate },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                candidate.matches(request)?;
+                check(
+                    candidate.publication.change.platform == self.hello.package.platform
+                        && candidate.publication.change.child_origin.intent.epoch
+                            == self.hello.epoch,
+                )?;
+            }
+            (
+                Operation::DisposeUnbootedBranch { request }
+                | Operation::ResolveUnbootedBranchDisposal { request },
+                Outcome::UnbootedBranchDisposed { proof },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                request.matches(proof)?;
+                check(proof.publication.change.platform == self.hello.package.platform)?;
+            }
+            (
+                Operation::ReleaseUnbootedBranchBacking { request },
+                Outcome::BranchBackingReleased { proof },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                request.matches(proof)?;
+                check(proof.publication.change.platform == self.hello.package.platform)?;
+            }
+            (
+                Operation::RetirePreparedBranch { request },
+                Outcome::PreparedBranchRetired { proof },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                request.matches(proof)?;
+            }
+            (
+                Operation::ContinueHeldBranchDeletion { request },
+                Outcome::HeldBranchDeletionContinued { proof },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                request.matches_continuation(proof)?;
+                check(
+                    request.completion.publication.change.platform == self.hello.package.platform,
+                )?;
+            }
+            (
+                Operation::CleanupHeldBranchDeletion { request },
+                Outcome::HeldBranchDeletionCleaned { proof },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                request.matches_cleanup(proof)?;
+                check(
+                    request.completion.publication.change.platform == self.hello.package.platform,
+                )?;
+            }
+            (
+                Operation::ContinueReleasedBranchDeletion { request },
+                Outcome::ReleasedBranchDeletionContinued { proof },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                request.matches(proof)?;
+                check(
+                    request.completion.publication.change.platform == self.hello.package.platform,
+                )?;
+            }
+            (
+                Operation::CleanupReleasedBranchDeletion { request },
+                Outcome::ReleasedBranchDeletionCleaned { proof },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                request.matches(proof)?;
+                check(
+                    request.completion.publication.change.platform == self.hello.package.platform,
+                )?;
+            }
+            (
+                Operation::CollectBranchDeletion { request },
+                Outcome::BranchDeletionCollected { proof },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                request.matches(proof)?;
+                check(
+                    request.completion.publication.change.platform == self.hello.package.platform,
+                )?;
+            }
+            (
+                Operation::ResolveReleasedBranchDeletion { request },
+                Outcome::ReleasedBranchDeletionResolved { proof },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                request.matches(proof)?;
+                check(
+                    request.completion.publication.change.platform == self.hello.package.platform,
+                )?;
+            }
+            (
+                Operation::ResolveHeldBranchDeletion { request },
+                Outcome::HeldBranchDeletionResolved { proof },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                request.matches(proof)?;
+                check(
+                    request.completion.publication.change.platform == self.hello.package.platform,
+                )?;
+            }
+            (
+                Operation::ReleaseBranchBacking { request },
+                Outcome::BranchBackingReleased { proof },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                request.matches(proof)?;
+                check(
+                    request.completion.publication.change.platform == self.hello.package.platform,
+                )?;
+            }
+            (
+                Operation::QualifyUnbootedBranchChildAbsence { request },
+                Outcome::UnbootedBranchChildAbsent { proof },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                request.matches(proof)?;
+                check(
+                    request.disposal.publication.change.platform == self.hello.package.platform
+                        && request
+                            .disposal
+                            .publication
+                            .change
+                            .child_origin
+                            .intent
+                            .epoch
+                            == self.hello.epoch,
+                )?;
+            }
+            (
+                Operation::QualifyBranchChildAbsence { request },
+                Outcome::BranchChildAbsent { proof },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                request.matches(proof)?;
+                check(
+                    request.completion.publication.change.platform == self.hello.package.platform,
+                )?;
+            }
+            (
                 Operation::ReleaseHeldBranch { request },
                 Outcome::HeldBranchReleased { transition },
             ) => {
@@ -731,6 +880,22 @@ impl Session {
                 check(pending.output_bytes == 0)?;
                 completion.matches(request)?;
                 check(completion.publication.change.platform == self.hello.package.platform)?;
+            }
+            (
+                Operation::ResolveReadyBranchCompletion {
+                    request,
+                    quiesced: true,
+                },
+                Outcome::BranchCompletionPresence { completion },
+            ) => {
+                check(pending.output_bytes == 0)?;
+                if let Some(completion) = completion {
+                    completion.matches(request)?;
+                    check(completion.publication.change.platform == self.hello.package.platform)?;
+                    check(
+                        completion.publication.change.child_origin.intent.epoch == self.hello.epoch,
+                    )?;
+                }
             }
             (
                 Operation::InspectBranchCompletion { request },

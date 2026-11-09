@@ -7,7 +7,48 @@ use std::io::{self, Read, Write};
 
 #[cfg(test)]
 mod branch;
+mod branch_backing;
+mod unbooted_branch_absence;
+pub use unbooted_branch_absence::{
+    UnbootedBranchChildAbsence, UnbootedBranchChildAbsenceRequest, UNBOOTED_BRANCH_ABSENCE_BYTES,
+};
+mod unbooted_branch;
+pub use branch_backing::{
+    BranchBackingRelease, BranchBackingReleaseRequest, BRANCH_BACKING_PROOF_BYTES,
+    BRANCH_BACKING_REQUEST_BYTES,
+};
+pub use unbooted_branch::{
+    UnbootedBranchBackingReleaseRequest, UnbootedBranchDisposal, UnbootedBranchDisposalCandidate,
+    UnbootedBranchDisposalCompletion, UnbootedBranchDisposalIntent, UnbootedBranchDisposalRequest,
+};
+mod prepared_branch_retirement;
+pub use prepared_branch_retirement::{
+    InitialBranchRetirement, PreparedBranchRetirement, PreparedBranchRetirementRequest,
+    PREPARED_BRANCH_RETIREMENT_BYTES,
+};
+mod held_branch_deletion_action;
+pub use held_branch_deletion_action::{
+    BranchDeletionContinuation, HeldBranchDeletionAction, HeldBranchDeletionActionRequest,
+};
+mod released_branch_deletion_continuation;
+pub use released_branch_deletion_continuation::{
+    ReleasedBranchDeletionContinuation, ReleasedBranchDeletionContinuationRequest,
+};
+mod released_branch_deletion_cleanup;
+pub use released_branch_deletion_cleanup::ReleasedBranchDeletionCleanupRequest;
+mod released_branch_deletion;
+pub use released_branch_deletion::{
+    ReleasedBranchDeletionRequest, ReleasedBranchDeletionResolution,
+    RELEASED_BRANCH_DELETION_PROOF_BYTES, RELEASED_BRANCH_DELETION_REQUEST_BYTES,
+};
+mod held_branch_deletion;
+pub use held_branch_deletion::{
+    BranchDeletionResolution, HeldBranchDeletionRequest, HELD_BRANCH_DELETION_PROOF_BYTES,
+    HELD_BRANCH_DELETION_REQUEST_BYTES,
+};
+mod branch_absence;
 mod branches;
+pub use branch_absence::{BranchChildAbsence, BranchChildAbsenceRequest, BRANCH_ABSENCE_BYTES};
 mod exports;
 #[cfg(test)]
 mod held_release;
@@ -531,3 +572,9 @@ mod tests {
         assert!(output.is_empty());
     }
 }
+
+mod branch_deletion_collection;
+pub use branch_deletion_collection::{
+    BranchDeletionCollection, BranchDeletionCollectionRequest,
+    BRANCH_DELETION_COLLECTION_PROOF_BYTES, BRANCH_DELETION_COLLECTION_REQUEST_BYTES,
+};

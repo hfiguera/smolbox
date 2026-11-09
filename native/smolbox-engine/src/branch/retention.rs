@@ -8,8 +8,13 @@ use std::os::unix::fs::MetadataExt;
 use std::sync::{Mutex, Weak};
 mod backing;
 mod boot;
+mod resolution;
 pub use backing::BranchBackingRelease;
 pub use boot::{BranchBootIdentity, BranchGuestIdentity};
+pub use resolution::{
+    RetainedBranchResolution, UnbootedBranchDisposal, UnbootedBranchDisposalCandidate,
+    UnbootedBranchDisposalCompletion, UnbootedBranchDisposalRequest,
+};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum BranchPreparationState {
@@ -18,6 +23,8 @@ pub enum BranchPreparationState {
     Collected,
     Unresolved,
     MaterialPublished,
+    Disposing,
+    Disposed,
     Booting,
     Booted,
     Initializing,
@@ -33,6 +40,8 @@ enum Phase {
     Entered,
     Verified,
     Published,
+    DisposalEntered,
+    Disposed,
     BootEntered,
     Booted,
     IdentityEntered,
@@ -42,6 +51,7 @@ enum Phase {
 }
 struct Ownership {
     intent: PreparedBranchIntent,
+    creation: Option<BranchCreateRequest>,
     jobs: crate::jobs::JobPool,
 }
 struct Work {
@@ -55,7 +65,7 @@ struct Work {
 struct Entry {
     ownership: Arc<Ownership>,
     expected: crate::branch_worker::Expected,
-    borrower: Weak<()>,
+    borrower: Mutex<Weak<()>>,
     work: Mutex<Work>,
 }
 struct VerifiedSnapshot {
@@ -68,6 +78,7 @@ struct VerifiedSnapshot {
 pub(crate) struct Registry {
     entries: Mutex<BTreeMap<String, Arc<Entry>>>,
     completed: Mutex<BTreeMap<String, CompletedChild>>,
+    disposed: Mutex<BTreeMap<String, resolution::disposal::DisposedChild>>,
     domain: Arc<crate::domain::DomainGuard>,
 }
 struct CompletedChild {
@@ -126,10 +137,29 @@ impl Registry {
         }
         Ok(result)
     }
+
+    pub(crate) fn completed_context_exact(
+        &self,
+        expected: &crate::BranchCompletion,
+    ) -> Result<Arc<crate::branch_owned::Context>> {
+        self.domain.verify()?;
+        expected.validate()?;
+        let completed = self
+            .completed
+            .try_lock()
+            .map_err(|_| Error::before(ErrorCode::Conflict))?;
+        let mut matching = completed.values().filter(|entry| entry.result == *expected);
+        let result = matching.next().ok_or(Error::before(ErrorCode::Ownership))?;
+        if result.borrower.upgrade().is_some() || matching.next().is_some() {
+            return Err(Error::before(ErrorCode::Conflict));
+        }
+        Ok(result._context.clone())
+    }
     pub(crate) fn new(domain: Arc<crate::domain::DomainGuard>) -> Arc<Self> {
         Arc::new(Self {
             entries: Mutex::new(BTreeMap::new()),
             completed: Mutex::new(BTreeMap::new()),
+            disposed: Mutex::new(BTreeMap::new()),
             domain,
         })
     }
@@ -137,13 +167,17 @@ impl Registry {
         self: &Arc<Self>,
         mut input: PreparedBranchWorker,
         engine: &Engine,
+        creation: Option<BranchCreateRequest>,
     ) -> Result<RetainedBranchPreparation> {
+        if let Some(request) = &creation {
+            request.validate(engine)?;
+        }
         input
             .intent
             .as_ref()
             .ok_or(Error::before(ErrorCode::State))?
             .recheck(engine)?;
-        self.insert_checked(&mut input)
+        self.insert_with_creation_checked(&mut input, creation)
     }
     pub(crate) fn retire_prepared(
         &self,
@@ -168,7 +202,11 @@ impl Registry {
         let Some(entry) = entry else {
             return Ok(None);
         };
-        if entry.borrower.upgrade().is_some() {
+        let borrower = entry
+            .borrower
+            .try_lock()
+            .map_err(|_| Error::before(ErrorCode::Conflict))?;
+        if borrower.upgrade().is_some() {
             return Err(Error::before(ErrorCode::Conflict));
         }
         self.retire_entry(engine, &entry, budget).map(Some)
@@ -228,9 +266,10 @@ impl Registry {
     }
     // Production callers must first recheck the original live engine authority.
     // Kept separate so non-VM state/lease models never fabricate live enrollment.
-    fn insert_checked(
+    fn insert_with_creation_checked(
         self: &Arc<Self>,
         input: &mut PreparedBranchWorker,
+        creation: Option<BranchCreateRequest>,
     ) -> Result<RetainedBranchPreparation> {
         self.domain.verify()?;
         let intent = input
@@ -239,6 +278,10 @@ impl Registry {
             .ok_or(Error::before(ErrorCode::State))?;
         if !Arc::ptr_eq(&self.domain, &intent.guard.domain) {
             return Err(Error::before(ErrorCode::Ownership));
+        }
+        if let Some(request) = &creation {
+            resolution::validate_creation(request)?;
+            intent.intent.matches_creation(request)?;
         }
         let prepared = input
             .prepared
@@ -262,13 +305,17 @@ impl Registry {
             .entries
             .try_lock()
             .map_err(|_| Error::before(ErrorCode::Conflict))?;
+        let completed = self
+            .completed
+            .try_lock()
+            .map_err(|_| Error::before(ErrorCode::Conflict))?;
+        let disposed = self
+            .disposed
+            .try_lock()
+            .map_err(|_| Error::before(ErrorCode::Conflict))?;
         if entries.len() >= crate::JOB_WORK_SLOTS
             || entries.contains_key(&input.expected.metadata_sha256)
-            || self
-                .completed
-                .try_lock()
-                .map_err(|_| Error::before(ErrorCode::Conflict))?
-                .len()
+            || completed.len().saturating_add(disposed.len())
                 >= (crate::jobs::BRANCH_BACKING_METADATA_BYTES
                     / crate::jobs::BRANCH_BACKING_METADATA) as usize
         {
@@ -281,10 +328,11 @@ impl Registry {
             Arc::new(Entry {
                 ownership: Arc::new(Ownership {
                     intent: input.intent.take().unwrap(),
+                    creation,
                     jobs: input.jobs.clone(),
                 }),
                 expected: input.expected.clone(),
-                borrower: Arc::downgrade(&borrower),
+                borrower: Mutex::new(Arc::downgrade(&borrower)),
                 work: Mutex::new(Work {
                     prepared: input.prepared.take(),
                     collected: None,
@@ -311,6 +359,13 @@ impl Drop for Registry {
             std::mem::take(self.completed.get_mut().unwrap_or_else(|e| e.into_inner()))
         {
             if child._backing.material_bytes() != 0 {
+                child.jobs.quarantine();
+                std::mem::forget(child);
+            }
+        }
+        for (_, child) in std::mem::take(self.disposed.get_mut().unwrap_or_else(|e| e.into_inner()))
+        {
+            if child.backing.material_bytes() != 0 {
                 child.jobs.quarantine();
                 std::mem::forget(child);
             }
@@ -381,6 +436,8 @@ impl RetainedBranchPreparation {
             .ok_or(Error::before(ErrorCode::Ownership))?;
         if !entry
             .borrower
+            .try_lock()
+            .map_err(|_| Error::before(ErrorCode::Conflict))?
             .upgrade()
             .is_some_and(|borrower| Arc::ptr_eq(&borrower, &self.borrower))
         {
@@ -406,6 +463,8 @@ impl RetainedBranchPreparation {
             Phase::Prepared => BranchPreparationState::Prepared,
             Phase::Verified => BranchPreparationState::Collected,
             Phase::Published => BranchPreparationState::MaterialPublished,
+            Phase::DisposalEntered => BranchPreparationState::Disposing,
+            Phase::Disposed => BranchPreparationState::Disposed,
             Phase::BootEntered if work.worker.upgrade().is_some() => {
                 BranchPreparationState::Booting
             }
@@ -911,6 +970,28 @@ fn read_output(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn ordinary_non_branch_deletion_selection_ignores_busy_branch_completion_registry() {
+        let temp = tempfile::tempdir().unwrap();
+        let engine = crate::machine::tests::test_engine(temp.path());
+        let child = crate::machine::tests::install_record(&engine);
+        let _busy = engine.branch_retention.completed.lock().unwrap();
+        let budget = ReadBudget::new(
+            std::time::Duration::from_secs(5),
+            crate::Cancellation::default(),
+        )
+        .unwrap();
+        assert!(!engine
+            .retained_released_deletion_head(&child, &budget)
+            .unwrap());
+        // Ordinary missing-row selection also avoids unrelated branch state;
+        // the caller still performs its own receipt-bound presence checks.
+        engine.db.remove_vm(&child.name).unwrap();
+        assert!(!engine
+            .retained_released_deletion_head(&child, &budget)
+            .unwrap());
+    }
+
     use super::*;
     use std::io::Write;
     use std::os::unix::fs::PermissionsExt;
@@ -947,8 +1028,18 @@ mod tests {
     }
 
     // Pure private-DB ownership model. These synthetic SDK PID fields are never
-    // enrolled into a runtime, and insert_checked cannot dispatch an SDK call.
+    // enrolled into a runtime, and insert_with_creation_checked cannot dispatch an SDK call.
     fn fixture() -> (
+        tempfile::TempDir,
+        Engine,
+        crate::branch_worker::Metadata,
+        RetainedBranchPreparation,
+    ) {
+        fixture_bound(false)
+    }
+    pub(super) fn fixture_bound(
+        bound: bool,
+    ) -> (
         tempfile::TempDir,
         Engine,
         crate::branch_worker::Metadata,
@@ -1026,7 +1117,26 @@ mod tests {
             expected,
             jobs: engine.jobs.clone(),
         };
-        let token = engine.branch_retention.insert_checked(&mut input).unwrap();
+        let creation = bound.then(|| {
+            let intent = &metadata.grant.intent;
+            BranchCreateRequest {
+                source: intent.source.clone(),
+                child: intent.child.clone(),
+                approval: intent.approval.clone(),
+                initial_release: if intent.child.hold {
+                    None
+                } else {
+                    Some(crate::BranchReleaseRequest {
+                        operation_id: "original-activation".into(),
+                        request_sha256: "a".repeat(64),
+                    })
+                },
+            }
+        });
+        let token = engine
+            .branch_retention
+            .insert_with_creation_checked(&mut input, creation)
+            .unwrap();
         assert!(input.intent.is_none() && input.prepared.is_none());
         (temp, engine, metadata, token)
     }
@@ -1110,6 +1220,16 @@ mod tests {
         let intent = &metadata.grant.intent;
         let budget =
             ReadBudget::new(Duration::from_secs(30), crate::Cancellation::default()).unwrap();
+        let checked = crate::branch::prepared_retirement::tests::request(intent);
+        assert_eq!(
+            engine
+                .retire_prepared_branch_checked(&checked, &budget)
+                .unwrap_err()
+                .code,
+            ErrorCode::Conflict
+        );
+        assert_eq!(engine.jobs.counts(), admitted);
+        assert_eq!(std::fs::read(&journal).unwrap(), before);
         assert_eq!(
             engine
                 .retire_prepared_initial_branch(

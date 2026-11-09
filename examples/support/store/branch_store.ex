@@ -34,6 +34,32 @@ defmodule SmolBox.DurableHost.BranchStore do
            do: BranchOps.resolve(p, c, source, observed, now)
     end
 
+    if function_exported?(BranchOps, :accept_backing, 5) and
+         function_exported?(BranchOps, :retire, 4) and
+         function_exported?(BranchOps, :release_storage, 4) do
+      def run(context, :branch_retire, [key, guard, id, proof, now]) do
+        with {:ok, p, c} <- pair(context, key, guard, id, now),
+             do: BranchOps.retire(p, c, proof, now)
+      end
+
+      def run(context, :branch_backing_accept, [key, guard, id, version, removed, now]) do
+        with {:ok, p, c} <- pair(context, key, guard, id, now),
+             do: BranchOps.accept_backing(p, c, version, removed, now)
+      end
+
+      def run(context, :branch_release_storage, [key, guard, id, proof, now]) do
+        with {:ok, p, c} <- pair(context, key, guard, id, now),
+             do: BranchOps.release_storage(p, c, proof, now)
+      end
+    else
+      def run(_context, operation, [_, _, _, _, _])
+          when operation in [:branch_retire, :branch_release_storage],
+          do: {:error, %SmolBox.Error{category: :unsupported_capability, operation: :store}}
+
+      def run(_context, :branch_backing_accept, [_, _, _, _, _, _]),
+        do: {:error, %SmolBox.Error{category: :unsupported_capability, operation: :store}}
+    end
+
     def run(context, :branch_retire, [key, guard, id, now]) do
       with {:ok, p, c} <- pair(context, key, guard, id, now), do: BranchOps.retire(p, c, now)
     end

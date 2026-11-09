@@ -5,11 +5,17 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
 mod creation;
+pub(crate) mod prepared_retirement;
+pub use prepared_retirement::{
+    PreparedBranchRetirement, PreparedBranchRetirementRequest, PREPARED_BRANCH_RETIREMENT_BYTES,
+};
 pub(crate) mod retention;
 pub use creation::BranchCreateRequest;
 pub use retention::{
     BranchBackingRelease, BranchBootIdentity, BranchGuestIdentity, BranchPreparationState,
-    RetainedBranchPreparation,
+    RetainedBranchPreparation, RetainedBranchResolution, UnbootedBranchDisposal,
+    UnbootedBranchDisposalCandidate, UnbootedBranchDisposalCompletion,
+    UnbootedBranchDisposalRequest,
 };
 
 const POLICY_LIMIT: u64 = 1_048_576;
@@ -385,7 +391,19 @@ impl PreparedBranchWorker {
     /// Retain the original source, gates, SDK runtime and admission in Engine.
     /// This publishes no entered state and never invokes the SDK.
     pub fn retain(self, engine: &Engine) -> Result<RetainedBranchPreparation> {
-        engine.branch_retention.insert(self, engine)
+        engine.branch_retention.insert(self, engine, None)
+    }
+    /// Freeze the full host creation request, including an initial activation
+    /// choice, before SDK entry. Later resolution can select only this original
+    /// retained context; legacy unbound preparations cannot be adopted by request.
+    pub fn retain_creation(
+        self,
+        engine: &Engine,
+        request: &BranchCreateRequest,
+    ) -> Result<RetainedBranchPreparation> {
+        engine
+            .branch_retention
+            .insert(self, engine, Some(request.clone()))
     }
     pub fn metadata_sha256(&self) -> &str {
         &self.expected.metadata_sha256
@@ -460,6 +478,11 @@ impl InitialBranchRetirement {
     pub fn resource_plan(&self) -> &BranchResourcePlan {
         &self.intent.plan
     }
+    pub(crate) fn matches_creation(&self, request: &BranchCreateRequest) -> Result<()> {
+        self.validate()?;
+        self.intent.matches_creation(request)
+    }
+
     pub fn request_sha256(&self) -> &str {
         &self.intent.request_sha256
     }
@@ -546,6 +569,16 @@ impl InitialBranchJournal {
                     self.source_pid,
                     &self.epoch,
                 )?
+        {
+            return Err(Error::before(ErrorCode::Ownership));
+        }
+        Ok(())
+    }
+    pub(crate) fn matches_creation(&self, request: &BranchCreateRequest) -> Result<()> {
+        self.validate()?;
+        if self.source != request.source
+            || self.child != request.child
+            || self.approval != request.approval
         {
             return Err(Error::before(ErrorCode::Ownership));
         }
@@ -669,10 +702,11 @@ fn source_resources(
 }
 fn require_absent(engine: &Engine, name: &str, budget: &ReadBudget) -> Result<()> {
     engine.verify_database_identity()?;
-    if !crate::sdk_compat::observe_absence(
+    if !crate::sdk_compat::observe_absence_budget(
         &engine.binding().database,
         engine.database_identity,
         name,
+        budget,
         || engine.creation_material_absent(name),
     )? {
         return Err(Error::before(ErrorCode::Conflict));
@@ -1001,7 +1035,7 @@ pub(crate) mod tests {
             epoch,
         }
     }
-    fn prepared_stopped_model(
+    pub(super) fn prepared_stopped_model(
         root: &std::path::Path,
         live_original: bool,
     ) -> (Engine, CreationReceipt, InitialBranchJournal) {
