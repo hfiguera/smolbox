@@ -399,6 +399,8 @@ defmodule SmolBox.PersistentMachinesTest do
     assert conflict.worker_id == nil and conflict.reserved_ports == []
     {:ok, _} = Machines.delete(fixture.runtime, handle, owner.version)
     wait_machine(fixture, handle, &(&1.state == :deleted))
+    # The deletion can be visible before the coordinator frees its maintenance slot.
+    RuntimeFixture.await_idle(fixture.runtime, contender)
     assert :ok = Machines.reconcile(fixture.runtime, contender)
 
     RuntimeFixture.await_idle(fixture.runtime, contender)
