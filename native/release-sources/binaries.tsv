@@ -1,0 +1,180 @@
+target	scope	path	sha256	provenance
+linux-aarch64	native	smolbox-port	20cbdd8d8029b8d155b4602f94f84b213680d25303fa455c7695e5e0c1e5d199	pinned SmolBox build
+linux-aarch64	native	lib/libkrun.so	137ad7ced03ca3430bc3e78788a5129c97da11b693e5443d15a08da2bed30dfd	byte-identical upstream release
+linux-aarch64	native	lib/libkrun.so.2	137ad7ced03ca3430bc3e78788a5129c97da11b693e5443d15a08da2bed30dfd	byte-identical upstream release
+linux-aarch64	native	lib/libkrunfw.so	54a613ce1482c99ad9119ebbd4c7190f5e1792ac8bbd6b6cb07238e40253092d	byte-identical upstream release
+linux-aarch64	native	lib/libkrunfw.so.5	54a613ce1482c99ad9119ebbd4c7190f5e1792ac8bbd6b6cb07238e40253092d	byte-identical upstream release
+linux-aarch64	native	lib/libkrunfw.so.5.5.0	54a613ce1482c99ad9119ebbd4c7190f5e1792ac8bbd6b6cb07238e40253092d	byte-identical upstream release
+linux-aarch64	agent rootfs outside APK inventory	usr/bin/rosetta-wrapper	6083850db8dd58533b6d08864f4a0d8e6fb6b6fe73719c303f9753cacd5f5999	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/bin/crane	0feac94485aa511e8baf0e2f2569940aefa190c9884fbcf92cc005b4cbd1619c	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/bin/smolvm-agent	d70d82e977a8d57f6ee59055003c009aaf5e58eed84c7bc451b76112e979832b	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/bin/smolvm-cuda-run	2ff371ef81c2a6fdd669bae8f196a9991d8f4c51119e497d518fa7852cb882cf	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-cuda/libcuda.so.1	c3ccaa7817d9231c91a6f3ed596eb8080159878f4270e96d72c96250c967613d	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-cuda/libcudart-shim.so	ef0bffef86a24b3cecbc4e9e3954e5db5ecaf05edd4b83b5cb6607c3e070de9a	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-cuda/proto-hash	7af153bb0f944ded9d55511510ca54210361a37c063b614f110d4451a4cf95a2	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libX11-xcb.so.1.0.0	909cbc7e4cd38d6d8e5f5f0bc9713ac182ed177173970c46f1ec42074473c77e	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libXau.so.6.0.0	ea2a26f8db008d473c4a14e7a448e3970ac0daf27330c1eb7e4436264dff03e5	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libdrm.so.2.123.0	df4fa10148ee7703373047a20c864fcc0afb40bfd08c3a5452c3e179d536de26	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libdrm_amdgpu.so.1.123.0	c983fc35924a3a62b5cd957d59d2e7bbb14bb7e5e8c7ecbfa8274ab3dc066a77	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libdrm_etnaviv.so.1.123.0	733d4739d361f085f5e4232b4895a653a9079ed248f7077c54cac8f4e9d67f08	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libdrm_freedreno.so.1.123.0	4db4ab29026f2ee3b23ad9a21b7989e342ac3b0d4831f557003cb71aa077c889	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libdrm_nouveau.so.2.123.0	70d83c0ef706efc58b0f38cbeb224993c843d909a77fb5df879b000c57a4bfef	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libdrm_radeon.so.1.123.0	b38cf066905da9e487404cd42c73a3a9c609e730394ec9b2e15db1f4f29d5092	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libdrm_tegra.so.0.123.0	9f7935762e71eb11672cb6f02c410b76263a5b83527dc6b5e169bdf93f20b77d	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libexpat.so.1.8.10	8651502a09923f16cfcb31f534015225788112da8a07c3f7f4f878e515797b6a	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libvulkan_virtio.so	d624152b4fb9e07862f6f81ecce2175b171caa48326d892267d43e3aaebc4e97	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libwayland-client.so.0.21.0	f5b078e011b966b92eb181cac65308090b5ba85cf54c87e607bb1e251968f5b3	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-composite.so.0.0.0	7678358279dd2c5bfda4048e7a2cae2a324f40d4d7946348bfb535959d99061a	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-damage.so.0.0.0	18894af9e5ec6483b4cbbd9b86a89db2d3c3a5576b78bc9d7cd684572f5950be	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-dpms.so.0.0.0	7be49b69b67b22c89ca8dc78ab55515dad5f63ac990525e7c396aa573e03529d	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-dri2.so.0.0.0	66c882281a20f09c4d60ba8aed00f486463947fea4ec676c0303ee3a2250a6c4	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-dri3.so.0.0.0	4c291ed29fd0291164de26c31e5db3978b0a90300cd6e41638e0882e3d49336f	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-glx.so.0.0.0	b073ea2486f5f7469cac916f707e0aab7b8ff1e6e7eea70923d285859e8ce4bf	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-present.so.0.0.0	53ab34c634ae3b1e428cf723a5eb552fbbe34ca3761f3d7707bb8b1c6cd83dce	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-randr.so.0.1.0	d72ffc35816a9c4baff036644158d3385ecdcd66b719b4e378c9ae712008da66	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-record.so.0.0.0	341eb29bf55c7eea6453147b3bef29489930d4b728505516ed3a60852c3ed060	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-render.so.0.0.0	90ff5f73493499bf2c419114f1053a5610bbc8d39098d65548e14968a8aedd06	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-res.so.0.0.0	6048289e4732cfeaea169305672fe62fe8b741447e96fdf156aed4a9864c09c0	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-screensaver.so.0.0.0	6661e871159792ff784691854f341238a41a855bcf2bcab0850dbf98ba22f962	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-shape.so.0.0.0	2083213cd1244f82779486b14d9f839026ea39449458e64423e336ff1b095c32	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-shm.so.0.0.0	742a43c84f1de86e62a93b6e894b14e3213789d834624256a2dd79507c28f268	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-sync.so.1.0.0	e15718bf310983233e41c972d30211f978ac2e157157c29b1a0f2ce2bc6615a4	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-xf86dri.so.0.0.0	9dc24ce17c2774f44cc5e13a972bec5d2a51a42a8b79dce371601fb150a95aa5	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-xfixes.so.0.0.0	b083c77f22cdb9ba104dab5bfbd5fd9d4a2f718ed8f57b983cebc0cda2ca8702	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-xinerama.so.0.0.0	3d366cf8861f7977c8e9b355b515e8bc32665f973a7d39e0dc3ce290c68832d7	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-xinput.so.0.1.0	fc32abbdf0efc89b037a309c3245c7b81b9176809933ecafaa9946989175668d	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-xkb.so.1.0.0	b8eb5ca10206041e9cc2274548f895ffdf8ccce02e79aae08d2764809c91949f	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-xselinux.so.0.0.0	491caec9845800ef7e626827b6759707a956f635bd3ed52a47764203562e12a9	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-xtest.so.0.0.0	aa25d4862afb1c1fbc23cd0ad72be5ae6f323327b78dd87f557e6fc8ad2066db	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-xv.so.0.0.0	4d2cffbdfd169f9520426e971753e0609b3a7ab8b5e9e3741804af55593e272d	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-xvmc.so.0.0.0	f7cfee34419bb058338825ff87ee46f3afd68797518c35b10c5b9723f2d6bb53	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb.so.1.1.0	dc4390862e32eea5adda2bc2a44fe566eec865318928290120a619b4980fc3f2	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxshmfence.so.1.0.0	6af934e17416f287c117ab09221875ef3c2dc2831226fb348a6ee63090c77f17	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libz.so.1.2.11	ed7356e1b854f3f0bf439f49f1746acf7a858060571f64fadf33afcbe45ed1a5	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libzstd.so.1.5.5	e4f2958ced84b2746f00fad781ae30dc118b1bef39e833202c58e8815a0ee96c	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/loader/libvulkan.so.1.4.304	6b15494275f4f0eeef83a876ed5e8865eef4741f243b396f172bc9e9010631b8	upstream release rootfs
+linux-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/virtio_icd.json	dd239aa1280358579d6ba9a8685b96391d9a84f02964c5fd72aff325787a8e63	upstream release rootfs
+linux-aarch64	demo library	lib/libkrun.so	137ad7ced03ca3430bc3e78788a5129c97da11b693e5443d15a08da2bed30dfd	matches native library
+linux-aarch64	demo library	lib/libkrunfw.so.5	54a613ce1482c99ad9119ebbd4c7190f5e1792ac8bbd6b6cb07238e40253092d	matches native library
+linux-aarch64	demo tar member	agent-rootfs.tar	aaff66b4530522cc9fb6fec0c2760d7db0d03a7aa05460b673885fcf04a12d11	nested guest payload
+linux-aarch64	demo tar member	layers/248d4d6535e8932d2b51acdf49a4ca8d87629cd408a02bd59788b4c31e3d0c28.tar	89b61f5421d38f6fec767e26ac0b5485d6359d42f83c7323b876903477348023	nested guest payload
+linux-x86_64	native	smolbox-port	55032af80aa6d970953904f161c7598b8b2f9c40d4204bf4ca88d49d1b732a03	pinned SmolBox build
+linux-x86_64	native	lib/libkrun.so	5967c6a231ee56e51b747ba4147791a04f99cce7ecbdf0df567b5d6256eff460	byte-identical upstream release
+linux-x86_64	native	lib/libkrun.so.2	5967c6a231ee56e51b747ba4147791a04f99cce7ecbdf0df567b5d6256eff460	byte-identical upstream release
+linux-x86_64	native	lib/libkrunfw.so	38dfd8d043290e6ec562774e501057e9e3e40718c31e651a491896d348f8f521	byte-identical upstream release
+linux-x86_64	native	lib/libkrunfw.so.5	38dfd8d043290e6ec562774e501057e9e3e40718c31e651a491896d348f8f521	byte-identical upstream release
+linux-x86_64	native	lib/libkrunfw.so.5.5.0	38dfd8d043290e6ec562774e501057e9e3e40718c31e651a491896d348f8f521	byte-identical upstream release
+linux-x86_64	agent rootfs outside APK inventory	usr/bin/rosetta-wrapper	6083850db8dd58533b6d08864f4a0d8e6fb6b6fe73719c303f9753cacd5f5999	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/bin/crane	59037b5cad62b65f511d75e8c901257e35612f269121f8fb1fb4bfa07cbd5826	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/bin/smolvm-agent	f140596cda1a4ec6f1402c44acdc67556e349d7879c54cca4464594e5334d737	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/bin/smolvm-cuda-run	1c30a6b6f5c6acfe290bf101b68957b4ade246a5d5f1478afdf38f9fa6c72aa2	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-cuda/libcuda.so.1	f4ca2459e4c6bcb965e399c381d5a57fdad3468063e93a50e5c9a204884c8176	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-cuda/libcudart-shim.so	a15286b4ae91313d6b516b74a107e0096f4d0e14c3a42cf89773d3ec1bbac751	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-cuda/proto-hash	7af153bb0f944ded9d55511510ca54210361a37c063b614f110d4451a4cf95a2	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libX11-xcb.so.1.0.0	a0033e59487dc5d25eb2f5717d82eba6e2d3d3eb0fc3af430e373911e0f99dd1	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libXau.so.6.0.0	9250f1c17bd7deabf7daa960c1101e9fc2cd0715a22922f93a6e810fa0928d38	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libdrm.so.2.123.0	f94a70cfb50cd3bd9406d24de07e4fa70cb7ce34e13b3caa270d9709874c794c	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libdrm_amdgpu.so.1.123.0	e7a86d3f1a52e6916bc98bc27ba87f5fa337ef90eb5497ce456715e65b96e2e5	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libdrm_intel.so.1.123.0	89362391220351a0f90b9f30644e8dd213c826f37863e2bcbb5d2b458746b943	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libdrm_nouveau.so.2.123.0	c73d5d4095f98d0df4ee3e41e9fd3337d6ecd366163066fe5cc9439ba8f5ab1e	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libdrm_radeon.so.1.123.0	4277288101eac26021ce22ddcd68ad8bcc795f61d0a40da6dc362a8de99a7d1a	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libexpat.so.1.8.10	440950ceca0b4150e617c378644133741d386a8b3e24e97a35663e86ec8c4443	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libvulkan_virtio.so	86e78344d57e91bc787735177d919bd127ec73e4c5cb10d9dfe8447d30987071	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libwayland-client.so.0.21.0	1923ac2bcb156188d65c409a144a524f2bc068c331d923c1b9b1e915091943bb	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-composite.so.0.0.0	e0e7672c11979486b48cf2713119ffde66ea42b1090ffd84030e3f4fcb753e55	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-damage.so.0.0.0	0c4c2ff104cca32736c9a3d6b0b69a1371240c8bd6a8a6278d48b88cac561dcf	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-dpms.so.0.0.0	d67f794de59ffe41846acfabc6fbacf699967faa1929cf0dd3efb21d674631f3	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-dri2.so.0.0.0	9db070e3d9061159273f9889dca17a143d503a0f311ca2a1a9548b3c92005225	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-dri3.so.0.0.0	8e2f4c1c449e2d1c7959c8dfd207d442060d14cc032f671e06aa6eaaf60049c9	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-glx.so.0.0.0	dcbbe246ce6cd4078e748c98d79848de293faecae31d4ce503e10a54398efd4e	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-present.so.0.0.0	a6191168a7443bbd974c978b33d35c2618095baa0f4792ecb1f412a7d766907e	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-randr.so.0.1.0	8ea62869721aeb40828455a1ac5288cd3ce77ff894e7c103c99ddcaaae1afeef	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-record.so.0.0.0	23b2fe91824d668643b4c53898c5d9f47367541fac86443fa474eb66f2f801a2	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-render.so.0.0.0	4d6256c54a8f73766e6300e483e577902498dca3aae81b6d4f5e3e0414edd96b	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-res.so.0.0.0	e9d4bf9d1685c4d06381be352f9dd4074658e82ac2da62ef7dd7954d479e6dcd	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-screensaver.so.0.0.0	1678c69cff58bdd7f1fcec4b7bb364fb89865df292089d244eecec72ffca5a48	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-shape.so.0.0.0	8939528fc71e599e587bc159e59d8174839dfcb201412ea1814b04d7f6736656	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-shm.so.0.0.0	2a6cb6b61113e91a2758a8bb0522688e592515310bd57966764802607735c40b	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-sync.so.1.0.0	e989b66281f0f265870478cde6d61ac6fb6b5a9ad1581aa693163b4ca97687c9	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-xf86dri.so.0.0.0	6feec76e8ca973eaa49456a1355d0e7780c9ee4dec9f27fb09beb2994cffb53c	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-xfixes.so.0.0.0	c7c8b5eca65af78340c6eac4b26f9cba11be45fd07df4d0917c635a59400544e	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-xinerama.so.0.0.0	effa815231c8e2a9987ba7738df0c2330925eb4a5ab3db59a3da694903467fa7	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-xinput.so.0.1.0	ce2d983cd0791fa0358d980774fb3b85bb2e26185ff5af2a60813bda5c76bf3a	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-xkb.so.1.0.0	630bfd50a8095fff36bacb4227614de5d527d4239647d996ed1241b81078d4d9	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-xselinux.so.0.0.0	f1803ed7316cb99af61bd575f16cc729136791ce2dbae2a2237467811a9810d4	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-xtest.so.0.0.0	4526b80d58bf70101d6b2bec263cbe5949d255a343e93370f473a9d9ff4550ae	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-xv.so.0.0.0	f4abc4fc973715c752702d505042593744cb2044d065d5b76cb49f56718af889	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-xvmc.so.0.0.0	a60baa5cceab1ad5e3834f581e82fd49cb363fbbc4a5672589262e9b7e708e3a	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb.so.1.1.0	bf39488106024979530ab8b5090c58e750d9f1d94f966f74049c87f290a3054a	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxshmfence.so.1.0.0	bf040e2aaad503884c61d28e1b9c45ac8fe95671538e9fb8c57f5b399e58024e	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libz.so.1.2.11	ba81e2cb736f3575c19592691d71ff1e6ec87ec8dc37a051870b9dd704e023a9	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libzstd.so.1.5.5	3bc1862cc2847e405b9ebfd6c0ea68c01eff5fab4319d3d7458646acb29ee4d5	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/loader/libvulkan.so.1.4.304	d9e925e8812c1ec93e17e7b7889ad4c269395e051c0f275bf22abaad00e59f8c	upstream release rootfs
+linux-x86_64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/virtio_icd.json	dd239aa1280358579d6ba9a8685b96391d9a84f02964c5fd72aff325787a8e63	upstream release rootfs
+linux-x86_64	demo library	lib/libkrun.so	5967c6a231ee56e51b747ba4147791a04f99cce7ecbdf0df567b5d6256eff460	matches native library
+linux-x86_64	demo library	lib/libkrunfw.so.5	38dfd8d043290e6ec562774e501057e9e3e40718c31e651a491896d348f8f521	matches native library
+linux-x86_64	demo tar member	agent-rootfs.tar	67f314c7ae4beea59fbf7b3ac7930525998bdc29026df091df44e5e08ab0799f	nested guest payload
+linux-x86_64	demo tar member	layers/5a9bfd996c6d49c6c3cb4ddfb76e8d09cf16b6b7cf6601d1f2dffbdbc3edb5d4.tar	5a9bfd996c6d49c6c3cb4ddfb76e8d09cf16b6b7cf6601d1f2dffbdbc3edb5d4	nested guest payload
+macos-aarch64	native	smolbox-port	ba56c4eaa8abfccbec87d2ea20025d5aa0c806c5674335056cc5b57451803df0	pinned SmolBox build
+macos-aarch64	native	lib/libMoltenVK.dylib	945c9d86e886edc19a9cc3975336f4c67279d3ca884bf55638b041d8921fd16f	byte-identical upstream release
+macos-aarch64	native	lib/libepoxy.0.dylib	4907b7a0cf4ef3515bde843dc187f22482d142898f6c44f2859b59c6298e3324	byte-identical upstream release
+macos-aarch64	native	lib/libkrun.dylib	03b62510617705307e7ca4fa60c8a499a42ea536bd6aa29a14e2a4ed258384b3	release match after Mach-O metadata normalization
+macos-aarch64	native	lib/libkrunfw.5.dylib	44335384f89f35daaa3bb72345925add9725a5b7fe122d4a9bbb92606294dfcc	byte-identical upstream release
+macos-aarch64	native	lib/libkrunfw.dylib	44335384f89f35daaa3bb72345925add9725a5b7fe122d4a9bbb92606294dfcc	byte-identical upstream release
+macos-aarch64	native	lib/libvirglrenderer.1.dylib	6ad956b217da875edd64a25f799f3d2036c611626053d39b2cc4e36577645205	byte-identical upstream release
+macos-aarch64	agent rootfs outside APK inventory	usr/bin/rosetta-wrapper	6083850db8dd58533b6d08864f4a0d8e6fb6b6fe73719c303f9753cacd5f5999	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/bin/crane	0feac94485aa511e8baf0e2f2569940aefa190c9884fbcf92cc005b4cbd1619c	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/bin/smolvm-agent	d70d82e977a8d57f6ee59055003c009aaf5e58eed84c7bc451b76112e979832b	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/bin/smolvm-cuda-run	2ff371ef81c2a6fdd669bae8f196a9991d8f4c51119e497d518fa7852cb882cf	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-cuda/libcuda.so.1	c3ccaa7817d9231c91a6f3ed596eb8080159878f4270e96d72c96250c967613d	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-cuda/libcudart-shim.so	ef0bffef86a24b3cecbc4e9e3954e5db5ecaf05edd4b83b5cb6607c3e070de9a	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-cuda/proto-hash	7af153bb0f944ded9d55511510ca54210361a37c063b614f110d4451a4cf95a2	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libX11-xcb.so.1.0.0	909cbc7e4cd38d6d8e5f5f0bc9713ac182ed177173970c46f1ec42074473c77e	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libXau.so.6.0.0	ea2a26f8db008d473c4a14e7a448e3970ac0daf27330c1eb7e4436264dff03e5	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libdrm.so.2.123.0	df4fa10148ee7703373047a20c864fcc0afb40bfd08c3a5452c3e179d536de26	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libdrm_amdgpu.so.1.123.0	c983fc35924a3a62b5cd957d59d2e7bbb14bb7e5e8c7ecbfa8274ab3dc066a77	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libdrm_etnaviv.so.1.123.0	733d4739d361f085f5e4232b4895a653a9079ed248f7077c54cac8f4e9d67f08	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libdrm_freedreno.so.1.123.0	4db4ab29026f2ee3b23ad9a21b7989e342ac3b0d4831f557003cb71aa077c889	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libdrm_nouveau.so.2.123.0	70d83c0ef706efc58b0f38cbeb224993c843d909a77fb5df879b000c57a4bfef	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libdrm_radeon.so.1.123.0	b38cf066905da9e487404cd42c73a3a9c609e730394ec9b2e15db1f4f29d5092	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libdrm_tegra.so.0.123.0	9f7935762e71eb11672cb6f02c410b76263a5b83527dc6b5e169bdf93f20b77d	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libexpat.so.1.8.10	8651502a09923f16cfcb31f534015225788112da8a07c3f7f4f878e515797b6a	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libvulkan_virtio.so	d624152b4fb9e07862f6f81ecce2175b171caa48326d892267d43e3aaebc4e97	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libwayland-client.so.0.21.0	f5b078e011b966b92eb181cac65308090b5ba85cf54c87e607bb1e251968f5b3	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-composite.so.0.0.0	7678358279dd2c5bfda4048e7a2cae2a324f40d4d7946348bfb535959d99061a	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-damage.so.0.0.0	18894af9e5ec6483b4cbbd9b86a89db2d3c3a5576b78bc9d7cd684572f5950be	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-dpms.so.0.0.0	7be49b69b67b22c89ca8dc78ab55515dad5f63ac990525e7c396aa573e03529d	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-dri2.so.0.0.0	66c882281a20f09c4d60ba8aed00f486463947fea4ec676c0303ee3a2250a6c4	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-dri3.so.0.0.0	4c291ed29fd0291164de26c31e5db3978b0a90300cd6e41638e0882e3d49336f	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-glx.so.0.0.0	b073ea2486f5f7469cac916f707e0aab7b8ff1e6e7eea70923d285859e8ce4bf	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-present.so.0.0.0	53ab34c634ae3b1e428cf723a5eb552fbbe34ca3761f3d7707bb8b1c6cd83dce	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-randr.so.0.1.0	d72ffc35816a9c4baff036644158d3385ecdcd66b719b4e378c9ae712008da66	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-record.so.0.0.0	341eb29bf55c7eea6453147b3bef29489930d4b728505516ed3a60852c3ed060	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-render.so.0.0.0	90ff5f73493499bf2c419114f1053a5610bbc8d39098d65548e14968a8aedd06	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-res.so.0.0.0	6048289e4732cfeaea169305672fe62fe8b741447e96fdf156aed4a9864c09c0	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-screensaver.so.0.0.0	6661e871159792ff784691854f341238a41a855bcf2bcab0850dbf98ba22f962	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-shape.so.0.0.0	2083213cd1244f82779486b14d9f839026ea39449458e64423e336ff1b095c32	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-shm.so.0.0.0	742a43c84f1de86e62a93b6e894b14e3213789d834624256a2dd79507c28f268	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-sync.so.1.0.0	e15718bf310983233e41c972d30211f978ac2e157157c29b1a0f2ce2bc6615a4	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-xf86dri.so.0.0.0	9dc24ce17c2774f44cc5e13a972bec5d2a51a42a8b79dce371601fb150a95aa5	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-xfixes.so.0.0.0	b083c77f22cdb9ba104dab5bfbd5fd9d4a2f718ed8f57b983cebc0cda2ca8702	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-xinerama.so.0.0.0	3d366cf8861f7977c8e9b355b515e8bc32665f973a7d39e0dc3ce290c68832d7	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-xinput.so.0.1.0	fc32abbdf0efc89b037a309c3245c7b81b9176809933ecafaa9946989175668d	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-xkb.so.1.0.0	b8eb5ca10206041e9cc2274548f895ffdf8ccce02e79aae08d2764809c91949f	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-xselinux.so.0.0.0	491caec9845800ef7e626827b6759707a956f635bd3ed52a47764203562e12a9	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-xtest.so.0.0.0	aa25d4862afb1c1fbc23cd0ad72be5ae6f323327b78dd87f557e6fc8ad2066db	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-xv.so.0.0.0	4d2cffbdfd169f9520426e971753e0609b3a7ab8b5e9e3741804af55593e272d	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb-xvmc.so.0.0.0	f7cfee34419bb058338825ff87ee46f3afd68797518c35b10c5b9723f2d6bb53	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxcb.so.1.1.0	dc4390862e32eea5adda2bc2a44fe566eec865318928290120a619b4980fc3f2	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libxshmfence.so.1.0.0	6af934e17416f287c117ab09221875ef3c2dc2831226fb348a6ee63090c77f17	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libz.so.1.2.11	ed7356e1b854f3f0bf439f49f1746acf7a858060571f64fadf33afcbe45ed1a5	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/libzstd.so.1.5.5	e4f2958ced84b2746f00fad781ae30dc118b1bef39e833202c58e8815a0ee96c	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/loader/libvulkan.so.1.4.304	6b15494275f4f0eeef83a876ed5e8865eef4741f243b396f172bc9e9010631b8	upstream release rootfs
+macos-aarch64	agent rootfs outside APK inventory	usr/local/lib/smolvm-vulkan/virtio_icd.json	dd239aa1280358579d6ba9a8685b96391d9a84f02964c5fd72aff325787a8e63	upstream release rootfs
+macos-aarch64	demo library	lib/libMoltenVK.dylib	945c9d86e886edc19a9cc3975336f4c67279d3ca884bf55638b041d8921fd16f	matches native library
+macos-aarch64	demo library	lib/libepoxy.0.dylib	4907b7a0cf4ef3515bde843dc187f22482d142898f6c44f2859b59c6298e3324	matches native library
+macos-aarch64	demo library	lib/libkrun.dylib	03b62510617705307e7ca4fa60c8a499a42ea536bd6aa29a14e2a4ed258384b3	matches native library
+macos-aarch64	demo library	lib/libkrunfw.5.dylib	44335384f89f35daaa3bb72345925add9725a5b7fe122d4a9bbb92606294dfcc	matches native library
+macos-aarch64	demo library	lib/libvirglrenderer.1.dylib	6ad956b217da875edd64a25f799f3d2036c611626053d39b2cc4e36577645205	matches native library
+macos-aarch64	demo tar member	agent-rootfs.tar	0fc163b6757f49787b86ce4e8624100fae2b6fab33939f06a488750b01b1331a	nested guest payload
+macos-aarch64	demo tar member	layers/eb380aebecfca9bc8f9229d9aefcb5b08b26a21c3a8467090b1bc55309729d93.tar	eb380aebecfca9bc8f9229d9aefcb5b08b26a21c3a8467090b1bc55309729d93	nested guest payload

@@ -1,0 +1,99 @@
+# Embedded Port preview source and license review
+
+This review covers the three local preview archives below. Publication approval
+is open. Each final release needs the same checks against its exact payload and
+source artifacts. The release workflow requires an approved input catalog.
+[Release procedure](../../native/release-review.md#prebuilt-release-procedure)
+
+| Target | Preview archive SHA-256 | Native manifest SHA-256 |
+| --- | --- | --- |
+| Apple Silicon | `e1ddff59f352f73de24d469f8197a23676973ed5f361abc29a80cf6e43826978` | `3ed1158fb1a4fb2e6bdc377353702ac0ac615ed2b4cfbb45ea8a4d595eaa4ed0` |
+| Linux x86_64 | `41ab15a7a0034d3678b27b86b7e2ddf7bad335a51e27993dd8ad26fe24113846` | `cce85464c0bb235d14fc026fbdbbe7ca8ed1ec9a3503d926fc05710ba5b37590` |
+| Linux ARM64 | `6a05ffa4c6949ce70169221a20f8bcd29d8115f3996219bd967930de1997b368` | `a9b6517b9176306c86e53494ba5f9c00a0c562c778461e4ad04fb6e551d9b4ee` |
+
+## Native helper and libraries
+
+- SmolBox compiles its MIT-licensed Port helper with the unmodified
+  Apache-2.0 SmolVM SDK at `9f446ae00219148ca4a703914f44a8e2fab11655`.
+  The helper uses SmolBox's locked Cargo inputs. The native dependency
+  inventory records the target-filtered normal dependency graphs from Cargo
+  metadata, which can include dependencies the release linker eliminated.
+  [SDK pin](../../native/vendor/source.json) · [Rust inventory](../../native/release-sources/rust.tsv)
+- The firmware on all three targets matches the release archive and the Git
+  LFS object at the SmolVM v1.22.0 release tag `f40f42c337319b724e221e8d3f809f7b186340c2`.
+  The release-tag provenance identifies `libkrunfw` commit
+  `b8c9994d121d2ba8853216aac68a135e3a4c93ac`. Its Makefile selects Linux
+  6.12.95 and applies its patches and architecture-specific configurations.
+  The staged source includes the firmware code, scripts, configurations,
+  patches, and Linux 6.12.95 archive. This also covers the duplicate firmware
+  in the standalone demo packs where the bytes match the same runtime.
+  [Release-tag inputs](https://github.com/smol-machines/smolvm/tree/f40f42c337319b724e221e8d3f809f7b186340c2/lib) · [Firmware source](https://github.com/smol-machines/libkrunfw/commit/b8c9994d121d2ba8853216aac68a135e3a4c93ac)
+- Both Linux `libkrun` binaries match the release archives and release-tag
+  Git LFS objects. The tag records `libkrun` commit
+  `3285db7404144ed61faf0848bb424c0f82743f41`. On macOS, after removing
+  signatures from temporary copies, the preview and released `libkrun` differ
+  only in the `__LINKEDIT` virtual size. The load commands identify the same
+  libraries. The release-tag build and signing steps account for the provenance
+  of the macOS input.
+  [libkrun source](https://github.com/smol-machines/libkrun/commit/3285db7404144ed61faf0848bb424c0f82743f41) · [Binary inventory](../../native/release-sources/binaries.tsv)
+- The three macOS graphics dylibs match the release bytes and tag Git LFS
+  objects. The virglrenderer recipe pins `0.10.4e-krunkit` by SHA-256 and
+  applies the SmolVM tag's virglrenderer patches. The dylibs for libepoxy
+  1.5.10 and MoltenVK 1.4.1 match the Homebrew arm64 Tahoe bottles after
+  normalizing the install names and removing signatures from temporary
+  copies. The sources include the matching Homebrew recipe and all six
+  MoltenVK resources pinned by that recipe.
+  [virglrenderer build recipe](https://github.com/smol-machines/smolvm/blob/f40f42c337319b724e221e8d3f809f7b186340c2/scripts/build-virglrenderer-macos.sh) · [MoltenVK 1.4.1](https://github.com/KhronosGroup/MoltenVK/releases/tag/v1.4.1)
+
+## Guest filesystem and demos
+
+- The Alpine 3.19 agent root filesystem contains 64 installed APK packages
+  per target. The inventory records versions, declared licenses, and aports
+  commits from the installed package databases. The same process covered the
+  15 APK packages in the Linux ARM64 Alpine 3.21.8 demo. The 35 distinct
+  aports revisions, their recipe files, and their checksum-listed inputs
+  were staged. The Linux ARM64 demo has the same 88 regular-file contents
+  as the digest-pinned OCI layer after unpacking.
+  [APK inventory](../../native/release-sources/alpine.tsv) · [Alpine packaging source](https://github.com/alpinelinux/aports)
+- The agent, CUDA compatibility shims, CUDA guest runner, and Rosetta
+  wrapper are SmolVM release assets with code in the v1.22.0 source tree.
+  The vendored `crane` binaries match the published go-containerregistry
+  v0.19.0 Linux assets for both architectures. Both binaries identify the
+  same Go 1.21.6 toolchain and 17 dependency modules. Their staged sources
+  verify against the Go release checksum and the project's `go.sum`.
+  The tagged guest graphics
+  recipe pins 22 binary RPMs from COPR and AlmaLinux. All 22 RPM digests
+  verified, and all 11 corresponding source RPMs named by their headers were
+  staged. These provide the exact distro recipes and patches, including the
+  patched Mesa Venus driver.
+  [SmolVM guest build](https://github.com/smol-machines/smolvm/blob/f40f42c337319b724e221e8d3f809f7b186340c2/scripts/build-agent-rootfs.sh) · [Guest Vulkan recipe](https://github.com/smol-machines/smolvm/blob/f40f42c337319b724e221e8d3f809f7b186340c2/scripts/fetch-vulkan-guest-driver.sh) · [RPM source inventory](../../native/release-sources/vulkan.tsv)
+- The x86_64 Linux and macOS demo layers match the BusyBox official image
+  `diff_id` for their respective architecture. Both use BusyBox 1.37.0
+  with Debian glibc 2.41-12+deb13u4. The pinned BusyBox Docker build recipes,
+  patches, BusyBox source archive, and Debian glibc source package inputs
+  were staged. The copied `getconf` and `libc.so.6` match Debian's binaries
+  for both architectures. The BusyBox recipes also use the Buildroot 2026.08
+  system skeleton.
+  [ARM64 image recipe](https://github.com/docker-library/busybox/tree/54028ab642a011c458878f7393b1483f23ee1057/latest-1/glibc) · [x86_64 image recipe](https://github.com/docker-library/busybox/tree/7f8c76693ac4a64018eb67cf2768e5792d24bf6e/latest-1/glibc) · [Debian glibc source](https://deb.debian.org/debian/pool/main/g/glibc/)
+
+## Publication checks still open
+
+1. Review the assembled notices for the final binaries, including embedded
+   C, Go, and graphics dependencies, and preserve all applicable upstream
+   copyright and license texts. The Cargo inventory and staged notices are
+   review inputs. The final build must confirm its exact linked components.
+2. Record the final post-processing and signing steps for the macOS dylibs
+   and check the notice set against the exact resulting payload.
+3. Put the matching source downloads alongside the binaries and keep them
+   available for as long as the binaries are offered. The package verifier
+   binds native library digests to the approved manifest. Review the LGPL
+   relinking terms against a documented workflow for rebuilding the helper
+   and approving a new manifest with the modified library. Verify that
+   workflow with the final macOS signing policy.
+   [LGPL-2.1 terms](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html)
+4. Repeat inventory and digest checks on the final signed or attested
+   archives, then approve the exact catalog inputs.
+
+The [draft third-party notices](../../native/release-sources/THIRD-PARTY-NOTICES.md)
+and [source downloads index](../../native/release-sources/downloads.tsv) cover
+the materials prepared in this review.

@@ -103,6 +103,11 @@ configuration, patches and build recipes; provide applicable corresponding sourc
 and satisfy delivery/relinking obligations. Audit the guest agent and root filesystem
 packages as well. Copying license texts alone does not close this gate.
 
+The [preview source review](../docs/evidence/embedded-port-release-sources.md)
+maps all three candidate bundles to the upstream artifacts and inventories
+their native, guest and demo contents. It records the exact firmware source,
+the staged corresponding-source materials and the open publication checks.
+
 ## Development admission and distribution gate
 
 Public Runtime admission accepts explicitly configured development Port targets.
