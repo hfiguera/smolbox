@@ -1,8 +1,8 @@
 # Embedded Port release review
 
-The distribution review is complete as a gap assessment. **Publication remains
-blocked.** No Developer ID signature, notarization, publisher attestation or license
-compliance approval is claimed by the ordinary development proofs.
+The release inputs for the three Embedded Port targets are approved for
+candidate builds. **Binary publication remains gated** on checking the
+resulting payloads and qualifying the public install.
 
 ## Integrity and provenance
 
@@ -77,12 +77,12 @@ and subsequent isolated rebuild distinguish successful package signing from inpu
 preservation. Neither action opens the quarantined SDK domain or grants native
 feature acceptance.
 
-macOS development builds are ad-hoc signed with hypervisor entitlements. Linux
-packages are digest pinned. `--signing-identity` supports an explicit macOS identity
-with timestamped library signatures and hardened helper signing, but this path has
-not been qualified with a distribution identity. Release work must produce and
-verify the actual signed bytes, notarize/staple as applicable, authenticate the
-manifest and rerun consumers against those exact bytes.
+The macOS CLI candidate policy uses ad-hoc signing with the hypervisor
+entitlement. The installer authenticates the enclosing archive with GitHub
+build attestation. The final candidate must pass a clean-account test of
+the exact public download and install path with Gatekeeper enabled. The
+package builder retains its explicit `--signing-identity` option for a
+separately qualified Developer ID distribution.
 
 ## License and source delivery gaps
 
@@ -99,6 +99,11 @@ copyrights and notices; establish the exact libkrun, firmware and kernel version
 configuration, patches and build recipes; provide applicable corresponding sources
 and satisfy delivery/relinking obligations. Audit the guest agent and root filesystem
 packages as well. Copying license texts alone does not close this gate.
+
+The [source review](../docs/evidence/embedded-port-release-sources.md) maps all
+three approved inputs to upstream artifacts and inventories their native,
+guest, and demo contents. It records the firmware source, verified public
+source downloads, notice delivery, and final archive checks.
 
 ## Development admission and distribution gate
 
@@ -127,3 +132,81 @@ bytes. Ordinary HTTP-parity completion also requires all current operation,
 source, platform, durable-store and upgrade gates in the completion audit;
 historical offline qualification cannot close them. No native package is
 published by this change. Local manifest approval is not publisher authentication.
+
+## Prebuilt release procedure
+
+The manual [release workflow](../.github/workflows/smolbox-embedded-release.yml)
+builds Apple Silicon, Linux x86_64, and Linux ARM64 candidates on GitHub-hosted
+runners. It requires an explicit Git tag matching the Mix package version and
+an approved entry in the [release input catalog](release-inputs.json) for each
+target. Each entry pins the runtime archive, standalone offline demo, host tool
+package and installed executable. The shared entries pin the notices and source
+archive. Repeat the input review before changing a pin.
+
+The runtime input has one enclosing directory with `lib/`, `agent-rootfs/`,
+and the two `.ext4.zst` disk templates. The builder expands the templates,
+includes the verified notices, and checks that its `resize2fs` matches the
+reviewed path and digest. The installer checks the same values on the consumer
+host. List the supported host profiles and link the matching sources in the
+binary release notes.
+
+1. Configure deployment protections for the `embedded-port-release` GitHub
+   environment, then dispatch the workflow on the release tag.
+2. Keep the platform archives and their matching `.sigstore.jsonl`
+   bundles together. The workflow emits candidates as run artifacts. Release
+   assets use these same filenames and bytes.
+3. Qualify the release installation from a fresh standard account on each
+   target with current and minimum Elixir/OTP and without Rust on
+   `PATH`. Verify the public attestation and run the offline command through
+   cleanup. On macOS, leave Gatekeeper enabled and use the download method
+   from the quickstart.
+4. Record the exact tag, archive and manifest digests, host profiles, and
+   consumer results. Make Embedded Port the default quickstart after the
+   verified assets and the matching Hex package are available.
+
+### Local installation preview
+
+Local candidates built from native source at SmolBox commit `54618c8f` used
+the test-only tag `v0.5.0-rc.1` in the archive envelope. The installer checked
+an independently supplied archive digest after a loopback download. All four
+lanes ran without Rust on `PATH` in dedicated standard accounts. Elixir
+1.20.4 / OTP 29.0.6 and Elixir 1.18.4 / OTP 27.3.4.15 each printed `42`,
+deleted the disposable VM, and released the reservation.
+
+| Platform | Archive SHA-256 | Manifest SHA-256 | Test setup |
+| --- | --- | --- | --- |
+| Apple Silicon | `e1ddff59f352f73de24d469f8197a23676973ed5f361abc29a80cf6e43826978` | `3ed1158fb1a4fb2e6bdc377353702ac0ac615ed2b4cfbb45ea8a4d595eaa4ed0` | Ad-hoc signing and Gatekeeper enabled. |
+| Linux x86_64 | `41ab15a7a0034d3678b27b86b7e2ddf7bad335a51e27993dd8ad26fe24113846` | `cce85464c0bb235d14fc026fbdbbe7ca8ed1ec9a3503d926fc05710ba5b37590` | KVM lab with staged Hex dependencies for offline use. |
+
+The macOS input inventory matched all 404 regular guest-rootfs files, the
+versioned firmware library, MoltenVK, epoxy, and virglrenderer against the
+upstream 1.22.0 macOS archive. The packaged `libkrun.dylib` differed at the
+binary level. This comparison leaves corresponding-source and notice delivery
+open. Qualification of the tagged GitHub workflow, public attestation
+verification, and the final release assets is still pending.
+
+### Linux ARM64 Lima preview
+
+The Linux ARM64 preview ran in Ubuntu 24.04 under Lima on Apple Silicon,
+using nested KVM and Linux `6.8.0-147-generic`. The helper was built from the
+same unmodified SDK revision as the other targets. Runtime libraries and the
+agent rootfs came from the verified upstream `smolvm-1.22.0-linux-arm64.tar.gz`
+release asset. The offline Alpine fixture used the pinned OCI image and
+included the matching Linux ARM64 libraries inline. The bundle supplied the
+disk templates.
+
+| Input | SHA-256 |
+| --- | --- |
+| Upstream runtime archive | `069f34e4840313cf8fe163e0324c5f74756aa8296ee9238e46268e23ce5531a9` |
+| Alpine OCI image | `0a7ed0d449b9318548e66674610d757de19b7645759f74b587b610b59d6b43fd` |
+| Quickstart demo | `11ee6ae490cdc148d398a40aeda571c5fd2cfaf9d706faa4070741df3f08c0dd` |
+| Native manifest | `a9b6517b9176306c86e53494ba5f9c00a0c562c778461e4ad04fb6e551d9b4ee` |
+| Preview release archive | `6a05ffa4c6949ce70169221a20f8bcd29d8115f3996219bd967930de1997b368` |
+| Host `/sbin/resize2fs` | `e742981c302ad5efec590381e22910180447052f0b5eb6b999c16a4ca6da68d9` |
+
+Elixir 1.20.4 / OTP 29.0.6 and Elixir 1.18.4 / OTP 27.3.4.15 used separate
+standard accounts without Rust on `PATH`. Both installed the digest-verified
+preview archive, printed `42` in an offline guest, and released the VM and its
+reservation. Both SDK databases ended with zero VMs and create reservations.
+The evidence covers the local Embedded Port quickstart. Broader ARM64 feature
+qualification and the public release path remain separate.

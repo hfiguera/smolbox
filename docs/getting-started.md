@@ -24,6 +24,9 @@ This is a local demo with an in-memory store. See
 [Supported platforms](supported-platforms.md#host-prerequisites) for host
 requirements. Existing deployments should use [Upgrading SmolBox](upgrading.md).
 
+For local execution through a supervised helper, see the
+[Embedded Port quickstart preview](embedded-quickstart.md).
+
 ## Open the Livebook
 
 1. [Install Livebook locally](https://livebook.dev/#install) using the desktop app

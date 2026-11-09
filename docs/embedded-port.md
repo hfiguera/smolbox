@@ -571,9 +571,11 @@ the helper, libraries, root filesystem, disk templates and manifest. Consumers d
 not need Rust. Maintainers build it with `native/package.py` from the verified SDK
 source described in `native/vendor/source.json`.
 
-Qualified development hosts are Linux x86_64 with accessible `/dev/kvm` and macOS
-arm64 with the hypervisor entitlement. Prepare approved offline `.smolmachine`
-artifacts and the manifest's digest-pinned `resize2fs` tool. Preserve asset modes
+The [quickstart preview](embedded-quickstart.md) includes Linux ARM64 with
+accessible `/dev/kvm`, alongside Linux x86_64 and macOS ARM64. The broader
+feature evidence on this page applies to its recorded package and host.
+Prepare approved offline `.smolmachine` artifacts and the manifest's
+digest-pinned `resize2fs` tool. Preserve asset modes
 when extracting (`tar --same-permissions` on Linux). Install at a private absolute
 path. Approve the exact manifest digest and its complete identity tuple through
 your trusted release channel; computing a digest does not authenticate a publisher.

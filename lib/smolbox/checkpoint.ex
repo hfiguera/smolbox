@@ -52,6 +52,7 @@ defmodule SmolBox.Checkpoint do
          true <-
            {checkpoint.platform, checkpoint.architecture} in [
              {:linux, "x86_64"},
+             {:linux, "aarch64"},
              {:macos, "aarch64"}
            ],
          true <-
@@ -78,6 +79,11 @@ defmodule SmolBox.Checkpoint do
       "kind" => "checkpoint"
     }
   end
+
+  @doc false
+  def host_platform(%{platform: :linux, architecture: "x86_64"}), do: "linux/amd64"
+  def host_platform(%{platform: :linux, architecture: "aarch64"}), do: "linux/arm64"
+  def host_platform(%{platform: :macos, architecture: "aarch64"}), do: "darwin/arm64"
 
   @doc false
   @spec machine(t(), String.t()) :: {:ok, MachineSpec.t()} | {:error, Error.t()}
