@@ -9,6 +9,13 @@ use std::path::Path;
 
 pub const OBSERVATION_SCHEMA: u32 = 1;
 
+/// The pinned agent stores the canonical image reference as a cache filename.
+/// The caller supplies a validated digest-pinned registry reference.
+pub(crate) fn oci_manifest_cache_path(image: &str) -> String {
+    let key = smolvm_protocol::normalize_image_ref(image).replace(['/', ':', '@'], "_");
+    format!("/storage/manifests/{key}.json")
+}
+
 /// The pinned SDK transports launch failures as text. Keep the same narrow
 /// virtio bind-conflict classification as its public HTTP path, without
 /// publishing diagnostics or treating an unrelated conflict as a port error.
@@ -116,11 +123,11 @@ pub(crate) fn branch_deletion_cache(directory: &Path) -> Result<()> {
     }
 }
 
-/// A completed bare child can cold-start by extracting its approved pack into
-/// a private cache. Only the pinned bare layout is allowed here. In particular,
-/// SDK force_detach_layers_volume must find neither a mount nor lease state.
-/// Callers still require original collection and a canonical stopped row;
-/// unbooted/partial callers retain the stricter absent/link/empty predicate.
+/// A booted bare child can extract its approved pack into a private cache.
+/// Only the pinned bare layout is allowed here. In particular, the SDK detach
+/// path must find neither a mount nor a lease. Callers require original
+/// collection and a canonical stopped row at SDK deletion. Unbooted disposal
+/// retains the stricter absent/link/empty predicate.
 pub(crate) fn stopped_branch_deletion_cache(directory: &Path) -> Result<()> {
     unredirected(directory)?;
     let pack = directory.join("pack");

@@ -145,6 +145,16 @@ and machine image pulling have no matching per-request token field. They use
 upstream's guest registry configuration. Worker API credentials, registry
 credentials and workload secrets are separate mechanisms.
 
+Embedded Port qualification on Linux and macOS verified host-side static
+bearer rotation, OCI cold start with guest Basic credentials, and managed
+pulls using both Docker inline credentials and a Docker credential helper.
+Those checks used an isolated local fixture. Separate runs against private
+GHCR packages verified account Basic authentication under public TLS trust
+on both supported toolchains. The explicit `credential_ref` exchange still
+needs qualification with a publicly trusted token realm that accepts the
+resolver's bearer identity.
+[Local registry evidence](evidence/embedded-port-http-parity-registry-auth-ac6ac709.json) · [Private GHCR evidence](evidence/embedded-port-http-parity-private-ghcr-redirect-e03a29b0.json)
+
 ## Managed image operations
 
 Register the target OCI source in the assigned worker's `sources` independently

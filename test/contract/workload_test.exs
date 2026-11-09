@@ -82,7 +82,7 @@ defmodule SmolBox.ManagedWorkloadTest do
     [wire] = ManagedPeer.snapshot(fixture.peer).creations
     assert wire["cmd"] == ["app.py"] and wire["workdir"] == "/app"
     assert wire["env"] == [%{"name" => "APP", "value" => "private"}]
-    {:ok, _} = Machines.start(fixture.runtime, handle, created.version)
+    {:ok, _} = RuntimeFixture.request_machine(fixture.runtime, handle, &Machines.start/3)
     {:ok, running} = Machines.await(fixture.runtime, handle, 5000)
     assert running.state == :running
     stop_supervised!(Runtime)
@@ -93,14 +93,14 @@ defmodule SmolBox.ManagedWorkloadTest do
     {:ok, execution} = Machines.submit(runtime, handle, fixture.spec)
     assert {:ok, %{lines: ["agent ready"]}} = Machines.logs(runtime, handle)
     assert {:ok, %{state: :completed}} = SmolBox.await(runtime, execution, 5000)
-    idle = RuntimeFixture.await_idle(runtime, handle)
+    RuntimeFixture.await_idle(runtime, handle)
     assert {:ok, %{slots: 1}} = Memory.usage(fixture.store, "peer")
-    {:ok, _} = Machines.stop(runtime, handle, idle.version)
-    {:ok, stopped} = Machines.await(runtime, handle, 5000)
-    {:ok, _} = Machines.start(runtime, handle, stopped.version)
+    {:ok, _} = RuntimeFixture.request_machine(runtime, handle, &Machines.stop/3)
+    {:ok, %{state: :stopped}} = Machines.await(runtime, handle, 5000)
+    {:ok, _} = RuntimeFixture.request_machine(runtime, handle, &Machines.start/3)
     {:ok, restarted} = Machines.await(runtime, handle, 5000)
     assert restarted.spec.workload == spec.workload
-    {:ok, _} = Machines.delete(runtime, handle, restarted.version)
+    {:ok, _} = RuntimeFixture.request_machine(runtime, handle, &Machines.delete/3)
     {:ok, deleted} = Machines.await(runtime, handle, 5000)
     assert deleted.state == :deleted and deleted.spec.workload == spec.workload
     assert {:ok, %{slots: 0}} = Memory.usage(fixture.store, "peer")

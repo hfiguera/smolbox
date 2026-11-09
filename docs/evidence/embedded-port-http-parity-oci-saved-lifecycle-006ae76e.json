@@ -1,0 +1,359 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-11-06",
+  "source_commit": "006ae76e1d8b0f590ad5fcf7285fec731ddf2fd1",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "hex_archive_sha256": "c7ec86d77a3ae978ddaced92cd006e5e75855f05bc842edeccbc06ee26374fb3",
+  "qualification_workflow_sha256": "dd36f977c6ba927ea57cd0086a9e6735ce95a1135b533a62220d3b08fe7c449f",
+  "focused_elixir_checks_passed": 52,
+  "crash_validation_deferred": true,
+  "cli_race_validation_deferred": true,
+  "linux_current": {
+    "host": "linux-x86_64",
+    "toolchain_version": "Elixir 1.20.4 / OTP 29",
+    "report_sha256": "0b19794c22f3a6aaa599e4a272c5b21895afa784a2dbc876a9ab3e6f63a57111",
+    "status": "passed",
+    "evidence": {
+      "status": "passed",
+      "package_manifest_sha256": "06328244c299a4fb237b105ce532c8fd64427a2e7b6390118fd8a195fff9607f",
+      "durable": true,
+      "cases": [
+        {
+          "policy": "oci-hostname",
+          "cpus": 1,
+          "memory_mb": 512,
+          "deleted_and_released": true,
+          "published_port_count": 1,
+          "cycles": [
+            {
+              "dns": {
+                "approved_name_resolves": true,
+                "unapproved_name_blocked": true
+              },
+              "outbound_reached": [
+                false,
+                false
+              ],
+              "inbound_reply_verified": true
+            },
+            {
+              "dns": {
+                "approved_name_resolves": true,
+                "unapproved_name_blocked": true
+              },
+              "outbound_reached": [
+                false,
+                false
+              ],
+              "inbound_reply_verified": true
+            }
+          ],
+          "conflict_before_dispatch": true,
+          "retained_across_replacement": true
+        },
+        {
+          "policy": "oci-combined",
+          "cpus": 2,
+          "memory_mb": 640,
+          "deleted_and_released": true,
+          "published_port_count": 2,
+          "cycles": [
+            {
+              "dns": {
+                "approved_name_resolves": true,
+                "unapproved_name_blocked": true
+              },
+              "outbound_reached": [
+                true,
+                false
+              ],
+              "inbound_reply_verified": true
+            },
+            {
+              "dns": {
+                "approved_name_resolves": true,
+                "unapproved_name_blocked": true
+              },
+              "outbound_reached": [
+                true,
+                false
+              ],
+              "inbound_reply_verified": true
+            }
+          ],
+          "conflict_before_dispatch": true,
+          "retained_across_replacement": true
+        }
+      ],
+      "saved_state": {
+        "offline": true,
+        "no_published_ports": true,
+        "restored_guest_ready": true,
+        "stopped_runtime_replacement": true,
+        "disk_retained": true,
+        "ram_not_replayed": true,
+        "deleted_and_released": true
+      },
+      "checkpoint_network_and_ports_refused": true,
+      "zero_reservations": true,
+      "fixture_source_kind": "oci",
+      "offline_oci_rejected_before_dispatch": true,
+      "crash_validation_deferred": true,
+      "cli_race_validation_deferred": true
+    },
+    "postflight": {
+      "sdk_table_counts": {
+        "vms": 0,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "config": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0,
+        "fork_pools": 0,
+        "fork_pool_snapshots": 0,
+        "fork_pool_slots": 0,
+        "fork_leases": 0
+      },
+      "account_lock_available": true,
+      "postgresql_normal_stop": true
+    },
+    "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+    "toolchain": "current",
+    "hex_archive_sha256": "c7ec86d77a3ae978ddaced92cd006e5e75855f05bc842edeccbc06ee26374fb3",
+    "assets_verified": 806,
+    "without_rust": true,
+    "crash_validation_deferred": true
+  },
+  "linux_minimum": {
+    "host": "linux-x86_64",
+    "toolchain_version": "Elixir 1.18.4 / OTP 27",
+    "report_sha256": "607f35433fb76c2946223f3cade13cff7faee801e0042dfc619052088d7a0679",
+    "status": "passed",
+    "evidence": {
+      "status": "passed",
+      "package_manifest_sha256": "06328244c299a4fb237b105ce532c8fd64427a2e7b6390118fd8a195fff9607f",
+      "durable": true,
+      "cases": [
+        {
+          "policy": "oci-hostname",
+          "cpus": 1,
+          "memory_mb": 512,
+          "deleted_and_released": true,
+          "published_port_count": 1,
+          "cycles": [
+            {
+              "dns": {
+                "approved_name_resolves": true,
+                "unapproved_name_blocked": true
+              },
+              "outbound_reached": [
+                false,
+                false
+              ],
+              "inbound_reply_verified": true
+            },
+            {
+              "dns": {
+                "approved_name_resolves": true,
+                "unapproved_name_blocked": true
+              },
+              "outbound_reached": [
+                false,
+                false
+              ],
+              "inbound_reply_verified": true
+            }
+          ],
+          "conflict_before_dispatch": true,
+          "retained_across_replacement": true
+        },
+        {
+          "policy": "oci-combined",
+          "cpus": 2,
+          "memory_mb": 640,
+          "deleted_and_released": true,
+          "published_port_count": 2,
+          "cycles": [
+            {
+              "dns": {
+                "approved_name_resolves": true,
+                "unapproved_name_blocked": true
+              },
+              "outbound_reached": [
+                true,
+                false
+              ],
+              "inbound_reply_verified": true
+            },
+            {
+              "dns": {
+                "approved_name_resolves": true,
+                "unapproved_name_blocked": true
+              },
+              "outbound_reached": [
+                true,
+                false
+              ],
+              "inbound_reply_verified": true
+            }
+          ],
+          "conflict_before_dispatch": true,
+          "retained_across_replacement": true
+        }
+      ],
+      "saved_state": {
+        "offline": true,
+        "no_published_ports": true,
+        "restored_guest_ready": true,
+        "stopped_runtime_replacement": true,
+        "disk_retained": true,
+        "ram_not_replayed": true,
+        "deleted_and_released": true
+      },
+      "checkpoint_network_and_ports_refused": true,
+      "zero_reservations": true,
+      "fixture_source_kind": "oci",
+      "offline_oci_rejected_before_dispatch": true,
+      "crash_validation_deferred": true,
+      "cli_race_validation_deferred": true
+    },
+    "postflight": {
+      "sdk_table_counts": {
+        "vms": 0,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "config": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0,
+        "fork_pools": 0,
+        "fork_pool_snapshots": 0,
+        "fork_pool_slots": 0,
+        "fork_leases": 0
+      },
+      "account_lock_available": true,
+      "postgresql_normal_stop": true
+    },
+    "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+    "toolchain": "minimum",
+    "hex_archive_sha256": "c7ec86d77a3ae978ddaced92cd006e5e75855f05bc842edeccbc06ee26374fb3",
+    "assets_verified": 806,
+    "without_rust": true,
+    "crash_validation_deferred": true
+  },
+  "macos_minimum": {
+    "host": "macos-aarch64",
+    "toolchain_version": "Elixir 1.18.4 / OTP 27",
+    "report_sha256": "25ec5f387c2431f7f5bf3dc436ec909137eac495c0e140debcfca9210127a18a",
+    "status": "passed",
+    "evidence": {
+      "status": "passed",
+      "package_manifest_sha256": "28d07b9a209c856c4c734939afa3404539975c881a7a7c0e8b03102c08d58a3a",
+      "durable": true,
+      "cases": [
+        {
+          "policy": "oci-hostname",
+          "cpus": 1,
+          "memory_mb": 512,
+          "deleted_and_released": true,
+          "published_port_count": 1,
+          "cycles": [
+            {
+              "dns": {
+                "approved_name_resolves": true,
+                "unapproved_name_blocked": true
+              },
+              "outbound_reached": [
+                false,
+                false
+              ],
+              "inbound_reply_verified": true
+            },
+            {
+              "dns": {
+                "approved_name_resolves": true,
+                "unapproved_name_blocked": true
+              },
+              "outbound_reached": [
+                false,
+                false
+              ],
+              "inbound_reply_verified": true
+            }
+          ],
+          "conflict_before_dispatch": true,
+          "retained_across_replacement": true
+        },
+        {
+          "policy": "oci-combined",
+          "cpus": 2,
+          "memory_mb": 640,
+          "deleted_and_released": true,
+          "published_port_count": 2,
+          "cycles": [
+            {
+              "dns": {
+                "approved_name_resolves": true,
+                "unapproved_name_blocked": true
+              },
+              "outbound_reached": [
+                true,
+                false
+              ],
+              "inbound_reply_verified": true
+            },
+            {
+              "dns": {
+                "approved_name_resolves": true,
+                "unapproved_name_blocked": true
+              },
+              "outbound_reached": [
+                true,
+                false
+              ],
+              "inbound_reply_verified": true
+            }
+          ],
+          "conflict_before_dispatch": true,
+          "retained_across_replacement": true
+        }
+      ],
+      "saved_state": {
+        "offline": true,
+        "no_published_ports": true,
+        "restored_guest_ready": true,
+        "stopped_runtime_replacement": true,
+        "disk_retained": true,
+        "ram_not_replayed": true,
+        "deleted_and_released": true
+      },
+      "checkpoint_network_and_ports_refused": true,
+      "zero_reservations": true,
+      "fixture_source_kind": "oci",
+      "offline_oci_rejected_before_dispatch": true,
+      "crash_validation_deferred": true,
+      "cli_race_validation_deferred": true
+    },
+    "postflight": {
+      "sdk_table_counts": {
+        "vms": 0,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "config": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0,
+        "fork_pools": 0,
+        "fork_pool_snapshots": 0,
+        "fork_pool_slots": 0,
+        "fork_leases": 0
+      },
+      "account_lock_available": true,
+      "postgresql_normal_stop": true
+    },
+    "postgresql": "17.11 (Homebrew)",
+    "toolchain": "minimum",
+    "hex_archive_sha256": "c7ec86d77a3ae978ddaced92cd006e5e75855f05bc842edeccbc06ee26374fb3",
+    "assets_verified": 809,
+    "without_rust": true,
+    "crash_validation_deferred": true
+  }
+}

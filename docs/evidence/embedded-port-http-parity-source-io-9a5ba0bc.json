@@ -1,0 +1,337 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-11-07",
+  "source_commit": "9a5ba0bc",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "full_http_parity_claimed": false,
+  "distribution_approved": false,
+  "production_private_tls_deferred_by_operator": true,
+  "crash_validation_deferred": true,
+  "cli_race_validation_deferred": true,
+  "packages": {
+    "linux": {
+      "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+      "assets_sha256": "706c83d1a75e5ed5791da54bb4cfa6e80448302a3921b202a5d8c769868e3c15",
+      "platform": "linux",
+      "architecture": "x86_64"
+    },
+    "macos": {
+      "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+      "assets_sha256": "0c109ee5c9cc8f1681e5b8b83b06d6712041bd36f9eda9940a423b52c7be5b25",
+      "platform": "macos",
+      "architecture": "aarch64"
+    }
+  },
+  "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+  "client_archive_runtime_files_verified_against_commit": 354,
+  "toolchains": {
+    "current": {
+      "elixir": "1.20.4",
+      "otp": "29.0.6"
+    },
+    "minimum": {
+      "elixir": "1.18.4",
+      "otp": "27.3.4.15"
+    }
+  },
+  "checks_verified_in_each_passing_lane": [
+    "inventory_empty_created_running_stopped_deleted",
+    "receipt_free_inventory_and_owned_inspection",
+    "measurements_running_stopped_deleted",
+    "console_tail_follow_and_deleted_refusal",
+    "observations_preserved_reservations",
+    "buffered_stdin_stdout_stderr_exit",
+    "streaming_stdout_stderr_exit",
+    "binary_upload_and_download",
+    "path_and_file_budget_refusals",
+    "workerless_readback",
+    "zero_reservations",
+    "ordinary_shutdown"
+  ],
+  "focused_contracts": {
+    "current_passed": 38,
+    "minimum_passed": 38
+  },
+  "fixture_note": "Registry-prepared bare artifacts used digest-pinned anonymous loopback fixtures. Managed volumes are a Linux feature.",
+  "initial_registry_attempts": {
+    "reason": "The test profile omitted download permission for the upload staging directory. Spec validation refused dispatch.",
+    "corrected_in_qualification_fixture": true,
+    "owned_fixture_deleted_before_retry": true
+  },
+  "workflow_sha256": "ed1fab093ef349e7813ecf016b752191ec0e0931d290424d6104174e24f1a934",
+  "runner_sha256": "1ac5df659f071d2228c942de5f99a9a5fc0ecc2a674095342ef53102aafe9a4c",
+  "linux_evidence_archived_and_lab_stopped": true,
+  "live_results": {
+    "linux": [
+      {
+        "toolchain": "current",
+        "store": "postgresql",
+        "source": "registry",
+        "mounted": false,
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "prepared_receipt": {
+          "content_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+          "manifest_sha256": "7b45a3809c692738d72330c8d7703c398a2b2b4aa5d55efa6af36af222a35ec0"
+        }
+      },
+      {
+        "toolchain": "current",
+        "store": "postgresql",
+        "source": "registry-mounted",
+        "mounted": true,
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "prepared_receipt": {
+          "content_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+          "manifest_sha256": "7b45a3809c692738d72330c8d7703c398a2b2b4aa5d55efa6af36af222a35ec0"
+        }
+      },
+      {
+        "toolchain": "current",
+        "store": "postgresql",
+        "source": "local-mounted",
+        "mounted": true,
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)"
+      },
+      {
+        "toolchain": "current",
+        "store": "postgresql",
+        "source": "local",
+        "mounted": false,
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)"
+      },
+      {
+        "toolchain": "current",
+        "store": "postgresql",
+        "source": "oci-mounted",
+        "mounted": true,
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "oci_reference": "docker.io/library/alpine@sha256:3c81aa9a3d770b316568f4499e30461a5cd3fbd7180bd89e28e34894c7845832"
+      },
+      {
+        "toolchain": "minimum",
+        "store": "postgresql",
+        "source": "registry",
+        "mounted": false,
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "prepared_receipt": {
+          "content_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+          "manifest_sha256": "7b45a3809c692738d72330c8d7703c398a2b2b4aa5d55efa6af36af222a35ec0"
+        }
+      },
+      {
+        "toolchain": "minimum",
+        "store": "postgresql",
+        "source": "registry-mounted",
+        "mounted": true,
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "prepared_receipt": {
+          "content_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+          "manifest_sha256": "7b45a3809c692738d72330c8d7703c398a2b2b4aa5d55efa6af36af222a35ec0"
+        }
+      },
+      {
+        "toolchain": "minimum",
+        "store": "postgresql",
+        "source": "local-mounted",
+        "mounted": true,
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)"
+      },
+      {
+        "toolchain": "minimum",
+        "store": "postgresql",
+        "source": "local",
+        "mounted": false,
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)"
+      },
+      {
+        "toolchain": "minimum",
+        "store": "postgresql",
+        "source": "oci-mounted",
+        "mounted": true,
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "oci_reference": "docker.io/library/alpine@sha256:3c81aa9a3d770b316568f4499e30461a5cd3fbd7180bd89e28e34894c7845832"
+      },
+      {
+        "toolchain": "current",
+        "store": "memory",
+        "source": "registry",
+        "mounted": false,
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "prepared_receipt": {
+          "content_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+          "manifest_sha256": "7b45a3809c692738d72330c8d7703c398a2b2b4aa5d55efa6af36af222a35ec0"
+        }
+      },
+      {
+        "toolchain": "current",
+        "store": "memory",
+        "source": "registry-mounted",
+        "mounted": true,
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "prepared_receipt": {
+          "content_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+          "manifest_sha256": "7b45a3809c692738d72330c8d7703c398a2b2b4aa5d55efa6af36af222a35ec0"
+        }
+      },
+      {
+        "toolchain": "current",
+        "store": "memory",
+        "source": "local-mounted",
+        "mounted": true,
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1"
+      },
+      {
+        "toolchain": "current",
+        "store": "memory",
+        "source": "local",
+        "mounted": false,
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1"
+      },
+      {
+        "toolchain": "current",
+        "store": "memory",
+        "source": "oci-mounted",
+        "mounted": true,
+        "oci_reference": "docker.io/library/alpine@sha256:3c81aa9a3d770b316568f4499e30461a5cd3fbd7180bd89e28e34894c7845832"
+      },
+      {
+        "toolchain": "minimum",
+        "store": "memory",
+        "source": "registry",
+        "mounted": false,
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "prepared_receipt": {
+          "content_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+          "manifest_sha256": "7b45a3809c692738d72330c8d7703c398a2b2b4aa5d55efa6af36af222a35ec0"
+        }
+      },
+      {
+        "toolchain": "minimum",
+        "store": "memory",
+        "source": "registry-mounted",
+        "mounted": true,
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "prepared_receipt": {
+          "content_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+          "manifest_sha256": "7b45a3809c692738d72330c8d7703c398a2b2b4aa5d55efa6af36af222a35ec0"
+        }
+      },
+      {
+        "toolchain": "minimum",
+        "store": "memory",
+        "source": "local-mounted",
+        "mounted": true,
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1"
+      },
+      {
+        "toolchain": "minimum",
+        "store": "memory",
+        "source": "local",
+        "mounted": false,
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1"
+      },
+      {
+        "toolchain": "minimum",
+        "store": "memory",
+        "source": "oci-mounted",
+        "mounted": true,
+        "oci_reference": "docker.io/library/alpine@sha256:3c81aa9a3d770b316568f4499e30461a5cd3fbd7180bd89e28e34894c7845832"
+      }
+    ],
+    "macos": [
+      {
+        "toolchain": "current",
+        "store": "postgresql",
+        "source": "registry",
+        "mounted": false,
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "postgresql": "17.11 (Homebrew)",
+        "prepared_receipt": {
+          "content_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+          "manifest_sha256": "9ebdf3e81df8c4b457424820e199d845e2c870cee279933798f4289e81fd6fa7"
+        }
+      },
+      {
+        "toolchain": "current",
+        "store": "postgresql",
+        "source": "local",
+        "mounted": false,
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "postgresql": "17.11 (Homebrew)"
+      },
+      {
+        "toolchain": "minimum",
+        "store": "postgresql",
+        "source": "registry",
+        "mounted": false,
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "postgresql": "17.11 (Homebrew)",
+        "prepared_receipt": {
+          "content_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+          "manifest_sha256": "9ebdf3e81df8c4b457424820e199d845e2c870cee279933798f4289e81fd6fa7"
+        }
+      },
+      {
+        "toolchain": "minimum",
+        "store": "postgresql",
+        "source": "local",
+        "mounted": false,
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "postgresql": "17.11 (Homebrew)"
+      },
+      {
+        "toolchain": "current",
+        "store": "memory",
+        "source": "registry",
+        "mounted": false,
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "prepared_receipt": {
+          "content_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+          "manifest_sha256": "9ebdf3e81df8c4b457424820e199d845e2c870cee279933798f4289e81fd6fa7"
+        }
+      },
+      {
+        "toolchain": "current",
+        "store": "memory",
+        "source": "local",
+        "mounted": false,
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc"
+      },
+      {
+        "toolchain": "minimum",
+        "store": "memory",
+        "source": "registry",
+        "mounted": false,
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "prepared_receipt": {
+          "content_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+          "manifest_sha256": "9ebdf3e81df8c4b457424820e199d845e2c870cee279933798f4289e81fd6fa7"
+        }
+      },
+      {
+        "toolchain": "minimum",
+        "store": "memory",
+        "source": "local",
+        "mounted": false,
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc"
+      }
+    ]
+  },
+  "remaining_lanes": []
+}

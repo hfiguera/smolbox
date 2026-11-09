@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-11-06",
+  "source_base_commit": "dadef569",
+  "status": "unresolved-before-publication",
+  "host": "linux-x86_64",
+  "toolchain": "Elixir 1.20.4 / OTP 29",
+  "package_manifest_sha256": "06328244c299a4fb237b105ce532c8fd64427a2e7b6390118fd8a195fff9607f",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "fixture": "docker.io/library/busybox@sha256:66a6306db78bf2dbf3487f293aa8d6990d8e506fdffab9cc43fe422becf886e4",
+  "source_started_wrote_marker_and_stopped": true,
+  "retained_store_state": {
+    "exports": {
+      "ordinary": {
+        "state": "unknown",
+        "category": "unknown",
+        "operation": "export",
+        "evidence": "unknown"
+      }
+    },
+    "machine": "unknown"
+  },
+  "retained_native_stage": {
+    "schema": 8,
+    "phase": "preparing",
+    "sha256": "c187c896391e85e9552f802074cb250aacb89adf989a44fc2c531d8bde313830"
+  },
+  "read_only_cache_observation": {
+    "pinned_manifest_sha256": "66a6306db78bf2dbf3487f293aa8d6990d8e506fdffab9cc43fe422becf886e4",
+    "config_sha256": "30ecbe1509090b38ef3260f3609d64d8261230464eaa4d235901db496e9647fb",
+    "manifest_bytes": 610,
+    "config_bytes": 459,
+    "config_digest_and_length_match_manifest": true,
+    "manifest_layer_count": 1
+  },
+  "diagnosis": "Pinned SDK Query reports the config digest. The OCI export plan currently requires that value to equal the pinned platform manifest digest.",
+  "crash_validation_deferred": true,
+  "cli_race_validation_deferred": true
+}

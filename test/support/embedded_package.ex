@@ -79,6 +79,23 @@ defmodule SmolBox.Test.EmbeddedPackage do
     config
   end
 
+  def remove!(config), do: remove_tree!(config.package_path, 20)
+
+  defp remove_tree!(root, attempts) do
+    case File.rm_rf(root) do
+      {:ok, _removed} ->
+        :ok
+
+      # The helper may finish an atomic snapshot after its Port closes.
+      {:error, reason, _path} when reason in [:eexist, :enotempty] and attempts > 0 ->
+        Process.sleep(10)
+        remove_tree!(root, attempts - 1)
+
+      {:error, reason, path} ->
+        raise File.Error, reason: reason, action: "remove embedded test package", path: path
+    end
+  end
+
   def received(config), do: read_received(Path.join(config.package_path, "received.jsonl"), 20)
 
   defp read_received(path, retries) do
@@ -169,6 +186,7 @@ defmodule SmolBox.Test.EmbeddedPackage do
       "pull_error" => Keyword.get(options, :pull_error, false),
       "prepare_error" => Keyword.get(options, :prepare_error, false),
       "capture_transition" => options[:capture_transition],
+      "unreachable_after_start" => Keyword.get(options, :unreachable_after_start, false),
       "stop_no_change" => Keyword.get(options, :stop_no_change, false)
     }
     |> Map.merge(volume_metadata(options))

@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-11-06",
+  "status": "compatible-macos-stopped-helper-replacement-passed",
+  "source_commit": "0618e7cc",
+  "proof_scope": "raw Port retained stopped VM, not managed durable histories",
+  "upgrade": {
+    "from_manifest_sha256": "447d4d7eb7a461e5ea7a0492a8e619740a2378d666c3435d5088a98cf89101bb",
+    "to_manifest_sha256": "1fc30dba6d32965c89a02e38cfc34efdb6ddabf6edef786bd4f6344f4853c9ce",
+    "from_identity": {
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "aff740d6431bb5349f1ce13b9cc91a8465acfc7e7397e7ef381682a1438dba2d",
+      "assets_sha256": "ed7024042052055a66c50eb60d6446bc9bdacadf499941cd86c90130194c1d2e",
+      "platform": "macos",
+      "architecture": "aarch64"
+    },
+    "to_identity": {
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "9ccc23423dbf5c584c8dc3e89c82b0c57b4450e38ab22a4fa8ea199d8ed97c38",
+      "assets_sha256": "ed7024042052055a66c50eb60d6446bc9bdacadf499941cd86c90130194c1d2e",
+      "platform": "macos",
+      "architecture": "aarch64"
+    },
+    "retained_full_receipt": true,
+    "domain_generation_unchanged": true,
+    "old_assets_retained_during_upgrade": true,
+    "codec_rollback_qualified": false
+  },
+  "fixture_sha256": "0f4a26a548738c6ba359701ea23c5d2bbb93f0c1d95f6444df897bfa99e27aa2",
+  "retained_file_bytes": 1048593,
+  "retained_file_sha256": "b863256dee74effc15743dff63a34ea93bb1f6778b22f6c971469c259638dd41",
+  "new_epoch_and_exact_retained_data": true,
+  "owned_deleted": true,
+  "ordinary_observability_samples": 6,
+  "ordinary_terminal_preflight_samples": 5,
+  "proof_sha256": "f55420797789eb9917e5dc08c695be329ab51772e186fe658d13dada262df164",
+  "incompatible_preflight": {
+    "policy_mismatch_refused": true,
+    "native_owner_opened": false
+  },
+  "postflight": {
+    "sdk_tables": {
+      "vms": 0,
+      "vm_create_reservations": 0,
+      "vm_pause_operations": 0,
+      "config": 0,
+      "vm_resize_intents": 0,
+      "vm_resize_receipts": 0,
+      "fork_pools": 0,
+      "fork_pool_snapshots": 0,
+      "fork_pool_slots": 0,
+      "fork_leases": 0
+    },
+    "account_lock_available": true,
+    "verified_assets_per_package": 809
+  },
+  "crash_validation_deferred": true,
+  "full_http_parity_claimed": false,
+  "distribution_approved": false
+}

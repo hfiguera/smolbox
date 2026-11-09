@@ -166,25 +166,18 @@ impl Engine {
             let has_children = records
                 .iter()
                 .any(|child| child.golden.as_deref() == Some(record.name.as_str()));
-            let state = crate::identity::record_state(record, has_children);
-            let state = match state {
-                crate::ObservedState::Stopped => "stopped",
-                crate::ObservedState::Running => {
-                    let directory = self.vm_directory(&record.name);
-                    crate::host::unredirected(&directory)?;
-                    smolvm::agent::AgentClient::connect_for_state_probe(
-                        directory.join("agent.sock"),
-                    )
+            let state = inventory_state(record, has_children, || {
+                let directory = self.vm_directory(&record.name);
+                crate::host::unredirected(&directory)?;
+                smolvm::agent::AgentClient::connect_for_state_probe(directory.join("agent.sock"))
                     .and_then(|mut client| client.ping())
                     .map_err(|_| Error::before(ErrorCode::State))?;
-                    budget.check()?;
-                    if live_pid(record)?.is_none() {
-                        return Err(Error::before(ErrorCode::State));
-                    }
-                    "running"
+                budget.check()?;
+                if live_pid(record)?.is_none() {
+                    return Err(Error::before(ErrorCode::State));
                 }
-                _ => return Err(Error::before(ErrorCode::State)),
-            };
+                Ok(())
+            })?;
             let body = inventory_value(record, state)?;
             let encoded =
                 serde_json::to_vec(&body).map_err(|_| Error::before(ErrorCode::Native))?;
@@ -405,6 +398,24 @@ impl Engine {
     }
 }
 
+fn inventory_state(
+    record: &VmRecord,
+    has_children: bool,
+    probe_running: impl FnOnce() -> Result<()>,
+) -> Result<&'static str> {
+    match crate::identity::record_state(record, has_children) {
+        crate::ObservedState::Stopped => Ok("stopped"),
+        // A branch source can be intentionally frozen while its children run.
+        // Its guest agent cannot reply during this state.
+        crate::ObservedState::Frozen => Ok("frozen"),
+        crate::ObservedState::Running => {
+            probe_running()?;
+            Ok("running")
+        }
+        _ => Err(Error::before(ErrorCode::State)),
+    }
+}
+
 fn live_pid(record: &VmRecord) -> Result<Option<(i32, u64)>> {
     let Some(pid) = record.pid else {
         return Ok(None);
@@ -518,4 +529,21 @@ fn inventory_value(record: &VmRecord, state: &str) -> Result<serde_json::Value> 
         "gpu": record.gpu.unwrap_or(false), "cuda": record.cuda, "mounts": mounts,
         "ports": record.ports.iter().map(|(host, guest)| serde_json::json!({"host": host, "guest": guest})).collect::<Vec<_>>() }),
     )
+}
+
+#[cfg(test)]
+mod inventory_tests {
+    use super::*;
+
+    #[test]
+    fn a_frozen_source_is_included_without_probing_its_paused_agent() {
+        let source = VmRecord::new("source".into(), 1, 512, vec![], vec![], false);
+        let child = VmRecord::new("child".into(), 1, 512, vec![], vec![], false);
+        let probe = || panic!("unexpected guest probe");
+
+        let state = inventory_state(&source, true, probe).unwrap();
+        assert_eq!(inventory_value(&source, state).unwrap()["state"], "frozen");
+        assert_eq!(inventory_state(&child, false, probe).unwrap(), "stopped");
+        assert_eq!(inventory_state(&source, false, probe).unwrap(), "stopped");
+    }
 }

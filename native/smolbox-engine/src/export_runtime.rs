@@ -120,7 +120,9 @@ fn limit(name: &str, plan: &crate::ExportConversionBudget) -> Result<(u64, bool)
         "agent.config.json" | "boot-config.json" => (8 << 20, false),
         "agent-console.log" | "agent-startup-error.log" | "boot-debug.log" => (64 << 20, false),
         "vm.lock" => (0, false),
-        "agent.sock" | "agent.ready" => (4096, true),
+        // The SDK can leave the libkrun control endpoint in the original
+        // helper directory after collection, alongside its agent sockets.
+        "agent.sock" | "agent.ready" | "control.sock" => (4096, true),
         _ => return Err(Error::before(ErrorCode::Ownership)),
     })
 }

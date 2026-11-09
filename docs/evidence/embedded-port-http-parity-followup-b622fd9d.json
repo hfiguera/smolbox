@@ -1,0 +1,1545 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-11-07",
+  "base_commit": "b622fd9d",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_verified_unmodified_for_native_builds": true,
+  "full_http_parity_claimed": false,
+  "distribution_approved": false,
+  "production_private_tls_deferred_by_operator": true,
+  "crash_validation_deferred": true,
+  "cli_race_validation_deferred": true,
+  "toolchains": {
+    "current": {
+      "elixir": "1.20.4",
+      "otp": "29.0.6"
+    },
+    "minimum": {
+      "elixir": "1.18.4",
+      "otp": "27.3.4.15"
+    }
+  },
+  "macos_minimum_stopped_helper_upgrade": {
+    "original_attempt_preserved": true,
+    "original_child_store_state": "unknown",
+    "original_child_creation_receipt": false,
+    "original_child_native_boot_phase": "initializing",
+    "original_child_console_event_counts": {
+      "fork_resume": 0,
+      "fork_child": 1,
+      "identity_initialization": 2,
+      "agent_ready": 0,
+      "timeout": 0
+    },
+    "original_child_material_sha256": "b40091781b86dea0dc52482bd326c17893049f95926e5fb6dfacc09b663992ff",
+    "replacement_not_opened_in_original_attempt": true,
+    "exact_initialization_stall_cause_established": false,
+    "same_approved_package_pair_retried_on_clean_domain": {
+      "status": "passed",
+      "lane": "minimum",
+      "elixir": "1.18.4",
+      "otp": "27.3.4.15",
+      "hex_archive_sha256": "09afbb118f6ac264bf41b374856184e69f8930ac78f43225903954ae57f8e82d",
+      "prior_manifest_sha256": "28d07b9a209c856c4c734939afa3404539975c881a7a7c0e8b03102c08d58a3a",
+      "replacement_manifest_sha256": "ee13e2a4afff3cbbfa7cb8349353558e74a679982ec25ff0f5867df7be5b6f73",
+      "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+      "history": {
+        "mode": "postgres",
+        "completed_native_scan": true,
+        "original_generation_and_immutable_histories_preserved": true,
+        "helper_epoch_changed": true,
+        "persisted_draining_preserved": true,
+        "replacement_manifest_sha256": "ee13e2a4afff3cbbfa7cb8349353558e74a679982ec25ff0f5867df7be5b6f73",
+        "records_compared": 15,
+        "historical_backing_acknowledgements": 2,
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0,
+        "ordinary_shutdown": true,
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false
+      },
+      "postgresql": "17.11 (Homebrew)",
+      "postgresql_normal_stop": true,
+      "postflight": {
+        "sdk_table_counts": {
+          "vms": 0,
+          "vm_create_reservations": 0,
+          "vm_pause_operations": 0,
+          "config": 0,
+          "vm_resize_intents": 0,
+          "vm_resize_receipts": 0,
+          "fork_pools": 0,
+          "fork_pool_snapshots": 0,
+          "fork_pool_slots": 0,
+          "fork_leases": 0
+        },
+        "account_lock_available": true
+      }
+    }
+  },
+  "linux_packed_growth_resolution": {
+    "current": {
+      "evidence": {
+        "status": "passed",
+        "genuine_completed_native_resize": true,
+        "store_boundary_retained_unknown_after_verified_completion": true,
+        "public_resolution_requires_quiescence": true,
+        "recovered_same_native_transition": true,
+        "original_creation_and_reservation_retained": true,
+        "storage_gib": 2,
+        "overlay_gib": 3,
+        "resolved_history_survived_restart_and_delete": true,
+        "workerless_postgresql_readback_exact": true,
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gib": 0
+      },
+      "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+      "postgresql_normal_stop": true,
+      "empty_sdk_tables": 10,
+      "manifest_sha256": "51fef500f29463edc5924aa0413ae56ff55b10b474fba17e94406da2fff62242",
+      "verified_assets": 806,
+      "fixture_sha256": "691a2c6ab685c447ef64a47445825eb6fa51ccea64aaa37eb8a64ffbc727a780",
+      "archive_sha256": "09afbb118f6ac264bf41b374856184e69f8930ac78f43225903954ae57f8e82d",
+      "scratch_start_bytes": 3618193408,
+      "scratch_final_bytes": 3393667072
+    },
+    "minimum": {
+      "evidence": {
+        "status": "passed",
+        "genuine_completed_native_resize": true,
+        "store_boundary_retained_unknown_after_verified_completion": true,
+        "public_resolution_requires_quiescence": true,
+        "recovered_same_native_transition": true,
+        "original_creation_and_reservation_retained": true,
+        "storage_gib": 2,
+        "overlay_gib": 3,
+        "resolved_history_survived_restart_and_delete": true,
+        "workerless_postgresql_readback_exact": true,
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gib": 0
+      },
+      "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+      "postgresql_normal_stop": true,
+      "empty_sdk_tables": 10,
+      "manifest_sha256": "51fef500f29463edc5924aa0413ae56ff55b10b474fba17e94406da2fff62242",
+      "verified_assets": 806,
+      "fixture_sha256": "691a2c6ab685c447ef64a47445825eb6fa51ccea64aaa37eb8a64ffbc727a780",
+      "archive_sha256": "09afbb118f6ac264bf41b374856184e69f8930ac78f43225903954ae57f8e82d",
+      "scratch_start_bytes": 3392176128,
+      "scratch_final_bytes": 3390496768
+    }
+  },
+  "linux_entered_growth_publication": {
+    "qualification_helper_only": true,
+    "controlled_boundary": "After real resize and SDK database update, before journal completion.",
+    "operation_replayed": false,
+    "lanes": {
+      "current": {
+        "evidence": {
+          "status": "passed",
+          "genuine_completed_native_resize": true,
+          "native_reply_uncertain_with_entered_journal": true,
+          "entered_geometry_published_only_by_explicit_resolution": true,
+          "sdk_row_unchanged_by_qualification": true,
+          "public_resolution_requires_quiescence": true,
+          "retained_original_resize_request_and_published_one_transition": true,
+          "original_creation_and_reservation_retained": true,
+          "storage_gib": 2,
+          "overlay_gib": 3,
+          "resolved_history_survived_restart_and_delete": true,
+          "workerless_postgresql_readback_exact": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gib": 0
+        },
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "postgresql_normal_stop": true,
+        "empty_sdk_tables": 10,
+        "qualification_only_helper": true,
+        "manifest_sha256": "a8fc504e6432750cfe2324b2f84ee796aa5d8d5ad9d048dd0c415dc0c887e0d0",
+        "helper_sha256": "f26b7f9bdefbe3774c96bf2e1b101f740768dd37912a97f1e2ed819eb028100a",
+        "base_manifest_sha256": "49b5909d844070bb027370a9d8bfa47f2247a630bf099e91e886dce5d38e065b",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "archive_sha256": "09afbb118f6ac264bf41b374856184e69f8930ac78f43225903954ae57f8e82d",
+        "lane": "current",
+        "family": "entered"
+      },
+      "minimum": {
+        "evidence": {
+          "status": "passed",
+          "genuine_completed_native_resize": true,
+          "native_reply_uncertain_with_entered_journal": true,
+          "entered_geometry_published_only_by_explicit_resolution": true,
+          "sdk_row_unchanged_by_qualification": true,
+          "public_resolution_requires_quiescence": true,
+          "retained_original_resize_request_and_published_one_transition": true,
+          "original_creation_and_reservation_retained": true,
+          "storage_gib": 2,
+          "overlay_gib": 3,
+          "resolved_history_survived_restart_and_delete": true,
+          "workerless_postgresql_readback_exact": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gib": 0
+        },
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "postgresql_normal_stop": true,
+        "empty_sdk_tables": 10,
+        "qualification_only_helper": true,
+        "manifest_sha256": "a8fc504e6432750cfe2324b2f84ee796aa5d8d5ad9d048dd0c415dc0c887e0d0",
+        "helper_sha256": "f26b7f9bdefbe3774c96bf2e1b101f740768dd37912a97f1e2ed819eb028100a",
+        "base_manifest_sha256": "49b5909d844070bb027370a9d8bfa47f2247a630bf099e91e886dce5d38e065b",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "archive_sha256": "09afbb118f6ac264bf41b374856184e69f8930ac78f43225903954ae57f8e82d",
+        "lane": "minimum",
+        "family": "entered"
+      }
+    }
+  },
+  "linux_local_bare_managed_volumes": {
+    "baseline_manifest_sha256": "51fef500f29463edc5924aa0413ae56ff55b10b474fba17e94406da2fff62242",
+    "baseline_canonical_root_start_error": "admission_exhausted",
+    "cause": "Promoted mount lease already consumed the work budget, then bare start requested a second readiness lease.",
+    "fix": "Retain the promoted mount lease through the readiness check and reserve a separate relay only for unmounted start.",
+    "fixed_manifest_sha256": "49b5909d844070bb027370a9d8bfa47f2247a630bf099e91e886dce5d38e065b",
+    "fixed_native_identity": {
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "e00b41cdbb316a4283218df5c679285e3b61eaf604806130a95ec8bf539bb13d",
+      "assets_sha256": "706c83d1a75e5ed5791da54bb4cfa6e80448302a3921b202a5d8c769868e3c15",
+      "platform": "linux",
+      "architecture": "x86_64"
+    },
+    "lanes": {
+      "current": {
+        "evidence": {
+          "scope": "public-linux-mounted-runtime",
+          "identity": {
+            "architecture": "x86_64",
+            "assets_sha256": "706c83d1a75e5ed5791da54bb4cfa6e80448302a3921b202a5d8c769868e3c15",
+            "build_sha256": "e00b41cdbb316a4283218df5c679285e3b61eaf604806130a95ec8bf539bb13d",
+            "engine_version": "0.2.0",
+            "platform": "linux",
+            "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+            "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+          },
+          "phase": "single",
+          "package_manifest_sha256": "49b5909d844070bb027370a9d8bfa47f2247a630bf099e91e886dce5d38e065b",
+          "owned_deleted": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+          "worker_capacity": {
+            "slots": 2,
+            "cpus": 2,
+            "memory_mb": 1536,
+            "disk_gb": 10
+          },
+          "store_mode": "durable",
+          "deliberate_process_interruption": false,
+          "crash_handling_qualified": false,
+          "file_bytes": 65554,
+          "file_sha256": "25ac6018e1a86a5aa310d7cd70d12c517e89e42b33afb021d07ca3c0ce909638",
+          "readonly_reattachment": true,
+          "stopped_runtime_replacement": true,
+          "drain_retained": true,
+          "running_sibling_preserved": true,
+          "competing_attachment_rejected": true,
+          "volume_budget_rejected_before_dispatch": true,
+          "proof_retained": true
+        },
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "postgresql_normal_stop": true,
+        "empty_sdk_tables": 10,
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "archive_sha256": "09afbb118f6ac264bf41b374856184e69f8930ac78f43225903954ae57f8e82d",
+        "manifest_sha256": "49b5909d844070bb027370a9d8bfa47f2247a630bf099e91e886dce5d38e065b",
+        "scratch_start_bytes": 1278631936,
+        "scratch_final_bytes": 1140330496
+      },
+      "minimum": {
+        "evidence": {
+          "scope": "public-linux-mounted-runtime",
+          "identity": {
+            "architecture": "x86_64",
+            "assets_sha256": "706c83d1a75e5ed5791da54bb4cfa6e80448302a3921b202a5d8c769868e3c15",
+            "build_sha256": "e00b41cdbb316a4283218df5c679285e3b61eaf604806130a95ec8bf539bb13d",
+            "engine_version": "0.2.0",
+            "platform": "linux",
+            "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+            "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+          },
+          "phase": "single",
+          "package_manifest_sha256": "49b5909d844070bb027370a9d8bfa47f2247a630bf099e91e886dce5d38e065b",
+          "owned_deleted": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+          "worker_capacity": {
+            "cpus": 2,
+            "memory_mb": 1536,
+            "slots": 2,
+            "disk_gb": 10
+          },
+          "store_mode": "durable",
+          "deliberate_process_interruption": false,
+          "crash_handling_qualified": false,
+          "file_bytes": 65554,
+          "file_sha256": "25ac6018e1a86a5aa310d7cd70d12c517e89e42b33afb021d07ca3c0ce909638",
+          "readonly_reattachment": true,
+          "stopped_runtime_replacement": true,
+          "drain_retained": true,
+          "running_sibling_preserved": true,
+          "competing_attachment_rejected": true,
+          "volume_budget_rejected_before_dispatch": true,
+          "proof_retained": true
+        },
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "postgresql_normal_stop": true,
+        "empty_sdk_tables": 10,
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "archive_sha256": "09afbb118f6ac264bf41b374856184e69f8930ac78f43225903954ae57f8e82d",
+        "manifest_sha256": "49b5909d844070bb027370a9d8bfa47f2247a630bf099e91e886dce5d38e065b",
+        "scratch_start_bytes": 1138802688,
+        "scratch_final_bytes": 1119412224
+      }
+    }
+  },
+  "linux_durable_branch_recovery": {
+    "qualification_helper_only": true,
+    "boundary": "Ordinary cancellation after real SDK preparation and material publication or child boot.",
+    "public_controls": [
+      "publish_collected",
+      "resolve_deleted",
+      "collect_partial",
+      "dispose_partial",
+      "retire",
+      "release_backing"
+    ],
+    "lanes": {
+      "unbooted": {
+        "current": {
+          "evidence": {
+            "mode": "postgresql",
+            "campaign": "ordinary-public-durable-branch-recovery",
+            "actual_recovery_family": "unbooted",
+            "original_proof_retained": true,
+            "paired_retirement_and_release": true,
+            "final_reserved_slots": 0,
+            "final_reserved_disk_gb": 0,
+            "owned_cleanup": true,
+            "normal_shutdown": true,
+            "deliberate_process_interruption": false,
+            "crash_handling_qualified": false
+          },
+          "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+          "postgresql_normal_stop": true,
+          "empty_sdk_tables": 10,
+          "qualification_only_helper": true,
+          "manifest_sha256": "a8fc504e6432750cfe2324b2f84ee796aa5d8d5ad9d048dd0c415dc0c887e0d0",
+          "helper_sha256": "f26b7f9bdefbe3774c96bf2e1b101f740768dd37912a97f1e2ed819eb028100a",
+          "base_manifest_sha256": "49b5909d844070bb027370a9d8bfa47f2247a630bf099e91e886dce5d38e065b",
+          "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+          "archive_sha256": "09afbb118f6ac264bf41b374856184e69f8930ac78f43225903954ae57f8e82d",
+          "lane": "current",
+          "family": "unbooted"
+        },
+        "minimum": {
+          "evidence": {
+            "mode": "postgresql",
+            "campaign": "ordinary-public-durable-branch-recovery",
+            "actual_recovery_family": "unbooted",
+            "original_proof_retained": true,
+            "paired_retirement_and_release": true,
+            "final_reserved_slots": 0,
+            "final_reserved_disk_gb": 0,
+            "owned_cleanup": true,
+            "normal_shutdown": true,
+            "deliberate_process_interruption": false,
+            "crash_handling_qualified": false
+          },
+          "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+          "postgresql_normal_stop": true,
+          "empty_sdk_tables": 10,
+          "qualification_only_helper": true,
+          "manifest_sha256": "a8fc504e6432750cfe2324b2f84ee796aa5d8d5ad9d048dd0c415dc0c887e0d0",
+          "helper_sha256": "f26b7f9bdefbe3774c96bf2e1b101f740768dd37912a97f1e2ed819eb028100a",
+          "base_manifest_sha256": "49b5909d844070bb027370a9d8bfa47f2247a630bf099e91e886dce5d38e065b",
+          "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+          "archive_sha256": "09afbb118f6ac264bf41b374856184e69f8930ac78f43225903954ae57f8e82d",
+          "lane": "minimum",
+          "family": "unbooted"
+        }
+      },
+      "partial": {
+        "current": {
+          "evidence": {
+            "mode": "postgresql",
+            "campaign": "ordinary-public-durable-branch-recovery",
+            "actual_recovery_family": "partial",
+            "original_proof_retained": true,
+            "paired_retirement_and_release": true,
+            "final_reserved_slots": 0,
+            "final_reserved_disk_gb": 0,
+            "owned_cleanup": true,
+            "normal_shutdown": true,
+            "deliberate_process_interruption": false,
+            "crash_handling_qualified": false
+          },
+          "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+          "postgresql_normal_stop": true,
+          "empty_sdk_tables": 10,
+          "qualification_only_helper": true,
+          "manifest_sha256": "a8fc504e6432750cfe2324b2f84ee796aa5d8d5ad9d048dd0c415dc0c887e0d0",
+          "helper_sha256": "f26b7f9bdefbe3774c96bf2e1b101f740768dd37912a97f1e2ed819eb028100a",
+          "base_manifest_sha256": "49b5909d844070bb027370a9d8bfa47f2247a630bf099e91e886dce5d38e065b",
+          "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+          "archive_sha256": "09afbb118f6ac264bf41b374856184e69f8930ac78f43225903954ae57f8e82d",
+          "lane": "current",
+          "family": "partial"
+        },
+        "minimum": {
+          "evidence": {
+            "mode": "postgresql",
+            "campaign": "ordinary-public-durable-branch-recovery",
+            "actual_recovery_family": "partial",
+            "original_proof_retained": true,
+            "paired_retirement_and_release": true,
+            "final_reserved_slots": 0,
+            "final_reserved_disk_gb": 0,
+            "owned_cleanup": true,
+            "normal_shutdown": true,
+            "deliberate_process_interruption": false,
+            "crash_handling_qualified": false
+          },
+          "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+          "postgresql_normal_stop": true,
+          "empty_sdk_tables": 10,
+          "qualification_only_helper": true,
+          "manifest_sha256": "a8fc504e6432750cfe2324b2f84ee796aa5d8d5ad9d048dd0c415dc0c887e0d0",
+          "helper_sha256": "f26b7f9bdefbe3774c96bf2e1b101f740768dd37912a97f1e2ed819eb028100a",
+          "base_manifest_sha256": "49b5909d844070bb027370a9d8bfa47f2247a630bf099e91e886dce5d38e065b",
+          "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+          "archive_sha256": "09afbb118f6ac264bf41b374856184e69f8930ac78f43225903954ae57f8e82d",
+          "lane": "minimum",
+          "family": "partial"
+        }
+      }
+    }
+  },
+  "checkpoint_creation_observation": {
+    "fix": "Decode absence and unverified presence for the checkpoint creation inspection operation.",
+    "client_archive_sha256": "1501c12550cfaa644c8f7a597f333bb406898e6a9322a7b58b77859382c14d2e",
+    "macos": {
+      "current": {
+        "status": "passed",
+        "lane": "current",
+        "archive_sha256": "1501c12550cfaa644c8f7a597f333bb406898e6a9322a7b58b77859382c14d2e",
+        "fixture_sha256": "fe4eac20410328d13696ecb2d09478005b376a18d63cbb73888caf906e649350",
+        "manifest_sha256": "ee13e2a4afff3cbbfa7cb8349353558e74a679982ec25ff0f5867df7be5b6f73",
+        "postgresql": "17.11 (Homebrew)",
+        "postgresql_normal_stop": true,
+        "postflight": {
+          "sdk_table_counts": {
+            "vms": 0,
+            "vm_create_reservations": 0,
+            "vm_pause_operations": 0,
+            "config": 0,
+            "vm_resize_intents": 0,
+            "vm_resize_receipts": 0,
+            "fork_pools": 0,
+            "fork_pool_snapshots": 0,
+            "fork_pool_slots": 0,
+            "fork_leases": 0
+          },
+          "account_lock_available": true
+        },
+        "evidence": {
+          "status": "passed",
+          "oci": {
+            "streaming_stdout_stderr_and_exit": true,
+            "owned_and_unassigned_inspection": true,
+            "read_only_creation_inspection_and_absence": true,
+            "console_tail_bounded_follow_and_deleted_refusal": true,
+            "deleted_and_released": true,
+            "startup_entrypoint_arguments_environment_workdir": true,
+            "startup_counts": [
+              1,
+              2
+            ],
+            "custom_workdir_and_directional_file_roots": true,
+            "path_and_budget_rejections": true,
+            "buffered_stdin_stdout_stderr_and_exit": true,
+            "terminal_resize_output_exit_and_slot_release": true
+          },
+          "package_manifest_sha256": "ee13e2a4afff3cbbfa7cb8349353558e74a679982ec25ff0f5867df7be5b6f73",
+          "durable": true,
+          "saved_state": {
+            "default_path_binary_roundtrip": true,
+            "unsupported_pty_and_unapproved_cwd_refused": true,
+            "streaming_stdout_stderr_and_exit": true,
+            "measurements_running_stopped_deleted": true,
+            "owned_and_unassigned_inspection": true,
+            "read_only_creation_inspection_and_absence": true,
+            "console_tail_bounded_follow_and_deleted_refusal": true,
+            "deleted_and_released": true
+          },
+          "zero_reservations": true,
+          "fixture_source_kind": "oci",
+          "crash_validation_deferred": true,
+          "cli_race_validation_deferred": true
+        }
+      },
+      "minimum": {
+        "status": "passed",
+        "lane": "minimum",
+        "archive_sha256": "1501c12550cfaa644c8f7a597f333bb406898e6a9322a7b58b77859382c14d2e",
+        "fixture_sha256": "fe4eac20410328d13696ecb2d09478005b376a18d63cbb73888caf906e649350",
+        "manifest_sha256": "ee13e2a4afff3cbbfa7cb8349353558e74a679982ec25ff0f5867df7be5b6f73",
+        "postgresql": "17.11 (Homebrew)",
+        "postgresql_normal_stop": true,
+        "postflight": {
+          "sdk_table_counts": {
+            "vms": 0,
+            "vm_create_reservations": 0,
+            "vm_pause_operations": 0,
+            "config": 0,
+            "vm_resize_intents": 0,
+            "vm_resize_receipts": 0,
+            "fork_pools": 0,
+            "fork_pool_snapshots": 0,
+            "fork_pool_slots": 0,
+            "fork_leases": 0
+          },
+          "account_lock_available": true
+        },
+        "evidence": {
+          "status": "passed",
+          "oci": {
+            "streaming_stdout_stderr_and_exit": true,
+            "owned_and_unassigned_inspection": true,
+            "read_only_creation_inspection_and_absence": true,
+            "console_tail_bounded_follow_and_deleted_refusal": true,
+            "deleted_and_released": true,
+            "startup_entrypoint_arguments_environment_workdir": true,
+            "startup_counts": [
+              1,
+              2
+            ],
+            "custom_workdir_and_directional_file_roots": true,
+            "path_and_budget_rejections": true,
+            "buffered_stdin_stdout_stderr_and_exit": true,
+            "terminal_resize_output_exit_and_slot_release": true
+          },
+          "package_manifest_sha256": "ee13e2a4afff3cbbfa7cb8349353558e74a679982ec25ff0f5867df7be5b6f73",
+          "durable": true,
+          "saved_state": {
+            "default_path_binary_roundtrip": true,
+            "unsupported_pty_and_unapproved_cwd_refused": true,
+            "streaming_stdout_stderr_and_exit": true,
+            "measurements_running_stopped_deleted": true,
+            "owned_and_unassigned_inspection": true,
+            "read_only_creation_inspection_and_absence": true,
+            "console_tail_bounded_follow_and_deleted_refusal": true,
+            "deleted_and_released": true
+          },
+          "zero_reservations": true,
+          "fixture_source_kind": "oci",
+          "crash_validation_deferred": true,
+          "cli_race_validation_deferred": true
+        }
+      }
+    },
+    "linux": {
+      "current": {
+        "status": "passed",
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "archive_sha256": "1501c12550cfaa644c8f7a597f333bb406898e6a9322a7b58b77859382c14d2e",
+        "empty_sdk_tables": 10,
+        "postgres_normal_stop": true,
+        "fixture_sha256": "88b7171fc87edf17368bab2ae80652a673361c299b1035f053eda3863d8caedd",
+        "manifest_sha256": "49b5909d844070bb027370a9d8bfa47f2247a630bf099e91e886dce5d38e065b",
+        "evidence": {
+          "status": "passed",
+          "oci": {
+            "streaming_stdout_stderr_and_exit": true,
+            "owned_and_unassigned_inspection": true,
+            "read_only_creation_inspection_and_absence": true,
+            "console_tail_bounded_follow_and_deleted_refusal": true,
+            "deleted_and_released": true,
+            "startup_entrypoint_arguments_environment_workdir": true,
+            "startup_counts": [
+              1,
+              2
+            ],
+            "custom_workdir_and_directional_file_roots": true,
+            "path_and_budget_rejections": true,
+            "buffered_stdin_stdout_stderr_and_exit": true,
+            "terminal_resize_output_exit_and_slot_release": true
+          },
+          "package_manifest_sha256": "49b5909d844070bb027370a9d8bfa47f2247a630bf099e91e886dce5d38e065b",
+          "durable": true,
+          "saved_state": {
+            "default_path_binary_roundtrip": true,
+            "unsupported_pty_and_unapproved_cwd_refused": true,
+            "streaming_stdout_stderr_and_exit": true,
+            "measurements_running_stopped_deleted": true,
+            "owned_and_unassigned_inspection": true,
+            "read_only_creation_inspection_and_absence": true,
+            "console_tail_bounded_follow_and_deleted_refusal": true,
+            "deleted_and_released": true
+          },
+          "zero_reservations": true,
+          "fixture_source_kind": "oci",
+          "crash_validation_deferred": true,
+          "cli_race_validation_deferred": true
+        }
+      },
+      "minimum": {
+        "status": "passed",
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "archive_sha256": "1501c12550cfaa644c8f7a597f333bb406898e6a9322a7b58b77859382c14d2e",
+        "empty_sdk_tables": 10,
+        "postgres_normal_stop": true,
+        "fixture_sha256": "88b7171fc87edf17368bab2ae80652a673361c299b1035f053eda3863d8caedd",
+        "manifest_sha256": "49b5909d844070bb027370a9d8bfa47f2247a630bf099e91e886dce5d38e065b",
+        "evidence": {
+          "status": "passed",
+          "oci": {
+            "streaming_stdout_stderr_and_exit": true,
+            "owned_and_unassigned_inspection": true,
+            "read_only_creation_inspection_and_absence": true,
+            "console_tail_bounded_follow_and_deleted_refusal": true,
+            "deleted_and_released": true,
+            "startup_entrypoint_arguments_environment_workdir": true,
+            "startup_counts": [
+              1,
+              2
+            ],
+            "custom_workdir_and_directional_file_roots": true,
+            "path_and_budget_rejections": true,
+            "buffered_stdin_stdout_stderr_and_exit": true,
+            "terminal_resize_output_exit_and_slot_release": true
+          },
+          "package_manifest_sha256": "49b5909d844070bb027370a9d8bfa47f2247a630bf099e91e886dce5d38e065b",
+          "durable": true,
+          "saved_state": {
+            "default_path_binary_roundtrip": true,
+            "unsupported_pty_and_unapproved_cwd_refused": true,
+            "streaming_stdout_stderr_and_exit": true,
+            "measurements_running_stopped_deleted": true,
+            "owned_and_unassigned_inspection": true,
+            "read_only_creation_inspection_and_absence": true,
+            "console_tail_bounded_follow_and_deleted_refusal": true,
+            "deleted_and_released": true
+          },
+          "zero_reservations": true,
+          "fixture_source_kind": "oci",
+          "crash_validation_deferred": true,
+          "cli_race_validation_deferred": true
+        },
+        "postflight_lock_verified_after_normal_helper_collection": true
+      }
+    }
+  },
+  "test_results": {
+    "selected_elixir_models_passed_per_toolchain": 1013,
+    "checkpoint_source_wire_and_coverage_tests_passed_per_toolchain": 14,
+    "final_checkpoint_source_coverage_export_network_and_terminal_tests_passed_per_toolchain": 89,
+    "focused_rust_mount_admission_and_explicit_growth_tests_passed": 5,
+    "rust_test_fixture_umask": "077",
+    "http_contracts_and_coverage_tests_passed_per_toolchain": 417,
+    "focused_terminal_models_passed_per_toolchain": 16,
+    "initial_current_contract_sweep_observer_timeout_repassed_at_lower_concurrency": true
+  },
+  "linux_parked_attempts": {
+    "preserved_in_private_lab_custody": true,
+    "checksummed_native_files_and_postgresql_dumps": true,
+    "deliberate_process_interruption": false
+  },
+  "linux_durable_two_port_local_packed": {
+    "current": {
+      "status": "passed",
+      "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+      "archive_sha256": "1501c12550cfaa644c8f7a597f333bb406898e6a9322a7b58b77859382c14d2e",
+      "empty_sdk_tables": 10,
+      "postgres_normal_stop": true,
+      "fixture_sha256": "691a2c6ab685c447ef64a47445825eb6fa51ccea64aaa37eb8a64ffbc727a780",
+      "manifest_sha256": "49b5909d844070bb027370a9d8bfa47f2247a630bf099e91e886dce5d38e065b",
+      "evidence": {
+        "status": "passed",
+        "offline": true,
+        "direct_pack": true,
+        "published_ports": 2,
+        "distinct_guest_ports": true,
+        "forwarded_responses_both_cycles": true,
+        "durable_reservation_across_restart_and_replacement": true,
+        "duplicate_idempotent": true,
+        "conflict_refused_before_dispatch": true,
+        "final_inventory_empty": true,
+        "workerless_readback_exact": true,
+        "zero_reservations": true
+      }
+    },
+    "minimum": {
+      "status": "passed",
+      "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+      "archive_sha256": "1501c12550cfaa644c8f7a597f333bb406898e6a9322a7b58b77859382c14d2e",
+      "empty_sdk_tables": 10,
+      "postgres_normal_stop": true,
+      "fixture_sha256": "691a2c6ab685c447ef64a47445825eb6fa51ccea64aaa37eb8a64ffbc727a780",
+      "manifest_sha256": "49b5909d844070bb027370a9d8bfa47f2247a630bf099e91e886dce5d38e065b",
+      "evidence": {
+        "status": "passed",
+        "offline": true,
+        "direct_pack": true,
+        "published_ports": 2,
+        "distinct_guest_ports": true,
+        "forwarded_responses_both_cycles": true,
+        "durable_reservation_across_restart_and_replacement": true,
+        "duplicate_idempotent": true,
+        "conflict_refused_before_dispatch": true,
+        "final_inventory_empty": true,
+        "workerless_readback_exact": true,
+        "zero_reservations": true
+      }
+    }
+  },
+  "linux_prepared_registry_volumes": {
+    "current": {
+      "status": "passed",
+      "manifest_sha256": "49b5909d844070bb027370a9d8bfa47f2247a630bf099e91e886dce5d38e065b",
+      "archive_sha256": "1501c12550cfaa644c8f7a597f333bb406898e6a9322a7b58b77859382c14d2e",
+      "source": "digest-pinned-loopback-prepared-bare",
+      "content_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+      "registry_manifest_sha256": "7b45a3809c692738d72330c8d7703c398a2b2b4aa5d55efa6af36af222a35ec0",
+      "verified_preparation_receipt": true,
+      "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+      "postgresql_normal_stop": true,
+      "empty_sdk_tables": 10,
+      "workflow": {
+        "scope": "public-linux-mounted-runtime",
+        "identity": {
+          "architecture": "x86_64",
+          "assets_sha256": "706c83d1a75e5ed5791da54bb4cfa6e80448302a3921b202a5d8c769868e3c15",
+          "build_sha256": "e00b41cdbb316a4283218df5c679285e3b61eaf604806130a95ec8bf539bb13d",
+          "engine_version": "0.2.0",
+          "platform": "linux",
+          "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+          "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+        },
+        "phase": "single",
+        "package_manifest_sha256": "49b5909d844070bb027370a9d8bfa47f2247a630bf099e91e886dce5d38e065b",
+        "owned_deleted": true,
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0,
+        "fixture_sha256": "7b45a3809c692738d72330c8d7703c398a2b2b4aa5d55efa6af36af222a35ec0",
+        "worker_capacity": {
+          "slots": 2,
+          "cpus": 2,
+          "memory_mb": 1536,
+          "disk_gb": 10
+        },
+        "store_mode": "durable",
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false,
+        "file_bytes": 65554,
+        "file_sha256": "25ac6018e1a86a5aa310d7cd70d12c517e89e42b33afb021d07ca3c0ce909638",
+        "readonly_reattachment": true,
+        "stopped_runtime_replacement": true,
+        "drain_retained": true,
+        "running_sibling_preserved": true,
+        "competing_attachment_rejected": true,
+        "volume_budget_rejected_before_dispatch": true,
+        "proof_retained": true
+      }
+    },
+    "minimum": {
+      "status": "passed",
+      "manifest_sha256": "49b5909d844070bb027370a9d8bfa47f2247a630bf099e91e886dce5d38e065b",
+      "archive_sha256": "1501c12550cfaa644c8f7a597f333bb406898e6a9322a7b58b77859382c14d2e",
+      "source": "digest-pinned-loopback-prepared-bare",
+      "content_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+      "registry_manifest_sha256": "7b45a3809c692738d72330c8d7703c398a2b2b4aa5d55efa6af36af222a35ec0",
+      "verified_preparation_receipt": true,
+      "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+      "postgresql_normal_stop": true,
+      "empty_sdk_tables": 10,
+      "workflow": {
+        "scope": "public-linux-mounted-runtime",
+        "identity": {
+          "architecture": "x86_64",
+          "assets_sha256": "706c83d1a75e5ed5791da54bb4cfa6e80448302a3921b202a5d8c769868e3c15",
+          "build_sha256": "e00b41cdbb316a4283218df5c679285e3b61eaf604806130a95ec8bf539bb13d",
+          "engine_version": "0.2.0",
+          "platform": "linux",
+          "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+          "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+        },
+        "phase": "single",
+        "package_manifest_sha256": "49b5909d844070bb027370a9d8bfa47f2247a630bf099e91e886dce5d38e065b",
+        "owned_deleted": true,
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0,
+        "fixture_sha256": "7b45a3809c692738d72330c8d7703c398a2b2b4aa5d55efa6af36af222a35ec0",
+        "worker_capacity": {
+          "cpus": 2,
+          "memory_mb": 1536,
+          "slots": 2,
+          "disk_gb": 10
+        },
+        "store_mode": "durable",
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false,
+        "file_bytes": 65554,
+        "file_sha256": "25ac6018e1a86a5aa310d7cd70d12c517e89e42b33afb021d07ca3c0ce909638",
+        "readonly_reattachment": true,
+        "stopped_runtime_replacement": true,
+        "drain_retained": true,
+        "running_sibling_preserved": true,
+        "competing_attachment_rejected": true,
+        "volume_budget_rejected_before_dispatch": true,
+        "proof_retained": true
+      }
+    }
+  },
+  "oci_export_larger_source_reservation": {
+    "linux": {
+      "current": {
+        "status": "passed",
+        "manifest_sha256": "49b5909d844070bb027370a9d8bfa47f2247a630bf099e91e886dce5d38e065b",
+        "archive_sha256": "1501c12550cfaa644c8f7a597f333bb406898e6a9322a7b58b77859382c14d2e",
+        "loopback_authenticated_writes_anonymous_reads": true,
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "postgresql_normal_stop": true,
+        "empty_sdk_tables": 10,
+        "verified_digest": "1a81589ac925084c4c99e49709f2d31ad38ca8748037f2580d64b8c2bf758264",
+        "registry_request_counts": {
+          "heads": 5,
+          "uploads": 2,
+          "chunks": 30,
+          "blobs": 2,
+          "manifests": 3,
+          "reads": 11,
+          "rejected": 0
+        },
+        "workflow": {
+          "mode": "oci",
+          "store": "postgresql",
+          "final_reserved_slots": 0,
+          "crash_validation_deferred": true,
+          "content_sha256": "1a81589ac925084c4c99e49709f2d31ad38ca8748037f2580d64b8c2bf758264",
+          "source_reservation": {
+            "slots": 1,
+            "cpus": 2,
+            "memory_mb": 896,
+            "disk_gb": 5
+          },
+          "package_manifest_sha256": "49b5909d844070bb027370a9d8bfa47f2247a630bf099e91e886dce5d38e065b",
+          "runtime_replacement": true,
+          "native_cleanup_resolved": true,
+          "export_history_after_delete": true,
+          "pinned_registry_reimport": true,
+          "source_and_copy_independent": true,
+          "manifest_sha256": "6999376dbda9f9e1839b4b792b7b78a8dc74fd4db93052d7344998242db1bdce",
+          "size_bytes": 29508640,
+          "source_storage_gib": 3,
+          "source_overlay_gib": 2,
+          "reservation_during_publication": {
+            "slots": 2,
+            "cpus": 6,
+            "memory_mb": 2048,
+            "disk_gb": 74
+          },
+          "released_by_resolution": {
+            "slots": 1,
+            "cpus": 4,
+            "memory_mb": 1152,
+            "disk_gb": 69
+          }
+        },
+        "durable_readback": {
+          "exact_machine_records": 2,
+          "exact_completed_export_receipt": true,
+          "native_workers": 0,
+          "final_reserved_slots": 0,
+          "crash_validation_deferred": true
+        }
+      },
+      "minimum": {
+        "status": "passed",
+        "manifest_sha256": "49b5909d844070bb027370a9d8bfa47f2247a630bf099e91e886dce5d38e065b",
+        "archive_sha256": "1501c12550cfaa644c8f7a597f333bb406898e6a9322a7b58b77859382c14d2e",
+        "loopback_authenticated_writes_anonymous_reads": true,
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "postgresql_normal_stop": true,
+        "empty_sdk_tables": 10,
+        "verified_digest": "e107abba11da39726c9980173cbfff69c83f5a186417ef0d2743175b622544e6",
+        "registry_request_counts": {
+          "heads": 5,
+          "uploads": 2,
+          "chunks": 30,
+          "blobs": 2,
+          "manifests": 3,
+          "reads": 11,
+          "rejected": 0
+        },
+        "workflow": {
+          "mode": "oci",
+          "store": "postgresql",
+          "final_reserved_slots": 0,
+          "crash_validation_deferred": true,
+          "content_sha256": "e107abba11da39726c9980173cbfff69c83f5a186417ef0d2743175b622544e6",
+          "source_reservation": {
+            "slots": 1,
+            "cpus": 2,
+            "memory_mb": 896,
+            "disk_gb": 5
+          },
+          "package_manifest_sha256": "49b5909d844070bb027370a9d8bfa47f2247a630bf099e91e886dce5d38e065b",
+          "runtime_replacement": true,
+          "native_cleanup_resolved": true,
+          "export_history_after_delete": true,
+          "pinned_registry_reimport": true,
+          "source_and_copy_independent": true,
+          "manifest_sha256": "a0982d2072afb9777256c5b5235bab70799ab5a9877f8fc7bbb50d9399ea3672",
+          "size_bytes": 29508635,
+          "source_storage_gib": 3,
+          "source_overlay_gib": 2,
+          "reservation_during_publication": {
+            "slots": 2,
+            "cpus": 6,
+            "memory_mb": 2048,
+            "disk_gb": 74
+          },
+          "released_by_resolution": {
+            "slots": 1,
+            "cpus": 4,
+            "memory_mb": 1152,
+            "disk_gb": 69
+          }
+        },
+        "durable_readback": {
+          "exact_machine_records": 2,
+          "exact_completed_export_receipt": true,
+          "native_workers": 0,
+          "final_reserved_slots": 0,
+          "crash_validation_deferred": true
+        }
+      }
+    },
+    "macos": {
+      "current": {
+        "status": "passed",
+        "lane": "current",
+        "archive_sha256": "1501c12550cfaa644c8f7a597f333bb406898e6a9322a7b58b77859382c14d2e",
+        "manifest_sha256": "ee13e2a4afff3cbbfa7cb8349353558e74a679982ec25ff0f5867df7be5b6f73",
+        "postgresql": "17.11 (Homebrew)",
+        "postgresql_normal_stop": true,
+        "postflight": {
+          "sdk_table_counts": {
+            "vms": 0,
+            "vm_create_reservations": 0,
+            "vm_pause_operations": 0,
+            "config": 0,
+            "vm_resize_intents": 0,
+            "vm_resize_receipts": 0,
+            "fork_pools": 0,
+            "fork_pool_snapshots": 0,
+            "fork_pool_slots": 0,
+            "fork_leases": 0
+          },
+          "account_lock_available": true
+        },
+        "verified_digest": "5c34a2f95ad015ab52aa8bb0a60972d43a43e382aa071a696c0e5215b7a78795",
+        "loopback_authenticated_writes_anonymous_reads": true,
+        "registry_request_counts": {
+          "heads": 5,
+          "uploads": 2,
+          "chunks": 28,
+          "blobs": 2,
+          "manifests": 3,
+          "reads": 11,
+          "rejected": 0
+        },
+        "workflow": {
+          "mode": "oci",
+          "store": "postgresql",
+          "final_reserved_slots": 0,
+          "crash_validation_deferred": true,
+          "content_sha256": "5c34a2f95ad015ab52aa8bb0a60972d43a43e382aa071a696c0e5215b7a78795",
+          "source_reservation": {
+            "slots": 1,
+            "cpus": 2,
+            "memory_mb": 896,
+            "disk_gb": 5
+          },
+          "package_manifest_sha256": "ee13e2a4afff3cbbfa7cb8349353558e74a679982ec25ff0f5867df7be5b6f73",
+          "runtime_replacement": true,
+          "native_cleanup_resolved": true,
+          "export_history_after_delete": true,
+          "pinned_registry_reimport": true,
+          "source_and_copy_independent": true,
+          "manifest_sha256": "51e8f3426bba4e97985372eed3cf8693aa03f4425329b305c6badfc71d8eeddc",
+          "size_bytes": 27733694,
+          "source_storage_gib": 3,
+          "source_overlay_gib": 2,
+          "reservation_during_publication": {
+            "slots": 2,
+            "cpus": 6,
+            "memory_mb": 2048,
+            "disk_gb": 74
+          },
+          "released_by_resolution": {
+            "slots": 1,
+            "cpus": 4,
+            "memory_mb": 1152,
+            "disk_gb": 69
+          }
+        },
+        "durable_readback": {
+          "exact_machine_records": 2,
+          "exact_completed_export_receipt": true,
+          "native_workers": 0,
+          "final_reserved_slots": 0,
+          "crash_validation_deferred": true
+        }
+      },
+      "minimum": {
+        "status": "passed",
+        "lane": "minimum",
+        "archive_sha256": "1501c12550cfaa644c8f7a597f333bb406898e6a9322a7b58b77859382c14d2e",
+        "manifest_sha256": "ee13e2a4afff3cbbfa7cb8349353558e74a679982ec25ff0f5867df7be5b6f73",
+        "postgresql": "17.11 (Homebrew)",
+        "postgresql_normal_stop": true,
+        "postflight": {
+          "sdk_table_counts": {
+            "vms": 0,
+            "vm_create_reservations": 0,
+            "vm_pause_operations": 0,
+            "config": 0,
+            "vm_resize_intents": 0,
+            "vm_resize_receipts": 0,
+            "fork_pools": 0,
+            "fork_pool_snapshots": 0,
+            "fork_pool_slots": 0,
+            "fork_leases": 0
+          },
+          "account_lock_available": true
+        },
+        "verified_digest": "d7d56340941e9c7833e3d27ae6fbf6027cd7a98bac2b342f15d806c4a3685b74",
+        "loopback_authenticated_writes_anonymous_reads": true,
+        "registry_request_counts": {
+          "heads": 5,
+          "uploads": 2,
+          "chunks": 28,
+          "blobs": 2,
+          "manifests": 3,
+          "reads": 11,
+          "rejected": 0
+        },
+        "workflow": {
+          "mode": "oci",
+          "store": "postgresql",
+          "final_reserved_slots": 0,
+          "crash_validation_deferred": true,
+          "content_sha256": "d7d56340941e9c7833e3d27ae6fbf6027cd7a98bac2b342f15d806c4a3685b74",
+          "source_reservation": {
+            "slots": 1,
+            "cpus": 2,
+            "memory_mb": 896,
+            "disk_gb": 5
+          },
+          "package_manifest_sha256": "ee13e2a4afff3cbbfa7cb8349353558e74a679982ec25ff0f5867df7be5b6f73",
+          "runtime_replacement": true,
+          "native_cleanup_resolved": true,
+          "export_history_after_delete": true,
+          "pinned_registry_reimport": true,
+          "source_and_copy_independent": true,
+          "manifest_sha256": "49b56685a5712ac646f403adb32dd46d0c4b84baab85958365efe954d4e3bece",
+          "size_bytes": 27733684,
+          "source_storage_gib": 3,
+          "source_overlay_gib": 2,
+          "reservation_during_publication": {
+            "slots": 2,
+            "cpus": 6,
+            "memory_mb": 2048,
+            "disk_gb": 74
+          },
+          "released_by_resolution": {
+            "slots": 1,
+            "cpus": 4,
+            "memory_mb": 1152,
+            "disk_gb": 69
+          }
+        },
+        "durable_readback": {
+          "exact_machine_records": 2,
+          "exact_completed_export_receipt": true,
+          "native_workers": 0,
+          "final_reserved_slots": 0,
+          "crash_validation_deferred": true
+        }
+      }
+    }
+  },
+  "macos_durable_branch_recovery": {
+    "qualification_helper_only": true,
+    "macos_cache_backing_paths_verified_absent": {
+      "unbooted": {
+        "current": {
+          "verified_macos_native_backing_paths_absent": 2
+        },
+        "minimum": {
+          "verified_macos_native_backing_paths_absent": 2
+        }
+      },
+      "partial": {
+        "current": {
+          "verified_macos_native_backing_paths_absent": 2
+        },
+        "minimum": {
+          "verified_macos_native_backing_paths_absent": 2
+        }
+      }
+    },
+    "lanes": {
+      "unbooted": {
+        "current": {
+          "status": "passed",
+          "lane": "current",
+          "family": "unbooted",
+          "archive_sha256": "1501c12550cfaa644c8f7a597f333bb406898e6a9322a7b58b77859382c14d2e",
+          "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+          "manifest_sha256": "e3c318b73e01ebf2033816b2a6ece64863d11767632de12f6dce85179cf7d88d",
+          "helper_sha256": "6f62be10ef73b0be33d1353bde868a118932d320b0c49159d08153294e75ef6a",
+          "qualification_only_helper": true,
+          "postgresql": "17.11 (Homebrew)",
+          "postgresql_normal_stop": true,
+          "postflight": {
+            "sdk_table_counts": {
+              "vms": 0,
+              "vm_create_reservations": 0,
+              "vm_pause_operations": 0,
+              "config": 0,
+              "vm_resize_intents": 0,
+              "vm_resize_receipts": 0,
+              "fork_pools": 0,
+              "fork_pool_snapshots": 0,
+              "fork_pool_slots": 0,
+              "fork_leases": 0
+            },
+            "account_lock_available": true
+          },
+          "evidence": {
+            "mode": "postgresql",
+            "campaign": "ordinary-public-durable-branch-recovery",
+            "actual_recovery_family": "unbooted",
+            "original_proof_retained": true,
+            "paired_retirement_and_release": true,
+            "final_reserved_slots": 0,
+            "final_reserved_disk_gb": 0,
+            "owned_cleanup": true,
+            "normal_shutdown": true,
+            "deliberate_process_interruption": false,
+            "crash_handling_qualified": false
+          }
+        },
+        "minimum": {
+          "status": "passed",
+          "lane": "minimum",
+          "family": "unbooted",
+          "archive_sha256": "1501c12550cfaa644c8f7a597f333bb406898e6a9322a7b58b77859382c14d2e",
+          "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+          "manifest_sha256": "e3c318b73e01ebf2033816b2a6ece64863d11767632de12f6dce85179cf7d88d",
+          "helper_sha256": "6f62be10ef73b0be33d1353bde868a118932d320b0c49159d08153294e75ef6a",
+          "qualification_only_helper": true,
+          "postgresql": "17.11 (Homebrew)",
+          "postgresql_normal_stop": true,
+          "postflight": {
+            "sdk_table_counts": {
+              "vms": 0,
+              "vm_create_reservations": 0,
+              "vm_pause_operations": 0,
+              "config": 0,
+              "vm_resize_intents": 0,
+              "vm_resize_receipts": 0,
+              "fork_pools": 0,
+              "fork_pool_snapshots": 0,
+              "fork_pool_slots": 0,
+              "fork_leases": 0
+            },
+            "account_lock_available": true
+          },
+          "evidence": {
+            "mode": "postgresql",
+            "campaign": "ordinary-public-durable-branch-recovery",
+            "actual_recovery_family": "unbooted",
+            "original_proof_retained": true,
+            "paired_retirement_and_release": true,
+            "final_reserved_slots": 0,
+            "final_reserved_disk_gb": 0,
+            "owned_cleanup": true,
+            "normal_shutdown": true,
+            "deliberate_process_interruption": false,
+            "crash_handling_qualified": false
+          }
+        }
+      },
+      "partial": {
+        "current": {
+          "status": "passed",
+          "lane": "current",
+          "family": "partial",
+          "archive_sha256": "1501c12550cfaa644c8f7a597f333bb406898e6a9322a7b58b77859382c14d2e",
+          "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+          "manifest_sha256": "e3c318b73e01ebf2033816b2a6ece64863d11767632de12f6dce85179cf7d88d",
+          "helper_sha256": "6f62be10ef73b0be33d1353bde868a118932d320b0c49159d08153294e75ef6a",
+          "qualification_only_helper": true,
+          "postgresql": "17.11 (Homebrew)",
+          "postgresql_normal_stop": true,
+          "postflight": {
+            "sdk_table_counts": {
+              "vms": 0,
+              "vm_create_reservations": 0,
+              "vm_pause_operations": 0,
+              "config": 0,
+              "vm_resize_intents": 0,
+              "vm_resize_receipts": 0,
+              "fork_pools": 0,
+              "fork_pool_snapshots": 0,
+              "fork_pool_slots": 0,
+              "fork_leases": 0
+            },
+            "account_lock_available": true
+          },
+          "evidence": {
+            "mode": "postgresql",
+            "campaign": "ordinary-public-durable-branch-recovery",
+            "actual_recovery_family": "partial",
+            "original_proof_retained": true,
+            "paired_retirement_and_release": true,
+            "final_reserved_slots": 0,
+            "final_reserved_disk_gb": 0,
+            "owned_cleanup": true,
+            "normal_shutdown": true,
+            "deliberate_process_interruption": false,
+            "crash_handling_qualified": false
+          }
+        },
+        "minimum": {
+          "status": "passed",
+          "lane": "minimum",
+          "family": "partial",
+          "archive_sha256": "1501c12550cfaa644c8f7a597f333bb406898e6a9322a7b58b77859382c14d2e",
+          "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+          "manifest_sha256": "e3c318b73e01ebf2033816b2a6ece64863d11767632de12f6dce85179cf7d88d",
+          "helper_sha256": "6f62be10ef73b0be33d1353bde868a118932d320b0c49159d08153294e75ef6a",
+          "qualification_only_helper": true,
+          "postgresql": "17.11 (Homebrew)",
+          "postgresql_normal_stop": true,
+          "postflight": {
+            "sdk_table_counts": {
+              "vms": 0,
+              "vm_create_reservations": 0,
+              "vm_pause_operations": 0,
+              "config": 0,
+              "vm_resize_intents": 0,
+              "vm_resize_receipts": 0,
+              "fork_pools": 0,
+              "fork_pool_snapshots": 0,
+              "fork_pool_slots": 0,
+              "fork_leases": 0
+            },
+            "account_lock_available": true
+          },
+          "evidence": {
+            "mode": "postgresql",
+            "campaign": "ordinary-public-durable-branch-recovery",
+            "actual_recovery_family": "partial",
+            "original_proof_retained": true,
+            "paired_retirement_and_release": true,
+            "final_reserved_slots": 0,
+            "final_reserved_disk_gb": 0,
+            "owned_cleanup": true,
+            "normal_shutdown": true,
+            "deliberate_process_interruption": false,
+            "crash_handling_qualified": false
+          }
+        }
+      }
+    }
+  },
+  "linux_lab_scratch": {
+    "mountpoint": "/dev/shm",
+    "original_capacity_kib": 4065888,
+    "temporary_capacity_kib": 4718592,
+    "original_capacity_restored": true
+  },
+  "memory_branch_recovery": {
+    "qualification_helper_only": true,
+    "lanes": {
+      "linux": {
+        "unbooted": {
+          "current": {
+            "status": "passed",
+            "lane": "current",
+            "family": "unbooted",
+            "manifest_sha256": "a8fc504e6432750cfe2324b2f84ee796aa5d8d5ad9d048dd0c415dc0c887e0d0",
+            "archive_sha256": "1501c12550cfaa644c8f7a597f333bb406898e6a9322a7b58b77859382c14d2e",
+            "qualification_helper_only": true,
+            "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+            "empty_sdk_tables": 10,
+            "evidence": {
+              "mode": "memory",
+              "campaign": "ordinary-public-durable-branch-recovery",
+              "actual_recovery_family": "unbooted",
+              "original_proof_retained": true,
+              "paired_retirement_and_release": true,
+              "final_reserved_slots": 0,
+              "final_reserved_disk_gb": 0,
+              "owned_cleanup": true,
+              "normal_shutdown": true,
+              "deliberate_process_interruption": false,
+              "crash_handling_qualified": false
+            },
+            "workerless_readback": {
+              "workers": 0,
+              "exact_records": 3,
+              "exact_machine_records": 2,
+              "saved_backing_reply": true
+            }
+          },
+          "minimum": {
+            "status": "passed",
+            "lane": "minimum",
+            "family": "unbooted",
+            "manifest_sha256": "a8fc504e6432750cfe2324b2f84ee796aa5d8d5ad9d048dd0c415dc0c887e0d0",
+            "archive_sha256": "1501c12550cfaa644c8f7a597f333bb406898e6a9322a7b58b77859382c14d2e",
+            "qualification_helper_only": true,
+            "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+            "empty_sdk_tables": 10,
+            "evidence": {
+              "mode": "memory",
+              "campaign": "ordinary-public-durable-branch-recovery",
+              "actual_recovery_family": "unbooted",
+              "original_proof_retained": true,
+              "paired_retirement_and_release": true,
+              "final_reserved_slots": 0,
+              "final_reserved_disk_gb": 0,
+              "owned_cleanup": true,
+              "normal_shutdown": true,
+              "deliberate_process_interruption": false,
+              "crash_handling_qualified": false
+            },
+            "workerless_readback": {
+              "workers": 0,
+              "exact_records": 3,
+              "exact_machine_records": 2,
+              "saved_backing_reply": true
+            }
+          }
+        },
+        "partial": {
+          "current": {
+            "status": "passed",
+            "lane": "current",
+            "family": "partial",
+            "manifest_sha256": "a8fc504e6432750cfe2324b2f84ee796aa5d8d5ad9d048dd0c415dc0c887e0d0",
+            "archive_sha256": "1501c12550cfaa644c8f7a597f333bb406898e6a9322a7b58b77859382c14d2e",
+            "qualification_helper_only": true,
+            "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+            "empty_sdk_tables": 10,
+            "evidence": {
+              "mode": "memory",
+              "campaign": "ordinary-public-durable-branch-recovery",
+              "actual_recovery_family": "partial",
+              "original_proof_retained": true,
+              "paired_retirement_and_release": true,
+              "final_reserved_slots": 0,
+              "final_reserved_disk_gb": 0,
+              "owned_cleanup": true,
+              "normal_shutdown": true,
+              "deliberate_process_interruption": false,
+              "crash_handling_qualified": false
+            },
+            "workerless_readback": {
+              "workers": 0,
+              "exact_records": 3,
+              "exact_machine_records": 2,
+              "saved_backing_reply": true
+            }
+          },
+          "minimum": {
+            "status": "passed",
+            "lane": "minimum",
+            "family": "partial",
+            "manifest_sha256": "a8fc504e6432750cfe2324b2f84ee796aa5d8d5ad9d048dd0c415dc0c887e0d0",
+            "archive_sha256": "1501c12550cfaa644c8f7a597f333bb406898e6a9322a7b58b77859382c14d2e",
+            "qualification_helper_only": true,
+            "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+            "empty_sdk_tables": 10,
+            "evidence": {
+              "mode": "memory",
+              "campaign": "ordinary-public-durable-branch-recovery",
+              "actual_recovery_family": "partial",
+              "original_proof_retained": true,
+              "paired_retirement_and_release": true,
+              "final_reserved_slots": 0,
+              "final_reserved_disk_gb": 0,
+              "owned_cleanup": true,
+              "normal_shutdown": true,
+              "deliberate_process_interruption": false,
+              "crash_handling_qualified": false
+            },
+            "workerless_readback": {
+              "workers": 0,
+              "exact_records": 3,
+              "exact_machine_records": 2,
+              "saved_backing_reply": true
+            }
+          }
+        }
+      },
+      "macos": {
+        "unbooted": {
+          "current": {
+            "status": "passed",
+            "lane": "current",
+            "family": "unbooted",
+            "manifest_sha256": "e3c318b73e01ebf2033816b2a6ece64863d11767632de12f6dce85179cf7d88d",
+            "archive_sha256": "1501c12550cfaa644c8f7a597f333bb406898e6a9322a7b58b77859382c14d2e",
+            "qualification_helper_only": true,
+            "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+            "empty_sdk_tables": 10,
+            "evidence": {
+              "mode": "memory",
+              "campaign": "ordinary-public-durable-branch-recovery",
+              "actual_recovery_family": "unbooted",
+              "original_proof_retained": true,
+              "paired_retirement_and_release": true,
+              "final_reserved_slots": 0,
+              "final_reserved_disk_gb": 0,
+              "owned_cleanup": true,
+              "normal_shutdown": true,
+              "deliberate_process_interruption": false,
+              "crash_handling_qualified": false
+            },
+            "workerless_readback": {
+              "workers": 0,
+              "exact_records": 3,
+              "exact_machine_records": 2,
+              "saved_backing_reply": true
+            }
+          },
+          "minimum": {
+            "status": "passed",
+            "lane": "minimum",
+            "family": "unbooted",
+            "manifest_sha256": "e3c318b73e01ebf2033816b2a6ece64863d11767632de12f6dce85179cf7d88d",
+            "archive_sha256": "1501c12550cfaa644c8f7a597f333bb406898e6a9322a7b58b77859382c14d2e",
+            "qualification_helper_only": true,
+            "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+            "empty_sdk_tables": 10,
+            "evidence": {
+              "mode": "memory",
+              "campaign": "ordinary-public-durable-branch-recovery",
+              "actual_recovery_family": "unbooted",
+              "original_proof_retained": true,
+              "paired_retirement_and_release": true,
+              "final_reserved_slots": 0,
+              "final_reserved_disk_gb": 0,
+              "owned_cleanup": true,
+              "normal_shutdown": true,
+              "deliberate_process_interruption": false,
+              "crash_handling_qualified": false
+            },
+            "workerless_readback": {
+              "workers": 0,
+              "exact_records": 3,
+              "exact_machine_records": 2,
+              "saved_backing_reply": true
+            }
+          }
+        },
+        "partial": {
+          "current": {
+            "status": "passed",
+            "lane": "current",
+            "family": "partial",
+            "manifest_sha256": "e3c318b73e01ebf2033816b2a6ece64863d11767632de12f6dce85179cf7d88d",
+            "archive_sha256": "1501c12550cfaa644c8f7a597f333bb406898e6a9322a7b58b77859382c14d2e",
+            "qualification_helper_only": true,
+            "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+            "empty_sdk_tables": 10,
+            "evidence": {
+              "mode": "memory",
+              "campaign": "ordinary-public-durable-branch-recovery",
+              "actual_recovery_family": "partial",
+              "original_proof_retained": true,
+              "paired_retirement_and_release": true,
+              "final_reserved_slots": 0,
+              "final_reserved_disk_gb": 0,
+              "owned_cleanup": true,
+              "normal_shutdown": true,
+              "deliberate_process_interruption": false,
+              "crash_handling_qualified": false
+            },
+            "workerless_readback": {
+              "workers": 0,
+              "exact_records": 3,
+              "exact_machine_records": 2,
+              "saved_backing_reply": true
+            }
+          },
+          "minimum": {
+            "status": "passed",
+            "lane": "minimum",
+            "family": "partial",
+            "manifest_sha256": "e3c318b73e01ebf2033816b2a6ece64863d11767632de12f6dce85179cf7d88d",
+            "archive_sha256": "1501c12550cfaa644c8f7a597f333bb406898e6a9322a7b58b77859382c14d2e",
+            "qualification_helper_only": true,
+            "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+            "empty_sdk_tables": 10,
+            "evidence": {
+              "mode": "memory",
+              "campaign": "ordinary-public-durable-branch-recovery",
+              "actual_recovery_family": "partial",
+              "original_proof_retained": true,
+              "paired_retirement_and_release": true,
+              "final_reserved_slots": 0,
+              "final_reserved_disk_gb": 0,
+              "owned_cleanup": true,
+              "normal_shutdown": true,
+              "deliberate_process_interruption": false,
+              "crash_handling_qualified": false
+            },
+            "workerless_readback": {
+              "workers": 0,
+              "exact_records": 3,
+              "exact_machine_records": 2,
+              "saved_backing_reply": true
+            }
+          }
+        }
+      }
+    },
+    "initial_macos_partial_readback_difference_fields": [
+      {
+        "fields": [
+          "updated_at_ms",
+          "claim_until_ms",
+          "version"
+        ],
+        "record_type": "machine"
+      },
+      {
+        "fields": [],
+        "record_type": "execution"
+      },
+      {
+        "fields": [],
+        "record_type": "machine"
+      }
+    ]
+  }
+}

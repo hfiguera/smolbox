@@ -1,0 +1,580 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-11-06",
+  "source_commit": "b4a1926028609cf79cb3a27d6d34cffb50564830",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "native_source_archive_sha256": "af03b4d347d2888ba96bedbf0ff2f4be9d33887e32d0ea31473b6235cb47dc09",
+  "hex_archive_sha256": "65eb98f042cc9ef552d41dee16ed429daa924a5f31227b0fddc932161ebd40e6",
+  "packages": {
+    "linux-x86_64": {
+      "manifest_sha256": "3051ffec8a83b12e28dbc412bcebed9a284da4171d138aac5262ec371d64f9b1",
+      "helper_sha256": "84bf7a6728e00c35e06869d27ceaffa18c97e376521595bd9555c732662dee13",
+      "asset_count": 806,
+      "identity": {
+        "engine_version": "0.2.0",
+        "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+        "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+        "build_sha256": "84bf7a6728e00c35e06869d27ceaffa18c97e376521595bd9555c732662dee13",
+        "assets_sha256": "706c83d1a75e5ed5791da54bb4cfa6e80448302a3921b202a5d8c769868e3c15",
+        "platform": "linux",
+        "architecture": "x86_64"
+      },
+      "unmodified_sdk_verified_before_and_after_build": true,
+      "default_policy": true
+    },
+    "macos-aarch64": {
+      "manifest_sha256": "d7f18dcda7b634898200c72322d96b9e345be2f183e8760322cc6d25e9691e95",
+      "helper_sha256": "ae40d57bacb33c1bcaca05623b3848b005ba1daa1c31c9e29bab50cf02c5679b",
+      "asset_count": 809,
+      "identity": {
+        "engine_version": "0.2.0",
+        "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+        "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+        "build_sha256": "ae40d57bacb33c1bcaca05623b3848b005ba1daa1c31c9e29bab50cf02c5679b",
+        "assets_sha256": "0c109ee5c9cc8f1681e5b8b83b06d6712041bd36f9eda9940a423b52c7be5b25",
+        "platform": "macos",
+        "architecture": "aarch64"
+      },
+      "unmodified_sdk_verified_before_and_after_build": true,
+      "default_policy": true,
+      "strict_helper_signature_verified": true
+    }
+  },
+  "http_only": {
+    "identical_archive_and_packaged_file_hashes": true,
+    "package_file_count": 679,
+    "package_file_map_sha256": "24d170052bdce635a3e65b206ffb5c5bc664fd3c3bcebf7d495857fc3b281d22",
+    "lanes": {
+      "linux-current": {
+        "architecture": "x86_64",
+        "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+        "without_rust": true,
+        "native": {
+          "scope": "not-requested",
+          "exercised": false
+        },
+        "runtime_dependencies": [
+          "finch",
+          "hpax",
+          "jason",
+          "mime",
+          "mint",
+          "mint_web_socket",
+          "nimble_options",
+          "nimble_pool",
+          "req",
+          "telemetry"
+        ],
+        "smoke": {
+          "checkpoint": true,
+          "client": true,
+          "guest_files": true,
+          "interactive": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "managed_branches": true,
+          "managed_checkpoints": true,
+          "managed_exports": true,
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.22.0",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.5",
+            "mint": "1.11.0",
+            "mint_web_socket": "1.0.6",
+            "nimble_options": "1.2.0",
+            "req": "0.7.5",
+            "telemetry": "1.4.2"
+          },
+          "without_rust": true,
+          "workload": true
+        }
+      },
+      "linux-minimum": {
+        "architecture": "x86_64",
+        "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+        "without_rust": true,
+        "native": {
+          "scope": "not-requested",
+          "exercised": false
+        },
+        "runtime_dependencies": [
+          "finch",
+          "hpax",
+          "jason",
+          "mime",
+          "mint",
+          "mint_web_socket",
+          "nimble_options",
+          "nimble_pool",
+          "req",
+          "telemetry"
+        ],
+        "smoke": {
+          "checkpoint": true,
+          "client": true,
+          "guest_files": true,
+          "interactive": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "managed_branches": true,
+          "managed_checkpoints": true,
+          "managed_exports": true,
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.22.0",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.0",
+            "mint": "1.11.0",
+            "mint_web_socket": "1.0.6",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          },
+          "without_rust": true,
+          "workload": true
+        }
+      },
+      "macos-current": {
+        "architecture": "arm64",
+        "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+        "without_rust": true,
+        "native": {
+          "scope": "not-requested",
+          "exercised": false
+        },
+        "runtime_dependencies": [
+          "finch",
+          "hpax",
+          "jason",
+          "mime",
+          "mint",
+          "mint_web_socket",
+          "nimble_options",
+          "nimble_pool",
+          "req",
+          "telemetry"
+        ],
+        "smoke": {
+          "checkpoint": true,
+          "client": true,
+          "guest_files": true,
+          "interactive": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "managed_branches": true,
+          "managed_checkpoints": true,
+          "managed_exports": true,
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.22.0",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.5",
+            "mint": "1.11.0",
+            "mint_web_socket": "1.0.6",
+            "nimble_options": "1.2.0",
+            "req": "0.7.5",
+            "telemetry": "1.4.2"
+          },
+          "without_rust": true,
+          "workload": true
+        }
+      },
+      "macos-minimum": {
+        "architecture": "arm64",
+        "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+        "without_rust": true,
+        "native": {
+          "scope": "not-requested",
+          "exercised": false
+        },
+        "runtime_dependencies": [
+          "finch",
+          "hpax",
+          "jason",
+          "mime",
+          "mint",
+          "mint_web_socket",
+          "nimble_options",
+          "nimble_pool",
+          "req",
+          "telemetry"
+        ],
+        "smoke": {
+          "checkpoint": true,
+          "client": true,
+          "guest_files": true,
+          "interactive": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "managed_branches": true,
+          "managed_checkpoints": true,
+          "managed_exports": true,
+          "network_policy": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.22.0",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.0",
+            "mint": "1.11.0",
+            "mint_web_socket": "1.0.6",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          },
+          "without_rust": true,
+          "workload": true
+        }
+      }
+    }
+  },
+  "linux_bare_postgresql": {
+    "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+    "installed_no_rust_consumers": true,
+    "lanes": {
+      "current": {
+        "elixir": "1.20.4",
+        "otp": "29.0.6",
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "proof": {
+          "inventory_empty_created_running_stopped_deleted": true,
+          "unassigned_inventory_has_no_receipt": true,
+          "managed_scope_filtered_and_deleted_history_retained": true,
+          "zero_reservations": true,
+          "health_capacity_metrics_readiness_and_observe_health": true,
+          "incompatible_engine_rejected": true,
+          "scoped_measurements_running_and_stopped": true,
+          "ordinary_shutdown": true,
+          "crash_validation_deferred": true,
+          "custom_workdir_upload_download": true,
+          "denied_direction_boundary_and_budget_before_reservation": true,
+          "transferred_bytes": 65537,
+          "transferred_sha256": "f6b82df7d28d7ebac8601da4c154ce0d5389b929901075bbbeec3003e37e12b4",
+          "tail_lines": 2,
+          "bounded_follow_expiry_with_callback": true,
+          "invalid_follow_rejected": true,
+          "running_and_stopped_observation": true,
+          "deleted_handle_rejected": true
+        },
+        "postflight": {
+          "sdk_tables": {
+            "vms": 0,
+            "vm_create_reservations": 0,
+            "vm_pause_operations": 0,
+            "config": 0,
+            "vm_resize_intents": 0,
+            "vm_resize_receipts": 0,
+            "fork_pools": 0,
+            "fork_pool_snapshots": 0,
+            "fork_pool_slots": 0,
+            "fork_leases": 0
+          },
+          "account_lock_available": true,
+          "package_assets_verified": 806
+        },
+        "report_sha256": "84835d40d3a176a282986eb61e5a855d8a04f0002cc9574d576d825f4ddd8f67"
+      },
+      "minimum": {
+        "elixir": "1.18.4",
+        "otp": "27.3.4.15",
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "proof": {
+          "inventory_empty_created_running_stopped_deleted": true,
+          "unassigned_inventory_has_no_receipt": true,
+          "managed_scope_filtered_and_deleted_history_retained": true,
+          "zero_reservations": true,
+          "health_capacity_metrics_readiness_and_observe_health": true,
+          "incompatible_engine_rejected": true,
+          "scoped_measurements_running_and_stopped": true,
+          "ordinary_shutdown": true,
+          "crash_validation_deferred": true,
+          "custom_workdir_upload_download": true,
+          "denied_direction_boundary_and_budget_before_reservation": true,
+          "transferred_bytes": 65537,
+          "transferred_sha256": "f6b82df7d28d7ebac8601da4c154ce0d5389b929901075bbbeec3003e37e12b4",
+          "tail_lines": 2,
+          "bounded_follow_expiry_with_callback": true,
+          "invalid_follow_rejected": true,
+          "running_and_stopped_observation": true,
+          "deleted_handle_rejected": true
+        },
+        "postflight": {
+          "sdk_tables": {
+            "vms": 0,
+            "vm_create_reservations": 0,
+            "vm_pause_operations": 0,
+            "config": 0,
+            "vm_resize_intents": 0,
+            "vm_resize_receipts": 0,
+            "fork_pools": 0,
+            "fork_pool_snapshots": 0,
+            "fork_pool_slots": 0,
+            "fork_leases": 0
+          },
+          "account_lock_available": true,
+          "package_assets_verified": 806
+        },
+        "report_sha256": "84835d40d3a176a282986eb61e5a855d8a04f0002cc9574d576d825f4ddd8f67"
+      }
+    }
+  },
+  "macos_saved_state_memory": {
+    "bare_fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+    "basic_seed_sha256": {
+      "current": "946056ab728393e2934bc499e14f88cfb02affab621c148043f3c10d08b16816",
+      "minimum": "371cc45609e785456fee6f242964155b60429cd433a28e61e2b701e90856aa48"
+    },
+    "installed_no_rust_consumers": true,
+    "lanes": {
+      "current-branches": {
+        "elixir": "1.20.4",
+        "otp": "29.0.6",
+        "observations": {
+          "released-branch": {
+            "console": {
+              "status": "ok",
+              "lines": 2
+            },
+            "inventory_receipt_free": true,
+            "owned_measurement": true,
+            "usage_unchanged": true,
+            "worker_observations": true,
+            "frozen_source_receipt_free": true
+          },
+          "running-branch": {
+            "console": {
+              "status": "ok",
+              "lines": 2
+            },
+            "inventory_receipt_free": true,
+            "owned_measurement": true,
+            "usage_unchanged": true,
+            "worker_observations": true,
+            "frozen_source_receipt_free": true
+          },
+          "running-source": {
+            "console": {
+              "status": "ok",
+              "lines": 2
+            },
+            "inventory_receipt_free": true,
+            "owned_measurement": true,
+            "usage_unchanged": true,
+            "worker_observations": true,
+            "frozen_source_receipt_free": null
+          }
+        },
+        "status": "ordinary-workflow-passed",
+        "proof": {
+          "campaign": "ordinary-public-native-branches",
+          "package_manifest_sha256": "d7f18dcda7b634898200c72322d96b9e345be2f183e8760322cc6d25e9691e95",
+          "store_mode": "ephemeral",
+          "cold_restart_does_not_restore_ram": true,
+          "codec_roundtrips": true,
+          "owned_deleted": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "deliberate_process_interruption": false,
+          "crash_handling_qualified": false,
+          "source_and_two_children_independent": true,
+          "held_release": true,
+          "duplicate_release_retained": true,
+          "source_dependencies_retired": 2,
+          "native_backing_acknowledgements": 2,
+          "branch_budget_rejected_before_dispatch": true,
+          "drain_rejected_new_branch": true
+        },
+        "postflight": {
+          "tables": {
+            "vms": 0,
+            "vm_create_reservations": 0,
+            "vm_pause_operations": 0,
+            "config": 0,
+            "vm_resize_intents": 0,
+            "vm_resize_receipts": 0,
+            "fork_pools": 0,
+            "fork_pool_snapshots": 0,
+            "fork_pool_slots": 0,
+            "fork_leases": 0
+          },
+          "account_lock_available": true,
+          "package_assets": 809
+        },
+        "report_sha256": "9f3615fa8cad9af3483afa842da80a22111787d5a40b15f69018ee1090d3e03a"
+      },
+      "current-checkpoints": {
+        "elixir": "1.20.4",
+        "otp": "29.0.6",
+        "observations": {
+          "running-source": {
+            "console": {
+              "status": "ok",
+              "lines": 2
+            },
+            "inventory_receipt_free": true,
+            "owned_measurement": true,
+            "usage_unchanged": true,
+            "worker_observations": true,
+            "frozen_source_receipt_free": null
+          }
+        },
+        "status": "failed",
+        "rejection": {},
+        "first_failure_function": "command"
+      }
+    },
+    "independent_retry": {
+      "minimum-branches": {
+        "elixir": "1.18.4",
+        "otp": "27.3.4.15",
+        "observations": {
+          "released-branch": {
+            "console": {
+              "status": "ok",
+              "lines": 2
+            },
+            "inventory_receipt_free": true,
+            "owned_measurement": true,
+            "usage_unchanged": true,
+            "worker_observations": true,
+            "frozen_source_receipt_free": true
+          },
+          "running-branch": {
+            "console": {
+              "status": "ok",
+              "lines": 2
+            },
+            "inventory_receipt_free": true,
+            "owned_measurement": true,
+            "usage_unchanged": true,
+            "worker_observations": true,
+            "frozen_source_receipt_free": true
+          },
+          "running-source": {
+            "console": {
+              "status": "ok",
+              "lines": 2
+            },
+            "inventory_receipt_free": true,
+            "owned_measurement": true,
+            "usage_unchanged": true,
+            "worker_observations": true,
+            "frozen_source_receipt_free": null
+          }
+        },
+        "status": "ordinary-workflow-passed",
+        "proof": {
+          "campaign": "ordinary-public-native-branches",
+          "package_manifest_sha256": "d7f18dcda7b634898200c72322d96b9e345be2f183e8760322cc6d25e9691e95",
+          "store_mode": "ephemeral",
+          "cold_restart_does_not_restore_ram": true,
+          "codec_roundtrips": true,
+          "owned_deleted": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "deliberate_process_interruption": false,
+          "crash_handling_qualified": false,
+          "source_and_two_children_independent": true,
+          "held_release": true,
+          "duplicate_release_retained": true,
+          "source_dependencies_retired": 2,
+          "native_backing_acknowledgements": 2,
+          "branch_budget_rejected_before_dispatch": true,
+          "drain_rejected_new_branch": true
+        },
+        "postflight": {
+          "tables": {
+            "vms": 0,
+            "vm_create_reservations": 0,
+            "vm_pause_operations": 0,
+            "config": 0,
+            "vm_resize_intents": 0,
+            "vm_resize_receipts": 0,
+            "fork_pools": 0,
+            "fork_pool_snapshots": 0,
+            "fork_pool_slots": 0,
+            "fork_leases": 0
+          },
+          "account_lock_available": true,
+          "package_assets": 809
+        },
+        "report_sha256": "9f3615fa8cad9af3483afa842da80a22111787d5a40b15f69018ee1090d3e03a"
+      },
+      "minimum-checkpoints": {
+        "elixir": "1.18.4",
+        "otp": "27.3.4.15",
+        "observations": {
+          "running-source": {
+            "console": {
+              "status": "ok",
+              "lines": 2
+            },
+            "inventory_receipt_free": true,
+            "owned_measurement": true,
+            "usage_unchanged": true,
+            "worker_observations": true,
+            "frozen_source_receipt_free": null
+          }
+        },
+        "status": "failed",
+        "rejection": {},
+        "first_failure_function": "command",
+        "guest_command_failure": {
+          "label": "prepare-capture",
+          "detail": {
+            "state": "unknown",
+            "exit_code": null,
+            "collection": "pending",
+            "stderr_bytes": 0,
+            "typed_execution_error_recorded": false
+          }
+        }
+      }
+    }
+  },
+  "first_macos_ordinary_cleanup": {
+    "steps": [
+      {
+        "action": "delete",
+        "id": "first",
+        "reply": {
+          "status": "accepted"
+        }
+      },
+      {
+        "action": "retire",
+        "id": "first",
+        "reply": {
+          "status": "accepted"
+        }
+      },
+      {
+        "action": "delete",
+        "id": "source",
+        "reply": {
+          "status": "accepted"
+        }
+      }
+    ],
+    "result": "stopped-at-RuntimeError",
+    "no_signals": true
+  },
+  "distribution_approved": false,
+  "crash_validation_deferred": true,
+  "checkpoint_attempt_ordinary_cleanup": {
+    "steps": [],
+    "result": "stopped-at-AssertionError",
+    "no_signals": true
+  }
+}

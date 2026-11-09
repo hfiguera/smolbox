@@ -525,16 +525,19 @@ fn blob_destination(location: &Location, status: StatusCode, value: &str) -> Res
     if !matches!(
         status,
         StatusCode::TEMPORARY_REDIRECT | StatusCode::PERMANENT_REDIRECT
-    ) || location.origin.as_str() != "https://registry-1.docker.io/"
-        || value.len() > CHALLENGE_BYTES
+    ) || value.len() > CHALLENGE_BYTES
     {
         return Err(invalid());
     }
+    // Match exact registry/CDN pairs for credential-free signed blob downloads.
+    let host = match location.origin.as_str() {
+        "https://registry-1.docker.io/" => "production.cloudfront.docker.com",
+        "https://ghcr.io/" => "pkg-containers.githubusercontent.com",
+        _ => return Err(invalid()),
+    };
     let url = Url::parse(value).map_err(|_| invalid())?;
-    // The observed Docker Hub blob endpoint is an infrastructure alias, not
-    // permission for arbitrary docker.com subdomains or registry redirects.
     if url.scheme() != "https"
-        || url.host_str() != Some("production.cloudfront.docker.com")
+        || url.host_str() != Some(host)
         || url.port_or_known_default() != Some(443)
         || !url.username().is_empty()
         || url.password().is_some()
@@ -1059,35 +1062,50 @@ mod tests {
     }
 
     #[test]
-    fn docker_blob_redirect_is_exact_https_infrastructure_only() {
+    fn registry_blob_redirect_requires_the_exact_https_host_pair() {
         let docker = Location::new(&source("docker.io/library/alpine")).unwrap();
-        let endpoint = "https://production.cloudfront.docker.com/blob?signature=private";
-        for status in [
-            StatusCode::TEMPORARY_REDIRECT,
-            StatusCode::PERMANENT_REDIRECT,
+        let ghcr = Location::new(&source("ghcr.io/team/app")).unwrap();
+        let docker_host = "production.cloudfront.docker.com";
+        let ghcr_host = "pkg-containers.githubusercontent.com";
+        let other = Location::new(&source("registry.example/team/app")).unwrap();
+        for (registry, host, other_host) in [
+            (&docker, docker_host, ghcr_host),
+            (&ghcr, ghcr_host, docker_host),
         ] {
-            assert_eq!(
-                blob_destination(&docker, status, endpoint)
-                    .unwrap()
-                    .as_str(),
-                endpoint
-            );
+            let endpoint = format!("https://{host}/blob?signature=private");
+            for status in [
+                StatusCode::TEMPORARY_REDIRECT,
+                StatusCode::PERMANENT_REDIRECT,
+            ] {
+                assert_eq!(
+                    blob_destination(registry, status, &endpoint)
+                        .unwrap()
+                        .as_str(),
+                    endpoint
+                );
+            }
+            for invalid in [
+                format!("http://{host}/blob"),
+                format!("https://{host}:444/blob"),
+                format!("https://{host}.evil.example/blob"),
+                format!("https://user@{host}/blob"),
+                format!("https://{host}/blob#fragment"),
+                format!("https://{other_host}/blob"),
+            ] {
+                assert!(
+                    blob_destination(registry, StatusCode::TEMPORARY_REDIRECT, &invalid).is_err()
+                );
+            }
+            assert!(blob_destination(registry, StatusCode::FOUND, &endpoint).is_err());
+            assert!(blob_destination(&other, StatusCode::TEMPORARY_REDIRECT, &endpoint).is_err());
         }
         for endpoint in [
-            "http://production.cloudfront.docker.com/blob",
-            "https://production.cloudfront.docker.com:444/blob",
-            "https://production.cloudfront.docker.com.evil.example/blob",
             "https://other.docker.com/blob",
-            "https://user@production.cloudfront.docker.com/blob",
-            "https://production.cloudfront.docker.com/blob#fragment",
             "/relative",
             "https://127.0.0.1/blob",
         ] {
             assert!(blob_destination(&docker, StatusCode::TEMPORARY_REDIRECT, endpoint).is_err());
         }
-        assert!(blob_destination(&docker, StatusCode::FOUND, endpoint).is_err());
-        let other = Location::new(&source("registry.example/team/app")).unwrap();
-        assert!(blob_destination(&other, StatusCode::TEMPORARY_REDIRECT, endpoint).is_err());
     }
     fn reply(stream: &mut TcpStream, status: &str, extra: &str, bytes: &[u8]) {
         write!(

@@ -16,7 +16,7 @@ struct Manifest {
     media_type: Option<String>,
     config: Descriptor,
     #[serde(deserialize_with = "layers")]
-    layers: usize,
+    layers: Vec<String>,
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -25,21 +25,22 @@ struct Descriptor {
     digest: String,
     size: u64,
 }
-fn layers<'de, D: serde::Deserializer<'de>>(decoder: D) -> std::result::Result<usize, D::Error> {
+fn layers<'de, D: serde::Deserializer<'de>>(
+    decoder: D,
+) -> std::result::Result<Vec<String>, D::Error> {
     struct Visitor;
     impl<'de> serde::de::Visitor<'de> for Visitor {
-        type Value = usize;
+        type Value = Vec<String>;
         fn expecting(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
             f.write_str("bounded OCI layer descriptors")
         }
         fn visit_seq<A: serde::de::SeqAccess<'de>>(
             self,
             mut seq: A,
-        ) -> std::result::Result<usize, A::Error> {
-            let mut count = 0;
+        ) -> std::result::Result<Vec<String>, A::Error> {
+            let mut layers = Vec::new();
             while let Some(layer) = seq.next_element::<Descriptor>()? {
-                count += 1;
-                if count > 65536
+                if layers.len() >= 65536
                     || !digest(&layer.digest)
                     || layer.size > i64::MAX as u64
                     || layer.media_type.is_empty()
@@ -47,8 +48,9 @@ fn layers<'de, D: serde::Deserializer<'de>>(decoder: D) -> std::result::Result<u
                 {
                     return Err(serde::de::Error::custom("invalid layer descriptor"));
                 }
+                layers.push(layer.digest);
             }
-            Ok(count)
+            Ok(layers)
         }
     }
     decoder.deserialize_seq(Visitor)
@@ -137,7 +139,7 @@ fn verified_manifest(source: &ImagePullRequest, bytes: &[u8]) -> Result<Manifest
 pub struct VerifiedOci {
     source: ImagePullRequest,
     manifest: PackManifest,
-    layer_count: usize,
+    layers: Vec<String>,
 }
 impl VerifiedOci {
     pub fn verify(
@@ -176,7 +178,7 @@ impl VerifiedOci {
         Ok(Self {
             source,
             manifest: metadata,
-            layer_count: manifest.layers,
+            layers: manifest.layers,
         })
     }
     /// Verify the manifest before selecting any configuration-blob request.
@@ -191,7 +193,13 @@ impl VerifiedOci {
         &self.source
     }
     pub fn layer_count(&self) -> usize {
-        self.layer_count
+        self.layers.len()
+    }
+    pub(crate) fn layers(&self) -> &[String] {
+        &self.layers
+    }
+    pub(crate) fn metadata(&self) -> &PackManifest {
+        &self.manifest
     }
     pub(crate) fn qualify(&self, features: &CreationFeatures) -> Result<()> {
         if self.source.platform != native_oci_platform() {

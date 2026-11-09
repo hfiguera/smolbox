@@ -62,6 +62,45 @@ defmodule SmolBox.ManagedCheckpointTest do
     assert count(f.peer) == 0
   end
 
+  test "a running checkpoint source cannot use an unapproved policy or a draining worker" do
+    {f, machine, spec} = fixture()
+    {:ok, usage} = Memory.usage(f.store, "peer")
+    unapproved = %{spec | policy: %{spec.policy | id: "unapproved"}}
+
+    assert {:error, %{category: :unsupported_capability, evidence: :not_dispatched}} =
+             Checkpoints.capture(f.runtime, machine, unapproved)
+
+    assert :ok = SmolBox.drain_worker(f.runtime, "peer")
+
+    assert {:error, %{category: :admission_exhausted, evidence: :not_dispatched}} =
+             Checkpoints.capture(f.runtime, machine, spec)
+
+    assert {:ok, %{state: :running, captures: captures, active_capture: nil}} =
+             Machines.inspect(f.runtime, machine)
+
+    assert captures == %{}
+    assert {:ok, ^usage} = Memory.usage(f.store, "peer")
+    assert count(f.peer) == 0
+    assert File.ls!(spec.policy.root) == []
+  end
+
+  test "capture that exceeds the remaining worker capacity reserves nothing" do
+    capacity = %{slots: 1, cpus: 8, memory_mb: 8192, disk_gb: 128}
+    {f, machine, spec} = fixture(capacity: capacity)
+    {:ok, %{slots: 1} = usage} = Memory.usage(f.store, "peer")
+
+    assert {:error, %{category: :admission_exhausted, evidence: :not_dispatched}} =
+             Checkpoints.capture(f.runtime, machine, spec)
+
+    assert {:ok, %{state: :running, captures: captures, active_capture: nil}} =
+             Machines.inspect(f.runtime, machine)
+
+    assert captures == %{}
+    assert {:ok, ^usage} = Memory.usage(f.store, "peer")
+    assert count(f.peer) == 0
+    assert File.ls!(spec.policy.root) == []
+  end
+
   test "capture, durable fetch, explicit resolution, source deletion and artifact release" do
     {f, m, s} = fixture()
     {:ok, h} = Checkpoints.capture(f.runtime, m, s)

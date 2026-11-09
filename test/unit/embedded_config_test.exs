@@ -1,7 +1,7 @@
 defmodule SmolBox.Embedded.ConfigTest do
   use ExUnit.Case, async: true
+  alias SmolBox.{Checkpoint, Error, Profile, Source}
   alias SmolBox.Embedded.{Config, Health, Launch, Limits, Protocol, RegistryPolicy, SDKIdentity}
-  alias SmolBox.{Error, Profile, Source}
   alias SmolBox.Runtime.Target
 
   defp options do
@@ -143,6 +143,42 @@ defmodule SmolBox.Embedded.ConfigTest do
 
     assert Config.sdk_version(unknown) == nil
     assert Target.sdk_version(%{runtime_version: "1.19.0"}) == "1.19.0"
+  end
+
+  test "checkpoint-only workers require an approved checkpoint-capable package" do
+    options = options()
+    [profile] = options[:profiles]
+
+    {:ok, checkpoint} =
+      Checkpoint.new(
+        id: "approved-idle",
+        sha256: String.duplicate("a", 64),
+        architecture: "aarch64",
+        platform: :macos,
+        path: "/nonexistent/idle.smolcheckpoint",
+        profile: profile
+      )
+
+    options = Keyword.merge(options, artifacts: [], checkpoints: [checkpoint])
+    assert_invalid(options)
+
+    package = Map.put(options[:package_identity], "engine_version", "0.2.0")
+    sdk = SDKIdentity.implemented("1.22.0", package["smolvm_revision"])
+    options = Keyword.merge(options, package_identity: package, sdk_identity: sdk)
+    assert_invalid(options)
+
+    sdk = put_in(sdk, ["feature_versions", "checkpoints"], 1)
+    options = Keyword.put(options, :sdk_identity, sdk)
+    assert {:ok, config} = Config.new(options)
+    assert :ok = config |> Target.normalize() |> Target.validate()
+
+    assert %{"approved_artifacts" => [], "approved_checkpoints" => [approval]} =
+             Launch.helper_config(config)
+
+    assert approval["source"] == Checkpoint.artifact(checkpoint)
+
+    assert_invalid(Keyword.put(options, :checkpoints, []))
+    assert_invalid(Keyword.put(options, :checkpoints, [%{checkpoint | architecture: "x86_64"}]))
   end
 
   test "volume root enters helper config only under an explicitly approved Linux descriptor" do

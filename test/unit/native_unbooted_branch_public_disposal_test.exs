@@ -27,6 +27,13 @@ defmodule SmolBox.NativeUnbootedBranchPublicDisposalTest do
     def init(state), do: {:ok, state}
     def handle_call(:config, _, state), do: {:reply, {:ok, state.config}, state}
 
+    def handle_call({:native_acquire_operation, id}, from, state) do
+      case handle_call({:native_acquire, id}, from, state) do
+        {:reply, :ok, state} -> {:reply, {:ok, false}, state}
+        reply -> reply
+      end
+    end
+
     def handle_call({:native_acquire, id}, {caller, _}, state) do
       reply =
         Agent.get_and_update(state.authority, fn

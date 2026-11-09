@@ -2901,7 +2901,17 @@ mod tests {
     fn model_sdk_identity() -> Result<wire::SdkIdentity, serde_json::Error> {
         let policy: serde_json::Value =
             serde_json::from_slice(include_bytes!("../../policy.json"))?;
-        serde_json::from_value(policy["sdk"].clone())
+        let mut sdk: wire::SdkIdentity = serde_json::from_value(policy["sdk"].clone())?;
+        // Branch models opt in explicitly. A newly qualified package policy
+        // must not silently turn on the negative (missing-feature) fixtures.
+        for feature in [
+            "branches",
+            "partial_collection_preflight",
+            "partial_cleanup_resolution",
+        ] {
+            sdk.feature_versions.remove(feature);
+        }
+        Ok(sdk)
     }
 
     fn model_branch_sdk_identity() -> Result<wire::SdkIdentity, serde_json::Error> {

@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-11-06",
+  "status": "linux-ordinary-engine-partial-branch-disposal-passed",
+  "native_source_commit": "07778edce83ebbc64c01504c79687629d1f0ebce",
+  "source_archive_sha256": "095ca88ef4bc3f6af6322becdf4b4936bfbdbc1ab4b5d3544e7c96617035eb30",
+  "source_files_verified": 1858,
+  "native_inputs_verified": 343,
+  "sdk": {
+    "version": "1.22.0",
+    "revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source_unmodified": true
+  },
+  "package": {
+    "manifest_sha256": "055a460c4d72d2412c7b0499594b0f64c0a3bb92045cc1b02fdc656365022d5b",
+    "helper_sha256": "318a7b9f2e2ffd351e9918ab7b2bcd9cb37142121e665d0b6e7cf5cb3f662c5f",
+    "witness_sha256": "b14da6ee35a9c380ef6013c81ede89c9f62ba4f147901bd705df11876865f647",
+    "assets": 806
+  },
+  "build_and_verification_stages_passed": 13,
+  "ordinary_model_results": {
+    "engine": {
+      "passed": 1074,
+      "ignored": 25
+    },
+    "port": {
+      "passed": 91,
+      "ignored": 2
+    },
+    "protocol": {
+      "passed": 104
+    },
+    "wire_contracts": {
+      "passed": 60
+    },
+    "branch_witness_models": {
+      "passed": 13
+    }
+  },
+  "ordinary_partial_cancellation": {
+    "crash_validation_performed": false,
+    "distribution_approved": false,
+    "durable_dependency_retirement_qualified": false,
+    "explicit_operation_cancellation": true,
+    "normal_owner_shutdown": true,
+    "original_boot_api_returned": true,
+    "package_manifest_sha256": "055a460c4d72d2412c7b0499594b0f64c0a3bb92045cc1b02fdc656365022d5b",
+    "partial_collection_disposal_absence_and_backing": true,
+    "port_branch_routing_qualified": false,
+    "public_consumer_qualified": false,
+    "public_native_branch_admission_enabled": false,
+    "scope": "ordinary-shared-engine-partial-cancellation-linux-local-bare",
+    "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source_disk_and_memory_preserved_before_owned_cleanup": true,
+    "status": "passed",
+    "witness_executable_sha256": "b14da6ee35a9c380ef6013c81ede89c9f62ba4f147901bd705df11876865f647"
+  },
+  "final": {
+    "sdk_table_counts": {
+      "vms": 0,
+      "vm_create_reservations": 0,
+      "vm_pause_operations": 0,
+      "config": 0,
+      "vm_resize_intents": 0,
+      "vm_resize_receipts": 0,
+      "fork_pools": 0,
+      "fork_pool_snapshots": 0,
+      "fork_pool_slots": 0,
+      "fork_leases": 0
+    },
+    "native_processes": [],
+    "account_lock_available": true,
+    "package_assets_verified": 806
+  },
+  "verified_private_proof_archive_members": 22,
+  "parity_complete": false,
+  "crash_validation_deferred": true,
+  "distribution_approved": false,
+  "lab_shutdown": {
+    "guest_requested_poweroff": true,
+    "service_inactive": true,
+    "exit_status": 0,
+    "provisioning_disk_preserved": true,
+    "run_and_baseline_disks_retained": true,
+    "forced_termination": false
+  }
+}

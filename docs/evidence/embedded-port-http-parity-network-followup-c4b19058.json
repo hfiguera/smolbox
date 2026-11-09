@@ -1,0 +1,142 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-11-06",
+  "source_commit": "c4b19058",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "linux_hostname_only": {
+    "status": "passed",
+    "evidence": {
+      "status": "passed",
+      "package_manifest_sha256": "06328244c299a4fb237b105ce532c8fd64427a2e7b6390118fd8a195fff9607f",
+      "durable": true,
+      "cases": [
+        {
+          "observations": {
+            "approved_dns": true,
+            "approved_tcp": true,
+            "denied_dns": false,
+            "denied_literal_tcp": false
+          },
+          "hostname_only": true,
+          "deleted_and_released": true
+        }
+      ],
+      "zero_reservations": true,
+      "fixture_source_kind": "packed_python",
+      "host_controls_resolved_and_connected": true,
+      "crash_validation_deferred": true,
+      "cli_race_validation_deferred": true
+    },
+    "postflight": {
+      "sdk_table_counts": {
+        "vms": 0,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "config": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0,
+        "fork_pools": 0,
+        "fork_pool_snapshots": 0,
+        "fork_pool_slots": 0,
+        "fork_leases": 0
+      },
+      "account_lock_available": true,
+      "postgresql_normal_stop": true
+    },
+    "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+    "assets_verified": 806,
+    "without_rust": true,
+    "crash_validation_deferred": true
+  },
+  "linux_host_port_collision": {
+    "operation": "start",
+    "durable_state": "unknown",
+    "safe_error": {
+      "category": "port_conflict",
+      "operation": "start",
+      "evidence": "unknown"
+    },
+    "reservation_retained": true,
+    "independent_listener_unchanged": true,
+    "backend_states": [
+      "stopped"
+    ],
+    "report_sha256": "1a068c2cf70a146decbfb60cfa64d53a70fc909bb4e79d0b427c4f80c6798bf3",
+    "later_delete_readback": {
+      "error": {
+        "category": "unknown",
+        "operation": "reconcile",
+        "evidence": "unknown"
+      },
+      "state": "unknown",
+      "phase": "uncertain",
+      "operation": "delete",
+      "reservation_retained": true
+    },
+    "sdk_bind_failure_observed": true,
+    "explicit_stopped_resolution_completed": true,
+    "sdk_record_after_delete": {
+      "state": "created",
+      "recorded_pid_present": false
+    }
+  },
+  "macos_minimum": {
+    "forwarding_observation": {
+      "host_response_verified": true,
+      "outbound_reached": [
+        false,
+        false
+      ],
+      "report_sha256": "cf770871805439e258cf09fe74d6b737423ceac3a51a8ab498ac4c277ce8d4c4"
+    },
+    "offline_forwarding": {
+      "status": "passed",
+      "package_manifest_sha256": "28d07b9a209c856c4c734939afa3404539975c881a7a7c0e8b03102c08d58a3a",
+      "durable": true,
+      "cases": [
+        {
+          "policy": "offline",
+          "cycles": [
+            {
+              "outbound_reached": [
+                false,
+                false
+              ],
+              "inbound_reply_verified": true
+            }
+          ],
+          "conflict_before_dispatch": true,
+          "retained_across_replacement": true,
+          "deleted_and_released": true
+        }
+      ],
+      "zero_reservations": true,
+      "fixture_source_kind": "prepared_bare",
+      "crash_validation_deferred": true,
+      "cli_race_validation_deferred": true,
+      "report_sha256": "e970a23424c3261528b09f68e652b0ec53542e2127fa96293d79c833984437f2"
+    },
+    "host_port_collision": {
+      "durable_state": "unknown",
+      "operation": "start",
+      "safe_error": {
+        "category": "port_conflict",
+        "operation": "start",
+        "evidence": "unknown"
+      },
+      "reservation_retained": true,
+      "independent_listener_unchanged": true,
+      "backend_states": [
+        "stopped"
+      ],
+      "report_sha256": "cf2325d8e1fc0aae35feccf69b42bf075fec6afa0cf4f9972f59f0f8b429b3dd",
+      "later_delete_state": "unknown",
+      "explicit_stopped_resolution_completed": true
+    },
+    "failure_report_sha256": "eb6e8d0e99a4b9a0596be8a7fb68c0724e57d45e0227a58608a0cdcf50edd534"
+  },
+  "registry_production_tls_authentication": "pending-approved-private-artifacts-and-local-read-credential",
+  "focused_elixir_checks_passed": 24,
+  "crash_validation_deferred": true,
+  "cli_race_validation_deferred": true
+}

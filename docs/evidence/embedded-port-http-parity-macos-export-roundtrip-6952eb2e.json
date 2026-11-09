@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-11-06",
+  "status": "macos-container-engine-roundtrip-passed-bare-boot-gap-preserved",
+  "sdk": {
+    "version": "1.22.0",
+    "revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source_unmodified": true
+  },
+  "previous_ordinary_run": {
+    "native_source_commit": "164c3c9a9a58cee820d787bfee167157889c9667",
+    "manifest_sha256": "b7851d7e7f7b71c4c6067daa17a1ecc30fb418925e13e3139df9165edeebe700",
+    "source_boot_and_stop": true,
+    "conversion_layer_registered": true,
+    "conversion_helper_collected": true,
+    "post_collection_custody_rejected_sdk_control_socket": true,
+    "original_witness_retained": true,
+    "source_stopped": true,
+    "forced_termination": false
+  },
+  "corrected_package": {
+    "source_commit": "6952eb2e415f47df73d90ecd5d159106224125ce",
+    "manifest_sha256": "18f87197e4531d6a57135ba7baf4792e9098aca77ca94a00a91dc76ddc88b72f",
+    "helper_sha256": "9f4e0ddea929c71012de6b92b84ea5efece426d64b04a205dfdffe92dc4e94b2",
+    "asset_count": 809,
+    "sdk": "9f446ae00219148ca4a703914f44a8e2fab11655"
+  },
+  "container": {
+    "artifact": {
+      "bytes": 41511524,
+      "sha256": "a17bacb6ff3bf6ab7b57035a4ce70e3c92772864e45843a09edb0da237e5f489"
+    },
+    "production_qualification_and_pack": true,
+    "helper_collected": true,
+    "staging_cleaned": true,
+    "normal_new_incarnation_import_boot_stop_delete": true,
+    "final": {
+      "sdk_table_counts": {
+        "vms": 0,
+        "vm_create_reservations": 0,
+        "vm_pause_operations": 0,
+        "config": 0,
+        "vm_resize_intents": 0,
+        "vm_resize_receipts": 0,
+        "fork_pools": 0,
+        "fork_pool_snapshots": 0,
+        "fork_pool_slots": 0,
+        "fork_leases": 0
+      },
+      "normal_owner_shutdown": true,
+      "account_lock_available": true,
+      "new_incarnation": true,
+      "artifact_verified_unchanged": true,
+      "package_assets_verified": 809,
+      "helper_signature_verified": true
+    },
+    "witness_elapsed_seconds": 73.71
+  },
+  "bare": {
+    "artifact": {
+      "bytes": 25666881,
+      "sha256": "1d199a26a73aab10557192b034c8bc965067070a738cbba74569b301707deab4"
+    },
+    "production_qualification_and_pack": true,
+    "staging_cleaned": true,
+    "original_source_deleted": true,
+    "new_incarnation_imported": true,
+    "new_incarnation_boot_passed": false,
+    "witness_elapsed_seconds": 261.37,
+    "boot_error": "A nonempty synthetic image name caused the SDK to require a packed layers directory.",
+    "original_owner_closed_normally": true,
+    "failed_stopped_vm_and_disks_preserved": true,
+    "correction_commit": "07778edc",
+    "corrected_live_boot_pending": true
+  },
+  "checks": {
+    "export_staging_models": 46,
+    "export_pack_models": 5,
+    "macos_port_models": 91,
+    "focused_elixir_export_checks": 34,
+    "loopback_registry_fixture_smoke": true,
+    "linux_branch_fixture_correction": "690af24c",
+    "linux_live_acceptance_pending": true
+  },
+  "public_export_admission": false,
+  "publication_qualification": false,
+  "parity_complete": false,
+  "crash_validation_deferred": true,
+  "crash_handling_qualified": false,
+  "distribution_approved": false
+}

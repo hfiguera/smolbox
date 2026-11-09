@@ -542,7 +542,11 @@ impl Journal {
         if record.intent != *intent
             || !matches!(
                 record.phase,
-                Phase::Collecting | Phase::Collected | Phase::Deleting | Phase::Finishing
+                Phase::Collecting
+                    | Phase::Collected
+                    | Phase::Deleting
+                    | Phase::Finishing
+                    | Phase::Deleted
             )
             || absence.intent_sha256 != crate::material::hash(intent)?
         {
@@ -698,6 +702,7 @@ impl Retained {
         child: &CreationReceipt,
         operation_id: &str,
         request_sha256: &str,
+        budget: &ReadBudget,
     ) -> Result<Option<BranchDeletionResolution>> {
         if self.cleanup.as_ref().is_some_and(|request| {
             request.operation_id != operation_id || request.request_sha256 != request_sha256
@@ -705,8 +710,14 @@ impl Retained {
             return Err(Error::before(ErrorCode::Conflict));
         }
         self.check_returned(child)?;
-        if self.completion.is_none() {
-            let (record, _) = journal.read()?;
+        if self.completion.is_none() || matches!(self.completion, Some(Completion::Deleted)) {
+            let (record, version) = journal.read()?;
+            if let Some(proof) = &record.resolution {
+                if !proof.matches_request(operation_id, request_sha256) {
+                    return Err(Error::before(ErrorCode::Conflict));
+                }
+                journal.sync_record::<Record>(&version, budget)?;
+            }
             if !self.import_completion(record)? {
                 return Ok(None);
             }
@@ -718,6 +729,7 @@ impl Retained {
                 Ok(Some((**proof).clone()))
             }
             Some(Completion::Resolved(_)) => Err(Error::before(ErrorCode::Conflict)),
+            Some(Completion::Deleted) => Ok(None),
             _ => Err(Error::before(ErrorCode::State)),
         }
     }
@@ -731,11 +743,11 @@ impl Retained {
         budget: &ReadBudget,
     ) -> Result<BranchDeletionResolution> {
         if let Some(proof) =
-            self.recorded_resolution(journal, child, operation_id, request_sha256)?
+            self.recorded_resolution(journal, child, operation_id, request_sha256, budget)?
         {
             return Ok(proof);
         }
-        if self.leases.is_none() {
+        if self.leases.is_none() && !matches!(self.completion, Some(Completion::Deleted)) {
             return Err(Error::before(ErrorCode::Ownership));
         }
         let collection = authority
@@ -940,46 +952,67 @@ impl Engine {
             .map_err(|_| Error::before(ErrorCode::Conflict))?;
         let state = retained.as_mut().ok_or(Error::before(ErrorCode::State))?;
         state.intent.require_held()?;
-        let proof =
-            match state.recorded_resolution(&journal, child, operation_id, request_sha256)? {
-                Some(proof) => proof,
-                None => {
-                    self.verify_database_identity()?;
-                    let epoch = self.collection_epoch()?;
-                    if state.intent.plan != context.plan
-                        || state.intent.boot != *context.enrollment.intent()
-                        || state.intent.child != context.enrollment.child()
-                        || state.intent.identity_sha256 != context.identity_sha256
-                        || !epoch.bound_to(self.binding())
-                        || !context
-                            .enrollment
-                            .intent()
-                            .matches_epoch(&child.name, epoch)
-                        || context._runtime.pid(&child.name).is_some()
-                        || context
-                            .manager
-                            .try_lock()
-                            .map_err(|_| Error::before(ErrorCode::Conflict))?
-                            .child_pid()
-                            .is_some()
-                    {
-                        return Err(Error::before(ErrorCode::Ownership));
-                    }
-                    state.resolve(
-                        &journal,
-                        child,
-                        operation_id,
-                        request_sha256,
-                        ResolutionAuthority {
-                            epoch,
-                            enrollment: &context.enrollment,
-                            database: &self.binding().database,
-                            identity: self.database_identity,
-                        },
-                        budget,
-                    )?
+        let proof = match state.recorded_resolution(
+            &journal,
+            child,
+            operation_id,
+            request_sha256,
+            budget,
+        )? {
+            Some(proof) => proof,
+            None => {
+                self.verify_database_identity()?;
+                // Ordinary completion already retired its leases. Pin the
+                // same pair again while proving current absence.
+                let source_name = &context.plan.publication.previous.name;
+                let _fresh_gates = if state.leases.is_none() {
+                    let source_gate = self.observation_gate(source_name)?;
+                    let child_gate = self.observation_gate(&child.name)?;
+                    Some(
+                        crate::gate::lock_pair(
+                            (source_name, &source_gate),
+                            (&child.name, &child_gate),
+                        )
+                        .map_err(|()| Error::before(ErrorCode::Conflict))?,
+                    )
+                } else {
+                    None
+                };
+                let epoch = self.collection_epoch()?;
+                if state.intent.plan != context.plan
+                    || state.intent.boot != *context.enrollment.intent()
+                    || state.intent.child != context.enrollment.child()
+                    || state.intent.identity_sha256 != context.identity_sha256
+                    || !epoch.bound_to(self.binding())
+                    || !context
+                        .enrollment
+                        .intent()
+                        .matches_epoch(&child.name, epoch)
+                    || context._runtime.pid(&child.name).is_some()
+                    || context
+                        .manager
+                        .try_lock()
+                        .map_err(|_| Error::before(ErrorCode::Conflict))?
+                        .child_pid()
+                        .is_some()
+                {
+                    return Err(Error::before(ErrorCode::Ownership));
                 }
-            };
+                state.resolve(
+                    &journal,
+                    child,
+                    operation_id,
+                    request_sha256,
+                    ResolutionAuthority {
+                        epoch,
+                        enrollment: &context.enrollment,
+                        database: &self.binding().database,
+                        identity: self.database_identity,
+                    },
+                    budget,
+                )?
+            }
+        };
         budget.check().map_err(|e| Error::uncertain(e.code))?;
         drop(retained);
         // The retained original gates stay held until cache retirement succeeds.
@@ -1566,15 +1599,33 @@ mod tests {
         state.completion = None; // Exact journal recovery of a lost result, no SDK work.
         assert_eq!(
             state
-                .recorded_resolution(&journal, intent.receipt(), RESOLVE_ID, &request())
+                .recorded_resolution(
+                    &journal,
+                    intent.receipt(),
+                    RESOLVE_ID,
+                    &request(),
+                    &budget()
+                )
                 .unwrap(),
             Some(proof.clone())
         );
         assert!(state
-            .recorded_resolution(&journal, intent.receipt(), "another-resolution", &request())
+            .recorded_resolution(
+                &journal,
+                intent.receipt(),
+                "another-resolution",
+                &request(),
+                &budget()
+            )
             .is_err());
         assert!(state
-            .recorded_resolution(&journal, intent.receipt(), RESOLVE_ID, &"f".repeat(64))
+            .recorded_resolution(
+                &journal,
+                intent.receipt(),
+                RESOLVE_ID,
+                &"f".repeat(64),
+                &budget()
+            )
             .is_err());
         assert_eq!(std::fs::read(&journal.path).unwrap(), bytes);
         std::fs::rename(
@@ -1584,7 +1635,13 @@ mod tests {
         .unwrap();
         assert_eq!(
             state
-                .recorded_resolution(&journal, intent.receipt(), RESOLVE_ID, &request())
+                .recorded_resolution(
+                    &journal,
+                    intent.receipt(),
+                    RESOLVE_ID,
+                    &request(),
+                    &budget()
+                )
                 .unwrap(),
             Some(proof)
         );
@@ -1873,9 +1930,34 @@ mod tests {
             state.completed(&journal, intent.receipt()).unwrap();
         }
         assert!(state
-            .recorded_resolution(&journal, intent.receipt(), RESOLVE_ID, &request())
-            .is_err());
+            .recorded_resolution(
+                &journal,
+                intent.receipt(),
+                RESOLVE_ID,
+                &request(),
+                &budget()
+            )
+            .unwrap()
+            .is_none());
         assert_eq!(std::fs::read(&journal.path).unwrap(), before);
+        let resolve = |state: &mut Retained| {
+            state.resolve(
+                &journal,
+                intent.receipt(),
+                RESOLVE_ID,
+                &request(),
+                authority(&model, &epoch),
+                &budget(),
+            )
+        };
+        std::fs::create_dir(&intent.plan.child.path).unwrap();
+        assert!(resolve(&mut state).is_err());
+        assert_eq!(std::fs::read(&journal.path).unwrap(), before);
+        std::fs::remove_dir(&intent.plan.child.path).unwrap();
+        let proof = resolve(&mut state).unwrap();
+        let resolved = std::fs::read(&journal.path).unwrap();
+        assert_eq!(resolve(&mut state).unwrap(), proof);
+        assert_eq!(std::fs::read(&journal.path).unwrap(), resolved);
         assert_eq!(
             model.engine.jobs.counts().branch_metadata,
             2 * crate::jobs::BRANCH_BACKING_METADATA

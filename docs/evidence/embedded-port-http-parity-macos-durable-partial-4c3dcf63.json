@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-11-06",
+  "status": "public-durable-partial-branch-passed",
+  "native_fix_commit": "4c3dcf638be0eb19eceadf4dc4100acbe7f19850",
+  "elixir_source_commit": "0618e7cc",
+  "platform": "macos",
+  "architecture": "aarch64",
+  "elixir": "1.18.4",
+  "otp": "27.3.4.15",
+  "postgresql": "17.11 (Homebrew)",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+  "hex_archive_sha256": "8e309276833c6b663f6d6f7bca18e1a645ba2e63791c5ddbcce4825c57fb268a",
+  "old_disposal_rejection": {
+    "category": "identity_conflict",
+    "dispatch": "not_dispatched",
+    "collected_child_cache": {
+      "row_state": "running",
+      "pid_present": true,
+      "pack": "directory",
+      "entries": [
+        ".smolvm-extracted",
+        "agent-rootfs",
+        "agent-rootfs.tar",
+        "layers",
+        "overlay.raw",
+        "storage.ext4"
+      ],
+      "vm_cache_exists": true,
+      "layers_empty": true,
+      "known_files_private": true,
+      "empty_extraction_marker": true,
+      "pid_still_present": false
+    },
+    "original_failed_domains_preserved": true
+  },
+  "qualification_helper": {
+    "manifest_sha256": "24a7b6b8a8a7a3133a55679dd0ff62bf8d5c087916c84fee895ce2b4776acbff",
+    "helper_sha256": "f11c9bc446e9b601814390c2b26ae848a510753fb2cfe695f55aec64976f5a7e",
+    "adapter_overlay_sha256": "f0e6bee0d4aa81e0acf7bfee333dd8e58beaa1057ca6bacbd83271a6c48e9745",
+    "proof_script_sha256": "d84eca518de06f0a8d6fc6178c2b1ff2cee4fb8ee468ea0dc5af32daa7e037ac",
+    "boundary": "Call the original child boot and cancel its budget only after the API returns, before identity initialization.",
+    "qualification_only_cancellation_hook": true,
+    "default_helper_contains_hook": false
+  },
+  "public_recovery": {
+    "mode": "postgresql",
+    "campaign": "ordinary-public-durable-branch-recovery",
+    "actual_recovery_family": "partial",
+    "original_proof_retained": true,
+    "paired_retirement_and_release": true,
+    "final_reserved_slots": 0,
+    "final_reserved_disk_gb": 0,
+    "owned_cleanup": true,
+    "normal_shutdown": true,
+    "deliberate_process_interruption": false,
+    "crash_handling_qualified": false
+  },
+  "original_owner_source_stop_then_public_stopped_resolution": true,
+  "fresh_workerless_readback": {
+    "workers": 0,
+    "exact_records": 3,
+    "exact_machine_records": 2,
+    "saved_backing_reply": true
+  },
+  "postflight": {
+    "tables": {
+      "vms": 0,
+      "vm_create_reservations": 0,
+      "vm_pause_operations": 0,
+      "config": 0,
+      "vm_resize_intents": 0,
+      "vm_resize_receipts": 0,
+      "fork_pools": 0,
+      "fork_pool_snapshots": 0,
+      "fork_pool_slots": 0,
+      "fork_leases": 0
+    },
+    "account_lock_available": true,
+    "package_assets_verified": 809,
+    "encrypted_machine_rows": 2
+  },
+  "postgresql_stopped_normally": true,
+  "focused_macos_native_models_passed": 109,
+  "postgresql_models_passed": 298,
+  "report_sha256": "a96df197efe156002285360d5d3d30b5868136b316f0e9b53c4ff0e324f79184",
+  "readback_sha256": "390466e233e836c955bb5a8f25385c60d0e348d6f7170d9907fa6359052f320c",
+  "full_http_parity_claimed": false,
+  "crash_validation_deferred": true,
+  "default_macos_rebuild": {
+    "manifest_sha256": "b6b4a0a54295036d719ffdf2b241ce5c1a16b3c79811356b7995fa6cc4aa881c",
+    "helper_sha256": "5ed6cb9ebe3cbe50aecfccb0e9d7f21a71f8aa5a9e114ae0d3ad5ca40538f2f4",
+    "all_809_assets_match_qualification_helper": true,
+    "native_policy_matches_qualification_helper": true,
+    "signature_verified": true,
+    "qualification_hook_absent": true,
+    "live_partial_case_used_qualification_helper": true
+  },
+  "linux_host_native_models": {
+    "passed": 109,
+    "logs_sha256": "f8551b74d8c55528933544cd6eb7c8e5176338ea4780e8598f06f3901d264f62",
+    "live_vm_used": false,
+    "unmodified_sdk_verified_before_and_after": true
+  }
+}

@@ -38,12 +38,20 @@ defmodule SmolBox.TerminalEmbeddedConnectionTest do
     end
 
     def terminal_control(owner, _handle, control, timeout) do
-      Agent.update(
-        owner,
-        &%{&1 | controls: &1.controls ++ [control], timeouts: [timeout | &1.timeouts]}
-      )
+      Agent.get_and_update(owner, fn peer ->
+        if Map.get(peer, :reject_next_control, false) do
+          error = %Error{
+            category: :admission_exhausted,
+            operation: :embedded,
+            evidence: :not_dispatched
+          }
 
-      :ok
+          {{:error, error}, Map.delete(peer, :reject_next_control)}
+        else
+          {:ok,
+           %{peer | controls: peer.controls ++ [control], timeouts: [timeout | peer.timeouts]}}
+        end
+      end)
     end
 
     def acknowledge(owner, _handle, bytes, timeout) do
@@ -101,6 +109,26 @@ defmodule SmolBox.TerminalEmbeddedConnectionTest do
              Terminal.next(handle)
 
     assert Agent.get(peer, & &1.cancelled)
+  end
+
+  test "undispatched terminal input backpressure leaves the same session usable" do
+    {peer, source} = source()
+    {:ok, handle} = Server.start_connection({Embedded, source}, "owned", source.spec, self())
+    on_exit(fn -> if Process.alive?(handle.pid), do: GenServer.stop(handle.pid, :normal) end)
+
+    assert :ok = Terminal.resize(handle, 120, 43)
+    Agent.update(peer, &Map.put(&1, :reject_next_control, true))
+
+    assert {:error, %Error{category: :admission_exhausted, evidence: :not_dispatched}} =
+             Terminal.input(handle, "exit")
+
+    assert Enum.map(Agent.get(peer, & &1.controls), & &1["action"]) == ~w(attach resize)
+    refute Agent.get(peer, & &1.cancelled)
+    assert :ok = Terminal.input(handle, "exit")
+    assert Enum.map(Agent.get(peer, & &1.controls), & &1["action"]) == ~w(attach resize input)
+
+    publish(peer, {:terminal, outcome(7, true, 0), nil})
+    assert {:ok, {:closed, {:ok, %Result{exit_code: 7}}}} = Terminal.next(handle)
   end
 
   test "native connection rejects partial credit and stale admission without replay" do

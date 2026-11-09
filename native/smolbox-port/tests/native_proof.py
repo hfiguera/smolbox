@@ -91,6 +91,12 @@ def limits(manifest):
             values['volumes'] = dict(work_ms=86400000, observation_ms=30000,
                 record_bytes=16384, delete_entries=1000000, ancestor_bytes=4096,
                 control_metadata_bytes=262144, observation_metadata_bytes=131072)
+        if features.get('exports') == 1:
+            values['exports'] = dict(staging_bytes=549755813888, metadata_bytes=1048576,
+                upload_chunk_bytes=1048576, registry_requests=1048576, record_bytes=16384,
+                records=256, asset_file_bytes=2147483648, asset_total_bytes=4294967296,
+                control_metadata_bytes=262144, observation_metadata_bytes=131072,
+                retirement_metadata_bytes=33554432)
     return values
 
 

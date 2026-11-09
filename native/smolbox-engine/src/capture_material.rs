@@ -133,12 +133,16 @@ impl CaptureTransition {
 pub(crate) struct Completed {
     pub change: CaptureChange,
     pub proof: MaterialProof,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub resulting_immutable_sha256: Option<String>,
 }
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(crate) struct Pending {
     pub intent: Intent,
     pub entered: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub previous_lineage: Option<u64>,
 }
 pub(crate) struct Permit {
     pub intent: Intent,

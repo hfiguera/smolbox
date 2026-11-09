@@ -1,0 +1,356 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-11-07",
+  "source_base": "7737ace6cf79dd4fd0921283133664ff2d369346",
+  "client_change": "Allow checkpoint-only Port catalogs when the approved package declares checkpoint capability.",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "full_http_parity_claimed": false,
+  "distribution_approved": false,
+  "production_private_tls_deferred_by_operator": true,
+  "crash_validation_deferred": true,
+  "cli_race_validation_deferred": true,
+  "packages": {
+    "linux": {
+      "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+      "assets_sha256": "706c83d1a75e5ed5791da54bb4cfa6e80448302a3921b202a5d8c769868e3c15",
+      "platform": "linux",
+      "architecture": "x86_64"
+    },
+    "macos": {
+      "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+      "assets_sha256": "0c109ee5c9cc8f1681e5b8b83b06d6712041bd36f9eda9940a423b52c7be5b25",
+      "platform": "macos",
+      "architecture": "aarch64"
+    }
+  },
+  "client_archive_sha256": "95bc26da56ab91c2826668776760d8bd113bdc54e0ba06388bfb634c501533d7",
+  "client_runtime_files_verified": 354,
+  "consumer": "Local Hex archive consumed on the current and minimum toolchains with neither Rust nor Cargo in the consumer PATH.",
+  "fixture_packer_sources_sha256": "a5b1a4e7d2681dfa59866de3d0b0ba11ab421de14c7cea9dea5acfa353720eae",
+  "toolchains": {
+    "current": {
+      "elixir": "1.20.4",
+      "otp": "29.0.6"
+    },
+    "minimum": {
+      "elixir": "1.18.4",
+      "otp": "27.3.4.15"
+    }
+  },
+  "focused_contracts_passed": {
+    "current": 83,
+    "minimum": 83
+  },
+  "packed_fixtures": {
+    "linux": {
+      "bytes": 26535961,
+      "fixture_sha256": "ac45bd5b794e57f9627369facd15a18649f6af3b600f866f223f5f91b5bfa954",
+      "image_digest": "66a6306db78bf2dbf3487f293aa8d6990d8e506fdffab9cc43fe422becf886e4",
+      "layer_sha256": "5a9bfd996c6d49c6c3cb4ddfb76e8d09cf16b6b7cf6601d1f2dffbdbc3edb5d4",
+      "package_manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+      "platform": "linux/amd64"
+    },
+    "macos": {
+      "bytes": 27415363,
+      "fixture_sha256": "ec6ccce9b31a97bf8157cef7b5b6a5739f3bc7905f46f54656e143fe780291b9",
+      "image_digest": "d82c2ab94640ded77cf76514ce6a84870761105058a4a9e51b05a8a79be97a6c",
+      "layer_sha256": "eb380aebecfca9bc8f9229d9aefcb5b08b26a21c3a8467090b1bc55309729d93",
+      "package_manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+      "platform": "darwin/arm64"
+    }
+  },
+  "fixture_scope": "Architecture-matched digest-pinned public BusyBox layers were repacked with the unmodified SDK packer. Prepared-registry checks served the same local pack via a digest-pinned anonymous loopback registry. Egress checks used two host-local HTTP responders.",
+  "initial_checkpoint_catalog_rejection": "On both hosts the prior client rejected the documented checkpoint-only worker shape before dispatch. The replacement client admits it only under an approved checkpoint-capable package, with the existing approval checks intact.",
+  "workflow_sha256": {
+    "checkpoint": "b4d3338b1df70efcf8ce68d43429a0651408c38c14ffb8f01077ea02815060d7",
+    "linux_packed_and_registry": "2602f799011decdd009e43188ff3a9d361a1616b13f4b4b4cf20d93111c44a98",
+    "macos_packed_and_registry": "d0a6fa6e34b6402d4ee8cb47c6cd5a5598b2229f674a26165eebc7580f33f6d2",
+    "linux_mounted_packed_and_registry": "ef54a09af5a067db2c79dc25f11262341ec2c2990ea826e76f5b688d841dbbe1"
+  },
+  "runner_sha256": {
+    "checkpoint": "6bb42a50a93e80fabc39f8fc375727e8c7ff3028ee43ec060a2d150dc8fd5b9f",
+    "packed_and_registry": "6d446734e640fe34d4bff9eb0be49862ac594b98857348f9ab597306766eed67",
+    "linux_mounted_packed_and_registry": "9c4de9cd5645b5764b8a74a404edebf7b7eef02a1125517c1cf6df8364e12e3b"
+  },
+  "prepared_registry_receipts": {
+    "linux": {
+      "content_sha256": "ac45bd5b794e57f9627369facd15a18649f6af3b600f866f223f5f91b5bfa954",
+      "manifest_sha256": "63f71ce644e7de7633cf35af33fec5c6fa4865988cd9635177327707c849caf1"
+    },
+    "macos": {
+      "content_sha256": "ec6ccce9b31a97bf8157cef7b5b6a5739f3bc7905f46f54656e143fe780291b9",
+      "manifest_sha256": "c7bfbbb8b600750cb17d0bc13477f808f2cb4f9a2aea144c2f7fc1034025d7fa"
+    }
+  },
+  "checks_in_each_listed_lane": {
+    "checkpoint": {
+      "verified": [
+        "checkpoint_only_worker",
+        "offline_creation",
+        "approval_rejected_online",
+        "rejected_ports_mounts_and_workloads",
+        "duplicate_uses_one_reservation",
+        "reservation_survives_stop_and_runtime_replacement",
+        "guest_command_on_both_starts",
+        "positive_owned_absence_after_delete"
+      ],
+      "reservation": {
+        "slots": 1,
+        "cpus": 1,
+        "memory_mb": 768,
+        "disk_gb": 2
+      },
+      "ports_reserved": 0
+    },
+    "packed": {
+      "variants": [
+        "explicit startup with filtered egress",
+        "inherited startup with offline egress",
+        "neutral startup with offline egress"
+      ],
+      "explicit_workload": "Literal argument, inherited environment, override and /tmp workdir",
+      "startup": "Exactly one marker per explicit start, including after a nonzero workload exit",
+      "unsupported_restart_rejected": true
+    },
+    "registry": {
+      "variants": [
+        "neutral startup with offline egress",
+        "inherited startup with filtered egress"
+      ],
+      "prepared_receipt_retained_through_stop_and_start": true
+    },
+    "packed_and_registry": {
+      "verified": [
+        "local_egress_enforced",
+        "duplicate_uses_one_reservation",
+        "conflicts_rejected_before_dispatch",
+        "positive_owned_absence_after_delete"
+      ],
+      "distinct_forwarded_responses_per_cycle": 2,
+      "start_stop_cycles": 2,
+      "filtered_variant_custom_guest_workdir": true,
+      "normal_runtime_replacement": "All Linux variants, and each source's first variant on macOS"
+    },
+    "linux_mounted": {
+      "variants": [
+        "direct packed explicit workload",
+        "prepared-registry inherited workload"
+      ],
+      "includes_filtered_egress_and_two_mappings": true,
+      "volume_data_and_reservation_retained_through_normal_replacement": true,
+      "volume_detached_and_deleted_with_matching_workerless_readback": true
+    }
+  },
+  "postflight_in_each_passing_lane": [
+    "ordinary_shutdown",
+    "zero_reservations",
+    "inventory_empty",
+    "exact_workerless_readback",
+    "ten_empty_sdk_tables"
+  ],
+  "live_results": {
+    "linux": [
+      {
+        "toolchain": "current",
+        "store": "memory",
+        "workflow": "checkpoint",
+        "fixture_sha256": "88b7171fc87edf17368bab2ae80652a673361c299b1035f053eda3863d8caedd"
+      },
+      {
+        "toolchain": "current",
+        "store": "postgresql",
+        "workflow": "checkpoint",
+        "fixture_sha256": "88b7171fc87edf17368bab2ae80652a673361c299b1035f053eda3863d8caedd",
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)"
+      },
+      {
+        "toolchain": "minimum",
+        "store": "memory",
+        "workflow": "checkpoint",
+        "fixture_sha256": "88b7171fc87edf17368bab2ae80652a673361c299b1035f053eda3863d8caedd"
+      },
+      {
+        "toolchain": "minimum",
+        "store": "postgresql",
+        "workflow": "checkpoint",
+        "fixture_sha256": "88b7171fc87edf17368bab2ae80652a673361c299b1035f053eda3863d8caedd",
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)"
+      },
+      {
+        "toolchain": "current",
+        "store": "memory",
+        "workflow": "packed",
+        "fixture_sha256": "ac45bd5b794e57f9627369facd15a18649f6af3b600f866f223f5f91b5bfa954"
+      },
+      {
+        "toolchain": "current",
+        "store": "memory",
+        "workflow": "registry",
+        "fixture_sha256": "ac45bd5b794e57f9627369facd15a18649f6af3b600f866f223f5f91b5bfa954"
+      },
+      {
+        "toolchain": "current",
+        "store": "postgresql",
+        "workflow": "packed",
+        "fixture_sha256": "ac45bd5b794e57f9627369facd15a18649f6af3b600f866f223f5f91b5bfa954",
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)"
+      },
+      {
+        "toolchain": "current",
+        "store": "postgresql",
+        "workflow": "registry",
+        "fixture_sha256": "ac45bd5b794e57f9627369facd15a18649f6af3b600f866f223f5f91b5bfa954",
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)"
+      },
+      {
+        "toolchain": "minimum",
+        "store": "memory",
+        "workflow": "packed",
+        "fixture_sha256": "ac45bd5b794e57f9627369facd15a18649f6af3b600f866f223f5f91b5bfa954"
+      },
+      {
+        "toolchain": "minimum",
+        "store": "memory",
+        "workflow": "registry",
+        "fixture_sha256": "ac45bd5b794e57f9627369facd15a18649f6af3b600f866f223f5f91b5bfa954"
+      },
+      {
+        "toolchain": "minimum",
+        "store": "postgresql",
+        "workflow": "packed",
+        "fixture_sha256": "ac45bd5b794e57f9627369facd15a18649f6af3b600f866f223f5f91b5bfa954",
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)"
+      },
+      {
+        "toolchain": "minimum",
+        "store": "postgresql",
+        "workflow": "registry",
+        "fixture_sha256": "ac45bd5b794e57f9627369facd15a18649f6af3b600f866f223f5f91b5bfa954",
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)"
+      },
+      {
+        "toolchain": "current",
+        "store": "postgresql",
+        "workflow": "packed",
+        "fixture_sha256": "ac45bd5b794e57f9627369facd15a18649f6af3b600f866f223f5f91b5bfa954",
+        "mounted": true,
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)"
+      },
+      {
+        "toolchain": "current",
+        "store": "postgresql",
+        "workflow": "registry",
+        "fixture_sha256": "ac45bd5b794e57f9627369facd15a18649f6af3b600f866f223f5f91b5bfa954",
+        "mounted": true,
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)"
+      },
+      {
+        "toolchain": "minimum",
+        "store": "postgresql",
+        "workflow": "packed",
+        "fixture_sha256": "ac45bd5b794e57f9627369facd15a18649f6af3b600f866f223f5f91b5bfa954",
+        "mounted": true,
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)"
+      },
+      {
+        "toolchain": "minimum",
+        "store": "postgresql",
+        "workflow": "registry",
+        "fixture_sha256": "ac45bd5b794e57f9627369facd15a18649f6af3b600f866f223f5f91b5bfa954",
+        "mounted": true,
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)"
+      }
+    ],
+    "macos": [
+      {
+        "toolchain": "current",
+        "store": "memory",
+        "workflow": "checkpoint",
+        "fixture_sha256": "fe4eac20410328d13696ecb2d09478005b376a18d63cbb73888caf906e649350"
+      },
+      {
+        "toolchain": "current",
+        "store": "postgresql",
+        "workflow": "checkpoint",
+        "fixture_sha256": "fe4eac20410328d13696ecb2d09478005b376a18d63cbb73888caf906e649350",
+        "postgresql": "17.11 (Homebrew)"
+      },
+      {
+        "toolchain": "minimum",
+        "store": "memory",
+        "workflow": "checkpoint",
+        "fixture_sha256": "fe4eac20410328d13696ecb2d09478005b376a18d63cbb73888caf906e649350"
+      },
+      {
+        "toolchain": "minimum",
+        "store": "postgresql",
+        "workflow": "checkpoint",
+        "fixture_sha256": "fe4eac20410328d13696ecb2d09478005b376a18d63cbb73888caf906e649350",
+        "postgresql": "17.11 (Homebrew)"
+      },
+      {
+        "toolchain": "current",
+        "store": "memory",
+        "workflow": "packed",
+        "fixture_sha256": "ec6ccce9b31a97bf8157cef7b5b6a5739f3bc7905f46f54656e143fe780291b9"
+      },
+      {
+        "toolchain": "current",
+        "store": "memory",
+        "workflow": "registry",
+        "fixture_sha256": "ec6ccce9b31a97bf8157cef7b5b6a5739f3bc7905f46f54656e143fe780291b9"
+      },
+      {
+        "toolchain": "current",
+        "store": "postgresql",
+        "workflow": "packed",
+        "fixture_sha256": "ec6ccce9b31a97bf8157cef7b5b6a5739f3bc7905f46f54656e143fe780291b9",
+        "postgresql": "17.11 (Homebrew)"
+      },
+      {
+        "toolchain": "current",
+        "store": "postgresql",
+        "workflow": "registry",
+        "fixture_sha256": "ec6ccce9b31a97bf8157cef7b5b6a5739f3bc7905f46f54656e143fe780291b9",
+        "postgresql": "17.11 (Homebrew)"
+      },
+      {
+        "toolchain": "minimum",
+        "store": "memory",
+        "workflow": "packed",
+        "fixture_sha256": "ec6ccce9b31a97bf8157cef7b5b6a5739f3bc7905f46f54656e143fe780291b9"
+      },
+      {
+        "toolchain": "minimum",
+        "store": "memory",
+        "workflow": "registry",
+        "fixture_sha256": "ec6ccce9b31a97bf8157cef7b5b6a5739f3bc7905f46f54656e143fe780291b9"
+      },
+      {
+        "toolchain": "minimum",
+        "store": "postgresql",
+        "workflow": "packed",
+        "fixture_sha256": "ec6ccce9b31a97bf8157cef7b5b6a5739f3bc7905f46f54656e143fe780291b9",
+        "postgresql": "17.11 (Homebrew)"
+      },
+      {
+        "toolchain": "minimum",
+        "store": "postgresql",
+        "workflow": "registry",
+        "fixture_sha256": "ec6ccce9b31a97bf8157cef7b5b6a5739f3bc7905f46f54656e143fe780291b9",
+        "postgresql": "17.11 (Homebrew)"
+      }
+    ]
+  },
+  "ordinary_current_suite_passed": 2135,
+  "linux_result_archive_sha256": "884316214a4b88a4e2e35eb2a5c77ef0971b7c18a5887abd23f24fc1757e71c1",
+  "linux_lab_normal_shutdown": true
+}

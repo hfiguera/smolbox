@@ -1,0 +1,163 @@
+{
+  "schema": 1,
+  "source_commit": "4e2f125a7cd075de1c63f39e21a19e1dc2c3cf46",
+  "recorded_date": "2026-11-07",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "libkrun_revision": "3285db7404144ed61faf0848bb424c0f82743f41",
+  "package": {
+    "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+    "engine_version": "0.2.0",
+    "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+    "build_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+    "assets_sha256": "706c83d1a75e5ed5791da54bb4cfa6e80448302a3921b202a5d8c769868e3c15",
+    "platform": "linux",
+    "architecture": "x86_64"
+  },
+  "client_archive_sha256": "95bc26da56ab91c2826668776760d8bd113bdc54e0ba06388bfb634c501533d7",
+  "client_runtime_files_verified_against_commit": 354,
+  "toolchains": {
+    "current": {
+      "elixir": "1.20.4",
+      "otp": "29.0.6"
+    },
+    "minimum": {
+      "elixir": "1.18.4",
+      "otp": "27.3.4.15"
+    }
+  },
+  "fixtures": {
+    "packed": "ac45bd5b794e57f9627369facd15a18649f6af3b600f866f223f5f91b5bfa954",
+    "bare": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+    "oci": "docker.io/library/alpine@sha256:3c81aa9a3d770b316568f4499e30461a5cd3fbd7180bd89e28e34894c7845832"
+  },
+  "prepared_registry": "Anonymous digest-pinned loopback registry serving the verified local container pack.",
+  "oci_registry": "Public anonymous digest-pinned Alpine pull over HTTPS with the existing hostname-only profile.",
+  "platform_scope": "Linux x86_64 on the nested KVM lab with a dedicated unprivileged account and a private canonical SDK volume root.",
+  "focused_contracts_passed": {
+    "current": 65,
+    "minimum": 65
+  },
+  "qualified_mount_counts_by_tested_topology": {
+    "offline_local_bare": 2,
+    "offline_local_container": 2,
+    "offline_prepared_registry_container": 2,
+    "filtered_prepared_registry_container": 1,
+    "filtered_oci": 2
+  },
+  "volume_witness": {
+    "verified_in_every_passing_lane": [
+      "atomic_attachment_rollback",
+      "attachment_released_only_on_delete",
+      "bounded_capacity_refused_without_mutation",
+      "capacity_reusable_by_fresh_volume",
+      "drain_and_normal_replacement",
+      "exact_backing_absence",
+      "exact_provision_and_delete_proofs",
+      "identical_provision_and_delete_retry",
+      "ordinary_shutdown",
+      "private_0700_backing",
+      "readonly_write_refusal",
+      "retained_symlink_target_preserved",
+      "sibling_data_and_running_machine_preserved",
+      "stale_version_and_conflicting_size_refused",
+      "stopped_attachments_exclusive",
+      "zero_reservations"
+    ],
+    "initial_volume_sizes_gib": [
+      1,
+      2,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "worker_disk_capacity_gib": 12,
+    "deep_tree_entries": 640,
+    "tree_depth": 20,
+    "workerless_tombstones": 10,
+    "filtered_prepared_registry_modes": [
+      "readonly",
+      "writable"
+    ],
+    "multi_mount_modes": "Offline bare mounts were writable. The other passing two-mount cases combined one read-only and one writable volume.",
+    "accounting": "Deleting the machine released attachments and machine resources. Each volume kept its independent disk reservation until verified deletion. The released capacity admitted a new volume."
+  },
+  "start_limits": {
+    "cause": "The pinned libkrun x86_64 MMIO allocator exhausted its virtio interrupt range before the guest booted.",
+    "irq_layout_source": "https://github.com/libkrun/libkrun/blob/3285db7404144ed61faf0848bb424c0f82743f41/src/arch/src/x86_64/layout.rs#L22-L26",
+    "attempts": [
+      {
+        "topology": "offline_local_bare",
+        "mount_count": 8,
+        "failed_device": "filesystem",
+        "machine_state": "unknown",
+        "custody": "Archived disks and durable records. The operator authorized ending only this parked runner. A fresh Runtime confirmed the owned machine was stopped, resolved it explicitly and completed normal deletion of the machine and all nine volumes with zero reservations.",
+        "private_disk_and_records_sha256": "da9f4041c4538a13e8c6a2e9e2165594182a05c72326f33920239e88af80100b",
+        "private_postgresql_dump_sha256": "f1e6a659be0b5e7f98b1358d0f46a2cf6e280a0314275e678c8eb63da3599af7"
+      },
+      {
+        "topology": "offline_local_bare",
+        "mount_count": 4,
+        "failed_device": "block",
+        "machine_state": "unknown",
+        "custody": "Archived disks and durable records. This separate parked witness was preserved outside the passing scope.",
+        "private_disk_and_records_sha256": "fa232df2f133249d3f98fe90e4c213b8bb029869031a414eed5ade0c07ed3c20",
+        "private_postgresql_dump_sha256": "269a7f9013b42ad4422211244bb8db175c1d5bab55edcedf5afddb65da8834b7"
+      },
+      {
+        "topology": "filtered_prepared_registry_container",
+        "mount_count": 2,
+        "failed_device": "network",
+        "machine_state": "unknown",
+        "custody": "The original runtime observed the owned stopped machine after draining, explicitly resolved the start and completed ordinary cleanup."
+      }
+    ],
+    "parity_disposition": "Mount-count parity remains pending. Passing counts are demonstrated layouts. The public constructor's eight-entry bound exceeds the boot-device budget in the tested pinned x86_64 layouts."
+  },
+  "ordinary_harness_correction": "The first pass through the supported layouts met a temporary reconciliation gate before the stale-version delete check. The original scope cleaned up normally. Passing runs repeat only known non-dispatch gate refusals with an unchanged volume record.",
+  "live_results": [
+    {
+      "toolchain": "current",
+      "store": "memory",
+      "status": "passed",
+      "empty_sdk_tables": 10,
+      "result_sha256": "85a4cb73b0e6a4459c9caf516caab91da736e525c779d00fd00b392c146f3079"
+    },
+    {
+      "toolchain": "current",
+      "store": "postgresql",
+      "status": "passed",
+      "empty_sdk_tables": 10,
+      "result_sha256": "55bbd27e75846cdddb7383d4f417da9d288883859b50c576ae951541cffc6ee6",
+      "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+      "postgresql_normal_stop": true
+    },
+    {
+      "toolchain": "minimum",
+      "store": "memory",
+      "status": "passed",
+      "empty_sdk_tables": 10,
+      "result_sha256": "8bc1b6f677fa362844c117c79e202e61bcb4967671bc387e7e59738bf8ac4828"
+    },
+    {
+      "toolchain": "minimum",
+      "store": "postgresql",
+      "status": "passed",
+      "empty_sdk_tables": 10,
+      "result_sha256": "eb1d8433b6f48e63f1f60f0fe6e60e1e33de52d918139905e16a3108b3a2afac",
+      "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+      "postgresql_normal_stop": true
+    }
+  ],
+  "proof_sha256": "ae425599abdf1e8ca336bf039b0abd5cd51044cee42a40126dec977e797d6760",
+  "runner_sha256": "23f98daf4a412d6e8ea47fc697175e09ddf19187f0f6b7225a2ede3e884d5b04",
+  "result_archive_sha256": "e4de0762d127f3dcfe619a51638769498511db5ecf4e40aca8424a482c4256ba",
+  "private_production_tls_validation_deferred": true,
+  "crash_validation_deferred": true,
+  "cli_race_validation_deferred": true,
+  "parity_complete": false
+}

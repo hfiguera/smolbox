@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-11-06",
+  "status": "four-installed-http-only-consumers-passed",
+  "source_commit": "0618e7cc",
+  "package_sha256": "8e309276833c6b663f6d6f7bca18e1a645ba2e63791c5ddbcce4825c57fb268a",
+  "package_contents_identical_across_lanes": true,
+  "dependencies_resolved_offline": true,
+  "lanes": [
+    {
+      "platform": "macos",
+      "architecture": "arm64",
+      "lane": "current",
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "verified_package_files": 671,
+      "runtime_dependencies": {
+        "jason": "1.4.5",
+        "mint": "1.11.0",
+        "mint_web_socket": "1.0.6",
+        "nimble_options": "1.2.0",
+        "req": "0.7.5",
+        "telemetry": "1.4.2"
+      },
+      "report_sha256": "634c3ea02357cdd9b63e218a0d87c59b8964cab2e3a35ecf1afa76cadab51672",
+      "http_client_and_runtime_smoke_passed": true,
+      "without_rust": true,
+      "native_exercised": false
+    },
+    {
+      "platform": "macos",
+      "architecture": "arm64",
+      "lane": "minimum",
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "verified_package_files": 671,
+      "runtime_dependencies": {
+        "jason": "1.4.0",
+        "mint": "1.11.0",
+        "mint_web_socket": "1.0.6",
+        "nimble_options": "1.1.0",
+        "req": "0.7.4",
+        "telemetry": "1.3.0"
+      },
+      "report_sha256": "47ac63f2b70ace6cabb8c41b8eea01c8c682908c68a963fc3a8d090ed527ab42",
+      "http_client_and_runtime_smoke_passed": true,
+      "without_rust": true,
+      "native_exercised": false
+    },
+    {
+      "platform": "linux",
+      "architecture": "x86_64",
+      "lane": "current",
+      "toolchain": "warning: the VM is running with native name encoding of latin1 which may cause Elixir to malfunction as it expects utf8. Please ensure your locale is set to UTF-8 (which can be verified by running \"locale\" in your shell) or set the ELIXIR_ERL_OPTIONS=\"+fnu\" environment variable\nErlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "verified_package_files": 671,
+      "runtime_dependencies": {
+        "jason": "1.4.5",
+        "mint": "1.11.0",
+        "mint_web_socket": "1.0.6",
+        "nimble_options": "1.2.0",
+        "req": "0.7.5",
+        "telemetry": "1.4.2"
+      },
+      "report_sha256": "a91165188a63f31b775300fda276b463855363ec93ab97f381cdf124e4cb2c67",
+      "http_client_and_runtime_smoke_passed": true,
+      "without_rust": true,
+      "native_exercised": false
+    },
+    {
+      "platform": "linux",
+      "architecture": "x86_64",
+      "lane": "minimum",
+      "toolchain": "warning: the VM is running with native name encoding of latin1 which may cause Elixir to malfunction as it expects utf8. Please ensure your locale is set to UTF-8 (which can be verified by running \"locale\" in your shell) or set the ELIXIR_ERL_OPTIONS=\"+fnu\" environment variable\nErlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "verified_package_files": 671,
+      "runtime_dependencies": {
+        "jason": "1.4.0",
+        "mint": "1.11.0",
+        "mint_web_socket": "1.0.6",
+        "nimble_options": "1.1.0",
+        "req": "0.7.4",
+        "telemetry": "1.3.0"
+      },
+      "report_sha256": "6d4cc58482053bf7c3fde6feeb94af0182556bfc9c8ecf9139676b3757374af2",
+      "http_client_and_runtime_smoke_passed": true,
+      "without_rust": true,
+      "native_exercised": false
+    }
+  ],
+  "full_http_parity_claimed": false,
+  "crash_validation_deferred": true
+}

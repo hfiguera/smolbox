@@ -39,6 +39,14 @@ defmodule SmolBox.BackendParityCoverageTest do
       assert Enum.all?(operation["arities"], &(is_integer(&1) and &1 > 0))
       assert Enum.count_until(operation["acceptance"], 3) == 3
       assert operation["parity_status"] in ["pending", "qualified"]
+
+      assert %{"evidence" => evidence, "remaining" => remaining} = operation["review"]
+      assert evidence != []
+      assert Enum.uniq(evidence) == evidence
+      assert Enum.all?(evidence, &File.regular?(Path.join(@root, &1)))
+      qualified = operation["parity_status"] == "qualified"
+      assert qualified == (remaining == [])
+      assert Enum.all?(remaining, &(is_binary(&1) and String.trim(&1) != ""))
     end
 
     for contract <- Map.values(contracts) do
@@ -63,6 +71,9 @@ defmodule SmolBox.BackendParityCoverageTest do
       assert is_binary(spec["contract"]) and spec["contract"] != ""
       assert Enum.count_until(spec["acceptance"], 3) == 3
       assert spec["parity_status"] in ["pending", "qualified"]
+      qualified = spec["parity_status"] == "qualified"
+      assert qualified == (spec["remaining"] == [])
+      assert Enum.all?(spec["remaining"], &(is_binary(&1) and String.trim(&1) != ""))
     end
   end
 
@@ -78,11 +89,31 @@ defmodule SmolBox.BackendParityCoverageTest do
 
     assert @coverage["parity_complete"] == all_qualified
     assert @coverage["crash_validation_deferred"]
+    assert @coverage["cli_race_validation_deferred"]
     refute @coverage["crash_handling_qualified"]
     refute @coverage["distribution_approved"]
 
     source = @root |> Path.join("native/vendor/source.json") |> File.read!() |> Jason.decode!()
     assert @coverage["sdk_revision"] == source["revision"]
     assert source["patches"] == []
+  end
+
+  test "HTTP closeout matches the shared operation and specification coverage" do
+    closeout = @coverage["http_parity"]
+    shared = Enum.filter(@coverage["operations"], & &1["http_supported"])
+    {qualified, pending} = Enum.split_with(shared, &(&1["parity_status"] == "qualified"))
+
+    assert closeout["total_operations"] == length(shared)
+    assert closeout["qualified_operations"] == length(qualified)
+
+    pending_specs =
+      for spec <- @coverage["specifications"], spec["parity_status"] == "pending", do: spec["id"]
+
+    gaps = closeout["remaining_gaps"]
+
+    assert Enum.sort(Enum.flat_map(gaps, & &1["operations"])) ==
+             Enum.sort(Enum.map(pending, & &1["name"]))
+
+    assert Enum.sort(Enum.flat_map(gaps, & &1["specifications"])) == Enum.sort(pending_specs)
   end
 end

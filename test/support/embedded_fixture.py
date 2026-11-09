@@ -440,10 +440,16 @@ try:
                     elif VM and action in ("start", "stop"):
                         if action != "stop" or not META.get("stop_no_change"):
                             VM["state"] = "running" if action == "start" else "stopped"
-                        if action == "start": VM["started"] = True
+                        if action == "start":
+                            VM["started"] = True
+                            if META.get("unreachable_after_start"):
+                                VM["unreachable_on_inspect"] = True
+                    observed = observation()
+                    if action == "inspect" and VM and VM.pop("unreachable_on_inspect", False):
+                        observed.update(state="unreachable", pid_identity=None)
                     save_vm()
                     send(correlated("terminal", identifier, 1, outcome=dict(result="observed",
-                        observation=observation())))
+                        observation=observed)))
                 elif META.get("backend") and operation["operation"] == "logs":
                     if not VM or not VM.get("started"):
                         send(correlated("terminal", identifier, 1, outcome=dict(

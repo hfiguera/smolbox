@@ -488,12 +488,14 @@ defmodule SmolBox.Machines do
             System.monotonic_time(:millisecond) +
               min(Target.connection(worker).budget.timeout_ms, 30_000)
 
+      control = if deadline, do: {:ordinary_branch, :resolve_branch_deletion}, else: disposition
+
       NativeResolution.run(
         config,
         Runtime.coordinator(runtime),
         record,
         worker,
-        disposition,
+        control,
         fn pinned ->
           resolve_record(config, handle, version, pinned, disposition, deadline)
         end

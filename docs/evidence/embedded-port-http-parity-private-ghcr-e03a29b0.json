@@ -1,0 +1,239 @@
+{
+  "schema": 1,
+  "source_commit": "e03a29b0",
+  "recorded_date": "2026-11-08",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "status": "blocked",
+  "production_tls": {
+    "registry": "ghcr.io",
+    "ordinary_ca_and_hostname_verification": true,
+    "private_package_visibility_verified": true,
+    "manifests_verified_by_reader": 6,
+    "anonymous_manifest_refusal_verified": true,
+    "token_realm": "https://ghcr.io/token",
+    "basic_exchange_with_reader": true,
+    "explicit_bearer_exchange_with_reader_pat": false,
+    "blob_redirect": [
+      {
+        "host": "ghcr.io",
+        "status": 307
+      },
+      {
+        "host": "pkg-containers.githubusercontent.com",
+        "status": 200
+      }
+    ]
+  },
+  "fixture_digests": {
+    "amd64": {
+      "prepared": {
+        "manifest": "sha256:03c9e2175c47ad586f48d637a6383bb42d7f52592371113f2e82ceb2db8c3056",
+        "content_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1"
+      },
+      "boot": {
+        "manifest": "sha256:7aeedda7704140881c3e9e30fc00d6faa94324b6c6d19b497f1794eb978a38f2",
+        "config_digest": "sha256:90d8cf39c330433f67324bb8dc7995658c26d4f9612d4e182b3439edc108ded2"
+      },
+      "pull": {
+        "manifest": "sha256:5c5d1bd214a1ecaec7b54721bc7a352b5047ea051cac63059bb12a5cc564c83c",
+        "config_digest": "sha256:fb2b979188086ebb8fe99ec84cffb34e57f5676fa44d57f054fb869dc7208d75"
+      }
+    },
+    "arm64": {
+      "prepared": {
+        "manifest": "sha256:99028778687771149039f23ffb2e849410bb5c85ecf658583a7a5ed5359c1db7",
+        "content_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc"
+      },
+      "boot": {
+        "manifest": "sha256:1df8512183d83fca1aa3dcc1d75a275ac1ce9ec44a92639dd744785f4279e97a",
+        "config_digest": "sha256:dbcf01e4fed4393f02b556854703385cbe03bedc95f59c53e9d991e0fae7eab3"
+      },
+      "pull": {
+        "manifest": "sha256:37c2956f26e78291f77848eea7158aeb5930ade1b5762e7246721342571e0ffa",
+        "config_digest": "sha256:ee143715deea314743f605c76e02cbcf423fafd0c99d0e5ce629dcfe88669161"
+      }
+    }
+  },
+  "toolchains": {
+    "current": {
+      "elixir": "1.20.4",
+      "otp": "29.0.6"
+    },
+    "minimum": {
+      "elixir": "1.18.4",
+      "otp": "27.3.4.15"
+    }
+  },
+  "lanes": [
+    {
+      "platform": "linux",
+      "toolchain": "current",
+      "result_sha256": "f3d7531e9a9c417375b84b3b6606502a07cb5e2e0efa155f980b24ccb23e0f5c",
+      "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+      "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+      "postgres": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+      "postgresql_normal_stop": true,
+      "empty_sdk_tables": 10,
+      "workflow": {
+        "invalid_reader_refusal": {
+          "status": "refused",
+          "category": "unknown",
+          "operation": "prepare_artifact",
+          "evidence": "dispatch_uncertain"
+        },
+        "prepared_with_reader": {
+          "status": "refused",
+          "category": "validation",
+          "operation": "prepare_artifact",
+          "evidence": "dispatch_uncertain"
+        },
+        "oci_metadata_with_reader": {
+          "boot": {
+            "status": "refused",
+            "category": "validation",
+            "operation": "qualify_creation",
+            "evidence": "not_dispatched"
+          },
+          "pull": {
+            "status": "refused",
+            "category": "validation",
+            "operation": "qualify_creation",
+            "evidence": "not_dispatched"
+          }
+        },
+        "zero_reservations": true,
+        "empty_inventory": true,
+        "ordinary_shutdown": true
+      }
+    },
+    {
+      "platform": "linux",
+      "toolchain": "minimum",
+      "result_sha256": "2fd509c48022b86f1ed3890d495ea207ef86828b68f69d45849e37dc560ed27b",
+      "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+      "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+      "postgres": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+      "postgresql_normal_stop": true,
+      "empty_sdk_tables": 10,
+      "workflow": {
+        "invalid_reader_refusal": {
+          "status": "refused",
+          "category": "unknown",
+          "operation": "prepare_artifact",
+          "evidence": "dispatch_uncertain"
+        },
+        "prepared_with_reader": {
+          "status": "refused",
+          "category": "validation",
+          "operation": "prepare_artifact",
+          "evidence": "dispatch_uncertain"
+        },
+        "oci_metadata_with_reader": {
+          "boot": {
+            "status": "refused",
+            "category": "validation",
+            "operation": "qualify_creation",
+            "evidence": "not_dispatched"
+          },
+          "pull": {
+            "status": "refused",
+            "category": "validation",
+            "operation": "qualify_creation",
+            "evidence": "not_dispatched"
+          }
+        },
+        "zero_reservations": true,
+        "empty_inventory": true,
+        "ordinary_shutdown": true
+      }
+    },
+    {
+      "platform": "macos",
+      "toolchain": "current",
+      "result_sha256": "5d7a141cb1f3c5c2bf22bfd4010252301049d2d07f060037770917aa2ab4dd6d",
+      "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+      "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+      "postgres": "17.11 (Homebrew)",
+      "postgresql_normal_stop": true,
+      "empty_sdk_tables": 10,
+      "workflow": {
+        "invalid_reader_refusal": {
+          "status": "refused",
+          "category": "unknown",
+          "operation": "prepare_artifact",
+          "evidence": "dispatch_uncertain"
+        },
+        "prepared_with_reader": {
+          "status": "refused",
+          "category": "validation",
+          "operation": "prepare_artifact",
+          "evidence": "dispatch_uncertain"
+        },
+        "oci_metadata_with_reader": {
+          "boot": {
+            "status": "refused",
+            "category": "validation",
+            "operation": "qualify_creation",
+            "evidence": "not_dispatched"
+          },
+          "pull": {
+            "status": "refused",
+            "category": "validation",
+            "operation": "qualify_creation",
+            "evidence": "not_dispatched"
+          }
+        },
+        "zero_reservations": true,
+        "empty_inventory": true,
+        "ordinary_shutdown": true
+      }
+    },
+    {
+      "platform": "macos",
+      "toolchain": "minimum",
+      "result_sha256": "d6fff9ced945205ad7141ad48ee2c78e7a2a59c8142a494d3e9292b86ec73cbb",
+      "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+      "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+      "postgres": "17.11 (Homebrew)",
+      "postgresql_normal_stop": true,
+      "empty_sdk_tables": 10,
+      "workflow": {
+        "invalid_reader_refusal": {
+          "status": "refused",
+          "category": "unknown",
+          "operation": "prepare_artifact",
+          "evidence": "dispatch_uncertain"
+        },
+        "prepared_with_reader": {
+          "status": "refused",
+          "category": "validation",
+          "operation": "prepare_artifact",
+          "evidence": "dispatch_uncertain"
+        },
+        "oci_metadata_with_reader": {
+          "boot": {
+            "status": "refused",
+            "category": "validation",
+            "operation": "qualify_creation",
+            "evidence": "not_dispatched"
+          },
+          "pull": {
+            "status": "refused",
+            "category": "validation",
+            "operation": "qualify_creation",
+            "evidence": "not_dispatched"
+          }
+        },
+        "zero_reservations": true,
+        "empty_inventory": true,
+        "ordinary_shutdown": true
+      }
+    }
+  ],
+  "blocking_policy": "Both prepared-blob download and OCI configuration verification use the shared blob redirect policy. The tested helper permits the Docker Hub redirect pair. It rejects the observed GHCR redirect pair.",
+  "lifecycle_qualified": false,
+  "private_production_tls_qualified": false,
+  "crash_validation_deferred": true,
+  "cli_race_validation_deferred": true,
+  "full_http_parity_claimed": false
+}

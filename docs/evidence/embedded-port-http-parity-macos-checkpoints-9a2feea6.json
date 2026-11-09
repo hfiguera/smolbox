@@ -1,0 +1,176 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-11-06",
+  "status": "passed",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "package": {
+    "source_commit": "9a2feea639f01e89d938a7a27a1fcbc4a6a7be92",
+    "source_native_sha256": "b4a3a6fe4f36620e7cc5d1e0e4ba67182e273566541fbd5a99cbb11c4bc4952e",
+    "manifest_sha256": "28d07b9a209c856c4c734939afa3404539975c881a7a7c0e8b03102c08d58a3a",
+    "helper_sha256": "f75384cdb8374e8f8653d4c1e001a0f3ed39e1e61c9b5f4c62c477a22b64e090",
+    "hex_archive_sha256": "e91ee58708ae3372d16f070c57382936b1daaab4e715aac014a98298006663dc",
+    "asset_count": 809,
+    "assets_policy_and_tools_match_previous_package": true,
+    "sdk_source_unmodified": true,
+    "signature_verified": true,
+    "signature_kind": "local-ad-hoc"
+  },
+  "seed_reused_from_prior_qualification": true,
+  "fresh_consumer_domains": true,
+  "lanes": {
+    "current": {
+      "elixir": "1.20.4",
+      "otp": "29.0.6",
+      "status": "passed",
+      "seed_sha256": "fe4eac20410328d13696ecb2d09478005b376a18d63cbb73888caf906e649350",
+      "evidence": {
+        "campaign": "ordinary-public-native-checkpoints",
+        "package_manifest_sha256": "28d07b9a209c856c4c734939afa3404539975c881a7a7c0e8b03102c08d58a3a",
+        "store_mode": "durable",
+        "capture_source_continues": true,
+        "duplicate_capture_retained": true,
+        "stopped_runtime_replacement": true,
+        "ram_and_disk_restored": true,
+        "independent_restores": 2,
+        "cold_restart_does_not_restore_ram": true,
+        "captured_bytes_unchanged": true,
+        "capture_artifact_removed": true,
+        "native_capture_cleanup": true,
+        "codec_roundtrips": true,
+        "owned_deleted": true,
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0,
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false
+      },
+      "postflight": {
+        "sdk_table_counts": {
+          "vms": 0,
+          "vm_create_reservations": 0,
+          "vm_pause_operations": 0,
+          "config": 0,
+          "vm_resize_intents": 0,
+          "vm_resize_receipts": 0,
+          "fork_pools": 0,
+          "fork_pool_snapshots": 0,
+          "fork_pool_slots": 0,
+          "fork_leases": 0
+        },
+        "account_lock_available": true,
+        "postgresql_normal_stop": true
+      },
+      "postgresql": "17.11 (Homebrew)",
+      "restored_diagnostics": {
+        "first": {
+          "follow": {
+            "category": "expired",
+            "operation": "logs",
+            "evidence": "dispatch_uncertain"
+          },
+          "inventory_receipt_free": true,
+          "console_tail": {
+            "lines": 2
+          },
+          "follow_delivered": true,
+          "usage_unchanged": true
+        },
+        "held": {
+          "follow": {
+            "category": "expired",
+            "operation": "logs",
+            "evidence": "dispatch_uncertain"
+          },
+          "inventory_receipt_free": true,
+          "console_tail": {
+            "lines": 2
+          },
+          "follow_delivered": true,
+          "usage_unchanged": true
+        }
+      },
+      "hex_archive_sha256": "e91ee58708ae3372d16f070c57382936b1daaab4e715aac014a98298006663dc",
+      "assets_verified": 809,
+      "without_rust": true,
+      "crash_validation_deferred": true,
+      "report_sha256": "3138f8ad0dcd655e4bf8b51149622d7173c83235070cce4b752fa7c35e79ccea"
+    },
+    "minimum": {
+      "elixir": "1.18.4",
+      "otp": "27.3.4.15",
+      "status": "passed",
+      "seed_sha256": "fe4eac20410328d13696ecb2d09478005b376a18d63cbb73888caf906e649350",
+      "evidence": {
+        "campaign": "ordinary-public-native-checkpoints",
+        "package_manifest_sha256": "28d07b9a209c856c4c734939afa3404539975c881a7a7c0e8b03102c08d58a3a",
+        "store_mode": "durable",
+        "capture_source_continues": true,
+        "duplicate_capture_retained": true,
+        "stopped_runtime_replacement": true,
+        "ram_and_disk_restored": true,
+        "independent_restores": 2,
+        "cold_restart_does_not_restore_ram": true,
+        "captured_bytes_unchanged": true,
+        "capture_artifact_removed": true,
+        "native_capture_cleanup": true,
+        "codec_roundtrips": true,
+        "owned_deleted": true,
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0,
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false
+      },
+      "postflight": {
+        "sdk_table_counts": {
+          "vms": 0,
+          "vm_create_reservations": 0,
+          "vm_pause_operations": 0,
+          "config": 0,
+          "vm_resize_intents": 0,
+          "vm_resize_receipts": 0,
+          "fork_pools": 0,
+          "fork_pool_snapshots": 0,
+          "fork_pool_slots": 0,
+          "fork_leases": 0
+        },
+        "account_lock_available": true,
+        "postgresql_normal_stop": true
+      },
+      "postgresql": "17.11 (Homebrew)",
+      "restored_diagnostics": {
+        "first": {
+          "follow": {
+            "category": "expired",
+            "evidence": "dispatch_uncertain",
+            "operation": "logs"
+          },
+          "inventory_receipt_free": true,
+          "console_tail": {
+            "lines": 2
+          },
+          "follow_delivered": true,
+          "usage_unchanged": true
+        },
+        "held": {
+          "follow": {
+            "category": "expired",
+            "evidence": "dispatch_uncertain",
+            "operation": "logs"
+          },
+          "inventory_receipt_free": true,
+          "console_tail": {
+            "lines": 2
+          },
+          "follow_delivered": true,
+          "usage_unchanged": true
+        }
+      },
+      "hex_archive_sha256": "e91ee58708ae3372d16f070c57382936b1daaab4e715aac014a98298006663dc",
+      "assets_verified": 809,
+      "without_rust": true,
+      "crash_validation_deferred": true,
+      "report_sha256": "37b09540041bda41cd2332be63888016fa246b62fd168dce83a3ecca9e43310a"
+    }
+  },
+  "crash_validation_deferred": true,
+  "cli_race_validation_deferred": true
+}

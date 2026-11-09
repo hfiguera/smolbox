@@ -1,0 +1,373 @@
+{
+  "schema": 1,
+  "source_commit": "ac6ac709799491db1ec1a7fca39fd43b57f60d25",
+  "recorded_date": "2026-11-07",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "packages": {
+    "linux": {
+      "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+      "assets_sha256": "706c83d1a75e5ed5791da54bb4cfa6e80448302a3921b202a5d8c769868e3c15",
+      "platform": "linux",
+      "architecture": "x86_64"
+    },
+    "macos": {
+      "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+      "assets_sha256": "0c109ee5c9cc8f1681e5b8b83b06d6712041bd36f9eda9940a423b52c7be5b25",
+      "platform": "macos",
+      "architecture": "aarch64"
+    }
+  },
+  "toolchains": {
+    "current": {
+      "elixir": "1.20.4",
+      "otp": "29.0.6"
+    },
+    "minimum": {
+      "elixir": "1.18.4",
+      "otp": "27.3.4.15"
+    }
+  },
+  "client_archive_sha256": "611a408b07907c8dbd756735704e010a2f17c622320707dfd94ed88af5dfa03f",
+  "client_lib_files_verified": 354,
+  "fixture_policy": {
+    "host_prepared": "Account-configured static bearer on a loopback registry. Wrong bearer refused, approved cold blob fetched once, rotated bearer verified on the warm path.",
+    "host_oci_metadata": "Separate loopback mirror supplies only verified source manifest and configuration before create and managed command admission.",
+    "guest_oci": "Private-address registry bound to a loopback interface, metadata-only SDK egress floor for the test processes, and an exact /32 guest allowlist. Registry traffic uses only generated fixture credentials.",
+    "boot": "Configured guest Basic credentials take precedence over conflicting inline Docker credentials. Independent fixture verifies Basic authentication for the cold guest manifest, config and layers.",
+    "pull": "Separately approved cold images exercise Docker inline Basic fallback and a Docker credential helper returning an identity token. The guest exchanges the identity token for a fixture-scoped bearer. Both results retain the exact source reference and configuration digest.",
+    "inventory": "Observed configuration digest and platform remain exact. The pinned agent can render a registry port as a path component in the display reference."
+  },
+  "existing_local_tls_exchange_evidence": [
+    "docs/evidence/embedded-port-http-parity-oci-network-7e3b43c7.json",
+    "docs/evidence/embedded-port-http-parity-five-contracts-b5d119c6.json"
+  ],
+  "diagnostics": {
+    "namespace": "The first harness namespace failed Runtime validation before machine creation.",
+    "default_floor": "Default package egress blocked the private registry despite an explicit CIDR. The isolated reruns used the SDK metadata-only floor and kept the exact guest allowlist.",
+    "inventory": "An earlier authenticated boot passed and reached image inventory. The first assertion incorrectly required display text to equal the source reference. Failed scopes were left separate from passing runs."
+  },
+  "focused_contracts_passed": {
+    "current": 34,
+    "minimum": 34
+  },
+  "live_results": {
+    "linux": [
+      {
+        "toolchain": "current",
+        "result_sha256": "29a2a134d7c7206fe5ab3e3170ab10673d0fa71c0b17bb7b2aa7973ea6d33d06",
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "input_digests": {
+          "prepared": {
+            "digest": "aebbf5884a8a0757a7c92c25b20b475bea6e0df855d7cfd832bacda5c2f9a08d",
+            "content_sha256": "ac45bd5b794e57f9627369facd15a18649f6af3b600f866f223f5f91b5bfa954",
+            "size": 26535961
+          },
+          "bootstrap": {
+            "digest": "7832be1bcf85bffa7efa39e5774feb77e2a2250e8c377b708263eddf80fd03c6",
+            "config_digest": "sha256:5fb5a05077c3934fc720d0b0c24a5ab77205aa13208acfee0ad4c7e58b8aed7d"
+          },
+          "inline": {
+            "digest": "410d013f5ce230e8e302edc1fc77cae44c723c22dd83ec43b361eb593a2b2398",
+            "config_digest": "sha256:3d81f7a31982aa3491701c0466f17246d26c944fbdf01f46395c39f17941c63a"
+          },
+          "provider": {
+            "digest": "8a3958e6c67bdd7183b0253696c777d5d4f5a56434a862eec2d2ea8c86e6b8d8",
+            "config_digest": "sha256:7ea09be974ae2ead73834af4b16ca4a2ea0fc6d53f03eb5c605f40b2cc198508"
+          }
+        },
+        "fixture_request_counts": {
+          "host": {
+            "refused_manifest": 1,
+            "manifest": 9,
+            "pack": 1,
+            "config": 6
+          },
+          "bootstrap": {
+            "challenge": 4,
+            "manifest": 2,
+            "config": 1,
+            "layer_0": 1,
+            "layer_1": 1
+          },
+          "inline": {
+            "challenge": 3,
+            "manifest": 2,
+            "config": 1,
+            "layer_1": 1
+          },
+          "provider": {
+            "challenge": 3,
+            "identity_exchange": 3,
+            "manifest": 2,
+            "config": 1,
+            "layer_1": 1
+          }
+        },
+        "workflow": {
+          "host_prepared_bearer_refused_before_prepare": true,
+          "prepared_cold_and_rotated_warm": true,
+          "configured_guest_basic_cold_start": true,
+          "docker_inline_basic_and_identity_provider_pulls": true,
+          "pull_idempotence": true,
+          "exact_configuration_digest_inventory": true,
+          "stopped_inventory_is_passive": true,
+          "no_credentials_in_codec_records": true,
+          "original_guest_data_and_receipt_preserved": true,
+          "stopped_runtime_replacement": true,
+          "zero_reservations": true,
+          "ordinary_cleanup": true
+        },
+        "durable_readback": {
+          "zero_reservations": true,
+          "exact_deleted_machines": 3,
+          "exact_completed_executions": 4,
+          "native_workers": 0
+        },
+        "empty_sdk_tables": 10,
+        "postgresql_normal_stop": true
+      },
+      {
+        "toolchain": "minimum",
+        "result_sha256": "240aa8fb8d234da43a63ec572ae7a0fe37960817e0342f27222f0688ea9960ac",
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "input_digests": {
+          "prepared": {
+            "digest": "aebbf5884a8a0757a7c92c25b20b475bea6e0df855d7cfd832bacda5c2f9a08d",
+            "content_sha256": "ac45bd5b794e57f9627369facd15a18649f6af3b600f866f223f5f91b5bfa954",
+            "size": 26535961
+          },
+          "bootstrap": {
+            "digest": "7832be1bcf85bffa7efa39e5774feb77e2a2250e8c377b708263eddf80fd03c6",
+            "config_digest": "sha256:5fb5a05077c3934fc720d0b0c24a5ab77205aa13208acfee0ad4c7e58b8aed7d"
+          },
+          "inline": {
+            "digest": "410d013f5ce230e8e302edc1fc77cae44c723c22dd83ec43b361eb593a2b2398",
+            "config_digest": "sha256:3d81f7a31982aa3491701c0466f17246d26c944fbdf01f46395c39f17941c63a"
+          },
+          "provider": {
+            "digest": "8a3958e6c67bdd7183b0253696c777d5d4f5a56434a862eec2d2ea8c86e6b8d8",
+            "config_digest": "sha256:7ea09be974ae2ead73834af4b16ca4a2ea0fc6d53f03eb5c605f40b2cc198508"
+          }
+        },
+        "fixture_request_counts": {
+          "host": {
+            "refused_manifest": 1,
+            "manifest": 9,
+            "pack": 1,
+            "config": 6
+          },
+          "bootstrap": {
+            "challenge": 4,
+            "manifest": 2,
+            "config": 1,
+            "layer_1": 1,
+            "layer_0": 1
+          },
+          "inline": {
+            "challenge": 3,
+            "manifest": 2,
+            "config": 1,
+            "layer_1": 1
+          },
+          "provider": {
+            "challenge": 3,
+            "identity_exchange": 3,
+            "manifest": 2,
+            "config": 1,
+            "layer_1": 1
+          }
+        },
+        "workflow": {
+          "host_prepared_bearer_refused_before_prepare": true,
+          "prepared_cold_and_rotated_warm": true,
+          "configured_guest_basic_cold_start": true,
+          "docker_inline_basic_and_identity_provider_pulls": true,
+          "pull_idempotence": true,
+          "exact_configuration_digest_inventory": true,
+          "stopped_inventory_is_passive": true,
+          "no_credentials_in_codec_records": true,
+          "original_guest_data_and_receipt_preserved": true,
+          "stopped_runtime_replacement": true,
+          "zero_reservations": true,
+          "ordinary_cleanup": true
+        },
+        "durable_readback": {
+          "zero_reservations": true,
+          "exact_deleted_machines": 3,
+          "exact_completed_executions": 4,
+          "native_workers": 0
+        },
+        "empty_sdk_tables": 10,
+        "postgresql_normal_stop": true
+      }
+    ],
+    "macos": [
+      {
+        "toolchain": "current",
+        "result_sha256": "c47b91bab730be8d56e5f0ace081c048f8f319b7d51ff8856bae5052b6cde6d5",
+        "postgresql": "17.11 (Homebrew)",
+        "input_digests": {
+          "prepared": {
+            "digest": "a374b40f4e632bd646b2191a1ebcf9966fcbe1c0d6e295419a48cca0afe06ceb",
+            "content_sha256": "ec6ccce9b31a97bf8157cef7b5b6a5739f3bc7905f46f54656e143fe780291b9",
+            "size": 27415363
+          },
+          "bootstrap": {
+            "digest": "07e71a19d0adca0527a70f1278137fb622e1236dd8c559c5481c4212d700327b",
+            "config_digest": "sha256:1efd15ad58fcf54032b5ed91a34af3a0fa7fb05ff86ceda7b820c5dd49b2e2e0"
+          },
+          "inline": {
+            "digest": "239bab514febe7befa27b9951e0df2285b4f6f1c8481a92d85d432af01504551",
+            "config_digest": "sha256:fe2fe7ed9c864fbf7c254e413150a9fd6a87929f2a262bcce3fd291fa0a28142"
+          },
+          "provider": {
+            "digest": "106991edc6b483af7b82c6410efb85dafc65d97ef325ddaa8222e9714abd6626",
+            "config_digest": "sha256:0b104af449f06d3bd529bd3347fe7e3745fefb6bb88c9108ef1acea404879e3f"
+          }
+        },
+        "fixture_request_counts": {
+          "host": {
+            "refused_manifest": 1,
+            "manifest": 9,
+            "pack": 1,
+            "config": 6
+          },
+          "bootstrap": {
+            "challenge": 4,
+            "manifest": 2,
+            "config": 1,
+            "layer_0": 1,
+            "layer_1": 1
+          },
+          "inline": {
+            "challenge": 3,
+            "manifest": 2,
+            "config": 1,
+            "layer_1": 1
+          },
+          "provider": {
+            "challenge": 3,
+            "identity_exchange": 3,
+            "manifest": 2,
+            "config": 1,
+            "layer_1": 1
+          }
+        },
+        "workflow": {
+          "host_prepared_bearer_refused_before_prepare": true,
+          "prepared_cold_and_rotated_warm": true,
+          "configured_guest_basic_cold_start": true,
+          "docker_inline_basic_and_identity_provider_pulls": true,
+          "pull_idempotence": true,
+          "exact_configuration_digest_inventory": true,
+          "stopped_inventory_is_passive": true,
+          "no_credentials_in_codec_records": true,
+          "original_guest_data_and_receipt_preserved": true,
+          "stopped_runtime_replacement": true,
+          "zero_reservations": true,
+          "ordinary_cleanup": true
+        },
+        "durable_readback": {
+          "zero_reservations": true,
+          "exact_deleted_machines": 3,
+          "exact_completed_executions": 4,
+          "native_workers": 0
+        },
+        "empty_sdk_tables": 10,
+        "postgresql_normal_stop": true
+      },
+      {
+        "toolchain": "minimum",
+        "result_sha256": "5821fd382c3b4d8a8f82bfdab4a55d076e2b3f2393eaaa3d1c0a16ca7ee69d0c",
+        "postgresql": "17.11 (Homebrew)",
+        "input_digests": {
+          "prepared": {
+            "digest": "a374b40f4e632bd646b2191a1ebcf9966fcbe1c0d6e295419a48cca0afe06ceb",
+            "content_sha256": "ec6ccce9b31a97bf8157cef7b5b6a5739f3bc7905f46f54656e143fe780291b9",
+            "size": 27415363
+          },
+          "bootstrap": {
+            "digest": "07e71a19d0adca0527a70f1278137fb622e1236dd8c559c5481c4212d700327b",
+            "config_digest": "sha256:1efd15ad58fcf54032b5ed91a34af3a0fa7fb05ff86ceda7b820c5dd49b2e2e0"
+          },
+          "inline": {
+            "digest": "239bab514febe7befa27b9951e0df2285b4f6f1c8481a92d85d432af01504551",
+            "config_digest": "sha256:fe2fe7ed9c864fbf7c254e413150a9fd6a87929f2a262bcce3fd291fa0a28142"
+          },
+          "provider": {
+            "digest": "106991edc6b483af7b82c6410efb85dafc65d97ef325ddaa8222e9714abd6626",
+            "config_digest": "sha256:0b104af449f06d3bd529bd3347fe7e3745fefb6bb88c9108ef1acea404879e3f"
+          }
+        },
+        "fixture_request_counts": {
+          "host": {
+            "refused_manifest": 1,
+            "manifest": 9,
+            "pack": 1,
+            "config": 6
+          },
+          "bootstrap": {
+            "challenge": 4,
+            "manifest": 2,
+            "config": 1,
+            "layer_1": 1,
+            "layer_0": 1
+          },
+          "inline": {
+            "challenge": 3,
+            "manifest": 2,
+            "config": 1,
+            "layer_1": 1
+          },
+          "provider": {
+            "challenge": 3,
+            "identity_exchange": 3,
+            "manifest": 2,
+            "config": 1,
+            "layer_1": 1
+          }
+        },
+        "workflow": {
+          "host_prepared_bearer_refused_before_prepare": true,
+          "prepared_cold_and_rotated_warm": true,
+          "configured_guest_basic_cold_start": true,
+          "docker_inline_basic_and_identity_provider_pulls": true,
+          "pull_idempotence": true,
+          "exact_configuration_digest_inventory": true,
+          "stopped_inventory_is_passive": true,
+          "no_credentials_in_codec_records": true,
+          "original_guest_data_and_receipt_preserved": true,
+          "stopped_runtime_replacement": true,
+          "zero_reservations": true,
+          "ordinary_cleanup": true
+        },
+        "durable_readback": {
+          "zero_reservations": true,
+          "exact_deleted_machines": 3,
+          "exact_completed_executions": 4,
+          "native_workers": 0
+        },
+        "empty_sdk_tables": 10,
+        "postgresql_normal_stop": true
+      }
+    ]
+  },
+  "proof_sha256": "c6643650c97cb8c4bd25df97cbac395d47f2a68f1b3c5d061484fc1378daca64",
+  "fixture_sha256": "978fe0befbe8c4618766d55a7921665f9fe61f29deef05eb2b49535e2ba79d61",
+  "linux_result_archive_sha256": {
+    "current": "a6a71048f4c2e8a2a081845c00faf349ed4648bb4f75213e391c2d1f848f457b",
+    "minimum": "3dcf198e7d826a43cffe872ce6b2f8e4aa7e546dd180c43fb5e767263e3c97b3"
+  },
+  "private_production_tls_validation_deferred": true,
+  "crash_validation_deferred": true,
+  "cli_race_validation_deferred": true,
+  "parity_complete": false
+}

@@ -256,6 +256,7 @@ pub enum ErrorCode {
     Ownership,
     Database,
     State,
+    Deadline,
     Native,
     Io,
     OutputLimit,

@@ -1,0 +1,147 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-11-06",
+  "source_commit": "2b984eedf473a12967a8bdd36cefca449ba0ecd6",
+  "host": "linux-x86_64",
+  "package_manifest_sha256": "51fef500f29463edc5924aa0413ae56ff55b10b474fba17e94406da2fff62242",
+  "package_identity": {
+    "architecture": "x86_64",
+    "assets_sha256": "706c83d1a75e5ed5791da54bb4cfa6e80448302a3921b202a5d8c769868e3c15",
+    "build_sha256": "bc39528ad7358acffd0db80070815319b817cb3c27e9ebe63eee2750ba35a053",
+    "engine_version": "0.2.0",
+    "platform": "linux",
+    "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2"
+  },
+  "fixture": "docker.io/library/alpine@sha256:3c81aa9a3d770b316568f4499e30461a5cd3fbd7180bd89e28e34894c7845832",
+  "source_catalog": "anonymous digest-pinned OCI",
+  "growth_path": [
+    {
+      "storage_gib": 1,
+      "overlay_gib": 1
+    },
+    {
+      "storage_gib": 2,
+      "overlay_gib": 3
+    },
+    {
+      "storage_gib": 3,
+      "overlay_gib": 3
+    }
+  ],
+  "orchestration": "Both prepare BEAMs exited normally with one stopped VM retained. The observer expected an empty SDK inventory, so the resume phase ran separately against the saved receipts after verifying both previous owners had exited and one stopped VM remained per account. No resize was resubmitted.",
+  "lanes": [
+    {
+      "toolchain": "current",
+      "elixir": "Elixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "erlang": "Erlang/OTP 29 [erts-17.0.6]",
+      "prepare": {
+        "prepared_stopped": true,
+        "reserved_slots": 1,
+        "reserved_disk_gb": 5
+      },
+      "workflow": {
+        "separate_normal_beam_restart": true,
+        "historical_output_after_normal_beam_restart": true,
+        "owned_deleted": true,
+        "growth_history_retained": true,
+        "immutable_creation_retained": true,
+        "growth_budget_rejected_before_dispatch": true,
+        "running_growth_rejected": true,
+        "drain_retained": true,
+        "duplicate_growth_retained": true,
+        "conflicting_growth_rejected": true,
+        "storage_filesystem_growth": true,
+        "overlay_geometry_verified": true,
+        "omitted_target_retained": true,
+        "material_chain_retained": true,
+        "file_bytes": 65554,
+        "file_sha256": "25ac6018e1a86a5aa310d7cd70d12c517e89e42b33afb021d07ca3c0ce909638",
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0
+      },
+      "postflight": {
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "workerless_readback": {
+          "exact_deleted_record": true,
+          "differing_lease_fields": [],
+          "linked_growth_receipts": 2,
+          "final_slots": 0,
+          "final_disk_gb": 0
+        },
+        "verified_empty_sdk_tables": [
+          "config",
+          "fork_leases",
+          "fork_pool_slots",
+          "fork_pool_snapshots",
+          "fork_pools",
+          "vm_create_reservations",
+          "vm_pause_operations",
+          "vm_resize_intents",
+          "vm_resize_receipts",
+          "vms"
+        ],
+        "account_lock_available": true,
+        "encrypted_machine_rows": 1,
+        "postgres_stopped_normally": true
+      }
+    },
+    {
+      "toolchain": "minimum",
+      "elixir": "Elixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "erlang": "Erlang/OTP 27 [erts-15.2.7.11]",
+      "prepare": {
+        "prepared_stopped": true,
+        "reserved_slots": 1,
+        "reserved_disk_gb": 5
+      },
+      "workflow": {
+        "separate_normal_beam_restart": true,
+        "historical_output_after_normal_beam_restart": true,
+        "owned_deleted": true,
+        "growth_history_retained": true,
+        "immutable_creation_retained": true,
+        "growth_budget_rejected_before_dispatch": true,
+        "running_growth_rejected": true,
+        "drain_retained": true,
+        "duplicate_growth_retained": true,
+        "conflicting_growth_rejected": true,
+        "storage_filesystem_growth": true,
+        "overlay_geometry_verified": true,
+        "omitted_target_retained": true,
+        "material_chain_retained": true,
+        "file_bytes": 65554,
+        "file_sha256": "25ac6018e1a86a5aa310d7cd70d12c517e89e42b33afb021d07ca3c0ce909638",
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0
+      },
+      "postflight": {
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "workerless_readback": {
+          "exact_deleted_record": true,
+          "differing_lease_fields": [],
+          "linked_growth_receipts": 2,
+          "final_slots": 0,
+          "final_disk_gb": 0
+        },
+        "verified_empty_sdk_tables": [
+          "config",
+          "fork_leases",
+          "fork_pool_slots",
+          "fork_pool_snapshots",
+          "fork_pools",
+          "vm_create_reservations",
+          "vm_pause_operations",
+          "vm_resize_intents",
+          "vm_resize_receipts",
+          "vms"
+        ],
+        "account_lock_available": true,
+        "encrypted_machine_rows": 1,
+        "postgres_stopped_normally": true
+      }
+    }
+  ],
+  "crash_validation_deferred": true,
+  "cli_race_validation_deferred": true
+}

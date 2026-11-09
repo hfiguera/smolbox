@@ -1,0 +1,259 @@
+{
+  "schema": 1,
+  "base_commit": "e03a29b0b71aba4d10cef2299ae351955599a768",
+  "registry_io_source_sha256": "f277a99f2a388f48232cdf3ef5a3c94848995f9612ceaedbd58885e78ea6d18e",
+  "recorded_date": "2026-11-08",
+  "baseline_evidence": "docs/evidence/embedded-port-http-parity-private-ghcr-e03a29b0.json",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "production_tls": {
+    "registry": "ghcr.io",
+    "ordinary_ca_and_hostname_verification": true,
+    "private_package_visibility_verified": true,
+    "anonymous_manifest_refusal_verified": true,
+    "account_basic": "passed",
+    "explicit_credential_ref": "open",
+    "reader_pat_as_explicit_bearer": "refused",
+    "blob_route": [
+      {
+        "host": "ghcr.io",
+        "status": 307
+      },
+      {
+        "host": "pkg-containers.githubusercontent.com",
+        "status": 200
+      }
+    ],
+    "blob_descriptors_checked": 14,
+    "max_redirects": 1,
+    "redirect_request_has_registry_credentials": false
+  },
+  "client_archive_sha256": "611a408b07907c8dbd756735704e010a2f17c622320707dfd94ed88af5dfa03f",
+  "toolchains": {
+    "current": {
+      "elixir": "1.20.4",
+      "otp": "29.0.6"
+    },
+    "minimum": {
+      "elixir": "1.18.4",
+      "otp": "27.3.4.15"
+    }
+  },
+  "fixtures": {
+    "amd64": {
+      "prepared": {
+        "reference": "ghcr.io/hfiguera/smolbox-parity-prepared@sha256:aebbf5884a8a0757a7c92c25b20b475bea6e0df855d7cfd832bacda5c2f9a08d",
+        "content_sha256": "ac45bd5b794e57f9627369facd15a18649f6af3b600f866f223f5f91b5bfa954"
+      },
+      "boot": {
+        "reference": "ghcr.io/hfiguera/smolbox-parity-oci@sha256:7aeedda7704140881c3e9e30fc00d6faa94324b6c6d19b497f1794eb978a38f2",
+        "config_digest": "sha256:90d8cf39c330433f67324bb8dc7995658c26d4f9612d4e182b3439edc108ded2"
+      },
+      "pull": {
+        "reference": "ghcr.io/hfiguera/smolbox-parity-oci@sha256:5c5d1bd214a1ecaec7b54721bc7a352b5047ea051cac63059bb12a5cc564c83c",
+        "config_digest": "sha256:fb2b979188086ebb8fe99ec84cffb34e57f5676fa44d57f054fb869dc7208d75"
+      }
+    },
+    "arm64": {
+      "prepared": {
+        "reference": "ghcr.io/hfiguera/smolbox-parity-prepared@sha256:a374b40f4e632bd646b2191a1ebcf9966fcbe1c0d6e295419a48cca0afe06ceb",
+        "content_sha256": "ec6ccce9b31a97bf8157cef7b5b6a5739f3bc7905f46f54656e143fe780291b9"
+      },
+      "boot": {
+        "reference": "ghcr.io/hfiguera/smolbox-parity-oci@sha256:1df8512183d83fca1aa3dcc1d75a275ac1ce9ec44a92639dd744785f4279e97a",
+        "config_digest": "sha256:dbcf01e4fed4393f02b556854703385cbe03bedc95f59c53e9d991e0fae7eab3"
+      },
+      "pull": {
+        "reference": "ghcr.io/hfiguera/smolbox-parity-oci@sha256:37c2956f26e78291f77848eea7158aeb5930ade1b5762e7246721342571e0ffa",
+        "config_digest": "sha256:ee143715deea314743f605c76e02cbcf423fafd0c99d0e5ce629dcfe88669161"
+      }
+    }
+  },
+  "packages": {
+    "linux": {
+      "manifest_sha256": "cce85464c0bb235d14fc026fbdbbe7ca8ed1ec9a3503d926fc05710ba5b37590",
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "55032af80aa6d970953904f161c7598b8b2f9c40d4204bf4ca88d49d1b732a03",
+      "assets_sha256": "ee2e0142d440c6843c2ca0fd2516f54658c97345e977bbd02d1b2a2d31e73d93",
+      "platform": "linux",
+      "architecture": "x86_64"
+    },
+    "macos": {
+      "manifest_sha256": "a2e2075d16bea72e57d9c1f8bb1c99210ec2fe2fb9d773e9a5ebc9c7937fbde4",
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "96aee9a81090a8f56f5ca3e1220a46f8260f9e673aead17d02063731dbe8617b",
+      "assets_sha256": "0c109ee5c9cc8f1681e5b8b83b06d6712041bd36f9eda9940a423b52c7be5b25",
+      "platform": "macos",
+      "architecture": "aarch64"
+    }
+  },
+  "focused_native_registry_tests_passed": {
+    "linux": 14,
+    "macos": 14
+  },
+  "focused_elixir_tests_passed": {
+    "current": 16,
+    "minimum": 16
+  },
+  "lanes": [
+    {
+      "toolchain": "current",
+      "platform": "linux",
+      "result_sha256": "51a6db1e9e6e148f070caec862c1f95edd1e3db653dc934e0de5f8bd5c0860ea",
+      "manifest_sha256": "cce85464c0bb235d14fc026fbdbbe7ca8ed1ec9a3503d926fc05710ba5b37590",
+      "helper_sha256": "55032af80aa6d970953904f161c7598b8b2f9c40d4204bf4ca88d49d1b732a03",
+      "postgres": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+      "postgresql_normal_stop": true,
+      "empty_sdk_tables": 10,
+      "ordinary_helper_exit": true,
+      "workflow": {
+        "invalid_reader_refusal": {
+          "category": "unknown",
+          "operation": "prepare_artifact",
+          "evidence": "dispatch_uncertain"
+        },
+        "cold_prepared_manifest_and_content_verified": true,
+        "prepared_guest_boot": true,
+        "cold_oci_boot_marker_verified": true,
+        "managed_oci_pull_and_idempotence": true,
+        "exact_configuration_digest_inventory": true,
+        "no_credentials_in_codec_records": true,
+        "zero_reservations": true,
+        "ordinary_cleanup": true
+      },
+      "durable_readback": {
+        "zero_reservations": true,
+        "exact_deleted_machines": 2,
+        "exact_completed_executions": 3,
+        "native_workers": 0
+      }
+    },
+    {
+      "toolchain": "minimum",
+      "platform": "linux",
+      "result_sha256": "e78568728f4fd7fdfd80847b61fc6185254473ff370e4cc86118fe16a7978778",
+      "manifest_sha256": "cce85464c0bb235d14fc026fbdbbe7ca8ed1ec9a3503d926fc05710ba5b37590",
+      "helper_sha256": "55032af80aa6d970953904f161c7598b8b2f9c40d4204bf4ca88d49d1b732a03",
+      "postgres": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+      "postgresql_normal_stop": true,
+      "empty_sdk_tables": 10,
+      "ordinary_helper_exit": true,
+      "workflow": {
+        "invalid_reader_refusal": {
+          "category": "unknown",
+          "operation": "prepare_artifact",
+          "evidence": "dispatch_uncertain"
+        },
+        "cold_prepared_manifest_and_content_verified": true,
+        "prepared_guest_boot": true,
+        "cold_oci_boot_marker_verified": true,
+        "managed_oci_pull_and_idempotence": true,
+        "exact_configuration_digest_inventory": true,
+        "no_credentials_in_codec_records": true,
+        "zero_reservations": true,
+        "ordinary_cleanup": true
+      },
+      "durable_readback": {
+        "zero_reservations": true,
+        "exact_deleted_machines": 2,
+        "exact_completed_executions": 3,
+        "native_workers": 0
+      }
+    },
+    {
+      "toolchain": "current",
+      "platform": "macos",
+      "result_sha256": "8e21bfeaf317580f66158f7881efe6d3c839daa89613c548cbd5b720da58f958",
+      "manifest_sha256": "a2e2075d16bea72e57d9c1f8bb1c99210ec2fe2fb9d773e9a5ebc9c7937fbde4",
+      "helper_sha256": "96aee9a81090a8f56f5ca3e1220a46f8260f9e673aead17d02063731dbe8617b",
+      "postgres": "17.11 (Homebrew)",
+      "postgresql_normal_stop": true,
+      "empty_sdk_tables": 10,
+      "ordinary_helper_exit": true,
+      "workflow": {
+        "invalid_reader_refusal": {
+          "category": "unknown",
+          "operation": "prepare_artifact",
+          "evidence": "dispatch_uncertain"
+        },
+        "cold_prepared_manifest_and_content_verified": true,
+        "prepared_guest_boot": true,
+        "cold_oci_boot_marker_verified": true,
+        "managed_oci_pull_and_idempotence": true,
+        "exact_configuration_digest_inventory": true,
+        "no_credentials_in_codec_records": true,
+        "zero_reservations": true,
+        "ordinary_cleanup": true
+      },
+      "durable_readback": {
+        "zero_reservations": true,
+        "exact_deleted_machines": 2,
+        "exact_completed_executions": 3,
+        "native_workers": 0
+      }
+    },
+    {
+      "toolchain": "minimum",
+      "platform": "macos",
+      "result_sha256": "ce77640036f79f4f87f199df2f2fb8031e34c68030bef07401a406aadec8abd8",
+      "manifest_sha256": "a2e2075d16bea72e57d9c1f8bb1c99210ec2fe2fb9d773e9a5ebc9c7937fbde4",
+      "helper_sha256": "96aee9a81090a8f56f5ca3e1220a46f8260f9e673aead17d02063731dbe8617b",
+      "postgres": "17.11 (Homebrew)",
+      "postgresql_normal_stop": true,
+      "empty_sdk_tables": 10,
+      "ordinary_helper_exit": true,
+      "workflow": {
+        "invalid_reader_refusal": {
+          "category": "unknown",
+          "operation": "prepare_artifact",
+          "evidence": "dispatch_uncertain"
+        },
+        "cold_prepared_manifest_and_content_verified": true,
+        "prepared_guest_boot": true,
+        "cold_oci_boot_marker_verified": true,
+        "managed_oci_pull_and_idempotence": true,
+        "exact_configuration_digest_inventory": true,
+        "no_credentials_in_codec_records": true,
+        "zero_reservations": true,
+        "ordinary_cleanup": true
+      },
+      "durable_readback": {
+        "zero_reservations": true,
+        "exact_deleted_machines": 2,
+        "exact_completed_executions": 3,
+        "native_workers": 0
+      }
+    }
+  ],
+  "macos_readiness_retry": {
+    "parallel_failures_before_machine_dispatch": 2,
+    "sequential_handshake_ms": 300000,
+    "sequential_startup_readiness_ms": 420000,
+    "existing_macos_domain_retry": "Used the same absolute helper package path recorded in the domain template approval. The prior retry used a different path for the same digest."
+  },
+  "diagnostics": {
+    "initial_macos_bare_artifact_preparation": "passed",
+    "initial_macos_bare_managed_create": {
+      "error": {
+        "category": "unsupported_capability",
+        "operation": "create",
+        "evidence": "unknown"
+      },
+      "state": "unknown",
+      "operation": "create"
+    },
+    "initial_bare_geometry_gib": {
+      "pack_storage": 1,
+      "pack_overlay": 1,
+      "profile_storage": 4,
+      "profile_overlay": 3
+    },
+    "prepared_workflow_retry": "Published the previously qualified container packs as separate private tags and retained the failed macOS bare scope.",
+    "linux_preflight_retry": "Only the modes of three public package metadata files differed from the previous package. The rerun verified all files against the rebuilt manifest."
+  },
+  "crash_validation_deferred": true,
+  "cli_race_validation_deferred": true
+}

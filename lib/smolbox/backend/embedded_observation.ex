@@ -54,7 +54,7 @@ defmodule SmolBox.Backend.EmbeddedObservation do
     with {:ok, values} <- Jason.decode(bytes),
          true <- Validation.list?(values, 1024),
          true <- length(values) == count do
-      decode_machines(values)
+      Machine.list_from_embedded_inventory(values)
     else
       _invalid -> invalid(:list)
     end
@@ -76,8 +76,6 @@ defmodule SmolBox.Backend.EmbeddedObservation do
           }}
 
   defp decode(_context, operation, _result, _output), do: invalid(operation)
-
-  defp decode_machines(values), do: Machine.list_from_wire(values)
 
   defp invalid(operation),
     do: {:error, %Error{category: :protocol, operation: operation, evidence: :dispatch_uncertain}}

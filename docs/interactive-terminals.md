@@ -13,14 +13,13 @@ provided.
 
 The HTTP backend enables this API. Explicitly approved embedded Port packages
 declaring `terminals: 1` also route managed terminals through owned PTY workers,
-bounded session controls and native durable authority. Exact packages have ordinary
-retained-image PTY and current/minimum public no-Rust consumer evidence on
-[macOS](evidence/embedded-port-http-parity-terminal-macos.json) and
-[Linux](evidence/embedded-port-http-parity-linux-mounted-guest-7993b53.json).
-The Linux package also passes PTY on an internally mounted local-container machine
-across normal stopped-owner replacement; public volume admission remains disabled.
-PostgreSQL, changed macOS packages and broader resource/interference qualification
-remain pending. Evidence applies to its exact package bytes and source combinations.
+bounded session controls and native durable authority. Both Linux and macOS
+packages passed direct and prepared-registry image sessions with PostgreSQL and
+Memory on the current and minimum no-Rust toolchains. The Linux runs also
+verified PTY I/O on writable managed mounts. The checks covered normal consumer
+detach, worker draining, owned stopped resolution, and durable readback.
+[Managed terminal qualification](evidence/embedded-port-http-parity-managed-terminals-7974cc9e.json)
+
 `Client.open_terminal` remains an HTTP client operation.
 
 ## Open and use a managed terminal
@@ -49,6 +48,8 @@ chunk boundaries; one input line need not produce one output event. A confirmed
 outcome is `{:ok, %SmolBox.Terminal.Result{exit_code: code}}`; an uncertain outcome
 is `{:error, %SmolBox.Error{}}`. `next/2` wraps each event in `{:ok, event}`.
 A caller read timeout returns an `:expired` error and leaves the session running.
+If embedded Port reports `:admission_exhausted` with `:not_dispatched` for an
+input or resize, the session stays open and the consumer can retry that control.
 
 `open/3` returns **durable acceptance**, not readiness. `attach/3` binds the calling
 process to the existing live connection on the runtime that owns it. It does not

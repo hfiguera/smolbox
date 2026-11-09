@@ -19,9 +19,14 @@ trusted configuration supplies `publish_address:` (loopback by default). One
 passes offline/CIDR inbound traffic, loopback publishing and current/minimum
 public no-Rust consumers. Memory-store checks verify port conflict rollback and
 retained reservations/draining across stop and graceful Runtime replacement,
-then release after owned deletion. Native PostgreSQL, OS-listener start-conflict,
-changed macOS packages and broader resource/interference checks remain pending. See
-[Embedded Port setup](embedded-port.md) for its current development status.
+then release after owned deletion. The default Linux and macOS packages
+also pass loopback forwarding with durable PostgreSQL reservations through
+the same lifecycle. A macOS prepared image passes offline forwarding. An
+independent host listener causes a typed start conflict on both hosts, and
+the reservation stays charged. After explicit stopped resolution, ordinary
+deletion releases the reservation on both hosts. A second managed machine can
+reserve the same port while the independent listener is still serving.
+[OCI port qualification](evidence/embedded-port-http-parity-oci-network-7e3b43c7.json), [port conflict cleanup](evidence/embedded-port-http-parity-port-conflict-cleanup-34413ad1.json)
 
 ## Create and use
 
@@ -118,10 +123,12 @@ an assigned machine to another worker.
 | Explicit deletion | Release only after verified absence under the existing owned-deletion contract. Preserve the deleted identity/specification for deduplication. |
 | Operator resolves absent resource | After quiescing old controllers and outstanding requests, verify absence with `Machines.resolve/4`, `quiesced: true, disposition: :deleted`; then release. |
 
-For uncertain start, remove the external conflict, establish operator quiescence,
-verify the recorded machine is stopped, and use `Machines.resolve/4` before a new
-explicit start. An observed stop or store lease does not fence requests already
-sent to a worker. Read [Persistent-machine recovery](persistent-machines.md#cancellation-and-uncertain-outcomes)
+For an uncertain start, establish operator quiescence and use
+`Machines.resolve/4` with `disposition: :stopped` to verify the recorded machine.
+Then explicitly delete it to release its reservations, or clear the external
+conflict before issuing a new start. An observed stop or store lease does not
+fence requests already sent to a worker. Read
+[Persistent-machine recovery](persistent-machines.md#cancellation-and-uncertain-outcomes)
 before asserting quiescence. Changed observed mappings never authorize mutations
 against a different configuration.
 

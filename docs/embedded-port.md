@@ -6,12 +6,18 @@ A separately approved helper runs locally under Elixir supervision. Existing HTT
 workers can be used in the same Runtime.
 Rustler is a future additional bridge; Kubernetes is a separate future backend.
 
-HTTP feature parity is in progress on this branch. Its repository
-design and implementation plan are `docs/design/embedded-port-http-parity.md` and
-`docs/design/embedded-port-http-parity-implementation-plan.md`. These documents do
-not establish native qualification. Protocol-2 observations and network/port/
-workload creation intent and managed terminals are implemented; other expanded
-operations remain pending. Feature-specific ordinary qualification is still required.
+For an HTTP-only application, install the Hex package and follow
+[Getting started](getting-started.md). Embedded development uses the helper
+build and approval steps on this page. The helper and its assets are installed
+separately from the Hex package.
+
+HTTP feature parity is in progress. Current protocol-2 helpers advertise their
+supported features in the approved package manifest. Linux x86-64 and macOS
+Apple Silicon packages have scoped evidence for remote sources, networking,
+managed terminals, checkpoints, branches and exports. Managed volumes and
+stopped disk growth have Linux qualification. Use the package and feature
+guides for platform, source and store limits. The repository audit is at
+`docs/design/embedded-port-http-parity-completion-audit.md`.
 
 Newly rebuilt macOS candidates advertise OCI/registry sources and image operations
 through the shared engine. The public ordinary image runner accepts Linux x86_64
@@ -42,8 +48,12 @@ stays deferred.
 The [83137f8c helper checkpoint](evidence/embedded-port-http-parity-partial-collection-83137f8c.json)
 passes its build and release models. Both fresh current/minimum ordinary partial
 attempts reject collection without a proof; normal shutdown preserves all disks
-and charges. Fresh collection admission still needs a positive original-context
-preflight before intent storage. Positive native partial acceptance remains open.
+and charges. The later
+[macOS durable partial case](evidence/embedded-port-http-parity-macos-durable-partial-4c3dcf63.json)
+passes original collection, disposal, retirement and backing release with a
+qualification helper, minimum Elixir and PostgreSQL. The collected child can
+have the pinned bare-pack cache even after its process has exited. Disposal
+checks the original collection and the cache before proceeding.
 
 The [06ba0d0e HTTP-only package consumers](evidence/embedded-port-http-parity-http-consumers-06ba0d0e.json)
 also pass strict compile and public smoke checks on current/minimum Linux
@@ -202,7 +212,8 @@ separate `--native-public --native-branches` installed-consumer campaign exercis
 the real APIs and stores. The recorded Memory and PostgreSQL cases above pass;
 remaining consumer combinations still require acceptance. No crash campaign is
 selected. Other platforms and the optional
-cleanup-resolution descriptor remain gated; exports retain their separate gate.
+cleanup-resolution descriptor remain gated. The default Linux and macOS packages
+advertise exports.
 
 The [first installed public branch case](evidence/embedded-port-http-parity-public-branches-first-runtime.json)
 creates a checkpointable source and ready child, then stops/deletes the child and
@@ -616,9 +627,11 @@ list to launch the Port bridge.
 | Draining | Worker drain fences new assignments; existing retained commands and lifecycle operations continue. Helper quiescence separately fences mutations during replacement |
 
 The exact Linux package `af4bc9ff` additionally has the scoped current/minimum
-network, port, workload and PTY qualification linked above. Broader network and
-buffered/background combinations, host mounts, checkpoint/export, branches and
-changed platform/package bytes remain unqualified. Streaming command stdin stays
+network, port, workload and PTY qualification linked above. Managed bare and
+container exports have separate [Linux](evidence/embedded-port-http-parity-linux-managed-exports-081a83e1.json)
+and [macOS](evidence/embedded-port-http-parity-macos-durable-exports-081a83e1.json)
+package qualification.
+Other feature and package combinations have separate qualification gates. Streaming command stdin stays
 unsupported. VM packs do not accept an explicit guest user; the execution
 container's numeric UID is separate. Unknown outcomes require inspection and
 explicit reconciliation, never automatic replay.
@@ -1093,22 +1106,44 @@ shutdown/replacement for current validation.
 
 ## Upgrade and drain procedure
 
-Quiesce the target, finish subscriptions and reconcile pending outcomes. Unknown
-reservations block completion. Stop retained VMs normally, close the helper, retain
-old assets, and preserve the enrolled generation and authentic receipts. Approve
-the replacement manifest, inspect retained state, then activate the matching epoch.
-Never reinterpret a foreign row or mint ownership from an inventory result.
+1. Call `SmolBox.drain_worker/2` to fence new reservations in the shared store.
+   Use `SmolBox.worker_maintenance/3` to inspect existing assignments and the
+   drain revision. Let retained operations finish, close subscriptions and
+   reconcile uncertain outcomes through their explicit controls.
+2. Stop retained VMs through their owned lifecycle operations while the original
+   helper is available. Resolve published exports with `SmolBox.Exports.resolve/4`
+   while that helper still owns the staging. Confirm completion and release of
+   the export reservation before replacement. Unknown reservations and unresolved
+   export staging block replacement. Quiesce the helper and close it normally.
+   Preserve the enrolled generation, original receipts and old package assets.
+3. Verify and explicitly approve the replacement manifest and helper. The
+   ordinary stopped-helper procedure requires the same platform, architecture,
+   engine version, SDK revision, manifest schema and native policy. Inspect the
+   retained VMs with their original receipts, then activate the new helper epoch.
+   Resume allocations with `SmolBox.resume_worker/3` using the maintenance
+   revision for the approved drain.
 
 Historical four-patch to five-patch package upgrades preserved data on both platforms.
 The [clean-package evidence](evidence/embedded-port-unmodified-sdk-ordinary.json)
 records explicit compatible clean helper replacements, retained data and owned
 cleanup on both platforms. These are specific approved package pairs, not automatic
 public store rebinding or patched-receipt adoption.
-It does not qualify arbitrary firmware changes or rollback. Native store encoding
-is selective version 16; legacy HTTP encodings remain supported. Upgrade every
-reader before persisting native records. Compatibility with old HTTP records does
-not make an old reader safe for native records, and helper rollback does not prove
-store-codec rollback.
+The [macOS PostgreSQL replacement record](evidence/embedded-port-http-parity-macos-durable-history-upgrade-0618e7cc.json)
+verifies the drain and retained branch histories through a distinct approved
+helper with the same native policy.
+The [optional history upgrade evidence](evidence/embedded-port-http-parity-optional-history-upgrades-74f58b5f.json)
+lists the approved helper pairs and the retained histories checked with
+PostgreSQL on Linux and macOS.
+
+Plan the store upgrade separately. Native history uses selective envelopes,
+including v50 for a collected branch publication. Upgrade every process that
+reads the shared store before admitting writes that use a new envelope. Keep
+the old write features gated until all readers are upgraded, and verify retained
+records with the upgraded readers before resuming. A helper rollback and a
+store-codec rollback have separate compatibility requirements.
+The [reader-first codec evidence](evidence/embedded-port-http-parity-reader-first-codec-0618e7cc.json)
+covers legacy HTTP v5 and synthetic collected-publication v50 records on both
+supported Elixir toolchains.
 
 The workspace now builds against verified unmodified SDK source. New clean
 packages require their own exact approvals; ordinary platform/consumer qualification
@@ -1184,7 +1219,7 @@ synthetic format tests do not establish runtime asset qualification. New local
 packages contain a manifest-approved rootfs tar. The helper installs exact tar/
 library grants in the engine, and packing selects that catalog without request
 paths. Older packages without the tar retain their existing setup path. Container
-export and the public registry workflow/durable histories remain pending. The
+export uses the same managed registry workflow. The
 engine has a bounded one-attempt publisher with protected acknowledgement evidence;
 that evidence requires separate registry verification and proves no helper cleanup.
 Gated protocol-2 preflight/publication/lookup/cleanup now select cached operator
@@ -1193,8 +1228,8 @@ request and package architecture. Tokens are transient; trust inputs are loaded
 during setup, outside Port reader admission. Native export history now has frozen
 source/request authority, correlated acknowledgement and separate cleanup proof
 under selective codec v28. Memory and PostgreSQL share guarded reservation-release
-contracts; old HTTP exports retain v11. These contracts do not activate public
-exports. Scoped managed routing now carries the frozen request through one pinned
+contracts; HTTP exports retain v11. Linux and macOS package admission advertise the
+capability explicitly. Managed routing carries the frozen request through one pinned
 publication attempt. Verification requires the exact recorded acknowledgement
 before the existing independent registry verifier; explicit resolution fences
 the pinned helper, consumes separate cleanup proof and retains unknown results.
@@ -1287,12 +1322,11 @@ connects originally enrolled local/registry container packs to the owned worker.
 It verifies source/layer identity, streams bounded guest parts, merges layers in
 manifest order and funds helper storage including temporary parts and filesystem
 overhead. Baked workloads/environment are not added back to the saved record.
-Non-VM peer/model checks cover this path without repairing SDK caches or copying
-host tars. Whole-pipeline output-credit acceptance, ordinary SDK storage/mount/tar
-behavior, public export/import and exact-package platform/consumer qualification
-remain pending; this implementation does not change public admission.
-Public export admission is disabled. Crash validation remains
-deferred and changed packages still require ordinary platform/consumer evidence.
+Linux bare and container exports passed ordinary public publication, resolution
+and digest-pinned re-import on the current and minimum toolchains with PostgreSQL.
+macOS bare and container exports passed the same workflow with Memory on the
+current toolchain and PostgreSQL on the minimum toolchain. Both default policies
+match their qualified descriptors. Crash validation remains deferred.
 
 Linux volume capability approval is explicit: an approved package must advertise
 volume descriptor one and the exact finite volume limits. Existing packages and

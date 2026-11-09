@@ -46,8 +46,9 @@ defmodule SmolBox.Embedded.Config do
   A registry catalog selected by remote_sources requires this policy. Dormant
   legacy catalogs remain valid without it. Catalog approval does not enable
   an operation absent from the approved helper. Legacy helpers still accept only
-  local offline assignments. Source-only OCI catalogs require an approved
-  remote_sources descriptor. The Linux source policy enables remote sources and
+  local offline assignments. OCI and registry catalogs without a local artifact
+  require the remote_sources descriptor. Checkpoint-only catalogs require the
+  checkpoints descriptor. The Linux source policy enables remote sources and
   images for newly rebuilt, exactly approved packages; older packages retain
   their original surface. Ordinary public qualification remains package-specific.
   `sdk_version/1` describes the pinned SDK independently of the SmolBox engine version.
@@ -267,7 +268,13 @@ defmodule SmolBox.Embedded.Config do
       unique?(config.profiles, & &1.id)
   end
 
-  defp catalog_present?(config), do: config.artifacts != [] or source_only?(config)
+  defp catalog_present?(config),
+    do: config.artifacts != [] or source_only?(config) or checkpoint_only?(config)
+
+  defp checkpoint_only?(config),
+    do:
+      config.checkpoints != [] and
+        match?(%{"feature_versions" => %{"checkpoints" => 1}}, sdk_identity(config))
 
   defp source_only?(config),
     do:

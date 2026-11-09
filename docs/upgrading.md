@@ -5,6 +5,10 @@ Use this guide for an existing deployment. For a new application, begin with
 [changelog](https://github.com/hfiguera/smolbox/blob/main/CHANGELOG.md); the guides
 below describe actions needed when crossing each release boundary.
 
+For an embedded worker built from the source checkout, follow the
+[Embedded Port upgrade and drain procedure](embedded-port.md#upgrade-and-drain-procedure)
+for helper approval and shared-store reader compatibility.
+
 ## Choose your upgrade path
 
 When upgrading to 0.4.3, follow applicable steps in release order. For example,

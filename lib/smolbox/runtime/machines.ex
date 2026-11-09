@@ -2,6 +2,8 @@ defmodule SmolBox.Runtime.Machines do
   alias SmolBox.Runtime.Target
   @moduledoc false
   alias SmolBox.{Backend, Error, Identity, Machine, ManagedMachine}
+  alias SmolBox.Backend.Assignment
+  alias SmolBox.Embedded.Identity, as: NativeIdentity
   alias SmolBox.Runtime.Branches
   alias SmolBox.Runtime.Checkpoints
   alias SmolBox.Runtime.DiskExpansions
@@ -53,6 +55,21 @@ defmodule SmolBox.Runtime.Machines do
   defp route(config, %{operation: :export} = record, _eligible),
     do: Exports.run(config, record)
 
+  # An older controller may have accepted and attached volumes before this
+  # check existed. Keep that record cancellable and reserve no machine resources.
+  defp route(config, %{state: :accepted, volume_worker_id: id} = record, eligible)
+       when is_binary(id) do
+    target = Enum.find(config.workers, &(Target.id(&1) == id))
+
+    case VolumeAccess.mount_budget(target, record.spec) do
+      :ok ->
+        reserve(config, record, eligible)
+
+      {:error, error} ->
+        unassigned_conflict(config, record, %{error | operation: :prepare_artifact})
+    end
+  end
+
   defp route(config, %{state: :accepted} = record, eligible),
     do: reserve(config, record, eligible)
 
@@ -96,27 +113,13 @@ defmodule SmolBox.Runtime.Machines do
             {:cont, {:ok, record}}
 
           {:error, %Error{category: :port_conflict} = error} ->
-            {:halt,
-             fresh_write(config, record,
-               state: :conflict,
-               operation: nil,
-               phase: nil,
-               last_error: error,
-               next_due_at_ms: config.clock.now() + 60_000
-             )}
+            {:halt, unassigned_conflict(config, record, error)}
 
           {:error,
            %Error{operation: :qualify_creation, evidence: :not_dispatched, category: category} =
                error}
           when category in [:unsupported_capability, :validation] ->
-            {:halt,
-             fresh_write(config, record,
-               state: :conflict,
-               operation: nil,
-               phase: nil,
-               last_error: %{error | operation: :prepare_artifact},
-               next_due_at_ms: config.clock.now() + 60_000
-             )}
+            {:halt, unassigned_conflict(config, record, %{error | operation: :prepare_artifact})}
 
           {:error, _error} = error ->
             {:halt, error}
@@ -127,6 +130,16 @@ defmodule SmolBox.Runtime.Machines do
       end)
 
     defer_admission(config, result)
+  end
+
+  defp unassigned_conflict(config, record, error) do
+    fresh_write(config, record,
+      state: :conflict,
+      operation: nil,
+      phase: nil,
+      last_error: error,
+      next_due_at_ms: config.clock.now() + 60_000
+    )
   end
 
   defp defer_admission(config, {:ok, %{state: :accepted} = record}),
@@ -288,10 +301,8 @@ defmodule SmolBox.Runtime.Machines do
              if(current.created_machine,
                do: SmolBox.DiskExpansion.matches?(current, observed),
                else: Machine.same_incarnation?(creation, observed)
-             ),
-         {:ok, saved} <-
-           write(config, current, created_machine: creation, observed_machine: observed) do
-      confirm(config, saved)
+             ) do
+      persist_response(config, current, creation, observed)
     else
       false ->
         failed_observation(config, record, %Error{
@@ -309,6 +320,23 @@ defmodule SmolBox.Runtime.Machines do
 
   defp complete_response(config, record, _invalid),
     do: uncertain(config, record, %Error{category: :protocol, operation: :machine})
+
+  # Port v2 start already verifies the enrolled process and guest readiness.
+  # Commit its matching observation under the receiving operation's store guard.
+  defp persist_response(
+         config,
+         %{operation: :start, backend_assignment: %Assignment{version: 2}} = current,
+         _creation,
+         %Machine{state: :running, backend_identity: %NativeIdentity{pid_identity: [_, _]}} =
+           observed
+       ),
+       do: write(config, current, completed_changes(config, observed))
+
+  defp persist_response(config, current, creation, observed) do
+    with {:ok, saved} <-
+           write(config, current, created_machine: creation, observed_machine: observed),
+         do: confirm(config, saved)
+  end
 
   # Only the process receiving the mutation response may complete a start/stop.
   # Recovery cannot distinguish an observed state from a delayed old request.
@@ -334,18 +362,22 @@ defmodule SmolBox.Runtime.Machines do
     if record.created_machine != nil and
          SmolBox.DiskExpansion.matches?(record, observed) and
          observed.state == expected do
-      fresh_write(config, record,
-        state: observed.state,
-        observed_machine: observed,
-        operation: nil,
-        phase: nil,
-        operation_deadline_ms: nil,
-        last_error: nil,
-        next_due_at_ms: config.clock.now() + 60_000
-      )
+      fresh_write(config, record, completed_changes(config, observed))
     else
       uncertain(config, record, %Error{category: :unknown, operation: :inspect})
     end
+  end
+
+  defp completed_changes(config, observed) do
+    [
+      state: observed.state,
+      observed_machine: observed,
+      operation: nil,
+      phase: nil,
+      operation_deadline_ms: nil,
+      last_error: nil,
+      next_due_at_ms: config.clock.now() + 60_000
+    ]
   end
 
   # A native name/intent cannot replace a missing creation receipt. Automatic

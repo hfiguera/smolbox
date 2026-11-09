@@ -417,7 +417,10 @@ impl RetainedBranchResolution {
         crate::machine::verify_branch_marker(publication.child(), snapshot._child.path())?;
         crate::material::MaterialJournal::at(snapshot._child.path())
             .verify_branch_child(publication.child(), &row)?;
-        crate::sdk_compat::branch_deletion_cache(snapshot._child.path())?;
+        // The collected child can have extracted its own bare pack during boot.
+        // The original manager and collection proof above establish that its
+        // process is gone even if the SDK row still records the old PID.
+        crate::sdk_compat::stopped_branch_deletion_cache(snapshot._child.path())?;
         if !crate::sdk_compat::source_dependents(
             &engine.binding().database,
             engine.database_identity,
@@ -621,7 +624,7 @@ impl Application {
             .ok_or(Error::before(ErrorCode::Ownership))?;
         snapshot._child.verify()?;
         snapshot._snapshot.verify()?;
-        crate::sdk_compat::branch_deletion_cache(snapshot._child.path())?;
+        crate::sdk_compat::stopped_branch_deletion_cache(snapshot._child.path())?;
         let source = crate::sdk_compat::observe_record(
             &self.database,
             self.identity,

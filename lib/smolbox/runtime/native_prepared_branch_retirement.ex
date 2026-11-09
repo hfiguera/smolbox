@@ -32,7 +32,7 @@ defmodule SmolBox.Runtime.NativePreparedBranchRetirement do
         coordinator,
         parent,
         worker,
-        :deleted,
+        {:ordinary_branch, :retire_prepared_branch},
         fn pinned ->
           resolve(config, parent, child, pinned, deadline, fallback)
         end,

@@ -1,0 +1,240 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-11-06",
+  "status": "four-linux-public-durable-branch-recovery-cases-passed",
+  "source_commit": "32d4b083d371362907ea086581549859f2b780a5",
+  "platform": "linux",
+  "architecture": "x86_64",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_source_verified_unmodified_before_and_after_build": true,
+  "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+  "package": {
+    "manifest_sha256": "b6d89999de1cc35804e14e1d8d44521eaa24bab15fd278a9e6a87c986c585ff4",
+    "helper_sha256": "8fce73b7796ac81d56ff7d405bf4eb947a9e4666e18ac5c26e0126adce4a3913",
+    "asset_count": 806,
+    "hex_archive_sha256": "9818e4d7908d4c5857064c63abd0145e2715f13f7062ca93e5406682e1ac222a",
+    "proof_sha256": "c281816079573a38371c608c4b78b39ddbd384aeb26b50d1380bc17dbefe6ea1"
+  },
+  "qualification_helper": {
+    "adapter_overlay_sha256": "f0e6bee0d4aa81e0acf7bfee333dd8e58beaa1057ca6bacbd83271a6c48e9745",
+    "default_package_contains_cancellation_hook": false,
+    "unbooted_boundary": "Cancel the original budget after material publication returns and before child boot.",
+    "partial_boundary": "Cancel the original budget after child boot returns and before identity initialization.",
+    "asset_bytes_and_policy_match_prior_linux_default": true,
+    "asset_modes_differ_on_three_read_only_metadata_files": true
+  },
+  "offline_installed_consumer": {
+    "without_rust": true,
+    "verified_production_mix_sha256": "9cf2780f91339638022beda31991b9266cb74e64ceac181d1194f4b5d4ffd924",
+    "current_lock_sha256": "a06e226867d2306753ca97374335cfde2e835c018c1fe65003175fa24f1ee95b",
+    "minimum_lock_sha256": "7330b2284b8fc353b3240f4e5afeb7bd158ccbc6fed2a35b65047e08923dc9ca",
+    "initial_development_lock_failure_before_postgresql_and_native_open": true
+  },
+  "lanes": [
+    {
+      "lane": "current",
+      "recovery_family": "unbooted",
+      "elixir": "1.20.4",
+      "otp": "29.0.6",
+      "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+      "public_recovery": {
+        "mode": "postgresql",
+        "campaign": "ordinary-public-durable-branch-recovery",
+        "actual_recovery_family": "unbooted",
+        "original_proof_retained": true,
+        "paired_retirement_and_release": true,
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0,
+        "owned_cleanup": true,
+        "normal_shutdown": true,
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false
+      },
+      "fresh_workerless_readback": {
+        "workers": 0,
+        "exact_records": 3,
+        "exact_machine_records": 2,
+        "saved_backing_reply": true
+      },
+      "postflight": {
+        "tables": {
+          "vms": 0,
+          "vm_create_reservations": 0,
+          "vm_pause_operations": 0,
+          "config": 0,
+          "vm_resize_intents": 0,
+          "vm_resize_receipts": 0,
+          "fork_pools": 0,
+          "fork_pool_snapshots": 0,
+          "fork_pool_slots": 0,
+          "fork_leases": 0
+        },
+        "account_lock_available": true,
+        "package_assets_verified": 806,
+        "native_processes": [],
+        "encrypted_machine_rows": 2
+      },
+      "original_owner_source_stop_then_public_stopped_resolution": true,
+      "postgresql_stopped_normally": true,
+      "report_sha256": "8917cffa9d26a7baae38cdf38dfd1f9681f9ba1ac778e9b690b61c0473955222"
+    },
+    {
+      "lane": "current",
+      "recovery_family": "partial",
+      "elixir": "1.20.4",
+      "otp": "29.0.6",
+      "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+      "public_recovery": {
+        "mode": "postgresql",
+        "campaign": "ordinary-public-durable-branch-recovery",
+        "actual_recovery_family": "partial",
+        "original_proof_retained": true,
+        "paired_retirement_and_release": true,
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0,
+        "owned_cleanup": true,
+        "normal_shutdown": true,
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false
+      },
+      "fresh_workerless_readback": {
+        "workers": 0,
+        "exact_records": 3,
+        "exact_machine_records": 2,
+        "saved_backing_reply": true
+      },
+      "postflight": {
+        "tables": {
+          "vms": 0,
+          "vm_create_reservations": 0,
+          "vm_pause_operations": 0,
+          "config": 0,
+          "vm_resize_intents": 0,
+          "vm_resize_receipts": 0,
+          "fork_pools": 0,
+          "fork_pool_snapshots": 0,
+          "fork_pool_slots": 0,
+          "fork_leases": 0
+        },
+        "account_lock_available": true,
+        "package_assets_verified": 806,
+        "native_processes": [],
+        "encrypted_machine_rows": 2
+      },
+      "original_owner_source_stop_then_public_stopped_resolution": true,
+      "postgresql_stopped_normally": true,
+      "report_sha256": "85c278c923b6578db1f43a4537d39fb3a8e28f479330d5c4b2d242a6998e9a3f"
+    },
+    {
+      "lane": "minimum",
+      "recovery_family": "unbooted",
+      "elixir": "1.18.4",
+      "otp": "27.3.4.15",
+      "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+      "public_recovery": {
+        "mode": "postgresql",
+        "campaign": "ordinary-public-durable-branch-recovery",
+        "actual_recovery_family": "unbooted",
+        "original_proof_retained": true,
+        "paired_retirement_and_release": true,
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0,
+        "owned_cleanup": true,
+        "normal_shutdown": true,
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false
+      },
+      "fresh_workerless_readback": {
+        "workers": 0,
+        "exact_records": 3,
+        "exact_machine_records": 2,
+        "saved_backing_reply": true
+      },
+      "postflight": {
+        "tables": {
+          "vms": 0,
+          "vm_create_reservations": 0,
+          "vm_pause_operations": 0,
+          "config": 0,
+          "vm_resize_intents": 0,
+          "vm_resize_receipts": 0,
+          "fork_pools": 0,
+          "fork_pool_snapshots": 0,
+          "fork_pool_slots": 0,
+          "fork_leases": 0
+        },
+        "account_lock_available": true,
+        "package_assets_verified": 806,
+        "native_processes": [],
+        "encrypted_machine_rows": 2
+      },
+      "original_owner_source_stop_then_public_stopped_resolution": true,
+      "postgresql_stopped_normally": true,
+      "report_sha256": "b0694d183e2874d12d1c1b74aa8e56e27ae4967d007e73af53cac000ac7dce3d"
+    },
+    {
+      "lane": "minimum",
+      "recovery_family": "partial",
+      "elixir": "1.18.4",
+      "otp": "27.3.4.15",
+      "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+      "public_recovery": {
+        "mode": "postgresql",
+        "campaign": "ordinary-public-durable-branch-recovery",
+        "actual_recovery_family": "partial",
+        "original_proof_retained": true,
+        "paired_retirement_and_release": true,
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0,
+        "owned_cleanup": true,
+        "normal_shutdown": true,
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false
+      },
+      "fresh_workerless_readback": {
+        "workers": 0,
+        "exact_records": 3,
+        "exact_machine_records": 2,
+        "saved_backing_reply": true
+      },
+      "postflight": {
+        "tables": {
+          "vms": 0,
+          "vm_create_reservations": 0,
+          "vm_pause_operations": 0,
+          "config": 0,
+          "vm_resize_intents": 0,
+          "vm_resize_receipts": 0,
+          "fork_pools": 0,
+          "fork_pool_snapshots": 0,
+          "fork_pool_slots": 0,
+          "fork_leases": 0
+        },
+        "account_lock_available": true,
+        "package_assets_verified": 806,
+        "native_processes": [],
+        "encrypted_machine_rows": 2
+      },
+      "original_owner_source_stop_then_public_stopped_resolution": true,
+      "postgresql_stopped_normally": true,
+      "report_sha256": "45c05b92659a67172ee12f4724b43a40f9168572a25d8b1d47c3175c720869c1"
+    }
+  ],
+  "guest_space": {
+    "before_template_reclaim_bytes": 8329404416,
+    "after_template_reclaim_bytes": 14769717248,
+    "staged_template_files_sha256_verified_unchanged": 6,
+    "bytes_free_before_poweroff": 12364804096
+  },
+  "lab_shutdown": {
+    "guest_requested_poweroff": true,
+    "service_inactive": true,
+    "exit_status": 0,
+    "provisioning_disk_retained": true,
+    "baseline_and_run_disk_metadata_unchanged": true,
+    "forced_termination": false
+  },
+  "crash_validation_deferred": true,
+  "full_http_parity_claimed": false,
+  "distribution_approved": false
+}

@@ -28,7 +28,8 @@
       "images": 1,
       "checkpoints": 1,
       "branches": 1,
-      "partial_collection_preflight": 1
+      "partial_collection_preflight": 1,
+      "exports": 1
     }
   },
   "observation_limits": {

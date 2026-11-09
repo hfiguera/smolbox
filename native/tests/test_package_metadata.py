@@ -76,6 +76,7 @@ class PackageMetadataTests(unittest.TestCase):
         expected['sdk']['feature_versions']['partial_collection_preflight'] = 1
         expected['volume_limits'] = hello['limits']['volumes']
         self.assertEqual(linux, expected)
+        hello['sdk']['feature_versions']['exports'] = 1
         self.assertEqual(linux['sdk'], hello['sdk'])
         for system, filename in [('Linux', 'policy-linux.json'), ('Darwin', 'policy.json')]:
             with self.subTest(system=system), mock.patch.object(package.platform, 'system', return_value=system):

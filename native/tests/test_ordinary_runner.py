@@ -171,7 +171,8 @@ class OrdinaryRunnerTests(unittest.TestCase):
         policy = json.loads((root / 'policy-linux.json').read_bytes())
         manifest = {'schema': 3, 'identity': hello['package'], 'policy': policy}
         self.assertEqual(proof.capabilities(manifest), hello['capabilities'])
-        self.assertEqual(proof.limits(manifest), hello['limits'])
+        exports = json.loads((root / 'smolbox-protocol/fixtures/export-limits-v1.json').read_bytes())
+        self.assertEqual(proof.limits(manifest), {**hello['limits'], 'exports': exports})
         self.assertEqual(policy['volume_limits'], hello['limits']['volumes'])
         self.assertEqual(proof.capabilities(manifest)[:5],
                          ['list_images', 'pull_image', 'expand_disks', 'inspect_growth', 'qualify_growth'])
@@ -185,12 +186,14 @@ class OrdinaryRunnerTests(unittest.TestCase):
         policy = json.loads((root / 'policy.json').read_bytes())
         manifest = {'schema': 3, 'identity': hello['package'], 'policy': policy}
         self.assertEqual(proof.capabilities(manifest), hello['capabilities'])
-        self.assertEqual(proof.limits(manifest), hello['limits'])
+        exports = json.loads((root / 'smolbox-protocol/fixtures/export-limits-v1.json').read_bytes())
+        self.assertEqual(proof.limits(manifest), {**hello['limits'], 'exports': exports})
         older = json.loads(json.dumps(manifest))
         older['policy']['sdk']['feature_versions'] = {'material_proofs': 2}
         self.assertNotIn('terminal_open', proof.capabilities(older))
         self.assertNotIn('terminals', proof.limits(older))
         self.assertNotIn('jobs', proof.limits(older))
+        self.assertNotIn('exports', proof.limits(older))
         future = json.loads(json.dumps(manifest))
         future['policy']['sdk']['feature_versions']['disk_growth'] = 1
         self.assertEqual(proof.capabilities(future)[:5],

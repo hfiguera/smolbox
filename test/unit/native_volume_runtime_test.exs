@@ -103,6 +103,40 @@ defmodule SmolBox.NativeVolumeRuntimeTest do
     )
   end
 
+  test "x86_64 Port mount budget rejects before qualification and attachment", context do
+    runtime = start_runtime(context)
+    spec = machine_spec(context.native, "over-budget")
+
+    mounts =
+      for id <- ~w(first second third) do
+        assert {:ok, key} =
+                 Volumes.create(runtime,
+                   scope: spec.scope,
+                   id: id,
+                   worker_id: context.native.id,
+                   size_gb: 1
+                 )
+
+        assert {:ok, %{state: :ready}} = Volumes.inspect(runtime, key)
+        {:ok, mount} = VolumeMount.new(id, "/mnt/volumes/#{id}")
+        mount
+      end
+
+    assert {:error, %{category: :unsupported_capability, evidence: :not_dispatched}} =
+             Machines.create(runtime, %{spec | volumes: mounts})
+
+    assert {:error, %{category: :not_found}} = Machines.inspect(runtime, {spec.scope, spec.id})
+    assert {:ok, %{slots: 0, disk_gb: 3}} = Memory.usage(context.store, context.native.id)
+
+    for mount <- mounts do
+      assert {:ok, %{attached_to: nil}} = Volumes.inspect(runtime, {spec.scope, mount.volume_id})
+    end
+
+    refute Enum.any?(Package.received(context.native), fn request ->
+             get_in(request, ["operation", "operation"]) in ["qualify_creation", "create"]
+           end)
+  end
+
   @tag volume_delay_ms: 100
   test "public volumes attach, retain proof/accounting through stopped replacement and delete normally",
        context do

@@ -1,0 +1,2081 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-11-07",
+  "base_commit": "e8135e87",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "sdk_verified_unmodified_for_native_builds": true,
+  "full_http_parity_claimed": false,
+  "distribution_approved": false,
+  "production_private_tls_deferred_by_operator": true,
+  "crash_validation_deferred": true,
+  "cli_race_validation_deferred": true,
+  "default_packages": {
+    "linux": {
+      "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+      "assets_sha256": "706c83d1a75e5ed5791da54bb4cfa6e80448302a3921b202a5d8c769868e3c15",
+      "platform": "linux",
+      "architecture": "x86_64"
+    },
+    "macos": {
+      "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+      "engine_version": "0.2.0",
+      "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+      "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+      "build_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+      "assets_sha256": "0c109ee5c9cc8f1681e5b8b83b06d6712041bd36f9eda9940a423b52c7be5b25",
+      "platform": "macos",
+      "architecture": "aarch64"
+    }
+  },
+  "toolchains": {
+    "current": {
+      "elixir": "1.20.4",
+      "otp": "29.0.6"
+    },
+    "minimum": {
+      "elixir": "1.18.4",
+      "otp": "27.3.4.15"
+    }
+  },
+  "acknowledgement_handoff": {
+    "native_operations_completed_under_original_helper": true,
+    "test_store_left_completed_native_acknowledgement_uncertain": true,
+    "native_response_synthesized": false,
+    "native_authority_edited": false,
+    "original_helper_interrupted": false
+  },
+  "baseline_current_memory": {
+    "linux_manifest_sha256": "49b5909d844070bb027370a9d8bfa47f2247a630bf099e91e886dce5d38e065b",
+    "macos_manifest_sha256": "ee13e2a4afff3cbbfa7cb8349353558e74a679982ec25ff0f5867df7be5b6f73",
+    "both_hosts_adopted_original_held_and_initially_released_child": true,
+    "both_hosts_rejected_completed_held_delete_resolution": {
+      "category": "unknown",
+      "operation": "reconcile",
+      "evidence": "not_dispatched"
+    },
+    "ordinary_shutdown_preserved_original_disks_and_records": true
+  },
+  "rebuilt_helper_before_runtime_fix": {
+    "current_memory_typed_held_delete_resolution": {
+      "linux": {
+        "state": "deleted",
+        "branch_state": "held",
+        "version": 18
+      },
+      "macos": {
+        "version": 18,
+        "state": "deleted",
+        "branch_state": "held"
+      }
+    },
+    "both_hosts_accepted_held_dependency_retirement": true,
+    "full_cleanup_in_these_attempts": false,
+    "managed_source_marked_uncertain_by_ordinary_worker_rescan": true
+  },
+  "models": {
+    "native_linux_branch_deletion": {
+      "passed": 80
+    },
+    "native_linux_prepared_retirement": {
+      "passed": 7
+    },
+    "client_branch_and_coverage_models": {
+      "current_passed": 1007,
+      "minimum_passed": 1007
+    },
+    "http_and_managed_machine_regressions": {
+      "current_passed": 54,
+      "minimum_passed": 54
+    }
+  },
+  "other_attempts": {
+    "linux_prepared_admission_contention": {
+      "managed_branch_state": "failed",
+      "child_state": "deleted",
+      "protected_prepared_intent_reached": false
+    },
+    "linux_prepared_owner_read_only": {
+      "protected_prepared_intent_reached": false,
+      "detail": "The helper restored the private staging directory mode before opening the spool."
+    },
+    "macos_current_memory_combined_ready_run": {
+      "both_original_children_adopted": true,
+      "held_delete_resolved_and_dependency_retired": true,
+      "released_delete_completed_acknowledgement_observed": false,
+      "full_cleanup": false
+    },
+    "linux_prepared_receipt_before_readiness_fix": {
+      "typed_prepared_retirement": true,
+      "duplicate_receipt_exact": true,
+      "native_preparation_never_entered": true
+    },
+    "held_collection_and_continuation_before_readiness_fix": {
+      "linux": {
+        "held": true,
+        "original_collection_acknowledged": true,
+        "final_deletion_continued_after_admission_guard": true,
+        "dependency_retired": true,
+        "duplicate_proofs_preserved": true
+      },
+      "macos": {
+        "held": true,
+        "original_collection_acknowledged": true,
+        "final_deletion_continued_after_admission_guard": true,
+        "dependency_retired": true,
+        "duplicate_proofs_preserved": true
+      },
+      "source_cleanup_completed": false
+    }
+  },
+  "client_archives": {
+    "completed_deletion_readiness": "88af1bfc153b69186ffac8390c69f7caa9b17b95942b6a4ae4e7efc7a5a4a9be",
+    "prepared_retirement_readiness": "e2f029e467afcd9ca316b5ee43a1ebb41b842dd440fe44543d27c2992cdfe63f",
+    "deletion_action_readiness": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0"
+  },
+  "live_package_results": {
+    "linux": [
+      {
+        "status": "passed",
+        "lane": "current",
+        "mode": "memory",
+        "family": "cleanup-held",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": true,
+            "original_sdk_row_absence_verified": true,
+            "retained_child_directory_cleaned": true,
+            "duplicate_proof_preserved": true,
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "minimum",
+        "mode": "memory",
+        "family": "cleanup-held",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": true,
+            "original_sdk_row_absence_verified": true,
+            "retained_child_directory_cleaned": true,
+            "duplicate_proof_preserved": true,
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "current",
+        "mode": "postgresql",
+        "family": "cleanup-held",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "postgresql_normal_stop": true,
+        "evidence": {
+          "status": "passed",
+          "mode": "postgresql",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": true,
+            "original_sdk_row_absence_verified": true,
+            "retained_child_directory_cleaned": true,
+            "duplicate_proof_preserved": true,
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "minimum",
+        "mode": "postgresql",
+        "family": "cleanup-held",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "postgresql_normal_stop": true,
+        "evidence": {
+          "status": "passed",
+          "mode": "postgresql",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": true,
+            "original_sdk_row_absence_verified": true,
+            "retained_child_directory_cleaned": true,
+            "duplicate_proof_preserved": true,
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "current",
+        "mode": "memory",
+        "family": "cleanup-released",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": false,
+            "original_sdk_row_absence_verified": true,
+            "retained_child_directory_cleaned": true,
+            "duplicate_proof_preserved": true,
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "minimum",
+        "mode": "memory",
+        "family": "cleanup-released",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": false,
+            "original_sdk_row_absence_verified": true,
+            "retained_child_directory_cleaned": true,
+            "duplicate_proof_preserved": true,
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "current",
+        "mode": "postgresql",
+        "family": "cleanup-released",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "postgresql_normal_stop": true,
+        "evidence": {
+          "status": "passed",
+          "mode": "postgresql",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": false,
+            "original_sdk_row_absence_verified": true,
+            "retained_child_directory_cleaned": true,
+            "duplicate_proof_preserved": true,
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "minimum",
+        "mode": "postgresql",
+        "family": "cleanup-released",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "postgresql_normal_stop": true,
+        "evidence": {
+          "status": "passed",
+          "mode": "postgresql",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": false,
+            "original_sdk_row_absence_verified": true,
+            "retained_child_directory_cleaned": true,
+            "duplicate_proof_preserved": true,
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "current",
+        "mode": "memory",
+        "family": "continue-held",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": true,
+            "original_collection_acknowledged": true,
+            "final_deletion_continued_after_admission_guard": true,
+            "dependency_retired": true,
+            "duplicate_proofs_preserved": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "minimum",
+        "mode": "memory",
+        "family": "continue-held",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": true,
+            "original_collection_acknowledged": true,
+            "final_deletion_continued_after_admission_guard": true,
+            "dependency_retired": true,
+            "duplicate_proofs_preserved": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "current",
+        "mode": "postgresql",
+        "family": "continue-held",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "postgresql_normal_stop": true,
+        "evidence": {
+          "status": "passed",
+          "mode": "postgresql",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": true,
+            "original_collection_acknowledged": true,
+            "final_deletion_continued_after_admission_guard": true,
+            "dependency_retired": true,
+            "duplicate_proofs_preserved": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "minimum",
+        "mode": "postgresql",
+        "family": "continue-held",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "postgresql_normal_stop": true,
+        "evidence": {
+          "status": "passed",
+          "mode": "postgresql",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": true,
+            "original_collection_acknowledged": true,
+            "final_deletion_continued_after_admission_guard": true,
+            "dependency_retired": true,
+            "duplicate_proofs_preserved": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "current",
+        "mode": "memory",
+        "family": "continue-released",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": false,
+            "original_collection_acknowledged": true,
+            "final_deletion_continued_after_admission_guard": true,
+            "dependency_retired": true,
+            "duplicate_proofs_preserved": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "minimum",
+        "mode": "memory",
+        "family": "continue-released",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": false,
+            "original_collection_acknowledged": true,
+            "final_deletion_continued_after_admission_guard": true,
+            "dependency_retired": true,
+            "duplicate_proofs_preserved": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "current",
+        "mode": "postgresql",
+        "family": "continue-released",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "postgresql_normal_stop": true,
+        "evidence": {
+          "status": "passed",
+          "mode": "postgresql",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": false,
+            "original_collection_acknowledged": true,
+            "final_deletion_continued_after_admission_guard": true,
+            "dependency_retired": true,
+            "duplicate_proofs_preserved": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "minimum",
+        "mode": "postgresql",
+        "family": "continue-released",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "postgresql_normal_stop": true,
+        "evidence": {
+          "status": "passed",
+          "mode": "postgresql",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": false,
+            "original_collection_acknowledged": true,
+            "final_deletion_continued_after_admission_guard": true,
+            "dependency_retired": true,
+            "duplicate_proofs_preserved": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "current",
+        "mode": "memory",
+        "family": "prepared-capacity",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "e2f029e467afcd9ca316b5ee43a1ebb41b842dd440fe44543d27c2992cdfe63f",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "prepared_retirement": true,
+          "native_preparation_never_entered": true,
+          "ordinary_staging_capacity_refusal": true,
+          "exact_repeated_retirement": true,
+          "source_creation_unchanged": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "minimum",
+        "mode": "memory",
+        "family": "prepared-capacity",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "e2f029e467afcd9ca316b5ee43a1ebb41b842dd440fe44543d27c2992cdfe63f",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "prepared_retirement": true,
+          "native_preparation_never_entered": true,
+          "ordinary_staging_capacity_refusal": true,
+          "exact_repeated_retirement": true,
+          "source_creation_unchanged": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "current",
+        "mode": "postgresql",
+        "family": "prepared-capacity",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "e2f029e467afcd9ca316b5ee43a1ebb41b842dd440fe44543d27c2992cdfe63f",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "postgresql_normal_stop": true,
+        "evidence": {
+          "status": "passed",
+          "mode": "postgresql",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "prepared_retirement": true,
+          "native_preparation_never_entered": true,
+          "ordinary_staging_capacity_refusal": true,
+          "exact_repeated_retirement": true,
+          "source_creation_unchanged": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "minimum",
+        "mode": "postgresql",
+        "family": "prepared-capacity",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "e2f029e467afcd9ca316b5ee43a1ebb41b842dd440fe44543d27c2992cdfe63f",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "postgresql_normal_stop": true,
+        "evidence": {
+          "status": "passed",
+          "mode": "postgresql",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "prepared_retirement": true,
+          "native_preparation_never_entered": true,
+          "ordinary_staging_capacity_refusal": true,
+          "exact_repeated_retirement": true,
+          "source_creation_unchanged": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "current",
+        "mode": "memory",
+        "family": "ready-held",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "88af1bfc153b69186ffac8390c69f7caa9b17b95942b6a4ae4e7efc7a5a4a9be",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": true,
+            "original_delete_ack_withheld": true,
+            "recovery": "explicit_resolution",
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true,
+          "source_remained_running_until_explicit_stop": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "minimum",
+        "mode": "memory",
+        "family": "ready-held",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "88af1bfc153b69186ffac8390c69f7caa9b17b95942b6a4ae4e7efc7a5a4a9be",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": true,
+            "original_delete_ack_withheld": true,
+            "recovery": "explicit_resolution",
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true,
+          "source_remained_running_until_explicit_stop": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "current",
+        "mode": "postgresql",
+        "family": "ready-held",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "88af1bfc153b69186ffac8390c69f7caa9b17b95942b6a4ae4e7efc7a5a4a9be",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "postgresql_normal_stop": true,
+        "evidence": {
+          "status": "passed",
+          "mode": "postgresql",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": true,
+            "original_delete_ack_withheld": true,
+            "recovery": "explicit_resolution",
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true,
+          "source_remained_running_until_explicit_stop": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "minimum",
+        "mode": "postgresql",
+        "family": "ready-held",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "88af1bfc153b69186ffac8390c69f7caa9b17b95942b6a4ae4e7efc7a5a4a9be",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "postgresql_normal_stop": true,
+        "evidence": {
+          "status": "passed",
+          "mode": "postgresql",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": true,
+            "original_delete_ack_withheld": true,
+            "recovery": "explicit_resolution",
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true,
+          "source_remained_running_until_explicit_stop": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "current",
+        "mode": "memory",
+        "family": "ready-released",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "88af1bfc153b69186ffac8390c69f7caa9b17b95942b6a4ae4e7efc7a5a4a9be",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": false,
+            "original_delete_ack_withheld": false,
+            "recovery": "explicit_resolution",
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true,
+          "source_remained_running_until_explicit_stop": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "minimum",
+        "mode": "memory",
+        "family": "ready-released",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": false,
+            "original_delete_ack_withheld": true,
+            "recovery": "explicit_resolution",
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true,
+          "source_remained_running_until_explicit_stop": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "current",
+        "mode": "postgresql",
+        "family": "ready-released",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "88af1bfc153b69186ffac8390c69f7caa9b17b95942b6a4ae4e7efc7a5a4a9be",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "postgresql_normal_stop": true,
+        "evidence": {
+          "status": "passed",
+          "mode": "postgresql",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": false,
+            "original_delete_ack_withheld": true,
+            "recovery": "explicit_resolution",
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true,
+          "source_remained_running_until_explicit_stop": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "minimum",
+        "mode": "postgresql",
+        "family": "ready-released",
+        "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+        "helper_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+        "client_archive_sha256": "88af1bfc153b69186ffac8390c69f7caa9b17b95942b6a4ae4e7efc7a5a4a9be",
+        "fixture_sha256": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+        "empty_sdk_tables": 10,
+        "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+        "postgresql_normal_stop": true,
+        "evidence": {
+          "status": "passed",
+          "mode": "postgresql",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": false,
+            "original_delete_ack_withheld": true,
+            "recovery": "explicit_resolution",
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true,
+          "source_remained_running_until_explicit_stop": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      }
+    ],
+    "macos": [
+      {
+        "status": "passed",
+        "lane": "current",
+        "mode": "memory",
+        "family": "cleanup-held",
+        "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+        "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": true,
+            "original_sdk_row_absence_verified": true,
+            "retained_child_directory_cleaned": true,
+            "duplicate_proof_preserved": true,
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "minimum",
+        "mode": "memory",
+        "family": "cleanup-held",
+        "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+        "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": true,
+            "original_sdk_row_absence_verified": true,
+            "retained_child_directory_cleaned": true,
+            "duplicate_proof_preserved": true,
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "current",
+        "mode": "postgresql",
+        "family": "cleanup-held",
+        "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+        "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "empty_sdk_tables": 10,
+        "postgresql": "17.11 (Homebrew)",
+        "postgresql_normal_stop": true,
+        "evidence": {
+          "status": "passed",
+          "mode": "postgresql",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": true,
+            "original_sdk_row_absence_verified": true,
+            "retained_child_directory_cleaned": true,
+            "duplicate_proof_preserved": true,
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "minimum",
+        "mode": "postgresql",
+        "family": "cleanup-held",
+        "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+        "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "empty_sdk_tables": 10,
+        "postgresql": "17.11 (Homebrew)",
+        "postgresql_normal_stop": true,
+        "evidence": {
+          "status": "passed",
+          "mode": "postgresql",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": true,
+            "original_sdk_row_absence_verified": true,
+            "retained_child_directory_cleaned": true,
+            "duplicate_proof_preserved": true,
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "current",
+        "mode": "memory",
+        "family": "cleanup-released",
+        "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+        "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": false,
+            "original_sdk_row_absence_verified": true,
+            "retained_child_directory_cleaned": true,
+            "duplicate_proof_preserved": true,
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "minimum",
+        "mode": "memory",
+        "family": "cleanup-released",
+        "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+        "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": false,
+            "original_sdk_row_absence_verified": true,
+            "retained_child_directory_cleaned": true,
+            "duplicate_proof_preserved": true,
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "current",
+        "mode": "postgresql",
+        "family": "cleanup-released",
+        "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+        "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "empty_sdk_tables": 10,
+        "postgresql": "17.11 (Homebrew)",
+        "postgresql_normal_stop": true,
+        "evidence": {
+          "status": "passed",
+          "mode": "postgresql",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": false,
+            "original_sdk_row_absence_verified": true,
+            "retained_child_directory_cleaned": true,
+            "duplicate_proof_preserved": true,
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "minimum",
+        "mode": "postgresql",
+        "family": "cleanup-released",
+        "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+        "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "empty_sdk_tables": 10,
+        "postgresql": "17.11 (Homebrew)",
+        "postgresql_normal_stop": true,
+        "evidence": {
+          "status": "passed",
+          "mode": "postgresql",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": false,
+            "original_sdk_row_absence_verified": true,
+            "retained_child_directory_cleaned": true,
+            "duplicate_proof_preserved": true,
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "current",
+        "mode": "memory",
+        "family": "continue-held",
+        "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+        "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": true,
+            "original_collection_acknowledged": true,
+            "final_deletion_continued_after_admission_guard": true,
+            "dependency_retired": true,
+            "duplicate_proofs_preserved": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "minimum",
+        "mode": "memory",
+        "family": "continue-held",
+        "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+        "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": true,
+            "original_collection_acknowledged": true,
+            "final_deletion_continued_after_admission_guard": true,
+            "dependency_retired": true,
+            "duplicate_proofs_preserved": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "current",
+        "mode": "postgresql",
+        "family": "continue-held",
+        "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+        "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "empty_sdk_tables": 10,
+        "postgresql": "17.11 (Homebrew)",
+        "postgresql_normal_stop": true,
+        "evidence": {
+          "status": "passed",
+          "mode": "postgresql",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": true,
+            "original_collection_acknowledged": true,
+            "final_deletion_continued_after_admission_guard": true,
+            "dependency_retired": true,
+            "duplicate_proofs_preserved": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "minimum",
+        "mode": "postgresql",
+        "family": "continue-held",
+        "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+        "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "empty_sdk_tables": 10,
+        "postgresql": "17.11 (Homebrew)",
+        "postgresql_normal_stop": true,
+        "evidence": {
+          "status": "passed",
+          "mode": "postgresql",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": true,
+            "original_collection_acknowledged": true,
+            "final_deletion_continued_after_admission_guard": true,
+            "dependency_retired": true,
+            "duplicate_proofs_preserved": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "current",
+        "mode": "memory",
+        "family": "continue-released",
+        "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+        "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": false,
+            "original_collection_acknowledged": true,
+            "final_deletion_continued_after_admission_guard": true,
+            "dependency_retired": true,
+            "duplicate_proofs_preserved": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "minimum",
+        "mode": "memory",
+        "family": "continue-released",
+        "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+        "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": false,
+            "original_collection_acknowledged": true,
+            "final_deletion_continued_after_admission_guard": true,
+            "dependency_retired": true,
+            "duplicate_proofs_preserved": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "current",
+        "mode": "postgresql",
+        "family": "continue-released",
+        "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+        "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "empty_sdk_tables": 10,
+        "postgresql": "17.11 (Homebrew)",
+        "postgresql_normal_stop": true,
+        "evidence": {
+          "status": "passed",
+          "mode": "postgresql",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": false,
+            "original_collection_acknowledged": true,
+            "final_deletion_continued_after_admission_guard": true,
+            "dependency_retired": true,
+            "duplicate_proofs_preserved": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "minimum",
+        "mode": "postgresql",
+        "family": "continue-released",
+        "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+        "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+        "client_archive_sha256": "d13d45a5e6611caf5706f1a77da02b0a5b1f13d9d75056b31f08c295805d89a0",
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "empty_sdk_tables": 10,
+        "postgresql": "17.11 (Homebrew)",
+        "postgresql_normal_stop": true,
+        "evidence": {
+          "status": "passed",
+          "mode": "postgresql",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": false,
+            "original_collection_acknowledged": true,
+            "final_deletion_continued_after_admission_guard": true,
+            "dependency_retired": true,
+            "duplicate_proofs_preserved": true
+          },
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "current",
+        "mode": "memory",
+        "family": "prepared-capacity",
+        "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+        "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+        "client_archive_sha256": "e2f029e467afcd9ca316b5ee43a1ebb41b842dd440fe44543d27c2992cdfe63f",
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "prepared_retirement": true,
+          "native_preparation_never_entered": true,
+          "ordinary_staging_capacity_refusal": true,
+          "exact_repeated_retirement": true,
+          "source_creation_unchanged": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "minimum",
+        "mode": "memory",
+        "family": "prepared-capacity",
+        "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+        "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+        "client_archive_sha256": "e2f029e467afcd9ca316b5ee43a1ebb41b842dd440fe44543d27c2992cdfe63f",
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "prepared_retirement": true,
+          "native_preparation_never_entered": true,
+          "ordinary_staging_capacity_refusal": true,
+          "exact_repeated_retirement": true,
+          "source_creation_unchanged": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "current",
+        "mode": "postgresql",
+        "family": "prepared-capacity",
+        "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+        "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+        "client_archive_sha256": "e2f029e467afcd9ca316b5ee43a1ebb41b842dd440fe44543d27c2992cdfe63f",
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "empty_sdk_tables": 10,
+        "postgresql": "17.11 (Homebrew)",
+        "postgresql_normal_stop": true,
+        "evidence": {
+          "status": "passed",
+          "mode": "postgresql",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "prepared_retirement": true,
+          "native_preparation_never_entered": true,
+          "ordinary_staging_capacity_refusal": true,
+          "exact_repeated_retirement": true,
+          "source_creation_unchanged": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "minimum",
+        "mode": "postgresql",
+        "family": "prepared-capacity",
+        "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+        "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+        "client_archive_sha256": "e2f029e467afcd9ca316b5ee43a1ebb41b842dd440fe44543d27c2992cdfe63f",
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "empty_sdk_tables": 10,
+        "postgresql": "17.11 (Homebrew)",
+        "postgresql_normal_stop": true,
+        "evidence": {
+          "status": "passed",
+          "mode": "postgresql",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "prepared_retirement": true,
+          "native_preparation_never_entered": true,
+          "ordinary_staging_capacity_refusal": true,
+          "exact_repeated_retirement": true,
+          "source_creation_unchanged": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "current",
+        "mode": "postgresql",
+        "family": "ready",
+        "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+        "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+        "client_archive_sha256": "88af1bfc153b69186ffac8390c69f7caa9b17b95942b6a4ae4e7efc7a5a4a9be",
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "empty_sdk_tables": 10,
+        "postgresql": "17.11 (Homebrew)",
+        "postgresql_normal_stop": true,
+        "evidence": {
+          "status": "passed",
+          "mode": "postgresql",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": [
+            {
+              "held": true,
+              "original_delete_ack_withheld": true,
+              "recovery": "explicit_resolution",
+              "dependency_retired": true
+            },
+            {
+              "held": false,
+              "original_delete_ack_withheld": true,
+              "recovery": "explicit_resolution",
+              "dependency_retired": true
+            }
+          ],
+          "held_and_initially_released_ready_adopted": true,
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 4,
+          "exact_machine_records": 3,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "minimum",
+        "mode": "postgresql",
+        "family": "ready",
+        "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+        "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+        "client_archive_sha256": "88af1bfc153b69186ffac8390c69f7caa9b17b95942b6a4ae4e7efc7a5a4a9be",
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "empty_sdk_tables": 10,
+        "postgresql": "17.11 (Homebrew)",
+        "postgresql_normal_stop": true,
+        "evidence": {
+          "status": "passed",
+          "mode": "postgresql",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": [
+            {
+              "held": true,
+              "original_delete_ack_withheld": true,
+              "recovery": "explicit_resolution",
+              "dependency_retired": true
+            },
+            {
+              "held": false,
+              "original_delete_ack_withheld": true,
+              "recovery": "explicit_resolution",
+              "dependency_retired": true
+            }
+          ],
+          "held_and_initially_released_ready_adopted": true,
+          "exact_original_completion_and_repeated_adoption": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 4,
+          "exact_machine_records": 3,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "current",
+        "mode": "memory",
+        "family": "ready-held",
+        "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+        "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+        "client_archive_sha256": "88af1bfc153b69186ffac8390c69f7caa9b17b95942b6a4ae4e7efc7a5a4a9be",
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": true,
+            "original_delete_ack_withheld": false,
+            "recovery": "explicit_resolution",
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true,
+          "source_remained_running_until_explicit_stop": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "minimum",
+        "mode": "memory",
+        "family": "ready-held",
+        "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+        "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+        "client_archive_sha256": "88af1bfc153b69186ffac8390c69f7caa9b17b95942b6a4ae4e7efc7a5a4a9be",
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": true,
+            "original_delete_ack_withheld": true,
+            "recovery": "explicit_resolution",
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true,
+          "source_remained_running_until_explicit_stop": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "current",
+        "mode": "memory",
+        "family": "ready-released",
+        "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+        "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+        "client_archive_sha256": "88af1bfc153b69186ffac8390c69f7caa9b17b95942b6a4ae4e7efc7a5a4a9be",
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": false,
+            "original_delete_ack_withheld": false,
+            "recovery": "explicit_resolution",
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true,
+          "source_remained_running_until_explicit_stop": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      },
+      {
+        "status": "passed",
+        "lane": "minimum",
+        "mode": "memory",
+        "family": "ready-released",
+        "manifest_sha256": "7d3028e5cf6c3a41c82b9beea08461c1d9e35e1f21c3950d5568c71538fe4bb1",
+        "helper_sha256": "bd1156f52cd07b603e92a5cb2407148f2c834eda4968a9a668d968eea3f341c5",
+        "client_archive_sha256": "88af1bfc153b69186ffac8390c69f7caa9b17b95942b6a4ae4e7efc7a5a4a9be",
+        "fixture_sha256": "790e1f9b311ebff24d44e86862182cc524a3a06b66366c70743fa23f8d982bdc",
+        "empty_sdk_tables": 10,
+        "postgresql": null,
+        "postgresql_normal_stop": false,
+        "evidence": {
+          "status": "passed",
+          "mode": "memory",
+          "owned_cleanup": true,
+          "normal_shutdown": true,
+          "final_reserved_slots": 0,
+          "final_reserved_disk_gb": 0,
+          "original_helper_retained_through_recovery": true,
+          "deletion": {
+            "held": false,
+            "original_delete_ack_withheld": false,
+            "recovery": "explicit_resolution",
+            "dependency_retired": true
+          },
+          "exact_original_completion_and_repeated_adoption": true,
+          "source_remained_running_until_explicit_stop": true
+        },
+        "workerless_readback": {
+          "workers": 0,
+          "exact_records": 3,
+          "exact_machine_records": 2,
+          "saved_recovery_reply": true
+        }
+      }
+    ]
+  }
+}

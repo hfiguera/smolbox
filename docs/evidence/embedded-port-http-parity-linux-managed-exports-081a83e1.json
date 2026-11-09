@@ -1,0 +1,301 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-11-06",
+  "status": "linux-default-managed-exports-qualified",
+  "proof_source_commit": "f0e87d93",
+  "sdk": {
+    "version": "1.22.0",
+    "revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source_unmodified": true
+  },
+  "default_linux_policy_sha256": "06c84140085fc9c14faecc98cefb0c07d3074d0951bf3f4affbfa5b824edf309",
+  "qualified_candidate_policy_matches_default": true,
+  "lanes": {
+    "minimum": {
+      "package": {
+        "source_base": "081a83e1",
+        "archive_sha256": "0bb70fdb7ce109b00365af8797478df63a02c89d5f602d736bbed0bbff62b0a3",
+        "policy_sha256": "06c84140085fc9c14faecc98cefb0c07d3074d0951bf3f4affbfa5b824edf309",
+        "manifest_sha256": "0870a210d25fe5183800404df626205ac2da1d6ceb3e857fd618667bb058f986",
+        "helper_sha256": "40ac91f1704ab99c5be28651f78b5d2deeb89a92c9459198884ab01a55409f23",
+        "asset_count": 806,
+        "hex_archive_sha256": "6348090d042b39d94a16dabddab55c436d1fde029979f009544cd48712dce46a",
+        "proof_sha256": "e55a4708a8b7e522d7ee70032890d987bb3fa1b1cb214ff5fd9dce0f6d1da4ed"
+      },
+      "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+      "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+      "dependencies_lock_sha256": "7330b2284b8fc353b3240f4e5afeb7bd158ccbc6fed2a35b65047e08923dc9ca",
+      "postgresql_normal_shutdown": true,
+      "native_owner_absent": true,
+      "modes": {
+        "bare": {
+          "managed": {
+            "mode": "bare",
+            "store": "postgresql",
+            "final_reserved_slots": 0,
+            "crash_validation_deferred": true,
+            "content_sha256": "a8550089650599a60da3a2ff666364409a388503237114855edce2345a45a1cd",
+            "package_manifest_sha256": "0870a210d25fe5183800404df626205ac2da1d6ceb3e857fd618667bb058f986",
+            "runtime_replacement": true,
+            "native_cleanup_resolved": true,
+            "export_history_after_delete": true,
+            "pinned_registry_reimport": true,
+            "source_and_copy_independent": true,
+            "manifest_sha256": "782a66a33819a71d8f3c381e75b8c4c36cbf634bf92e303a825e15210c6f3377",
+            "size_bytes": 27171131
+          },
+          "durable_readback": {
+            "exact_machine_records": 2,
+            "exact_completed_export_receipt": true,
+            "native_workers": 0,
+            "final_reserved_slots": 0,
+            "crash_validation_deferred": true
+          },
+          "postflight": {
+            "tables": {
+              "vms": 0,
+              "vm_create_reservations": 0,
+              "vm_pause_operations": 0,
+              "config": 0,
+              "vm_resize_intents": 0,
+              "vm_resize_receipts": 0,
+              "fork_pools": 0,
+              "fork_pool_snapshots": 0,
+              "fork_pool_slots": 0,
+              "fork_leases": 0
+            },
+            "account_lock_available": true,
+            "package_assets_verified": 806,
+            "encrypted_machine_rows": 2
+          },
+          "independent_registry_readback": {
+            "request_counts": {
+              "heads": 5,
+              "uploads": 2,
+              "chunks": 27,
+              "blobs": 2,
+              "manifests": 3,
+              "reads": 11,
+              "rejected": 0
+            },
+            "sha256": "a8550089650599a60da3a2ff666364409a388503237114855edce2345a45a1cd"
+          }
+        },
+        "container": {
+          "managed": {
+            "mode": "container",
+            "store": "postgresql",
+            "final_reserved_slots": 0,
+            "crash_validation_deferred": true,
+            "content_sha256": "3457e9d0778cfb65ef2108fd943bf203e09755e984d998090a6d29c047c3a710",
+            "package_manifest_sha256": "0870a210d25fe5183800404df626205ac2da1d6ceb3e857fd618667bb058f986",
+            "runtime_replacement": true,
+            "native_cleanup_resolved": true,
+            "export_history_after_delete": true,
+            "pinned_registry_reimport": true,
+            "source_and_copy_independent": true,
+            "manifest_sha256": "a9d489415be3a5cc2b28f8726136c223af610b1c39fd40c0e50620af5b915d9e",
+            "size_bytes": 43758133
+          },
+          "durable_readback": {
+            "exact_machine_records": 2,
+            "exact_completed_export_receipt": true,
+            "native_workers": 0,
+            "final_reserved_slots": 0,
+            "crash_validation_deferred": true
+          },
+          "postflight": {
+            "tables": {
+              "vms": 0,
+              "vm_create_reservations": 0,
+              "vm_pause_operations": 0,
+              "config": 0,
+              "vm_resize_intents": 0,
+              "vm_resize_receipts": 0,
+              "fork_pools": 0,
+              "fork_pool_snapshots": 0,
+              "fork_pool_slots": 0,
+              "fork_leases": 0
+            },
+            "account_lock_available": true,
+            "package_assets_verified": 806,
+            "encrypted_machine_rows": 2
+          },
+          "independent_registry_readback": {
+            "request_counts": {
+              "heads": 5,
+              "uploads": 2,
+              "chunks": 43,
+              "blobs": 2,
+              "manifests": 3,
+              "reads": 11,
+              "rejected": 0
+            },
+            "sha256": "3457e9d0778cfb65ef2108fd943bf203e09755e984d998090a6d29c047c3a710"
+          }
+        }
+      }
+    },
+    "current": {
+      "package": {
+        "source_base": "081a83e1",
+        "archive_sha256": "0bb70fdb7ce109b00365af8797478df63a02c89d5f602d736bbed0bbff62b0a3",
+        "policy_sha256": "06c84140085fc9c14faecc98cefb0c07d3074d0951bf3f4affbfa5b824edf309",
+        "manifest_sha256": "0870a210d25fe5183800404df626205ac2da1d6ceb3e857fd618667bb058f986",
+        "helper_sha256": "40ac91f1704ab99c5be28651f78b5d2deeb89a92c9459198884ab01a55409f23",
+        "asset_count": 806,
+        "hex_archive_sha256": "6348090d042b39d94a16dabddab55c436d1fde029979f009544cd48712dce46a",
+        "proof_sha256": "e55a4708a8b7e522d7ee70032890d987bb3fa1b1cb214ff5fd9dce0f6d1da4ed"
+      },
+      "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+      "postgresql": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+      "dependencies_lock_sha256": "a06e226867d2306753ca97374335cfde2e835c018c1fe65003175fa24f1ee95b",
+      "postgresql_normal_shutdown": true,
+      "native_owner_absent": true,
+      "modes": {
+        "bare": {
+          "managed": {
+            "mode": "bare",
+            "store": "postgresql",
+            "final_reserved_slots": 0,
+            "crash_validation_deferred": true,
+            "content_sha256": "5b3ae09eded82fcfc9cf9eb00329cedd8b066f1ea8dec3ad9bc598ceb23830df",
+            "package_manifest_sha256": "0870a210d25fe5183800404df626205ac2da1d6ceb3e857fd618667bb058f986",
+            "runtime_replacement": true,
+            "native_cleanup_resolved": true,
+            "export_history_after_delete": true,
+            "pinned_registry_reimport": true,
+            "source_and_copy_independent": true,
+            "manifest_sha256": "99bb64b1ee2fd844dce68b09cfeb57df4f1a8e817faae0b4bb0239919d1c1fa3",
+            "size_bytes": 27171068
+          },
+          "durable_readback": {
+            "exact_machine_records": 2,
+            "exact_completed_export_receipt": true,
+            "native_workers": 0,
+            "final_reserved_slots": 0,
+            "crash_validation_deferred": true
+          },
+          "postflight": {
+            "tables": {
+              "vms": 0,
+              "vm_create_reservations": 0,
+              "vm_pause_operations": 0,
+              "config": 0,
+              "vm_resize_intents": 0,
+              "vm_resize_receipts": 0,
+              "fork_pools": 0,
+              "fork_pool_snapshots": 0,
+              "fork_pool_slots": 0,
+              "fork_leases": 0
+            },
+            "account_lock_available": true,
+            "package_assets_verified": 806,
+            "encrypted_machine_rows": 2
+          },
+          "independent_registry_readback": {
+            "request_counts": {
+              "heads": 5,
+              "uploads": 2,
+              "chunks": 27,
+              "blobs": 2,
+              "manifests": 3,
+              "reads": 11,
+              "rejected": 0
+            },
+            "sha256": "5b3ae09eded82fcfc9cf9eb00329cedd8b066f1ea8dec3ad9bc598ceb23830df"
+          }
+        },
+        "container": {
+          "managed": {
+            "mode": "container",
+            "store": "postgresql",
+            "final_reserved_slots": 0,
+            "crash_validation_deferred": true,
+            "content_sha256": "aca63440e90024a1f9b6c9ddcf2ebe9567432d5c58d9f9a9b3157fa2ef6503f3",
+            "package_manifest_sha256": "0870a210d25fe5183800404df626205ac2da1d6ceb3e857fd618667bb058f986",
+            "runtime_replacement": true,
+            "native_cleanup_resolved": true,
+            "export_history_after_delete": true,
+            "pinned_registry_reimport": true,
+            "source_and_copy_independent": true,
+            "manifest_sha256": "6059f74e8ef32f4b9ffd3a9e15c2813ad6df1b80e08496014a837b1654e1a47a",
+            "size_bytes": 43759098
+          },
+          "durable_readback": {
+            "exact_machine_records": 2,
+            "exact_completed_export_receipt": true,
+            "native_workers": 0,
+            "final_reserved_slots": 0,
+            "crash_validation_deferred": true
+          },
+          "postflight": {
+            "tables": {
+              "vms": 0,
+              "vm_create_reservations": 0,
+              "vm_pause_operations": 0,
+              "config": 0,
+              "vm_resize_intents": 0,
+              "vm_resize_receipts": 0,
+              "fork_pools": 0,
+              "fork_pool_snapshots": 0,
+              "fork_pool_slots": 0,
+              "fork_leases": 0
+            },
+            "account_lock_available": true,
+            "package_assets_verified": 806,
+            "encrypted_machine_rows": 2
+          },
+          "independent_registry_readback": {
+            "request_counts": {
+              "heads": 5,
+              "uploads": 2,
+              "chunks": 43,
+              "blobs": 2,
+              "manifests": 3,
+              "reads": 11,
+              "rejected": 0
+            },
+            "sha256": "aca63440e90024a1f9b6c9ddcf2ebe9567432d5c58d9f9a9b3157fa2ef6503f3"
+          }
+        }
+      }
+    }
+  },
+  "native_port_model_checks_passed": 91,
+  "native_port_model_checks_ignored": 2,
+  "native_export_pack_model_checks_passed": 5,
+  "focused_elixir_export_checks_passed": 79,
+  "minimum_consumer": {
+    "elixir": "1.18.4",
+    "otp": "27.3.4.15",
+    "jason": "1.4.5",
+    "reason": "Decimal 3 compatibility with Ecto SQL 3.14"
+  },
+  "lab": {
+    "normal_guest_poweroff": true,
+    "unit_inactive": true,
+    "exit_status": 0,
+    "provisioning_disk_preserved": true
+  },
+  "macos_default_exports_enabled": false,
+  "crash_validation_deferred": true,
+  "crash_handling_qualified": false,
+  "distribution_approved": false,
+  "default_rebuild": {
+    "commit": "f052cb41",
+    "policy_sha256": "06c84140085fc9c14faecc98cefb0c07d3074d0951bf3f4affbfa5b824edf309",
+    "manifest_sha256": "0870a210d25fe5183800404df626205ac2da1d6ceb3e857fd618667bb058f986",
+    "helper_sha256": "40ac91f1704ab99c5be28651f78b5d2deeb89a92c9459198884ab01a55409f23",
+    "asset_count": 806,
+    "policy_and_all_assets_match_candidate": true,
+    "helper_bytes_match_candidate": true
+  },
+  "ordinary_elixir_suite": {
+    "passed_on_rerun": 2123,
+    "excluded": 42,
+    "first_run_failures": 1,
+    "isolated_retry_passed": true,
+    "first_run_failure_scope": "branch renewal timing assertion"
+  }
+}

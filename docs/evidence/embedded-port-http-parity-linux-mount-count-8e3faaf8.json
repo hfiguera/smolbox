@@ -1,0 +1,174 @@
+{
+  "schema": 1,
+  "source_commit": "8e3faaf8a8da4a8899d7611673462e7f2ad09cb0",
+  "recorded_date": "2026-11-07",
+  "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+  "libkrun_revision": "3285db7404144ed61faf0848bb424c0f82743f41",
+  "libkrun_sha256": "5967c6a231ee56e51b747ba4147791a04f99cce7ecbdf0df567b5d6256eff460",
+  "http_release": {
+    "version": "1.22.0",
+    "linux_x86_64_archive_sha256": "00d2f057c963ff950846d4059af87bdddb7edf707750cdab863cb0879d6b339e"
+  },
+  "port_package": {
+    "manifest_sha256": "e34d5202a5bbb53d013453fbcb82dca81cc9f6312071ee2fa6025f7fa78e7eb8",
+    "engine_version": "0.2.0",
+    "smolvm_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "source_sha256": "be0b236c59f4bd8595de4236eb74f3128e456a6eefec14785f8c0a2e0b1d22d2",
+    "build_sha256": "2a05862e1834bc0a7c98c5d8d4cf46005d796055409a57ed554327d22edfd002",
+    "assets_sha256": "706c83d1a75e5ed5791da54bb4cfa6e80448302a3921b202a5d8c769868e3c15",
+    "platform": "linux",
+    "architecture": "x86_64"
+  },
+  "client_archive_sha256": "611a408b07907c8dbd756735704e010a2f17c622320707dfd94ed88af5dfa03f",
+  "client_runtime_files_verified": 354,
+  "toolchains": {
+    "current": {
+      "elixir": "1.20.4",
+      "otp": "29.0.6"
+    },
+    "minimum": {
+      "elixir": "1.18.4",
+      "otp": "27.3.4.15"
+    }
+  },
+  "fixtures": {
+    "packed": "ac45bd5b794e57f9627369facd15a18649f6af3b600f866f223f5f91b5bfa954",
+    "bare": "8f53378fb7348be4e7a171f0ac65fa67ad4616d46c1eb874dae2fbc00d2986d1",
+    "oci": "docker.io/library/alpine@sha256:3c81aa9a3d770b316568f4499e30461a5cd3fbd7180bd89e28e34894c7845832"
+  },
+  "previous_exact_package_evidence": "docs/evidence/embedded-port-http-parity-linux-volumes-4e2f125a.json",
+  "baseline_comparison": {
+    "method": "HTTP sent the managed client wire shapes to the upstream Unix-socket server. Port used the previous public client with the pinned native package. Both used identical fixture digests, memory and CPU resources and the same libkrun binary.",
+    "matched_case_count": 22,
+    "http": {
+      "bare-offline-2": "guest_exit_0",
+      "bare-offline-3": "irq_exhausted_before_boot",
+      "bare-offline-4": "irq_exhausted_before_boot",
+      "bare-offline-8": "irq_exhausted_before_boot",
+      "packed-offline-2": "guest_exit_0",
+      "packed-offline-3": "irq_exhausted_before_boot",
+      "registry-offline-2": "guest_exit_0",
+      "registry-offline-3": "irq_exhausted_before_boot",
+      "registry-filtered-1": "guest_exit_0",
+      "registry-filtered-2": "irq_exhausted_before_boot",
+      "oci-filtered-2": "guest_exit_0",
+      "oci-filtered-3": "irq_exhausted_before_boot",
+      "bare-filtered-2": "irq_exhausted_before_boot",
+      "packed-filtered-1": "guest_exit_0",
+      "packed-filtered-2": "irq_exhausted_before_boot",
+      "bare-forwarded-2": "irq_exhausted_before_boot",
+      "bare-filtered-1": "guest_exit_0",
+      "bare-forwarded-1": "guest_exit_0",
+      "packed-forwarded-1": "guest_exit_0",
+      "packed-forwarded-2": "irq_exhausted_before_boot",
+      "registry-forwarded-1": "guest_exit_0",
+      "registry-forwarded-2": "irq_exhausted_before_boot"
+    },
+    "port": {
+      "bare-offline-3": "irq_exhausted_before_boot",
+      "packed-offline-3": "irq_exhausted_before_boot",
+      "registry-offline-3": "irq_exhausted_before_boot",
+      "bare-filtered-2": "irq_exhausted_before_boot",
+      "bare-filtered-3": "irq_exhausted_before_boot",
+      "packed-filtered-2": "irq_exhausted_before_boot",
+      "oci-filtered-3": "irq_exhausted_before_boot",
+      "bare-filtered-1": "guest_exit_0",
+      "packed-filtered-1": "guest_exit_0",
+      "bare-forwarded-1": "guest_exit_0",
+      "bare-forwarded-2": "irq_exhausted_before_boot",
+      "packed-forwarded-1": "guest_exit_0",
+      "packed-forwarded-2": "irq_exhausted_before_boot",
+      "registry-forwarded-1": "guest_exit_0",
+      "registry-forwarded-2": "irq_exhausted_before_boot",
+      "bare-offline-2": "guest_exit_0",
+      "packed-offline-2": "guest_exit_0",
+      "registry-offline-2": "guest_exit_0",
+      "registry-filtered-1": "guest_exit_0",
+      "oci-filtered-2": "guest_exit_0",
+      "bare-offline-4": "irq_exhausted_before_boot",
+      "bare-offline-8": "irq_exhausted_before_boot",
+      "registry-filtered-2": "irq_exhausted_before_boot"
+    },
+    "port_harness_setup": "The first probe runner stopped before forwarding setup because of a fixture constructor error. Its empty VM inventory and two unused test backing directories were preserved. A clean scope repeated the forwarding probe and released all resources.",
+    "preserved_scope_sha256": "207b7a136aaed667696c1e58d2ad341dfbb08fddab407edac759def25a9892df"
+  },
+  "admission": {
+    "scope": "Managed Linux x86_64 targets approved for smolvm 1.22.0.",
+    "limits_by_exercised_layout": {
+      "bare-offline": 2,
+      "packed-offline": 2,
+      "registry-offline": 2,
+      "bare-filtered": 1,
+      "packed-filtered": 1,
+      "registry-filtered": 1,
+      "bare-forwarded": 1,
+      "packed-forwarded": 1,
+      "registry-forwarded": 1,
+      "oci-filtered": 2,
+      "oci-filtered_and_forwarded": 2
+    },
+    "rejected_category": "unsupported_capability",
+    "rejected_evidence": "not_dispatched",
+    "checks": [
+      "no machine record",
+      "unchanged volume records",
+      "unchanged worker usage",
+      "empty backend inventory",
+      "boundary guest write and read-only refusal where applicable",
+      "verified machine and volume cleanup with zero reservations"
+    ],
+    "legacy_queue": "A preexisting accepted request enters the existing unassigned conflict state and can be cancelled. It takes no machine reservation.",
+    "live_results": [
+      {
+        "backend": "http",
+        "toolchain": "current",
+        "store": "memory",
+        "boundary_layouts": 11,
+        "zero_reservations": true,
+        "ordinary_shutdown": true,
+        "result_sha256": "b2d11c3e8fb92aeebb3fa847560b31330a27dd6f7c8c701527655ece97de2108"
+      },
+      {
+        "backend": "http",
+        "toolchain": "minimum",
+        "store": "memory",
+        "boundary_layouts": 11,
+        "zero_reservations": true,
+        "ordinary_shutdown": true,
+        "result_sha256": "b2d11c3e8fb92aeebb3fa847560b31330a27dd6f7c8c701527655ece97de2108"
+      },
+      {
+        "backend": "port",
+        "toolchain": "current",
+        "store": "memory",
+        "boundary_layouts": 11,
+        "zero_reservations": true,
+        "ordinary_shutdown": true,
+        "result_sha256": "8a791c1b7ccc850f0ea853137ba3e1bf473d6a00d5e4a39d2d61e67c83a4d3fa"
+      },
+      {
+        "backend": "port",
+        "toolchain": "minimum",
+        "store": "memory",
+        "boundary_layouts": 11,
+        "zero_reservations": true,
+        "ordinary_shutdown": true,
+        "result_sha256": "8a791c1b7ccc850f0ea853137ba3e1bf473d6a00d5e4a39d2d61e67c83a4d3fa"
+      }
+    ]
+  },
+  "focused_contracts_passed": {
+    "current": 68,
+    "minimum": 68
+  },
+  "ordinary_suite_current": {
+    "passed": 2138,
+    "excluded_runtime_or_deferred": 42
+  },
+  "admission_proof_sha256": "04e75aa3ef1c75ac994614f64a60132ee2eb5fbaa76c25e78fe9c7ed0aeb455d",
+  "selected_result_archive_sha256": "83a2eff36f0497c755c9e4a4f01b8d2a7eef86f2e316920d0ec403fb87e698d2",
+  "private_production_tls_validation_deferred": true,
+  "crash_validation_deferred": true,
+  "cli_race_validation_deferred": true,
+  "parity_complete": false
+}

@@ -157,6 +157,7 @@ pub(crate) fn run(request: &Request, blob: &Blob, expected: &Expected) -> Result
         &metadata.operation_id,
         &metadata.request,
         &before,
+        crate::material::CaptureSourcePhase::BeforeCapture,
     )?;
     let resources = crate::checkpoint_capture::validate_portable_record(&before)?;
     if !smolvm::process::is_alive(source_pid.0)
@@ -262,6 +263,7 @@ pub(crate) fn run(request: &Request, blob: &Blob, expected: &Expected) -> Result
             &metadata.operation_id,
             &metadata.request,
             &after,
+            crate::material::CaptureSourcePhase::AfterCapture,
         )
         .map_err(|_| Error::uncertain(ErrorCode::Ownership))?;
     if after.checkpoint_head.as_ref() != Some(&artifact.head)

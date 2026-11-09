@@ -1,5 +1,6 @@
 defmodule SmolBox.Embedded.CheckpointContractTest do
   use ExUnit.Case, async: true
+  alias SmolBox.Backend.EmbeddedReply
   alias SmolBox.{Checkpoint, Profile}
   alias SmolBox.Embedded.{Channel, CheckpointContract, Config, Launch, Request, SDKIdentity}
 
@@ -130,6 +131,32 @@ defmodule SmolBox.Embedded.CheckpointContractTest do
 
     assert {:ok, _, {1, {:terminal, %{"presence" => "unverified"}}}} =
              Channel.receive_message(observer, presence)
+  end
+
+  test "checkpoint creation inspection distinguishes absence from unverified presence" do
+    context = %{identity: nil}
+    request = %{"operation" => "inspect_checkpoint_creation", "create" => creation()}
+    outcome = %{"result" => "creation_presence", "presence" => "absent"}
+    output = %{stdout: <<>>, stderr: <<>>, file: <<>>}
+
+    assert {:ok, :absent} =
+             EmbeddedReply.decode(
+               context,
+               :inspect_creation,
+               request,
+               {:ok, outcome, output, nil}
+             )
+
+    unverified = %{outcome | "presence" => "unverified"}
+
+    assert {:error,
+            %{category: :identity_conflict, operation: :inspect, evidence: :dispatch_uncertain}} =
+             EmbeddedReply.decode(context, :inspect_creation, request, {
+               :ok,
+               unverified,
+               output,
+               nil
+             })
   end
 
   test "checkpoint source operations require v2 identity and preflight accepts only running observation" do
