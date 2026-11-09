@@ -1,5 +1,6 @@
 defmodule SmolBox.InspectionTest do
-  use ExUnit.Case, async: true
+  # Keep inventory requests with a one-second deadline out of the parallel test phase.
+  use ExUnit.Case, async: false
 
   alias SmolBox.{
     Client,
