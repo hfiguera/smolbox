@@ -3,7 +3,9 @@
 //! proof. Boot, activation, source/snapshot cleanup and backing release remain
 //! separate original-context operations.
 use super::*;
+mod collection;
 pub(super) mod disposal;
+pub(super) mod partial_disposal;
 mod ready;
 pub use disposal::{
     UnbootedBranchDisposal, UnbootedBranchDisposalCandidate, UnbootedBranchDisposalCompletion,

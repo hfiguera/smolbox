@@ -1,13 +1,9 @@
 defmodule SmolBox.Backend.EmbeddedUnbootedBranchDisposal do
   @moduledoc false
-  alias SmolBox.Backend.{Budget, EmbeddedBranchOperation}
+  alias SmolBox.Backend.{Budget, EmbeddedBranchOperation, EmbeddedBranchSourceObservation}
 
   alias SmolBox.Embedded.{
-    BranchPublication,
-    Call,
-    Identity,
     NativeBranchAdmission,
-    NativeGrowth,
     NativeUnbootedBranchDisposal,
     NativeUnbootedBranchDisposalResult,
     Protocol,
@@ -15,40 +11,13 @@ defmodule SmolBox.Backend.EmbeddedUnbootedBranchDisposal do
     UnbootedBranchDisposalCandidate
   }
 
-  alias SmolBox.{Error, ManagedMachine}
+  alias SmolBox.Error
   @empty %{stdout: <<>>, stderr: <<>>, file: <<>>}
   @operations [
     :inspect_unbooted_branch_disposal,
     :dispose_unbooted_branch,
     :resolve_unbooted_branch_disposal
   ]
-
-  def run(context, operation, %ManagedMachine{} = parent, %ManagedMachine{} = child, budget)
-      when operation in @operations do
-    {:ok, budget} = constrain(budget)
-    deadline = now() + budget.timeout_ms
-
-    with {:ok, pinned} <-
-           EmbeddedBranchOperation.pin(
-             context,
-             budget,
-             deadline,
-             {:branch, :not_dispatched},
-             child
-           ),
-         do:
-           coordinate(
-             pinned,
-             operation,
-             parent,
-             child,
-             budget,
-             &Call.run/3,
-             deadline
-           )
-  end
-
-  def run(_, _, _, _, _), do: failure(:validation, :not_dispatched)
 
   # Shared semantic sequence for the Port and inert peers. The source alone is
   # assigned: a never-booted child has no public Machine or usable child receipt.
@@ -81,18 +50,9 @@ defmodule SmolBox.Backend.EmbeddedUnbootedBranchDisposal do
 
   defp scope?(context, operation, parent, child),
     do:
-      operation in @operations and pinned?(context) and
+      operation in @operations and EmbeddedBranchOperation.pinned?(context) and
         NativeBranchAdmission.disposal_pending?(parent, child) and
-        source_context?(context, parent) and mode?(operation, child)
-
-  defp pinned?(context),
-    do: context.pinned and context.quiesced and is_pid(context.server) and context.epoch != nil
-
-  defp source_context?(context, parent),
-    do:
-      context.spec == parent.spec and context.assignment == parent.backend_assignment and
-        context.profile == parent.spec.profile and context.name == parent.machine_name and
-        NativeGrowth.current_identity(parent) == {:ok, context.identity}
+        EmbeddedBranchOperation.source?(context, parent) and mode?(operation, child)
 
   defp mode?(:inspect_unbooted_branch_disposal, child),
     do: child.branch.native_authority.disposal == nil
@@ -159,13 +119,12 @@ defmodule SmolBox.Backend.EmbeddedUnbootedBranchDisposal do
          parent,
          child,
          context.epoch,
-         platform(context)
+         EmbeddedBranchOperation.platform(context)
        ), do: {:ok, candidate}, else: failure(:identity_conflict, :dispatch_uncertain)
   end
 
   defp finish(context, _, parent, child, proof, {request, outcome}, {budget, call, deadline}) do
-    with true <- epoch?(proof, context),
-         {:ok, context} <- promote(context, proof),
+    with {:ok, context} <- EmbeddedBranchSourceObservation.promote(context, proof),
          {:ok, budget} <-
            EmbeddedBranchOperation.unused_budget(budget, request, outcome, deadline),
          request = %{"operation" => "inspect", "receipt" => context.identity.receipt},
@@ -195,25 +154,6 @@ defmodule SmolBox.Backend.EmbeddedUnbootedBranchDisposal do
          )
   end
 
-  defp epoch?(proof, context),
-    do:
-      get_in(proof.publication, ~w(change child_origin intent epoch)) == context.epoch and
-        proof.publication["change"]["platform"] == platform(context)
-
-  defp promote(context, proof) do
-    with true <- proof.publication["previous"] == context.identity.receipt,
-         {:ok, publication} <- BranchPublication.from_wire(proof.publication),
-         history = (context.history || []) ++ [publication],
-         identity = %Identity{
-           receipt: publication.receipt,
-           transition: publication,
-           material_history: history
-         },
-         true <- Identity.valid?(identity),
-         do: {:ok, %{context | identity: identity, history: history}},
-         else: (_ -> failure(:identity_conflict, :dispatch_uncertain))
-  end
-
   defp after_response(operation, budget, deadline) do
     case remaining(budget, deadline) do
       {:error, %Error{} = error} when operation != :inspect_unbooted_branch_disposal ->
@@ -224,13 +164,12 @@ defmodule SmolBox.Backend.EmbeddedUnbootedBranchDisposal do
     end
   end
 
-  defp constrain(budget),
+  def constrain(budget),
     do: Budget.constrain(budget, timeout_ms: 30_000, max_response_bytes: 64 * 1024)
 
   defp remaining(budget, deadline),
     do: EmbeddedBranchOperation.remaining(budget, deadline, {:branch, :not_dispatched})
 
-  defp platform(context), do: Atom.to_string(context.config.platform)
   defp fits?(value, maximum), do: size(value) <= maximum
   defp size(value), do: byte_size(Jason.encode!(value))
 

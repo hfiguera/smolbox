@@ -3,7 +3,18 @@ defmodule SmolBox.Embedded.PortTest do
   alias SmolBox.{Backend, Error}
   alias SmolBox.Backend.Budget
   alias SmolBox.Backend.Embedded, as: EmbeddedBackend
-  alias SmolBox.Embedded.{Config, Health, Port, Protocol, Request, Supervisor}
+
+  alias SmolBox.Embedded.{
+    BranchRequest,
+    Config,
+    Health,
+    PartialBranchDisposalCleanup,
+    Port,
+    Protocol,
+    Request,
+    Supervisor
+  }
+
   alias SmolBox.Test.EmbeddedPackage, as: Package
 
   defp package(options \\ []) do
@@ -67,6 +78,60 @@ defmodule SmolBox.Embedded.PortTest do
 
       assert {:error, %Error{evidence: :not_dispatched}} =
                Port.submit(pid, %{"operation" => name, "request" => request}, budget(), self())
+    end
+
+    refute Enum.any?(Package.received(config), &(&1["type"] == "request"))
+    assert :ok = Port.shutdown(pid)
+    wait_until(fn -> match?({:ok, %{status: :stopped}}, Port.health(pid)) end)
+  end
+
+  test "current package rejects partial disposal cleanup despite an exact operator catalog" do
+    fixture =
+      Path.expand(
+        "../../native/smolbox-protocol/fixtures/partial-branch-disposal-cleanup-v1.json",
+        __DIR__
+      )
+
+    rows = fixture |> File.read!() |> Jason.decode!()
+
+    {:ok, policy} =
+      SmolBox.BranchPolicy.new(
+        id: "branches",
+        resources: %{slots: 1, cpus: 1, memory_mb: 384, disk_gb: 5}
+      )
+
+    config = package(protocol_major: 2, backend: true)
+    source = get_in(hd(rows), ~w(request disposal_request collection_request creation source))
+
+    config = %{
+      config
+      | id: source["target_id"],
+        domain_generation: source["domain_generation"],
+        branch_policies: [policy],
+        profiles: Enum.map(config.profiles, &%{&1 | host_overhead_mb: 128}),
+        allocation_floor: %{config.allocation_floor | host_overhead_mb: 128}
+    }
+
+    pid = owner(config)
+
+    for row <- rows do
+      request = row["request"]
+
+      assert PartialBranchDisposalCleanup.approval(request) in BranchRequest.approvals(config)
+
+      assert Request.valid?(
+               %{"operation" => "cleanup_partial_branch_disposal", "request" => request},
+               1000,
+               2
+             )
+
+      assert {:error, %Error{evidence: :not_dispatched}} =
+               Port.submit(
+                 pid,
+                 %{"operation" => "cleanup_partial_branch_disposal", "request" => request},
+                 budget(),
+                 self()
+               )
     end
 
     refute Enum.any?(Package.received(config), &(&1["type"] == "request"))

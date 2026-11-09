@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "status": "shared-engine-partial-branch-collection-models-passed",
+  "source_base_commit": "832a6f2da7735553a8d33ee4c10bffac0ca9f058",
+  "source_files_sha256": {
+    "native/smolbox-engine/src/branch/creation.rs": "699b9094cd2d7ac259958bcfd615b6cf8fbefadf5229a643505055c4ad486708",
+    "native/smolbox-engine/src/branch/retention.rs": "57d58e43a345a3f5af96e7c3db55ec7fdf2031c3e7dd4fe13d1bc18f27c3ae42",
+    "native/smolbox-engine/src/branch/retention/boot.rs": "81d8935a22b61bcc8da60e6bf8430b294ffb2446275c9c57dffa46d5fe5dd9cd",
+    "native/smolbox-engine/src/branch/retention/boot/collection.rs": "25cee102e6b7a1b9e9f2c8955a76b64d1edcfaa61798c290efde251d9a73e8d8",
+    "native/smolbox-engine/src/branch/retention/resolution.rs": "c6811b0fff12be020d1a3e6a44c880bee643c3d76c4a7e47dd03f3d08d399555",
+    "native/smolbox-engine/src/branch/retention/resolution/collection.rs": "2d614253843090cd2dbe01a437610579b8c4b401e3b640d4e5c73dd949278030",
+    "native/smolbox-engine/src/branch_boot.rs": "3f40373f900f59e5ef12c53bb91932a910342d28373621013e36a30c6d1672b5",
+    "native/smolbox-engine/src/branch_boot/collection.rs": "78f71979ff2b335cdc562a7fcd62f8caa0a09f23e66d81989d389c47ab0d49b5",
+    "native/smolbox-engine/src/branch_owned.rs": "8888830d4559d11d3f5ab6f8cec508dd4c7dcf17bcccdc0d477034d35d8032cd",
+    "native/smolbox-engine/src/branch_owned/collection.rs": "49ff9b6b3949d03a04321b4d25d25a7e418ac1419cce6410285ad3340c64986c",
+    "native/smolbox-engine/src/branch_partial_collection.rs": "3987eba4e39c56b9b3e0b9d2a8c3f43b8552f1a6e8355b9942672407c3755ace",
+    "native/smolbox-engine/src/lib.rs": "146d16385f15121e0d9ad04d0b9cf7478b6122a6a83baa1a5a03a742a96c632e",
+    "native/smolbox-engine/src/sdk_compat.rs": "f71348268005b4adbb076a33c7f6b6fdd67ccac014659221e693bccfd3592110"
+  },
+  "implementation": {
+    "entry": "RetainedBranchResolution::collect_partial_child",
+    "typed_full_creation_action_quiescence_request": true,
+    "positive_original_opaque_enrollment_required": true,
+    "original_manager_collector_shared_with_completed_children": true,
+    "protected_collection_fence_preserves_prior_phase": true,
+    "readiness_initialization_release_and_restart_blocked_after_fence": true,
+    "exact_synchronized_collection_only_proof": true,
+    "caller_budget_and_cancellation_preserved_in_database_observation": true,
+    "owned_thread_retains_original_job_and_control_through_actual_return": true,
+    "rows_disks_dependencies_backing_and_public_reservations_not_released": true
+  },
+  "bounds": {
+    "creation_json_bytes": 16384,
+    "action_json_bytes": 20480,
+    "private_lifecycle_json_bytes": 65536,
+    "control_descriptors": 4,
+    "retained_preparation_descriptors": 24,
+    "observer_descriptors": 4,
+    "aggregate_descriptor_ceiling": 32,
+    "retained_backing_bytes_in_resource_model": 1073741824,
+    "independent_material_control_metadata_bytes": 33554432
+  },
+  "validation": {
+    "results": [
+      {
+        "name": "branch-final",
+        "exit_code": 0,
+        "summary": [
+          "test result: ok. 256 passed; 0 failed; 1 ignored; 0 measured; 681 filtered out; finished in 40.39s"
+        ],
+        "errors": []
+      },
+      {
+        "name": "sdk-models",
+        "exit_code": 0,
+        "summary": [
+          "test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 924 filtered out; finished in 0.09s"
+        ],
+        "errors": []
+      },
+      {
+        "name": "clippy",
+        "exit_code": 0,
+        "summary": [],
+        "errors": []
+      }
+    ],
+    "new_branch_regression_cases": 6,
+    "new_database_budget_case": 1,
+    "selected_suite_counts_may_overlap": true,
+    "ignored": [
+      "test transfer_supervisor::tests::ordinary_branch_worker_rejects_unentered_fixture_and_collects_original_leases ... ignored, requires a built helper; explicit ordinary non-VM branch namespace rejection"
+    ],
+    "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)",
+    "upstream_snapshot_verified_unmodified": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "upstream_deprecation_warnings_preserved": true,
+    "touched_rustfmt_passed": true,
+    "docs_warnings_as_errors_passed": true,
+    "local_documentation_pages_checked": 166
+  },
+  "compatibility": {
+    "prior_lifecycle_bytes_roundtrip_exactly_with_collection_omitted": true,
+    "new_cleanup_fence_requires_a_new_private_reader": true,
+    "wire_changed": false,
+    "elixir_or_store_codec_changed": false,
+    "sdk_changed": false,
+    "historical_package_qualification_transferred": false
+  },
+  "scope": {
+    "deterministic_file_actor_and_resource_models_only": true,
+    "sdk_boot_or_stop_executed": false,
+    "live_owner_loss_or_persistence_interruption_executed": false,
+    "port_routing_implemented": false,
+    "durable_public_action_consumption_implemented": false,
+    "partial_child_disposal_implemented": false,
+    "all_partial_states_complete": false,
+    "ordinary_changed_package_qualification_complete": false,
+    "public_native_branch_admission_enabled": false,
+    "all_full_parity_acceptance_rows_still_pending": true,
+    "full_parity_complete": false,
+    "crash_validation_deferred": true,
+    "crash_handling_qualified": false,
+    "distribution_approved": false,
+    "pushed_or_published": false
+  }
+}

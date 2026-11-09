@@ -218,12 +218,20 @@ pub fn run_with_policy(
     let result = match operation {
         wire::Operation::InspectUnbootedBranchDisposal { .. } | wire::Operation::DisposeUnbootedBranch { .. } | wire::Operation::ResolveUnbootedBranchDisposal { .. } | wire::Operation::ReleaseUnbootedBranchBacking { .. } | wire::Operation::RetirePreparedBranch { .. } | wire::Operation::ContinueHeldBranchDeletion { .. } | wire::Operation::CleanupHeldBranchDeletion { .. }
         | wire::Operation::ContinueReleasedBranchDeletion { .. }
+        | wire::Operation::DisposePartialBranch { .. }
+        | wire::Operation::ResolvePartialBranchDisposal { .. }
+        | wire::Operation::CleanupPartialBranchDisposal { .. }
+        | wire::Operation::ResolvePartialBranchCleanup { .. }
+                    | wire::Operation::QualifyPartialBranchCleanup { .. }
+        | wire::Operation::CollectPartialBranch { .. }
         | wire::Operation::CollectBranchDeletion { .. }
         | wire::Operation::CleanupReleasedBranchDeletion { .. }
         | wire::Operation::ResolveReleasedBranchDeletion { .. }
         | wire::Operation::ResolveHeldBranchDeletion { .. }
         | wire::Operation::ReleaseBranchBacking { .. }
         | wire::Operation::QualifyUnbootedBranchChildAbsence { .. }
+        | wire::Operation::QualifyPartialBranchChildAbsence { .. }
+        | wire::Operation::ReleasePartialBranchBacking { .. }
         | wire::Operation::QualifyBranchChildAbsence { .. }
         | wire::Operation::ReleaseHeldBranch { .. } | wire::Operation::QualifyHeldBranchRelease { .. }
         | wire::Operation::CreateBranch { .. } | wire::Operation::InspectBranchCompletion { .. }
@@ -1357,6 +1365,273 @@ pub fn branch(
         };
         return run().unwrap_or_else(error);
     }
+    if let wire::Operation::QualifyPartialBranchCleanup { request } = &operation {
+        let run = || -> engine::Result<wire::Outcome> {
+            let before = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::NotDispatched,
+            };
+            let uncertain = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::MayHaveDispatched,
+            };
+            operation
+                .validate(remaining.as_millis().min(u64::MAX as u128) as u64)
+                .map_err(|_| before())?;
+            if request.collection_request.creation.approval != approval {
+                return Err(before());
+            }
+            let native: engine::PartialBranchDisposalRequest =
+                serde_json::from_value(serde_json::to_value(request).map_err(|_| before())?)
+                    .map_err(|_| before())?;
+            let deadline = collection_deadline.ok_or_else(before)?;
+            let check_cancel = cancel.clone();
+            let budget = engine::ReadBudget::until(deadline, cancel)?;
+            let result = match engine.qualify_partial_branch_cleanup(&native, &budget)? {
+                engine::PartialBranchCleanupState::Residual { candidate } => {
+                    let candidate: wire::PartialBranchCleanupCandidate = serde_json::from_value(
+                        serde_json::to_value(candidate).map_err(|_| uncertain())?,
+                    )
+                    .map_err(|_| uncertain())?;
+                    candidate
+                        .matches_request(request)
+                        .map_err(|_| uncertain())?;
+                    wire::Outcome::PartialBranchCleanupCandidate {
+                        candidate: Box::new(candidate),
+                    }
+                }
+                engine::PartialBranchCleanupState::Disposed { proof } => {
+                    let proof: wire::PartialBranchDisposal = serde_json::from_value(
+                        serde_json::to_value(proof).map_err(|_| uncertain())?,
+                    )
+                    .map_err(|_| uncertain())?;
+                    proof.matches_request(request).map_err(|_| uncertain())?;
+                    wire::Outcome::PartialBranchDisposed {
+                        proof: Box::new(proof),
+                    }
+                }
+            };
+            if check_cancel.is_cancelled() || Instant::now() >= deadline {
+                return Err(uncertain());
+            }
+            Ok(result)
+        };
+        return run().unwrap_or_else(error);
+    }
+    if let wire::Operation::ResolvePartialBranchCleanup { request } = &operation {
+        let run = || -> engine::Result<wire::Outcome> {
+            let before = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::NotDispatched,
+            };
+            let uncertain = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::MayHaveDispatched,
+            };
+            operation
+                .validate(remaining.as_millis().min(u64::MAX as u128) as u64)
+                .map_err(|_| before())?;
+            if request
+                .disposal_request
+                .collection_request
+                .creation
+                .approval
+                != approval
+            {
+                return Err(before());
+            }
+            let native: engine::PartialBranchDisposalCleanupRequest =
+                serde_json::from_value(serde_json::to_value(request).map_err(|_| before())?)
+                    .map_err(|_| before())?;
+            let deadline = collection_deadline.ok_or_else(before)?;
+            let check_cancel = cancel.clone();
+            let budget = engine::ReadBudget::until(deadline, cancel)?;
+            let native = engine
+                .resolve_unneeded_partial_cleanup(&native, &budget)?
+                .ok_or(engine::Error {
+                    code: engine::ErrorCode::State,
+                    dispatch: engine::Dispatch::NotDispatched,
+                })?;
+            let proof: wire::PartialBranchDisposalCleanupUnneeded =
+                serde_json::from_value(serde_json::to_value(native).map_err(|_| uncertain())?)
+                    .map_err(|_| uncertain())?;
+            proof.matches_request(request).map_err(|_| uncertain())?;
+            if check_cancel.is_cancelled() || Instant::now() >= deadline {
+                return Err(uncertain());
+            }
+            Ok(wire::Outcome::PartialBranchCleanupUnneeded {
+                proof: Box::new(proof),
+            })
+        };
+        return run().unwrap_or_else(error);
+    }
+    if let wire::Operation::CleanupPartialBranchDisposal { request } = &operation {
+        let run = || -> engine::Result<wire::Outcome> {
+            let before = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::NotDispatched,
+            };
+            let uncertain = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::MayHaveDispatched,
+            };
+            operation
+                .validate(remaining.as_millis().min(u64::MAX as u128) as u64)
+                .map_err(|_| before())?;
+            if request
+                .disposal_request
+                .collection_request
+                .creation
+                .approval
+                != approval
+            {
+                return Err(before());
+            }
+            let native: engine::PartialBranchDisposalCleanupRequest =
+                serde_json::from_value(serde_json::to_value(request).map_err(|_| before())?)
+                    .map_err(|_| before())?;
+            let deadline = collection_deadline.ok_or_else(before)?;
+            let check_cancel = cancel.clone();
+            let budget = engine::ReadBudget::until(deadline, cancel)?;
+            let result =
+                if let Some(saved) = engine.inspect_partial_disposal_cleanup(&native, &budget)? {
+                    saved
+                } else {
+                    let retained = engine
+                        .retain_branch_resolution(
+                            &native.disposal_request.collection_request.creation,
+                            true,
+                            &budget,
+                        )?
+                        .ok_or(engine::Error {
+                            code: engine::ErrorCode::State,
+                            dispatch: engine::Dispatch::NotDispatched,
+                        })?;
+                    let proof = retained.cleanup_partial_disposal(engine, &native)?;
+                    retained
+                        .finish_partial_branch_disposal(engine, &proof.disposal)
+                        .map_err(|e| engine::Error {
+                            code: e.code,
+                            dispatch: engine::Dispatch::MayHaveDispatched,
+                        })?;
+                    proof
+                };
+            let proof: wire::PartialBranchDisposalCleanup =
+                serde_json::from_value(serde_json::to_value(result).map_err(|_| uncertain())?)
+                    .map_err(|_| uncertain())?;
+            request.matches(&proof).map_err(|_| uncertain())?;
+            if check_cancel.is_cancelled() || Instant::now() >= deadline {
+                return Err(engine::Error {
+                    code: engine::ErrorCode::State,
+                    dispatch: engine::Dispatch::MayHaveDispatched,
+                });
+            }
+            Ok(wire::Outcome::PartialBranchDisposalCleaned {
+                proof: Box::new(proof),
+            })
+        };
+        return run().unwrap_or_else(error);
+    }
+    if let Some(request) = operation.partial_disposal_request() {
+        let run = || -> engine::Result<wire::Outcome> {
+            let before = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::NotDispatched,
+            };
+            let uncertain = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::MayHaveDispatched,
+            };
+            operation
+                .validate(remaining.as_millis().min(u64::MAX as u128) as u64)
+                .map_err(|_| before())?;
+            if request.collection_request.creation.approval != approval {
+                return Err(before());
+            }
+            let native: engine::PartialBranchDisposalRequest =
+                serde_json::from_value(serde_json::to_value(request).map_err(|_| before())?)
+                    .map_err(|_| before())?;
+            let deadline = collection_deadline.ok_or_else(before)?;
+            let check_cancel = cancel.clone();
+            let budget = engine::ReadBudget::until(deadline, cancel)?;
+            let result = if let Some(saved) =
+                engine.inspect_partial_branch_disposal(&native, &budget)?
+            {
+                saved
+            } else {
+                let retained = engine
+                    .retain_branch_resolution(&native.collection_request.creation, true, &budget)?
+                    .ok_or(engine::Error {
+                        code: engine::ErrorCode::State,
+                        dispatch: engine::Dispatch::NotDispatched,
+                    })?;
+                let proof = if matches!(operation, wire::Operation::DisposePartialBranch { .. }) {
+                    retained.dispose_partial_child(engine, &native)?
+                } else {
+                    retained.resolve_partial_disposal(engine, &native)?
+                };
+                retained
+                    .finish_partial_branch_disposal(engine, &proof)
+                    .map_err(|e| engine::Error {
+                        code: e.code,
+                        dispatch: engine::Dispatch::MayHaveDispatched,
+                    })?
+            };
+            let proof: wire::PartialBranchDisposal =
+                serde_json::from_value(serde_json::to_value(result).map_err(|_| uncertain())?)
+                    .map_err(|_| uncertain())?;
+            proof.matches_request(request).map_err(|_| uncertain())?;
+            if check_cancel.is_cancelled() || Instant::now() >= deadline {
+                return Err(engine::Error {
+                    code: engine::ErrorCode::State,
+                    dispatch: engine::Dispatch::MayHaveDispatched,
+                });
+            }
+            Ok(wire::Outcome::PartialBranchDisposed {
+                proof: Box::new(proof),
+            })
+        };
+        return run().unwrap_or_else(error);
+    }
+    if let wire::Operation::CollectPartialBranch { request } = &operation {
+        let run = || -> engine::Result<wire::Outcome> {
+            let before = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::NotDispatched,
+            };
+            let uncertain = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::MayHaveDispatched,
+            };
+            operation
+                .validate(remaining.as_millis().min(u64::MAX as u128) as u64)
+                .map_err(|_| before())?;
+            if request.creation.approval != approval {
+                return Err(before());
+            }
+            let native: engine::PartialBranchCollectionRequest =
+                serde_json::from_value(serde_json::to_value(request).map_err(|_| before())?)
+                    .map_err(|_| before())?;
+            let budget =
+                engine::ReadBudget::until(collection_deadline.ok_or_else(before)?, cancel)?;
+            let retained = engine
+                .retain_branch_resolution(&native.creation, true, &budget)?
+                .ok_or(engine::Error {
+                    code: engine::ErrorCode::State,
+                    dispatch: engine::Dispatch::NotDispatched,
+                })?;
+            let proof = retained.collect_partial_child(engine, &native)?;
+            let proof: wire::PartialBranchCollection =
+                serde_json::from_value(serde_json::to_value(proof).map_err(|_| uncertain())?)
+                    .map_err(|_| uncertain())?;
+            request.matches(&proof).map_err(|_| uncertain())?;
+            Ok(wire::Outcome::PartialBranchCollected {
+                proof: Box::new(proof),
+                platform: std::env::consts::OS.into(),
+            })
+        };
+        return run().unwrap_or_else(error);
+    }
     if let wire::Operation::CollectBranchDeletion { request } = &operation {
         let run = || -> engine::Result<wire::Outcome> {
             let failure = || engine::Error {
@@ -1477,6 +1752,74 @@ pub fn branch(
                     .map_err(|_| uncertain())?;
             request.matches(&proof).map_err(|_| uncertain())?;
             Ok(wire::Outcome::BranchBackingReleased {
+                proof: Box::new(proof),
+            })
+        };
+        return run().unwrap_or_else(error);
+    }
+    if let wire::Operation::ReleasePartialBranchBacking { request } = &operation {
+        let run = || -> engine::Result<wire::Outcome> {
+            let before = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::NotDispatched,
+            };
+            let uncertain = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::MayHaveDispatched,
+            };
+            operation
+                .validate(remaining.as_millis().min(u64::MAX as u128) as u64)
+                .map_err(|_| before())?;
+            if *request.approval() != approval {
+                return Err(before());
+            }
+            let native: engine::PartialBranchBackingReleaseRequest =
+                serde_json::from_value(serde_json::to_value(request).map_err(|_| before())?)
+                    .map_err(|_| before())?;
+            let deadline = collection_deadline.ok_or_else(before)?;
+            let check_cancel = cancel.clone();
+            let budget = engine::ReadBudget::until(deadline, cancel)?;
+            let result = engine.release_partial_branch_backing_checked(&native, &budget)?;
+            let proof: wire::BranchBackingRelease =
+                serde_json::from_value(serde_json::to_value(result).map_err(|_| uncertain())?)
+                    .map_err(|_| uncertain())?;
+            request.matches(&proof).map_err(|_| uncertain())?;
+            if check_cancel.is_cancelled() || Instant::now() >= deadline {
+                return Err(uncertain());
+            }
+            Ok(wire::Outcome::BranchBackingReleased {
+                proof: Box::new(proof),
+            })
+        };
+        return run().unwrap_or_else(error);
+    }
+    if let wire::Operation::QualifyPartialBranchChildAbsence { request } = &operation {
+        let run = || -> engine::Result<wire::Outcome> {
+            let failure = || engine::Error {
+                code: engine::ErrorCode::Ownership,
+                dispatch: engine::Dispatch::NotDispatched,
+            };
+            operation
+                .validate(remaining.as_millis().min(u64::MAX as u128) as u64)
+                .map_err(|_| failure())?;
+            if *request.approval() != approval {
+                return Err(failure());
+            }
+            let native: engine::PartialBranchChildAbsenceRequest =
+                serde_json::from_value(serde_json::to_value(request).map_err(|_| failure())?)
+                    .map_err(|_| failure())?;
+            let deadline = collection_deadline.ok_or_else(failure)?;
+            let check_cancel = cancel.clone();
+            let budget = engine::ReadBudget::until(deadline, cancel)?;
+            let proof = engine.qualify_partial_branch_child_absence(&native, &budget)?;
+            let proof: wire::PartialBranchChildAbsence =
+                serde_json::from_value(serde_json::to_value(proof).map_err(|_| failure())?)
+                    .map_err(|_| failure())?;
+            request.matches(&proof).map_err(|_| failure())?;
+            if check_cancel.is_cancelled() || Instant::now() >= deadline {
+                return Err(failure());
+            }
+            Ok(wire::Outcome::PartialBranchChildAbsent {
                 proof: Box::new(proof),
             })
         };

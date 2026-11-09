@@ -26,6 +26,10 @@ defmodule SmolBox.Branches do
     MachineSession,
     NativeBranchBacking,
     NativeDeletedBranchResolution,
+    NativePartialBranchCleanup,
+    NativePartialBranchCollection,
+    NativePartialBranchDisposal,
+    NativePartialBranchRetirement,
     NativeReadyBranchResolution,
     NativeResolution,
     NativeUnbootedBranchRetirement,
@@ -172,7 +176,10 @@ defmodule SmolBox.Branches do
   helper/controller fence covers selection, acceptance and final paired commit.
   Retried accepted intent preserves its original identity and observes completion
   before offering any still-unentered one-shot dispatch. Never replays SDK deletion
-  or adopts a child by name.
+  or adopts a child by name. An acknowledged pre-handoff collection selects its
+  distinct partial-disposal action instead, preserving collection history and
+  requiring original disposal proof plus fresh source observation. An unacknowledged
+  collection cannot fall through to other disposal or retirement paths.
   """
   @spec resolve(SmolBox.runtime(), ManagedMachine.key(), keyword()) ::
           {:ok, ManagedMachine.t()} | {:error, Error.t()}
@@ -189,6 +196,36 @@ defmodule SmolBox.Branches do
            error -> error
          )
   end
+
+  defp resolve_child(
+         config,
+         runtime,
+         %{branch: %{native_authority: %{partial_disposal: %{cleanup: cleanup}}}} = child,
+         :deleted
+       )
+       when not is_nil(cleanup),
+       do:
+         NativePartialBranchCleanup.run(
+           config,
+           Runtime.coordinator(runtime),
+           child,
+           child.version
+         )
+
+  defp resolve_child(
+         config,
+         runtime,
+         %{branch: %{native_authority: %{partial_collection: collection}}} = child,
+         :deleted
+       )
+       when not is_nil(collection),
+       do:
+         NativePartialBranchDisposal.run(
+           config,
+           Runtime.coordinator(runtime),
+           child,
+           child.version
+         )
 
   defp resolve_child(config, runtime, %{branch: %{native_authority: authority}} = child, :deleted)
        when not is_nil(authority),
@@ -212,6 +249,102 @@ defmodule SmolBox.Branches do
   end
 
   @doc """
+  Explicitly collect the original embedded child of an uncertain creation.
+  Requires its expected version and `quiesced: true`. The accepted request is
+  durable before helper IO; an exact saved acknowledgement returns without IO.
+  Collection alone leaves creation unknown and retains all reservations,
+  dependencies and disks. It never initializes, deletes or adopts a child, or
+  releases backing. Historical acknowledgement reads return the current record,
+  including a later separately acknowledged disposal, without helper IO.
+  """
+  @spec collect_partial(SmolBox.runtime(), ManagedMachine.key(), pos_integer(), keyword()) ::
+          {:ok, ManagedMachine.t()} | {:error, Error.t()}
+  def collect_partial(runtime, handle, version, options) do
+    with true <-
+           options == [quiesced: true] and Validation.integer?(version, 1, 9_007_199_254_740_991),
+         {:ok, config} <- config(runtime),
+         {:ok, child} <- fetch(runtime, handle),
+         :ok <- require_partial_native(child),
+         do:
+           NativePartialBranchCollection.run(
+             config,
+             Runtime.coordinator(runtime),
+             child,
+             version
+           ),
+         else: (
+           false -> Session.error(:validation, :branch)
+           error -> error
+         )
+  end
+
+  @doc """
+  Dispose an uncertain original embedded child after acknowledged collection.
+  Requires its expected version and `quiesced: true`. The distinct request is
+  saved before native IO. Completion requires the original disposal proof and
+  fresh source observation; only ordinary child capacity retires. Source
+  dependency and extra backing remain charged. Exact saved results return without
+  helper IO. An uncertain retry never automatically replays native deletion.
+  """
+  @spec dispose_partial(SmolBox.runtime(), ManagedMachine.key(), pos_integer(), keyword()) ::
+          {:ok, ManagedMachine.t()} | {:error, Error.t()}
+  def dispose_partial(runtime, handle, version, options) do
+    with true <-
+           options == [quiesced: true] and
+             Validation.integer?(version, 1, 9_007_199_254_740_991),
+         {:ok, config} <- config(runtime),
+         {:ok, child} <- fetch(runtime, handle),
+         :ok <- require_partial_native(child),
+         do:
+           NativePartialBranchDisposal.run(config, Runtime.coordinator(runtime), child, version),
+         else: (
+           false -> Session.error(:validation, :branch)
+           error -> error
+         )
+  end
+
+  @doc """
+  Clean residual files of an uncertain, collected original embedded child.
+
+  Requires an accepted original disposal, its expected current version and
+  `quiesced: true`. Qualifies the original disposal before accepting fresh cleanup.
+  An already terminal disposal is recorded with fresh source observation instead.
+  Only a positive residual candidate permits saving a separate cleanup request.
+  Its original cached/protected removal grant may remove the child subtree;
+  this never retries SDK deletion. Matching cleanup and fresh source observation
+  commit disposal and release only ordinary child capacity. Source dependency and
+  extra backing remain charged. Retries preserve the exact accepted request.
+  If cleanup definitively did not dispatch, a helper with the negotiated optional
+  resolution capability may acknowledge that original disposal made cleanup
+  unnecessary. This distinct proof and fresh source observation close the same
+  saved action without claiming removal. Missing history retains pending state;
+  no removal/SDK fallback follows resolution. Saved acknowledgements return
+  without helper IO, including the version that completed the action.
+  """
+  @spec cleanup_partial(SmolBox.runtime(), ManagedMachine.key(), pos_integer(), keyword()) ::
+          {:ok, ManagedMachine.t()} | {:error, Error.t()}
+  def cleanup_partial(runtime, handle, version, options) do
+    with true <-
+           options == [quiesced: true] and
+             Validation.integer?(version, 1, 9_007_199_254_740_991),
+         {:ok, config} <- config(runtime),
+         {:ok, child} <- fetch(runtime, handle),
+         :ok <- require_partial_native(child),
+         do: NativePartialBranchCleanup.run(config, Runtime.coordinator(runtime), child, version),
+         else: (
+           false -> Session.error(:validation, :branch)
+           error -> error
+         )
+  end
+
+  defp require_partial_native(%{
+         branch: %{native_authority: %SmolBox.Embedded.NativeBranchAuthority{}}
+       }),
+       do: :ok
+
+  defp require_partial_native(_), do: Session.error(:unsupported_capability, :branch)
+
+  @doc """
   After child deletion, assert that its prior requests are quiescent with
   `quiesced: true`. Verifies absence and retires the source dependency. Extra
   backing allowance remains until `SmolBox.Branches.release_storage/3`. Never deletes anything.
@@ -228,6 +361,19 @@ defmodule SmolBox.Branches do
            error -> error
          )
   end
+
+  defp retire_child(
+         config,
+         runtime,
+         %{
+           branch: %{
+             native_authority: %{
+               partial_disposal: %{proof: %SmolBox.Embedded.PartialBranchDisposal{}}
+             }
+           }
+         } = child
+       ),
+       do: NativePartialBranchRetirement.run(config, Runtime.coordinator(runtime), child)
 
   defp retire_child(
          config,

@@ -1,0 +1,357 @@
+{
+  "schema": 1,
+  "status": "public-original-partial-disposal-coordination-models-passed",
+  "source_base_commit": "becff5b028e92597cd857e1066a2ead3e30cd1d2",
+  "source_files_sha256": {
+    "docs/design/embedded-port-http-parity-coverage.json": "70d26c2b61c48878c3b22b9a10152b8d9acea2d940c1811207937d83a5cc7a70",
+    "lib/smolbox/backend.ex": "e51876e7e752f0c23c42f947f43b010e277c5286ee14688a901d9f235b89faa5",
+    "lib/smolbox/backend/embedded.ex": "19237cf086cf0d0cb69f1a70774b554357b186214b3fd8465ad3a0482d054176",
+    "lib/smolbox/backend/embedded_partial_branch_disposal.ex": "fec89fbfddc2bd62f1c15cf07bb7ff6a85b008cbabb06eeffc9689ea250fdc5c",
+    "lib/smolbox/backend/http.ex": "a751c67d49319b104259026c179ccbaf317597f0657ce23cbb8436f54d4df7e8",
+    "lib/smolbox/branches.ex": "d7ef37d7b9877682258416d5e1e9a22d37e560db9a08bde4596eb36dd44408f9",
+    "lib/smolbox/runtime/native_partial_branch_collection.ex": "fa96cc03fcd5bbaa7809b51a7c3f57237964e57d831e1486dba8deb43f04ea0a",
+    "lib/smolbox/runtime/native_partial_branch_disposal.ex": "b920e23f69e441bc07e1b2f6d8bbad1de18dceaee91c2c66582a1cdd4c0b0c62",
+    "lib/smolbox/store.ex": "94ae78fee2dc98451dab6938bc6296a404f967b2059777fc354659d6557cea02",
+    "test/unit/backend_test.exs": "1a852f1d18d81f4d517615a1b2c1a8912a209dd7d32e7f0fdecf0f1bdcfd663a",
+    "test/unit/native_partial_branch_public_disposal_test.exs": "896aca20853db564793555075457aea79602c5ade4166c3fec73b693676f2997"
+  },
+  "public_api": {
+    "versioned_dispose": "Branches.dispose_partial/4",
+    "explicit_deleted_resolution": "Branches.resolve/3",
+    "both_require_explicit_quiescence": true,
+    "original_collection_acknowledgement_required": true,
+    "pending_unacknowledged_collection_cannot_fall_through_to_other_retirement": true,
+    "same_controller_helper_fence_spans_acceptance_io_and_paired_commit": true,
+    "request_action_version_platform_full_collection_frozen_before_io": true,
+    "exact_disposal_proof_and_fresh_source_observation_required": true,
+    "only_ordinary_child_capacity_released": true,
+    "source_dependency_extra_backing_retained": true,
+    "exact_saved_disposal_lookup_without_helper_io": true,
+    "collection_history_lookup_without_io_after_later_disposal": true,
+    "no_child_machine_or_initialization_completion_synthesized": true
+  },
+  "retry_and_budget": {
+    "accepted_request_observed_before_offer": true,
+    "uncertain_observation_never_falls_through_to_deletion": true,
+    "only_definitive_not_dispatched_state_reply_allows_same_original_request_offer": true,
+    "engine_original_one_shot_grant_independently_forbids_sdk_replay": true,
+    "lost_proof_source_reply_or_failed_stale_commit_retains_accepted_identity_and_reservations": true,
+    "original_monotonic_deadline_retained": true,
+    "control_ceiling_ms": 30000,
+    "per_offered_stage_request_bytes": 26624,
+    "per_offered_stage_response_bytes": 65536,
+    "failed_and_lost_observer_offer_charged_before_fallback": true,
+    "source_observation_consumes_only_unused_native_stage_bytes": true,
+    "explicit_encoding_framing_headroom_per_value_bytes": 1024
+  },
+  "backend": {
+    "native_only_operations": {
+      "dispose_partial_branch": 3,
+      "resolve_partial_branch_disposal": 3
+    },
+    "pinned_scoped_quiesced_source_and_exact_child_assignment_required": true,
+    "proof_platform_epoch_full_request_publication_optional_release_bound": true,
+    "http_rejects_before_transport_io": true,
+    "checked_operation_inventory": 57,
+    "all_full_parity_acceptance_rows_still_pending": true
+  },
+  "validation": {
+    "results": [
+      {
+        "name": "current-elixir",
+        "command": [
+          "mix",
+          "test",
+          "test/unit/native_branch_admission_test.exs",
+          "test/unit/native_branch_authority_test.exs",
+          "test/unit/native_branch_backing_test.exs",
+          "test/unit/native_branch_collection_test.exs",
+          "test/unit/native_branch_completion_test.exs",
+          "test/unit/native_branch_deletion_action_test.exs",
+          "test/unit/native_branch_deletion_test.exs",
+          "test/unit/native_branch_material_history_test.exs",
+          "test/unit/native_branch_release_test.exs",
+          "test/unit/native_branch_retirement_test.exs",
+          "test/unit/native_partial_branch_collection_test.exs",
+          "test/unit/native_prepared_branch_retirement_test.exs",
+          "test/unit/native_released_branch_cleanup_test.exs",
+          "test/unit/native_released_branch_continuation_test.exs",
+          "test/unit/native_released_branch_deletion_test.exs",
+          "test/unit/native_unbooted_branch_backing_test.exs",
+          "test/unit/native_unbooted_branch_disposal_test.exs",
+          "test/unit/native_unbooted_branch_retirement_test.exs",
+          "test/unit/native_partial_branch_public_collection_test.exs",
+          "test/unit/native_unbooted_branch_public_disposal_test.exs",
+          "test/unit/native_material_support_test.exs",
+          "test/unit/native_codec_test.exs",
+          "test/unit/native_source_codec_test.exs",
+          "test/unit/native_checkpoint_codec_test.exs",
+          "test/unit/native_volume_codec_test.exs",
+          "test/unit/embedded_partial_branch_collection_test.exs",
+          "test/unit/backend_test.exs",
+          "test/unit/backend_features_test.exs",
+          "test/unit/backend_store_test.exs",
+          "test/unit/backend_parity_coverage_test.exs",
+          "test/unit/branch_public_authority_test.exs",
+          "test/unit/branch_observation_test.exs",
+          "test/unit/branch_store_test.exs",
+          "test/unit/machine_store_test.exs",
+          "test/unit/native_partial_branch_disposal_test.exs",
+          "test/unit/embedded_partial_branch_disposal_test.exs",
+          "test/unit/native_partial_branch_public_disposal_test.exs"
+        ],
+        "exit_code": 0,
+        "summary": [
+          "",
+          "...............................................................................................................................................................................................................................................................................................................................................",
+          "Finished in 10.5 seconds (10.5s async, 0.00s sync)",
+          "",
+          "Result: 335 passed"
+        ]
+      },
+      {
+        "name": "minimum-elixir",
+        "command": [
+          "mix",
+          "test",
+          "test/unit/native_branch_admission_test.exs",
+          "test/unit/native_branch_authority_test.exs",
+          "test/unit/native_branch_backing_test.exs",
+          "test/unit/native_branch_collection_test.exs",
+          "test/unit/native_branch_completion_test.exs",
+          "test/unit/native_branch_deletion_action_test.exs",
+          "test/unit/native_branch_deletion_test.exs",
+          "test/unit/native_branch_material_history_test.exs",
+          "test/unit/native_branch_release_test.exs",
+          "test/unit/native_branch_retirement_test.exs",
+          "test/unit/native_partial_branch_collection_test.exs",
+          "test/unit/native_prepared_branch_retirement_test.exs",
+          "test/unit/native_released_branch_cleanup_test.exs",
+          "test/unit/native_released_branch_continuation_test.exs",
+          "test/unit/native_released_branch_deletion_test.exs",
+          "test/unit/native_unbooted_branch_backing_test.exs",
+          "test/unit/native_unbooted_branch_disposal_test.exs",
+          "test/unit/native_unbooted_branch_retirement_test.exs",
+          "test/unit/native_partial_branch_public_collection_test.exs",
+          "test/unit/native_unbooted_branch_public_disposal_test.exs",
+          "test/unit/native_material_support_test.exs",
+          "test/unit/native_codec_test.exs",
+          "test/unit/native_source_codec_test.exs",
+          "test/unit/native_checkpoint_codec_test.exs",
+          "test/unit/native_volume_codec_test.exs",
+          "test/unit/embedded_partial_branch_collection_test.exs",
+          "test/unit/backend_test.exs",
+          "test/unit/backend_features_test.exs",
+          "test/unit/backend_store_test.exs",
+          "test/unit/backend_parity_coverage_test.exs",
+          "test/unit/branch_public_authority_test.exs",
+          "test/unit/branch_observation_test.exs",
+          "test/unit/branch_store_test.exs",
+          "test/unit/machine_store_test.exs",
+          "test/unit/native_partial_branch_disposal_test.exs",
+          "test/unit/embedded_partial_branch_disposal_test.exs",
+          "test/unit/native_partial_branch_public_disposal_test.exs"
+        ],
+        "exit_code": 0,
+        "summary": [
+          "Excluding tags: [:runtime, :deferred_crash]",
+          "",
+          "...............................................................................................................................................................................................................................................................................................................................................",
+          "Finished in 8.5 seconds (8.5s async, 0.00s sync)",
+          "335 tests, 0 failures"
+        ]
+      },
+      {
+        "name": "compile",
+        "command": [
+          "mix",
+          "compile",
+          "--warnings-as-errors"
+        ],
+        "exit_code": 0,
+        "summary": [
+          "Compiling 1 file (.ex)"
+        ]
+      },
+      {
+        "name": "credo",
+        "command": [
+          "mix",
+          "credo",
+          "--strict",
+          "--format",
+          "json"
+        ],
+        "exit_code": 14,
+        "summary": []
+      },
+      {
+        "name": "sdk-check",
+        "command": [
+          "python3",
+          "native/bootstrap.py",
+          "--check"
+        ],
+        "exit_code": 0,
+        "summary": [
+          "Verified unmodified native source."
+        ]
+      }
+    ],
+    "documentation_static": [
+      {
+        "name": "compile-final",
+        "command": [
+          "mix",
+          "compile",
+          "--warnings-as-errors"
+        ],
+        "exit_code": 0,
+        "summary": [
+          "Compiling 2 files (.ex)"
+        ]
+      },
+      {
+        "name": "credo-final",
+        "command": [
+          "mix",
+          "credo",
+          "--strict",
+          "--format",
+          "json"
+        ],
+        "exit_code": 14,
+        "summary": []
+      },
+      {
+        "name": "docs",
+        "command": [
+          "mix",
+          "docs",
+          "--warnings-as-errors"
+        ],
+        "exit_code": 0,
+        "summary": [
+          "Generating docs...",
+          "View html docs at \"doc/index.html\"",
+          "View markdown docs at \"doc/llms.txt\"",
+          "View epub docs at \"doc/SmolBox.epub\""
+        ]
+      },
+      {
+        "name": "doc-links",
+        "command": [
+          "mix",
+          "smolbox.ci.docs"
+        ],
+        "exit_code": 0,
+        "summary": [
+          "Checked local links and fragments in 170 documentation pages"
+        ]
+      }
+    ],
+    "format": {
+      "command": [
+        "mix",
+        "format",
+        "--check-formatted",
+        "lib/smolbox/backend.ex",
+        "lib/smolbox/backend/embedded.ex",
+        "lib/smolbox/backend/embedded_partial_branch_disposal.ex",
+        "lib/smolbox/backend/http.ex",
+        "lib/smolbox/branches.ex",
+        "lib/smolbox/runtime/native_partial_branch_collection.ex",
+        "lib/smolbox/runtime/native_partial_branch_disposal.ex",
+        "lib/smolbox/store.ex",
+        "test/unit/backend_test.exs",
+        "test/unit/native_partial_branch_public_disposal_test.exs"
+      ],
+      "exit_code": 0
+    },
+    "credo": {
+      "repository_issues": 67,
+      "new_issues": [],
+      "changed_or_new_line_issues": []
+    },
+    "selected_root_test_files": [
+      "test/unit/native_branch_admission_test.exs",
+      "test/unit/native_branch_authority_test.exs",
+      "test/unit/native_branch_backing_test.exs",
+      "test/unit/native_branch_collection_test.exs",
+      "test/unit/native_branch_completion_test.exs",
+      "test/unit/native_branch_deletion_action_test.exs",
+      "test/unit/native_branch_deletion_test.exs",
+      "test/unit/native_branch_material_history_test.exs",
+      "test/unit/native_branch_release_test.exs",
+      "test/unit/native_branch_retirement_test.exs",
+      "test/unit/native_partial_branch_collection_test.exs",
+      "test/unit/native_prepared_branch_retirement_test.exs",
+      "test/unit/native_released_branch_cleanup_test.exs",
+      "test/unit/native_released_branch_continuation_test.exs",
+      "test/unit/native_released_branch_deletion_test.exs",
+      "test/unit/native_unbooted_branch_backing_test.exs",
+      "test/unit/native_unbooted_branch_disposal_test.exs",
+      "test/unit/native_unbooted_branch_retirement_test.exs",
+      "test/unit/native_partial_branch_public_collection_test.exs",
+      "test/unit/native_unbooted_branch_public_disposal_test.exs",
+      "test/unit/native_material_support_test.exs",
+      "test/unit/native_codec_test.exs",
+      "test/unit/native_source_codec_test.exs",
+      "test/unit/native_checkpoint_codec_test.exs",
+      "test/unit/native_volume_codec_test.exs",
+      "test/unit/embedded_partial_branch_collection_test.exs",
+      "test/unit/backend_test.exs",
+      "test/unit/backend_features_test.exs",
+      "test/unit/backend_store_test.exs",
+      "test/unit/backend_parity_coverage_test.exs",
+      "test/unit/branch_public_authority_test.exs",
+      "test/unit/branch_observation_test.exs",
+      "test/unit/branch_store_test.exs",
+      "test/unit/machine_store_test.exs",
+      "test/unit/native_partial_branch_disposal_test.exs",
+      "test/unit/embedded_partial_branch_disposal_test.exs",
+      "test/unit/native_partial_branch_public_disposal_test.exs"
+    ],
+    "tests_per_current_minimum_toolchain": 335,
+    "new_in_process_peer_cases": 25,
+    "peer_material_modes": [
+      "held",
+      "pre_release",
+      "initial_release",
+      "explicit_release"
+    ],
+    "peer_completion_provenance": [
+      "deleted",
+      "resolved_absent"
+    ],
+    "peer_kind": "synthetic canonical store/protocol/observation models; no SDK ownership or native platform qualification",
+    "peer_fixtures_platform": "macos",
+    "documentation_pages": 170
+  },
+  "sdk": {
+    "version": "1.22.0",
+    "revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "patches": [],
+    "unmodified_snapshot_verified": true
+  },
+  "scope": {
+    "public_backend_runtime_partial_disposal_dispatch_implemented": true,
+    "public_native_branch_admission_enabled": false,
+    "sdk_or_vm_launched": false,
+    "native_engine_bridge_or_store_codec_source_changed": false,
+    "ordinary_current_package_qualification_complete": false,
+    "historical_qualification_transferred": false,
+    "full_parity_complete": false,
+    "crash_validation_deferred": true,
+    "live_loss_forced_termination_or_persistence_interruption_run": false,
+    "crash_handling_qualified": false,
+    "distribution_approved": false,
+    "pushed_or_published": false
+  },
+  "remaining": [
+    "explicit partial continuation/residual cleanup",
+    "dependency/backing closure",
+    "completed-child inventory-PID ownership audit",
+    "ordinary exact-package platform/source/store/resource qualification and remaining P0-P9 gates"
+  ]
+}

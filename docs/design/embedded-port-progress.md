@@ -16128,3 +16128,1272 @@ platform/resource histories, cancellation/isolation/reaping checks, P8 completio
 and final P9 regressions/setup/provenance/license gates remain required. All
 full-parity rows remain pending. No production library/native/SDK bytes change;
 crash validation stays deferred and distribution approval remains separate.
+
+
+## October 16, 2026 — retain original branch return before protected publication
+
+The partial-child recovery audit found a concrete startup ordering gap: the owned
+worker published its returned lifecycle before retaining the SDK's original opaque
+boot enrollment. A publication error could therefore leave that retained job
+without its original return evidence. A single-assignment return record now stores
+the enrollment and SDK success/failure before the protected write. Errors preserve
+those facts; retries cannot replace them. A return without enrollment supplies no
+child authority, and existing identity/lifecycle/handoff gates remain mandatory.
+No collection, deletion, absence or capacity release is inferred from SDK return.
+
+Three deterministic regressions cover the actual lifecycle writer's stale-state
+rejection for successful/failed returns, single publication/overwrite rejection,
+and a modeled IO error without enrollment. Selected branch creation/retention and
+broader branch suites pass 95 and 161 cases respectively (selections can overlap);
+one existing built-helper fixture stays ignored. These run no live SDK boot,
+owner-loss or persistence interruption. The verified SDK snapshot is unmodified.
+[Retention evidence](../evidence/embedded-port-http-parity-branch-return-retention.json)
+records this scoped correction. Pre-handoff collection/disposal and other partial
+states still need implementation and ordinary exact-package qualification. Wire,
+codec and public admission shapes are unchanged. Earlier package evidence keeps
+its exact byte scope. Full parity remains incomplete and crash validation deferred.
+
+
+## October 16, 2026 — shared-engine pre-handoff child collection
+
+The shared engine now exposes explicit original-child collection through
+`RetainedBranchResolution::collect_partial_child`, separate from completed-child
+SDK deletion and never-booted disposal. The typed request binds full frozen
+creation, a distinct action/canonical digest and positive quiescence. Only the
+original retained job's returned opaque enrollment and matching manager can
+enter normal collection. The original-manager collector is shared with completed
+branch stop/deletion; no SDK row, label or caller PID constructs ownership.
+
+A bounded optional protected lifecycle fence retains the exact prior phase and
+freezes the collection request before SDK stop. It blocks initialization, release,
+ready handoff and ordinary restart. The distinct synchronized acknowledgement
+requires positive original actor collection; SDK return alone grants none. The
+owned worker keeps its independent control lease and whole original job through
+actual return. Rows, disks, source/snapshot dependencies, backing and public
+reservations remain retained. Existing journal bytes omit the new field exactly;
+old readers reject the cleanup fence. Database checking now uses the same caller
+budget/cancellation rather than creating a fresh control timeout.
+
+A full-retained-work resource model exposed that the general eight-descriptor
+retirement demand would consume observer headroom. This control uses four
+material-control descriptors, leaving one four-descriptor observer alongside the
+retained 24-descriptor branch job. The model holds full work metadata and a real
+one-GiB native backing charge through fencing and collection acknowledgement,
+without freeing those charges. Six new branch models cover phase/creation/actor
+binding, pre-initialization returns, unchanged namespace/accounting, overwritten
+or missing fence rejection and legacy bytes. A new database model covers caller
+cancellation. Final selections pass 256 branch and 14 SDK compatibility tests;
+one existing built-helper fixture remains ignored. Workspace/all-target Clippy
+passes with warnings denied for workspace code; upstream deprecation warnings
+stay unchanged. [Evidence](../evidence/embedded-port-http-parity-partial-branch-collection.json)
+records exact source-file hashes and scoped checks.
+
+These are deterministic file/actor/resource models, with no SDK boot/stop, VM,
+owner loss or live persistence interruption. Port/durable/public consumption,
+explicit partial-child disposal, broader partial states and ordinary rebuilt
+package/source/platform qualification remain required. Native branch admission
+stays disabled. All full-parity rows remain pending; crash validation is deferred
+and distribution approval remains separate. The lab remains off and all older
+SDK disks/accounts stay preserved.
+
+
+## October 16, 2026 — partial branch collection through Port and typed Elixir
+
+Protocol two now carries `collect_partial_branch {request}` and the required
+`partial_branch_collected {proof, platform}` acknowledgement. The request freezes
+full original creation, a distinct action/digest and explicit quiescence. It
+requires the branch feature, exact immutable approval, source domain and Delete
+capability. The adapter captures one deadline before conversion/selection, uses
+only the original retained resolution token and passes that same budget into
+collection. A missing registry entry supplies no SDK-row or generic deletion
+fallback. The unchanged engine proof stays separate from new reply platform
+metadata, which Rust Session and Elixir Channel bind to the helper package.
+
+Creation/request/proof caps are 16/20/four KiB with at most 30 seconds, zero output
+and no upload. Reserved helper control and branch-terminal storage remain usable
+under work quarantine. Typed Elixir validation preserves exact keys, canonical
+full-creation/action hashes, source-domain binding and redacted Inspect. New
+synthetic fixtures cover held and initially released macOS creation;
+these hash models grant no SDK source or ownership provenance.
+
+The complete protocol suite passes 79 tests; one shared engine reader, one framed
+in-process Native peer and eight output-buffer contracts pass. The peer rejects
+disabled features, missing catalogs and crossed approvals with zero dispatch,
+while the exact quarantined control succeeds. Selected request/channel/protocol
+and older branch-boundary tests pass 33 cases on each actual toolchain (Elixir
+1.20.4/OTP 29.0.6 and 1.18.4/OTP 27.3.4.15). Workspace/all-target Clippy, Cargo
+formatting and the unmodified SDK snapshot check pass. Repository-wide strict
+Credo still reports 67 issues; none are in new files or on changed lines.
+[Transport evidence](../evidence/embedded-port-http-parity-partial-branch-collection-port.json)
+records exact source/fixture hashes and the scoped results.
+
+This change adds no Backend/Runtime/durable public action consumption, codec
+version or public branch activation. Those paired fenced acceptance/completion
+transactions, partial-child disposal, remaining partial states and ordinary exact
+package/platform/source qualification are still required. No SDK/VM, live helper/
+BEAM loss, forced termination or persistence interruption is run. Every full-parity
+row remains pending; crash validation stays deferred and distribution approval
+remains separate. No historical qualification is transferred to changed bytes.
+
+
+## October 16, 2026 — durable/public pre-handoff child collection
+
+`Branches.collect_partial/4` now coordinates the existing original-child control
+through Backend and Runtime. Explicit quiescence, the pinned helper/controller
+fence and original source head precede paired source/child acceptance. A stable
+request freezes full creation, action, submitted management version and target
+platform before IO. A matching typed acknowledgement records historical original
+child collection under the same fence. It leaves creation unknown, the source
+locked and every ordinary reservation, dependency, disk and extra backing charge
+intact. No readiness, absence, deletion or disposal is inferred. The HTTP adapter
+rejects this native-only operation before transport IO.
+
+Lost replies retain the identical action for explicit retry against its original
+retained native context. An already recorded acknowledgement returns without
+helper IO. Stale child versions, crossed platforms, unsolicited output/cursors
+and store rejection cannot acknowledge collection. Definitive native rejection
+retains not-dispatched evidence; uncertain replies/failed final commits retain
+uncertainty. One absolute deadline includes source claims, pin/fence, acceptance,
+helper IO and completion. Request/reply allowances cap at 21/six KiB including
+framing headroom, with at most 30 seconds.
+
+Selective **codec v44** carries pending/completed collection. Old v1–v43 tags
+reject the new action, old byte fixtures still match, fresh normal BEAM readers
+retain both states, and compressed/oversized/trailing envelopes reject. Memory
+and encrypted PostgreSQL implement the same atomic pair contract, including
+rollback and stale source/child guards without releasing capacity. Both expose
+`native_partial_branch_collections: 1`; native branch enrollment additionally
+requires this reader marker. Neither store enables `native_branches: 1` here.
+
+Focused suites pass **292 tests per current/minimum toolchain**, including 16
+public in-process peer cases and existing HTTP/store/codec/branch contracts.
+PostgreSQL branch contracts pass **88 per toolchain**, including six new paired
+collection cases. The private PostgreSQL 17 cluster has no remaining test
+partitions/clients and shuts down normally with smart shutdown. Warnings-as-errors
+compilation and the unmodified SDK snapshot check pass. Strict repository Credo
+retains its prior 67 findings, with no new findings or issues in new files/changed
+lines. Documentation builds with warnings as errors and all local links/fragments
+pass across 168 pages. [Collection action evidence](../evidence/embedded-port-http-parity-partial-branch-collection-durable.json)
+records the exact scope. Synthetic peer/proof fixtures supply no SDK provenance.
+The preceding transport progress text is corrected to match its fixture inventory:
+all three canonical platform fixtures are macOS, not a Linux qualification.
+
+Pre-handoff disposal, remaining partial states and ordinary current-package
+SDK/platform/source/store qualification remain required. No SDK/VM launches or
+live loss/persistence interruption campaigns run here; crash validation remains
+deferred. All full-parity rows stay pending, public native branch admission stays
+disabled and distribution approval remains separate. No historical native
+qualification transfers to changed source. Nothing is pushed or published.
+
+
+## October 16, 2026 — shared-engine collected pre-handoff disposal
+
+The shared engine adds `dispose_partial_child` and `resolve_partial_disposal` on
+an exclusively borrowed original resolution token. Their distinct bounded request
+freezes the full collection request/proof, a separate action/digest and explicit
+quiescence. The original manager/enrollment and current epoch must positively
+requalify collection; source/child maps exclude lifecycle handoff. The protected
+lifecycle may authorize only its original held material or the exact before/after
+head of its entered release. A cleared SDK flag alone supplies no head/readiness.
+Request/proof caps are 24/48 KiB; the separate private ledger is capped at 128 KiB.
+
+A synchronized immutable original grant precedes SDK deletion. Its owned thread
+retains the original entry, opaque enrollment, control lease and active-worker
+fence through actual SDK return. It rechecks actor collection, exact roots,
+lifecycle, source/child row hashes and grant before conditionally acknowledging
+only that original child's canonical stopped row. Public SDK deletion is then
+entered once. Positive bounded row/reservation/directory absence and fresh exact
+source authority precede a distinct deleted or resolved-absent acknowledgement.
+Repeated published entry never calls SDK deletion again. Missing/crossed history,
+partial removal, changed source/child material and spent budgets keep uncertainty.
+Only the separately qualified target may have an entered release journal;
+source authority still validates every other sibling's clean published material.
+The ordinary dependency checker would otherwise reject the target's legitimate
+unfinished release head. A new private cleanup filter excludes only that exact
+owned target and supplies no ownership by itself; its model rejects an unrelated
+unpublished sibling. Every original source dependency, work/gate and backing charge remains retained;
+this control alone performs no terminal-job handoff or backing closure.
+
+The models exposed a pre-handoff collection prerequisite: pinned SDK `runtime.pid`
+falls back to its stored record and therefore cannot identify runtime-owned handle
+handoff. Pre-handoff collection now uses the actual SmolBox ownership maps and
+runtime-boot registry for that exclusion. These filters grant no collection;
+original manager/enrollment and actor proof remain mandatory. The regression
+shows an original stored PID passing exclusion, an installed handle rejecting it,
+and an inert model still unable to mint public SDK authority. Other completed-child
+controls using inventory PID filters remain a separate ownership audit item.
+
+[Engine disposal evidence](../evidence/embedded-port-http-parity-partial-branch-disposal-engine.json)
+records twelve new deterministic application/actor/file/row models. They cover
+failed return, initialized held material, both entered-release material heads,
+canonical stopped-row acknowledgement, distinct absence completion, one-shot
+selection, corruption, cancellation/expiry, partial removal and retained charges.
+They use private projections and synthetic out-of-range actor identities. They
+construct no AgentManager, touch no live SDK namespace and call no SDK delete.
+The broader branch suite passes 269 models with one explicitly ignored built-helper
+fixture; fourteen SDK compatibility models and workspace/all-target strict Clippy
+pass. Current/minimum Elixir boundary/public-collection/codec/HTTP regression models
+pass 34 cases each. Cargo formatting and the unmodified SDK snapshot check pass.
+The native original-manager producer and ordinary SDK behavior still require
+exact-package qualification. No native package is built or granted historical
+qualification by these checks.
+
+Port routing/readers, durable/public disposal consumption, terminal handoff,
+entered-unperformed continuation/residual cleanup and explicit backing closure
+remain required, along with the other P0–P9 gates. Public native branch admission
+stays disabled. Crash campaigns remain deferred and distribution approval remains
+separate. No SDK/VM, live owner loss, forced termination or persistence interruption
+is run; nothing is pushed or published.
+
+
+## October 16, 2026 — partial disposal through Port and typed readers
+
+Protocol two now exposes distinct `dispose_partial_branch` and
+`resolve_partial_branch_disposal` requests, with a required
+`partial_branch_disposed` terminal proof. The full acknowledged collection,
+creation, separate action/digest and explicit quiescence remain exact. Dispose
+requires Delete; resolve requires Inspect. Both require the branch feature and
+exact immutable branch approval, use reserved control/terminal capacity while
+work is unavailable, and forbid output/upload streams. Request/proof limits remain
+24/48 KiB with a 30-second ceiling. The adapter captures its deadline before
+conversion and original-context selection, then passes that same deadline into
+the engine. Missing original retention produces an error, with no SDK-row/name
+fallback. The unchanged engine proof preserves SDK deletion and positive-absence
+completion separately; neither grants terminal handoff or backing release.
+
+Strict Rust wire/session and typed Elixir request/proof/channel readers agree on
+full request, collection, publication and optional-release hashes. The session
+and channel bind terminal platform and original publication epoch to the current
+approved helper, and require zero output. Existing store envelopes and capability
+markers do not change. Backend/Runtime public disposal consumption is still absent.
+The native original job and source gate remain retained until the separate terminal
+handoff; this must precede a public coordinator's fresh source observation.
+
+Ten explicitly synthetic canonical rows cover deleted/resolved-absent alternatives
+for held and explicitly released macOS/Linux material, plus initially released
+macOS material. They derive from existing synthetic fixtures and supply no SDK
+source, manager or process provenance. The shared engine reader validates the
+same bytes without SDK work. An in-process framed peer checks both controls across
+disabled feature, missing/crossed catalog and exact approval, including quarantine,
+with normal shutdown. It invokes no SDK helper process or VM. Bounded output tests
+keep both observer slots available beside the new terminal proofs.
+
+The full protocol suite passes 81 unit and 59 contract tests, the shared engine
+reader passes one case, the framed peer passes its catalog/control case, and nine
+output contracts pass. Current/minimum Elixir reader/channel/public-collection/
+codec/HTTP regression models pass 38 each. Compilation with warnings as errors,
+workspace/all-target Clippy, Cargo/Elixir formatting and the unmodified SDK snapshot
+check pass. Strict repository Credo retains its existing 67 findings with no new
+or changed-file findings. [Port disposal evidence](../evidence/embedded-port-http-parity-partial-branch-disposal-port.json)
+records source/fixture hashes and these exact scopes.
+
+Terminal registry handoff, durable/public disposal acceptance/completion, explicit
+continuation/residual cleanup and dependency/backing closure remain required. The
+completed-child inventory-PID ownership audit and ordinary current-package/platform/
+source/store qualification also remain open. Public branch admission stays disabled,
+every full-parity row stays pending, crash validation remains deferred and
+distribution approval stays separate. No historical native qualification is
+transferred to changed bytes; no SDK/VM is launched or package published.
+
+
+## October 16, 2026 — original partial disposal terminal handoff
+
+The original positively collected pre-handoff disposal now has a distinct native
+terminal archive. `finish_partial_branch_disposal` requires the original current
+epoch, exact cached synchronized disposal intent/proof, original manager and opaque
+enrollment, eligible inactive work, retained snapshot/child descriptor identities,
+source material and unique original entry ownership. The SDK child is already
+positively collected and disposed before this handoff. Conversion releases only
+transient work, descriptors, spools and source/child gates. The archive keeps the
+same runtime/domain, original opaque enrollment, bounded metadata, disposal
+provenance and all native backing. Source publication, snapshot and public source
+dependency/reservations are not removed. Accounting failure restores the exact
+whole entry, including its borrower and gates.
+
+Port disposal/resolve first query the exact original archive; otherwise they
+select the original retained job, perform their distinct engine control and finish
+terminal handoff before replying. Saved acknowledgement re-synchronizes its exact
+protected ledger without SDK entry or current source/child namespace observation.
+A different action, missing/crossed ledger or runtime cannot recreate authority.
+Recreated names remain untouched. The original captured deadline/cancellation also
+covers wire conversion and final acknowledgement. Registry admission includes
+partial archives in its bounded terminal metadata inventory; an unreleased archive
+keeps its charge and quarantines on registry teardown. Successful retained cleanup
+can retire transient work while already quarantined without reopening admission.
+
+[Terminal handoff evidence](../evidence/embedded-port-http-parity-partial-branch-disposal-handoff.json)
+records nine new inert original-entry/actor/file/accounting models covering both
+completion kinds and failed-boot/initialized/entered-release states, exact saved
+history, strong/weak outstanding owners, rollback, rejected collection, active
+worker, crossed material, cancellation/expiry/control capacity, quarantine and
+recreated namespaces. The final branch suite passes 279 models with one built-helper fixture explicitly
+ignored; resource accounting passes 38 and SDK compatibility passes fourteen.
+The framed helper peer and nine output contracts pass. Workspace/all-target strict
+Clippy, Cargo formatting and the unmodified SDK snapshot check pass. Focused
+current/minimum Elixir readers and HTTP/backend contracts pass 38 each. Docs build
+with warnings as errors and local links/fragments pass across 169 pages.
+These tests construct no AgentManager, enter no SDK deletion or VM, lose no owner
+and interrupt no live persistence. Native producer behavior and
+changed packages still require ordinary qualification; historical native results
+remain bound to their original bytes.
+
+Backend/Runtime and paired durable public disposal acceptance/completion remain
+required, followed by explicit partial continuation/residual cleanup and backing
+closure. Completed-child ownership-filter audit and the other P0–P9/platform/
+source/store/resource gates remain open. Public native branch admission stays
+disabled and full parity is incomplete. Crash validation remains deferred;
+distribution approval stays separate. Nothing is pushed or published.
+
+
+## October 16, 2026 — reader-first paired partial disposal records
+
+A distinct `NativePartialBranchDisposal` now freezes the full acknowledged
+collection request/proof, disposal action/digest, management version, explicit
+quiescence and original pinned platform. The original collection record is retained
+unchanged through disposal. Only acknowledged original collection can admit this
+separate action; never-booted disposal, prepared retirement, readiness and regular
+release/deletion histories cannot substitute. Pending disposal retains unknown
+creation and every ordinary/dependency/backing reservation.
+
+Memory and encrypted PostgreSQL now implement the same paired acceptance and
+completion contract. A typed `NativePartialBranchDisposalResult` must bind the
+exact accepted request, current child version, publication, optional release,
+platform, ordinary resource plan and original source PID, together with a separate
+fresh source observation carrying the actual publication. One atomic transaction
+records a disposed child tombstone and source material history, unlocks the public
+source operation and releases only ordinary child capacity. It manufactures no
+child Machine or initialization completion. Source dependency, snapshot and extra
+backing remain charged until explicit cleanup. Stale child/source guards, crossed
+observations and transaction rollback preserve both records and resource projections.
+
+Selective **codec v45** retains pending/completed disposal alongside the acknowledged
+v44 collection history. Older tags reject the new action; old envelopes omit its
+nil default exactly and restore it on read. Updated same-BEAM byte contracts keep
+legacy omission expectations explicit. Six envelopes saved before this change
+also decode and retain the same prefix and exact ETF record content after encoding;
+ETF map byte ordering across different BEAMs is not claimed canonical. Fresh normal
+current/minimum readers retain pending and completed actions; compressed,
+oversized, trailing and older-tag substitution reject. Both stores expose
+`native_partial_branch_disposals: 1`; native branch enrollment additionally requires
+this reader marker. Neither store advertises `native_branches: 1`.
+
+[Durable disposal evidence](../evidence/embedded-port-http-parity-partial-branch-disposal-durable.json)
+records 310 focused root contracts per current/minimum toolchain, including fourteen
+new memory/codec cases, and 100 PostgreSQL branch contracts per toolchain, including
+twelve new SQL cases. The fresh private PostgreSQL 17 cluster has zero test
+partitions/other clients and smart-stops normally. Warnings-as-errors compilation,
+formatting and the unmodified SDK snapshot check pass. Strict Credo retains its
+67 baseline issues with no new/changed-line findings. Docs build with warnings as
+errors and local links/fragments pass across 170 pages. These are deterministic
+store/observation projections, including held, pre-release,
+initial-release and explicit-release material, with both deleted and resolved-absent
+provenance. They construct no SDK owner or VM and supply no native platform
+qualification. Public Backend/Runtime disposal dispatch is the next integration;
+these reader/writer contracts alone expose no public disposal operation. Explicit
+partial continuation/residual cleanup, dependency/backing closure, completed-child
+ownership-filter audit and remaining ordinary package/platform/source/store/resource
+qualification stay required. Full parity remains incomplete, public native branch
+admission stays disabled, crash validation remains deferred and distribution stays
+separate. Nothing is pushed or published.
+
+
+## October 16, 2026 — public original partial disposal coordination
+
+`Branches.dispose_partial/4` requires the expected child version and explicit
+quiescence, with acknowledged original collection already saved. Deleted branch
+resolution routes any existing collection through this same boundary; a pending
+unacknowledged collection rejects without falling through to prepared/unbooted
+retirement. The source/controller/helper fence now spans immutable disposal
+acceptance before native IO, original dispose/resolve control, exact proof and
+fresh source observation, and paired store completion. No child Machine or
+readiness is synthesized; ordinary child capacity retires only at the final paired
+commit, while source dependency and backing stay charged.
+
+Accepted retries first observe the same original request. An uncertain observation
+cannot fall through to deletion. Only a definitive not-dispatched state response
+can offer that exact request to the engine's one-shot original grant, which still
+independently refuses repeated SDK entry. A successful native proof followed by
+lost source observation or a failed/stale store commit retains the accepted request
+and all public reservations. Exact saved disposal results return without helper IO;
+collection acknowledgement lookup also retains that property after later disposal.
+
+Both distinct native-only Backend controls require branch feature approval and
+quiesced pinned source identity. They bind full creation/collection/action,
+platform/epoch, publication and optional release before inspecting the actual
+published source head. HTTP rejects both before transport IO. One captured
+30-second ceiling spans each public call and the adapter's native conversion,
+source observation and acknowledgement. Each offered stage caps request/response
+at 26/64 KiB; failed/lost observer offers are charged before any allowed fallback.
+The source observation consumes only the stage's unused bytes, including explicit
+framing headroom. The checked coverage manifest now contains 57 operations; all
+full-parity acceptance rows remain pending.
+
+[Public disposal evidence](../evidence/embedded-port-http-parity-partial-branch-disposal-public.json)
+records twenty-five in-process peer cases, including four material modes, both
+completion provenances, lost proof/source replies, unentered retry, uncertain
+observer isolation, stale versions, failed writes, wrong epoch/source/platform,
+output/cursor rejection, draining, historical lookup and bounded admission.
+The focused shared branch/store/codec/HTTP suites pass 335 contracts per current/
+minimum toolchain. Compilation with warnings as errors, formatting and the
+unmodified SDK snapshot check pass. Strict Credo retains its 67 baseline findings
+with no new/changed-line issues. Docs build with warnings as errors and local
+links/fragments pass across 170 pages. These model DTOs confer no SDK owner,
+native package or platform qualification.
+Public native branch admission remains disabled. Explicit partial continuation/
+residual cleanup, dependency/backing closure, completed-child ownership-filter
+audit and remaining P0–P9 ordinary package/platform/source/store/resource gates
+stay open. Crash validation remains deferred; distribution approval stays separate.
+Nothing is pushed or published.
+
+
+## October 16, 2026 — fresh original partial-child namespace absence
+
+A distinct `PartialBranchChildAbsence` engine/Port observation now binds the full
+original partial-disposal proof and a separate quiesced action/digest. The saved
+creation, collection, disposal and optional-release IDs cannot substitute for its
+action. Request/proof caps are 56 KiB and the control ceiling is 30 seconds. The
+original terminal archive retains its opaque enrollment and same runtime/domain;
+protected completed ledger synchronization and actual current-epoch original
+collection are mandatory before fresh namespace checks.
+
+The observer holds paired source/child gates and a reserved material-control
+allowance, checks bounded read-only SDK row/reservation and original-directory
+absence before and after issuing correlation, then rechecks the same archive
+intent and exact enrollment. Source state/path/readiness is not inferred and the
+source may remain running. A recreated row, reservation, directory, redirect,
+current owned handle or missing/crossed history rejects without cleanup. A stored
+disposal or earlier absence proof alone cannot satisfy a fresh observation. Every
+source dependency, snapshot and backing charge remains retained.
+
+The ownership guard now uses nonblocking actual handle/branch-owner/manager and
+ordinary-boot registry lookups, so a control cannot wait behind a busy registry.
+It performs no SDK `runtime.pid` persisted-row fallback. The same guard protects
+existing original pre-handoff collection/disposal/handoff. Protocol two requires
+Inspect, the branch feature and exact catalog, source/domain/epoch/platform
+correlation and a zero-stream typed terminal. It remains available while ordinary
+work is quarantined and preserves both reserved observer outputs. The adapter
+uses its original captured deadline through conversion and final acknowledgement.
+Strict Rust wire and Elixir request/channel/readers share ten explicitly synthetic
+canonical rows for both disposal provenances and held, explicit/initial-release
+material. No SDK provenance or guest qualification is supplied by these bytes.
+
+[Fresh partial absence evidence](../evidence/embedded-port-http-parity-partial-branch-child-absence.json)
+records 290 passing branch models (one built-helper fixture explicitly ignored),
+eighteen ordinary-boot models, 84 protocol units/59 contracts, fifty framed peer
+sessions and ten bounded-output contracts. The focused Elixir suites pass 347
+contracts on each current/minimum toolchain. Workspace/all-target strict Clippy,
+compilation with warnings as errors, formatting and the unmodified SDK snapshot
+check pass. Strict Credo retains its 67 baseline findings with no new/changed-line
+issues. Docs build with warnings as errors and local links/fragments pass across
+171 pages. Paired durable/public dependency
+retirement consumption, explicit partial continuation/residual cleanup and backing
+closure remain required, along with completed-child ownership-filter audit and
+all remaining ordinary exact-package/platform/source/store/resource P0–P9 gates.
+Public branch admission stays disabled and all 57 full-parity operation rows
+remain pending. Crash validation remains deferred; distribution stays separate.
+No SDK/VM, live owner loss, forced termination or persistence interruption is run.
+Nothing is pushed or published.
+
+
+## October 16, 2026 — paired original partial-child dependency retirement
+
+`Branches.retire/3` now routes disposed original partial children through a
+separate bounded native absence observation and paired source/child commit. The
+exact request binds the saved disposal and current child version; the backend
+requires the original source pin, platform and helper epoch and a typed matching
+zero-output proof. Controller ownership and helper quiescence span observation
+and commit. The captured deadline is never reset, with a 30-second control cap and
+60-KiB adapter request/response limits around the native 56-KiB values. Early
+input/expiry rejection is not dispatched; uncertain responses and failed commits
+retain all remaining authority and charges.
+
+Memory and encrypted PostgreSQL now persist the same versioned retirement proof.
+Only the source dependency retires. Collection/disposal history, source material
+publication and extra backing remain unchanged; no child Machine or initialization
+completion is invented. Source deletion still retains backing, and completed-child
+or never-booted backing controls reject this new origin. Saved retirement,
+collection and disposal acknowledgements remain readable without helper IO;
+draining leaves retirement available.
+
+Selective **codec v46** saves partial-child retirement in existing fields, rejects
+older-tag substitution, compressed/trailing/oversized input and disposal-only
+records mislabeled as v46. Disposal-only v45 and all earlier encodings keep their
+existing defaults and envelope selection. Six pre-change envelopes retain their
+prefix and exact ETF term content across current/minimum BEAMs; cross-BEAM map
+byte ordering is not claimed canonical. Upgrade all readers/projectors before
+advertising `native_partial_branch_retirements: 1`; neither Memory nor PostgreSQL
+advertises native branch admission.
+
+[Retirement evidence](../evidence/embedded-port-http-parity-partial-branch-retirement.json)
+records 393 focused Elixir tests per current/minimum toolchain, including fifteen
+new Memory/codec cases and nineteen in-process public peer cases, plus 112
+PostgreSQL branch tests per toolchain including twelve new SQL cases. The final
+fresh private PostgreSQL 17 cluster has zero test partitions/other clients and
+smart-stops normally, with its socket removed. Six pre-change envelopes pass on
+both toolchains. Warnings-as-errors compilation, formatting and SDK source checks
+pass. Strict Credo retains 67 baseline findings with no new/changed-line issues;
+docs build and local link/fragment checks pass across 171 pages. All 410 HTTP
+contract regressions pass on both toolchains. These are canonical store/control and in-process peer models, not SDK/VM or changed-package
+qualification. The checked backend inventory is 58 operations;
+all full-parity rows remain pending. Explicit partial backing closure, continuation/
+residual cleanup, remaining partial states, completed-child ownership-filter audit
+and broader P0–P9/platform/source/store/resource gates remain open. Public branch
+admission stays disabled, crash validation stays deferred, distribution approval
+stays separate, and nothing is pushed or published.
+
+
+## October 16, 2026 — original partial-child native backing control
+
+`PartialBranchBackingReleaseRequest` and
+`Engine::release_partial_branch_backing_checked` now provide a distinct shared
+engine boundary for this original collected/disposed pre-handoff origin. The
+request binds the complete disposal and caller's expected source/child heads,
+explicit quiescence, host removal confirmation and a separate canonical action.
+The child head must equal its exact held/released disposal head. A later source
+head cannot change creation origin or roll back/rewrite an equal revision; absent
+SDK state cannot establish that head's historical existence.
+
+Only the exact retained terminal archive/runtime/domain/protected ledger and
+opaque original child enrollment can authorize this control. An owned accounting
+worker retains both source/child gates, reserved control and original context
+through normal return. A new release checks actual ownership maps without an
+unbudgeted SDK inventory-PID fallback, original source/child collection and twice
+bounded SDK row/reservation/original-directory absence. It rechecks and synchronizes
+the original terminal ledger before publishing its accounting acknowledgement.
+Only the original entry's native material charge retires after acknowledgement
+synchronization; sibling charges and bounded result metadata remain. Missing or
+crossed original/disposal/backing history cannot mint authority. Exact saved
+acknowledgements do not requalify or remove recreated names or ownership handles.
+
+[Native backing evidence](../evidence/embedded-port-http-parity-partial-branch-backing-engine.json)
+records the scoped Rust contracts, canonical synthetic fixtures and exact limits.
+Twelve new private control models cover failed/returned boot, identity and both
+entered-release heads, both disposal provenances, sibling isolation, second-pass
+changes, ownership/gate/control contention, missing/crossed history, live-source
+liveness rejection and cancellation before/after collection. Cancellation is an
+explicit in-process API operation with normal worker return and retained material;
+no VM, SDK deletion, owner loss or live persistence interruption is involved.
+Ten shared synthetic wire rows match canonical Rust request/proof readers. The
+focused twelve models pass; the full branch filter passes 303 cases with one
+existing ignored case, and eighteen runtime-boot models pass. Strict workspace/
+all-target Clippy, scoped Rust formatting, warnings-as-errors Rustdoc and the
+unmodified SDK snapshot check pass. Upstream deprecation warnings remain
+unmodified. No new Elixir/store/codec/HTTP qualification is claimed here.
+
+Port routing, typed readers and paired durable/public backing actions remain
+required before this origin's public backing can close. No Elixir/store/codec
+writers, public capability or backend inventory change here; all 58 full-parity
+rows remain pending. The remaining partial states, continuation/residual cleanup,
+completed-child ownership-filter audit and wider P0–P9/platform/source/store/
+resource gates stay open. Changed native bytes still need ordinary exact-package
+qualification. Crash validation stays deferred, distribution approval stays
+separate, and nothing is pushed or published.
+
+
+## October 16, 2026 — Port and paired public partial-child backing closure
+
+Protocol-two `release_partial_branch_backing` now reaches the existing checked
+shared engine boundary with a strict request DTO and matching original-context
+`BranchBackingRelease` acknowledgement. Native and Elixir admission require the
+original branch approval, feature/catalog, Inspect capability, platform/domain/
+original epoch and zero streams. The Port adapter captures its deadline before
+conversion and preserves it through accounting and final correlation. The
+existing native-only backend operation selects this separate wire path; HTTP and
+the 58-operation inventory remain unchanged.
+
+`Branches.release_storage/3` now accepts and closes this partial origin under the
+same controller/helper fence as its paired Memory/PostgreSQL writes. Source deletion,
+all dependencies retired and explicit host removal confirmation precede acceptance.
+The saved action version, exact original disposal, retirement and source/child
+material heads remain immutable through claims/retries. `backing_pending` retains
+all extra capacity. Only the typed matching proof atomically closes the child and
+retires that extra charge. Original collection/disposal/retirement and source
+publication history remain unchanged; no child Machine or boot completion is
+invented. Lost/late replies and failed commits preserve the accepted action and
+charges; explicit retry uses the same request, and saved closure/history reads
+need no helper IO. Cleanup remains available while draining.
+
+Selective **codec v47** and `native_partial_branch_backings: 1` readers preserve
+retirement-only v46 and earlier encodings while rejecting older-tag substitution,
+stripped/mislabelled records, compressed/trailing/oversized input. Six pre-change
+envelopes retain their prefix and exact ETF term content on current/minimum BEAMs;
+map byte ordering across BEAMs is not claimed canonical. Both stores implement
+paired encrypted/Memory projections without advertising native branch admission.
+
+[Boundary and public closure evidence](../evidence/embedded-port-http-parity-partial-branch-backing-public.json)
+records 88 protocol units and 59 contracts, one in-process framed peer across fifty
+catalog/control sessions, and 463 focused Elixir cases per current/minimum toolchain.
+The new scopes include seven strict reader/channel cases, thirteen Memory/codec
+cases and nineteen public backing peer cases. The PostgreSQL suite passes 124
+branch cases per toolchain, including twelve new SQL cases with deterministic
+transaction rollback. Its fresh private cluster ends with zero partitions/other
+clients and smart-stops normally. Six pre-change envelopes and fresh normal
+readers pass on both toolchains. All 410 HTTP contracts pass per toolchain.
+Warnings-as-errors compilation, strict workspace/all-target Clippy, formatting,
+SDK verification and docs/local links across 171 pages pass. Credo retains only
+its 67 baseline findings, with no new/changed-line findings.
+No VM, SDK deletion, owner loss or live persistence
+interruption is exercised; no ordinary changed-package qualification is supplied.
+
+Remaining partial states, entered-unperformed continuation/residual cleanup,
+completed-child ownership-filter audit and broader P0–P9/platform/source/store/
+resource/consumer gates remain open. Public branch admission stays disabled, all
+58 full-parity operation rows stay pending, crash validation stays deferred,
+distribution approval stays separate, and nothing is pushed or published.
+
+
+## October 16, 2026 — original partial-disposal residual cleanup engine
+
+`PartialBranchDisposalCleanupRequest`, `PartialBranchDisposalCleanup` and
+`RetainedBranchResolution::cleanup_partial_disposal` now provide a separate shared
+engine action for SDK-absent original partial-disposal residuals. The full prior
+collection/disposal request and distinct action/quiescence bind the canonical
+request. Its proof preserves the original resolved-absent disposal, publication,
+optional release and private intent hash. Neither SDK deletion/initialization,
+child readiness nor dependency/backing retirement is inferred.
+
+The original job/runtime/domain, published primary disposal, opaque enrollment,
+positive collection, row/reservation absence and unchanged live source are
+required. A cached and separately protected grant captures original child/parent
+directory identities before descriptor-relative bounded removal. Symlinks are
+unlinked without following them. A missing root cannot create removal authority;
+partial removal can resume only the same cached/published request and original
+inode. Missing/crossed primary or cleanup history, changed source, new ownership,
+active workers and exhausted control keep all remaining authority/charges. The
+owned worker retains original gates/context and reserved control through return.
+Original source and snapshot directories remain intact. Final positive absence
+and fresh source authority precede primary resolved-absent completion and its
+separate cleanup acknowledgement.
+
+Typed protected-record IO is shared while the primary journal's existing schema,
+fields and serialization stay unchanged. The new cleanup sidecar is independently
+path/type bound and capped at 256 KiB; request/proof caps are 28/80 KiB with a
+30-second control deadline and the existing one-million-entry removal ceiling.
+Original completion with an accepted pending cleanup receipt can re-synchronize
+its acknowledgement without replay, including after terminal archive handoff and
+source deletion. Recreated names/handles remain untouched. Partial-disposal final
+absence now checks actual nonblocking ownership maps rather than SDK runtime.pid
+inventory fallback.
+
+[Residual cleanup engine evidence](../evidence/embedded-port-http-parity-partial-disposal-cleanup-engine.json)
+records nine new inert actor/file/SQLite/control models, the full branch-model
+filter and supporting checks: 312 branch models pass with one existing ignored
+case, plus eighteen runtime-boot models. Strict workspace/all-target Clippy,
+scoped formatting, warnings-as-errors Rustdoc and unmodified SDK verification pass.
+Upstream deprecation warnings remain unmodified. These create no manager or VM, call no SDK delete,
+lose no owner and interrupt no live persistence. No new Port/Elixir/store/codec/
+HTTP or ordinary rebuilt-package/platform qualification is claimed here.
+
+Port routing, typed readers and paired durable/public cleanup actions remain
+required. Demonstrably unentered SDK continuation also remains required: legacy
+entered state is an intent-publication fence, not proof that SDK entry never
+occurred. A separate original cached/protected entry marker must distinguish those
+states before any continuation can safely run. Remaining partial states,
+completed-child ownership-filter audit and the other P0–P9/platform/source/store/
+resource/consumer gates stay open. All 58 full-parity rows stay pending, native
+branch admission stays disabled, crash validation stays deferred, distribution
+approval stays separate, and nothing is pushed or published.
+
+
+## October 16, 2026 — original partial-disposal cleanup Port boundary
+
+Protocol two now routes `cleanup_partial_branch_disposal` to the existing shared
+engine residual cleanup control and returns the distinct
+`partial_branch_disposal_cleaned` acknowledgement. Exact original archive lookup
+precedes retained original selection; successful cleanup is terminally archived
+before a reply. No original manager is reconstructed and no SDK lifecycle action
+is retried. Conversion, original selection, cleanup and terminal handoff share one
+captured absolute deadline, capped at 30 seconds. Post-action conversion, archive,
+cancellation or expiry failures retain dispatch uncertainty.
+
+Independent strict Rust and Elixir readers preserve the engine's 28-KiB request
+and 80-KiB proof schemas and canonical hashes. The acknowledgement contains the
+exact request and resolved-absent disposal, including its original publication
+and optional release. Rehashed SDK-deleted provenance, reused prior action IDs,
+crossed requests, unsupported fields, wrong platform/epoch and streamed output
+cannot acknowledge cleanup. The source receipt binds the domain; feature version,
+exact immutable approval catalog and Delete capability gate dispatch. Reserved
+control remains available while ordinary work is quarantined. Branch terminal
+storage now reserves the largest advertised proof (80 KiB plus envelope), retaining
+finite frame/byte limits and both observer slots under saturation.
+
+[Port boundary evidence](../evidence/embedded-port-http-parity-partial-disposal-cleanup-port.json)
+records synthetic Rust/Elixir readers, a normally shutting down framed peer,
+reserved-output models, current/minimum shared Elixir contracts, old codec reads
+and HTTP regressions. These establish boundary behavior, not ordinary SDK/VM or
+rebuilt-package/platform qualification. The unchanged SDK remains verified.
+
+Paired reader-first durable/public cleanup acceptance and completion remain next:
+the exact request must persist before dispatch, and only its matching typed proof
+may commit paired disposal while preserving dependency/backing charges. No new
+backend operation, public cleanup API, store shape, codec tag or capability marker
+is introduced at this boundary. All 58 full-parity operation rows remain pending.
+Demonstrably unentered SDK continuation still requires the separate original
+cached/protected SDK-entry fence; the legacy entered intent is insufficient.
+Remaining partial states, completed-child ownership audit and all other P0–P9/
+source/store/resource/platform/package/consumer gates remain open. Public native
+branch admission stays disabled, crash validation stays deferred and distribution
+approval stays separate. Nothing is pushed or published.
+
+
+## October 16, 2026 — paired durable original partial-disposal cleanup
+
+Memory and encrypted PostgreSQL now accept a separate immutable cleanup action
+inside the original partial-disposal history. The request derives from the exact
+original disposal, creation fingerprint, action version and pinned platform. Both
+source and child are guarded before acceptance, and the saved request survives
+claims and retries without replacing the original collection/disposal. The child
+uses the distinct `disposal_cleanup_pending` phase, remains unknown and retains
+all ordinary, dependency and backing charges. Stripping its action cannot make
+that pending phase valid as an older disposal record.
+
+Only `NativePartialBranchCleanupResult` with the exact saved request,
+resolved-absent disposal, current child version and fresh source observation can
+commit paired completion. The cleanup wrapper and original disposal proofs commit
+in the same transaction with the source publication. Only ordinary child capacity
+is released. Ordinary disposal results cannot acknowledge cleanup, and existing
+backend/Runtime disposal paths reject pending cleanup before helper IO. Matching
+cleanup history remains immutable through later dependency retirement and backing
+closeout. Stale guards/results, crossed proofs/platforms and deterministic SQL
+rollback retain authority, records and accounting.
+
+Selective codec v48 persists pending/completed cleanup and its later histories.
+Earlier v45/v46/v47 records omit exactly the new nested nil default and restore it
+on read. Older tags reject nonnil cleanup; v48 rejects missing actions, old-state
+mislabeling, compressed/trailing/oversized data and invalid proof/record shapes.
+Twelve envelopes saved before the field change retain prefix and exact decoded
+ETF term on current/minimum readers; map byte order is not canonical across
+BEAMs. Fresh normal readers load both pending and completed v48 records.
+`native_partial_branch_cleanups: 1` joins the required reader markers for future
+branch activation. Neither store advertises native branches. Durable example
+test selection also excludes deferred crash campaigns independently of ordinary
+runtime qualification.
+
+[Paired cleanup evidence](../evidence/embedded-port-http-parity-partial-disposal-cleanup-durable.json)
+records deterministic Memory/PostgreSQL, codec, current/minimum shared and HTTP
+contracts. No native/SDK source changes or ordinary VM/new-package/platform
+qualification are supplied by this checkpoint. Public cleanup coordination remains
+next: the controller/helper fence must span this acceptance, bounded Port IO,
+fresh source observation and paired commit. Unentered SDK continuation still needs
+the separate original cached/protected SDK-entry fence; legacy intent publication
+cannot establish no SDK call. Remaining partial states, completed-child ownership
+audit and all other P0–P9/source/store/resource/platform/package/consumer gates
+remain open. All 58 full-parity operation rows stay pending, public native branch
+admission stays disabled, crash validation stays deferred and distribution
+approval stays separate. Nothing is pushed or published.
+
+
+## October 16, 2026 — public original partial-disposal cleanup coordination
+
+`Branches.cleanup_partial/4` now routes the exact saved partial cleanup action
+through the existing Port control. The source's pinned controller/helper epoch is
+quiesced and held through paired acceptance, cleanup, source observation and
+paired completion. Explicit version and `quiesced: true` precede acceptance.
+No child Machine is constructed. An accepted retry preserves the saved request;
+deleted resolution selects the already accepted cleanup instead of offering
+ordinary SDK disposal. A saved acknowledged result returns without helper IO,
+including after dependency retirement, source deletion and backing closeout.
+
+The new `cleanup_partial_branch_disposal/3` backend operation is native-only;
+HTTP rejects it before transport IO. The checked inventory now contains 59
+operation rows, all still pending full-parity acceptance. Cleanup and disposal
+share the same source-publication promotion, epoch/platform checks, fresh source
+inspection and actual encoded-byte accounting. Cleanup's aggregate caps are
+30 seconds, 32 KiB input and 96 KiB output, including envelope headroom. The
+captured deadline spans pinning, durable acceptance, native IO, fresh source
+observation, result validation and commit admission/acknowledgement. Expired
+acceptance cannot dispatch cleanup. Missing/late/wrong proof or source, crossed
+actions, streamed data/cursors and failed commit retain the accepted request and
+all uncommitted reservations. A delayed successful store acknowledgement returns
+uncertain rather than late success; its actually committed proof remains readable
+without another helper call. Only matching paired completion retires ordinary
+capacity; dependency and backing histories stay separate.
+
+[Public cleanup evidence](../evidence/embedded-port-http-parity-partial-disposal-cleanup-public.json)
+records in-process public peers, aggregate budgets, current/minimum shared/store,
+codec and HTTP contracts. These supply no ordinary SDK/VM or rebuilt-package/
+platform/public-consumer qualification. Native/SDK code and codec v48 are unchanged.
+
+Native eligibility and recovery remain required before public activation. In
+particular, qualification must handle original native disposal that completed
+before its public acknowledgement was stored: a fresh cleanup grant must not
+strand an already-terminal original disposition. Refused cleanup in other
+partial SDK phases also needs a complete authorized recovery path. The current
+models cover the SDK-absent residual context and preserve charges on refusal;
+they do not close those other states. Unentered SDK continuation still needs the
+separate original cached/protected SDK-entry fence; legacy intent publication
+cannot establish no SDK call. Remaining partial states, completed-child ownership
+audit and all other P0–P9/source/store/resource/platform/package/consumer gates
+stay open. Public native branch admission remains disabled, all 59 full-parity
+rows remain pending, crash validation stays deferred and distribution approval
+stays separate. Nothing is pushed or published.
+
+
+## October 16, 2026 — original cleanup qualification and terminal-disposal boundary
+
+The shared engine and protocol-two Port now qualify the original saved partial
+disposal before a future fresh public cleanup grant. The exact original
+runtime/domain/job, published cached disposal, original manager/enrollment,
+positive actor collection, unchanged live source and SDK row/reservation absence
+are required. A positive residual candidate additionally binds the original
+child descriptor/inode/root, source/snapshot and protected main history. Repeated
+checks and actual nonblocking ownership maps reject stale/replaced/symlinked roots,
+current handles, work, missing/crossed history or exhausted control. No cleanup
+sidecar is written and no work/dependency/backing reservation is released.
+
+The distinct candidate binds the full disposal request, original publication and
+optional release plus intent digest. It is neither disposal nor cleanup proof and
+supplies no SDK-entry authority. Original positive absence resolves the prior
+disposal as ResolvedAbsent without creating cleanup. Original terminal proof keeps
+both Deleted and ResolvedAbsent provenance and is archived before later public
+source observation. Archived lookup can survive source removal without reading or
+touching newly recreated child names. Existing cached/protected cleanup refuses
+fresh eligibility; no public action is reconstructed from private files.
+
+Protocol-two `qualify_partial_branch_cleanup` uses Inspect, the exact immutable
+branch catalog, reserved control/output and one captured 30-second deadline. The
+old bounded disposal request is reused (24 KiB); candidates are capped at 48 KiB.
+Independent Rust/Elixir readers accept only the exact zero-output candidate or
+original terminal proof, checking full request/platform/domain/original epoch.
+Both readers share the existing original publication/release context checks;
+legacy disposal schemas and their strictness remain unchanged.
+
+[Qualification boundary evidence](../evidence/embedded-port-http-parity-partial-cleanup-qualification.json)
+records private actor/file/SQLite models, synthetic cross-language fixtures,
+framed policy and output peers, shared/current/minimum/store/codec/HTTP checks.
+These do not qualify an ordinary SDK/VM, changed native package or public consumer.
+The SDK remains verified unmodified and no upstream source is changed.
+
+The public coordinator still must call qualification before accepting a new
+cleanup and consume an already-terminal original disposal with fresh source
+observation and guarded paired commit. That required integration must prevent a
+fresh cleanup grant from stranding native disposal whose public acknowledgement
+was lost. Refused other partial states and already accepted unsupported grants
+also need complete authorized recovery. Separate cached/protected actual SDK-entry
+fencing and demonstrably unentered continuation remain required; legacy entered
+intent cannot establish no SDK call. All other P0–P9/source/store/resource/platform/
+package/consumer gates remain open. Backend inventory remains 59 with all full-
+parity rows pending; codec v48 stays unchanged. Public native branch admission
+stays disabled, crash validation stays deferred and distribution approval stays
+separate. Nothing is pushed or published.
+
+
+## October 16, 2026 — public cleanup qualification before durable acceptance
+
+Fresh `Branches.cleanup_partial/4` now calls the original-context Port qualifier
+under the pinned controller/helper fence before saving any cleanup action. Only
+a distinct typed residual candidate with the exact saved disposal, child version,
+source head, platform and original helper epoch permits acceptance. Generic
+unknown/not-dispatched errors do not imply eligibility or dispatch SDK disposal.
+Missing, malformed, streamed, crossed or expired qualification leaves the original
+pending disposal and all reservations intact. The candidate stays transient and
+adds no durable codec shape or reader marker.
+
+If qualification returns the original terminal disposal, the backend observes the
+published source freshly and commits the existing typed disposal through guarded
+paired resolution. It creates no cleanup grant or removal proof and preserves
+Deleted versus ResolvedAbsent provenance. Missing source/commit acknowledgement
+retains the pending original action; delayed successful commit returns uncertainty
+while its actually committed result is readable. Saved disposition remains
+readable through retirement/source deletion/backing closeout with the original
+pending completion version, original disposal version or current version.
+
+One captured 30-second deadline spans qualification, optional acceptance/cleanup,
+source observation and paired commit acknowledgement. The workflow caps aggregate
+encoded input/output at 64/192 KiB, reserving 26/64 KiB for qualification and a
+complete 32/96-KiB cleanup/observation stage before fresh acceptance. Source
+inspection consumes its stage's actual remaining bytes, including envelope
+headroom. Already accepted cleanup skips fresh qualification, keeps its exact
+request, needs no new qualifier capability and preserves smaller configured
+budgets when the existing request/proof fit. Draining permits the same controls.
+
+The backend inventory adds native-only `qualify_partial_branch_cleanup/3` (60
+operation rows); HTTP rejects it before IO. The public in-process models cover
+four original heads and both terminal provenances, retry, budgets, stale versions,
+source/store uncertainty, late acknowledgements, compatibility and controller
+exclusion. [Public qualification evidence](../evidence/embedded-port-http-parity-partial-cleanup-qualification-public.json)
+records current/minimum shared, Memory/PostgreSQL, HTTP and old-envelope checks.
+No native/SDK source changed in this step and no SDK/VM or changed-package/platform
+public-consumer qualification is supplied or transferred.
+
+Recovery for previously accepted unsupported cleanup grants, other partial states,
+and a distinct cached/protected actual SDK-entry fence remain required. Legacy
+entered intent cannot establish that SDK deletion never began. All remaining
+P0–P9 source/store/resource/platform/package/consumer acceptance gates remain open;
+all 60 full-parity rows stay pending. Public native branch admission remains
+disabled, crash validation remains deferred and distribution approval stays
+separate. Nothing is pushed or published.
+
+
+## October 16, 2026 — separate original partial-disposal SDK-entry fence
+
+The shared engine now separates original disposal intent publication from actual
+SDK deletion entry. The unchanged primary schema-one Entered record alone grants
+no SDK continuation. A new protected `sdk-entry.json` sidecar (maximum 4 KiB)
+binds the full original intent digest and creation key, with distinct Prepared
+and Entered states. Its original cached grant is created only when the original
+retained collection first accepts that disposal intent; re-offering an older
+intent with no new cache never reconstructs one from private files or inventory.
+
+Exact cached/protected Prepared permits the first SDK deletion call after a
+published intent whose worker never entered deletion. Observation revalidates
+the original enrollment/collection, lifecycle/release, roots, exact before/stopped
+child row, unchanged source and live source authority; it can synchronize the
+original Prepared publication without calling SDK deletion or changing the row.
+Only the same saved public action may then be offered again. Structural selection
+of a published primary intent is not SDK authority: the original application
+independently rechecks these facts and both grants before entry. Existing generic
+not-dispatched errors still cannot authorize a missing cached/protected grant.
+
+The cached grant is spent before the protected Entered write, synchronization and
+SDK callback. Publication failure, cancellation after entry publication, an SDK
+error, missing/rolled-back sidecar or crossed context cannot authorize another SDK
+call. A matching visible Prepared write may be synchronized only by its original
+cached publication attempt. Existing residual-cleanup state blocks SDK
+continuation; explicit positive absence may still resolve an old disposal without
+adopting SDK authority. Source/snapshot/backing reservations remain separate.
+
+The implementation is private to the transport-independent Rust engine. It adds
+no Port operation, wire proof, public result, codec envelope or store marker.
+The existing 32-MiB material-control lease and four-descriptor bound cover the
+small sidecar; deterministic actor/file/SQLite models preserve existing charges.
+[SDK-entry evidence](../evidence/embedded-port-http-parity-partial-disposal-sdk-entry.json)
+records these models, strict toolchain checks, protocol/Port readers and
+current/minimum shared/store/HTTP/legacy contracts. No ordinary SDK deletion/VM or
+changed-package/platform/public-consumer qualification is supplied here. SDK source
+remains unmodified, and qualification of earlier package bytes is not transferred.
+
+Initial primary publication with no synchronized cached publication, other partial
+SDK phases and recovery of previously accepted unsupported cleanup actions still
+need complete recovery paths. All remaining completed-child ownership and P0–P9
+source/store/resource/platform/package/public-consumer gates remain required.
+All 60 full-parity rows stay pending. Public branch admission remains disabled,
+crash validation remains deferred and distribution approval stays separate.
+Nothing is pushed or published.
+
+
+## October 16, 2026 — recover visible original partial-disposal intent publication
+
+The shared engine now recovers a matching visible primary Entered intent whose
+original retained publication flag was not acknowledged. Structural selection
+only requests synchronization; it supplies no SDK-entry authority. Before
+acknowledgement the engine rebuilds the entire original disposal intent read-only
+and requires exact equality: original manager/enrollment and collection,
+lifecycle/release, before-row, roots/descriptors, metadata and unchanged live
+source must still match. The original collection then requires its exact cached
+intent and unused original SDK-entry grant. Any prior SDK-entry publication
+attempt, published/entered SDK state, existing sidecar, residual-cleanup state or
+missing legacy cache refuses recovery.
+
+Recovery synchronizes the existing protected primary and its directory without
+rewriting the intent or changing the SDK row. Only then may the original cached
+publication flag advance. It keeps the same SDK-entry Arc and all reservations;
+no manager, intent or grant is reconstructed from inventory/files. The existing
+observer may subsequently synchronize the original Prepared sidecar without SDK
+deletion, allowing only the same saved action to make its independently fenced
+first call. Entered uncertainty still prevents SDK replay. Missing/crossed/
+corrupt or terminal primary records cannot become a fresh initial publication.
+Nonblocking cache contention, cancellation and deadlines preserve pending state.
+
+[Primary-publication evidence](../evidence/embedded-port-http-parity-partial-disposal-primary-publication.json)
+records private actor/file/SQLite guard and cache models, normal first-call
+continuation, shared native/protocol/Port tests, current/minimum Memory/PostgreSQL/
+HTTP/old-envelope checks, and strict tooling. These are deterministic models;
+no live persistence interruption, SDK deletion/VM or changed-package/platform/
+public-consumer qualification is supplied. SDK source remains verified unmodified.
+
+Private primary and SDK-entry schemas, wire protocol 2.0, codec v48, store markers
+and the 60-operation/66-signature backend inventory stay unchanged. Existing
+32-MiB/four-descriptor material control and original work/source/snapshot/backing
+charges remain intact. Recovery still refuses absent or changed original context;
+other partial SDK states, previously accepted unsupported cleanup actions and
+completed-child ownership audit remain required, along with every remaining
+P0–P9 source/store/resource/platform/package/public-consumer gate. All full-parity
+rows remain pending, public branch admission stays disabled, crash validation
+stays deferred and distribution approval remains separate. Nothing is pushed or
+published.
+
+
+## October 16, 2026 — original terminal cleanup-unnecessary acknowledgement
+
+The shared engine now distinguishes unnecessary accepted cleanup from actual
+residual removal. Original terminal handoff captures whether the original
+retained owner had ever enrolled cleanup, alongside the original opaque actor,
+runtime/domain and disposal proof. That positive no-cleanup fact is not inferred
+from empty SDK inventory or a missing sidecar. Conservative owner models without
+that fact cannot supply it later from files.
+
+`Engine::resolve_unneeded_partial_cleanup` accepts the exact saved cleanup request
+only against the original terminal archive and synchronized matching protected
+disposal. A distinct `PartialBranchDisposalCleanupUnneeded` binds the entire
+request and original terminal proof, retaining both Deleted and ResolvedAbsent
+provenance. Its digest prefix distinguishes it from removal proof even for the
+same ResolvedAbsent payload. It grants no SDK entry, residual removal, dependency
+retirement or backing release. No current SDK row, source/child namespace or
+ownership handle is observed/adopted; initial and repeated acknowledgements leave
+new occupants untouched and can survive source removal.
+
+A bounded protected `cleanup-unneeded.json` receipt is paired with the original
+archive's immutable cached request/proof digests and publication flags. Original
+publication attempts can resynchronize a matching visible receipt after an IO
+error or late cancellation. Missing published receipts, foreign/crossed receipt
+history, invalid modes/links/bytes, other accepted actions, absent original
+history, existing cleanup grants, busy archive/control or spent budgets cannot
+mint or reconstruct acknowledgements. The cache retains only two digests and
+flags, with temporary proof parsing under existing 32-MiB/four-descriptor control;
+all work/dependency/backing charges remain unchanged. The request/proof caps are
+28/80 KiB and the private receipt adds at most 256 bytes of envelope.
+
+[Cleanup-unnecessary engine evidence](../evidence/embedded-port-http-parity-partial-cleanup-unneeded-engine.json)
+records inert owner/actor/file/SQLite models, synthetic strict DTO checks and
+shared/native/store/HTTP/legacy/tooling regressions. No SDK manager/deletion, VM,
+live persistence interruption or changed-package/platform/public-consumer
+qualification is supplied. SDK source stays verified unmodified.
+
+Port/Rust/Elixir readers, explicit alternate outcome consumption, reader-first
+paired Memory/PostgreSQL history and public coordination still must integrate
+this distinct acknowledgement before the public stranded case is resolved. The
+current removal-only proof is not widened or relabeled. Fresh qualification,
+SDK first-entry and residual removal reject this receipt/history, including a
+missing published receipt retained by its original acknowledgement cache.
+Terminal-but-unarchived disposal and original enrolled-but-unused cleanup also
+remain required. Other partial SDK states,
+previously accepted unsupported cleanup recovery and remaining P0–P9 ownership/
+source/store/resource/platform/package/consumer gates stay open. Backend inventory
+remains 60/66 signatures, wire remains 2.0 and codec v48 remains unchanged; all
+full-parity rows remain pending. Branch admission stays disabled, crash validation
+stays deferred and distribution approval stays separate. Nothing is pushed or
+published.
+
+
+## October 16, 2026 — Port resolution for unnecessary partial cleanup
+
+The explicit protocol-two `resolve_partial_branch_cleanup` operation now carries
+an exact accepted cleanup request to the shared engine's original terminal
+archive. Its distinct `partial_branch_cleanup_unneeded` outcome preserves both
+Deleted and ResolvedAbsent disposal provenance. Strict independent Rust/Elixir
+readers validate the complete request and proof, canonical digest, original epoch,
+platform/domain and zero output. The original removal command and proof retain
+their existing meaning; neither can substitute for this acknowledgement.
+
+This operation requires Inspect, the exact immutable branch approval/catalog and
+optional feature `partial_cleanup_resolution: 1`, which requires `branches: 1`.
+An older protocol-two helper without that feature rejects before dispatch. The
+feature is structurally recognized but remains unadvertised and unapproved in
+default packages. Quiesced control and branch terminal output use their reserved
+capacity even while ordinary work is unavailable. One captured deadline covers
+conversion, native selection/publication and return; request/proof/control caps
+remain 28 KiB / 80 KiB / 30 seconds. No original archive match returns a bounded
+not-dispatched state error, never permission to attempt removal or SDK deletion.
+
+[Port acknowledgement evidence](../evidence/embedded-port-http-parity-partial-cleanup-unneeded-port.json)
+records ten explicitly synthetic cross-language fixtures, framed in-process
+feature/catalog/domain/capability/control peers and shared native, current/minimum
+Elixir/store, HTTP and legacy-envelope regressions. These checks do not supply
+ordinary SDK/VM, changed-package/platform or public-consumer qualification.
+
+Reader-first paired Memory/PostgreSQL acknowledgement history and public
+consumption remain required before the public pending cleanup can close. There
+is no new backend operation or store marker: the inventory stays 60 operations /
+66 signatures, wire stays 2.0 and durable codec stays v48. Terminal-but-unarchived
+disposal, enrolled-but-unused cleanup and the other partial SDK cases also remain
+required. No full-parity row closes; native branch admission stays disabled,
+crash validation stays deferred and distribution approval remains separate.
+
+
+## October 16, 2026 — paired durable resolution of unnecessary cleanup
+
+Both Memory and the encrypted PostgreSQL example now consume the distinct
+`NativePartialBranchCleanupResolutionResult` beside an exact fresh source
+observation in their guarded source/child transaction. Its typed acknowledgement that cleanup was unnecessary must bind the saved immutable action, full original
+collection/disposal, platform, current child version and source publication.
+Crossed requests, stale observations/versions and swapped removal/resolution proof
+types reject without changing either record or accounting.
+
+Completion records `cleanup.unneeded` while the actual-removal `cleanup.proof`
+remains nil, retaining original Deleted or ResolvedAbsent provenance. Only ordinary
+child capacity retires. Source dependency and extra backing stay charged until
+separate explicit retirement/backing protocols; their later records preserve the
+entire acknowledged cleanup unchanged. Completed history cannot be rewritten,
+relabelled as removal or independently cleared.
+
+Selective codec v49 carries nonnil unnecessary-cleanup history. Pending and actual
+removal records retain v48, omitting/restoring exactly the new nil default. Older
+envelopes reject the new history, including a v48 payload carrying the new field.
+Reader-first stores expose `native_partial_branch_cleanup_resolutions: 1`; future
+native branch enrollment requires it alongside the existing branch markers.
+The reader marker does not advertise native branch support.
+
+[Durable resolution evidence](../evidence/embedded-port-http-parity-partial-cleanup-unneeded-durable.json)
+records synthetic paired accounting/immutability/provenance models on both stores,
+deterministic PostgreSQL transaction rollback, current/minimum shared and HTTP
+regressions, original v48 envelope compatibility and cold ordinary BEAM readers.
+No native/SDK bytes change and no VM, live persistence interruption or changed
+package/platform/public-consumer qualification is supplied.
+
+Bounded backend routing and public coordinator consumption remain required to
+close this pending action through public APIs. Terminal-but-unarchived disposal,
+enrolled-but-unused cleanup and the remaining partial SDK/ordinary acceptance
+cases also remain required. All 60 operation / 66 signature parity rows remain
+pending; branch admission stays disabled, crash validation stays deferred and
+distribution approval remains separate.
+
+
+## October 16, 2026 — public resolution of unnecessary accepted cleanup
+
+The existing cleanup backend operation now checks original unnecessary-cleanup
+history only after a strictly valid zero-output `not_dispatched` native cleanup
+terminal, with the negotiated `partial_cleanup_resolution: 1` / `branches: 1`
+descriptor. The separate wire lookup and acknowledgement retain their own meaning;
+the removal command cannot return the alternate result. Direct transport errors,
+uncertain dispatch, malformed terminals/output/cursors and older helpers cannot
+trigger this lookup. A negative or uncertain lookup never falls through to another
+removal or SDK action. Original ownership, full request, epoch, platform and exact
+fresh source observation still bind the resulting paired commit.
+
+The public coordinator consumes the distinct typed result under its existing
+controller/helper fence, preserving the saved accepted action and all pending
+charges until guarded source/child completion. It records `cleanup.unneeded`
+separately from actual removal, retaining both original disposal provenances.
+Each control stays within 32-KiB input / 96-KiB output. Actual encoded first-request
+and refusal bytes, including envelope headroom, are deducted before lookup; source
+inspection consumes the remaining lookup-stage allowance. Accepted retries use
+at most 64/192 KiB and one captured 30-second deadline, reduced by configured
+budgets. Fresh qualification retains its earlier reserved stage bounds. Exhaustion
+cannot reset credit or dispatch another request. Saved acknowledgement reads
+accept the saved acceptance/completion or current version without helper IO,
+including after explicit retirement/backing closure and late commit uncertainty.
+
+[Public resolution evidence](../evidence/embedded-port-http-parity-partial-cleanup-unneeded-public.json)
+records in-process public controller/Port-peer models for both provenances and
+release origins, malformed/crossed/uncertain results, lost acknowledgement/source,
+old-helper negotiation, draining, deadlines, exact byte accounting and immutable
+saved history. Both encrypted PostgreSQL provenance cases also run the bounded
+backend/observation result through guarded paired persistence. Current/minimum
+shared/store/HTTP/old-envelope checks pass. Future descriptors in these models
+explicitly fail public package configuration approval; these are not installed
+native package consumers or ordinary SDK/platform qualification.
+
+SDK, shared engine, Port protocol and durable shapes stay unchanged; wire remains
+2.0, codec v49/v48 remains selective, and backend inventory stays 60 operations /
+66 signatures. Native branch and optional resolution feature admission remain
+unapproved/unadvertised. Terminal-but-unarchived disposal, enrolled-but-unused
+cleanup, other partial SDK states and all remaining ordinary P0–P9 acceptance
+remain required. Every full-parity row stays pending, crash validation stays
+deferred and distribution approval remains separate.
+
+
+## October 16, 2026 — original terminal handoff with unused cleanup enrollment
+
+The shared engine now preserves two positive unused-cleanup origins at original
+terminal handoff: never enrolled, or an exact original exclusive cleanup cache
+whose publication was neither attempted nor acknowledged. An enrolled cache
+retains only its validated request digest in the terminal archive. Used, busy or
+shared caches cannot mint that fact, and missing receipts cannot downgrade used
+cleanup. The acknowledged request must match this retained origin before the
+existing distinct unnecessary-cleanup proof can be published or read.
+
+When no terminal archive exists, the resolver can retain only the exact original
+quiesced owner and select an already protected terminal disposal. It requires the
+original published intent, collection/manager/actor identity, matching metadata
+and full request, inactive work and unchanged retained source/snapshot context.
+It then rechecks original provenance at handoff before releasing transient work
+and gates. Selection and archival each use one finite material control, in
+sequence under the same captured budget. No SDK lifecycle dispatch, new cleanup
+grant, namespace adoption, original-manager reconstruction or backing/dependency
+release is introduced. Nonterminal files remain pending even with positive SDK
+row/directory absence; a missing registry cannot be rebuilt from the ledger.
+
+[Terminal handoff evidence](../evidence/embedded-port-http-parity-unused-terminal-handoff.json)
+records private actor/cache/file/SQLite projections for all original heads, both
+terminal provenances and both unused origins. Missing/foreign cache and epoch,
+active work/competing child owner, conflicting receipts, exhausted control and
+cancelled budgets preserve original work/backing. Recreated SDK rows/files remain
+untouched; the selected control retires before two ordinary observers are admitted.
+These are deterministic models with no SDK manager/VM, process loss, live
+persistence interruption or ordinary changed-package qualification. Shared native,
+framed Port, current/minimum store/HTTP/old-envelope and strict tooling regressions
+remain separate from ordinary package acceptance.
+
+No wire or durable shape changes: protocol stays 2.0, selective codecs stay
+v49/v48, backend inventory stays 60 operations / 66 signatures, and no store or
+native feature activates. Nonterminal enrolled-but-unused cleanup, other partial
+SDK states and remaining ownership/source/store/platform/resource/package/consumer
+gates stay open. All full-parity rows remain pending; public branch admission
+stays disabled, crash validation stays deferred and distribution approval remains
+separate.
+
+
+## October 16, 2026 — positive absence for original unattempted cleanup
+
+A separate shared-engine completion now handles an existing Entered disposal
+whose exact original cleanup was enrolled but never attempted. It requires the
+retained original owner/manager, acknowledged collected actor, full immutable
+intent/request, and exclusive unused-cache provenance. Never-enrolled, used,
+shared, busy, missing or crossed cache history cannot authorize this nonterminal
+completion. No cleanup or SDK-entry grant is created and no namespace is removed.
+
+Under the original work lock, two fresh observations require both SDK row/create
+reservation and directory absence, unchanged source row and running authority,
+original source/snapshot/child descriptor bindings and no conflicting ownership.
+Original cache/actor/history is checked after each observation, and retained roots
+are checked again before publication. The existing protected writer publishes only
+ResolvedAbsent, preserving original collection/release/publication. Publication
+errors retain uncertainty. Work/source gates and every dependency/backing charge
+remain until the separate terminal handoff; its unused digest then permits the
+existing distinct acknowledgement and guarded public source/child completion.
+
+The material control uses four descriptors and the existing 32-MiB metadata bound,
+with retained roots still charged to original work. A concurrent ordinary observer
+fits, and observation, archival and acknowledgement controls do not stack. The
+same finite budget/cancellation survives every phase. A terminal proof is read
+through the historical path on retry; this does not replay absence completion,
+SDK deletion or residual removal.
+
+[Unused absence evidence](../evidence/embedded-port-http-parity-unused-absence.json)
+records private actor/cache/file/SQLite projections for every original partial
+head, staged interference between observations, crossed primary publication,
+cache provenance changes, reservations/paths/handles, source changes, snapshot
+substitution, actor mismatch and finite control/deadline admission. Shared native,
+protocol/Port and current/minimum store/HTTP/legacy checks are separate from
+ordinary SDK-manager/VM or rebuilt-package qualification. No live owner-loss or
+persistence interruption campaign is run.
+
+SDK source, wire 2.0, selective codec v49/v48, store markers and the 60-operation /
+66-signature backend inventory stay unchanged. Other partial SDK phases, the
+remaining ownership audit and all P0–P9 ordinary source/store/platform/resource/
+package/public-consumer acceptance remain required. All full-parity rows remain
+pending; public branch admission stays disabled, crash validation stays deferred
+and distribution approval remains separate.
+
+## Paired native sibling accounting — October 16, 2026
+
+The [branch authority audit](embedded-port-branch-authority-audit.md) maps original
+retained/completed states to their permitted operations and retained resources.
+Missing original enrollment or foreign/used cleanup history continues to retain
+uncertainty; namespace absence cannot reconstruct that authority.
+
+A shared Memory/encrypted PostgreSQL contract now exercises two completed
+siblings across all nine held/initially-ready/explicitly-released pairs and both
+retirement orders. The second publication appends the source head without
+changing the first child. Deletion releases only ordinary child capacity;
+retirement preserves the other dependency and both backing allowances. Source
+stop remains blocked until both dependencies retire. Both backing requests can
+remain pending independently after source deletion; each matching acknowledgement
+closes only its own extra charge. Crossed valid proofs reject without changing
+records or usage, exact retries are idempotent, and codec round-trips preserve
+records at each retirement/closure boundary.
+
+[Sibling evidence](../evidence/embedded-port-http-parity-branch-siblings.json)
+records 18 new sibling cases per store/toolchain, 635 shared checks (four deferred
+cases excluded), 169 PostgreSQL checks and 410 HTTP contracts per current/minimum
+toolchain. Original legacy envelopes remain compatible. SQL inventories finish
+empty and the private cluster stops normally; strict Credo retains its 67
+preexisting findings with no new findings.
+
+These are real paired-store operations driven by synthetic native proofs. They
+establish no SDK manager, VM memory/disk independence or package qualification.
+Native, protocol and production library bytes are unchanged. Ordinary independent
+branch workloads, held release, child restart, dependency/backing cleanup and
+the remaining P0–P9 combinations remain required. Public native branch admission
+stays disabled; crash validation is deferred and distribution approval separate.

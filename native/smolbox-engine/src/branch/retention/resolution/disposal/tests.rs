@@ -14,18 +14,18 @@ mod backing;
 #[path = "tests/candidate.rs"]
 mod candidate;
 
-struct Model {
+pub(in crate::branch::retention::resolution) struct Model {
     _root: tempfile::TempDir,
-    engine: Engine,
-    entry: Option<Arc<Entry>>,
-    resolution: RetainedBranchResolution,
+    pub(in crate::branch::retention::resolution) engine: Engine,
+    pub(in crate::branch::retention::resolution) entry: Option<Arc<Entry>>,
+    pub(in crate::branch::retention::resolution) resolution: RetainedBranchResolution,
     request: UnbootedBranchDisposalRequest,
-    publication: crate::BranchPublication,
-    source: VmRecord,
-    child: VmRecord,
+    pub(in crate::branch::retention::resolution) publication: crate::BranchPublication,
+    pub(in crate::branch::retention::resolution) source: VmRecord,
+    pub(in crate::branch::retention::resolution) child: VmRecord,
 }
 impl Model {
-    fn new() -> Self {
+    pub(in crate::branch::retention::resolution) fn new() -> Self {
         let (root, engine, metadata, original) = super::super::super::tests::fixture_bound(true);
         let entry = original.entry(&engine).unwrap();
         let before = engine
@@ -136,10 +136,10 @@ impl Model {
             child,
         }
     }
-    fn entry(&self) -> &Arc<Entry> {
+    pub(in crate::branch::retention::resolution) fn entry(&self) -> &Arc<Entry> {
         self.entry.as_ref().unwrap()
     }
-    fn source_authority(
+    pub(in crate::branch::retention::resolution) fn source_authority(
         &self,
         publication: &crate::BranchPublication,
         source: &VmRecord,
@@ -182,7 +182,7 @@ impl Model {
             delete,
         )
     }
-    fn counts(&self) -> crate::jobs::Counts {
+    pub(in crate::branch::retention::resolution) fn counts(&self) -> crate::jobs::Counts {
         self.engine.jobs.counts()
     }
 }
@@ -194,6 +194,12 @@ impl Drop for Model {
         self.engine
             .branch_retention
             .disposed
+            .lock()
+            .unwrap()
+            .clear();
+        self.engine
+            .branch_retention
+            .partial_disposed
             .lock()
             .unwrap()
             .clear();

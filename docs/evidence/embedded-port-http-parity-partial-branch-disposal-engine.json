@@ -1,0 +1,199 @@
+{
+  "schema": 1,
+  "status": "shared-engine-partial-disposal-protected-application-models-passed",
+  "source_base_commit": "d6464d75fa68ccfacd29825f2e337b855ca7ed56",
+  "source_files_sha256": {
+    "native/smolbox-engine/src/branch/retention/boot/collection.rs": "120e3551de9c904d707f6dfd3d543d0f864f11ac55c769659261f18a907a8293",
+    "native/smolbox-engine/src/branch/retention/resolution.rs": "27c9e6d77e626ceb444c781a47d66198fc66585caa6643a517758d378c2bb8be",
+    "native/smolbox-engine/src/branch/retention/resolution/collection.rs": "370fce11727eee01abf76cd60982b1cae5150bae9d5006a26e580b97d068d624",
+    "native/smolbox-engine/src/branch/retention/resolution/disposal.rs": "178b4da68dce1584039b9325802cdd746dc1f65b528bdd00626d17b5a07ef087",
+    "native/smolbox-engine/src/branch/retention/resolution/disposal/tests.rs": "a3c9bcd63cc040846806593ea5efe647fcd2af0ab6c5c9c5c85665ffad4acb73",
+    "native/smolbox-engine/src/branch/retention/resolution/partial_disposal.rs": "1a6c99c93614d9e9f8a62ec04f86330fe39693cbf11a322477efdd5da25d5f9f",
+    "native/smolbox-engine/src/branch/retention/resolution/partial_disposal/ledger.rs": "996fb834c6815efe5035a0db88f60281606bdd88506230d19adf897dbdbe723e",
+    "native/smolbox-engine/src/branch/retention/resolution/partial_disposal/tests.rs": "3ac08c79e4f71ce6bddb9bf8eb6cde457a8e3917acb2ca692a52d7ed810456c6",
+    "native/smolbox-engine/src/branch_boot.rs": "f770af6737b2192eac199ae0ee1564dc4ae7953819b8aef3f3c05f0345d0bf4d",
+    "native/smolbox-engine/src/branch_boot/collection.rs": "c57a05e8ad630678ea829403995f56c8cb73fa54e86bcbcd6cc58f91f228ca18",
+    "native/smolbox-engine/src/branch_boot/partial_disposal.rs": "4f26f3ee749df492c1f7d33ac4c6abe82101496409deb5d364e837cd1869cbfb",
+    "native/smolbox-engine/src/branch_partial_disposal.rs": "6e1714306999b67d82e0c18111d798a031beb7d3f591302792cc82d2e68d96ef",
+    "native/smolbox-engine/src/lib.rs": "1ea4a065e0dce1286e849c9c57542610f7132f858d1bc8d0bb72c0dd9d785abc",
+    "native/smolbox-engine/src/machine.rs": "1030e99b34efdf51bed610c96f0b8ef75c250bafec2454dbcef047f28e342101"
+  },
+  "api": {
+    "methods": [
+      "RetainedBranchResolution.dispose_partial_child",
+      "RetainedBranchResolution.resolve_partial_disposal"
+    ],
+    "request_type": "PartialBranchDisposalRequest",
+    "proof_type": "PartialBranchDisposal",
+    "completion_variants": [
+      "deleted",
+      "resolved_absent"
+    ],
+    "request_bytes": 24576,
+    "proof_bytes": 49152,
+    "private_ledger_bytes": 131072,
+    "control_budget_ceiling_ms": 30000,
+    "request_binds_full_prior_collection_request_and_proof": true,
+    "distinct_action_digest_and_explicit_quiescence": true,
+    "original_manager_enrollment_and_current_epoch_required": true,
+    "protected_original_held_or_exact_entered_release_head_required": true,
+    "synchronized_immutable_grant_before_one_shot_sdk_entry": true,
+    "original_entry_enrollment_and_control_lease_retained_by_owned_sdk_thread": true,
+    "conditional_exact_original_row_stopped_acknowledgement_before_sdk_delete": true,
+    "bounded_row_reservation_directory_absence_and_fresh_source_authority_before_proof": true,
+    "historical_ack_lookup_cannot_replay_sdk_entry": true,
+    "unknown_partial_results_retain_original_work_gates_dependency_and_backing": true
+  },
+  "ownership_corrections": {
+    "sdk_runtime_pid_falls_back_to_inventory": true,
+    "pre_handoff_collection_disposal_use_actual_engine_maps_and_runtime_boot_registry_for_exclusion": true,
+    "exclusion_filter_alone_mints_no_native_authority": true,
+    "only_original_disposal_target_exempted_from_other_siblings_clean_head_validation": true,
+    "unrelated_unpublished_sibling_still_rejects": true,
+    "completed_child_inventory_pid_filters_require_separate_audit": true
+  },
+  "models": {
+    "new_tests": 12,
+    "kind": "private actor/file/SQLite-row/application projections; no AgentManager constructor, SDK stop/delete, live SDK namespace or VM",
+    "synthetic_actor_pid_outside_supported_os_ranges": true,
+    "native_original_manager_producer_not_instantiated_or_qualified": true,
+    "cases": [
+      "failed return and initialized held material",
+      "entered release before and after heads with authentic pending child material journal",
+      "opaque collected enrollment and exact source/child/root/grant binding",
+      "conditional canonical stopped-row acknowledgement",
+      "separate SDK-success and positive-absence completion",
+      "no SDK reentry from a published grant or historical result",
+      "missing/crossed protected history and unknown fields",
+      "symlink/hardlink/mode/size rejection",
+      "cancellation and expired budget before SDK application entry",
+      "failed delete and partial removal retain original allocations",
+      "stored SDK PID versus actual runtime handoff exclusion",
+      "strict validation of all non-target siblings"
+    ]
+  },
+  "validation": {
+    "rust": [
+      {
+        "name": "branch-final",
+        "exit_code": 0,
+        "summary": [
+          "test result: ok. 269 passed; 0 failed; 1 ignored; 0 measured; 681 filtered out; finished in 49.32s"
+        ]
+      },
+      {
+        "name": "sdk-compat-final",
+        "exit_code": 0,
+        "summary": [
+          "test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 937 filtered out; finished in 0.10s"
+        ]
+      },
+      {
+        "name": "clippy-final",
+        "exit_code": 0,
+        "summary": []
+      },
+      {
+        "name": "sdk-check-final",
+        "exit_code": 0,
+        "summary": []
+      },
+      {
+        "name": "rust-format-final",
+        "exit_code": 0,
+        "summary": []
+      }
+    ],
+    "ordinary_branch_models_passed": 269,
+    "helper_dependent_fixture_ignored": 1,
+    "sdk_compatibility_models_passed": 14,
+    "elixir": {
+      "files": [
+        "test/unit/embedded_partial_branch_collection_test.exs",
+        "test/unit/native_partial_branch_public_collection_test.exs",
+        "test/unit/native_partial_branch_collection_test.exs",
+        "test/unit/backend_test.exs",
+        "test/unit/backend_parity_coverage_test.exs"
+      ],
+      "results": [
+        {
+          "lane": "current",
+          "exit_code": 0,
+          "summary": [
+            "..................................",
+            "Finished in 0.8 seconds (0.8s async, 0.00s sync)",
+            "",
+            "Result: 34 passed"
+          ]
+        },
+        {
+          "lane": "minimum",
+          "exit_code": 0,
+          "summary": [
+            "",
+            "..................................",
+            "Finished in 0.8 seconds (0.8s async, 0.00s sync)",
+            "34 tests, 0 failures"
+          ]
+        }
+      ]
+    },
+    "elixir_tests_per_current_minimum_toolchain": 34,
+    "documentation": [
+      {
+        "name": "docs",
+        "exit_code": 0,
+        "summary": [
+          "Generating docs...",
+          "View html docs at \"doc/index.html\"",
+          "View markdown docs at \"doc/llms.txt\"",
+          "View epub docs at \"doc/SmolBox.epub\""
+        ]
+      },
+      {
+        "name": "doc-links",
+        "exit_code": 0,
+        "summary": [
+          "Checked local links and fragments in 168 documentation pages"
+        ]
+      }
+    ],
+    "git_diff_check_passed": true,
+    "upstream_deprecation_warnings_preserved": true,
+    "documentation_pages_checked": 168
+  },
+  "sdk": {
+    "revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "patches": [],
+    "verified_unmodified": true,
+    "external_reference_modified": false
+  },
+  "scope": {
+    "shared_engine_disposal_control_implemented": true,
+    "port_protocol_and_readers_implemented": false,
+    "durable_public_disposal_consumption_implemented": false,
+    "terminal_registry_handoff_complete": false,
+    "dependency_and_backing_closure_complete": false,
+    "entered_unperformed_continuation_and_residual_cleanup_complete": false,
+    "sdk_stop_or_delete_invoked_in_validation": false,
+    "sdk_or_vm_launched": false,
+    "distributable_native_package_assembled": false,
+    "ordinary_current_native_package_qualification_complete": false,
+    "historical_qualification_transferred": false,
+    "public_native_branch_admission_enabled": false,
+    "full_parity_complete": false,
+    "all_full_parity_rows_still_pending": true,
+    "crash_validation_deferred": true,
+    "live_loss_forced_termination_or_persistence_interruption_run": false,
+    "crash_handling_qualified": false,
+    "distribution_approved": false,
+    "pushed_or_published": false
+  },
+  "remaining": [
+    "Port routing/readers and durable/public disposal action consumption",
+    "terminal job/registry handoff and explicit dependency/backing closure",
+    "explicit unperformed-entry continuation and residual cleanup",
+    "completed-child inventory-PID filter audit",
+    "ordinary exact-package SDK/platform/source/store/resource qualification and all remaining P0-P9 gates"
+  ]
+}

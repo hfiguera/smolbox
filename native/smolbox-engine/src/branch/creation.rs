@@ -23,7 +23,7 @@ impl BranchCreateRequest {
         self.source.validate(engine.binding())?;
         self.validate_declaration()
     }
-    pub(super) fn validate_declaration(&self) -> Result<()> {
+    pub(crate) fn validate_declaration(&self) -> Result<()> {
         self.child.validate(&self.source)?;
         self.approval.validate()?;
         let material = self

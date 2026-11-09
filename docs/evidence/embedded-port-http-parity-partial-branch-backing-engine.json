@@ -1,0 +1,228 @@
+{
+  "schema": 1,
+  "status": "original-partial-child-native-backing-control-models-passed",
+  "source_base_commit": "1dbc9e199bc3bfc69df061a54b6ca6d3bc0c08a0",
+  "source_files_sha256": {
+    "native/smolbox-engine/src/branch/retention/resolution/partial_disposal/archive.rs": "c4056ead866a6179b62244067ecae5a243200d9e7c565de64d42bd31cb240b9f",
+    "native/smolbox-engine/src/branch/retention/resolution/partial_disposal/archive/absence.rs": "f486360822d9faafcca80f57816e0b4846b34c6cced879a7d4b6ed5fa149b817",
+    "native/smolbox-engine/src/branch/retention/resolution/partial_disposal/archive/backing.rs": "4a817ac5e4ac609986a6ad0af3cc83e7c944013b954e66922ecd27a0d542f50e",
+    "native/smolbox-engine/src/branch/retention/resolution/partial_disposal/tests.rs": "99e08943ad6a9fb0841082c850c8836bff19fac5cf3053e60fc95003c0f92c1a",
+    "native/smolbox-engine/src/branch/retention/resolution/partial_disposal/tests/backing.rs": "86bebdef61fdbd5972363a0597ee05720de8658ebd7b27668c63871a66f5f0b4",
+    "native/smolbox-engine/src/branch_backing.rs": "24c60f7e98b14ac5d1a3879a584501f8a7912dad41c1d435fdaefd31740fd869",
+    "native/smolbox-engine/src/branch_backing/partial.rs": "3fe07d124b5fe00f62f641033b5131f563555aa6215bc8f771cb7465a4fb3162",
+    "native/smolbox-engine/src/lib.rs": "80b5d08dd2f2d2d78d264b5fd705f6d16c3c6b4bfd2432b67376598be502fe62",
+    "native/smolbox-protocol/fixtures/partial-branch-backing-release-v1.json": "56357216b7cf872f45d147953d5f68b0d9fdac0e8ce2bc4cdede037466242d25"
+  },
+  "native_api": {
+    "request_type": "PartialBranchBackingReleaseRequest",
+    "entrypoint": "Engine::release_partial_branch_backing_checked",
+    "result_type": "BranchBackingRelease",
+    "transport_independent": true,
+    "future_rustler_kubernetes_not_implemented": true
+  },
+  "request": {
+    "full_original_disposal_source_and_child_heads_bound": true,
+    "exact_held_or_released_child_head_required": true,
+    "source_head_same_creation_no_rollback_or_equal_revision_rewrite": true,
+    "historical_source_head_existence_must_be_bound_by_durable_caller_not_inferred_from_absence": true,
+    "separate_request_hash_domain": "smolbox-partial-branch-backing-request-v1",
+    "action_distinct_from_creation_collection_disposal_initial_and_explicit_release": true,
+    "quiescence_and_host_backing_removal_confirmation_required": true,
+    "unknown_fields_reject": true,
+    "debug_redacts_ownership_fields": true
+  },
+  "engine_control": {
+    "same_terminal_archive_runtime_domain_protected_ledger_required": true,
+    "same_original_opaque_child_enrollment_required": true,
+    "original_epoch_binding_source_quiescence_and_gone_source_pid_required": true,
+    "positive_original_child_collection_required": true,
+    "paired_source_child_gates_and_reserved_control_retained_by_owned_accounting_worker": true,
+    "actual_engine_handle_manager_branch_owner_and_boot_registry_exclusion": true,
+    "nonblocking_ownership_map_checks": true,
+    "bounded_readonly_sdk_rows_reservations_original_directories_checked_twice": true,
+    "final_original_terminal_ledger_recheck_and_synchronization": true,
+    "no_sdk_inventory_pid_fallback": true,
+    "no_manager_reconstruction_sdk_mutation_filesystem_cleanup_or_namespace_adoption": true
+  },
+  "accounting_and_history": {
+    "release_acknowledgement_original_context_includes_disposal_intent_and_enrollment": true,
+    "protected_acknowledgement_synchronized_before_native_material_release": true,
+    "only_original_entry_native_backing_released": true,
+    "sibling_material_and_bounded_result_metadata_retained": true,
+    "exact_saved_acknowledgement_skips_new_collection_and_preserves_recreated_names_and_handles": true,
+    "missing_crossed_or_other_context_history_cannot_reconstruct_release": true,
+    "explicit_in_process_api_cancellation_preserves_material_through_normal_worker_return": true,
+    "reserved_cleanup_still_available_after_cancellation": true
+  },
+  "bounds": {
+    "request_bytes": 81920,
+    "proof_bytes": 69632,
+    "control_deadline_ms": 30000,
+    "accounting_ledger_max_bytes": 81920,
+    "original_partial_disposal_ledger_max_bytes": 131072
+  },
+  "synthetic_fixtures": {
+    "file": "native/smolbox-protocol/fixtures/partial-branch-backing-release-v1.json",
+    "rows": 10,
+    "platforms": [
+      "linux",
+      "macos"
+    ],
+    "provenances": [
+      "deleted",
+      "resolved_absent"
+    ],
+    "live_sdk_authority_supplied": false
+  },
+  "validation": {
+    "results": [
+      {
+        "name": "partial-backing-final",
+        "command": [
+          "cargo",
+          "test",
+          "--manifest-path",
+          "native/Cargo.toml",
+          "-p",
+          "smolbox-engine",
+          "--lib",
+          "partial_disposal::tests::backing"
+        ],
+        "exit_code": 0,
+        "summary": [
+          "test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 974 filtered out; finished in 8.06s"
+        ]
+      },
+      {
+        "name": "branch-models-final",
+        "command": [
+          "cargo",
+          "test",
+          "--manifest-path",
+          "native/Cargo.toml",
+          "-p",
+          "smolbox-engine",
+          "--lib",
+          "branch"
+        ],
+        "exit_code": 0,
+        "summary": [
+          "test result: ok. 303 passed; 0 failed; 1 ignored; 0 measured; 682 filtered out; finished in 60.82s"
+        ]
+      },
+      {
+        "name": "runtime-boot-models-final",
+        "command": [
+          "cargo",
+          "test",
+          "--manifest-path",
+          "native/Cargo.toml",
+          "-p",
+          "smolbox-engine",
+          "--lib",
+          "runtime_boot"
+        ],
+        "exit_code": 0,
+        "summary": [
+          "test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 968 filtered out; finished in 0.82s"
+        ]
+      },
+      {
+        "name": "clippy-final",
+        "command": [
+          "cargo",
+          "clippy",
+          "--manifest-path",
+          "native/Cargo.toml",
+          "--workspace",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exit_code": 0,
+        "summary": [
+          "warning: `smolvm` (lib) generated 1 warning (run `cargo clippy --fix --lib -p smolvm -- -D warnings` to apply 1 suggestion)",
+          "    Checking smolbox-engine v0.2.0 (/Users/humberto/Projects/smolbox/native/smolbox-engine)",
+          "    Checking smolbox-port v0.2.0 (/Users/humberto/Projects/smolbox/native/smolbox-port)",
+          "    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.28s"
+        ]
+      },
+      {
+        "name": "rust-fmt-final",
+        "command": [
+          "cargo",
+          "fmt",
+          "--manifest-path",
+          "native/Cargo.toml",
+          "-p",
+          "smolbox-engine",
+          "-p",
+          "smolbox-protocol",
+          "-p",
+          "smolbox-port",
+          "--check"
+        ],
+        "exit_code": 0,
+        "summary": []
+      },
+      {
+        "name": "sdk-check-final",
+        "command": [
+          "python3",
+          "native/bootstrap.py",
+          "--check"
+        ],
+        "exit_code": 0,
+        "summary": [
+          "Verified unmodified native source."
+        ]
+      }
+    ],
+    "new_partial_control_models": 12,
+    "new_canonical_reader_case": 1,
+    "branch_models": 303,
+    "existing_ignored_branch_tests": 1,
+    "runtime_boot_models": 18,
+    "rustdoc_warnings_as_errors_exit_code": 0,
+    "sdk_source_verified_unmodified": true,
+    "upstream_deprecation_warnings_preserved_without_patches": true,
+    "private_log_sha256": {
+      "partial-backing-final.log": "2e926716a9021a022621497bc3d2b15d7c3c9031d40cd67f566af018372a184f",
+      "branch-models-final.log": "14c96286ce5847278a9f5747bddc57d7312ada6a8049aec92cea020ccf6f2fb4",
+      "runtime-boot-models-final.log": "02ba0951d48bbe9e160a700758f3883f663295f1950c44ef67a0034dcaa20ae6",
+      "clippy-final.log": "6dc93c7252ba0f84c8e9717f8eaffc7370b46a68abe68ca4d4bbe6247a6f05f1",
+      "rust-fmt-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sdk-check-final.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "rustdoc.log": "9d1748bcd673505ba1b12918029a29961a162d92ff47a43069f0a5c2f86e1228"
+    },
+    "new_elixir_store_codec_http_runs_claimed": false,
+    "documentation": {
+      "build_warnings_as_errors_exit_code": 0,
+      "local_links_fragments_exit_code": 0,
+      "pages_checked": 171
+    }
+  },
+  "scope": {
+    "port_routing_implemented": false,
+    "typed_elixir_reader_implemented": false,
+    "paired_public_durable_backing_acceptance_completion_implemented": false,
+    "public_partial_backing_still_charged": true,
+    "backend_operation_inventory_unchanged": 58,
+    "all_full_parity_acceptance_rows_pending": true,
+    "native_branch_admission_enabled": false,
+    "ordinary_sdk_vm_platform_or_package_qualification_supplied": false,
+    "historical_qualification_not_transferred_to_changed_bytes": true,
+    "crash_validation_deferred": true,
+    "crash_handling_qualified": false,
+    "distribution_approved": false,
+    "parity_complete": false
+  },
+  "remaining": [
+    "Port routing and strict typed readers for original partial backing",
+    "paired reader-first durable/public backing acceptance and completion",
+    "entered-unperformed continuation and residual cleanup; remaining partial states",
+    "completed-child ownership-filter audit",
+    "ordinary exact-package platform/source/store/resource qualification and remaining P0-P9 gates"
+  ]
+}

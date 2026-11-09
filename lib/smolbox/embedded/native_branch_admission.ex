@@ -3,8 +3,11 @@ defmodule SmolBox.Embedded.NativeBranchAdmission do
   alias SmolBox.ManagedMachine
 
   alias SmolBox.Embedded.{
+    NativeBranchBacking,
     NativeBranchRetirement,
     NativeGrowth,
+    NativePartialBranchCollection,
+    NativePartialBranchDisposal,
     NativeUnbootedBranchDisposal,
     UnbootedBranchDisposalCandidate
   }
@@ -13,7 +16,11 @@ defmodule SmolBox.Embedded.NativeBranchAdmission do
         %ManagedMachine{
           branch: %{
             state: :unknown,
-            native_authority: %{completion: nil, prepared_retirement: nil}
+            native_authority: %{
+              completion: nil,
+              prepared_retirement: nil,
+              partial_collection: nil
+            }
           },
           operation: :branch_child
         } = child
@@ -49,6 +56,17 @@ defmodule SmolBox.Embedded.NativeBranchAdmission do
     end
   end
 
+  def partial_collection_pending?(parent, child),
+    do: partial_pending?(parent, child, &NativePartialBranchCollection.eligible?/1)
+
+  def partial_disposal_pending?(parent, child),
+    do: partial_pending?(parent, child, &NativePartialBranchDisposal.eligible?/1)
+
+  defp partial_pending?(parent, child, eligible?) do
+    ManagedMachine.validate(parent) == :ok and ManagedMachine.validate(child) == :ok and
+      eligible?.(child) and NativePartialBranchCollection.source_pending?(parent, child)
+  end
+
   def retirement_pair?(parent, child) do
     with :ok <- ManagedMachine.validate(parent),
          :ok <- ManagedMachine.validate(child),
@@ -65,6 +83,7 @@ defmodule SmolBox.Embedded.NativeBranchAdmission do
 
   def backing_pair?(parent, child) do
     with true <- retirement_pair?(parent, child),
+         true <- NativeBranchBacking.origin?(child.branch.native_authority),
          true <- child.branch.state in [:retired, :backing_pending, :closed],
          %NativeBranchRetirement{} <- child.branch.native_authority.retirement do
       parent.state == :deleted and ManagedMachine.idle?(parent) and parent.reservation == nil and

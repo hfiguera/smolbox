@@ -10,7 +10,7 @@ mod candidate;
 pub use candidate::UnbootedBranchDisposalCandidate;
 mod ledger;
 #[cfg(test)]
-mod tests;
+pub(super) mod tests;
 pub(in crate::branch::retention) use archive::DisposedChild;
 use ledger::{Intent, Ledger, Record, Stage};
 
@@ -392,7 +392,7 @@ impl RetainedBranchResolution {
         self.budget.check()
     }
 }
-fn source_record(
+pub(super) fn source_record(
     engine: &Engine,
     entry: &Entry,
     publication: &crate::BranchPublication,
@@ -412,7 +412,7 @@ fn source_record(
         .verify(&publication.receipt)?;
     Ok(source)
 }
-fn live_source(
+pub(super) fn live_source(
     engine: &Engine,
     publication: &crate::BranchPublication,
     source: &smolvm::config::VmRecord,

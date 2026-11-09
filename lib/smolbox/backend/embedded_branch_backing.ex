@@ -30,9 +30,9 @@ defmodule SmolBox.Backend.EmbeddedBranchBacking do
          true <-
            context.quiesced and
              Assignment.approved?(parent.backend_assignment, context.config, parent.spec) and
-             (not NativeBranchBacking.unbooted?(child) or
+             (not NativeBranchBacking.source_scoped?(child) or
                 Assignment.approved?(child.backend_assignment, context.config, child.spec)),
-         {:ok, pin_budget} <- remaining(budget, deadline),
+         {:ok, pin_budget} <- remaining(budget, deadline, :not_dispatched),
          do:
            coordinate(
              Call.pin(context, pin_budget),
@@ -69,8 +69,8 @@ defmodule SmolBox.Backend.EmbeddedBranchBacking do
          true <- source == request["source"],
          true <- bound?(request, context),
          operation = %{"operation" => operation(child), "request" => request},
-         true <- fits?(operation, budget.max_request_bytes),
-         {:ok, budget} <- remaining(budget, deadline),
+         :ok <- input_fits(operation, budget.max_request_bytes),
+         {:ok, budget} <- remaining(budget, deadline, :not_dispatched),
          response = call.(context, operation, budget),
          {:ok, _} <- remaining(budget, deadline),
          {:ok, proof} <-
@@ -106,13 +106,13 @@ defmodule SmolBox.Backend.EmbeddedBranchBacking do
   defp decode({:error, %Error{} = error}, _, _, _), do: {:error, error}
   defp decode(_, _, _, _), do: failure(:identity_conflict, :dispatch_uncertain)
 
-  defp remaining(budget, deadline),
-    do: EmbeddedBranchOperation.remaining(budget, deadline, {:branch, :dispatch_uncertain})
+  defp remaining(budget, deadline, evidence \\ :dispatch_uncertain),
+    do: EmbeddedBranchOperation.remaining(budget, deadline, {:branch, evidence})
 
   # Unbooted disposal retains source authority. Its original child receipt is
   # immutable evidence, never an operational Machine/Identity to assign.
   defp scope?(context, parent, child) do
-    if NativeBranchBacking.unbooted?(child) do
+    if NativeBranchBacking.source_scoped?(child) do
       context.spec == parent.spec and context.assignment == parent.backend_assignment and
         context.name == parent.machine_name and context.profile == parent.spec.profile and
         NativeGrowth.current_identity(parent) == {:ok, context.identity}
@@ -128,12 +128,16 @@ defmodule SmolBox.Backend.EmbeddedBranchBacking do
 
   defp bound?(_, _), do: true
 
-  defp operation(child),
-    do:
-      if(NativeBranchBacking.unbooted?(child),
-        do: "release_unbooted_branch_backing",
-        else: "release_branch_backing"
-      )
+  defp operation(child) do
+    cond do
+      NativeBranchBacking.partial?(child) -> "release_partial_branch_backing"
+      NativeBranchBacking.unbooted?(child) -> "release_unbooted_branch_backing"
+      true -> "release_branch_backing"
+    end
+  end
+
+  defp input_fits(value, maximum),
+    do: if(fits?(value, maximum), do: :ok, else: failure(:output_limit, :not_dispatched))
 
   defp fits?(value, maximum), do: byte_size(Jason.encode!(value)) <= maximum
 

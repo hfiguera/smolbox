@@ -8,6 +8,8 @@ defmodule SmolBox.Embedded.NativeBranchRetirement do
     BranchCompletion,
     BranchPublication,
     NativeGrowth,
+    PartialBranchChildAbsence,
+    PartialBranchDisposal,
     UnbootedBranchChildAbsence,
     UnbootedBranchDisposal
   }
@@ -21,6 +23,15 @@ defmodule SmolBox.Embedded.NativeBranchRetirement do
   # child version between public read, native proof and the paired store commit.
   def request(%{branch: %{native_authority: %{retirement: %__MODULE__{} = saved}}}),
     do: {:ok, saved.proof.request}
+
+  def request(
+        %{
+          branch: %{
+            native_authority: %{partial_disposal: %{proof: %PartialBranchDisposal{}}} = authority
+          }
+        } = child
+      ),
+      do: if(eligible?(child), do: {:ok, partial_intent(authority, child.version)}, else: :error)
 
   def request(
         %{
@@ -66,7 +77,44 @@ defmodule SmolBox.Embedded.NativeBranchRetirement do
           child.branch.state in [:disposed, :retired, :backing_pending, :closed] and
           child.created_machine == nil and child.observed_machine == nil
 
+  def eligible?(
+        %{
+          __struct__: ManagedMachine,
+          branch: %{
+            native_authority: %{
+              completion: nil,
+              partial_disposal: %{proof: %PartialBranchDisposal{}}
+            }
+          }
+        } = child
+      ),
+      do:
+        child.state == :deleted and ManagedMachineState.idle?(child) and child.reservation == nil and
+          child.branch.state in [:disposed, :retired, :backing_pending, :closed] and
+          child.created_machine == nil and
+          child.observed_machine == nil
+
   def eligible?(_), do: false
+
+  def partial_intent(authority, version) do
+    disposal = PartialBranchDisposal.to_wire(authority.partial_disposal.proof)
+
+    digest =
+      BranchCanonical.digest([
+        "smolbox-native-partial-retirement-v1",
+        authority.fingerprint,
+        version,
+        BranchCanonical.ordered(disposal, :partial_disposal)
+      ])
+
+    request = %{
+      "disposal" => disposal,
+      "operation_id" => "retire-partial-" <> binary_part(digest, 0, 32),
+      "quiesced" => true
+    }
+
+    Map.put(request, "request_sha256", PartialBranchChildAbsence.request_digest(request))
+  end
 
   def intent(authority, version, receipt) do
     digest =
@@ -116,6 +164,12 @@ defmodule SmolBox.Embedded.NativeBranchRetirement do
       }),
       do: BranchPublication.from_wire(publication)
 
+  def publication(%{
+        completion: nil,
+        partial_disposal: %{proof: %PartialBranchDisposal{publication: publication}}
+      }),
+      do: BranchPublication.from_wire(publication)
+
   def publication(_), do: :error
 
   def matches?(%BranchChildAbsence{} = proof, request),
@@ -123,6 +177,9 @@ defmodule SmolBox.Embedded.NativeBranchRetirement do
 
   def matches?(%UnbootedBranchChildAbsence{} = proof, request),
     do: UnbootedBranchChildAbsence.matches?(proof, request)
+
+  def matches?(%PartialBranchChildAbsence{} = proof, request),
+    do: PartialBranchChildAbsence.matches?(proof, request)
 
   def matches?(_, _), do: false
 
@@ -145,6 +202,20 @@ defmodule SmolBox.Embedded.NativeBranchRetirement do
           Validation.integer?(saved.version, 1, 9_007_199_254_740_991) and
           BranchChildAbsence.valid?(proof) and
           proof.request == intent(authority, saved.version, proof.request["child"])
+
+  def valid?(
+        %__MODULE__{proof: %PartialBranchChildAbsence{} = proof} = saved,
+        %{
+          completion: nil,
+          partial_disposal: %{proof: %PartialBranchDisposal{}, completion_version: completed}
+        } = authority
+      ),
+      do:
+        Validation.struct_shape?(saved, __MODULE__) and
+          Validation.integer?(saved.version, 1, 9_007_199_254_740_991) and
+          Validation.integer?(completed, 1, saved.version - 1) and
+          PartialBranchChildAbsence.valid?(proof) and
+          proof.request == partial_intent(authority, saved.version)
 
   def valid?(_, _), do: false
 
@@ -173,6 +244,11 @@ defmodule SmolBox.Embedded.NativeBranchRetirement do
     do:
       proof.request["disposal"] ==
         UnbootedBranchDisposal.to_wire(child.branch.native_authority.disposal.proof)
+
+  defp child_bound?(%{proof: %PartialBranchChildAbsence{} = proof}, child),
+    do:
+      proof.request["disposal"] ==
+        PartialBranchDisposal.to_wire(child.branch.native_authority.partial_disposal.proof)
 
   defp child_bound?(saved, child) do
     case NativeGrowth.head(child) do

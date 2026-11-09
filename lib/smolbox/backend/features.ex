@@ -40,6 +40,7 @@ defmodule SmolBox.Backend.Features do
   @native_names Map.new(
                   [
                     :material_proofs,
+                    :partial_cleanup_resolution,
                     :observability,
                     :compact_creation,
                     :job_resources,

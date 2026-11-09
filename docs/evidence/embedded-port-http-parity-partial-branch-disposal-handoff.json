@@ -1,0 +1,297 @@
+{
+  "schema": 1,
+  "status": "original-partial-disposal-terminal-handoff-models-passed",
+  "source_base_commit": "41ab0114a527144038eab656ff46011980c3158d",
+  "source_files_sha256": {
+    "native/smolbox-engine/src/branch/retention.rs": "48cc206e8f36b8ba856387a619eee06d4b7291cd94129fe23b352cdf69c3e357",
+    "native/smolbox-engine/src/branch/retention/resolution/disposal/tests.rs": "0b19981f6f3214f67c954d6db11a87ad8ae1fe9eb4bf24edf39ad3859f9b5122",
+    "native/smolbox-engine/src/branch/retention/resolution/partial_disposal.rs": "602f17ab125b3027761778b8992b727c6ebaa294a8cd3ba66decbe925ad8697e",
+    "native/smolbox-engine/src/branch/retention/resolution/partial_disposal/archive.rs": "d7f7eccaf1e0e759b608e104ed1ef4ce0e0ac577e51259d8144393f0a25a8350",
+    "native/smolbox-engine/src/branch/retention/resolution/partial_disposal/tests.rs": "03e0e19f44ed25e85e7f867491a0a730f2d51b07d8f2f3853aee3f164520358b",
+    "native/smolbox-engine/src/branch/retention/resolution/partial_disposal/tests/archive.rs": "bc6d036d375eb3aa43e0090218a3156724b96f8fa7aab8c9fac0f909e375512d",
+    "native/smolbox-engine/src/jobs.rs": "cc8135319372ee820e728a9ae95d05dd6970477dff3ad50e22ecac3d6ae43b0b",
+    "native/smolbox-port/src/adapter.rs": "66142578ccd38f2f7721791e5da6ddba9f5798d915a736da1d4df31e0f394cb2"
+  },
+  "implementation": {
+    "engine_api": [
+      "RetainedBranchResolution.finish_partial_branch_disposal",
+      "Engine.inspect_partial_branch_disposal"
+    ],
+    "distinct_original_partial_archive_no_completed_or_unbooted_proof_substitution": true,
+    "current_original_epoch_exact_cached_synchronized_grant_and_collection_required": true,
+    "unique_original_entry_and_ownership_before_conversion": true,
+    "inactive_eligible_work_and_exact_retained_source_snapshot_child_descriptor_identities_required": true,
+    "rollback_preserves_original_entry_borrower_and_gates": true,
+    "retired": [
+      "transient work",
+      "descriptors",
+      "spools",
+      "source/child gates"
+    ],
+    "retained": [
+      "original opaque child enrollment",
+      "original runtime/domain",
+      "exact completion provenance",
+      "source publication",
+      "source snapshot",
+      "public source dependency and reservations",
+      "all native backing"
+    ],
+    "port_looks_up_original_archive_before_selecting_original_job": true,
+    "port_finishes_terminal_handoff_before_acknowledgement": true,
+    "historical_ack_resynchronizes_protected_ledger_without_sdk_replay_or_namespace_adoption": true,
+    "same_deadline_and_cancellation_checked_after_final_wire_conversion": true,
+    "terminal_metadata_bytes_per_entry": 131072,
+    "terminal_metadata_combined_limit_bytes": 134217728,
+    "registry_teardown_preserves_unreleased_charge_and_quarantines": true,
+    "quarantined_cleanup_does_not_reopen_admission": true
+  },
+  "validation": {
+    "new_deterministic_archive_models": 9,
+    "model_kinds": [
+      "inert original entry",
+      "opaque actor projection",
+      "private file/SQLite projection",
+      "resource accounting"
+    ],
+    "final_rust": [
+      {
+        "name": "final-branch-models",
+        "command": [
+          "cargo",
+          "test",
+          "--manifest-path",
+          "native/Cargo.toml",
+          "-p",
+          "smolbox-engine",
+          "--lib",
+          "branch"
+        ],
+        "exit_code": 0,
+        "summary": [
+          "test result: ok. 279 passed; 0 failed; 1 ignored; 0 measured; 681 filtered out; finished in 53.94s"
+        ]
+      },
+      {
+        "name": "cargo-fmt",
+        "command": [
+          "cargo",
+          "fmt",
+          "--manifest-path",
+          "native/Cargo.toml",
+          "-p",
+          "smolbox-engine",
+          "-p",
+          "smolbox-protocol",
+          "-p",
+          "smolbox-port",
+          "--check"
+        ],
+        "exit_code": 0,
+        "summary": []
+      }
+    ],
+    "other_rust": [
+      {
+        "name": "job-models",
+        "command": [
+          "cargo",
+          "test",
+          "--manifest-path",
+          "native/Cargo.toml",
+          "-p",
+          "smolbox-engine",
+          "--lib",
+          "jobs::tests"
+        ],
+        "exit_code": 0,
+        "summary": [
+          "test result: ok. 38 passed; 0 failed; 0 ignored; 0 measured; 923 filtered out; finished in 0.00s"
+        ]
+      },
+      {
+        "name": "sdk-models",
+        "command": [
+          "cargo",
+          "test",
+          "--manifest-path",
+          "native/Cargo.toml",
+          "-p",
+          "smolbox-engine",
+          "--lib",
+          "sdk_compat"
+        ],
+        "exit_code": 0,
+        "summary": [
+          "test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 947 filtered out; finished in 0.10s"
+        ]
+      },
+      {
+        "name": "port-peer",
+        "command": [
+          "cargo",
+          "test",
+          "--manifest-path",
+          "native/Cargo.toml",
+          "-p",
+          "smolbox-port",
+          "partial_branch_disposal_uses_exact_fenced_control_without_sdk_fallback"
+        ],
+        "exit_code": 0,
+        "summary": [
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 82 filtered out; finished in 3.46s"
+        ]
+      },
+      {
+        "name": "port-output",
+        "command": [
+          "cargo",
+          "test",
+          "--manifest-path",
+          "native/Cargo.toml",
+          "-p",
+          "smolbox-port",
+          "output::tests"
+        ],
+        "exit_code": 0,
+        "summary": [
+          "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 74 filtered out; finished in 0.91s"
+        ]
+      },
+      {
+        "name": "clippy",
+        "command": [
+          "cargo",
+          "clippy",
+          "--manifest-path",
+          "native/Cargo.toml",
+          "--workspace",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exit_code": 0,
+        "summary": []
+      },
+      {
+        "name": "sdk-check",
+        "command": [
+          "python3",
+          "native/bootstrap.py",
+          "--check"
+        ],
+        "exit_code": 0,
+        "summary": []
+      }
+    ],
+    "current_minimum_readers_and_http_contracts_and_docs": [
+      {
+        "name": "current-elixir",
+        "command": [
+          "mix",
+          "test",
+          "test/unit/embedded_partial_branch_disposal_test.exs",
+          "test/unit/embedded_partial_branch_collection_test.exs",
+          "test/unit/native_partial_branch_collection_test.exs",
+          "test/unit/native_partial_branch_public_collection_test.exs",
+          "test/unit/backend_test.exs",
+          "test/unit/backend_parity_coverage_test.exs"
+        ],
+        "exit_code": 0,
+        "summary": [
+          "Excluding tags: [:runtime, :deferred_crash]",
+          "",
+          "......................................",
+          "Finished in 0.7 seconds (0.7s async, 0.00s sync)",
+          "",
+          "Result: 38 passed"
+        ]
+      },
+      {
+        "name": "minimum-elixir",
+        "command": [
+          "mix",
+          "test",
+          "test/unit/embedded_partial_branch_disposal_test.exs",
+          "test/unit/embedded_partial_branch_collection_test.exs",
+          "test/unit/native_partial_branch_collection_test.exs",
+          "test/unit/native_partial_branch_public_collection_test.exs",
+          "test/unit/backend_test.exs",
+          "test/unit/backend_parity_coverage_test.exs"
+        ],
+        "exit_code": 0,
+        "summary": [
+          "Running ExUnit with seed: 312795, max_cases: 32",
+          "Excluding tags: [:runtime, :deferred_crash]",
+          "",
+          "......................................",
+          "Finished in 0.8 seconds (0.8s async, 0.00s sync)",
+          "38 tests, 0 failures"
+        ]
+      },
+      {
+        "name": "docs",
+        "command": [
+          "mix",
+          "docs",
+          "--warnings-as-errors"
+        ],
+        "exit_code": 0,
+        "summary": [
+          "Generating docs...",
+          "View html docs at \"doc/index.html\"",
+          "View markdown docs at \"doc/llms.txt\"",
+          "View epub docs at \"doc/SmolBox.epub\""
+        ]
+      },
+      {
+        "name": "doc-links",
+        "command": [
+          "mix",
+          "smolbox.ci.docs"
+        ],
+        "exit_code": 0,
+        "summary": [
+          "Checked local links and fragments in 169 documentation pages"
+        ]
+      }
+    ],
+    "tests_per_elixir_toolchain": 38,
+    "local_documentation_pages": 169,
+    "sdk_manager_constructed": false,
+    "sdk_delete_or_vm_entered": false,
+    "peer_is_in_process_not_sdk_helper_process": true,
+    "peer_catalog_control_sessions": 80,
+    "ignored_built_helper_fixture_not_run": true
+  },
+  "sdk": {
+    "version": "1.22.0",
+    "revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "patches": [],
+    "unmodified_snapshot_verified": true
+  },
+  "scope": {
+    "terminal_native_registry_handoff_implemented": true,
+    "backend_runtime_paired_durable_public_partial_disposal_complete": false,
+    "public_native_branch_admission_enabled": false,
+    "explicit_backing_closure_complete": false,
+    "store_or_codec_changed": false,
+    "ordinary_changed_package_qualification_complete": false,
+    "historical_qualification_transferred": false,
+    "full_parity_complete": false,
+    "all_full_parity_acceptance_rows_still_pending": true,
+    "crash_validation_deferred": true,
+    "live_owner_loss_forced_termination_or_persistence_interruption_run": false,
+    "crash_handling_qualified": false,
+    "distribution_approved": false,
+    "pushed_or_published": false
+  },
+  "remaining": [
+    "Backend/Runtime/durable paired partial disposal acceptance/completion",
+    "explicit partial continuation and residual cleanup",
+    "dependency/backing closure",
+    "completed-child inventory-PID ownership audit",
+    "ordinary exact-package platform/source/store/resource qualification and remaining P0-P9 gates"
+  ]
+}

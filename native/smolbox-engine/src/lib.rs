@@ -8,13 +8,15 @@ mod agent_io;
 mod branch;
 mod branch_absence;
 pub use branch_absence::{
-    BranchChildAbsence, BranchChildAbsenceRequest, UnbootedBranchChildAbsence,
-    UnbootedBranchChildAbsenceRequest, BRANCH_ABSENCE_BYTES, UNBOOTED_BRANCH_ABSENCE_BYTES,
+    BranchChildAbsence, BranchChildAbsenceRequest, PartialBranchChildAbsence,
+    PartialBranchChildAbsenceRequest, UnbootedBranchChildAbsence,
+    UnbootedBranchChildAbsenceRequest, BRANCH_ABSENCE_BYTES, PARTIAL_BRANCH_ABSENCE_BYTES,
+    UNBOOTED_BRANCH_ABSENCE_BYTES,
 };
 mod branch_backing;
 pub use branch_backing::{
-    BranchBackingReleaseRequest, UnbootedBranchBackingReleaseRequest, BRANCH_BACKING_PROOF_BYTES,
-    BRANCH_BACKING_REQUEST_BYTES,
+    BranchBackingReleaseRequest, PartialBranchBackingReleaseRequest,
+    UnbootedBranchBackingReleaseRequest, BRANCH_BACKING_PROOF_BYTES, BRANCH_BACKING_REQUEST_BYTES,
 };
 mod branch_agent;
 mod branch_boot;
@@ -37,6 +39,27 @@ mod branch_identity;
 mod branch_material;
 mod branch_owned;
 pub use branch_owned::BranchCompletion;
+mod branch_partial_collection;
+pub use branch_partial_collection::{PartialBranchCollection, PartialBranchCollectionRequest};
+mod branch_partial_cleanup_candidate;
+pub use branch_partial_cleanup_candidate::{
+    PartialBranchCleanupCandidate, PartialBranchCleanupState,
+    PARTIAL_BRANCH_CLEANUP_CANDIDATE_BYTES,
+};
+mod branch_partial_cleanup;
+pub use branch_partial_cleanup::{
+    PartialBranchDisposalCleanup, PartialBranchDisposalCleanupRequest,
+    PARTIAL_BRANCH_CLEANUP_PROOF_BYTES, PARTIAL_BRANCH_CLEANUP_REQUEST_BYTES,
+};
+mod branch_partial_cleanup_unneeded;
+pub use branch_partial_cleanup_unneeded::{
+    PartialBranchDisposalCleanupUnneeded, PARTIAL_BRANCH_UNNEEDED_CLEANUP_PROOF_BYTES,
+};
+mod branch_partial_disposal;
+pub use branch_partial_disposal::{
+    PartialBranchDisposal, PartialBranchDisposalCompletion, PartialBranchDisposalRequest,
+    PARTIAL_BRANCH_DISPOSAL_PROOF_BYTES, PARTIAL_BRANCH_DISPOSAL_REQUEST_BYTES,
+};
 mod branch_release;
 pub use branch_release::{BranchReleaseChange, BranchReleaseRequest, BranchReleaseTransition};
 mod branch_worker;

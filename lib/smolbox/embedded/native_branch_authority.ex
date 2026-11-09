@@ -17,6 +17,8 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
     NativeBranchHistory,
     NativeBranchRelease,
     NativeBranchRetirement,
+    NativePartialBranchCollection,
+    NativePartialBranchDisposal,
     NativePreparedBranchRetirement,
     NativeUnbootedBranchDisposal
   }
@@ -27,6 +29,8 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
   @derive {Inspect, only: []}
   defstruct @enforce_keys ++
               [
+                partial_collection: nil,
+                partial_disposal: nil,
                 prepared_retirement: nil,
                 disposal: nil,
                 completion: nil,
@@ -108,6 +112,8 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
     do:
       Enum.all?(
         [
+          {authority.partial_collection, NativePartialBranchCollection},
+          {authority.partial_disposal, NativePartialBranchDisposal},
           {authority.prepared_retirement, NativePreparedBranchRetirement},
           {authority.disposal, NativeUnbootedBranchDisposal},
           {authority.release, NativeBranchRelease},
@@ -197,7 +203,9 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
 
   defp proof_records?(child, completion),
     do:
-      completion_record?(child, completion) and NativePreparedBranchRetirement.record?(child) and
+      completion_record?(child, completion) and NativePartialBranchCollection.record?(child) and
+        NativePartialBranchDisposal.record?(child) and
+        NativePreparedBranchRetirement.record?(child) and
         NativeUnbootedBranchDisposal.record?(child) and
         NativeBranchRetirement.record?(child) and
         NativeBranchBacking.record?(child) and
@@ -206,18 +214,32 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
 
   defp proofs_preserved?(original, saved, record, next),
     do:
-      NativePreparedBranchRetirement.preserved?(
-        original.prepared_retirement,
-        saved.prepared_retirement,
-        record.version
-      ) and
-        NativeUnbootedBranchDisposal.preserved?(original.disposal, saved.disposal, record.version) and
+      creation_proofs_preserved?(original, saved, record.version) and
         NativeBranchRelease.preserved?(original.release, saved.release) and
         NativeBranchRetirement.preserved?(original.retirement, saved.retirement, record.version) and
         NativeBranchBacking.preserved?(original.backing, saved.backing, record.version) and
         NativeBranchDeletion.preserved?(original.deletion, saved.deletion, record.version) and
         NativeBranchDeletionAction.preserved?(original, saved, record.version) and
         deletion_authorized?(record, next) and closure_authorized?(record.branch, next.branch)
+
+  defp creation_proofs_preserved?(original, saved, version),
+    do:
+      NativePartialBranchCollection.preserved?(
+        original.partial_collection,
+        saved.partial_collection,
+        version
+      ) and
+        NativePartialBranchDisposal.preserved?(
+          original.partial_disposal,
+          saved.partial_disposal,
+          version
+        ) and
+        NativePreparedBranchRetirement.preserved?(
+          original.prepared_retirement,
+          saved.prepared_retirement,
+          version
+        ) and
+        NativeUnbootedBranchDisposal.preserved?(original.disposal, saved.disposal, version)
 
   defp deletion_authorized?(record, %{state: :deleted} = next),
     do:
@@ -247,12 +269,14 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
       child.created_machine == nil and child.observed_machine == nil and
         ((child.branch.state in [
             :disposal_pending,
+            :disposal_cleanup_pending,
             :disposed,
             :retired,
             :backing_pending,
             :closed
           ] and
-            child.branch.native_authority.disposal != nil) or
+            (child.branch.native_authority.disposal != nil or
+               child.branch.native_authority.partial_disposal != nil)) or
            child.branch.state in [
              :accepted,
              :dispatching,

@@ -441,6 +441,69 @@ defmodule SmolBox.Store do
   Earlier envelopes omit the new nil default exactly and restore it on read;
   older tags cannot carry collection state. Upgrade every reader/projector first.
 
+  Pre-handoff child collection uses `:branch_advance` with
+  `{:accept_partial_collection, child_version, platform}` followed by
+  `{:complete_partial_collection, typed_result}`. Both records must retain the
+  original source head, active dependency and unknown creation. Acceptance freezes
+  the full creation, management version, explicit quiescence and pinned platform
+  before helper IO. Completion requires its exact typed proof and current child
+  version. It records historical original-child collection only: creation stays
+  unknown and no slot, port, disk, source dependency or backing is released.
+  Exact saved acknowledgement reads are idempotent. Generic readiness, absence,
+  disposal and prepared-only retirement cannot consume this grant. The selective
+  v44 envelope and `native_partial_branch_collections: 1` marker require all
+  readers/projectors to upgrade; this marker does not enable native branches.
+  Run NativePartialBranchCollectionContract against each real adapter.
+
+  Original collected pre-handoff disposal freezes a separate action with
+  `{:accept_partial_disposal, child_version, platform}` in `:branch_advance`.
+  A completed original collection must already exist. Acceptance preserves that
+  history and every reservation, changing only the distinct disposal-pending
+  phase. `:branch_resolve` consumes `NativePartialBranchDisposalResult` beside
+  its exact fresh source observation. Require matching full prior collection,
+  publication, optional release, platform, immutable action and current child
+  version. Commit the disposed tombstone and actual source publication together;
+  release only ordinary child capacity. Keep source dependency and extra backing
+  charged until their explicit cleanup protocols complete. Selective v45 and
+  `native_partial_branch_disposals: 1` require reader-first upgrades. They enable
+  no public native branches. Run NativePartialBranchDisposalContract against
+  each real adapter. `Branches.dispose_partial/4` and deleted branch resolution
+  now fence acceptance, native proof plus fresh source observation, and paired
+  completion through the same controller/helper owner. Backend/Runtime dispatch
+  preserves exact saved acknowledgement lookup and conservative retry semantics;
+  ordinary current-package qualification and public branch activation remain separate.
+
+  Original partial-disposal residual cleanup freezes a nested immutable action
+  with `{:accept_partial_disposal_cleanup, child_version, platform}` after original
+  collection and disposal acceptance. Its distinct `:disposal_cleanup_pending`
+  phase preserves every reservation, source dependency and backing allowance.
+  `:branch_resolve` consumes `NativePartialBranchCleanupResult` paired with its
+  exact fresh source observation. The typed acknowledgement must bind the saved
+  cleanup request and original resolved-absent disposal. Commit both records and
+  both acknowledgement histories together; release only ordinary child capacity.
+  Ordinary disposal cannot bypass an accepted cleanup. Selective v48 and
+  `native_partial_branch_cleanups: 1` require reader-first upgrades, and enable no
+  native branch feature. Run NativePartialBranchCleanupContract against each real
+  adapter. `Branches.cleanup_partial/4` now fences acceptance, native cleanup plus
+  source observation and paired commit. Accepted retries preserve the exact
+  request; already accepted cleanup is also resumed by deleted resolution. Native
+  eligibility/remaining partial-state recovery and ordinary package qualification
+  remain required before public activation.
+
+  An accepted cleanup made unnecessary by original terminal disposal instead
+  consumes `NativePartialBranchCleanupResolutionResult` in `:branch_resolve`,
+  paired with its exact fresh source observation. Its distinct typed proof binds
+  the same saved action and preserves Deleted/ResolvedAbsent provenance. Atomic
+  completion records cleanup.unneeded while cleanup.proof remains nil; it never
+  claims residual removal or releases dependencies/backing. Selective v49 and
+  `native_partial_branch_cleanup_resolutions: 1` require reader-first upgrades.
+  Old pending/removal records keep v48 with the new nil default omitted exactly.
+  Both Memory and PostgreSQL use these paired guards. The public coordinator now
+  consumes the distinct result under its original controller/helper fence after
+  bounded optional history lookup and fresh source observation. Missing history
+  cannot authorize removal. Ordinary package qualification and other partial
+  states remain required; this store marker enables no native branch capability.
+
   Prepared-only creation resolution uses the distinct
   `SmolBox.Embedded.NativePreparedBranchRetirementResult` in the child observation
   position, paired with its exact fresh source observation. Bind the typed proof
@@ -613,6 +676,11 @@ defmodule SmolBox.Store do
           | {:complete, SmolBox.Machine.t()}
           | {:native_complete, SmolBox.Embedded.NativeBranchResult.t()}
           | {:native_complete, SmolBox.Embedded.NativeBranchReleaseResult.t()}
+          | {:accept_partial_disposal, pos_integer(), String.t()}
+          | {:accept_partial_disposal_cleanup, pos_integer(), String.t()}
+          | {:accept_partial_collection, pos_integer(), String.t()}
+          | {:complete_partial_collection,
+             SmolBox.Embedded.NativePartialBranchCollectionResult.t()}
   @callback machine(context(), :branch_accept, [
               ManagedMachine.key()
               | SmolBox.BranchSpec.t()
@@ -637,6 +705,9 @@ defmodule SmolBox.Store do
               | SmolBox.Embedded.NativeBranchReleaseResult.t()
               | SmolBox.Embedded.NativePreparedBranchRetirementResult.t()
               | SmolBox.Embedded.NativeUnbootedBranchDisposalResult.t()
+              | SmolBox.Embedded.NativePartialBranchDisposalResult.t()
+              | SmolBox.Embedded.NativePartialBranchCleanupResult.t()
+              | SmolBox.Embedded.NativePartialBranchCleanupResolutionResult.t()
               | :absent
               | non_neg_integer()
             ]) :: machine_result()

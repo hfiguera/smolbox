@@ -1,0 +1,273 @@
+{
+  "schema": 1,
+  "status": "durable-public-partial-branch-collection-models-passed",
+  "source_base_commit": "65934fdace1e24b2a81bc93ba37365e94dfa9d29",
+  "source_files_sha256": {
+    "examples/durable_host/test/native_partial_branch_collection_store_test.exs": "d0914206cf6c91f17ca71e3a2ab947c08488039450a907f8af0103273ec23789",
+    "examples/support/store/branch_store.ex": "053fa31bece06a97bfacbd414e11d2bdeeeb6f94588360cd058b10cabe59076e",
+    "lib/smolbox/backend.ex": "53552592ba1e06e20b0c45625b895ae8a8dbbc065009516dde27e6f454376a40",
+    "lib/smolbox/backend/embedded.ex": "33216f0c9d7f208f40db2d1e39e88d7366ed58c3d974a7d6db94d59242778d34",
+    "lib/smolbox/backend/embedded_partial_branch_collection.ex": "da49b88538618d4f676097f8576bca8a48298ba55df298d58759078e34f48808",
+    "lib/smolbox/backend/http.ex": "63445475f848e8e4703de634e443e82862f710af162e78e22ebfbc259047706c",
+    "lib/smolbox/branches.ex": "c419eb7aed8a681d09d6488af46b62f11e1435c89e7d0886dcf374d9dd122a1e",
+    "lib/smolbox/embedded/native_branch_authority.ex": "d191db9b12eab3184f28652445556038cd38f47bddda162cf8e3d85e2d972a3f",
+    "lib/smolbox/embedded/native_partial_branch_collection.ex": "feca790d25d55f80eddfd790254734e8cb06f62f74baae27544334d603eb789e",
+    "lib/smolbox/embedded/native_partial_branch_collection_result.ex": "072132e012a17f67e7b2d338e03139a0e40040f4b67e373c6f86ad9a0c2c38b0",
+    "lib/smolbox/embedded/native_prepared_branch_retirement.ex": "d259349a9865ef949555b27213ef51af8184f336abd1e6dc66e0129d74ef463f",
+    "lib/smolbox/embedded/native_unbooted_branch_disposal.ex": "2252dff014214943983e28d4eeac038ea5b9497123f0f3c0f1031b674b7894c5",
+    "lib/smolbox/runtime/native_partial_branch_collection.ex": "7d81467cc0e4a05d8ac15c9412225c63a1115853614d53bd5b1fae7efad3ec4e",
+    "lib/smolbox/runtime/native_ready_branch_resolution.ex": "eb49502104f4c57490ea0d267d685d972b7ce280cccbb8fce6500e75919adcc6",
+    "lib/smolbox/runtime/native_support.ex": "92d64a446db40b77135df9d1b3f7f88edb65e6b85376081282a557e98161754e",
+    "lib/smolbox/store.ex": "d6a8f01136567967b52af5f4977b286f1fa4de406bae7dd602fb9d11c7a7dd4d",
+    "lib/smolbox/store/branch_ops.ex": "85eb49b147987709780fecce1a610e8941e1074c4aa7d4afa35bcab54999f1d2",
+    "lib/smolbox/store/codec.ex": "dafd4ce00fd48509fce54056a70d1af14925bb9f956cea4abb163904bb6bb306",
+    "lib/smolbox/store/codec_native_branch_collections.ex": "0058445b9798bf8d5274c7aa7981bcfab9de558866e2a80fa3f6bc037fbe40ee",
+    "lib/smolbox/store/codec_native_partial_branch_collections.ex": "554d701c06c3052454296ecbef4c9ca1fef47c3f682bce5ed2b183a1d9441443",
+    "lib/smolbox/store/memory.ex": "7eef167091240865eb404f90466cae2f6c4bea718bac9fd6a4ece096d270629d",
+    "lib/smolbox/store/native_partial_branch_collection_ops.ex": "42ea1b26375cb080a7b51a8e4dc4e2d26b64feb81d078ba9c813c71228891627",
+    "test/support/store/native_partial_branch_collection_contract.ex": "8bb71cc92dcbb2e6cd8ce30e0323ed5b20e849dafceb249dd66ea49ba58e9d00",
+    "test/unit/backend_test.exs": "f8fad877162a6854fd39f6054e8b1496ed3a4706b46cef50a17c2d389e5be7e2",
+    "test/unit/native_branch_backing_test.exs": "0c2f38cfde54bfdd3686b62f9bff1adf35a61579ff9005828fad59ce89c8c58a",
+    "test/unit/native_branch_deletion_action_test.exs": "f440379d3224d7b21982c4227858e01321a25cb605fc0b9f6f9b5b9e111d9f75",
+    "test/unit/native_branch_deletion_test.exs": "13913a2639949accdb1b00e7248621efbfffbdd1c4decb1f84257562e4f47949",
+    "test/unit/native_branch_retirement_test.exs": "22a4f8c48981025d8a24ba71042b95980a905e16763ed6d2122825902730bfdf",
+    "test/unit/native_material_support_test.exs": "37635e3bfc7804dcff2338f2531305c89237715d8587efc1c86812a8e29d9d8f",
+    "test/unit/native_partial_branch_collection_test.exs": "74c297f2788f3b822cfc1c9951a9bb1cf11648897e2b514c73122aecde518b9b",
+    "test/unit/native_partial_branch_public_collection_test.exs": "00fe209b002f39a4ef37120faa8b3f23ce051a76f7b15b829a58d3532736d17e",
+    "test/unit/native_prepared_branch_retirement_test.exs": "c73ac9745d55ae745446495155c722dfaba1a6295d4f34d1de1c9d9a5848d2da"
+  },
+  "action": {
+    "public_api": "SmolBox.Branches.collect_partial/4",
+    "backend_operation": "collect_partial_branch/3",
+    "explicit_quiescence": true,
+    "original_helper_controller_epoch_fence_covers_acceptance_and_completion": true,
+    "immutable_full_creation_action_management_version_and_platform": true,
+    "request_persisted_before_native_io": true,
+    "typed_proof_and_current_child_version_required": true,
+    "saved_acknowledgement_lookup_without_native_io": true,
+    "lost_reply_retains_same_request_for_original_context_retry": true,
+    "definitive_not_dispatched_evidence_preserved": true,
+    "unknown_creation_retained": true,
+    "all_reservations_dependencies_disks_backing_retained": true,
+    "no_readiness_absence_deletion_disposal_authority": true,
+    "request_allowance_bytes": 21504,
+    "reply_allowance_bytes": 6144,
+    "framing_headroom_bytes": 1024,
+    "control_timeout_ceiling_ms": 30000
+  },
+  "durability": {
+    "selective_envelope_version": 44,
+    "reader_marker": "native_partial_branch_collections: 1",
+    "memory_and_encrypted_postgresql_atomic_pair_contracts": true,
+    "stale_source_guard_and_child_version_reject": true,
+    "transaction_rollback_preserves_pair_and_resource_projections": true,
+    "old_byte_fixtures_preserved": true,
+    "old_envelope_substitution_rejected_versions": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43
+    ],
+    "compressed_oversized_trailing_and_stripped_new_envelopes_reject": true,
+    "fresh_normal_beam_readers_pending_and_completed": true,
+    "native_branch_admission_enabled": false
+  },
+  "validation": {
+    "elixir": [
+      {
+        "lane": "current",
+        "exit_code": 0,
+        "summary": [
+          "Finished in 9.4 seconds (9.4s async, 0.00s sync)",
+          "",
+          "Result: 292 passed"
+        ],
+        "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)"
+      },
+      {
+        "lane": "minimum",
+        "exit_code": 0,
+        "summary": [
+          "....................................................................................................................................................................................................................................................................................................",
+          "Finished in 8.6 seconds (8.6s async, 0.00s sync)",
+          "292 tests, 0 failures"
+        ],
+        "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)"
+      }
+    ],
+    "elixir_tests_per_toolchain": 292,
+    "new_public_in_process_peer_tests_per_toolchain": 16,
+    "new_memory_and_codec_tests_per_toolchain": 5,
+    "selected_test_files": [
+      "test/unit/native_branch_admission_test.exs",
+      "test/unit/native_branch_authority_test.exs",
+      "test/unit/native_branch_backing_test.exs",
+      "test/unit/native_branch_collection_test.exs",
+      "test/unit/native_branch_completion_test.exs",
+      "test/unit/native_branch_deletion_action_test.exs",
+      "test/unit/native_branch_deletion_test.exs",
+      "test/unit/native_branch_material_history_test.exs",
+      "test/unit/native_branch_release_test.exs",
+      "test/unit/native_branch_retirement_test.exs",
+      "test/unit/native_partial_branch_collection_test.exs",
+      "test/unit/native_prepared_branch_retirement_test.exs",
+      "test/unit/native_released_branch_cleanup_test.exs",
+      "test/unit/native_released_branch_continuation_test.exs",
+      "test/unit/native_released_branch_deletion_test.exs",
+      "test/unit/native_unbooted_branch_backing_test.exs",
+      "test/unit/native_unbooted_branch_disposal_test.exs",
+      "test/unit/native_unbooted_branch_retirement_test.exs",
+      "test/unit/native_partial_branch_public_collection_test.exs",
+      "test/unit/native_unbooted_branch_public_disposal_test.exs",
+      "test/unit/native_material_support_test.exs",
+      "test/unit/native_codec_test.exs",
+      "test/unit/native_source_codec_test.exs",
+      "test/unit/native_checkpoint_codec_test.exs",
+      "test/unit/native_volume_codec_test.exs",
+      "test/unit/embedded_partial_branch_collection_test.exs",
+      "test/unit/backend_test.exs",
+      "test/unit/backend_features_test.exs",
+      "test/unit/backend_store_test.exs",
+      "test/unit/backend_parity_coverage_test.exs",
+      "test/unit/branch_public_authority_test.exs",
+      "test/unit/branch_observation_test.exs",
+      "test/unit/branch_store_test.exs",
+      "test/unit/machine_store_test.exs"
+    ],
+    "postgresql": [
+      {
+        "lane": "current",
+        "exit_code": 0,
+        "summary": [
+          "Finished in 31.5 seconds (0.00s async, 31.5s sync)",
+          "",
+          "Result: 88 passed"
+        ]
+      },
+      {
+        "lane": "minimum",
+        "exit_code": 0,
+        "summary": [
+          "........................................................................................",
+          "Finished in 24.8 seconds (0.00s async, 24.8s sync)",
+          "88 tests, 0 failures"
+        ]
+      }
+    ],
+    "postgresql_branch_contracts_per_toolchain": 88,
+    "new_postgresql_contracts_per_toolchain": 6,
+    "postgresql_version": "pg_ctl (PostgreSQL) 17.11 (Homebrew)",
+    "postgresql_private_unix_socket_only": true,
+    "postgresql_test_partitions_and_other_clients_at_exit": 0,
+    "postgresql_smart_shutdown_exit_code": 0,
+    "static": [
+      {
+        "name": "compile",
+        "exit_code": 0
+      },
+      {
+        "name": "credo-final",
+        "exit_code": 14
+      },
+      {
+        "name": "sdk-check",
+        "exit_code": 0
+      }
+    ],
+    "credo": {
+      "repository_issues": 67,
+      "changed_line_or_new_file_issues": [],
+      "new_issues_compared_with_prior_commit": []
+    },
+    "documentation_validation": [
+      {
+        "name": "docs",
+        "exit_code": 0,
+        "summary": [
+          "Compiling 1 file (.ex)",
+          "Generating docs...",
+          "View html docs at \"doc/index.html\"",
+          "View markdown docs at \"doc/llms.txt\"",
+          "View epub docs at \"doc/SmolBox.epub\""
+        ]
+      },
+      {
+        "name": "doc-links",
+        "exit_code": 0,
+        "summary": [
+          "Checked local links and fragments in 168 documentation pages"
+        ]
+      }
+    ],
+    "format_check_passed": true,
+    "git_diff_check_passed": true,
+    "postgresql_server_status_exit_code": 3,
+    "documentation_pages_checked": 168
+  },
+  "sdk": {
+    "revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "patches": [],
+    "unmodified_snapshot_verified": true,
+    "native_and_sdk_worktree_bytes_unchanged": true
+  },
+  "scope": {
+    "backend_runtime_durable_public_collection_control_implemented": true,
+    "synthetic_models_supply_no_sdk_ownership_or_source_provenance": true,
+    "sdk_or_vm_launched": false,
+    "ordinary_changed_package_qualification_complete": false,
+    "historical_native_qualification_transferred": false,
+    "pre_handoff_child_disposal_complete": false,
+    "full_parity_complete": false,
+    "all_full_parity_rows_still_pending": true,
+    "public_native_branch_admission_enabled": false,
+    "crash_validation_deferred": true,
+    "live_loss_forced_termination_or_persistence_interruption_run": false,
+    "crash_handling_qualified": false,
+    "distribution_approved": false,
+    "pushed_or_published": false
+  },
+  "remaining": [
+    "explicit disposal after original pre-handoff collection, remaining partial branch states and other P8 requirements",
+    "ordinary exact-package platform/source/store/resource qualification",
+    "remaining P0-P9 gates, HTTP regressions and public setup/signing/provenance/license review"
+  ]
+}

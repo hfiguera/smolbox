@@ -16,47 +16,43 @@ impl Context {
         if self._runtime.pid(name).is_some() {
             return Err(Error::before(ErrorCode::Ownership));
         }
-        let manager = self
-            .manager
-            .try_lock()
-            .map_err(|_| Error::before(ErrorCode::Conflict))?;
-        if manager.name() != Some(name.as_str())
-            || manager.storage_path()
-                != self
-                    .plan
-                    .child
-                    .path
-                    .join(smolvm::storage::STORAGE_DISK_FILENAME)
-            || manager.overlay_path()
-                != self
-                    .plan
-                    .child
-                    .path
-                    .join(smolvm::storage::OVERLAY_DISK_FILENAME)
-        {
-            return Err(Error::before(ErrorCode::Ownership));
-        }
-        let proof = collect_with(
-            budget,
-            epoch,
-            &self.enrollment,
-            name,
-            manager.child_pid(),
-            || {
-                manager
-                    .stop()
-                    .map_err(|_| Error::uncertain(ErrorCode::Native))?;
-                if manager.child_pid().is_some() {
-                    return Err(Error::uncertain(ErrorCode::Ownership));
-                }
-                Ok(())
-            },
-        )?;
-        // Only positive collection permits dropping the manager's launch flock.
-        manager.mark_stopped();
-        budget.check().map_err(|e| Error::uncertain(e.code))?;
-        Ok(proof)
+        collect_manager(&self.plan, &self.manager, epoch, &self.enrollment, budget)
     }
+}
+// Both completed and pre-handoff jobs retain the original manager/enrollment.
+// This helper constructs neither from an SDK row or caller-supplied PID.
+pub(crate) fn collect_manager(
+    plan: &crate::branch_boot::Plan,
+    manager: &std::sync::Mutex<smolvm::agent::AgentManager>,
+    epoch: &ActorEpoch,
+    enrollment: &BootEnrollment,
+    budget: &ReadBudget,
+) -> Result<BootCollection> {
+    budget.check()?;
+    plan.verify()?;
+    let name = &plan.publication.child().name;
+    let manager = manager
+        .try_lock()
+        .map_err(|_| Error::before(ErrorCode::Conflict))?;
+    if manager.name() != Some(name.as_str())
+        || manager.storage_path() != plan.child.path.join(smolvm::storage::STORAGE_DISK_FILENAME)
+        || manager.overlay_path() != plan.child.path.join(smolvm::storage::OVERLAY_DISK_FILENAME)
+    {
+        return Err(Error::before(ErrorCode::Ownership));
+    }
+    let proof = collect_with(budget, epoch, enrollment, name, manager.child_pid(), || {
+        manager
+            .stop()
+            .map_err(|_| Error::uncertain(ErrorCode::Native))?;
+        if manager.child_pid().is_some() {
+            return Err(Error::uncertain(ErrorCode::Ownership));
+        }
+        Ok(())
+    })?;
+    // Only positive collection permits dropping the manager's launch flock.
+    manager.mark_stopped();
+    budget.check().map_err(|e| Error::uncertain(e.code))?;
+    Ok(proof)
 }
 fn collect_with(
     budget: &ReadBudget,

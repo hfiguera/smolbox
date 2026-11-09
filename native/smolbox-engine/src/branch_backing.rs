@@ -6,7 +6,9 @@ use crate::{
     Result,
 };
 use serde::{Deserialize, Serialize};
+mod partial;
 mod unbooted;
+pub use partial::PartialBranchBackingReleaseRequest;
 pub use unbooted::UnbootedBranchBackingReleaseRequest;
 
 pub const BRANCH_BACKING_REQUEST_BYTES: usize = 80 * 1024;

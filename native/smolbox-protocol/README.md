@@ -445,3 +445,20 @@ historical disposal and retirement without any Machine or boot completion.
 Only the dependency flag retires; every backing charge remains. Host backing
 closure and ordinary SDK/platform qualification remain required. No native
 branch capability is enabled here.
+
+
+Unadvertised protocol-two `collect_partial_branch {request}` selects only an
+original retained pre-handoff branch job. The request binds full frozen creation,
+a distinct action/digest and `quiesced: true`; it requires the immutable branch
+approval, source domain, `branches: 1` and Delete capability. The creation/request
+caps are 16/20 KiB and the control budget is at most 30 seconds. It stays available
+under work quarantine using reserved control and bounded branch-terminal space.
+No stream or upload is accepted. The required
+`{result: "partial_branch_collected", proof, platform}` validates the unchanged
+engine proof against the full request and the reply platform against the package.
+The proof grants no readiness, SDK deletion, namespace absence, dependency/backing
+or public reservation release. Missing original registry state never supplies a
+fallback through SDK rows. [Shared reader/peer evidence](../../docs/evidence/embedded-port-http-parity-partial-branch-collection-port.json)
+uses synthetic canonical fixtures and an in-process native peer, not SDK/VM
+qualification. Durable/public consumption, disposal and exact-package ordinary
+qualification remain required; public native branch admission remains disabled.

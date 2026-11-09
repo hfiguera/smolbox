@@ -21,6 +21,23 @@ SDK directories and files are private even with a shared-group caller default.
 The shared engine leaves process-wide umask control to the bridge; a future
 Rustler bridge must preserve BEAM process settings.
 
+The shared engine has a separate pre-handoff branch collection control on the
+original `RetainedBranchResolution`. It requires the full frozen creation, a
+distinct action and explicit quiescence. It can collect the original returned
+manager/enrollment without inventing initialized readiness, deletion or backing
+release. Its synchronized cleanup fence preserves earlier lifecycle bytes and
+blocks further initialization/release/restart. The original work and backing stay
+charged; a four-descriptor material-control allowance leaves one observer available
+under full branch preparation admission. [Deterministic evidence](../docs/evidence/embedded-port-http-parity-partial-branch-collection.json)
+is separate from SDK/package qualification. Its later protocol-two
+`collect_partial_branch` boundary now checks exact approval, source domain,
+full-request/proof correlation and package platform, with no streams and one
+30-second control deadline. The engine proof keeps its original persisted bytes;
+platform is reply metadata. [Port models](../docs/evidence/embedded-port-http-parity-partial-branch-collection-port.json)
+launch no SDK or VM. Durable/public integration, explicit partial-child disposal
+and ordinary changed-package qualification remain required before native branch
+admission can activate.
+
 The protocol crate builds independently of hypervisor assets and implements
 bounded framing, [versioned DTOs and admission/credit state](smolbox-protocol/README.md).
 Protocol-2 packages declaring `streaming_exec: 1` expose the owned streaming

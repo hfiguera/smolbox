@@ -79,6 +79,8 @@ pub(crate) struct Registry {
     entries: Mutex<BTreeMap<String, Arc<Entry>>>,
     completed: Mutex<BTreeMap<String, CompletedChild>>,
     disposed: Mutex<BTreeMap<String, resolution::disposal::DisposedChild>>,
+    partial_disposed:
+        Mutex<BTreeMap<String, resolution::partial_disposal::archive::DisposedPartialChild>>,
     domain: Arc<crate::domain::DomainGuard>,
 }
 struct CompletedChild {
@@ -160,6 +162,7 @@ impl Registry {
             entries: Mutex::new(BTreeMap::new()),
             completed: Mutex::new(BTreeMap::new()),
             disposed: Mutex::new(BTreeMap::new()),
+            partial_disposed: Mutex::new(BTreeMap::new()),
             domain,
         })
     }
@@ -313,9 +316,16 @@ impl Registry {
             .disposed
             .try_lock()
             .map_err(|_| Error::before(ErrorCode::Conflict))?;
+        let partial_disposed = self
+            .partial_disposed
+            .try_lock()
+            .map_err(|_| Error::before(ErrorCode::Conflict))?;
         if entries.len() >= crate::JOB_WORK_SLOTS
             || entries.contains_key(&input.expected.metadata_sha256)
-            || completed.len().saturating_add(disposed.len())
+            || completed
+                .len()
+                .saturating_add(disposed.len())
+                .saturating_add(partial_disposed.len())
                 >= (crate::jobs::BRANCH_BACKING_METADATA_BYTES
                     / crate::jobs::BRANCH_BACKING_METADATA) as usize
         {
@@ -365,6 +375,16 @@ impl Drop for Registry {
         }
         for (_, child) in std::mem::take(self.disposed.get_mut().unwrap_or_else(|e| e.into_inner()))
         {
+            if child.backing.material_bytes() != 0 {
+                child.jobs.quarantine();
+                std::mem::forget(child);
+            }
+        }
+        for (_, child) in std::mem::take(
+            self.partial_disposed
+                .get_mut()
+                .unwrap_or_else(|e| e.into_inner()),
+        ) {
             if child.backing.material_bytes() != 0 {
                 child.jobs.quarantine();
                 std::mem::forget(child);
@@ -459,6 +479,13 @@ impl RetainedBranchPreparation {
             .work
             .try_lock()
             .map_err(|_| Error::before(ErrorCode::Conflict))?;
+        if work
+            .boot
+            .as_ref()
+            .is_some_and(|boot| boot.collection_started())
+        {
+            return Ok(BranchPreparationState::Unresolved);
+        }
         Ok(match work.phase {
             Phase::Prepared => BranchPreparationState::Prepared,
             Phase::Verified => BranchPreparationState::Collected,

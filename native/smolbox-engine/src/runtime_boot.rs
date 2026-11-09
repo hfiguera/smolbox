@@ -55,6 +55,14 @@ impl Registry {
             .map_err(|_| Error::before(ErrorCode::Native))?
             .contains_key(name))
     }
+    /// Bounded control observation must not wait behind another registry user.
+    pub(crate) fn try_contains(&self, name: &str) -> Result<bool> {
+        Ok(self
+            .0
+            .try_lock()
+            .map_err(|_| Error::before(ErrorCode::Conflict))?
+            .contains_key(name))
+    }
     pub(crate) fn retire(&self, owned: &Arc<Owned>) -> Result<()> {
         let mut entries = self
             .0

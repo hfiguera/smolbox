@@ -1,0 +1,160 @@
+{
+  "schema": 1,
+  "status": "partial-branch-collection-port-and-typed-elixir-models-passed",
+  "source_base_commit": "3ae9546da45cbdb46beb7a0ceda31ddf545abcd8",
+  "source_files_sha256": {
+    "lib/smolbox/embedded/channel.ex": "c25283a47e74ee9474308b19833d5d599702090b6a571e1fb7a5d6dbd523af69",
+    "lib/smolbox/embedded/partial_branch_collection.ex": "b02c99dfa9378210e73574e1103520adb5fc3c7e7037fe1a7a8abbb1ecdc5a0a",
+    "lib/smolbox/embedded/port.ex": "cc99eb971a4957b2045d60d38d8a69de1a6afb7cc5ed10943b2c6fc2355160cf",
+    "lib/smolbox/embedded/protocol.ex": "5c5559fff78975a95e72a5b68d82b6d6f075bc8eddb86b50ce8533b4eb3dfe0c",
+    "lib/smolbox/embedded/request.ex": "db64092cf84726187d6800c4ae2068edbef9516011fcd798901d4638deb87249",
+    "native/smolbox-engine/src/branch_partial_collection.rs": "9fe291a335cb9cc9aba724bd98735c0513d4c2c68c680738dce1c1cb64a556cc",
+    "native/smolbox-port/src/adapter.rs": "0b93fab43f2347d9c7eb0b85ae74991e0906d8b2a658e61f01513dd1b0e28420",
+    "native/smolbox-port/src/output.rs": "fb56fab301f4585a9f41d149345df4c7c949798e03d6e095192a3707f8d9f430",
+    "native/smolbox-port/src/runtime.rs": "3fae7363037163bc82e117077395f4b3448d64230256b394e87f633489f47e93",
+    "native/smolbox-protocol/fixtures/partial-branch-collection-v1.json": "558a83d355ce495f52e05d0309ef27f1e0d484af0222fb37516729acd87987c4",
+    "native/smolbox-protocol/src/lib.rs": "6ae91ded4cb15d8f61aef0e0f2d004263dfdc5afd5978c76533f6f46e3031d9d",
+    "native/smolbox-protocol/src/partial_branch_collection.rs": "094a142dcd8668ee9bb79e4d19d2c7dd35a7513d233d4a39490a0861bcc4d4b0",
+    "native/smolbox-protocol/src/session.rs": "b8e577149f0c30bc1cd376f4e1e892e1d8ce878cb658f93c8348980c55059fba",
+    "native/smolbox-protocol/src/wire.rs": "301d494e702dd8cbed868087ae3d318dceb06a31ebd403b3c6f2c226f876adab",
+    "test/unit/embedded_partial_branch_collection_test.exs": "cabcfa02533041a19f913e506e7b9c4c96e3bebfdba619d1d134568730ed968e"
+  },
+  "wire": {
+    "major": 2,
+    "operation": "collect_partial_branch",
+    "outcome": "partial_branch_collected",
+    "capability": "delete",
+    "explicit_quiescence_required": true,
+    "branch_feature_and_exact_immutable_approval_required": true,
+    "source_receipt_binds_domain": true,
+    "request_creation_bytes": 16384,
+    "request_bytes": 20480,
+    "proof_bytes": 4096,
+    "control_budget_ms": 30000,
+    "no_stream_or_upload": true,
+    "outcome_platform_metadata_required_and_package_bound": true,
+    "engine_persisted_proof_shape_unchanged": true,
+    "one_adapter_deadline_for_selection_and_collection": true,
+    "reserved_control_and_branch_terminal_output": true,
+    "missing_original_registry_never_uses_sdk_inventory_fallback": true
+  },
+  "fixtures": {
+    "kind": "synthetic canonical hash models; no SDK source or ownership provenance",
+    "rows": 3,
+    "platform_hold_cases": [
+      {
+        "platform": "macos",
+        "held_creation": true
+      },
+      {
+        "platform": "macos",
+        "held_creation": false
+      },
+      {
+        "platform": "macos",
+        "held_creation": false
+      }
+    ]
+  },
+  "validation": {
+    "rust": [
+      {
+        "name": "protocol",
+        "exit_code": 0,
+        "summary": [
+          "test result: ok. 79 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s"
+        ],
+        "errors": []
+      },
+      {
+        "name": "engine-reader",
+        "exit_code": 0,
+        "summary": [
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 938 filtered out; finished in 0.00s"
+        ],
+        "errors": []
+      },
+      {
+        "name": "port-peer",
+        "exit_code": 0,
+        "summary": [
+          "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 80 filtered out; finished in 0.47s"
+        ],
+        "errors": []
+      },
+      {
+        "name": "port-output",
+        "exit_code": 0,
+        "summary": [
+          "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 73 filtered out; finished in 0.32s"
+        ],
+        "errors": []
+      },
+      {
+        "name": "clippy",
+        "exit_code": 0,
+        "summary": [],
+        "errors": []
+      }
+    ],
+    "elixir": [
+      {
+        "lane": "current",
+        "toolchain": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)",
+        "exit_code": 0,
+        "tail": [
+          "",
+          ".................................",
+          "Finished in 0.1 seconds (0.1s async, 0.00s sync)",
+          "",
+          "Result: 33 passed"
+        ]
+      },
+      {
+        "lane": "minimum",
+        "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+        "exit_code": 0,
+        "tail": [
+          "Excluding tags: [:runtime, :deferred_crash]",
+          "",
+          ".................................",
+          "Finished in 0.1 seconds (0.1s async, 0.00s sync)",
+          "33 tests, 0 failures"
+        ]
+      }
+    ],
+    "credo": {
+      "repository_exit": 14,
+      "repository_issues": 67,
+      "new_file_issues": [],
+      "changed_line_or_new_file_issues": []
+    },
+    "cargo_fmt_all_passed": true,
+    "upstream_bootstrap_check_passed": true,
+    "verified_unmodified_sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
+    "upstream_deprecation_warnings_preserved": true,
+    "peer_is_in_process_fake_native_not_a_running_sdk": true,
+    "peer_requires_disabled_or_missing_or_mismatched_catalog_rejection_without_dispatch": true,
+    "quarantined_work_control_passed": true,
+    "elixir_format_passed": true,
+    "docs_warnings_as_errors_passed": true,
+    "local_documentation_pages_checked": 167
+  },
+  "scope": {
+    "port_routing_and_typed_elixir_boundary_implemented": true,
+    "backend_runtime_durable_public_action_consumption_complete": false,
+    "store_codec_changed": false,
+    "partial_child_disposal_complete": false,
+    "sdk_or_vm_launched": false,
+    "ordinary_changed_package_qualification_complete": false,
+    "historical_qualification_transferred_to_changed_bytes": false,
+    "public_native_branch_admission_enabled": false,
+    "full_parity_complete": false,
+    "all_full_parity_rows_still_pending": true,
+    "crash_validation_deferred": true,
+    "live_loss_forced_termination_or_persistence_interruption_run": false,
+    "crash_handling_qualified": false,
+    "distribution_approved": false,
+    "pushed_or_published": false
+  }
+}

@@ -105,4 +105,22 @@ defmodule SmolBox.BackendTest do
     assert {:error, %Error{category: :validation}} = Target.validate(target)
     assert {:error, %Error{category: :validation}} = Target.validate(%{target | client: nil})
   end
+
+  test "HTTP rejects native partial branch collection without transport IO" do
+    {:ok, worker} = Worker.new("http", "https://worker.example", token: "private-token")
+    {:ok, client} = Client.new(worker, transport: CaptureTransport)
+
+    for operation <- [
+          :collect_partial_branch,
+          :dispose_partial_branch,
+          :resolve_partial_branch_disposal,
+          :cleanup_partial_branch_disposal,
+          :qualify_partial_branch_cleanup
+        ] do
+      assert {:error, %Error{category: :unsupported_capability, evidence: :not_dispatched}} =
+               Backend.invoke(HTTP.reference(client), operation, [nil, nil])
+    end
+
+    refute_received {:http_request, _, _}
+  end
 end

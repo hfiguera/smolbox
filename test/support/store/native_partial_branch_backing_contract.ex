@@ -1,0 +1,177 @@
+defmodule SmolBox.Store.NativePartialBranchBackingContract do
+  @moduledoc false
+  import ExUnit.Assertions
+
+  alias SmolBox.Embedded.{
+    BranchBackingRelease,
+    BranchPublication,
+    NativeBranchBacking,
+    PartialBranchBackingRelease,
+    PartialBranchDisposal
+  }
+
+  alias SmolBox.ManagedMachine
+
+  alias SmolBox.Store.{
+    Codec,
+    Contract,
+    NativeBranchBackingContract,
+    NativePartialBranchRetirementContract
+  }
+
+  def prepare(adapter, store, mode, provenance \\ "deleted") do
+    {parent, child, _, _} =
+      NativePartialBranchRetirementContract.complete(adapter, store, mode, provenance)
+
+    assert {:ok, <<"smolbox-record-v46", 0, _::binary>> = before} = Codec.encode(child)
+
+    assert {:ok, deleting} =
+             adapter.machine(store, :request, [
+               ManagedMachine.key(parent),
+               :delete,
+               parent.version,
+               1310
+             ])
+
+    assert {:ok, source} =
+             adapter.machine(store, :write, [
+               ManagedMachine.key(parent),
+               Contract.guard(deleting),
+               [
+                 state: :deleted,
+                 operation: nil,
+                 phase: nil,
+                 operation_deadline_ms: nil,
+                 absence_at_ms: 1311
+               ],
+               1311
+             ])
+
+    assert {:ok, usage} = adapter.usage(store, source.worker_id)
+    assert usage == child.branch.spec.policy.resources
+    assert {:ok, ^child} = Codec.decode(before)
+    assert {:ok, ^before} = Codec.encode(child)
+    {source, child, usage}
+  end
+
+  # Synthetic native accounting acknowledgement. No filesystem deletion or SDK
+  # operation occurs; ordinary platform qualification remains separate.
+  def proof(request) do
+    proof = NativeBranchBackingContract.proof(request, request["disposal"]["publication"])
+    assert PartialBranchBackingRelease.matches?(proof, request)
+    proof
+  end
+
+  def completed(adapter, store, mode, provenance \\ "deleted") do
+    {source, child, usage} = prepare(adapter, store, mode, provenance)
+
+    assert {:error, _} =
+             NativeBranchBackingContract.accept(adapter, store, source, child, 1312, false)
+
+    assert {:error, _} =
+             NativeBranchBackingContract.accept(
+               adapter,
+               store,
+               source,
+               %{child | version: child.version + 1},
+               1312
+             )
+
+    assert {:ok, pending} =
+             NativeBranchBackingContract.accept(adapter, store, source, child, 1312)
+
+    source = NativeBranchBackingContract.fetch(adapter, store, source)
+    saved = pending.branch.native_authority.backing
+    assert pending.branch.state == :backing_pending and saved.proof == nil
+
+    assert saved.version == child.version and
+             saved.version > child.branch.native_authority.retirement.version
+
+    assert saved.request["disposal"] ==
+             PartialBranchDisposal.to_wire(child.branch.native_authority.partial_disposal.proof)
+
+    assert NativeBranchBacking.partial?(pending)
+    assert pending.branch.native_authority.retirement == child.branch.native_authority.retirement
+    assert {:ok, ^usage} = adapter.usage(store, source.worker_id)
+    roundtrip(pending)
+    ack = proof(saved.request)
+
+    assert {:error, _} =
+             NativeBranchBackingContract.complete_proof(
+               adapter,
+               store,
+               source,
+               pending,
+               BranchBackingRelease.to_wire(ack),
+               1313
+             )
+
+    assert {:error, _} =
+             NativeBranchBackingContract.complete_proof(
+               adapter,
+               store,
+               source,
+               pending,
+               %{ack | native_bytes: ack.native_bytes + 1},
+               1313
+             )
+
+    assert {:ok, ^usage} = adapter.usage(store, source.worker_id)
+
+    assert {:ok, closed} =
+             NativeBranchBackingContract.complete_proof(
+               adapter,
+               store,
+               source,
+               pending,
+               ack,
+               1313
+             )
+
+    source = NativeBranchBackingContract.fetch(adapter, store, source)
+    assert closed.branch.state == :closed and closed.state == :deleted
+    assert closed.branch.native_authority.backing == %{saved | proof: ack}
+
+    assert closed.branch.native_authority.partial_disposal ==
+             child.branch.native_authority.partial_disposal
+
+    assert closed.branch.native_authority.retirement == child.branch.native_authority.retirement
+
+    assert closed.branch.native_authority.partial_collection ==
+             child.branch.native_authority.partial_collection
+
+    assert closed.created_machine == nil and closed.observed_machine == nil and
+             closed.branch.native_authority.completion == nil
+
+    assert source.branch_children == %{child.id => true}
+
+    assert {:ok, publication} = BranchPublication.from_wire(ack.publication)
+    assert source.native_branch_history[child.id] == publication
+
+    assert {:ok, %{slots: 0, cpus: 0, memory_mb: 0, disk_gb: 0}} =
+             adapter.usage(store, source.worker_id)
+
+    assert {:ok, ^closed} =
+             NativeBranchBackingContract.complete_proof(adapter, store, source, closed, ack, 1314)
+
+    roundtrip(closed)
+    {source, closed, ack}
+  end
+
+  def roundtrip(record) do
+    assert {:ok, <<"smolbox-record-v47", 0, body::binary>> = encoded} = Codec.encode(record)
+    assert {:ok, ^record} = Codec.decode(encoded)
+
+    for version <- 1..46,
+        do: assert({:error, _} = Codec.decode("smolbox-record-v#{version}" <> <<0>> <> body))
+
+    assert {:error, _} = Codec.decode(encoded <> "tail")
+
+    assert {:error, _} =
+             Codec.decode(
+               "smolbox-record-v47" <> <<0>> <> :erlang.term_to_binary(record, compressed: 9)
+             )
+
+    encoded
+  end
+end

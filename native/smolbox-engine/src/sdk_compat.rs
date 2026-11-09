@@ -80,6 +80,13 @@ pub(crate) fn observe_absence_budget(
 pub(crate) fn validate_database(database: &Path, identity: (u64, u64)) -> Result<()> {
     with_observation(database, identity, |_| Ok(()))
 }
+pub(crate) fn validate_database_budget(
+    database: &Path,
+    identity: (u64, u64),
+    budget: &crate::ReadBudget,
+) -> Result<()> {
+    with_observation_budget(database, identity, budget, |_| Ok(()))
+}
 
 /// Pinned fork preparation creates `pack` as a link to its source or leaves it
 /// absent. SDK deletion skips volume detach for either shape. A private directory
@@ -875,6 +882,21 @@ mod tests {
         );
         assert!(db.list_vms().unwrap().is_empty());
         assert!(observe_absence(&path, identity, "absent", || Ok(true)).unwrap());
+    }
+    #[test]
+    fn database_validation_keeps_the_original_cancelled_control_budget() {
+        let (_temporary, db, path, identity) = database();
+        let budget = crate::ReadBudget::new(
+            std::time::Duration::from_secs(5),
+            crate::Cancellation::default(),
+        )
+        .unwrap();
+        validate_database_budget(&path, identity, &budget).unwrap();
+        budget.cancel.cancel();
+        let error = validate_database_budget(&path, identity, &budget).unwrap_err();
+        assert_eq!(error.code, ErrorCode::State);
+        assert_eq!(error.dispatch, crate::Dispatch::NotDispatched);
+        assert!(db.list_vms().unwrap().is_empty());
     }
     #[test]
     fn unsupported_schema_version_table_or_trigger_is_rejected_without_repair() {

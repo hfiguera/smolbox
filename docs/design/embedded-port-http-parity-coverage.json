@@ -596,6 +596,21 @@
       ]
     },
     {
+      "name": "retire_partial_branch",
+      "arities": [
+        3
+      ],
+      "contract": "branches",
+      "http_supported": false,
+      "port_operation_supported": true,
+      "parity_status": "pending",
+      "acceptance": [
+        "branches:validation-and-dispatch",
+        "branches:ordinary-public-behavior",
+        "branches:durable-accounting-and-no-replay"
+      ]
+    },
+    {
       "name": "inspect_unbooted_branch_disposal",
       "arities": [
         3
@@ -674,6 +689,81 @@
       "name": "continue_branch_deletion",
       "arities": [
         2
+      ],
+      "contract": "branches",
+      "http_supported": false,
+      "port_operation_supported": true,
+      "parity_status": "pending",
+      "acceptance": [
+        "branches:validation-and-dispatch",
+        "branches:ordinary-public-behavior",
+        "branches:durable-accounting-and-no-replay"
+      ]
+    },
+    {
+      "name": "collect_partial_branch",
+      "arities": [
+        3
+      ],
+      "contract": "branches",
+      "http_supported": false,
+      "port_operation_supported": true,
+      "parity_status": "pending",
+      "acceptance": [
+        "branches:validation-and-dispatch",
+        "branches:ordinary-public-behavior",
+        "branches:durable-accounting-and-no-replay"
+      ]
+    },
+    {
+      "name": "dispose_partial_branch",
+      "arities": [
+        3
+      ],
+      "contract": "branches",
+      "http_supported": false,
+      "port_operation_supported": true,
+      "parity_status": "pending",
+      "acceptance": [
+        "branches:validation-and-dispatch",
+        "branches:ordinary-public-behavior",
+        "branches:durable-accounting-and-no-replay"
+      ]
+    },
+    {
+      "name": "resolve_partial_branch_disposal",
+      "arities": [
+        3
+      ],
+      "contract": "branches",
+      "http_supported": false,
+      "port_operation_supported": true,
+      "parity_status": "pending",
+      "acceptance": [
+        "branches:validation-and-dispatch",
+        "branches:ordinary-public-behavior",
+        "branches:durable-accounting-and-no-replay"
+      ]
+    },
+    {
+      "name": "qualify_partial_branch_cleanup",
+      "arities": [
+        3
+      ],
+      "contract": "branches",
+      "http_supported": false,
+      "port_operation_supported": true,
+      "parity_status": "pending",
+      "acceptance": [
+        "branches:validation-and-dispatch",
+        "branches:ordinary-public-behavior",
+        "branches:durable-accounting-and-no-replay"
+      ]
+    },
+    {
+      "name": "cleanup_partial_branch_disposal",
+      "arities": [
+        3
       ],
       "contract": "branches",
       "http_supported": false,

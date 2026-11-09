@@ -2,6 +2,7 @@
 use crate::{BranchPublication, CreationReceipt, Error, ErrorCode, Result};
 use std::sync::{Arc, Mutex};
 mod collection;
+pub(crate) use collection::collect_manager;
 
 pub(crate) struct Context {
     // Drop the child's actual manager before its original source/runtime/domain.

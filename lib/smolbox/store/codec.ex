@@ -280,6 +280,54 @@ defmodule SmolBox.Store.Codec do
   none can authorize another route's completion. Earlier envelopes reject the new
   grant and earlier encodings remain exact. Upgrade every reader/projector before
   native activation; no native capability is enabled by this schema.
+
+  Original pre-handoff child collection selectively uses v44. Its separate
+  accepted request and typed acknowledgement retain unknown creation and every
+  reservation, dependency and disk. Earlier envelopes omit the nil action default
+  exactly and restore it on read; older tags reject a nonnil action. Upgrade every
+  reader/projector before advertising `native_partial_branch_collections: 1`.
+  This reader marker does not enable native branch admission.
+
+  Original collected pre-handoff disposal selectively uses v45. Its separate
+  accepted request and proof retain v44 collection history unchanged. Only the
+  paired source/child writer may consume its current-version result and fresh
+  source observation to release ordinary child capacity; source dependency and
+  extra backing remain charged. Older envelopes omit the new nil action exactly
+  and reject nonnil disposal. Upgrade every reader/projector before advertising
+  `native_partial_branch_disposals: 1`; native branch admission remains separate.
+
+  Original disposed partial-child dependency retirement selectively uses v46.
+  Its version-bound typed fresh absence proof preserves collection/disposal
+  history and retires only the source dependency; extra backing remains charged.
+  Earlier envelopes reject the new origin while older disposal-only envelopes
+  retain their exact term/default shape. Upgrade every reader/projector before
+  advertising `native_partial_branch_retirements: 1`; this reader marker alone
+  enables no native branch admission.
+
+  Original disposed partial-child backing closeout selectively uses v47. Exact
+  accepted source/child heads and typed acknowledgement preserve collection,
+  disposal and retirement histories; pending backing remains fully charged.
+  Earlier envelopes reject nonnil partial backing and retirement-only v46 stays
+  unchanged. Upgrade every reader/projector before advertising
+  `native_partial_branch_backings: 1`; this marker enables no native branch feature.
+
+  Original partial-disposal residual cleanup selectively uses v48. Its nested
+  immutable request and separate typed acknowledgement retain the original
+  collection/disposal. The disposal_cleanup_pending phase prevents a lost action
+  from becoming ordinary disposal. Paired completion releases only ordinary child
+  capacity after matching cleanup and fresh source observation; dependency/backing
+  stay charged. Earlier v45/v46/v47 envelopes omit and restore cleanup: nil
+  exactly, and reject nonnil cleanup. Upgrade every reader/projector before
+  advertising `native_partial_branch_cleanups: 1`; native activation stays separate.
+
+  Original terminal disposal can acknowledge that an already accepted cleanup
+  was unnecessary. Selective v49 stores that distinct typed acknowledgement in
+  cleanup.unneeded, with cleanup.proof still nil; actual removal remains v48.
+  Both original Deleted/ResolvedAbsent provenances and the same immutable action
+  survive paired completion, retirement and backing closeout. v48 omits/restores
+  exactly unneeded: nil and refuses nonnil acknowledgement history. Upgrade every
+  reader/projector before advertising `native_partial_branch_cleanup_resolutions: 1`.
+  This reader marker alone enables no native branch or public resolution path.
   """
 
   alias SmolBox.{Error, Execution, ExecutionFeatures}
@@ -310,6 +358,12 @@ defmodule SmolBox.Store.Codec do
     CodecNativeCheckpoints,
     CodecNativeExports,
     CodecNativeMounts,
+    CodecNativePartialBranchBackings,
+    CodecNativePartialBranchCleanupResolutions,
+    CodecNativePartialBranchCleanups,
+    CodecNativePartialBranchCollections,
+    CodecNativePartialBranchDisposals,
+    CodecNativePartialBranchRetirements,
     CodecNativePreparedBranchRetirements,
     CodecNativeReleasedBranchCleanups,
     CodecNativeReleasedBranchContinuations,
@@ -326,6 +380,12 @@ defmodule SmolBox.Store.Codec do
   }
 
   @max_bytes 16_777_216
+  @native_partial_branch_cleanup_resolutions_prefix "smolbox-record-v49\0"
+  @native_partial_branch_cleanups_prefix "smolbox-record-v48\0"
+  @native_partial_branch_backings_prefix "smolbox-record-v47\0"
+  @native_partial_branch_retirements_prefix "smolbox-record-v46\0"
+  @native_partial_branch_disposals_prefix "smolbox-record-v45\0"
+  @native_partial_branch_collections_prefix "smolbox-record-v44\0"
   @native_branch_collections_prefix "smolbox-record-v43\0"
   @native_released_branch_cleanups_prefix "smolbox-record-v42\0"
   @native_released_branch_continuations_prefix "smolbox-record-v41\0"
@@ -393,6 +453,14 @@ defmodule SmolBox.Store.Codec do
     SmolBox.Embedded.NativeReleasedBranchDeletionCleanup,
     SmolBox.Embedded.ReleasedBranchDeletionContinuation,
     SmolBox.Embedded.ReleasedBranchDeletionResolution,
+    SmolBox.Embedded.NativePartialBranchCollection,
+    SmolBox.Embedded.NativePartialBranchDisposal,
+    SmolBox.Embedded.NativePartialBranchCleanup,
+    SmolBox.Embedded.PartialBranchDisposalCleanup,
+    SmolBox.Embedded.PartialBranchDisposalCleanupUnneeded,
+    SmolBox.Embedded.PartialBranchDisposal,
+    SmolBox.Embedded.PartialBranchChildAbsence,
+    SmolBox.Embedded.PartialBranchCollection,
     SmolBox.Embedded.NativeBranchDeletionCollection,
     SmolBox.Embedded.BranchDeletionCollection,
     SmolBox.Embedded.NativeBranchDeletionAction,
@@ -458,6 +526,39 @@ defmodule SmolBox.Store.Codec do
         do: encode_native_volume(record),
         else: encode_volumes(record)
       )
+
+  def encode(
+        %{
+          spec: %{profile: %SmolBox.Profile{}},
+          branch: %{native_authority: %{partial_disposal: saved}}
+        } = record
+      )
+      when not is_nil(saved) do
+    cond do
+      CodecNativePartialBranchCleanupResolutions.required?(record) ->
+        encode_native_partial_branch_cleanup_resolutions(record)
+
+      CodecNativePartialBranchCleanups.required?(record) ->
+        encode_native_partial_branch_cleanups(record)
+
+      CodecNativePartialBranchBackings.required?(record) ->
+        encode_native_partial_branch_backings(record)
+
+      CodecNativePartialBranchRetirements.required?(record) ->
+        encode_native_partial_branch_retirements(record)
+
+      true ->
+        encode_native_partial_branch_disposals(record)
+    end
+  end
+
+  def encode(
+        %{
+          spec: %{profile: %SmolBox.Profile{}},
+          branch: %{native_authority: %{partial_collection: saved}}
+        } = record
+      )
+      when not is_nil(saved), do: encode_native_partial_branch_collections(record)
 
   def encode(
         %{
@@ -606,6 +707,32 @@ defmodule SmolBox.Store.Codec do
   @spec decode(binary()) ::
           {:ok, Execution.t() | SmolBox.ManagedMachine.t() | SmolBox.Volume.t()}
           | {:error, Error.t()}
+  def decode(
+        <<@native_partial_branch_cleanup_resolutions_prefix, 131, tag, _rest::binary>> = bytes
+      )
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_native_partial_branch_cleanup_resolutions(bytes)
+
+  def decode(<<@native_partial_branch_cleanups_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_native_partial_branch_cleanups(bytes)
+
+  def decode(<<@native_partial_branch_backings_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_native_partial_branch_backings(bytes)
+
+  def decode(<<@native_partial_branch_retirements_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_native_partial_branch_retirements(bytes)
+
+  def decode(<<@native_partial_branch_disposals_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_native_partial_branch_disposals(bytes)
+
+  def decode(<<@native_partial_branch_collections_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes,
+      do: decode_native_partial_branch_collections(bytes)
+
   def decode(<<@native_branch_collections_prefix, 131, tag, _rest::binary>> = bytes)
       when tag != 80 and byte_size(bytes) <= @max_bytes,
       do: decode_native_branch_collections(bytes)
@@ -1066,13 +1193,164 @@ defmodule SmolBox.Store.Codec do
     ArgumentError -> invalid()
   end
 
+  defp encode_native_partial_branch_cleanup_resolutions(record),
+    do:
+      encode_native_record(
+        record,
+        @native_partial_branch_cleanup_resolutions_prefix,
+        &Function.identity/1
+      )
+
+  defp decode_native_partial_branch_cleanup_resolutions(
+         <<@native_partial_branch_cleanup_resolutions_prefix, payload::binary>>
+       ) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <-
+           used == byte_size(payload) and
+             CodecNativePartialBranchCleanupResolutions.required?(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp encode_native_partial_branch_cleanups(record),
+    do:
+      encode_native_record(
+        record,
+        @native_partial_branch_cleanups_prefix,
+        &CodecNativePartialBranchCleanupResolutions.transform(&1, :strip)
+      )
+
+  defp decode_native_partial_branch_cleanups(
+         <<@native_partial_branch_cleanups_prefix, payload::binary>>
+       ) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <- used == byte_size(payload) and CodecNativePartialBranchCleanups.required?(record),
+         record = CodecNativePartialBranchCleanupResolutions.transform(record, :upgrade),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp encode_native_partial_branch_backings(record),
+    do:
+      encode_native_record(
+        record,
+        @native_partial_branch_backings_prefix,
+        &CodecNativePartialBranchCleanups.transform(&1, :strip)
+      )
+
+  defp decode_native_partial_branch_backings(
+         <<@native_partial_branch_backings_prefix, payload::binary>>
+       ) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <-
+           used == byte_size(payload) and CodecNativePartialBranchBackings.required?(record),
+         record = CodecNativePartialBranchCleanups.transform(record, :upgrade),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp encode_native_partial_branch_retirements(record),
+    do:
+      encode_native_record(
+        record,
+        @native_partial_branch_retirements_prefix,
+        &CodecNativePartialBranchCleanups.transform(&1, :strip)
+      )
+
+  defp decode_native_partial_branch_retirements(
+         <<@native_partial_branch_retirements_prefix, payload::binary>>
+       ) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <-
+           used == byte_size(payload) and CodecNativePartialBranchRetirements.required?(record),
+         false <- CodecNativePartialBranchBackings.required?(record),
+         record = CodecNativePartialBranchCleanups.transform(record, :upgrade),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp encode_native_partial_branch_disposals(record),
+    do:
+      encode_native_record(
+        record,
+        @native_partial_branch_disposals_prefix,
+        &CodecNativePartialBranchCleanups.transform(&1, :strip)
+      )
+
+  defp decode_native_partial_branch_disposals(
+         <<@native_partial_branch_disposals_prefix, payload::binary>>
+       ) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <-
+           used == byte_size(payload) and CodecNativePartialBranchDisposals.required?(record),
+         false <- CodecNativePartialBranchRetirements.required?(record),
+         record = CodecNativePartialBranchCleanups.transform(record, :upgrade),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
+  defp encode_native_partial_branch_collections(record),
+    do:
+      encode_native_record(
+        record,
+        @native_partial_branch_collections_prefix,
+        &CodecNativePartialBranchDisposals.transform(&1, :strip)
+      )
+
+  defp decode_native_partial_branch_collections(
+         <<@native_partial_branch_collections_prefix, payload::binary>>
+       ) do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+
+    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         true <-
+           used == byte_size(payload) and CodecNativePartialBranchCollections.required?(record),
+         record = CodecNativePartialBranchDisposals.transform(record, :upgrade),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
   defp encode_native_branch_collections(record),
-    do: encode_native_record(record, @native_branch_collections_prefix, &Function.identity/1)
+    do:
+      encode_native_record(
+        record,
+        @native_branch_collections_prefix,
+        &CodecNativePartialBranchCollections.strip/1
+      )
 
   defp decode_native_branch_collections(<<@native_branch_collections_prefix, payload::binary>>) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
     with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+         record = CodecNativePartialBranchCollections.upgrade(record),
          true <- used == byte_size(payload) and CodecNativeBranchCollections.required?(record),
          :ok <- validate_extended(record),
          do: {:ok, record},

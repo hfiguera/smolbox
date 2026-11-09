@@ -81,7 +81,7 @@ defmodule SmolBox.Runtime.BranchObservation do
       when not is_nil(authority) do
     worker = Target.pin(worker)
 
-    owner = if NativeBranchBacking.unbooted?(child), do: parent, else: child
+    owner = if NativeBranchBacking.source_scoped?(child), do: parent, else: child
 
     with %NativeBranchBacking{request: request, proof: nil} <- authority.backing,
          {:ok, %BranchBackingRelease{} = proof} <-

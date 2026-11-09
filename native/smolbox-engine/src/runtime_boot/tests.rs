@@ -621,3 +621,15 @@ fn failed_created_child_normal_exit_keeps_wait_status_for_sdk_collection() {
         .unwrap();
     owned.collected(&receipt, &epoch, &budget()).unwrap();
 }
+
+#[test]
+fn bounded_boot_membership_refuses_a_busy_registry_without_waiting_or_minting_ownership() {
+    let registry = Registry::default();
+    let held = registry.0.lock().unwrap();
+    assert_eq!(
+        registry.try_contains("inert-model-child").unwrap_err().code,
+        ErrorCode::Conflict
+    );
+    drop(held);
+    assert!(!registry.try_contains("inert-model-child").unwrap());
+}

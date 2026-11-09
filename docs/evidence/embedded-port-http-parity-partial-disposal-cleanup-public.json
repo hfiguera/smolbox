@@ -1,0 +1,153 @@
+{
+  "schema": 1,
+  "status": "public-original-partial-disposal-cleanup-coordination-models-passed",
+  "source_base_commit": "534b93ef7027c46ff0334690c8d8cd12abf6f7e6",
+  "source_files_sha256": {
+    "docs/design/embedded-port-http-parity-coverage.json": "d9c305ed5a2c2a14e19e33035e07647bf9231310e322008777997eba1814c931",
+    "lib/smolbox/backend.ex": "3a66d0221f974eae80bf30242df61d5bc0cf5d57e1732993ebd627f42929f737",
+    "lib/smolbox/backend/embedded.ex": "9ffb5c8ea16651749c292e01689e7d4757d709f8a930688d6bab8f01e7e8c89e",
+    "lib/smolbox/backend/embedded_branch_source_observation.ex": "d72ee3efaaf8428d7064053c2e6a6a1d4e3461ae2e06be868e456e31767d7774",
+    "lib/smolbox/backend/embedded_partial_branch_cleanup.ex": "3369992dc63cb7796fd74570af3c37428688d20f98417a8d30912bf5b3f773fe",
+    "lib/smolbox/backend/embedded_partial_branch_disposal.ex": "46c4d5aee2cb673edeb314baf762e5c85d6519ea4515523dd5bfa6be97024201",
+    "lib/smolbox/backend/http.ex": "6b8eccaeab0a51c73431b7c3b464f297ceb7663d169a7ae95fa21ca9214b54ae",
+    "lib/smolbox/branches.ex": "c0d7833c0546572178eb79829feeda7cf8651097cf82bc670e63fa755662d179",
+    "lib/smolbox/runtime/native_partial_branch_cleanup.ex": "5e3647f96db06ef2e53dcf7891d81dbe02f8972a95ab4f80f75b9f50e6b550eb",
+    "lib/smolbox/store.ex": "79f3a6b757bc3fd6f096fb24dd015ccb8d25f46d2e7f3a9cae5670aa5d77dda8",
+    "test/unit/backend_test.exs": "e3ba910d674814f27a695af44714d4d4738c19e20c95b8caf2e125f822121aa6",
+    "test/unit/native_partial_branch_public_cleanup_test.exs": "2fba4077d878999c8ff61d1576cbe8390fe747e44fa95dda58d813e94f352f50"
+  },
+  "public": {
+    "api": "SmolBox.Branches.cleanup_partial/4",
+    "backend_operation": "cleanup_partial_branch_disposal/3",
+    "backend_operation_count": 59,
+    "http_rejects_before_transport_io": true,
+    "explicit_version_and_quiesced_option_required": true,
+    "one_pinned_controller_helper_fence_through_acceptance_io_and_paired_commit": true,
+    "same_saved_request_across_claims_and_retry": true,
+    "deleted_resolution_resumes_only_already_accepted_cleanup": true,
+    "no_sdk_disposal_fallback": true,
+    "no_child_machine_synthesized": true,
+    "cleanup_and_disposal_share_source_promotion_observation_and_byte_accounting": true,
+    "one_deadline_ms": 30000,
+    "aggregate_request_bytes": 32768,
+    "aggregate_response_bytes": 98304,
+    "framing_headroom_per_encoded_request_or_outcome": 1024,
+    "late_acceptance_cannot_dispatch_cleanup": true,
+    "late_proof_or_source_cannot_commit": true,
+    "failed_commit_keeps_exact_action_and_uncommitted_charges": true,
+    "late_positive_commit_reply_is_uncertain_with_saved_acknowledgement_lookup": true,
+    "retirement_and_backing_close_preserve_no_helper_acknowledgement_lookup": true,
+    "ordinary_child_capacity_only_released_by_matching_paired_commit": true,
+    "dependency_and_backing_closeout_remain_separate": true
+  },
+  "validation": {
+    "public_in_process_peers": {
+      "tests": 31,
+      "synthetic_positive_platform": "macos",
+      "material_contexts": [
+        "held",
+        "pre_release",
+        "initial_release",
+        "explicit_release"
+      ],
+      "native_vm_or_sdk_actions": false,
+      "cases": [
+        "paired fence held at both store writes",
+        "lost proof and source replies",
+        "immutable retry and accepted-version lookup",
+        "stale child and source identity",
+        "crossed valid request and original disposal provenance",
+        "wrong proof epoch and pinned platform",
+        "streamed output and cursors",
+        "acceptance and commit rejection",
+        "late acceptance and commit acknowledgement",
+        "captured adapter deadline expiry",
+        "shared transfer budget",
+        "draining",
+        "saved acknowledgement through retirement and backing closure"
+      ]
+    },
+    "current": {
+      "elixir": "1.20.4",
+      "otp": "29.0.6",
+      "shared_tests_passed": 531,
+      "deferred_crash_excluded": 4,
+      "postgresql_tests_passed": 134,
+      "http_contracts_passed": 410,
+      "legacy_envelopes": 12
+    },
+    "minimum": {
+      "elixir": "1.18.4-otp-27",
+      "otp": "27.3.4.15",
+      "shared_tests_passed": 531,
+      "deferred_crash_excluded": 4,
+      "postgresql_tests_passed": 134,
+      "http_contracts_passed": 410,
+      "legacy_envelopes": 12
+    },
+    "legacy_compatibility": "Original prefixes and exact decoded ETF terms retained; cross-BEAM map byte order is not canonical.",
+    "postgresql_final_state": {
+      "partition_rows": 0,
+      "other_database_clients": 0,
+      "normal_smart_shutdown": true,
+      "pg_ctl_status": 3,
+      "socket_removed": true
+    },
+    "strict_credo": {
+      "exit_code": 14,
+      "repository_issues": 67,
+      "new_issues": [],
+      "changed_or_new_line_issues": []
+    },
+    "compile_warnings_as_errors_exit_code": 0,
+    "elixir_format_exit_code": 0,
+    "unmodified_sdk_check_exit_code": 0,
+    "documentation": {
+      "warnings_as_errors_exit_code": 0,
+      "local_links_fragments_exit_code": 0,
+      "pages_checked": 173
+    },
+    "private_log_sha256": {
+      "current-tests.log": "3c93558e6fbb56275896c518205599d0b77aca4ac7fbfc707267a868a0bfe7c1",
+      "minimum-tests.log": "3d621831cc998e3b8cb611c2bea5a2f04ac2abae2690711443b32ec177f4dc45",
+      "public-final.log": "2b5248286af30ea3cee9a0a1299fad38f12fc90d36008d0fcb609facd7e2b70e",
+      "current-http.log": "66b6772ab10675fa928861ff6cdb6792838c3bd1c2fb23c69ee4adc0183e8289",
+      "minimum-http.log": "850aba488b879242cf5ce42e276c3c3fa692537638fe64ba6b46b4a16c1b8778",
+      "current-legacy.log": "473d3e115d2b769d7a6cb8e1219ea91c2e68c004e83fdd79d3c08243b6f8c38c",
+      "minimum-legacy.log": "7050ff551778a29dca98d46444466d6805d8f35a27befb5555bb3341a2890247",
+      "current-postgres.log": "34d0af07e057d58694c02817c4953a65b93647e49ba065d3de833634bb246c74",
+      "minimum-postgres.log": "f4ffe6ea1a51e973907f69ba0bfcb449012ac1c1c7406990e9cd046b4614f6cd",
+      "postgres-custody.log": "52f96c26a39ed25108a6db43d6e11c6051eba8a498a5baab1891adfa7ac7c262",
+      "postgres-stop.log": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "postgres-status.log": "e138ccb54fdb08283c6eb21159c53207bbbbf07077246e2804e18d22efe6e250",
+      "elixir-format.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "compile-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "credo-final.log": "7de5f7f9bed36c169e78c0e532a77b8c577318014b31c68b407e598882567b6d",
+      "sdk-check.log": "dc6f031429974cb46ec6833b81163c36ab8383e4dec195c89948f3d41b4a3571",
+      "docs.log": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+      "doc-links.log": "233681d0f552ebd9189c834283c0a3b6c33c6d850cbda911b9a3378ef3c83a48"
+    }
+  },
+  "scope": {
+    "codec_unchanged": 48,
+    "native_code_changed": false,
+    "rust_tests_rerun": false,
+    "sdk_absent_residual_context_modeled": true,
+    "native_cleanup_eligibility_and_already_terminal_disposal_recovery_complete": false,
+    "ordinary_vm_sdk_or_new_package_platform_public_consumer_qualification_supplied": false,
+    "historical_package_qualification_transferred": false,
+    "all_59_full_parity_acceptance_rows_pending": true,
+    "native_branch_admission_enabled": false,
+    "crash_validation_deferred": true,
+    "crash_handling_qualified": false,
+    "distribution_approved": false,
+    "parity_complete": false
+  },
+  "remaining": [
+    "qualify native residual eligibility before accepting a fresh cleanup, and recover already-terminal original native disposal whose public acknowledgement was lost without stranding its disposition",
+    "complete authorized recovery for refused cleanup in other partial SDK phases",
+    "separate original cached/protected actual SDK-entry fence and demonstrably unentered continuation",
+    "remaining partial states and completed-child ownership-filter audit",
+    "ordinary exact-package platform/source/store/resource/current-minimum-consumer qualification and every remaining P0-P9 gate"
+  ]
+}
