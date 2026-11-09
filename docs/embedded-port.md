@@ -1,23 +1,19 @@
 # Embedded Port setup and operation
 
-The embedded Port bridge is available for development through the public
-`SmolBox.Runtime` API in this source checkout. There is no published native package.
-A separately approved helper runs locally under Elixir supervision. Existing HTTP
-workers can be used in the same Runtime.
-Rustler is a future additional bridge; Kubernetes is a separate future backend.
+The Embedded Port bridge runs a separately approved helper locally under Elixir
+supervision through the public `SmolBox.Runtime` API. Install the native bundle
+alongside the Hex package using the [Embedded Port quickstart](embedded-quickstart.md).
+The same Runtime can use an external HTTP worker. For HTTP setup, see
+[Getting started with an HTTP worker](getting-started.md).
 
-For an HTTP-only application, install the Hex package and follow
-[Getting started](getting-started.md). Embedded development uses the helper
-build and approval steps on this page. The helper and its assets are installed
-separately from the Hex package.
-
-HTTP feature parity is in progress. Current protocol-2 helpers advertise their
-supported features in the approved package manifest. Linux x86-64 and macOS
-Apple Silicon packages have scoped evidence for remote sources, networking,
-managed terminals, checkpoints, branches and exports. Managed volumes and
-stopped disk growth have Linux qualification. Use the package and feature
-guides for platform, source and store limits. The repository audit is at
-`docs/design/embedded-port-http-parity-completion-audit.md`.
+Protocol-2 helpers advertise supported features in the approved package manifest.
+Linux x86_64 and Apple Silicon have scoped evidence for remote sources,
+networking, managed terminals, checkpoints, branches and exports. Managed
+volumes and stopped disk growth have Linux qualification. The audit records
+the deferred public TLS `credential_ref` exchange, crash and CLI-race checks.
+Follow the package and feature guides for platform, source and store limits.
+The sections below include historical results tied to specific package identities.
+[HTTP parity audit](https://github.com/hfiguera/smolbox/blob/v0.5.0/docs/design/embedded-port-http-parity-completion-audit.md)
 
 Newly rebuilt macOS candidates advertise OCI/registry sources and image operations
 through the shared engine. The public ordinary image runner accepts Linux x86_64
@@ -571,7 +567,7 @@ the helper, libraries, root filesystem, disk templates and manifest. Consumers d
 not need Rust. Maintainers build it with `native/package.py` from the verified SDK
 source described in `native/vendor/source.json`.
 
-The [quickstart preview](embedded-quickstart.md) includes Linux ARM64 with
+The [quickstart](embedded-quickstart.md) includes Linux ARM64 with
 accessible `/dev/kvm`, alongside Linux x86_64 and macOS ARM64. The broader
 feature evidence on this page applies to its recorded package and host.
 Prepare approved offline `.smolmachine` artifacts and the manifest's

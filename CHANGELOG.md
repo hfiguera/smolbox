@@ -1,16 +1,25 @@
 # Changelog
 
-## Unreleased
+## 0.5.0
 
-- Add development support for an embedded smolvm Port target through the public
-  supervised Runtime, alongside existing HTTP workers. Require an approved native
-  package, enrolled domain and a store with backend binding and recovery support.
-  Rust is unnecessary for consumers. Rustler and Kubernetes remain future options.
-- Support offline disposable and retained execution, bounded binary files, worker
-  draining and normal Runtime restart with surviving native ownership records.
-  Native records use codec version 16; upgrade every store reader before use.
-  Live interruption qualification and native distribution approval remain pending.
-- Correct embedded input admission to validate the input manifest's `size` field.
+The [Embedded Port quickstart](docs/embedded-quickstart.md) is the default for
+local execution. Install a verified native bundle on Apple Silicon, Linux
+x86_64 or Linux ARM64 without compiling Rust or starting a separate HTTP server.
+The [HTTP worker guide](docs/getting-started.md) remains available for external
+SmolVM servers. The default worker version is **1.22.0**.
+
+- Add a supervised Embedded Port worker through the public Runtime, using the
+  unmodified SmolVM SDK. The installer verifies the archive's GitHub build
+  attestation. Native bundles ship separately from the Hex package.
+- Support disposable and retained VMs, commands and files, worker draining,
+  and ordinary Runtime recovery. The package manifest and feature guides define
+  the platform, source and store requirements for networking, terminals, managed
+  volumes, disk growth, exports, checkpoints and branches.
+- Upgrade shared store readers and writers before admitting Embedded Port work.
+  Apply the backend-bindings migration if you use the supplied PostgreSQL
+  adapter. See [Upgrading to 0.5.0](docs/upgrading.md#upgrade-to-0-5-0).
+- Keep public TLS validation for the explicit `credential_ref` exchange, crash
+  validation, and CLI-race validation deferred.
 
 ## 0.4.3
 

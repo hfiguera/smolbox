@@ -1,10 +1,9 @@
 # Supported platforms
 
-Use this page to choose an Elixir toolchain, worker host and smolvm version for
-SmolBox 0.4.3. To install smolvm, follow
-[Install smolvm 1.22.0](getting-started.md#install-smolvm-1-22-0), then continue
-with the complete [Getting started](getting-started.md) example. For an existing deployment, follow
-[Upgrading SmolBox](upgrading.md).
+Use this page to choose an Elixir toolchain and a host for SmolBox 0.5.0.
+Start with the [Embedded Port quickstart](embedded-quickstart.md) for local
+execution or [Getting started with an HTTP worker](getting-started.md) for
+a separate server. For an existing deployment, see [Upgrading SmolBox](upgrading.md).
 
 ## Elixir and Erlang
 
@@ -13,7 +12,25 @@ The library requires Elixir **1.18 or later**. The repository and primary CI use
 Elixir 1.19.5 / OTP 28.5 and Elixir 1.20.4 / OTP 28.5.
 These tested pairs do not establish support for every possible Elixir/OTP pairing.
 
+## Embedded Port hosts
+
+The bundle installer checks the exact `resize2fs` executable from the
+[release input catalog](https://github.com/hfiguera/smolbox/blob/v0.5.0/native/release-inputs.json).
+Each entry lists the pinned package downloads and the executable path and
+SHA-256. Install the matching host tools before running the quickstart.
+
+| Host | Required preparation |
+| --- | --- |
+| Apple Silicon | A fresh standard account and the Homebrew e2fsprogs 1.47.4 arm64 Tahoe bottle, with `resize2fs` at `/opt/homebrew/opt/e2fsprogs/sbin/resize2fs`. Keep Gatekeeper enabled. |
+| Ubuntu 24.04 x86_64 | Read and write access to `/dev/kvm` and the amd64 e2fsprogs `1.47.0-2.4~exp1ubuntu4.1` packages in the catalog, with `resize2fs` at `/sbin/resize2fs`. |
+| Ubuntu 24.04 ARM64 | Read and write access to `/dev/kvm` and the arm64 e2fsprogs `1.47.0-2.4~exp1ubuntu4.1` packages in the catalog, with `resize2fs` at `/sbin/resize2fs`. |
+
+All three targets have an offline quickstart. For broader feature, source and
+store limits, see [Embedded Port setup and operation](embedded-port.md).
+
 ## Worker hosts and versions
+
+These targets use a separately installed HTTP worker.
 
 | Host | Supported worker path | Required preparation |
 | --- | --- | --- |
@@ -21,10 +38,7 @@ These tested pairs do not establish support for every possible Elixir/OTP pairin
 | macOS Apple Silicon | Native Darwin ARM64 smolvm distribution | Matching agent and VMM libraries, host disk tools and an image for aarch64; a separate account or host for the demo |
 
 Linux ARM64, Windows workers and Intel macOS are outside the tested HTTP worker
-support. For the local Embedded Port preview, see the
-[Embedded Port quickstart](embedded-quickstart.md).
-The controller talks to a worker API; this table describes worker hosts, not a
-requirement that every controller run on the same host as its worker.
+support. The Elixir controller can reach an HTTP worker on a separate host.
 
 The default worker is **smolvm 1.22.0**. Explicitly configured 1.20.2, 1.19.0,
 1.17.0, 1.16.1, 1.16.0, 1.14.6 and 1.14.1 remain selectable under their feature
@@ -36,6 +50,8 @@ worker. Pin checkpoint approvals to the version that captured them as well.
 Worker installation and upgrades are separate from the Elixir dependency.
 
 ## Host prerequisites
+
+The requirements below apply to a separately installed HTTP worker.
 
 Install the complete matching smolvm distribution; do not combine an agent or VMM
 library from another release. Approve prepared images by digest and architecture.

@@ -1,8 +1,9 @@
-# Getting started
+# Getting started with an HTTP worker
 
 Run a Python program in a disposable VM, read `42` from its output file, and
 wait for the VM to be deleted. You can use the downloadable Livebook or a Mix
-application. Both run the same example with SmolBox **0.4.3** and smolvm **1.22.0**.
+application. Both use smolvm **1.22.0**. The Mix steps use SmolBox **0.5.0**,
+and the Livebook uses its own pinned SmolBox version.
 
 Choose one path before preparing the worker:
 
@@ -24,8 +25,8 @@ This is a local demo with an in-memory store. See
 [Supported platforms](supported-platforms.md#host-prerequisites) for host
 requirements. Existing deployments should use [Upgrading SmolBox](upgrading.md).
 
-For local execution through a supervised helper, see the
-[Embedded Port quickstart preview](embedded-quickstart.md).
+For a first local run with a supervised helper, see the
+[Embedded Port quickstart](embedded-quickstart.md).
 
 ## Open the Livebook
 
@@ -82,7 +83,7 @@ Run `mix new smolbox_demo`, enter that directory, and add the following to `deps
 in `mix.exs`. Then run `mix deps.get`.
 
 ```elixir
-{:smolbox, "~> 0.4.3"}
+{:smolbox, "~> 0.5.0"}
 ```
 
 ## 2. Prepare one local worker

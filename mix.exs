@@ -2,7 +2,7 @@ defmodule SmolBox.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/hfiguera/smolbox"
-  @version "0.4.3"
+  @version "0.5.0"
 
   def project do
     [
@@ -101,6 +101,7 @@ defmodule SmolBox.MixProject do
         groups_for_extras: [
           "Start here": [
             "README.md",
+            "docs/embedded-quickstart.md",
             "docs/getting-started.md",
             "docs/supported-platforms.md"
           ],
@@ -109,7 +110,6 @@ defmodule SmolBox.MixProject do
             "docs/persistent-machines.md",
             "docs/client.md",
             "docs/embedded-port.md",
-            "docs/embedded-quickstart.md",
             "docs/images-and-registry-artifacts.md",
             "docs/workloads.md",
             "docs/long-running-exec.md",
@@ -260,13 +260,13 @@ defmodule SmolBox.MixProject do
         ],
         extras: [
           "README.md",
+          "docs/embedded-quickstart.md",
           "docs/getting-started.md",
           "docs/supported-platforms.md",
           {"docs/host-integration.md", title: "Host integration"},
           {"docs/persistent-machines.md", title: "Persistent machines"},
           "docs/client.md",
           "docs/embedded-port.md",
-          "docs/embedded-quickstart.md",
           "docs/images-and-registry-artifacts.md",
           {"docs/workloads.md", title: "Startup workloads"},
           {"docs/long-running-exec.md", title: "Long commands"},

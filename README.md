@@ -4,33 +4,22 @@ Run Python, JavaScript and other programs in disposable or retained Linux VMs
 from Elixir.
 
 SmolBox is a client and supervised execution runtime for
-[smolvm](https://github.com/smol-machines/smolvm). smolvm runs the machines on your
-hosts; SmolBox tracks command identity, results and cleanup under your
-application's supervision tree. You install the workers and prepare the images
-containing the languages and dependencies your programs need.
+[smolvm](https://github.com/smol-machines/smolvm). SmolBox runs VMs through a
+local Embedded Port helper or connects to an external smolvm HTTP worker.
+It tracks command identity, results and cleanup under your application's
+supervision tree.
 
 ## Start here
 
-You need Elixir 1.18 or later and smolvm **1.22.0** on Linux x86_64 with KVM
-or macOS Apple Silicon. Worker installation is included in the walkthrough; the
-Elixir dependency does not install smolvm.
+For a first local run, follow the [Embedded Port quickstart](docs/embedded-quickstart.md).
+It installs a verified native bundle and runs one offline command on Apple Silicon,
+Linux x86_64 or Linux ARM64. You need Elixir 1.18 or later and the
+[host prerequisites](docs/supported-platforms.md#embedded-port-hosts). SmolBox
+starts the helper from your Mix application without a separate HTTP server.
 
-Choose one path to your first execution:
-
-- **Livebook:** [download the notebook](docs/notebooks/getting-started.livemd),
-  import it into a local Livebook and follow its setup instructions. No Mix project
-  or database is needed. New to Livebook? See
-  [installation and import instructions](docs/getting-started.md#open-the-livebook).
-- **Mix application:** follow [Getting started](docs/getting-started.md) to install
-  the dependencies, prepare an image, start a separate worker, run Python and
-  confirm output collection and VM cleanup.
-
-See [Supported platforms](docs/supported-platforms.md) for host prerequisites.
-
-The [embedded Port setup guide](docs/embedded-port.md) describes development
-support for local execution through the public Runtime API, available from this
-source checkout with a separately approved native package.
-For an existing application, use [Upgrading SmolBox](docs/upgrading.md).
+For a separate smolvm server, follow [Getting started with an HTTP worker](docs/getting-started.md)
+or [download the HTTP Livebook](docs/notebooks/getting-started.livemd). For an
+existing application, see [Upgrading SmolBox](docs/upgrading.md).
 
 ## Why use SmolBox?
 
@@ -51,9 +40,8 @@ needs to handle duplicate requests, lost responses, restarts and leftover VMs.
 This fragment illustrates submitting a command to an already configured runtime.
 It assumes `SmolBoxDemo.Runtime` is running and `artifact` and `profile` are
 available in the same code context. For a complete runnable example, use
-[Getting started](docs/getting-started.md) or the notebook. Those walkthroughs
-stop their demo supervisor after cleanup, so this fragment is not a next step
-to paste into IEx after finishing them.
+[Getting started with an HTTP worker](docs/getting-started.md). The walkthrough
+stops its demo supervisor after cleanup.
 
 ```elixir
 alias SmolBox.{Command, ExecutionSpec}
