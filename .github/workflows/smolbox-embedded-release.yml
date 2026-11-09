@@ -22,7 +22,7 @@ jobs:
             target: linux-x86_64
           - runner: ubuntu-24.04-arm
             target: linux-aarch64
-          - runner: macos-15
+          - runner: macos-26
             target: macos-aarch64
     runs-on: ${{ matrix.runner }}
     env:
@@ -43,13 +43,13 @@ jobs:
           python3 -c 'import sys; assert sys.version_info >= (3, 11), "Python 3.11 or later is required"'
           rustup toolchain install "$RUSTUP_TOOLCHAIN" --profile minimal
           if [[ "$TARGET" == macos-* ]]; then
-            brew install e2fsprogs zstd
+            brew install zstd
           else
             sudo apt-get update
-            sudo apt-get install -y e2fsprogs zstd
+            sudo apt-get install -y zstd
           fi
       - name: Build the reviewed package and archive
-        run: bash native/build_release_candidate.sh "$GITHUB_REF_NAME" "$TARGET"
+        run: bash native/build_release_candidate.sh "$GITHUB_REF_NAME" "$TARGET" --install-host-tool
       - name: Attest the archive built on this runner
         id: provenance
         uses: actions/attest-build-provenance@96278af6caaf10aea03fd8d33a09a777ca52d62f # v3.2.0

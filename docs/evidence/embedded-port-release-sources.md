@@ -1,8 +1,8 @@
 # Embedded Port preview source and license review
 
-This review covers the three local preview archives below. Publication approval
-is open. Each final release needs the same checks against its exact payload and
-source artifacts. The release workflow requires an approved input catalog.
+This review covers the three local preview archives below and the corresponding
+inputs approved for tagged candidate builds. Binary publication depends on the
+checks against the final archives described below.
 [Release procedure](../../native/release-review.md#prebuilt-release-procedure)
 
 | Target | Preview archive SHA-256 | Native manifest SHA-256 |
@@ -155,23 +155,55 @@ kernel and returned `42`. SmolBox completed VM cleanup and released the
 reservations, and neither account had a remaining helper or VM process.
 Crash and CLI-race validation remains deferred.
 
-## Publication checks still open
+## Approved candidate inputs
 
-1. Review the assembled notices for the final binaries, including embedded
-   C, Go, and graphics dependencies, and preserve all applicable upstream
-   copyright and license texts. The Cargo inventory and staged notices are
-   review inputs. The final build must confirm its exact linked components.
-2. Record the final post-processing and signing steps for the macOS dylibs
-   and check the notice set against the exact resulting payload.
-3. Put the matching source downloads alongside the binaries and keep them
-   available for as long as the binaries are offered. The package verifier
-   binds native library digests to the approved manifest. Review the LGPL
-   relinking terms against the replacement workflow above. Verify that
-   workflow with the final macOS signing policy and public download.
-   [LGPL-2.1 terms](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html)
-4. Repeat inventory and digest checks on the final signed or attested
-   archives, then approve the exact catalog inputs.
+The [release input catalog](../../native/release-inputs.json) pins the exact
+SmolVM v1.22.0 runtime archive and offline demo for each target. The runtime
+archive digests match the upstream release. The demos match the bytes used in
+the local quickstart and firmware replacement runs. The catalog also pins the
+host disk tools, notice archive, and matching source archive.
 
-The [draft third-party notices](../../native/release-sources/THIRD-PARTY-NOTICES.md)
-and [source downloads index](../../native/release-sources/downloads.tsv) cover
-the materials prepared in this review.
+| Target | Reviewed host tool |
+| --- | --- |
+| Apple Silicon | Homebrew e2fsprogs 1.47.4, arm64 Tahoe bottle, at `/opt/homebrew/opt/e2fsprogs/sbin/resize2fs` |
+| Linux x86_64 | Ubuntu 24.04 amd64 e2fsprogs `1.47.0-2.4~exp1ubuntu4.1` at `/sbin/resize2fs` |
+| Linux ARM64 | Ubuntu 24.04 arm64 e2fsprogs `1.47.0-2.4~exp1ubuntu4.1` at `/sbin/resize2fs` |
+
+The Apple Silicon candidate uses ad-hoc signing with the hypervisor entitlement
+and GitHub build attestation for the archive. The builder packages the SDK's
+`@rpath/libkrun.dylib` from its private link directory and verifies the dylib
+signatures. The approval covers the CLI installer path, with Gatekeeper enabled
+during final qualification. Developer ID signing and notarization are outside
+this candidate policy.
+
+The input prerelease hosts the [matching source archive](https://github.com/hfiguera/smolbox/releases/download/embedded-port-inputs-v1/smolbox-embedded-sources.tar.gz),
+the [notice archive](https://github.com/hfiguera/smolbox/releases/download/embedded-port-inputs-v1/smolbox-embedded-notices.tar.gz),
+and the [download checksums](https://github.com/hfiguera/smolbox/releases/download/embedded-port-inputs-v1/SHA256SUMS).
+The source archive contains the 426 verified entries from the
+[source downloads index](../../native/release-sources/downloads.tsv) and 590
+registry crate sources checked against the native, libkrun, and guest Cargo
+lockfiles. It also carries the upstream build recipes, patches, license texts,
+and component inventories. The candidate builder includes the verified notice
+archive in each attested bundle. The binary release must link to the matching
+source downloads and keep them available while the binaries are offered.
+
+The published sources, notices, demos, and upstream runtime archives were
+downloaded anonymously and verified against the catalog. Local Linux
+packaging checks installed the pinned Ubuntu packages in clean containers,
+confirmed both `resize2fs` digests, and assembled bundles with the reviewed
+demo and notice bytes using the preview helpers. A local Apple Silicon build
+from the pinned SDK passed the candidate packaging and installer checks,
+including the packaged dylib signatures, hypervisor entitlement, and notice
+archive digest.
+
+## Final archive checks
+
+1. Confirm the actual linked and bundled components against the
+   [third-party notices](../../native/release-sources/THIRD-PARTY-NOTICES.md),
+   including embedded C, Go, and graphics dependencies. Verify the final source
+   and notice links against the published bytes.
+2. Record the final archive and manifest digests, verify the build attestations,
+   and confirm the macOS signatures and hypervisor entitlement.
+3. Run the public CLI download and install on both toolchains per platform.
+   Keep Gatekeeper enabled on macOS and verify the replacement workflow against
+   the final archive. [LGPL-2.1 terms](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html)

@@ -1,8 +1,8 @@
 # Embedded Port release review
 
-The distribution review is complete as a gap assessment. **Publication remains
-blocked.** No Developer ID signature, notarization, publisher attestation or license
-compliance approval is claimed by the ordinary development proofs.
+The release inputs for the three Embedded Port targets are approved for
+candidate builds. **Binary publication remains gated** on checking the
+resulting payloads and qualifying the public install.
 
 ## Integrity and provenance
 
@@ -77,15 +77,12 @@ and subsequent isolated rebuild distinguish successful package signing from inpu
 preservation. Neither action opens the quarantined SDK domain or grants native
 feature acceptance.
 
-macOS development builds are ad-hoc signed with hypervisor entitlements. Linux
-packages are digest pinned. `--signing-identity` supports an explicit macOS identity
-with timestamped library signatures and hardened helper signing, but this path has
-not been qualified with a distribution identity. The command-line release
-candidate workflow uses ad-hoc signing on macOS. Public distribution under this
-policy requires explicit approval and a clean-account test of the exact public
-download and install path with Gatekeeper enabled. A Developer ID build, if
-selected, requires its own verification and consumer runs against the signed
-and notarized artifact.
+The macOS CLI candidate policy uses ad-hoc signing with the hypervisor
+entitlement. The installer authenticates the enclosing archive with GitHub
+build attestation. The final candidate must pass a clean-account test of
+the exact public download and install path with Gatekeeper enabled. The
+package builder retains its explicit `--signing-identity` option for a
+separately qualified Developer ID distribution.
 
 ## License and source delivery gaps
 
@@ -103,10 +100,10 @@ configuration, patches and build recipes; provide applicable corresponding sourc
 and satisfy delivery/relinking obligations. Audit the guest agent and root filesystem
 packages as well. Copying license texts alone does not close this gate.
 
-The [preview source review](../docs/evidence/embedded-port-release-sources.md)
-maps all three candidate bundles to the upstream artifacts and inventories
-their native, guest and demo contents. It records the exact firmware source,
-the staged corresponding-source materials and the open publication checks.
+The [source review](../docs/evidence/embedded-port-release-sources.md) maps all
+three approved inputs to upstream artifacts and inventories their native,
+guest, and demo contents. It records the firmware source, verified public
+source downloads, notice delivery, and final archive checks.
 
 ## Development admission and distribution gate
 
@@ -141,36 +138,20 @@ published by this change. Local manifest approval is not publisher authenticatio
 The manual [release workflow](../.github/workflows/smolbox-embedded-release.yml)
 builds Apple Silicon, Linux x86_64, and Linux ARM64 candidates on GitHub-hosted
 runners. It requires an explicit Git tag matching the Mix package version and
-an approved entry in `native/release-inputs.json` for each target. Keep the
-catalog absent until the corresponding source, notice, and distribution review
-is complete. Each target entry uses this shape:
+an approved entry in the [release input catalog](release-inputs.json) for each
+target. Each entry pins the runtime archive, standalone offline demo, host tool
+package and installed executable. The shared entries pin the notices and source
+archive. Repeat the input review before changing a pin.
 
-```json
-{
-  "distribution_approved": true,
-  "source_review": "docs/evidence/embedded-port-release-sources.md",
-  "runtime": {"url": "https://...", "sha256": "64 lowercase hexadecimal digits"},
-  "demo": {"url": "https://...", "sha256": "64 lowercase hexadecimal digits"},
-  "resize2fs": {
-    "path": "/absolute/path/to/resize2fs",
-    "sha256": "64 lowercase hexadecimal digits"
-  }
-}
-```
+The runtime input has one enclosing directory with `lib/`, `agent-rootfs/`,
+and the two `.ext4.zst` disk templates. The builder expands the templates,
+includes the verified notices, and checks that its `resize2fs` matches the
+reviewed path and digest. The installer checks the same values on the consumer
+host. List the supported host profiles and link the matching sources in the
+binary release notes.
 
-Use keys `macos-aarch64`, `linux-x86_64`, and `linux-aarch64` at the top level.
-The runtime input is a tarball with one enclosing directory containing `lib/`,
-`agent-rootfs/`, `storage-template.ext4`, and `overlay-template.ext4`. The demo
-input is a digest-pinned standalone offline `.smolmachine` with its declared
-libraries in the archive and any disk templates within the quickstart profile.
-Review the contents of that image along with the runtime inputs. Record exact revisions,
-build recipes, corresponding-source delivery, and applicable notices in the
-linked review. The builder checks that its `resize2fs` matches the reviewed
-path and digest. The installer checks the same values on the consumer host.
-List the resulting supported host profiles in the release notes.
-
-1. Dispatch the workflow on the release tag through the protected
-   `embedded-port-release` environment.
+1. Configure deployment protections for the `embedded-port-release` GitHub
+   environment, then dispatch the workflow on the release tag.
 2. Keep the platform archives and their matching `.sigstore.jsonl`
    bundles together. The workflow emits candidates as run artifacts. Release
    assets use these same filenames and bytes.
