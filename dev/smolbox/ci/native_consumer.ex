@@ -655,7 +655,7 @@ defmodule SmolBox.CI.NativeConsumer do
   defp preserve_retained(_result, _log_path), do: :ok
 
   defp proof_files(consumer, tooling, options) do
-    script = proof_script(options)
+    {script, support_kind, names} = proof_selection(options)
 
     files = [
       {"scripts/#{script}", Path.join(consumer, "native-proof.exs")},
@@ -669,93 +669,44 @@ defmodule SmolBox.CI.NativeConsumer do
         do: [{"scripts/#{support}", Path.join(consumer, support)} | files],
         else: files
 
-    proof_support(files, tooling, options)
+    files ++ proof_support(tooling, support_kind, names)
   end
 
-  defp proof_script(options) do
+  defp proof_selection(options) do
     cond do
-      options[:native_branches] || options[:native_checkpoints] ->
-        "embedded-branches-runtime-proof.exs"
+      Enum.any?([:native_branches, :native_checkpoints], &options[&1]) ->
+        {"embedded-branches-runtime-proof.exs", :example, ~w(branch_demo.ex branch_control.ex)}
 
       options[:native_images] ->
-        "embedded-images-runtime-proof.exs"
+        {"embedded-images-runtime-proof.exs", :example,
+         ~w(images_demo.ex images_control.ex owned_control.ex)}
 
       options[:native_growth] ->
-        "embedded-growth-runtime-proof.exs"
+        {"embedded-growth-runtime-proof.exs", :example,
+         ~w(growth_demo.ex growth_control.ex owned_control.ex)}
 
       options[:native_volume] ->
-        "embedded-volume-runtime-proof.exs"
+        {"embedded-volume-runtime-proof.exs", :example, ~w(volume_demo.ex volume_control.ex)}
 
-      options[:native_network] || options[:native_workload] ->
-        "embedded-network-proof.exs"
+      Enum.any?([:native_network, :native_workload], &options[&1]) ->
+        {"embedded-network-proof.exs", :native,
+         ~w(ordinary_proof.py network_fixture.py network_proof.py)}
 
       options[:native_public] ->
-        "embedded-runtime-proof.exs"
+        {"embedded-runtime-proof.exs", :example, ["demo.ex"]}
 
       true ->
-        "embedded-port-proof.exs"
+        {"embedded-port-proof.exs", :native, []}
     end
   end
 
-  defp proof_support(files, tooling, options) do
-    cond do
-      options[:native_branches] || options[:native_checkpoints] ->
-        files ++
-          Enum.map(~w(branch_demo.ex branch_control.ex), fn name ->
-            {"examples/embedded_port/lib/#{name}", Path.join(tooling, name)}
-          end) ++
-          [
-            {"examples/embedded_port/config.example.exs",
-             Path.join(tooling, "config.example.exs")}
-          ]
+  defp proof_support(tooling, :example, names) do
+    Enum.map(names, &{"examples/embedded_port/lib/#{&1}", Path.join(tooling, &1)}) ++
+      [{"examples/embedded_port/config.example.exs", Path.join(tooling, "config.example.exs")}]
+  end
 
-      options[:native_images] ->
-        files ++
-          Enum.map(~w(images_demo.ex images_control.ex owned_control.ex), fn name ->
-            {"examples/embedded_port/lib/#{name}", Path.join(tooling, name)}
-          end) ++
-          [
-            {"examples/embedded_port/config.example.exs",
-             Path.join(tooling, "config.example.exs")}
-          ]
-
-      options[:native_growth] ->
-        files ++
-          Enum.map(~w(growth_demo.ex growth_control.ex owned_control.ex), fn name ->
-            {"examples/embedded_port/lib/#{name}", Path.join(tooling, name)}
-          end) ++
-          [
-            {"examples/embedded_port/config.example.exs",
-             Path.join(tooling, "config.example.exs")}
-          ]
-
-      options[:native_volume] ->
-        files ++
-          Enum.map(~w(volume_demo.ex volume_control.ex), fn name ->
-            {"examples/embedded_port/lib/#{name}", Path.join(tooling, name)}
-          end) ++
-          [
-            {"examples/embedded_port/config.example.exs",
-             Path.join(tooling, "config.example.exs")}
-          ]
-
-      options[:native_network] || options[:native_workload] ->
-        files ++
-          Enum.map(~w(ordinary_proof network_fixture network_proof), fn name ->
-            {"native/smolbox-port/tests/#{name}.py", Path.join(tooling, "#{name}.py")}
-          end)
-
-      options[:native_public] ->
-        files ++
-          [
-            {"examples/embedded_port/lib/demo.ex", Path.join(tooling, "demo.ex")},
-            {"examples/embedded_port/config.example.exs",
-             Path.join(tooling, "config.example.exs")}
-          ]
-
-      true ->
-        files
-    end
+  defp proof_support(tooling, :native, names) do
+    Enum.map(names, &{"native/smolbox-port/tests/#{&1}", Path.join(tooling, &1)})
   end
 
   defp scope(options) do

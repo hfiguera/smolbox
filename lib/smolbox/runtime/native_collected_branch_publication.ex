@@ -4,7 +4,7 @@ defmodule SmolBox.Runtime.NativeCollectedBranchPublication do
   alias SmolBox.Embedded.NativeBranchAdmission
   alias SmolBox.Embedded.NativeCollectedBranchPublication, as: Publication
   alias SmolBox.Embedded.NativeCollectedBranchPublicationResult
-  alias SmolBox.Runtime.{MachineSession, NativeResolution, Session, Target}
+  alias SmolBox.Runtime.{Deadline, MachineSession, NativeResolution, Session, Target}
 
   def run(config, coordinator, child, version) do
     with :ok <- ManagedMachine.validate(child),
@@ -36,7 +36,7 @@ defmodule SmolBox.Runtime.NativeCollectedBranchPublication do
   end
 
   defp fenced(config, coordinator, child, version, worker, deadline) do
-    with {:ok, _} <- remaining(deadline),
+    with {:ok, _} <- Deadline.remaining(deadline, :branch),
          {:ok, parent} <- MachineSession.claim(config, child.branch.source),
          true <- NativeBranchAdmission.collected_publication_pending?(parent, child) do
       NativeResolution.run(
@@ -57,11 +57,11 @@ defmodule SmolBox.Runtime.NativeCollectedBranchPublication do
   end
 
   defp accept(config, parent, child, version, worker, deadline) do
-    with {:ok, _} <- remaining(deadline),
+    with {:ok, _} <- Deadline.remaining(deadline, :branch),
          {:ok, current} <- MachineSession.claim(config, ManagedMachine.key(parent)),
-         {:ok, _} <- remaining(deadline),
+         {:ok, _} <- Deadline.remaining(deadline, :branch),
          {:ok, accepted} <-
-           advance(
+           MachineSession.advance_unknown_branch(
              config,
              current,
              child,
@@ -81,9 +81,9 @@ defmodule SmolBox.Runtime.NativeCollectedBranchPublication do
 
   defp dispatch(config, child, worker, deadline) do
     result =
-      with {:ok, _} <- remaining(deadline),
+      with {:ok, _} <- Deadline.remaining(deadline, :branch),
            {:ok, parent} <- MachineSession.claim(config, child.branch.source),
-           {:ok, timeout} <- remaining(deadline),
+           {:ok, timeout} <- Deadline.remaining(deadline, :branch),
            reference =
              worker
              |> Target.connection(parent)
@@ -99,10 +99,16 @@ defmodule SmolBox.Runtime.NativeCollectedBranchPublication do
                 Backend.invoke(reference, :publish_collected_branch_material, [parent, child])}
              end),
            true <- result_bound?(result, parent, child, worker),
-           {:ok, _} <- remaining(deadline),
+           {:ok, _} <- Deadline.remaining(deadline, :branch),
            {:ok, parent} <- MachineSession.claim(config, child.branch.source),
-           {:ok, _} <- remaining(deadline),
-           do: advance(config, parent, child, {:complete_collected_publication, result}),
+           {:ok, _} <- Deadline.remaining(deadline, :branch),
+           do:
+             MachineSession.advance_unknown_branch(
+               config,
+               parent,
+               child,
+               {:complete_collected_publication, result}
+             ),
            else: (
              {:native_response, {:error, %Error{evidence: :not_dispatched} = error}} ->
                {:definitive_rejection, error}
@@ -117,7 +123,7 @@ defmodule SmolBox.Runtime.NativeCollectedBranchPublication do
                Session.error(:identity_conflict, :branch)
            )
 
-    uncertain(result)
+    Error.uncertain(result, :branch)
   end
 
   defp result_bound?(result, parent, child, worker) do
@@ -135,28 +141,5 @@ defmodule SmolBox.Runtime.NativeCollectedBranchPublication do
       (saved != nil and version in [saved.version, saved.completion_version])
   end
 
-  defp advance(config, parent, child, change),
-    do:
-      MachineSession.store(config, :branch_advance, [
-        ManagedMachine.key(parent),
-        Session.guard(parent),
-        child.id,
-        :unknown,
-        change,
-        config.clock.now()
-      ])
-
-  defp remaining(deadline) do
-    timeout = deadline - now()
-    if timeout > 0, do: {:ok, timeout}, else: Session.error(:expired, :branch)
-  end
-
-  defp uncertain({:error, %Error{} = error}),
-    do: {:error, %{error | evidence: :dispatch_uncertain, operation: :branch}}
-
-  defp uncertain({:definitive_rejection, %Error{} = error}),
-    do: {:error, %{error | operation: :branch}}
-
-  defp uncertain(value), do: value
   defp now, do: System.monotonic_time(:millisecond)
 end

@@ -5,7 +5,7 @@ defmodule SmolBox.Runtime.NativePartialBranchCollection do
   alias SmolBox.Embedded.NativePartialBranchCollection, as: Collection
   alias SmolBox.Embedded.NativePartialBranchCollectionResult
   alias SmolBox.Embedded.PartialBranchCollectionCandidate
-  alias SmolBox.Runtime.{MachineSession, NativeResolution, Session, Target}
+  alias SmolBox.Runtime.{Deadline, MachineSession, NativeResolution, Session, Target}
 
   def run(config, coordinator, child, version) do
     with :ok <- ManagedMachine.validate(child),
@@ -45,7 +45,7 @@ defmodule SmolBox.Runtime.NativePartialBranchCollection do
   defp require_candidate_operation(_, _), do: :ok
 
   defp fenced(config, coordinator, child, version, worker, deadline) do
-    with {:ok, _} <- remaining(deadline),
+    with {:ok, _} <- Deadline.remaining(deadline, :branch),
          {:ok, parent} <- MachineSession.claim(config, child.branch.source),
          true <- NativeBranchAdmission.partial_collection_pending?(parent, child) do
       NativeResolution.run(
@@ -76,9 +76,9 @@ defmodule SmolBox.Runtime.NativePartialBranchCollection do
        when not is_nil(saved), do: :ok
 
   defp inspect_candidate(config, parent, child, worker, deadline) do
-    with {:ok, _} <- remaining(deadline),
+    with {:ok, _} <- Deadline.remaining(deadline, :branch),
          {:ok, current} <- MachineSession.claim(config, ManagedMachine.key(parent)),
-         {:ok, timeout} <- remaining(deadline),
+         {:ok, timeout} <- Deadline.remaining(deadline, :branch),
          reference =
            worker
            |> Target.connection(current)
@@ -104,7 +104,7 @@ defmodule SmolBox.Runtime.NativePartialBranchCollection do
            candidate.epoch == Target.connection(worker).context.epoch and
              candidate.platform ==
                Atom.to_string(Target.connection(worker).context.config.platform),
-         {:ok, _} <- remaining(deadline),
+         {:ok, _} <- Deadline.remaining(deadline, :branch),
          do: :ok,
          else: (
            {:native_response, {:error, %Error{} = error}} ->
@@ -119,11 +119,11 @@ defmodule SmolBox.Runtime.NativePartialBranchCollection do
   end
 
   defp accept_checked(config, parent, child, version, worker, deadline) do
-    with {:ok, _} <- remaining(deadline),
+    with {:ok, _} <- Deadline.remaining(deadline, :branch),
          {:ok, current} <- MachineSession.claim(config, ManagedMachine.key(parent)),
-         {:ok, _} <- remaining(deadline),
+         {:ok, _} <- Deadline.remaining(deadline, :branch),
          {:ok, accepted} <-
-           advance(
+           MachineSession.advance_unknown_branch(
              config,
              current,
              child,
@@ -143,9 +143,9 @@ defmodule SmolBox.Runtime.NativePartialBranchCollection do
 
   defp dispatch(config, child, worker, deadline) do
     result =
-      with {:ok, _} <- remaining(deadline),
+      with {:ok, _} <- Deadline.remaining(deadline, :branch),
            {:ok, parent} <- MachineSession.claim(config, child.branch.source),
-           {:ok, timeout} <- remaining(deadline),
+           {:ok, timeout} <- Deadline.remaining(deadline, :branch),
            reference =
              worker
              |> Target.connection(parent)
@@ -161,10 +161,16 @@ defmodule SmolBox.Runtime.NativePartialBranchCollection do
                 Backend.invoke(reference, :collect_partial_branch, [parent, child])}
              end),
            true <- NativePartialBranchCollectionResult.bound?(result, child),
-           {:ok, _} <- remaining(deadline),
+           {:ok, _} <- Deadline.remaining(deadline, :branch),
            {:ok, parent} <- MachineSession.claim(config, child.branch.source),
-           {:ok, _} <- remaining(deadline),
-           do: advance(config, parent, child, {:complete_partial_collection, result}),
+           {:ok, _} <- Deadline.remaining(deadline, :branch),
+           do:
+             MachineSession.advance_unknown_branch(
+               config,
+               parent,
+               child,
+               {:complete_partial_collection, result}
+             ),
            else: (
              {:native_response, {:error, %Error{evidence: :not_dispatched} = error}} ->
                {:definitive_rejection, error}
@@ -179,7 +185,7 @@ defmodule SmolBox.Runtime.NativePartialBranchCollection do
                Session.error(:identity_conflict, :branch)
            )
 
-    uncertain(result)
+    Error.uncertain(result, :branch)
   end
 
   defp matching_version?(child, version) do
@@ -187,28 +193,5 @@ defmodule SmolBox.Runtime.NativePartialBranchCollection do
     version == child.version or (saved != nil and version == saved.version)
   end
 
-  defp advance(config, parent, child, change),
-    do:
-      MachineSession.store(config, :branch_advance, [
-        ManagedMachine.key(parent),
-        Session.guard(parent),
-        child.id,
-        :unknown,
-        change,
-        config.clock.now()
-      ])
-
-  defp remaining(deadline) do
-    timeout = deadline - now()
-    if timeout > 0, do: {:ok, timeout}, else: Session.error(:expired, :branch)
-  end
-
-  defp uncertain({:error, %Error{} = error}),
-    do: {:error, %{error | evidence: :dispatch_uncertain, operation: :branch}}
-
-  defp uncertain({:definitive_rejection, %Error{} = error}),
-    do: {:error, %{error | operation: :branch}}
-
-  defp uncertain(value), do: value
   defp now, do: System.monotonic_time(:millisecond)
 end

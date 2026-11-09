@@ -142,6 +142,12 @@ defmodule SmolBox.Error do
   end
 
   @doc false
+  def uncertain(
+        {:definitive_rejection, %__MODULE__{evidence: :not_dispatched} = error},
+        operation
+      ),
+      do: {:error, %{error | operation: operation}}
+
   def uncertain({:error, %__MODULE__{} = error}, operation),
     do: {:error, %{error | operation: operation, evidence: :dispatch_uncertain}}
 

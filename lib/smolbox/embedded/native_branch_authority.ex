@@ -232,12 +232,14 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
 
   defp creation_proofs_preserved?(original, saved, version),
     do:
-      NativeCollectedBranchPublication.preserved?(
+      collection_preserved?(
+        NativeCollectedBranchPublication,
         original.collected_publication,
         saved.collected_publication,
         version
       ) and
-        NativePartialBranchCollection.preserved?(
+        collection_preserved?(
+          NativePartialBranchCollection,
           original.partial_collection,
           saved.partial_collection,
           version
@@ -253,6 +255,27 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
           version
         ) and
         NativeUnbootedBranchDisposal.preserved?(original.disposal, saved.disposal, version)
+
+  defp collection_preserved?(_module, nil, nil, _version), do: true
+
+  defp collection_preserved?(
+         module,
+         nil,
+         %{__struct__: module, version: version, proof: nil, completion_version: nil},
+         version
+       ),
+       do: true
+
+  defp collection_preserved?(
+         module,
+         %{__struct__: module, proof: nil} = before,
+         %{__struct__: module} = after_action,
+         _version
+       ),
+       do: %{after_action | proof: nil, completion_version: nil} == before
+
+  defp collection_preserved?(module, %{__struct__: module} = saved, saved, _version), do: true
+  defp collection_preserved?(_module, _before, _saved, _version), do: false
 
   defp deletion_authorized?(record, %{state: :deleted} = next),
     do:

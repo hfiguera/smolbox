@@ -153,18 +153,4 @@ defmodule SmolBox.Embedded.NativeCollectedBranchPublication do
           )
 
   def record?(_), do: false
-  def preserved?(nil, nil, _), do: true
-
-  def preserved?(
-        nil,
-        %__MODULE__{version: version, proof: nil, completion_version: nil},
-        version
-      ),
-      do: true
-
-  def preserved?(%__MODULE__{proof: nil} = before, %__MODULE__{} = after_action, _),
-    do: %{after_action | proof: nil, completion_version: nil} == before
-
-  def preserved?(%__MODULE__{} = saved, saved, _), do: true
-  def preserved?(_, _, _), do: false
 end
