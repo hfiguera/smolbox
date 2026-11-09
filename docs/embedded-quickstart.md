@@ -1,13 +1,10 @@
-# Try the Embedded Port quickstart
+# Embedded Port quickstart
 
-This preview runs one offline command in a disposable VM, prints `42`, and
-checks that SmolBox released the reservation. The Runtime starts the local
-helper. The demo uses an in-memory store.
-
-This checkout selects the GitHub-attested SmolVM 1.34.0 bundle from
-[v0.5.1-rc.1](https://github.com/hfiguera/smolbox/releases/tag/v0.5.1-rc.1).
-The [HTTP getting-started guide](getting-started.md) uses the published Hex
-walkthrough.
+Run one offline command in a disposable VM, print `42`, and verify that
+SmolBox released its reservation. The Runtime starts a local helper and
+uses an in-memory store for the demo. The verified bundle contains the
+helper, SmolVM 1.34.0 runtime assets and demo image. The example runs without
+Rust or a separate SmolVM HTTP server.
 
 ## Prerequisites
 
@@ -15,20 +12,27 @@ walkthrough.
   needs read and write access to a working `/dev/kvm`.
 - A dedicated standard account with empty smolvm state. The helper uses the
   SDK's default data paths for that account.
-- The exact `resize2fs` recorded by the bundle. The installer checks its path
-  and digest. This is a current constraint on which hosts a prebuilt bundle
-  can support. See [Embedded Port host preparation](embedded-port.md#package-and-host-preparation).
-- `tar`. The public download route also uses `curl` and a GitHub CLI version
-  that supports `gh attestation verify`.
+- The exact `resize2fs` listed for your host in
+  [Supported platforms](supported-platforms.md#embedded-port-hosts).
+  The installer verifies its path and digest.
+- `tar`, `curl`, and a GitHub CLI version that supports
+  `gh attestation verify`.
 
 ## Install and run
 
-In a Mix application with SmolBox installed, run `mix deps.get` and
-`mix deps.compile`. Run the installer with a new, private install directory.
-By default it selects the tag matching the installed SmolBox version. Use
-`--tag` to select a specific release.
+Run `mix new smolbox_demo`, enter the new directory, and add SmolBox to
+`deps/0` in `mix.exs`.
+
+```elixir
+{:smolbox, "~> 0.5.1"}
+```
+
+Install the dependency and bundle into a new, private directory. The
+installer selects the GitHub release tag that matches the dependency version.
 
 ```sh
+mix deps.get
+mix deps.compile
 mix smolbox.embedded.install --install-dir "$HOME/smolbox-demo-install"
 ```
 
@@ -52,3 +56,5 @@ dedicated account and records its identity in the run directory. A successful
 run prints `42` and `VM cleanup complete`. If startup or cleanup is uncertain,
 preserve the run directory and its SDK state for inspection. See the
 [operation guide](embedded-port.md) for retained machines and upgrade procedures.
+
+For a separate SmolVM server, see [Getting started with an HTTP worker](getting-started.md).

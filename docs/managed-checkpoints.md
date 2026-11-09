@@ -252,4 +252,4 @@ power-loss or production filesystem durability qualification. macOS managed capt
 has not been live-qualified in this campaign.
 
 See [Supported platforms](supported-platforms.md) for current worker selection
-and [Testing reports](testing.md) for recorded checks and their limits.
+and [Testing reports](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/testing.md) for recorded checks and their limits.

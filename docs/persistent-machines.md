@@ -181,9 +181,8 @@ this reuses the saved native request. A matching saved acknowledgement returns
 without contacting a helper. Missing, late or mismatched evidence keeps the child
 reservation. Success releases only ordinary child capacity: source dependency and
 extra backing need separate branch retirement/release. HTTP and released/restarted
-children reject these native-only calls. This development integration remains
-behind the branch gate; public native branch admission stays disabled pending
-remaining lifecycle and ordinary qualification requirements.
+children reject these native-only calls. The approved helper and store must
+both support the relevant branch operation.
 
 Machines are local to their assigned worker. Durable records recover management;
 they do not back up disks, restore lost files, migrate guests, or transparently
@@ -276,7 +275,7 @@ stops/starts, reads again, explicitly deletes, verifies absence, and checks zero
 reserved resources. Output reports the machine name so both processes can be
 compared. A failure retains evidence and may require the resolution procedure.
 
-See [validation evidence](persistent-machines-validation.md) for the tested scope
+See [validation evidence](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/persistent-machines-validation.md) for the tested scope
 and remaining qualification limits.
 
 ## Interactive use

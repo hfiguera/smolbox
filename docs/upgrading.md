@@ -1,19 +1,18 @@
 # Upgrading SmolBox
 
 Use this guide for an existing deployment. For a new application, begin with
-[Getting started](getting-started.md). Release descriptions are in the
+[Embedded Port quickstart](embedded-quickstart.md). Release descriptions are in the
 [changelog](https://github.com/hfiguera/smolbox/blob/main/CHANGELOG.md); the guides
 below describe actions needed when crossing each release boundary.
 
-For an embedded worker built from the source checkout, follow the
+For an existing embedded worker, follow the
 [Embedded Port upgrade and drain procedure](embedded-port.md#upgrade-and-drain-procedure)
 for helper approval and shared-store reader compatibility.
 
 ## Choose your upgrade path
 
-When upgrading to 0.4.3, follow applicable steps in release order. For example,
-a 0.3.1 application needs the 0.4.0, 0.4.1, 0.4.2 and 0.4.3 instructions. You can deploy
-the target library once, after accounting for all intervening requirements.
+When upgrading to 0.5.1, follow applicable steps in release order. You can
+deploy the target library once, after accounting for the intervening requirements.
 
 | If your application predates | Required action | Detailed instructions |
 | --- | --- | --- |
@@ -25,11 +24,43 @@ the target library once, after accounting for all intervening requirements.
 | 0.4.1 | Pin workers and checkpoint approvals, or separately adopt smolvm 1.22.0; coordinate readers of runtime receipts | [Upgrade to 0.4.1](upgrading-to-0.4.1.md) |
 | 0.4.2 | Upgrade every shared reader and custom error decoder before recording `:unsupported_network_policy` | [Upgrade to 0.4.2](upgrading-to-0.4.2.md) |
 | 0.4.3 | Update and restart controllers; account for the independent maintenance task if monitoring task counts | [Upgrade to 0.4.3](upgrading-to-0.4.3.md) |
+| 0.5.0 | Apply the PostgreSQL example's backend-bindings migration and coordinate store readers before enabling Embedded Port | [Upgrade to 0.5.0](#upgrade-to-0-5-0) |
+| 0.5.1 | Pin existing workers and checkpoint captures, or adopt SmolVM 1.34.0 in a separately prepared deployment | [Upgrade to 0.5.1](#upgrade-to-0-5-1) |
 
 SQL migrations belong to the supplied PostgreSQL example. Custom stores need
 equivalent atomic behavior rather than those particular tables. Applications
 coming from 0.1.2 or earlier must also account for the
 [upgrades within 0.1.x](upgrading-within-0.1.x.md).
+
+## Upgrade to 0.5.0
+
+Keep existing HTTP worker versions and approvals pinned. Existing HTTP workers
+can continue to serve the upgraded Runtime. Embedded Port targets require a
+separate approved native package and enrolled domain.
+
+Before enabling Embedded Port on a shared store, upgrade every controller,
+reader and writer together. Native records select newer codecs according to
+their retained history, and older readers can reject those records even after
+cleanup. Apply migration `20261010000000_backend_bindings` before using the
+supplied PostgreSQL adapter. Custom adapters must supply the corresponding
+atomic backend and recovery capabilities.
+
+For a retained Embedded Port domain, follow the
+[upgrade and drain procedure](embedded-port.md#upgrade-and-drain-procedure).
+Keep its installed paths, manifest and domain identity available during the
+upgrade.
+
+## Upgrade to 0.5.1
+
+SmolBox 0.5.1 selects SmolVM 1.34.0 when a worker or checkpoint approval omits
+`runtime_version`. Set `runtime_version: "1.22.0"` on each existing 1.22.0
+worker and its checkpoint approvals before updating the Elixir dependency.
+Keep approvals pinned to the version and platform that captured each checkpoint.
+
+The Embedded Port installer selects the 1.34.0 bundle by the SmolBox version.
+Keep the original native package and domain available while draining and
+reconciling its work. The 1.34.0 qualification used a fresh domain with its own
+package and account. [Embedded Port upgrade and drain procedure](embedded-port.md#upgrade-and-drain-procedure)
 
 ## Before changing the dependency
 

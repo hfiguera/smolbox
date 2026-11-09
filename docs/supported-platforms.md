@@ -1,10 +1,8 @@
 # Supported platforms
 
-Use this page to choose an Elixir toolchain, worker host and smolvm version.
-This checkout uses the [SmolVM 1.34.0 distribution](https://github.com/smol-machines/smolvm/releases/tag/v1.34.0).
-The [Getting started](getting-started.md) example uses published SmolBox 0.4.3
-and smolvm 1.22.0. For an existing deployment, follow
-[Upgrading SmolBox](upgrading.md).
+SmolBox 0.5.1 defaults to **SmolVM 1.34.0** for both backends. Use the
+[Embedded Port quickstart](embedded-quickstart.md) for a local helper or the
+[HTTP worker quickstart](getting-started.md) for a separate SmolVM server.
 
 ## Elixir and Erlang
 
@@ -13,6 +11,22 @@ The library requires Elixir **1.18 or later**. The repository and primary CI use
 Elixir 1.19.5 / OTP 28.5 and Elixir 1.20.4 / OTP 28.5.
 These tested pairs do not establish support for every possible Elixir/OTP pairing.
 
+## Embedded Port hosts
+
+The bundle installer checks the exact `resize2fs` executable from the
+[release input catalog](https://github.com/hfiguera/smolbox/blob/v0.5.1/native/release-inputs.json).
+Each entry lists the pinned package downloads and the executable path and
+SHA-256. Install the matching host tools before running the quickstart.
+
+| Host | Required preparation |
+| --- | --- |
+| Apple Silicon | A fresh standard account and the Homebrew e2fsprogs 1.47.4 arm64 Tahoe bottle, with `resize2fs` at `/opt/homebrew/opt/e2fsprogs/sbin/resize2fs`. Keep Gatekeeper enabled. |
+| Ubuntu 24.04 x86_64 | Read and write access to `/dev/kvm` and the amd64 e2fsprogs `1.47.0-2.4~exp1ubuntu4.1` packages in the catalog, with `resize2fs` at `/sbin/resize2fs`. |
+| Ubuntu 24.04 ARM64 | Read and write access to `/dev/kvm` and the arm64 e2fsprogs `1.47.0-2.4~exp1ubuntu4.1` packages in the catalog, with `resize2fs` at `/sbin/resize2fs`. |
+
+All three targets have an offline quickstart. For broader feature, source and
+store limits, see [Embedded Port setup and operation](embedded-port.md).
+
 ## Worker hosts and versions
 
 | Host | Supported worker path | Required preparation |
@@ -20,14 +34,9 @@ These tested pairs do not establish support for every possible Elixir/OTP pairin
 | Linux x86_64 | Native smolvm with working KVM | Access to `/dev/kvm`, the complete worker distribution, host disk tools and an image for x86_64 |
 | macOS Apple Silicon | Native Darwin ARM64 smolvm distribution | Matching agent and VMM libraries, host disk tools and an image for aarch64; a separate account or host for the demo |
 
-The HTTP worker matrix covers Linux x86_64 and macOS Apple Silicon.
-The 1.34.0 Embedded Port bundle also supports Linux ARM64.
-[Embedded Port quickstart](embedded-quickstart.md)
+The Elixir controller can connect to a worker on a separate host.
 
-The controller talks to a worker API; this table describes worker hosts, not a
-requirement that every controller run on the same host as its worker.
-
-This checkout defaults to **smolvm 1.34.0**. Explicitly configured 1.22.0, 1.20.2, 1.19.0,
+The HTTP worker defaults to **smolvm 1.34.0**. Explicitly configured 1.22.0, 1.20.2, 1.19.0,
 1.17.0, 1.16.1, 1.16.0, 1.14.6 and 1.14.1 remain selectable under their feature
 limits. The worker must report the exact configured version. A mismatch blocks
 new work; there is no automatic fallback or admission of arbitrary newer releases.
@@ -48,7 +57,7 @@ onward need working `resize2fs` in the worker environment. Install your Linux
 distribution's `e2fsprogs` package, or `brew install e2fsprogs` on macOS. Before
 admitting work, verify file persistence through a stop/start cycle on a fresh
 machine you own. A successful health response alone does not verify disk
-preparation. The [historical prerequisite report](compatibility.md#host-preparation-prerequisites)
+preparation. The [historical prerequisite report](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/compatibility.md#host-preparation-prerequisites)
 records the failures that led to this requirement.
 
 The Linux demo uses a fresh `SMOLVM_DATA_DIR` and separate HTTP and guest rollout
@@ -69,13 +78,11 @@ and platform restrictions:
 | Outbound networking | [Network access](network-access.md); explicit allowlists on supported workers from 1.16.0 onward |
 | Retained machines, ports, long commands and terminals | [Persistent machines](persistent-machines.md); extended image features require supported workers from 1.17.0 onward |
 | Registry images and saved state | [Images](images-and-registry-artifacts.md), [exports](machine-exports.md), [checkpoints](managed-checkpoints.md) and [branches](managed-branches.md); managed saved-state operations require supported workers from 1.19.0 onward and have separate platform limits |
-| Disk growth | [Disk expansion](disk-expansion.md); Linux checks on 1.20.2 and 1.22.0, with no macOS growth campaign |
-| Local volumes | [Local volumes](local-volumes.md); Linux 1.20.2 or 1.22.0, one exclusive attachment and no worker migration |
+| Disk growth | [Disk expansion](disk-expansion.md); Linux checks on 1.20.2, 1.22.0 and 1.34.0 |
+| Local volumes | [Local volumes](local-volumes.md); Linux 1.20.2, 1.22.0 or 1.34.0, with one exclusive attachment |
 
 Checkpoint restore is not a promise of portability across worker versions,
 architectures or hosts. Preserve the original runtime and platform approvals.
 
-Supported use remains `:development`. Your deployment must enforce host resource
-limits and protect worker access; admission reservations are not host quotas.
-Read [Deployment boundaries](security.md) for those responsibilities and
-[Testing reports](testing.md) for recorded checks and their limits.
+Enforce host resource limits and protect worker access separately from SmolBox
+admission. [Deployment boundaries](security.md)

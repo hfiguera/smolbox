@@ -1,21 +1,40 @@
 # Changelog
 
-## Unreleased
+## 0.5.1
 
-- Add development support for an embedded smolvm Port target through the public
-  supervised Runtime, alongside existing HTTP workers. Require an approved native
-  package, enrolled domain and a store with backend binding and recovery support.
-  Rust is unnecessary for consumers. Rustler and Kubernetes remain future options.
-- Support offline disposable and retained execution, bounded binary files, worker
-  draining and normal Runtime restart with surviving native ownership records.
-  Native records use codec version 16; upgrade every store reader before use.
-  Live interruption qualification remains pending.
-- Correct embedded input admission to validate the input manifest's `size` field.
-- Default the HTTP worker, checkpoint approvals and the Embedded Port bundle to
-  SmolVM 1.34.0. Keep explicit 1.22.0 worker and checkpoint pins for existing
-  deployments. The public Embedded Port installer passed on Apple Silicon,
-  Linux x86_64 and Linux ARM64.
-  [Qualification and upgrade boundaries](docs/evidence/smolvm-1.34.0-qualification.md)
+SmolVM **1.34.0** is the default for the HTTP worker, checkpoint approvals and
+Embedded Port. Existing workers and checkpoints can keep an explicit 1.22.0 pin.
+[Upgrade guidance](docs/upgrading.md#upgrade-to-0-5-1)
+
+- Allow quiet HTTP create and stop responses to use the remaining operation
+  budget, including cold disk preparation and the longer VMM exit flush.
+- Update the Embedded Port SDK and release inputs to 1.34.0. Preserve offline
+  checkpoint networking and deny-all outbound policy for port-only guests.
+- Build attested Embedded Port bundles for Apple Silicon, Linux x86_64 and Linux
+  ARM64. [Matching source and notice bundles](https://github.com/hfiguera/smolbox/releases/tag/embedded-port-inputs-v1.34.0)
+- Focus HexDocs on setup, API usage and operations. Keep historical reports and
+  migration guides in the repository.
+
+## 0.5.0
+
+The [Embedded Port quickstart](docs/embedded-quickstart.md) is the default for
+local execution. Install a verified native bundle on Apple Silicon, Linux
+x86_64 or Linux ARM64 without compiling Rust or starting a separate HTTP server.
+The [HTTP worker guide](docs/getting-started.md) remains available for external
+SmolVM servers. The default worker version is **1.22.0**.
+
+- Add a supervised Embedded Port worker through the public Runtime, using the
+  unmodified SmolVM SDK. The installer verifies the archive's GitHub build
+  attestation. Native bundles ship separately from the Hex package.
+- Support disposable and retained VMs, commands and files, worker draining,
+  and ordinary Runtime recovery. The package manifest and feature guides define
+  the platform, source and store requirements for networking, terminals, managed
+  volumes, disk growth, exports, checkpoints and branches.
+- Upgrade shared store readers and writers before admitting Embedded Port work.
+  Apply the backend-bindings migration if you use the supplied PostgreSQL
+  adapter. See [Upgrading to 0.5.0](docs/upgrading.md#upgrade-to-0-5-0).
+- Keep public TLS validation for the explicit `credential_ref` exchange, crash
+  validation, and CLI-race validation deferred.
 
 ## 0.4.3
 

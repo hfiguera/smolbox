@@ -109,16 +109,16 @@ Offline execution fingerprints retain their previous representation, so resubmit
 an old execution does not acquire a new identity. Malformed v1 records and v1
 records containing network fields are rejected. Do not downgrade a store writer
 or run old readers after v2 records have been written; coordinate this upgrade
-across controllers, including offline users. Follow [Upgrading to 0.1.3](upgrading-within-0.1.x.md#upgrading-to-0-1-3).
+across controllers, including offline users. Follow [Upgrading to 0.1.3](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/upgrading-within-0.1.x.md#upgrading-to-0-1-3).
 Custom store formats need equivalent explicit migration.
 
 ## Validation
 
 These checks cover specific policies and environments, not every protocol, DNS
 attack or platform combination. For the recorded Linux and macOS runs, their
-limits and reproduction commands, see [Network access tests](network-access-validation.md).
+limits and reproduction commands, see [Network access tests](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/network-access-validation.md).
 
 ### Extended checks
 
-The [extended test report](network-access-validation.md#extended-checks) records
+The [extended test report](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/network-access-validation.md#extended-checks) records
 IPv4/IPv6, TCP/UDP and DNS scenarios with reachable positive controls.

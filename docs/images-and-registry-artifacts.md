@@ -50,7 +50,7 @@ worker resolves metadata on the host and can launch a temporary network-enabled
 builder before the requested machine. Budget that builder and retained seed cache
 separately from SmolBox's machine reservations; the guest network policy does not
 constrain host preparation. Set `SMOLVM_IMAGE_SEEDS=0` in the **worker's environment**
-to disable this path. See the [qualification report](runtime-1.22.0-qualification.md)
+to disable this path. See the [qualification report](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/runtime-1.22.0-qualification.md)
 for the tested configurations and limits.
 
 ## Approve an immutable source
@@ -268,4 +268,4 @@ mode also demonstrates a managed pull of a different image. It consumes existing
 registry sources; it does not build or publish them.
 
 See [Supported platforms](supported-platforms.md) for current worker selection
-and [Testing reports](testing.md) for recorded checks and their limits.
+and [Testing reports](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/testing.md) for recorded checks and their limits.

@@ -71,7 +71,7 @@ defmodule SmolBox do
   observers; it does not establish guest termination. Use durable storage when
   execution ownership must survive a controller restart.
 
-  Embedded Port targets are supported for development with an explicitly approved
+  Embedded Port targets require an explicitly approved
   native package, offline artifact and enrolled data domain. They require store
   backend-binding, recovery and managed-machine capabilities. See
   [Embedded Port](embedded-port.html) for setup, owner-bound lifetime and limits.

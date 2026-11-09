@@ -229,7 +229,7 @@ memory, task, disk and namespace restrictions remain intact, as does the physica
 host's 45-minute outer-VM deadline. The longer worker deadline is necessary to
 observe workloads beyond five minutes; it is not a production isolation claim.
 
-See the [validation report](long-running-exec-validation.md) for measured Linux/macOS
+See the [validation report](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/long-running-exec-validation.md) for measured Linux/macOS
 long execution, durable background HTTP acceptance, checks and remaining limits.
 
 When a record uses an explicit guest path policy or expanded file budget,
@@ -238,4 +238,4 @@ and additionally requires `guest_files: 1`. Other feature capabilities and
 retention rules still apply.
 
 See [Supported platforms](supported-platforms.md) for current worker selection
-and [Testing reports](testing.md) for recorded checks and their limits.
+and [Testing reports](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/testing.md) for recorded checks and their limits.

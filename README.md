@@ -4,34 +4,21 @@ Run Python, JavaScript and other programs in disposable or retained Linux VMs
 from Elixir.
 
 SmolBox is a client and supervised execution runtime for
-[smolvm](https://github.com/smol-machines/smolvm). smolvm runs the machines on your
-hosts; SmolBox tracks command identity, results and cleanup under your
-application's supervision tree. You install the workers and prepare the images
-containing the languages and dependencies your programs need.
+[smolvm](https://github.com/smol-machines/smolvm). SmolBox runs VMs through a
+local Embedded Port helper or connects to an external smolvm HTTP worker.
+It tracks command identity, results and cleanup under your application's
+supervision tree.
 
 ## Start here
 
-The published walkthrough uses Elixir 1.18 or later and smolvm **1.22.0** on Linux x86_64 with KVM
-or macOS Apple Silicon. Worker installation is included in the walkthrough; the
-Elixir dependency does not install smolvm.
+For a first local run, follow the [Embedded Port quickstart](docs/embedded-quickstart.md).
+It installs a verified native bundle and runs one offline command on Apple Silicon,
+Linux x86_64 or Linux ARM64. You need Elixir 1.18 or later and the
+[host prerequisites](docs/supported-platforms.md#embedded-port-hosts). SmolBox
+starts the helper from your Mix application without a separate HTTP server.
 
-Choose one path to your first execution:
-
-- **Livebook:** [download the notebook](docs/notebooks/getting-started.livemd),
-  import it into a local Livebook and follow its setup instructions. No Mix project
-  or database is needed. New to Livebook? See
-  [installation and import instructions](docs/getting-started.md#open-the-livebook).
-- **Mix application:** follow [Getting started](docs/getting-started.md) to install
-  the dependencies, prepare an image, start a separate worker, run Python and
-  confirm output collection and VM cleanup.
-
-This checkout defaults to smolvm **1.34.0** for the HTTP worker and Embedded Port.
-[Supported platforms](docs/supported-platforms.md) · [Embedded Port quickstart](docs/embedded-quickstart.md)
-
-The [embedded Port setup guide](docs/embedded-port.md) describes development
-support for local execution through the public Runtime API, available from this
-source checkout with a separately approved native package.
-For an existing application, use [Upgrading SmolBox](docs/upgrading.md).
+SmolBox 0.5.1 defaults to **SmolVM 1.34.0** for both backends.
+For a separate SmolVM server, follow the [HTTP worker quickstart](docs/getting-started.md).
 
 ## Why use SmolBox?
 
@@ -52,9 +39,8 @@ needs to handle duplicate requests, lost responses, restarts and leftover VMs.
 This fragment illustrates submitting a command to an already configured runtime.
 It assumes `SmolBoxDemo.Runtime` is running and `artifact` and `profile` are
 available in the same code context. For a complete runnable example, use
-[Getting started](docs/getting-started.md) or the notebook. Those walkthroughs
-stop their demo supervisor after cleanup, so this fragment is not a next step
-to paste into IEx after finishing them.
+[Getting started with an HTTP worker](docs/getting-started.md). The walkthrough
+stops its demo supervisor after cleanup.
 
 ```elixir
 alias SmolBox.{Command, ExecutionSpec}
@@ -102,7 +88,6 @@ cleanup with `SmolBox.fetch/3`; see [Troubleshooting](docs/troubleshooting.md).
 | Reuse prepared disk or memory state | [Exports](docs/machine-exports.md) · [Checkpoints](docs/managed-checkpoints.md) · [Branches](docs/managed-branches.md) |
 | Configure networking or expose a guest service | [Network access](docs/network-access.md) · [Port mappings](docs/port-mappings.md) |
 | Recover from failures or prepare maintenance | [Recovery](docs/recovery.md) · [Draining](docs/worker-draining.md) |
-| Upgrade an existing deployment | [Upgrading SmolBox](docs/upgrading.md) |
 
 The [community workspace app](https://github.com/hfiguera/smolbox/tree/main/examples/community_workspace)
 provides a Phoenix walkthrough using its pinned SmolBox 0.3.0 dependency. It includes
@@ -117,10 +102,8 @@ Admission reservations do not enforce host quotas. Offline networking is the
 default, and retained machines remain until explicitly deleted. Read
 [Deployment boundaries](docs/security.md) before operating workers.
 
-Supported use remains `:development`. [Supported platforms](docs/supported-platforms.md)
-describes usable combinations and feature limits. [Testing reports](docs/testing.md)
-collects recorded worker checks, performance measurements and historical results,
-with their original versions and limits.
+Check the host, toolchain and feature requirements before selecting a backend.
+[Supported platforms](docs/supported-platforms.md)
 
 ## Contributing
 
