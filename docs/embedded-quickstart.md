@@ -4,10 +4,10 @@ This preview runs one offline command in a disposable VM, prints `42`, and
 checks that SmolBox released the reservation. The Runtime starts the local
 helper. The demo uses an in-memory store.
 
-The prebuilt install path is under release qualification. Use the
-[HTTP getting-started guide](getting-started.md) with the currently published
-Hex release. A maintainer can provide a privately staged candidate and its
-independently approved SHA-256 for the preview.
+This checkout selects the GitHub-attested SmolVM 1.34.0 bundle from
+[v0.5.1-rc.1](https://github.com/hfiguera/smolbox/releases/tag/v0.5.1-rc.1).
+The [HTTP getting-started guide](getting-started.md) uses the published Hex
+walkthrough.
 
 ## Prerequisites
 
@@ -24,11 +24,12 @@ independently approved SHA-256 for the preview.
 ## Install and run
 
 In a Mix application with SmolBox installed, run `mix deps.get` and
-`mix deps.compile`. After publication, use the matching version tag and a
-new, private install directory.
+`mix deps.compile`. Run the installer with a new, private install directory.
+By default it selects the tag matching the installed SmolBox version. Use
+`--tag` to select a specific release.
 
 ```sh
-mix smolbox.embedded.install --tag "vVERSION" --install-dir "$HOME/smolbox-demo-install"
+mix smolbox.embedded.install --install-dir "$HOME/smolbox-demo-install"
 ```
 
 For a staged candidate, use the same command with

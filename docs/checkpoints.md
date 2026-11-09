@@ -23,7 +23,7 @@ API to make interpreter initialization disappear.
 
 ## Prepare and approve the source
 
-Use a dedicated preparation worker running smolvm **1.17.0, 1.19.0, 1.20.2 or 1.22.0** (or explicitly selected **1.16.1**) on the same platform
+Use a dedicated preparation worker running smolvm **1.17.0, 1.19.0, 1.20.2, 1.22.0 or 1.34.0** (or explicitly selected **1.16.1**) on the same platform
 and compatible CPU as the execution worker. Prepare a bare, offline guest with
 no host mounts, ports, sockets, devices, secret references or workload restart.
 Wait for all preparation commands to exit. Capture the idle guest using smolvm's
@@ -107,7 +107,7 @@ For Embedded Port, pass the same checkpoint and profile to
 `SmolBox.Embedded.Config.new/1`. With a package approved for checkpoint support,
 `artifacts: []` configures a checkpoint-only worker.
 
-This checkout supports checkpoint execution on 1.22.0 (the default), 1.20.2, 1.19.0, 1.17.0 and 1.16.1.
+This checkout supports checkpoint execution on 1.34.0 (the default), 1.22.0, 1.20.2, 1.19.0, 1.17.0 and 1.16.1.
 Set `runtime_version: "1.17.0"` on both the checkpoint approval and worker for
 existing 1.17.0 captures. Published 0.1.5 requires 1.16.1. Captures must match their
 approved runtime; no cross-version restore compatibility is established. Existing image execution retains

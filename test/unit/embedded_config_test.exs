@@ -171,6 +171,7 @@ defmodule SmolBox.Embedded.ConfigTest do
         architecture: "aarch64",
         platform: :macos,
         path: "/nonexistent/idle.smolcheckpoint",
+        runtime_version: "1.22.0",
         profile: profile
       )
 
@@ -275,6 +276,7 @@ defmodule SmolBox.Embedded.ConfigTest do
                architecture: "aarch64",
                platform: :linux,
                path: "/approved/arm-idle.smolcheckpoint",
+               runtime_version: "1.22.0",
                profile: profile
              )
 

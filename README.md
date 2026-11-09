@@ -11,7 +11,7 @@ containing the languages and dependencies your programs need.
 
 ## Start here
 
-You need Elixir 1.18 or later and smolvm **1.22.0** on Linux x86_64 with KVM
+The published walkthrough uses Elixir 1.18 or later and smolvm **1.22.0** on Linux x86_64 with KVM
 or macOS Apple Silicon. Worker installation is included in the walkthrough; the
 Elixir dependency does not install smolvm.
 
@@ -25,7 +25,8 @@ Choose one path to your first execution:
   the dependencies, prepare an image, start a separate worker, run Python and
   confirm output collection and VM cleanup.
 
-See [Supported platforms](docs/supported-platforms.md) for host prerequisites.
+This checkout defaults to smolvm **1.34.0** for the HTTP worker and Embedded Port.
+[Supported platforms](docs/supported-platforms.md) · [Embedded Port quickstart](docs/embedded-quickstart.md)
 
 The [embedded Port setup guide](docs/embedded-port.md) describes development
 support for local execution through the public Runtime API, available from this

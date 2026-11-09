@@ -1,9 +1,9 @@
 # Supported platforms
 
-Use this page to choose an Elixir toolchain, worker host and smolvm version for
-SmolBox 0.4.3. To install smolvm, follow
-[Install smolvm 1.22.0](getting-started.md#install-smolvm-1-22-0), then continue
-with the complete [Getting started](getting-started.md) example. For an existing deployment, follow
+Use this page to choose an Elixir toolchain, worker host and smolvm version.
+This checkout uses the [SmolVM 1.34.0 distribution](https://github.com/smol-machines/smolvm/releases/tag/v1.34.0).
+The [Getting started](getting-started.md) example uses published SmolBox 0.4.3
+and smolvm 1.22.0. For an existing deployment, follow
 [Upgrading SmolBox](upgrading.md).
 
 ## Elixir and Erlang
@@ -20,13 +20,14 @@ These tested pairs do not establish support for every possible Elixir/OTP pairin
 | Linux x86_64 | Native smolvm with working KVM | Access to `/dev/kvm`, the complete worker distribution, host disk tools and an image for x86_64 |
 | macOS Apple Silicon | Native Darwin ARM64 smolvm distribution | Matching agent and VMM libraries, host disk tools and an image for aarch64; a separate account or host for the demo |
 
-Linux ARM64, Windows workers and Intel macOS are outside the tested HTTP worker
-support. For the local Embedded Port preview, see the
-[Embedded Port quickstart](embedded-quickstart.md).
+The HTTP worker matrix covers Linux x86_64 and macOS Apple Silicon.
+The 1.34.0 Embedded Port bundle also supports Linux ARM64.
+[Embedded Port quickstart](embedded-quickstart.md)
+
 The controller talks to a worker API; this table describes worker hosts, not a
 requirement that every controller run on the same host as its worker.
 
-The default worker is **smolvm 1.22.0**. Explicitly configured 1.20.2, 1.19.0,
+This checkout defaults to **smolvm 1.34.0**. Explicitly configured 1.22.0, 1.20.2, 1.19.0,
 1.17.0, 1.16.1, 1.16.0, 1.14.6 and 1.14.1 remain selectable under their feature
 limits. The worker must report the exact configured version. A mismatch blocks
 new work; there is no automatic fallback or admission of arbitrary newer releases.

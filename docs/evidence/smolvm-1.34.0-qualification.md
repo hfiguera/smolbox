@@ -1,9 +1,9 @@
 # SmolVM 1.34.0 qualification
 
-The HTTP worker and the public Embedded Port distribution stay on 1.22.0 while
-the 1.34.0 Embedded Port release inputs are reviewed. Both 1.34.0 candidates
-passed the live checks recorded here. Earlier Embedded Port package identities
-remain accepted under their original protocol and feature approvals.
+This checkout defaults to SmolVM 1.34.0 for the HTTP worker and Embedded Port
+after the live backend and public installation checks recorded here. Earlier
+Embedded Port package identities remain accepted under their original protocol
+and feature approvals.
 
 The Embedded Port build uses the unmodified
 [SmolVM 1.34.0 release](https://github.com/smol-machines/smolvm/releases/tag/v1.34.0)
@@ -79,13 +79,16 @@ Twenty-five focused Rust tests passed after the offline network fix.
 
 ## Paired default promotion
 
-The three local 1.34.0 development archives have verified digests. The
-distribution input catalog still binds the runtime archives, notices and
-corresponding source bundle reviewed for 1.22.0. The 1.34.0 tag records
-different libkrun and firmware revisions
-(`cac2acc16c55453dd3a5e8c57ee5a7b81816dff4` and
-`eab8d72d0778c8dd60ed9c97859145096670cc79`). The
-[prebuilt release procedure](../../native/release-review.md#prebuilt-release-procedure)
-requires reviewing the replacement inputs and testing the final attested
-archives via the public installer. Keep the HTTP default and the Embedded
-Port distribution pin together until that review and installation pass.
+The reviewed release inputs include the matching libkrun, firmware, guest,
+Rust and Go sources and notices. The three hosted builds passed, and clean
+consumers downloaded and verified the final archives through the public
+installer. Each target passed the guest quickstart on Elixir 1.20.4 with
+OTP 29.0.6 and on Elixir 1.18.4 with OTP 27.3.4.15.
+[Release input and installer evidence](embedded-port-1.34.0-release-sources.md#public-installer-validation)
+
+The branch selects 1.34.0 when the HTTP worker or checkpoint approval omits
+`runtime_version`. Its Embedded Port installer selects the attested
+`v0.5.1-rc.1` prerelease by the installed SmolBox version. The attested tag
+records the pre-promotion source used to build the native archives. Keep
+existing workers and checkpoint approvals pinned to their exact versions.
+Use separate enrollment for a new Embedded Port domain.

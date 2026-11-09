@@ -3,7 +3,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   Host-approved managed worker, prepared artifacts, and exact profile revisions.
 
   Optional `:sources` registers up to 32 exact remote `SmolBox.Source` approvals
-  on smolvm 1.19.0, 1.20.2 or 1.22.0. Each must match this worker's guest architecture. An OCI
+  on smolvm 1.19.0, 1.20.2, 1.22.0 or 1.34.0. Each must match this worker's guest architecture. An OCI
   source also requires an explicit network profile. Registry artifacts download
   on the worker host, independently of guest networking. Approving a source
   authorizes that exact registry/repository/manifest/content identity, not an
@@ -20,15 +20,15 @@ defmodule SmolBox.Runtime.WorkerConfig do
   Operators can disable it with `SMOLVM_IMAGE_SEEDS=0` on the worker.
 
   Optional `:checkpoint_policies` approves exact `SmolBox.CheckpointPolicy` values
-  for private controller storage and additional capture resources on 1.19.0, 1.20.2 or 1.22.0.
+  for private controller storage and additional capture resources on 1.19.0, 1.20.2, 1.22.0 or 1.34.0.
   See `SmolBox.Checkpoints` for idle assertions, quiescence and artifact retention.
 
   Optional `:branch_policies` approves exact `SmolBox.BranchPolicy` values for
-  same-worker leaf branches on 1.19.0, 1.20.2 or 1.22.0. Extra backing allowances survive child
+  same-worker leaf branches on 1.19.0, 1.20.2, 1.22.0 or 1.34.0. Extra backing allowances survive child
   deletion and dependency retirement; see `SmolBox.Branches` for cleanup.
 
   Optional `:export_destinations` approves exact `SmolBox.ExportDestination`
-  values for stopped-machine publication on 1.19.0, 1.20.2 or 1.22.0. Each includes additional
+  values for stopped-machine publication on 1.19.0, 1.20.2, 1.22.0 or 1.34.0. Each includes additional
   helper resources, immutable tag policy, and a credential reference resolving
   a scoped publication bearer. A successful response does not attest helper
   cleanup; see `SmolBox.Exports` for explicit quiescence confirmation.
@@ -51,7 +51,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   still expose a larger guest disk. Admission rejects profiles below these
   floors. This declaration is not remotely attested or a host filesystem quota.
 
-  Versions 1.14.6, 1.16.0, 1.16.1, 1.17.0, 1.19.0, 1.20.2 and 1.22.0 require working host `resize2fs` for disk requests below
+  Versions 1.14.6, 1.16.0, 1.16.1, 1.17.0, 1.19.0, 1.20.2, 1.22.0 and 1.34.0 require working host `resize2fs` for disk requests below
   template sizes. Verify file persistence across stop/start before admission;
   see [Supported platforms](supported-platforms.html#host-prerequisites).
 
@@ -86,7 +86,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   @derive {Inspect, only: [:architecture, :platform, :runtime_version, :qualification]}
   defstruct @enforce_keys ++
               [
-                runtime_version: "1.22.0",
+                runtime_version: "1.34.0",
                 qualification: :development,
                 draining: false,
                 checkpoints: [],
@@ -141,8 +141,8 @@ defmodule SmolBox.Runtime.WorkerConfig do
   `SmolBox.Checkpoint` approvals. At least one local image, checkpoint, or remote
   source is required. `:sources` defaults to `[]`; `:registry_credentials` to nil.
 
-  Other optional fields are `:runtime_version` (default `"1.22.0"` for Linux x86_64 or
-  macOS Apple Silicon; explicitly select `"1.20.2"`, `"1.19.0"`, `"1.17.0"`, `"1.16.1"`, `"1.16.0"`, `"1.14.1"` or `"1.14.6"`
+  Other optional fields are `:runtime_version` (default `"1.34.0"` for Linux x86_64 or
+  macOS Apple Silicon; explicitly select `"1.22.0"`, `"1.20.2"`, `"1.19.0"`, `"1.17.0"`, `"1.16.1"`, `"1.16.0"`, `"1.14.1"` or `"1.14.6"`
   for another supported worker), `:qualification`
   (only `:development`), and `:draining` (default `false`). Artifact IDs must be
   unique and architectures must match this worker. Construction makes no worker

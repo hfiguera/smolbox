@@ -338,7 +338,7 @@ to reconcile. Memory mode loses this authority when its store process stops.
 
 ## Upgrading a worker
 
-SmolBox 0.4.3 defaults to **smolvm 1.22.0**. Updating the Elixir dependency
+This checkout defaults to **smolvm 1.34.0**. Updating the Elixir dependency
 does not install smolvm or migrate worker state. Before updating the library,
 pin each existing worker to the version actually installed. For example, keep
 a worker on 1.20.2 with:
@@ -357,8 +357,8 @@ Follow [Upgrading SmolBox](upgrading.md) separately for controller and store
 changes, including checkpoint compatibility. Pinning a worker does not upgrade
 stored records or convert checkpoints.
 
-Review the [1.22.0 qualification and upgrade
-boundaries](runtime-1.22.0-qualification.md) before upgrading.
+Review the [1.34.0 qualification and upgrade
+boundaries](evidence/smolvm-1.34.0-qualification.md) before upgrading.
 The same drain, identity and prerequisite checks below apply to each supported
 version. Configure the same expected version on every controller owning the worker.
 

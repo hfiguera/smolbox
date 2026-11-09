@@ -9,8 +9,13 @@
 - Support offline disposable and retained execution, bounded binary files, worker
   draining and normal Runtime restart with surviving native ownership records.
   Native records use codec version 16; upgrade every store reader before use.
-  Live interruption qualification and native distribution approval remain pending.
+  Live interruption qualification remains pending.
 - Correct embedded input admission to validate the input manifest's `size` field.
+- Default the HTTP worker, checkpoint approvals and the Embedded Port bundle to
+  SmolVM 1.34.0. Keep explicit 1.22.0 worker and checkpoint pins for existing
+  deployments. The public Embedded Port installer passed on Apple Silicon,
+  Linux x86_64 and Linux ARM64.
+  [Qualification and upgrade boundaries](docs/evidence/smolvm-1.34.0-qualification.md)
 
 ## 0.4.3
 

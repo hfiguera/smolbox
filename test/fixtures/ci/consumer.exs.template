@@ -44,7 +44,7 @@ worker_options = [client: client, platform: :linux, architecture: "x86_64",
   capacity: %{slots: 1, cpus: 1, memory_mb: 1024, disk_gb: 2},
   artifacts: [%{"id" => "python", "sha256" => String.duplicate("a", 64),
     "architecture" => "x86_64", "path" => "/approved/python.smolmachine"}]]
-{:ok, %{runtime_version: "1.22.0"}} = SmolBox.Runtime.WorkerConfig.new(worker_options)
+{:ok, %{runtime_version: "1.34.0"}} = SmolBox.Runtime.WorkerConfig.new(worker_options)
 {:ok, %{runtime_version: "1.20.2"}} = SmolBox.Runtime.WorkerConfig.new(
   Keyword.put(worker_options, :runtime_version, "1.20.2"))
 {:ok, %{runtime_version: "1.19.0"}} = SmolBox.Runtime.WorkerConfig.new(
@@ -157,5 +157,5 @@ end)
 File.write!("smoke.json", Jason.encode!(%{client: true, supervisor: true,
   without_rust: without_rust,
   managed_branches: true, managed_checkpoints: true, managed_exports: true, guest_files: true, workload: true, checkpoint: true, interactive: true, network_policy: true, offline_default: true, runtime_1_16_0_explicit: "1.16.0",
-  unqualified_runtime_rejected: "1.16.2", runtime_default: "1.22.0", legacy_runtime_explicit: "1.14.1",
+  unqualified_runtime_rejected: "1.16.2", runtime_default: "1.34.0", legacy_runtime_explicit: "1.14.1",
   legacy_1_14_6_explicit: "1.14.6", versions: versions}))
