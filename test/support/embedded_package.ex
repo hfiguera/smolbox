@@ -6,11 +6,7 @@ defmodule SmolBox.Test.EmbeddedPackage do
   def create(options \\ []) do
     root = Path.expand(".local/embedded-port-tests-" <> random())
     File.mkdir_p!(root)
-    executable = Path.join(root, "smolbox-port")
-    python = System.find_executable("python3") || raise "Python 3 required for OS-Port fixture"
-    source = File.read!(Path.expand("test/support/embedded_fixture.py"))
-    File.write!(executable, "#!" <> python <> "\n" <> source)
-    File.chmod!(executable, 0o700)
+    executable = write_fixture_executable!(root)
 
     major = Keyword.get(options, :protocol_major, 1)
     minor = Keyword.get(options, :protocol_minor, if(major == 2, do: 0, else: 3))
@@ -78,6 +74,15 @@ defmodule SmolBox.Test.EmbeddedPackage do
       )
 
     config
+  end
+
+  defp write_fixture_executable!(root) do
+    executable = Path.join(root, "smolbox-port")
+    python = System.find_executable("python3") || raise "Python 3 required for OS-Port fixture"
+    source = File.read!(Path.expand("test/support/embedded_fixture.py"))
+    File.write!(executable, "#!" <> python <> "\n" <> source)
+    File.chmod!(executable, 0o700)
+    executable
   end
 
   def remove!(config), do: remove_tree!(config.package_path, 20)

@@ -33,8 +33,8 @@ fn registered_children_are_reaped_without_stealing_sibling_status() {
     for _ in 0..32 {
         let mut owned = child(23);
         let mut sibling = child(31);
-        smolvm::process::register_vm_child(owned.id() as i32);
-        smolvm::process::register_vm_child(i32::MAX); // Never our child: ECHILD.
+        smolvm::process::register_vm_child(owned.id() as i32, None);
+        smolvm::process::register_vm_child(i32::MAX, None); // Never our child: ECHILD.
         smolvm::process::reap_vm_children();
         assert!(owned.try_wait().unwrap().is_none());
         exited(&mut sibling);
