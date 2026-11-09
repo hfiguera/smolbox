@@ -1,17 +1,18 @@
 defmodule SmolBox.Backend.EmbeddedBranchBacking do
   @moduledoc false
+
   alias SmolBox.Backend.{
     Assignment,
     Budget,
-    EmbeddedBranchRetirement,
+    EmbeddedBranchOperation,
     EmbeddedContext,
-    EmbeddedReply,
     Features
   }
 
   alias SmolBox.Embedded.{
     BranchBackingRelease,
     Call,
+    NativeBranchAdmission,
     NativeBranchBacking,
     NativeGrowth,
     Protocol
@@ -61,7 +62,7 @@ defmodule SmolBox.Backend.EmbeddedBranchBacking do
     with true <-
            context.pinned and context.quiesced and is_pid(context.server) and context.epoch != nil,
          true <- scope?(context, parent, child),
-         true <- NativeBranchBacking.pair?(parent, child),
+         true <- NativeBranchAdmission.backing_pair?(parent, child),
          %NativeBranchBacking{request: request, proof: nil} <-
            child.branch.native_authority.backing,
          {:ok, source, _, _} <- NativeGrowth.head(parent),
@@ -99,22 +100,14 @@ defmodule SmolBox.Backend.EmbeddedBranchBacking do
          else: (_ -> failure(:identity_conflict, :dispatch_uncertain))
   end
 
-  defp decode({:ok, %{"result" => "error"} = outcome, @empty, nil} = response, _, _, maximum) do
-    if fits?(outcome, maximum) and Protocol.valid_outcome?(outcome, 2),
-      do: EmbeddedReply.decode(nil, :branch, nil, response),
-      else: failure(:identity_conflict, :dispatch_uncertain)
-  end
+  defp decode({:ok, %{"result" => "error"}, @empty, nil} = response, _, _, maximum),
+    do: EmbeddedBranchOperation.error_reply(response, :branch, maximum)
 
   defp decode({:error, %Error{} = error}, _, _, _), do: {:error, error}
   defp decode(_, _, _, _), do: failure(:identity_conflict, :dispatch_uncertain)
 
-  defp remaining(budget, deadline, evidence \\ :dispatch_uncertain) do
-    timeout = deadline - now()
-
-    if timeout > 0,
-      do: constrain(%{budget | timeout_ms: min(timeout, budget.timeout_ms)}),
-      else: failure(:expired, evidence)
-  end
+  defp remaining(budget, deadline, evidence \\ :dispatch_uncertain),
+    do: EmbeddedBranchOperation.remaining(budget, deadline, {:branch, evidence})
 
   # Unbooted disposal retains source authority. Its original child receipt is
   # immutable evidence, never an operational Machine/Identity to assign.
@@ -124,7 +117,7 @@ defmodule SmolBox.Backend.EmbeddedBranchBacking do
         context.name == parent.machine_name and context.profile == parent.spec.profile and
         NativeGrowth.current_identity(parent) == {:ok, context.identity}
     else
-      context.branch_retirement == child and EmbeddedBranchRetirement.scope?(context)
+      context.branch_retirement == child and EmbeddedContext.branch_retirement_scope?(context)
     end
   end
 

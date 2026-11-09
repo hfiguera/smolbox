@@ -38,18 +38,9 @@ defmodule SmolBox.Embedded.PartialBranchCleanupCandidate do
 
   def valid?(_), do: false
 
-  def from_wire(value) do
-    if valid?(value) and not is_struct(value),
-      do:
-        {:ok,
-         struct!(__MODULE__, Map.new(value, fn {k, v} -> {String.to_existing_atom(k), v} end))},
-      else: :error
-  end
+  def from_wire(value), do: BranchCanonical.from_wire(value, __MODULE__)
 
-  def to_wire(%__MODULE__{} = value) do
-    wire = Map.new(Map.from_struct(value), fn {k, v} -> {Atom.to_string(k), v} end)
-    if value.release == nil, do: Map.delete(wire, "release"), else: wire
-  end
+  def to_wire(%__MODULE__{} = value), do: BranchCanonical.optional_release_fields(value)
 
   def proof_digest(value),
     do:
@@ -64,8 +55,12 @@ defmodule SmolBox.Embedded.PartialBranchCleanupCandidate do
         value["disposal_sha256"]
       ])
 
-  def matches?(%__MODULE__{} = value, request), do: matches?(to_wire(value), request)
-
-  def matches?(value, request),
-    do: valid?(value) and PartialBranchDisposal.request?(request) and value["request"] == request
+  def matches?(proof, request),
+    do:
+      BranchCanonical.request_proof_matches?(
+        proof,
+        request,
+        __MODULE__,
+        &PartialBranchDisposal.request?/1
+      )
 end

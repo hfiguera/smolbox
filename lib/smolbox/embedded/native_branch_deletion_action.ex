@@ -8,7 +8,8 @@ defmodule SmolBox.Embedded.NativeBranchDeletionAction do
     HeldBranchDeletionAction,
     NativeBranchDeletion,
     NativeBranchDeletionCollection,
-    NativeGrowth,
+    NativeBranchDeletionState,
+    NativeReleasedBranchDeletion,
     NativeReleasedBranchDeletionCleanup,
     NativeReleasedBranchDeletionContinuation
   }
@@ -123,35 +124,40 @@ defmodule SmolBox.Embedded.NativeBranchDeletionAction do
   defp record?(_, nil, _, _), do: true
 
   defp record?(child, %__MODULE__{} = saved, authority, action) do
-    with true <- valid?(saved, authority, action) and saved.version < child.version,
-         true <- child.last_request == {:delete, saved.delete_version},
-         {:ok, receipt, _, _} <- NativeGrowth.head(child),
-         true <- receipt == saved.request["child"],
-         do: state?(child, saved.proof),
-         else: (_ -> false)
+    valid?(saved, authority, action) and NativeBranchDeletionState.bound_record?(child, saved) and
+      state?(child, saved.proof)
   end
 
   defp record?(child, %NativeReleasedBranchDeletionContinuation{}, _, :continue),
-    do: NativeReleasedBranchDeletionContinuation.record?(child)
+    do: NativeReleasedBranchDeletionContinuation.record?(child, &historical?/2)
 
   defp record?(child, %NativeReleasedBranchDeletionCleanup{}, _, :cleanup),
-    do: NativeReleasedBranchDeletionCleanup.record?(child)
+    do: NativeReleasedBranchDeletionCleanup.record?(child, &historical?/2)
 
   defp record?(child, %NativeBranchDeletionCollection{}, _, :collect),
-    do: NativeBranchDeletionCollection.record?(child)
+    do: NativeBranchDeletionCollection.record?(child, &historical?/2)
 
   defp record?(_, _, _, _), do: false
 
   defp state?(child, nil),
-    do: NativeBranchDeletion.eligible?(child) or historical?(child)
+    do: NativeBranchDeletion.eligible?(child) or historical?(child, :held)
 
   defp state?(child, _), do: NativeBranchDeletion.completed_state?(child)
 
-  def historical?(child),
+  def historical?(child, :held),
     do:
       NativeBranchDeletion.completed_state?(child) and
         (acknowledged?(child.branch.native_authority) or
            match?(%{proof: %BranchDeletionResolution{}}, child.branch.native_authority.deletion))
+
+  def historical?(child, :released) do
+    authority = child.branch.native_authority
+
+    NativeReleasedBranchDeletion.completed_state?(child) and
+      (NativeReleasedBranchDeletionContinuation.acknowledged?(authority) or
+         NativeReleasedBranchDeletionCleanup.acknowledged?(authority) or
+         NativeBranchDeletion.acknowledged?(authority))
+  end
 
   def acknowledged?(authority),
     do:

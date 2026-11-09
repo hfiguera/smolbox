@@ -9,7 +9,7 @@ defmodule SmolBox.Runtime.NativeBranchDeletionAction do
     NativeReleasedBranchDeletionContinuation
   }
 
-  alias SmolBox.Runtime.{MachineSession, NativeResolution, Session, Target}
+  alias SmolBox.Runtime.{Deadline, MachineSession, NativeResolution, Session, Target}
 
   def run(config, coordinator, child, version, action) do
     with :ok <- ManagedMachine.validate(child),
@@ -69,7 +69,7 @@ defmodule SmolBox.Runtime.NativeBranchDeletionAction do
   end
 
   defp claimed(config, child, version, worker, action, deadline) do
-    with {:ok, _} <- remaining(deadline),
+    with {:ok, _} <- Deadline.remaining(deadline, :reconcile),
          {:ok, current} <-
            MachineSession.store(config, :claim_version, [
              ManagedMachine.key(child),
@@ -78,7 +78,7 @@ defmodule SmolBox.Runtime.NativeBranchDeletionAction do
              config.clock.now(),
              config.lease_ms
            ]),
-         {:ok, _} <- remaining(deadline),
+         {:ok, _} <- Deadline.remaining(deadline, :reconcile),
          do: accepted(config, current, worker, action, deadline)
   end
 
@@ -90,7 +90,7 @@ defmodule SmolBox.Runtime.NativeBranchDeletionAction do
              action,
              config.clock.now()
            ]),
-         {:ok, timeout} <- remaining(deadline),
+         {:ok, timeout} <- Deadline.remaining(deadline, :reconcile),
          {:ok, proof} <- observe(config, child, worker, action, timeout),
          do: commit(config, child, proof, action, deadline)
   end
@@ -115,9 +115,9 @@ defmodule SmolBox.Runtime.NativeBranchDeletionAction do
   defp commit(config, child, proof, action, deadline) do
     result =
       with true <- NativeBranchDeletionAction.matches?(saved(child, action), action, proof),
-           {:ok, _} <- remaining(deadline),
+           {:ok, _} <- Deadline.remaining(deadline, :reconcile),
            {:ok, fresh} <- MachineSession.claim(config, ManagedMachine.key(child)),
-           {:ok, _} <- remaining(deadline) do
+           {:ok, _} <- Deadline.remaining(deadline, :reconcile) do
         MachineSession.store(config, :branch_delete_action_complete, [
           ManagedMachine.key(child),
           Session.guard(fresh),
@@ -137,11 +137,6 @@ defmodule SmolBox.Runtime.NativeBranchDeletionAction do
     do: {:error, %{error | operation: :reconcile, evidence: :dispatch_uncertain}}
 
   defp uncertain(result), do: result
-
-  defp remaining(deadline) do
-    timeout = deadline - now()
-    if timeout > 0, do: {:ok, timeout}, else: Session.error(:expired, :reconcile)
-  end
 
   defp now, do: System.monotonic_time(:millisecond)
 end

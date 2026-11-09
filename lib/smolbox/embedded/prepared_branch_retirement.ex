@@ -6,8 +6,15 @@ defmodule SmolBox.Embedded.PreparedBranchRetirement do
   request binds host intent, including an unused initial-release choice; only the
   inner native declaration is retired. Hashes alone confer no SDK ownership.
   """
-  alias SmolBox.Embedded.{BranchCanonical, BranchOrigin, BranchRequest, Shape}
-  alias SmolBox.Validation
+  alias SmolBox.Embedded.{
+    BranchCanonical,
+    BranchOrigin,
+    BranchRequest,
+    NativePreparedBranchRetirement,
+    Shape
+  }
+
+  alias SmolBox.{Profile, Validation}
   @enforce_keys [:schema, :request_sha256, :retirement, :proof_sha256]
   @derive {Inspect, only: [:schema]}
   defstruct @enforce_keys
@@ -91,4 +98,53 @@ defmodule SmolBox.Embedded.PreparedBranchRetirement do
           Map.take(request["creation"], ~w(source child approval))
 
   def approval(request), do: get_in(request, ~w(creation approval))
+
+  @doc false
+  def saved_valid?(%{__struct__: NativePreparedBranchRetirement, proof: %__MODULE__{}} = saved),
+    do:
+      Shape.keys?(saved, [:__struct__, :version, :request, :proof]) and
+        Validation.integer?(saved.version, 1, 9_007_199_254_740_991) and
+        matches?(saved.proof, saved.request)
+
+  def saved_valid?(_), do: false
+
+  @doc false
+  def saved_plan?(saved, profile),
+    do:
+      saved.proof.retirement["intent"]["plan"]["ordinary_child"] ==
+        Map.new(Profile.resources(profile), fn {key, value} -> {Atom.to_string(key), value} end)
+
+  @doc false
+  def saved_source?(record, id, %{__struct__: NativePreparedBranchRetirement} = saved) do
+    receipt = saved.request["creation"]["source"]
+    intent = saved.proof.retirement["intent"]
+    root = record.created_machine.backend_identity.receipt
+    profile = record.spec.profile
+
+    saved_valid?(saved) and Validation.identifier?(id) and record.branch_children[id] == true and
+      id != record.active_branch and saved.request["creation"]["child"]["operation_id"] == id and
+      Map.delete(receipt, "material") == Map.delete(root, "material") and
+      Shape.receipt?(root, 2) and
+      intent["approval"]["host_overhead_mb"] == profile.host_overhead_mb and
+      saved_plan?(saved, profile)
+  end
+
+  def saved_source?(_, _, _), do: false
+
+  @doc false
+  def saved_history?(record, transitions) do
+    Enum.all?(Map.get(record, :native_branch_history, %{}), fn
+      {id, %{__struct__: NativePreparedBranchRetirement} = saved} ->
+        receipts = [
+          record.created_machine.backend_identity.receipt | Enum.map(transitions, & &1.receipt)
+        ]
+
+        saved.request["creation"]["source"] in receipts and
+          not Map.has_key?(record.disk_expansions, id) and not Map.has_key?(record.captures, id) and
+          Enum.all?(transitions, &(&1.receipt["material"]["operation_id"] != id))
+
+      _ ->
+        true
+    end)
+  end
 end

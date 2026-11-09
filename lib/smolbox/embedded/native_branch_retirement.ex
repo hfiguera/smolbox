@@ -1,5 +1,7 @@
 defmodule SmolBox.Embedded.NativeBranchRetirement do
   @moduledoc false
+  alias SmolBox.ManagedMachineState
+
   alias SmolBox.Embedded.{
     BranchCanonical,
     BranchChildAbsence,
@@ -53,26 +55,31 @@ defmodule SmolBox.Embedded.NativeBranchRetirement do
   def request(_), do: :error
 
   def eligible?(
-        %ManagedMachine{branch: %{native_authority: %{completion: %BranchCompletion{}}}} = child
+        %{
+          __struct__: ManagedMachine,
+          branch: %{native_authority: %{completion: %BranchCompletion{}}}
+        } = child
       ),
       do:
-        child.state == :deleted and ManagedMachine.idle?(child) and child.reservation == nil and
+        child.state == :deleted and ManagedMachineState.idle?(child) and child.reservation == nil and
           child.branch.state in [:ready, :held, :released, :retired, :closed]
 
   def eligible?(
-        %ManagedMachine{
+        %{
+          __struct__: ManagedMachine,
           branch: %{
             native_authority: %{completion: nil, disposal: %{proof: %UnbootedBranchDisposal{}}}
           }
         } = child
       ),
       do:
-        child.state == :deleted and ManagedMachine.idle?(child) and child.reservation == nil and
+        child.state == :deleted and ManagedMachineState.idle?(child) and child.reservation == nil and
           child.branch.state in [:disposed, :retired, :backing_pending, :closed] and
           child.created_machine == nil and child.observed_machine == nil
 
   def eligible?(
-        %ManagedMachine{
+        %{
+          __struct__: ManagedMachine,
           branch: %{
             native_authority: %{
               completion: nil,
@@ -82,7 +89,7 @@ defmodule SmolBox.Embedded.NativeBranchRetirement do
         } = child
       ),
       do:
-        child.state == :deleted and ManagedMachine.idle?(child) and child.reservation == nil and
+        child.state == :deleted and ManagedMachineState.idle?(child) and child.reservation == nil and
           child.branch.state in [:disposed, :retired, :backing_pending, :closed] and
           child.created_machine == nil and
           child.observed_machine == nil
@@ -164,20 +171,6 @@ defmodule SmolBox.Embedded.NativeBranchRetirement do
       do: BranchPublication.from_wire(publication)
 
   def publication(_), do: :error
-
-  def pair?(parent, child) do
-    with :ok <- ManagedMachine.validate(parent),
-         :ok <- ManagedMachine.validate(child),
-         true <- eligible?(child),
-         {:ok, publication} <- publication(child.branch.native_authority) do
-      child.branch.source == ManagedMachine.key(parent) and parent.worker_id == child.worker_id and
-        parent.worker_generation == child.worker_generation and parent.active_branch != child.id and
-        Map.has_key?(parent.branch_children, child.id) and
-        parent.native_branch_history[child.id] == publication
-    else
-      _ -> false
-    end
-  end
 
   def matches?(%BranchChildAbsence{} = proof, request),
     do: BranchChildAbsence.matches?(proof, request)

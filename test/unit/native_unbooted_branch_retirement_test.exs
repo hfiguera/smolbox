@@ -4,7 +4,7 @@ defmodule SmolBox.NativeUnbootedBranchRetirementTest do
   alias SmolBox.Backend.{Budget, EmbeddedBranchRetirement, EmbeddedContext}
 
   alias SmolBox.Embedded.{
-    NativeBranchBacking,
+    NativeBranchAdmission,
     NativeBranchRetirement,
     UnbootedBranchChildAbsence,
     UnbootedBranchDisposal
@@ -145,7 +145,7 @@ defmodule SmolBox.NativeUnbootedBranchRetirementTest do
 
     assert {:ok, usage} = Memory.usage(store, parent.worker_id)
     assert usage == child.branch.spec.policy.resources
-    assert NativeBranchBacking.pair?(source, child)
+    assert NativeBranchAdmission.backing_pair?(source, child)
 
     assert {:ok, pending} =
              Memory.machine(store, :branch_backing_accept, [
@@ -168,7 +168,7 @@ defmodule SmolBox.NativeUnbootedBranchRetirementTest do
 
   test "completed-child observation cannot accept an unbooted retirement scope" do
     {_, child, proof, _} = Contract.complete(Memory, start_supervised!(Memory), true)
-    assert EmbeddedBranchRetirement.intent(child) == nil
+    assert EmbeddedContext.branch_retirement_intent(child) == nil
 
     context = %EmbeddedContext{
       config: nil,
@@ -184,7 +184,7 @@ defmodule SmolBox.NativeUnbootedBranchRetirementTest do
       identity: nil
     }
 
-    refute EmbeddedBranchRetirement.scope?(context)
+    refute EmbeddedContext.branch_retirement_scope?(context)
 
     assert {:error, _} =
              EmbeddedBranchRetirement.coordinate(

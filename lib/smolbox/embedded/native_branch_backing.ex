@@ -14,7 +14,7 @@ defmodule SmolBox.Embedded.NativeBranchBacking do
     UnbootedBranchDisposal
   }
 
-  alias SmolBox.{ManagedMachine, Validation}
+  alias SmolBox.Validation
   @enforce_keys [:version, :request]
   @derive {Inspect, only: [:version]}
   defstruct @enforce_keys ++ [proof: nil]
@@ -174,23 +174,23 @@ defmodule SmolBox.Embedded.NativeBranchBacking do
 
   defp acknowledgement?(_, _), do: false
 
-  defp origin?(%{completion: %BranchCompletion{}, disposal: nil}), do: true
+  def origin?(%{completion: %BranchCompletion{}, disposal: nil}), do: true
 
-  defp origin?(%{
-         completion: nil,
-         disposal: %{proof: %UnbootedBranchDisposal{}},
-         retirement: %{proof: %UnbootedBranchChildAbsence{}}
-       }),
-       do: true
+  def origin?(%{
+        completion: nil,
+        disposal: %{proof: %UnbootedBranchDisposal{}},
+        retirement: %{proof: %UnbootedBranchChildAbsence{}}
+      }),
+      do: true
 
-  defp origin?(%{
-         completion: nil,
-         partial_disposal: %{proof: %PartialBranchDisposal{}},
-         retirement: %{proof: %PartialBranchChildAbsence{}}
-       }),
-       do: true
+  def origin?(%{
+        completion: nil,
+        partial_disposal: %{proof: %PartialBranchDisposal{}},
+        retirement: %{proof: %PartialBranchChildAbsence{}}
+      }),
+      do: true
 
-  defp origin?(_), do: false
+  def origin?(_), do: false
 
   def request?(%{"disposal" => %{"request" => %{"collection_request" => _}}} = request),
     do: PartialBranchBackingRelease.request?(request)
@@ -227,19 +227,6 @@ defmodule SmolBox.Embedded.NativeBranchBacking do
   end
 
   def record?(_), do: false
-
-  def pair?(parent, child) do
-    with true <- origin?(child.branch.native_authority),
-         true <- NativeBranchRetirement.pair?(parent, child),
-         true <- child.branch.state in [:retired, :backing_pending, :closed],
-         %NativeBranchRetirement{} <- child.branch.native_authority.retirement do
-      parent.state == :deleted and ManagedMachine.idle?(parent) and parent.reservation == nil and
-        parent.active_branch == nil and parent.branch_children[child.id] == true and
-        Enum.all?(parent.branch_children, fn {_, retired} -> retired == true end)
-    else
-      _ -> false
-    end
-  end
 
   def preserved?(nil, nil, _), do: true
   def preserved?(nil, %__MODULE__{version: version, proof: nil}, version), do: true

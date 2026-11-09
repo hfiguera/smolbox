@@ -17,13 +17,21 @@ defmodule SmolBox.Backend.EmbeddedCaptureObservation do
 
     with true <- name == context.name and EmbeddedContext.scoped?(context),
          true <- Features.supports?(context.config, :checkpoints),
-         {:ok, budget} <- Budget.constrain(budget, max_response_bytes: 16_384),
-         {:ok, pin_budget} <- remaining(budget, deadline),
+         {:ok, budget} <- Budget.constrain(budget, max_response_bytes: 16_384) do
+      observe(context, name, budget, deadline)
+    else
+      {:error, _} = error -> error
+      _ -> invalid()
+    end
+  end
+
+  def observe(context, name, budget, deadline) do
+    with {:ok, pin_budget} <- Budget.until(budget, deadline, :inspect),
          context = Call.pin(context, pin_budget),
-         {:ok, lookup_budget} <- remaining(budget, deadline),
+         {:ok, lookup_budget} <- Budget.until(budget, deadline, :inspect),
          result = Call.run(context, request(context), lookup_budget),
          {:ok, promoted} <- recover(context, result, lookup_budget, deadline),
-         {:ok, inspect_budget} <- remaining(budget, deadline),
+         {:ok, inspect_budget} <- Budget.until(budget, deadline, :inspect),
          {:ok, request, inspect_budget, input, callback} <-
            EmbeddedOperation.build(promoted, :inspect_machine, [name], inspect_budget) do
       promoted
@@ -55,7 +63,7 @@ defmodule SmolBox.Backend.EmbeddedCaptureObservation do
        )
        when map_size(outcome) == 2 and empty == %{stdout: <<>>, stderr: <<>>, file: <<>>} do
     with {:ok, ^context} <- promote(context, result),
-         {:ok, budget} <- remaining(budget, deadline),
+         {:ok, budget} <- Budget.until(budget, deadline, :inspect),
          do:
            promote(
              context,
@@ -130,14 +138,6 @@ defmodule SmolBox.Backend.EmbeddedCaptureObservation do
   # capture/growth combinations remain excluded from public admission.
   defp prior_growth(%{transition: nil}), do: []
   defp prior_growth(%{transition: transition}), do: [transition]
-
-  defp remaining(budget, deadline) do
-    timeout = deadline - System.monotonic_time(:millisecond)
-
-    if timeout > 0,
-      do: Budget.constrain(budget, timeout_ms: timeout),
-      else: {:error, %Error{category: :expired, operation: :inspect, evidence: :not_dispatched}}
-  end
 
   defp invalid,
     do:

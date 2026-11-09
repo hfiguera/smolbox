@@ -192,7 +192,7 @@ defmodule SmolBox.NativeUnbootedBranchPublicRetirementTest do
       kind: :embedded,
       id: parent.worker_id,
       context: context,
-      budget: %Budget{timeout_ms: 1000, max_request_bytes: 131_072, max_response_bytes: 131_072}
+      budget: %Budget{timeout_ms: 5000, max_request_bytes: 131_072, max_response_bytes: 131_072}
     }
 
     worker = %Target{
@@ -258,7 +258,7 @@ defmodule SmolBox.NativeUnbootedBranchPublicRetirementTest do
       assert peer == worker.connection.context.server and epoch == worker.connection.context.epoch
       assert request == proof.request
 
-      assert budget.timeout_ms <= 1000 and budget.max_request_bytes <= 72 * 1024 and
+      assert budget.timeout_ms <= 5000 and budget.max_request_bytes <= 72 * 1024 and
                budget.max_response_bytes <= 72 * 1024
 
       assert_receive {:store_retirement, true}

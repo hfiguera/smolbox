@@ -4,7 +4,7 @@ defmodule SmolBox.NativePartialBranchRetirementTest do
   alias SmolBox.Backend.{Budget, EmbeddedBranchRetirement, EmbeddedContext}
 
   alias SmolBox.Embedded.{
-    NativeBranchBacking,
+    NativeBranchAdmission,
     NativeBranchRetirement,
     PartialBranchChildAbsence,
     PartialBranchDisposal
@@ -146,7 +146,7 @@ defmodule SmolBox.NativePartialBranchRetirementTest do
 
     assert {:ok, usage} = Memory.usage(store, parent.worker_id)
     assert usage == child.branch.spec.policy.resources
-    assert NativeBranchBacking.pair?(source, child)
+    assert NativeBranchAdmission.backing_pair?(source, child)
 
     assert {:ok, pending} =
              Memory.machine(store, :branch_backing_accept, [
@@ -163,9 +163,9 @@ defmodule SmolBox.NativePartialBranchRetirementTest do
     assert {:ok, ^usage} = Memory.usage(store, parent.worker_id)
   end
 
-  test "completed-child observation cannot accept an partial retirement scope" do
+  test "completed-child observation cannot accept a partial retirement scope" do
     {_, child, proof, _} = Contract.complete(Memory, start_supervised!(Memory), :held)
-    assert EmbeddedBranchRetirement.intent(child) == nil
+    assert EmbeddedContext.branch_retirement_intent(child) == nil
 
     context = %EmbeddedContext{
       config: nil,
@@ -181,7 +181,7 @@ defmodule SmolBox.NativePartialBranchRetirementTest do
       identity: nil
     }
 
-    refute EmbeddedBranchRetirement.scope?(context)
+    refute EmbeddedContext.branch_retirement_scope?(context)
 
     assert {:error, _} =
              EmbeddedBranchRetirement.coordinate(

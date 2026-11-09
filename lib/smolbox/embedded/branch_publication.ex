@@ -8,27 +8,16 @@ defmodule SmolBox.Embedded.BranchPublication do
   @derive {Inspect, only: [:schema]}
   defstruct @enforce_keys
 
-  def from_wire(value) do
-    if Shape.keys?(value, ~w(schema previous receipt change)) and valid?(value),
-      do:
-        {:ok,
-         struct!(
-           __MODULE__,
-           Map.new(value, fn {key, field} -> {String.to_existing_atom(key), field} end)
-         )},
-      else: :error
-  end
+  def from_wire(value), do: BranchCanonical.transition_from_wire(value, __MODULE__)
 
   def to_wire(%__MODULE__{} = value),
-    do: Map.new(Map.from_struct(value), fn {key, field} -> {Atom.to_string(key), field} end)
+    do: BranchCanonical.wire_fields(value)
 
   def valid?(%__MODULE__{} = value),
     do: Validation.struct_shape?(value, __MODULE__) and valid?(to_wire(value))
 
   def valid?(value) do
-    Shape.keys?(value, ~w(schema previous receipt change)) and value["schema"] === 1 and
-      Shape.receipt?(value["previous"], 2) and Shape.receipt?(value["receipt"], 2) and
-      BranchCanonical.origin(value["previous"]) == BranchCanonical.origin(value["receipt"]) and
+    BranchCanonical.transition_shape?(value) and
       change?(value["change"]) and
       value["previous"] == value["change"]["child_origin"]["intent"]["source"] and
       transition?(value)

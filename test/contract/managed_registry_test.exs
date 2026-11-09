@@ -91,8 +91,11 @@ defmodule SmolBox.ManagedRegistryTest do
     {fixture, _credentials} = fixture(warm_lost: true, slots: 2)
     {:ok, first} = Machines.create(fixture.runtime, spec(fixture))
 
-    assert {:ok, %{state: :unknown, phase: :uncertain, preparation: nil}} =
+    assert {:ok, %{state: state, phase: :uncertain, preparation: nil}} =
              Machines.await(fixture.runtime, first, 5000)
+
+    # The reconciler can observe absence before this process reads the record.
+    assert state in [:unknown, :missing]
 
     stop_supervised!(SmolBox.Runtime)
     runtime = start_supervised!({SmolBox.Runtime, fixture.options})
@@ -122,8 +125,10 @@ defmodule SmolBox.ManagedRegistryTest do
     Agent.update(credentials, fn _ -> {:error, "secret-resolver-failure"} end)
     {:ok, handle} = Machines.create(fixture.runtime, spec(fixture))
 
-    assert {:ok, %{state: :unknown, last_error: %{category: :authentication}} = record} =
+    assert {:ok, %{state: state, last_error: %{category: :authentication}} = record} =
              Machines.await(fixture.runtime, handle, 5000)
+
+    assert state in [:unknown, :missing]
 
     assert count(fixture.peer, "POST", "/artifacts/warm") == 0
     assert count(fixture.peer, "POST", "/api/v1/machines") == 0
@@ -163,8 +168,10 @@ defmodule SmolBox.ManagedRegistryTest do
     {fixture, _} = fixture(warm_digest: String.duplicate("f", 64))
     {:ok, handle} = Machines.create(fixture.runtime, spec(fixture))
 
-    assert {:ok, %{state: :unknown, preparation: nil}} =
+    assert {:ok, %{state: state, preparation: nil}} =
              Machines.await(fixture.runtime, handle, 5000)
+
+    assert state in [:unknown, :missing]
 
     assert count(fixture.peer, "POST", "/api/v1/machines") == 0
     assert {:ok, %{slots: 1}} = Memory.usage(fixture.store, "peer")

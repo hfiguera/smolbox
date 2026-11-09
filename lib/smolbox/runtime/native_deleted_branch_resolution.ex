@@ -5,6 +5,7 @@ defmodule SmolBox.Runtime.NativeDeletedBranchResolution do
 
   alias SmolBox.Embedded.{
     BranchPublication,
+    NativeBranchAdmission,
     NativeUnbootedBranchDisposal,
     NativeUnbootedBranchDisposalResult,
     UnbootedBranchDisposal,
@@ -12,6 +13,7 @@ defmodule SmolBox.Runtime.NativeDeletedBranchResolution do
   }
 
   alias SmolBox.Runtime.{
+    Deadline,
     MachineSession,
     NativePreparedBranchRetirement,
     NativeResolution,
@@ -135,10 +137,10 @@ defmodule SmolBox.Runtime.NativeDeletedBranchResolution do
            {:ok, %UnbootedBranchDisposalCandidate{} = candidate} <-
              perform(config, parent, child, worker, :inspect_unbooted_branch_disposal, stage),
            true <- candidate_bound?(candidate, parent, child, worker),
-           {:ok, _} <- remaining(deadline),
+           {:ok, _} <- Deadline.remaining(deadline, :branch),
            {:ok, current} <- MachineSession.claim(config, child.branch.source),
            true <- candidate_bound?(candidate, current, child, worker),
-           {:ok, _} <- remaining(deadline),
+           {:ok, _} <- Deadline.remaining(deadline, :branch),
            {:ok, accepted} <-
              MachineSession.store(config, :branch_advance, [
                child.branch.source,
@@ -159,7 +161,7 @@ defmodule SmolBox.Runtime.NativeDeletedBranchResolution do
   end
 
   defp dispatch(config, child, worker, budget, deadline) do
-    with {:ok, _} <- remaining(deadline),
+    with {:ok, _} <- Deadline.remaining(deadline, :branch),
          {:ok, parent} <- MachineSession.claim(config, child.branch.source),
          {:ok, stage, _} <- reserve(budget, 20 * 1024, 64 * 1024, deadline),
          {:ok, result} <- perform(config, parent, child, worker, :dispose_unbooted_branch, stage),
@@ -207,25 +209,13 @@ defmodule SmolBox.Runtime.NativeDeletedBranchResolution do
       else: Session.error(:identity_conflict, :branch)
   end
 
-  defp commit(config, child, result, deadline) do
-    with {:ok, _} <- remaining(deadline),
-         {:ok, current} <- MachineSession.claim(config, child.branch.source),
-         {:ok, _} <- remaining(deadline),
-         do:
-           MachineSession.store(config, :branch_resolve, [
-             child.branch.source,
-             Session.guard(current),
-             child.id,
-             result.source,
-             result,
-             config.clock.now()
-           ])
-  end
+  defp commit(config, child, result, deadline),
+    do: MachineSession.commit_branch_result(config, child, result, deadline)
 
   defp candidate_bound?(candidate, parent, child, worker) do
     context = Target.connection(worker).context
 
-    UnbootedBranchDisposalCandidate.bound?(
+    NativeBranchAdmission.disposal_candidate?(
       candidate,
       parent,
       child,
@@ -261,7 +251,7 @@ defmodule SmolBox.Runtime.NativeDeletedBranchResolution do
   end
 
   defp reserve(budget, input, output, deadline) do
-    with {:ok, timeout} <- remaining(deadline),
+    with {:ok, timeout} <- Deadline.remaining(deadline, :branch),
          true <- budget.max_request_bytes > 0 and budget.max_response_bytes > 0,
          {:ok, stage} <-
            Budget.constrain(budget,
@@ -281,14 +271,6 @@ defmodule SmolBox.Runtime.NativeDeletedBranchResolution do
     end
   end
 
-  defp remaining(deadline) do
-    timeout = deadline - now()
-    if timeout > 0, do: {:ok, min(timeout, 30_000)}, else: Session.error(:expired, :branch)
-  end
-
-  defp uncertain({:error, %Error{} = error}),
-    do: {:error, %{error | operation: :branch, evidence: :dispatch_uncertain}}
-
-  defp uncertain(result), do: result
+  defp uncertain(result), do: Error.uncertain(result, :branch)
   defp now, do: System.monotonic_time(:millisecond)
 end

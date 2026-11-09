@@ -212,7 +212,7 @@ defmodule SmolBox.Embedded.PartialBranchBackingReleaseTest do
       refute BranchBackingRelease.valid?(Map.update!(row["proof"], "native_bytes", &(&1 + 1)))
 
       refute BranchBackingRelease.valid?(
-               Map.put(row["proof"], "native_bytes", row["proof"]["native_bytes"] * 1.0)
+               Map.put(row["proof"], "native_bytes", :erlang.float(row["proof"]["native_bytes"]))
              )
 
       assert {:ok, proof} = BranchBackingRelease.from_wire(row["proof"])

@@ -23,9 +23,16 @@ PREPARED_PATH = ROOT / "prepared.json"
 PREPARED = set(json.loads(PREPARED_PATH.read_text())) if META.get("persistent_backend") and PREPARED_PATH.exists() else set()
 
 
+def save_snapshot(path, value):
+    # A replacement peer may start while this peer is still writing.
+    pending = path.with_name(f".{path.name}.{EPOCH}.tmp")
+    pending.write_text(json.dumps(value))
+    pending.replace(path)
+
+
 def save_vm():
     if META.get("persistent_backend"):
-        VM_PATH.write_text(json.dumps(VM))
+        save_snapshot(VM_PATH, VM)
 
 
 def volume_outcome(request):
@@ -51,7 +58,7 @@ def volume_outcome(request):
             VOLUMES[identifier] = entry
         assert entry["proof"]["backing"]["intent"] == intent
         assert entry["state"] == "ready"
-        VOLUMES_PATH.write_text(json.dumps(VOLUMES))
+        save_snapshot(VOLUMES_PATH, VOLUMES)
         proof = json.loads(json.dumps(entry["proof"]))
         if META.get("volume_mode") == "crossed":
             proof["backing"]["domain_generation"] = "f" * 32
@@ -77,7 +84,7 @@ def volume_outcome(request):
     if entry["state"] != "deleted":
         entry["deletion"] = dict(schema=1, operation_id=secrets.token_hex(16), provision=entry["proof"])
         entry["state"] = "deleted"
-        VOLUMES_PATH.write_text(json.dumps(VOLUMES))
+        save_snapshot(VOLUMES_PATH, VOLUMES)
     return dict(result="volume", volume=dict(status="deleted", proof=entry["deletion"]))
 
 
@@ -384,7 +391,7 @@ try:
                     cached = key in PREPARED
                     PREPARED.add(key)
                     if META.get("persistent_backend"):
-                        PREPARED_PATH.write_text(json.dumps(sorted(PREPARED)))
+                        save_snapshot(PREPARED_PATH, sorted(PREPARED))
                     send(correlated("terminal", identifier, 1, outcome=dict(result="prepared_artifact",
                         source=source, size_bytes=123, already_cached=cached)))
                 elif META.get("backend") and operation["operation"] in ("create", "create_oci", "create_registry_prepared"):

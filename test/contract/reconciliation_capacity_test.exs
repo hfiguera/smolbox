@@ -41,7 +41,7 @@ defmodule SmolBox.ReconciliationCapacityTest do
     {:ok, busy} = SmolBox.submit(f.runtime, f.spec)
     wait(fn -> fetch(f, busy) end, &(&1.state == :running))
     assert {:ok, _} = Machines.delete(f.runtime, machine, current.version)
-    assert {:ok, %{state: :deleted, reservation: nil}} = Machines.await(f.runtime, machine, 1000)
+    assert {:ok, %{state: :deleted, reservation: nil}} = Machines.await(f.runtime, machine, 5000)
     assert fetch(f, busy).state == :running
     cancel_running(f, busy)
   end

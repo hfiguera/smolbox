@@ -1,5 +1,7 @@
 defmodule SmolBox.Store.NativePartialBranchDisposalOps do
   @moduledoc false
+  alias SmolBox.Embedded.NativeBranchAdmission
+
   alias SmolBox.Embedded.{
     BranchPublication,
     NativePartialBranchCleanupResolutionResult,
@@ -13,7 +15,7 @@ defmodule SmolBox.Store.NativePartialBranchDisposalOps do
 
   def accept(parent, child, version, platform, now) do
     with true <- Validation.timestamp?(now) and platform in ~w(linux macos),
-         true <- NativePartialBranchDisposal.pending?(parent, child),
+         true <- NativeBranchAdmission.partial_disposal_pending?(parent, child),
          saved = child.branch.native_authority.partial_disposal,
          true <- platform == child.branch.native_authority.partial_collection.platform,
          true <- version == child.version or (saved != nil and version == saved.version) do
@@ -46,7 +48,7 @@ defmodule SmolBox.Store.NativePartialBranchDisposalOps do
 
   def resolve(parent, child, %NativePartialBranchDisposalResult{} = result, now) do
     with true <- Validation.timestamp?(now),
-         true <- NativePartialBranchDisposal.pending?(parent, child),
+         true <- NativeBranchAdmission.partial_disposal_pending?(parent, child),
          true <- NativePartialBranchDisposalResult.bound?(result, parent, child) do
       saved = %{
         child.branch.native_authority.partial_disposal
@@ -62,7 +64,7 @@ defmodule SmolBox.Store.NativePartialBranchDisposalOps do
 
   def resolve(parent, child, %NativePartialBranchCleanupResult{} = result, now) do
     with true <- Validation.timestamp?(now),
-         true <- NativePartialBranchDisposal.pending?(parent, child),
+         true <- NativeBranchAdmission.partial_disposal_pending?(parent, child),
          true <- NativePartialBranchCleanupResult.bound?(result, parent, child),
          {:ok, proof} <- PartialBranchDisposal.from_wire(result.proof.disposal) do
       disposal = child.branch.native_authority.partial_disposal
@@ -76,7 +78,7 @@ defmodule SmolBox.Store.NativePartialBranchDisposalOps do
 
   def resolve(parent, child, %NativePartialBranchCleanupResolutionResult{} = result, now) do
     with true <- Validation.timestamp?(now),
-         true <- NativePartialBranchDisposal.pending?(parent, child),
+         true <- NativeBranchAdmission.partial_disposal_pending?(parent, child),
          true <- NativePartialBranchCleanupResolutionResult.bound?(result, parent, child),
          {:ok, proof} <- PartialBranchDisposal.from_wire(result.proof.disposal) do
       disposal = child.branch.native_authority.partial_disposal

@@ -44,16 +44,9 @@ defmodule SmolBox.Embedded.PartialBranchDisposalCleanup do
         value["quiesced"]
       ])
 
-  def from_wire(value) do
-    if valid?(value) and not is_struct(value),
-      do:
-        {:ok,
-         struct!(__MODULE__, Map.new(value, fn {k, v} -> {String.to_existing_atom(k), v} end))},
-      else: :error
-  end
+  def from_wire(value), do: BranchCanonical.from_wire(value, __MODULE__)
 
-  def to_wire(%__MODULE__{} = proof),
-    do: Map.new(Map.from_struct(proof), fn {k, v} -> {Atom.to_string(k), v} end)
+  def to_wire(%__MODULE__{} = value), do: BranchCanonical.wire_fields(value)
 
   def valid?(%__MODULE__{} = value),
     do: Validation.struct_shape?(value, __MODULE__) and valid?(to_wire(value))
@@ -87,10 +80,8 @@ defmodule SmolBox.Embedded.PartialBranchDisposalCleanup do
         BranchCanonical.ordered(value["disposal"], :partial_disposal)
       ])
 
-  def matches?(%__MODULE__{} = proof, request), do: matches?(to_wire(proof), request)
-
   def matches?(proof, request),
-    do: valid?(proof) and request?(request) and proof["request"] == request
+    do: BranchCanonical.request_proof_matches?(proof, request, __MODULE__, &request?/1)
 
   def approval(request),
     do: get_in(request, ~w(disposal_request collection_request creation approval))

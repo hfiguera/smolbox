@@ -5,10 +5,21 @@ Code.require_file("examples/embedded_port/lib/growth_demo.ex")
 
 defmodule SmolBox.EmbeddedImagesRuntimeTest do
   use ExUnit.Case, async: false
-  alias SmolBox.{Machines, ManagedMachineSpec, NetworkPolicy, Profile, Source, TestArtifacts}
-  alias SmolBox.Store.Memory
-  alias SmolBox.Test.EmbeddedPackage, as: Package
+
+  alias SmolBox.{
+    Image,
+    Machines,
+    ManagedMachineSpec,
+    NetworkPolicy,
+    Profile,
+    Source,
+    TestArtifacts
+  }
+
   alias SmolBox.Example.EmbeddedImages, as: Workflow
+  alias SmolBox.Runtime.Session
+  alias SmolBox.Store.{Codec, Memory}
+  alias SmolBox.Test.EmbeddedPackage, as: Package
 
   for kind <- [:oci, :registry] do
     test "macOS #{kind} source uses public creation, durable identity and owned cleanup" do
@@ -57,8 +68,8 @@ defmodule SmolBox.EmbeddedImagesRuntimeTest do
     f = fixture(kind: :registry)
     {:ok, cold} = Machines.inspect(f.runtime, f.key)
     assert %{already_cached: false, size_bytes: 123} = cold.preparation
-    assert {:ok, bytes} = SmolBox.Store.Codec.encode(cold)
-    assert {:ok, ^cold} = SmolBox.Store.Codec.decode(bytes)
+    assert {:ok, bytes} = Codec.encode(cold)
+    assert {:ok, ^cold} = Codec.decode(bytes)
     assert cold.backend_assignment.creation["source"] == Source.artifact(f.source)
     assert Enum.count(requests(f.native), &(&1["operation"] == "prepare_artifact")) == 1
     assert Enum.count(requests(f.native), &(&1["operation"] == "create_registry_prepared")) == 1
@@ -89,7 +100,7 @@ defmodule SmolBox.EmbeddedImagesRuntimeTest do
     assert {:ok, _} =
              Memory.machine(f.store, :write, [
                f.key,
-               SmolBox.Runtime.Session.guard(failed),
+               Session.guard(failed),
                [next_due_at_ms: 0],
                System.system_time(:millisecond)
              ])
@@ -109,8 +120,8 @@ defmodule SmolBox.EmbeddedImagesRuntimeTest do
     assert blocked.operation == :create and blocked.phase == :uncertain
     assert blocked.last_error.evidence == :not_dispatched
     assert blocked.next_due_at_ms > System.system_time(:millisecond)
-    assert {:ok, bytes} = SmolBox.Store.Codec.encode(blocked)
-    assert {:ok, ^blocked} = SmolBox.Store.Codec.decode(bytes)
+    assert {:ok, bytes} = Codec.encode(blocked)
+    assert {:ok, ^blocked} = Codec.decode(bytes)
     assert {:ok, %{slots: 1}} = Memory.usage(f.store, f.native.id)
 
     assert {:ok, _} = resolve_owned(f.runtime, f.key, quiesced: true, disposition: :deleted)
@@ -128,7 +139,7 @@ defmodule SmolBox.EmbeddedImagesRuntimeTest do
     assert {:ok, %{state: :completed, evidence: :image_pulled, result: image}} =
              SmolBox.await(runtime, execution, 5000)
 
-    assert SmolBox.Image.matches?(image, pull)
+    assert Image.matches?(image, pull)
 
     before_retry = requests(native)
     assert Enum.count(before_retry, &(&1["operation"] == "pull_image")) == 1

@@ -1,15 +1,20 @@
 defmodule SmolBox.Backend.EmbeddedContext do
   @moduledoc false
-  alias SmolBox.Backend.{
-    Assignment,
-    EmbeddedBranchDeletion,
-    EmbeddedBranchRetirement,
-    EmbeddedCapture,
-    EmbeddedExport,
-    Features
+  alias SmolBox.Backend.{Assignment, Features}
+
+  alias SmolBox.Embedded.{
+    BranchCompletion,
+    Config,
+    Identity,
+    MaterialHistory,
+    NativeBranchDeletion,
+    NativeBranchRetirement,
+    NativeGrowth,
+    Port,
+    Request,
+    Shape
   }
 
-  alias SmolBox.Embedded.{Config, Identity, MaterialHistory, NativeGrowth, Port, Request, Shape}
   alias SmolBox.{Error, Execution, ManagedMachine, Volume}
 
   @enforce_keys [:config, :server]
@@ -81,11 +86,11 @@ defmodule SmolBox.Backend.EmbeddedContext do
            assignment: record.backend_assignment,
            identity: current_identity(record),
            growth: NativeGrowth.intent(record),
-           capture: EmbeddedCapture.intent(record),
-           export: EmbeddedExport.intent(record),
+           capture: capture_intent(record),
+           export: export_intent(record),
            history: material_history(record),
-           branch_retirement: EmbeddedBranchRetirement.intent(record),
-           branch_deletion: EmbeddedBranchDeletion.intent(record),
+           branch_retirement: branch_retirement_intent(record),
+           branch_deletion: if(NativeBranchDeletion.resolvable?(record), do: record),
            profile: record.spec.profile,
            spec: record.spec,
            managed_machine: Map.get(record, :managed_machine),
@@ -95,6 +100,24 @@ defmodule SmolBox.Backend.EmbeddedContext do
       _mismatch -> error()
     end
   end
+
+  defp capture_intent(%ManagedMachine{active_capture: id, captures: captures})
+       when not is_nil(id),
+       do: captures[id]
+
+  defp capture_intent(_), do: nil
+
+  defp export_intent(%ManagedMachine{active_export: id, exports: exports}) when not is_nil(id),
+    do: exports[id]
+
+  defp export_intent(_), do: nil
+
+  def branch_retirement_intent(
+        %ManagedMachine{branch: %{native_authority: %{completion: %BranchCompletion{}}}} = record
+      ),
+      do: if(NativeBranchRetirement.eligible?(record), do: record)
+
+  def branch_retirement_intent(_), do: nil
 
   def scoped?(%__MODULE__{} = context),
     do:
@@ -117,10 +140,30 @@ defmodule SmolBox.Backend.EmbeddedContext do
     do: growth_scope?(context) and retirement_scope?(context) and deletion_scope?(context)
 
   defp deletion_scope?(%{branch_deletion: nil}), do: true
-  defp deletion_scope?(context), do: EmbeddedBranchDeletion.scope?(context)
+  defp deletion_scope?(context), do: branch_deletion_scope?(context)
 
   defp retirement_scope?(%{branch_retirement: nil}), do: true
-  defp retirement_scope?(context), do: EmbeddedBranchRetirement.scope?(context)
+  defp retirement_scope?(context), do: branch_retirement_scope?(context)
+
+  def branch_deletion_scope?(%{branch_deletion: %ManagedMachine{} = child} = context),
+    do:
+      ManagedMachine.validate(child) == :ok and NativeBranchDeletion.resolvable?(child) and
+        branch_scope?(context, child)
+
+  def branch_deletion_scope?(_), do: false
+
+  def branch_retirement_scope?(%{branch_retirement: %ManagedMachine{} = child} = context),
+    do:
+      ManagedMachine.validate(child) == :ok and branch_retirement_intent(child) == child and
+        branch_scope?(context, child)
+
+  def branch_retirement_scope?(_), do: false
+
+  defp branch_scope?(context, child),
+    do:
+      child.spec == context.spec and child.backend_assignment == context.assignment and
+        child.machine_name == context.name and child.spec.profile == context.profile and
+        NativeGrowth.current_identity(child) == {:ok, context.identity}
 
   def volume_scoped?(%__MODULE__{volume: %Volume{} = volume} = context),
     do:

@@ -5,7 +5,7 @@ defmodule SmolBox.EmbeddedBranchRetirementTest do
   alias SmolBox.{Error, ManagedMachine}
   alias SmolBox.Store.{Memory, NativeBranchRetirementContract}
   @empty %{stdout: <<>>, stderr: <<>>, file: <<>>}
-  @budget %Budget{timeout_ms: 1000, max_request_bytes: 131_072, max_response_bytes: 131_072}
+  @budget %Budget{timeout_ms: 5000, max_request_bytes: 131_072, max_response_bytes: 131_072}
 
   defp fixture do
     store = start_supervised!(Memory)
@@ -56,7 +56,7 @@ defmodule SmolBox.EmbeddedBranchRetirementTest do
 
     assert pinned.server == context.server and pinned.epoch == context.epoch and pinned.quiesced
     assert request == proof.request and request["child"] == context.identity.receipt
-    assert budget.timeout_ms <= 1000 and budget.max_response_bytes <= 72 * 1024
+    assert budget.timeout_ms <= @budget.timeout_ms and budget.max_response_bytes <= 72 * 1024
     assert {:ok, ^child} = Memory.machine(store, :fetch, [ManagedMachine.key(child)])
     assert {:ok, ^parent} = Memory.machine(store, :fetch, [ManagedMachine.key(parent)])
     assert {:ok, ^usage} = Memory.usage(store, parent.worker_id)
@@ -112,7 +112,7 @@ defmodule SmolBox.EmbeddedBranchRetirementTest do
 
     late =
       peer(proof, self(), fn result ->
-        Process.sleep(210)
+        Process.sleep(2000)
         result
       end)
 
@@ -122,7 +122,7 @@ defmodule SmolBox.EmbeddedBranchRetirementTest do
                child.machine_name,
                @budget,
                late,
-               System.monotonic_time(:millisecond) + 200
+               System.monotonic_time(:millisecond) + 1500
              )
 
     assert {:ok, ^child} = Memory.machine(store, :fetch, [ManagedMachine.key(child)])

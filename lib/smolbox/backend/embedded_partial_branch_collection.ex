@@ -4,6 +4,7 @@ defmodule SmolBox.Backend.EmbeddedPartialBranchCollection do
 
   alias SmolBox.Embedded.{
     Call,
+    NativeBranchAdmission,
     NativeGrowth,
     NativePartialBranchCollection,
     NativePartialBranchCollectionResult,
@@ -41,7 +42,7 @@ defmodule SmolBox.Backend.EmbeddedPartialBranchCollection do
 
     with true <-
            context.pinned and context.quiesced and is_pid(context.server) and context.epoch != nil,
-         true <- NativePartialBranchCollection.pending?(parent, child),
+         true <- NativeBranchAdmission.partial_collection_pending?(parent, child),
          true <- child.branch.native_authority.partial_collection == nil,
          true <- context.spec == parent.spec and context.assignment == parent.backend_assignment,
          true <- NativeGrowth.current_identity(parent) == {:ok, context.identity},
@@ -112,7 +113,7 @@ defmodule SmolBox.Backend.EmbeddedPartialBranchCollection do
 
     with true <-
            context.pinned and context.quiesced and is_pid(context.server) and context.epoch != nil,
-         true <- NativePartialBranchCollection.pending?(parent, child),
+         true <- NativeBranchAdmission.partial_collection_pending?(parent, child),
          true <- context.spec == parent.spec and context.assignment == parent.backend_assignment,
          true <- NativeGrowth.current_identity(parent) == {:ok, context.identity},
          saved when not is_nil(saved) <- child.branch.native_authority.partial_collection,

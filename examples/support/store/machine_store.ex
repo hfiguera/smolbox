@@ -163,22 +163,33 @@ defmodule SmolBox.DurableHost.MachineStore do
          do: Database.write(context, execution)
   end
 
-  def run(context, :branch_delete_action_accept, [key, guard, action, now]) do
-    with {:ok, child} <- Database.guarded_machine(context, key, guard, now),
-         {:ok, child} <- NativeBranchDeletionActionOps.accept(child, action, now),
-         do: persist(context, child)
-  end
+  if Code.ensure_loaded?(NativeBranchDeletionActionOps) and
+       Code.ensure_loaded?(NativeBranchDeletionOps) do
+    def run(context, :branch_delete_action_accept, [key, guard, action, now]) do
+      with {:ok, child} <- Database.guarded_machine(context, key, guard, now),
+           {:ok, child} <- NativeBranchDeletionActionOps.accept(child, action, now),
+           do: persist(context, child)
+    end
 
-  def run(context, :branch_delete_action_complete, [key, guard, action, proof, now]) do
-    with {:ok, child} <- Database.guarded_machine(context, key, guard, now),
-         {:ok, child} <- NativeBranchDeletionActionOps.complete(child, action, proof, now),
-         do: persist(context, child)
-  end
+    def run(context, :branch_delete_action_complete, [key, guard, action, proof, now]) do
+      with {:ok, child} <- Database.guarded_machine(context, key, guard, now),
+           {:ok, child} <- NativeBranchDeletionActionOps.complete(child, action, proof, now),
+           do: persist(context, child)
+    end
 
-  def run(context, :branch_delete_accept, [key, guard, now]) do
-    with {:ok, child} <- Database.guarded_machine(context, key, guard, now),
-         {:ok, child} <- NativeBranchDeletionOps.accept(child, now),
-         do: persist(context, child)
+    def run(context, :branch_delete_accept, [key, guard, now]) do
+      with {:ok, child} <- Database.guarded_machine(context, key, guard, now),
+           {:ok, child} <- NativeBranchDeletionOps.accept(child, now),
+           do: persist(context, child)
+    end
+  else
+    def run(_context, operation, _args)
+        when operation in [
+               :branch_delete_action_accept,
+               :branch_delete_action_complete,
+               :branch_delete_accept
+             ],
+        do: error(:unsupported_capability)
   end
 
   def run(context, :resolve, [key, guard, observed, now]) do

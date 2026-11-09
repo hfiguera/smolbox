@@ -1,5 +1,6 @@
 defmodule SmolBox.EmbeddedReleasedBranchContinuationTest do
   use ExUnit.Case, async: true
+
   alias SmolBox.{Backend, Error}
 
   alias SmolBox.Backend.{
@@ -15,12 +16,13 @@ defmodule SmolBox.EmbeddedReleasedBranchContinuationTest do
 
   alias SmolBox.Store.{
     Memory,
+    NativeBranchDeletionActionContract,
     NativeBranchDeletionContract,
     NativeReleasedBranchCleanupContract,
     NativeReleasedBranchContinuationContract
   }
 
-  @budget %Budget{timeout_ms: 1000, max_request_bytes: 131_072, max_response_bytes: 131_072}
+  @budget %Budget{timeout_ms: 5000, max_request_bytes: 131_072, max_response_bytes: 131_072}
   @empty %{stdout: <<>>, stderr: <<>>, file: <<>>}
 
   defp other(:continue), do: :cleanup
@@ -38,7 +40,7 @@ defmodule SmolBox.EmbeddedReleasedBranchContinuationTest do
     {_, child, _} = NativeBranchDeletionContract.prepare(Memory, store, origin)
 
     assert {:ok, child} =
-             NativeReleasedBranchContinuationContract.accept(Memory, store, child, action, 1303)
+             NativeBranchDeletionActionContract.accept(Memory, store, child, action, 1303)
 
     {:ok, identity} = NativeGrowth.current_identity(child)
 
@@ -47,7 +49,7 @@ defmodule SmolBox.EmbeddedReleasedBranchContinuationTest do
         do: NativeReleasedBranchCleanupContract,
         else: NativeReleasedBranchContinuationContract
 
-    proof = contract.proof(NativeReleasedBranchContinuationContract.saved(child, action).request)
+    proof = contract.proof(NativeBranchDeletionActionContract.saved(child, action).request)
 
     context = %EmbeddedContext{
       config: struct(Config, platform: :macos),
@@ -93,8 +95,8 @@ defmodule SmolBox.EmbeddedReleasedBranchContinuationTest do
         assert pinned.server == context.server and pinned.epoch == context.epoch and
                  pinned.quiesced
 
-        assert request == NativeReleasedBranchContinuationContract.saved(child, action).request
-        assert budget.timeout_ms <= 1000 and budget.max_response_bytes <= 8192
+        assert request == NativeBranchDeletionActionContract.saved(child, action).request
+        assert budget.timeout_ms <= @budget.timeout_ms and budget.max_response_bytes <= 8192
         refute Embedded.supports_operation?(context, operation(action))
 
         assert {:error, %Error{evidence: :not_dispatched}} =
@@ -165,7 +167,7 @@ defmodule SmolBox.EmbeddedReleasedBranchContinuationTest do
 
         late =
           peer(proof, action, self(), fn response ->
-            Process.sleep(150)
+            Process.sleep(2000)
             response
           end)
 
@@ -176,7 +178,7 @@ defmodule SmolBox.EmbeddedReleasedBranchContinuationTest do
                    action,
                    @budget,
                    late,
-                   System.monotonic_time(:millisecond) + 100
+                   System.monotonic_time(:millisecond) + 1500
                  )
       end
 

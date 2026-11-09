@@ -14,6 +14,7 @@ defmodule SmolBox.NativeReleasedBranchContinuationTest do
     CodecNativePreparedBranchRetirements,
     Contract,
     Memory,
+    NativeBranchDeletionActionContract,
     NativeBranchDeletionActionOps,
     NativeBranchDeletionContract,
     NativeBranchRetirementContract,
@@ -124,7 +125,7 @@ defmodule SmolBox.NativeReleasedBranchContinuationTest do
       assert {:ok, before} = Codec.encode(observed)
 
       assert {:ok, pending} =
-               NativeReleasedBranchContinuationContract.accept(
+               NativeBranchDeletionActionContract.accept(
                  Memory,
                  store,
                  observed,
@@ -151,7 +152,7 @@ defmodule SmolBox.NativeReleasedBranchContinuationTest do
       {_, child, _} = NativeBranchDeletionContract.prepare(Memory, store, unquote(mode))
 
       assert {:ok, pending} =
-               NativeReleasedBranchContinuationContract.accept(
+               NativeBranchDeletionActionContract.accept(
                  Memory,
                  store,
                  child,
@@ -165,7 +166,7 @@ defmodule SmolBox.NativeReleasedBranchContinuationTest do
         )
 
       assert {:ok, gone} =
-               NativeReleasedBranchContinuationContract.finish(
+               NativeBranchDeletionActionContract.finish(
                  Memory,
                  store,
                  pending,

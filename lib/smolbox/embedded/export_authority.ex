@@ -24,10 +24,10 @@ defmodule SmolBox.Embedded.ExportAuthority do
   def enroll(%{backend_assignment: nil}), do: {:ok, nil}
   def enroll(_), do: :error
 
-  def valid?(%Export{native_authority: nil, receipt: receipt}),
+  def valid?(%{__struct__: Export, native_authority: nil, receipt: receipt}),
     do: receipt == nil or receipt.native_publication == nil
 
-  def valid?(%Export{native_authority: %__MODULE__{} = authority} = export) do
+  def valid?(%{__struct__: Export, native_authority: %__MODULE__{} = authority} = export) do
     Validation.struct_shape?(authority, __MODULE__) and Shape.receipt?(authority.source, 2) and
       authority.source["material"] != nil and request?(export, authority.request) and
       publication?(export) and cleanup?(export)
@@ -35,10 +35,11 @@ defmodule SmolBox.Embedded.ExportAuthority do
 
   def valid?(_), do: false
 
-  def entry_valid?(%Export{native_authority: nil}, %{backend_assignment: nil}), do: true
+  def entry_valid?(%{__struct__: Export, native_authority: nil}, %{backend_assignment: nil}),
+    do: true
 
   def entry_valid?(
-        %Export{native_authority: %__MODULE__{source: source}} = export,
+        %{__struct__: Export, native_authority: %__MODULE__{source: source}} = export,
         %{
           backend_assignment: %{version: 2},
           created_machine: %{backend_identity: %{receipt: origin}}
@@ -64,30 +65,30 @@ defmodule SmolBox.Embedded.ExportAuthority do
   def entry_valid?(_, _), do: false
 
   def freeze_request(
-        %Export{native_authority: %__MODULE__{request: nil} = authority} = export,
+        %{__struct__: Export, native_authority: %__MODULE__{request: nil} = authority} = export,
         request
       ),
       do: if(request?(export, request), do: {:ok, %{authority | request: request}}, else: :error)
 
   def freeze_request(
-        %Export{native_authority: %__MODULE__{request: request} = authority},
+        %{__struct__: Export, native_authority: %__MODULE__{request: request} = authority},
         request
       ),
       do: {:ok, authority}
 
-  def freeze_request(%Export{native_authority: nil}, nil), do: {:ok, nil}
+  def freeze_request(%{__struct__: Export, native_authority: nil}, nil), do: {:ok, nil}
   def freeze_request(_, _), do: :error
 
-  def freeze_cleanup(%Export{native_authority: nil}, nil), do: {:ok, nil}
+  def freeze_cleanup(%{__struct__: Export, native_authority: nil}, nil), do: {:ok, nil}
 
   def freeze_cleanup(
-        %Export{native_authority: %__MODULE__{cleanup: cleanup} = authority},
+        %{__struct__: Export, native_authority: %__MODULE__{cleanup: cleanup} = authority},
         cleanup
       ),
       do: {:ok, authority}
 
   def freeze_cleanup(
-        %Export{native_authority: %__MODULE__{cleanup: nil} = authority} = export,
+        %{__struct__: Export, native_authority: %__MODULE__{cleanup: nil} = authority} = export,
         cleanup
       ) do
     if authority.request != nil and
@@ -127,11 +128,15 @@ defmodule SmolBox.Embedded.ExportAuthority do
       identity["repository"] == export.spec.destination.repository and
       identity["manifest_sha256"] == export.receipt.manifest_sha256 and
       identity["size_bytes"] == export.receipt.size_bytes and
-      identity["platform"] == export.receipt.platform and
-      (export.result == nil or
-         (export.result.config_sha256 == identity["config_sha256"] and
-            export.result.content_sha256 == identity["content_sha256"]))
+      identity["platform"] == export.receipt.platform and result_matches?(export.result, identity)
   end
+
+  defp result_matches?(nil, _identity), do: true
+
+  defp result_matches?(result, identity),
+    do:
+      result.config_sha256 == identity["config_sha256"] and
+        result.content_sha256 == identity["content_sha256"]
 
   defp cleanup?(%{native_authority: %{cleanup: nil}} = export),
     do: export.state not in [:completed, :resolved_unknown]

@@ -37,4 +37,15 @@ defmodule SmolBox.Backend.Budget do
       {:error, %SmolBox.Error{category: :validation, operation: :backend}}
     end
   end
+
+  @doc false
+  def until(budget, deadline, operation) do
+    timeout = deadline - System.monotonic_time(:millisecond)
+
+    if timeout > 0,
+      do: constrain(budget, timeout_ms: timeout),
+      else:
+        {:error,
+         %SmolBox.Error{category: :expired, operation: operation, evidence: :not_dispatched}}
+  end
 end

@@ -9,7 +9,7 @@ defmodule SmolBox.Store.CodecNativePartialBranchCollections do
     if required?(record), do: raise(ArgumentError)
 
     record
-    |> CodecNativePartialBranchDisposals.strip()
+    |> CodecNativePartialBranchDisposals.transform(:strip)
     |> CodecFields.transform(@defaults, :strip)
   end
 
@@ -18,7 +18,7 @@ defmodule SmolBox.Store.CodecNativePartialBranchCollections do
 
     record
     |> CodecFields.transform(@defaults, :upgrade)
-    |> CodecNativePartialBranchDisposals.upgrade()
+    |> CodecNativePartialBranchDisposals.transform(:upgrade)
   end
 
   def required?(%{branch: %{native_authority: authority}}) when is_map(authority),

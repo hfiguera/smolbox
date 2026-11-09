@@ -155,7 +155,8 @@ defmodule SmolBox.Store.RecordOps do
   def resources(record), do: SmolBox.Profile.resources(record.spec.profile)
 
   @doc false
-  def accounted_resources(%SmolBox.Volume{} = volume), do: SmolBox.Volume.resources(volume)
+  def accounted_resources(%{__struct__: SmolBox.Volume} = volume),
+    do: SmolBox.Volume.resources(volume)
 
   def accounted_resources(%{exports: _, active_export: _} = record) do
     Map.merge(

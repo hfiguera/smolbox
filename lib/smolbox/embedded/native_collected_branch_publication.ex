@@ -72,30 +72,22 @@ defmodule SmolBox.Embedded.NativeCollectedBranchPublication do
 
   defp collection?(_, _), do: false
 
-  def eligible?(%ManagedMachine{branch: %{state: :unknown, native_authority: authority}} = child),
-    do:
-      child.state == :unknown and child.operation == :branch_child and
-        child.reservation == Profile.resources(child.spec.profile) and child.reserved_ports == [] and
-        child.created_machine == nil and child.observed_machine == nil and
-        child.absence_at_ms == nil and
-        Enum.all?(
-          ~w(completion prepared_retirement disposal partial_disposal release retirement backing deletion)a,
-          &(Map.fetch!(authority, &1) == nil)
-        )
+  def eligible?(
+        %{__struct__: ManagedMachine, branch: %{state: :unknown, native_authority: authority}} =
+          child
+      ),
+      do:
+        child.state == :unknown and child.operation == :branch_child and
+          child.reservation == Profile.resources(child.spec.profile) and
+          child.reserved_ports == [] and
+          child.created_machine == nil and child.observed_machine == nil and
+          child.absence_at_ms == nil and
+          Enum.all?(
+            ~w(completion prepared_retirement disposal partial_disposal release retirement backing deletion)a,
+            &(Map.fetch!(authority, &1) == nil)
+          )
 
   def eligible?(_), do: false
-
-  def pending?(parent, child),
-    do:
-      ManagedMachine.validate(parent) == :ok and ManagedMachine.validate(child) == :ok and
-        eligible?(child) and related?(parent, child) and source_pending?(parent, child)
-
-  defp related?(parent, child),
-    do:
-      parent.active_branch == child.id and parent.operation == :branch and
-        parent.branch_children[child.id] == false and parent.worker_id == child.worker_id and
-        parent.worker_generation == child.worker_generation and
-        child.branch.source == ManagedMachine.key(parent)
 
   # An accepted, still unacknowledged control cannot authorize a different
   # completion. A recorded publication must match both the paired head/history

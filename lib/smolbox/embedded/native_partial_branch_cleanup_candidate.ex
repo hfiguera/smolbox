@@ -1,8 +1,9 @@
 defmodule SmolBox.Embedded.NativePartialBranchCleanupCandidate do
   @moduledoc false
+
   alias SmolBox.Embedded.{
+    NativeBranchAdmission,
     NativeCollectedBranchPublication,
-    NativePartialBranchDisposal,
     NativeUnbootedBranchDisposal,
     PartialBranchCleanupCandidate
   }
@@ -15,7 +16,7 @@ defmodule SmolBox.Embedded.NativePartialBranchCleanupCandidate do
   # Transient eligibility, never a durable action or completion acknowledgement.
   def bound?(%__MODULE__{proof: %PartialBranchCleanupCandidate{} = proof} = result, parent, child) do
     with true <- Validation.struct_shape?(result, __MODULE__) and result.version == child.version,
-         true <- NativePartialBranchDisposal.pending?(parent, child),
+         true <- NativeBranchAdmission.partial_disposal_pending?(parent, child),
          %{proof: nil, cleanup: nil} = saved <- child.branch.native_authority.partial_disposal,
          true <- PartialBranchCleanupCandidate.matches?(proof, saved.request) do
       NativeCollectedBranchPublication.publication_pending?(parent, child, proof.publication) and

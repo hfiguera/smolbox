@@ -1,5 +1,7 @@
 defmodule SmolBox.Store.NativeBranchOps do
   @moduledoc false
+  alias SmolBox.Backend.Assignment
+
   alias SmolBox.Embedded.{
     BranchPublication,
     NativeBranchAuthority,
@@ -62,7 +64,14 @@ defmodule SmolBox.Store.NativeBranchOps do
              %{
                branch: branch,
                backend_assignment:
-                 NativeBranchAuthority.assignment(authority, child.spec.artifact, profile),
+                 struct!(
+                   Assignment,
+                   NativeBranchAuthority.assignment_fields(
+                     authority,
+                     child.spec.artifact,
+                     profile
+                   )
+                 ),
                worker_id: parent.worker_id,
                worker_generation: parent.worker_generation,
                machine_name: name,

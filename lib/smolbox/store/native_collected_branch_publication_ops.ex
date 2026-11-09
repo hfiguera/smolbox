@@ -1,6 +1,7 @@
 defmodule SmolBox.Store.NativeCollectedBranchPublicationOps do
   @moduledoc false
   alias SmolBox.Embedded.{
+    NativeBranchAdmission,
     NativeCollectedBranchPublication,
     NativeCollectedBranchPublicationResult
   }
@@ -9,7 +10,7 @@ defmodule SmolBox.Store.NativeCollectedBranchPublicationOps do
 
   def accept(parent, child, version, platform, now) do
     with true <- Validation.timestamp?(now) and platform in ~w(linux macos),
-         true <- NativeCollectedBranchPublication.pending?(parent, child),
+         true <- NativeBranchAdmission.collected_publication_pending?(parent, child),
          saved = child.branch.native_authority.collected_publication,
          true <- saved == nil or saved.platform == platform,
          collection = child.branch.native_authority.partial_collection,
@@ -36,7 +37,7 @@ defmodule SmolBox.Store.NativeCollectedBranchPublicationOps do
 
   def complete(parent, child, %NativeCollectedBranchPublicationResult{} = result, now) do
     with true <- Validation.timestamp?(now),
-         true <- NativeCollectedBranchPublication.pending?(parent, child),
+         true <- NativeBranchAdmission.collected_publication_pending?(parent, child),
          true <- NativeCollectedBranchPublicationResult.bound?(result, parent, child) do
       saved = child.branch.native_authority.collected_publication
 

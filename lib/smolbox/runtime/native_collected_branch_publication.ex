@@ -1,6 +1,7 @@
 defmodule SmolBox.Runtime.NativeCollectedBranchPublication do
   @moduledoc false
   alias SmolBox.{Backend, Error, ManagedMachine}
+  alias SmolBox.Embedded.NativeBranchAdmission
   alias SmolBox.Embedded.NativeCollectedBranchPublication, as: Publication
   alias SmolBox.Embedded.NativeCollectedBranchPublicationResult
   alias SmolBox.Runtime.{MachineSession, NativeResolution, Session, Target}
@@ -37,7 +38,7 @@ defmodule SmolBox.Runtime.NativeCollectedBranchPublication do
   defp fenced(config, coordinator, child, version, worker, deadline) do
     with {:ok, _} <- remaining(deadline),
          {:ok, parent} <- MachineSession.claim(config, child.branch.source),
-         true <- Publication.pending?(parent, child) do
+         true <- NativeBranchAdmission.collected_publication_pending?(parent, child) do
       NativeResolution.run(
         config,
         coordinator,

@@ -36,19 +36,9 @@ defmodule SmolBox.Embedded.BranchChildAbsence do
           ) and
         (request["child"]["material"]["revision"] != 0 or BranchCanonical.root?(request["child"]))
 
-  def from_wire(value) do
-    if Shape.keys?(value, ~w(schema request proof_sha256)) and valid?(value),
-      do:
-        {:ok,
-         struct!(
-           __MODULE__,
-           Map.new(value, fn {key, field} -> {String.to_existing_atom(key), field} end)
-         )},
-      else: :error
-  end
+  def from_wire(value), do: BranchCanonical.from_wire(value, __MODULE__)
 
-  def to_wire(%__MODULE__{} = proof),
-    do: Map.new(Map.from_struct(proof), fn {key, value} -> {Atom.to_string(key), value} end)
+  def to_wire(%__MODULE__{} = value), do: BranchCanonical.wire_fields(value)
 
   def valid?(%__MODULE__{} = proof),
     do: Validation.struct_shape?(proof, __MODULE__) and valid?(to_wire(proof))
@@ -64,10 +54,8 @@ defmodule SmolBox.Embedded.BranchChildAbsence do
             BranchCanonical.ordered(proof["request"], :child_absence_request)
           ]) and bounded?(proof)
 
-  def matches?(%__MODULE__{} = proof, request), do: matches?(to_wire(proof), request)
-
   def matches?(proof, request),
-    do: valid?(proof) and request?(request) and proof["request"] == request
+    do: BranchCanonical.request_proof_matches?(proof, request, __MODULE__, &request?/1)
 
   def platform(request), do: get_in(request, ~w(completion publication change platform))
 

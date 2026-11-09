@@ -2,7 +2,13 @@ defmodule SmolBox.NativePartialBranchBackingTest do
   use ExUnit.Case, async: true
   alias SmolBox.Embedded.{NativeBranchBacking, PartialBranchDisposal}
   alias SmolBox.ManagedMachine
-  alias SmolBox.Store.{Codec, Memory, NativePartialBranchBackingContract}
+
+  alias SmolBox.Store.{
+    Codec,
+    Memory,
+    NativeBranchBackingContract,
+    NativePartialBranchBackingContract
+  }
 
   alias NativePartialBranchBackingContract, as: Contract
 
@@ -21,19 +27,24 @@ defmodule SmolBox.NativePartialBranchBackingTest do
   test "an accepted request is stable across claims and repeated admission and still retains all backing" do
     store = start_supervised!(Memory)
     {parent, child, usage} = Contract.prepare(Memory, store, :held)
-    assert {:ok, accepted} = Contract.accept(Memory, store, parent, child, 1312)
-    parent = Contract.fetch(Memory, store, parent)
+
+    assert {:ok, accepted} =
+             NativeBranchBackingContract.accept(Memory, store, parent, child, 1312)
+
+    parent = NativeBranchBackingContract.fetch(Memory, store, parent)
     saved = accepted.branch.native_authority.backing
 
     assert {:ok, claimed} =
              Memory.machine(store, :claim, [ManagedMachine.key(accepted), "owner", 1313, 10_000])
 
-    assert {:ok, ^claimed} = Contract.accept(Memory, store, parent, claimed, 1314)
+    assert {:ok, ^claimed} =
+             NativeBranchBackingContract.accept(Memory, store, parent, claimed, 1314)
+
     assert claimed.branch.native_authority.backing == saved
     assert {:ok, ^usage} = Memory.usage(store, parent.worker_id)
 
     assert {:ok, _} =
-             Contract.complete_proof(
+             NativeBranchBackingContract.complete_proof(
                Memory,
                store,
                parent,
@@ -46,7 +57,10 @@ defmodule SmolBox.NativePartialBranchBackingTest do
   test "new state rejects stripped requests in every old envelope and preserves immutable acknowledgement" do
     store = start_supervised!(Memory)
     {parent, child, _} = Contract.prepare(Memory, store, :held)
-    assert {:ok, accepted} = Contract.accept(Memory, store, parent, child, 1312)
+
+    assert {:ok, accepted} =
+             NativeBranchBackingContract.accept(Memory, store, parent, child, 1312)
+
     stripped = put_in(accepted.branch.native_authority.backing, nil)
 
     for version <- 1..47 do
@@ -69,9 +83,18 @@ defmodule SmolBox.NativePartialBranchBackingTest do
                1313
              )
 
-    parent = Contract.fetch(Memory, store, parent)
+    parent = NativeBranchBackingContract.fetch(Memory, store, parent)
     proof = Contract.proof(accepted.branch.native_authority.backing.request)
-    assert {:ok, closed} = Contract.complete_proof(Memory, store, parent, accepted, proof, 1313)
+
+    assert {:ok, closed} =
+             NativeBranchBackingContract.complete_proof(
+               Memory,
+               store,
+               parent,
+               accepted,
+               proof,
+               1313
+             )
 
     assert {:error, _} =
              ManagedMachine.update(
@@ -93,8 +116,8 @@ defmodule SmolBox.NativePartialBranchBackingTest do
   test "the exact disposal child root and source head are required for every accounting acknowledgement" do
     store = start_supervised!(Memory)
     {parent, child, usage} = Contract.prepare(Memory, store, :initial_release)
-    assert {:ok, pending} = Contract.accept(Memory, store, parent, child, 1312)
-    parent = Contract.fetch(Memory, store, parent)
+    assert {:ok, pending} = NativeBranchBackingContract.accept(Memory, store, parent, child, 1312)
+    parent = NativeBranchBackingContract.fetch(Memory, store, parent)
     saved = pending.branch.native_authority.backing
 
     assert saved.request["child"] ==
@@ -108,7 +131,16 @@ defmodule SmolBox.NativePartialBranchBackingTest do
           %{Contract.proof(saved.request) | operation_id: "different-release"},
           %{Contract.proof(saved.request) | request_sha256: String.duplicate("0", 64)}
         ] do
-      assert {:error, _} = Contract.complete_proof(Memory, store, parent, pending, wrong, 1313)
+      assert {:error, _} =
+               NativeBranchBackingContract.complete_proof(
+                 Memory,
+                 store,
+                 parent,
+                 pending,
+                 wrong,
+                 1313
+               )
+
       assert {:ok, ^usage} = Memory.usage(store, parent.worker_id)
     end
 
@@ -121,11 +153,11 @@ defmodule SmolBox.NativePartialBranchBackingTest do
   test "fresh BEAM readers retain pending and closed v47 authority without native assets" do
     store = start_supervised!(Memory)
     {parent, child, _} = Contract.prepare(Memory, store, :held)
-    assert {:ok, pending} = Contract.accept(Memory, store, parent, child, 1312)
-    parent = Contract.fetch(Memory, store, parent)
+    assert {:ok, pending} = NativeBranchBackingContract.accept(Memory, store, parent, child, 1312)
+    parent = NativeBranchBackingContract.fetch(Memory, store, parent)
 
     assert {:ok, closed} =
-             Contract.complete_proof(
+             NativeBranchBackingContract.complete_proof(
                Memory,
                store,
                parent,

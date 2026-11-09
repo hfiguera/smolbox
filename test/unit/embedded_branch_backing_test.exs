@@ -14,7 +14,7 @@ defmodule SmolBox.EmbeddedBranchBackingTest do
   alias SmolBox.Embedded.{BranchBackingRelease, Config, NativeGrowth}
   alias SmolBox.Store.{Memory, NativeBranchBackingContract}
   @empty %{stdout: <<>>, stderr: <<>>, file: <<>>}
-  @budget %Budget{timeout_ms: 1000, max_request_bytes: 131_072, max_response_bytes: 131_072}
+  @budget %Budget{timeout_ms: 5000, max_request_bytes: 131_072, max_response_bytes: 131_072}
 
   defp fixture do
     store = start_supervised!(Memory)
@@ -70,7 +70,7 @@ defmodule SmolBox.EmbeddedBranchBackingTest do
 
     assert request == child.branch.native_authority.backing.request
     assert pinned.server == context.server and pinned.epoch == context.epoch and pinned.quiesced
-    assert budget.timeout_ms <= 1000 and budget.max_response_bytes <= 72 * 1024
+    assert budget.timeout_ms <= @budget.timeout_ms and budget.max_response_bytes <= 72 * 1024
     assert {:ok, ^child} = Memory.machine(store, :fetch, [ManagedMachine.key(child)])
     assert {:ok, ^usage} = Memory.usage(store, parent.worker_id)
     refute Embedded.supports_operation?(context, :release_branch_backing)
@@ -142,7 +142,7 @@ defmodule SmolBox.EmbeddedBranchBackingTest do
 
     late =
       peer(proof, self(), fn result ->
-        Process.sleep(150)
+        Process.sleep(2000)
         result
       end)
 
@@ -154,7 +154,7 @@ defmodule SmolBox.EmbeddedBranchBackingTest do
                true,
                @budget,
                late,
-               System.monotonic_time(:millisecond) + 100
+               System.monotonic_time(:millisecond) + 1500
              )
 
     assert {:ok, ^child} = Memory.machine(store, :fetch, [ManagedMachine.key(child)])

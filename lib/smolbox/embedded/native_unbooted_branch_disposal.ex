@@ -1,11 +1,12 @@
 defmodule SmolBox.Embedded.NativeUnbootedBranchDisposal do
   @moduledoc false
+  alias SmolBox.ManagedMachineState
+
   alias SmolBox.Embedded.{
     BranchBackingRelease,
     BranchCanonical,
     NativeBranchBacking,
     NativeBranchRetirement,
-    NativeCollectedBranchPublication,
     UnbootedBranchChildAbsence,
     UnbootedBranchDisposal
   }
@@ -81,7 +82,8 @@ defmodule SmolBox.Embedded.NativeUnbootedBranchDisposal do
   defp completion?(_), do: false
 
   def eligible?(
-        %ManagedMachine{
+        %{
+          __struct__: ManagedMachine,
           branch: %{
             native_authority: %{
               completion: nil,
@@ -101,21 +103,6 @@ defmodule SmolBox.Embedded.NativeUnbootedBranchDisposal do
           child.absence_at_ms == nil
 
   def eligible?(_), do: false
-
-  def pending?(parent, child) do
-    with :ok <- ManagedMachine.validate(parent),
-         :ok <- ManagedMachine.validate(child),
-         true <- eligible?(child) do
-      parent.active_branch == child.id and parent.operation == :branch and
-        parent.branch_children[child.id] == false and
-        parent.worker_id == child.worker_id and
-        parent.worker_generation == child.worker_generation and
-        child.branch.source == ManagedMachine.key(parent) and
-        NativeCollectedBranchPublication.source_pending?(parent, child)
-    else
-      _ -> false
-    end
-  end
 
   def record?(%{branch: %{native_authority: %{disposal: nil}}}), do: true
 
@@ -138,7 +125,7 @@ defmodule SmolBox.Embedded.NativeUnbootedBranchDisposal do
 
   defp tombstone?(child),
     do:
-      child.state == :deleted and disposed_state?(child) and ManagedMachine.idle?(child) and
+      child.state == :deleted and disposed_state?(child) and ManagedMachineState.idle?(child) and
         child.reservation == nil and child.reserved_ports == [] and child.absence_at_ms != nil and
         child.created_machine == nil and child.observed_machine == nil
 

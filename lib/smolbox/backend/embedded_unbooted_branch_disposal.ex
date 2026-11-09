@@ -1,18 +1,9 @@
 defmodule SmolBox.Backend.EmbeddedUnbootedBranchDisposal do
   @moduledoc false
-  alias SmolBox.Backend.{
-    Assignment,
-    Budget,
-    EmbeddedBranchSourceObservation,
-    EmbeddedContext,
-    EmbeddedReply,
-    Features
-  }
+  alias SmolBox.Backend.{Budget, EmbeddedBranchOperation, EmbeddedBranchSourceObservation}
 
   alias SmolBox.Embedded.{
-    BranchPublication,
-    Call,
-    NativeGrowth,
+    NativeBranchAdmission,
     NativeUnbootedBranchDisposal,
     NativeUnbootedBranchDisposalResult,
     Protocol,
@@ -20,42 +11,13 @@ defmodule SmolBox.Backend.EmbeddedUnbootedBranchDisposal do
     UnbootedBranchDisposalCandidate
   }
 
-  alias SmolBox.{Error, ManagedMachine}
+  alias SmolBox.Error
   @empty %{stdout: <<>>, stderr: <<>>, file: <<>>}
   @operations [
     :inspect_unbooted_branch_disposal,
     :dispose_unbooted_branch,
     :resolve_unbooted_branch_disposal
   ]
-
-  def run(context, operation, %ManagedMachine{} = parent, %ManagedMachine{} = child, budget)
-      when operation in @operations do
-    {:ok, budget} = constrain(budget)
-    deadline = now() + budget.timeout_ms
-
-    with true <-
-           EmbeddedContext.scoped?(context) and Features.supports?(context.config, :branches),
-         true <-
-           context.quiesced and
-             Assignment.approved?(child.backend_assignment, context.config, child.spec),
-         {:ok, pin_budget} <- remaining(budget, deadline),
-         do:
-           coordinate(
-             Call.pin(context, pin_budget),
-             operation,
-             parent,
-             child,
-             budget,
-             &Call.run/3,
-             deadline
-           ),
-         else: (
-           {:error, _} = error -> error
-           _ -> failure(:unsupported_capability, :not_dispatched)
-         )
-  end
-
-  def run(_, _, _, _, _), do: failure(:validation, :not_dispatched)
 
   # Shared semantic sequence for the Port and inert peers. The source alone is
   # assigned: a never-booted child has no public Machine or usable child receipt.
@@ -88,18 +50,9 @@ defmodule SmolBox.Backend.EmbeddedUnbootedBranchDisposal do
 
   defp scope?(context, operation, parent, child),
     do:
-      operation in @operations and pinned?(context) and
-        NativeUnbootedBranchDisposal.pending?(parent, child) and
-        source_context?(context, parent) and mode?(operation, child)
-
-  defp pinned?(context),
-    do: context.pinned and context.quiesced and is_pid(context.server) and context.epoch != nil
-
-  defp source_context?(context, parent),
-    do:
-      context.spec == parent.spec and context.assignment == parent.backend_assignment and
-        context.profile == parent.spec.profile and context.name == parent.machine_name and
-        NativeGrowth.current_identity(parent) == {:ok, context.identity}
+      operation in @operations and EmbeddedBranchOperation.pinned?(context) and
+        NativeBranchAdmission.disposal_pending?(parent, child) and
+        EmbeddedBranchOperation.source?(context, parent) and mode?(operation, child)
 
   defp mode?(:inspect_unbooted_branch_disposal, child),
     do: child.branch.native_authority.disposal == nil
@@ -154,33 +107,36 @@ defmodule SmolBox.Backend.EmbeddedUnbootedBranchDisposal do
          else: (_ -> failure(:identity_conflict, :dispatch_uncertain))
   end
 
-  defp decode({:ok, %{"result" => "error"} = outcome, @empty, nil} = response, _, _, maximum) do
-    if fits?(outcome, maximum) and Protocol.valid_outcome?(outcome, 2),
-      do: EmbeddedReply.decode(nil, :branch, nil, response),
-      else: failure(:identity_conflict, :dispatch_uncertain)
-  end
+  defp decode({:ok, %{"result" => "error"}, @empty, nil} = response, _, _, maximum),
+    do: EmbeddedBranchOperation.error_reply(response, :branch, maximum)
 
   defp decode({:error, %Error{} = error}, _, _, _), do: {:error, error}
   defp decode(_, _, _, _), do: failure(:identity_conflict, :dispatch_uncertain)
 
   defp finish(context, :inspect_unbooted_branch_disposal, parent, child, candidate, _, _) do
-    if UnbootedBranchDisposalCandidate.bound?(
+    if NativeBranchAdmission.disposal_candidate?(
          candidate,
          parent,
          child,
          context.epoch,
-         platform(context)
+         EmbeddedBranchOperation.platform(context)
        ), do: {:ok, candidate}, else: failure(:identity_conflict, :dispatch_uncertain)
   end
 
   defp finish(context, _, parent, child, proof, {request, outcome}, {budget, call, deadline}) do
-    with true <- epoch?(proof, context),
-         {:ok, context} <- promote(context, proof),
-         {:ok, budget} <- unused_budget(budget, request, outcome, deadline),
+    with {:ok, context} <- EmbeddedBranchSourceObservation.promote(context, proof),
+         {:ok, budget} <-
+           EmbeddedBranchOperation.unused_budget(budget, request, outcome, deadline),
          request = %{"operation" => "inspect", "receipt" => context.identity.receipt},
          true <- fits?(request, budget.max_request_bytes),
          response = call.(context, request, budget),
-         {:ok, source} <- observation(context, request, response, budget.max_response_bytes),
+         {:ok, source} <-
+           EmbeddedBranchOperation.observation(
+             context,
+             request,
+             response,
+             budget.max_response_bytes
+           ),
          {:ok, _} <- remaining(budget, deadline),
          result = %NativeUnbootedBranchDisposalResult{
            version: child.version,
@@ -198,39 +154,6 @@ defmodule SmolBox.Backend.EmbeddedUnbootedBranchDisposal do
          )
   end
 
-  defp epoch?(proof, context),
-    do:
-      get_in(proof.publication, ~w(change child_origin intent epoch)) == context.epoch and
-        proof.publication["change"]["platform"] == platform(context)
-
-  defp promote(context, proof) do
-    case BranchPublication.from_wire(proof.publication) do
-      {:ok, publication} ->
-        EmbeddedBranchSourceObservation.promote_publication(context, publication)
-
-      _ ->
-        failure(:identity_conflict, :dispatch_uncertain)
-    end
-  end
-
-  defp observation(context, request, {:ok, outcome, @empty, nil} = response, maximum) do
-    if fits?(outcome, maximum) and Protocol.valid_outcome?(outcome, 2),
-      do: EmbeddedReply.decode(context, :inspect_machine, request, response),
-      else: failure(:identity_conflict, :dispatch_uncertain)
-  end
-
-  defp observation(_, _, {:error, %Error{} = error}, _), do: {:error, error}
-  defp observation(_, _, _, _), do: failure(:identity_conflict, :dispatch_uncertain)
-
-  defp unused_budget(budget, request, outcome, deadline) do
-    input = budget.max_request_bytes - size(request)
-    output = budget.max_response_bytes - size(outcome)
-
-    if input > 0 and output > 0,
-      do: remaining(%{budget | max_request_bytes: input, max_response_bytes: output}, deadline),
-      else: failure(:output_limit, :dispatch_uncertain)
-  end
-
   defp after_response(operation, budget, deadline) do
     case remaining(budget, deadline) do
       {:error, %Error{} = error} when operation != :inspect_unbooted_branch_disposal ->
@@ -241,18 +164,12 @@ defmodule SmolBox.Backend.EmbeddedUnbootedBranchDisposal do
     end
   end
 
-  defp constrain(budget),
+  def constrain(budget),
     do: Budget.constrain(budget, timeout_ms: 30_000, max_response_bytes: 64 * 1024)
 
-  defp remaining(budget, deadline) do
-    timeout = deadline - now()
+  defp remaining(budget, deadline),
+    do: EmbeddedBranchOperation.remaining(budget, deadline, {:branch, :not_dispatched})
 
-    if timeout > 0,
-      do: constrain(%{budget | timeout_ms: min(timeout, budget.timeout_ms)}),
-      else: failure(:expired, :not_dispatched)
-  end
-
-  defp platform(context), do: Atom.to_string(context.config.platform)
   defp fits?(value, maximum), do: size(value) <= maximum
   defp size(value), do: byte_size(Jason.encode!(value))
 

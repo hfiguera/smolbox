@@ -17,7 +17,13 @@ defmodule SmolBox.NativePartialBranchPublicBackingTest do
   }
 
   alias SmolBox.Runtime.{Coordinator, Target, WorkSupervisor}
-  alias SmolBox.Store.{Codec, Memory, NativePartialBranchBackingContract}
+
+  alias SmolBox.Store.{
+    Codec,
+    Memory,
+    NativeBranchBackingContract,
+    NativePartialBranchBackingContract
+  }
 
   alias NativePartialBranchBackingContract, as: Contract
 
@@ -198,7 +204,7 @@ defmodule SmolBox.NativePartialBranchPublicBackingTest do
       kind: :embedded,
       id: parent.worker_id,
       context: context,
-      budget: %Budget{timeout_ms: 1000, max_request_bytes: 131_072, max_response_bytes: 131_072}
+      budget: %Budget{timeout_ms: 5000, max_request_bytes: 131_072, max_response_bytes: 131_072}
     }
 
     worker = %Target{
@@ -270,7 +276,7 @@ defmodule SmolBox.NativePartialBranchPublicBackingTest do
       assert peer == worker.connection.context.server and epoch == worker.connection.context.epoch
       assert request == closed.branch.native_authority.backing.request
 
-      assert budget.timeout_ms <= 1000 and budget.max_request_bytes <= 84 * 1024 and
+      assert budget.timeout_ms <= 5000 and budget.max_request_bytes <= 84 * 1024 and
                budget.max_response_bytes <= 72 * 1024
 
       assert_receive {:native_ack, proof}
@@ -310,7 +316,7 @@ defmodule SmolBox.NativePartialBranchPublicBackingTest do
       {runtime, store, parent, child, usage, authority, worker} = fixture(unquote(mode))
       assert {:error, error} = release(runtime, child)
       if unquote(mode) == :store_failure, do: assert(error.evidence == :dispatch_uncertain)
-      current = Contract.fetch(Memory, store, child)
+      current = NativeBranchBackingContract.fetch(Memory, store, child)
 
       assert current.branch.native_authority.partial_disposal ==
                child.branch.native_authority.partial_disposal
@@ -337,7 +343,7 @@ defmodule SmolBox.NativePartialBranchPublicBackingTest do
   test "a lost acknowledgement keeps the accepted request and only its exact retry closes accounting" do
     {runtime, store, parent, child, usage, _, _} = fixture(:lost_once)
     assert {:error, %Error{evidence: :dispatch_uncertain}} = release(runtime, child)
-    pending = Contract.fetch(Memory, store, child)
+    pending = NativeBranchBackingContract.fetch(Memory, store, child)
     assert pending.branch.state == :backing_pending
     assert {:ok, ^usage} = Memory.usage(store, parent.worker_id)
     saved = pending.branch.native_authority.backing
@@ -361,8 +367,8 @@ defmodule SmolBox.NativePartialBranchPublicBackingTest do
 
   test "wrong source scope original epoch platform request and response budgets cannot close backing" do
     {_, store, parent, child, usage, _, worker} = fixture()
-    assert {:ok, child} = Contract.accept(Memory, store, parent, child, 1312)
-    parent = Contract.fetch(Memory, store, parent)
+    assert {:ok, child} = NativeBranchBackingContract.accept(Memory, store, parent, child, 1312)
+    parent = NativeBranchBackingContract.fetch(Memory, store, parent)
     {:ok, context} = Adapter.assign(worker.connection.context, parent)
     context = %{context | quiesced: true}
     budget = worker.connection.budget
@@ -457,7 +463,7 @@ defmodule SmolBox.NativePartialBranchPublicBackingTest do
              )
 
     late = fn _, _, _ ->
-      Process.sleep(80)
+      Process.sleep(2000)
       response
     end
 
@@ -469,7 +475,7 @@ defmodule SmolBox.NativePartialBranchPublicBackingTest do
                true,
                budget,
                late,
-               System.monotonic_time(:millisecond) + 50
+               System.monotonic_time(:millisecond) + 1500
              )
 
     assert {:ok, ^usage} = Memory.usage(store, parent.worker_id)

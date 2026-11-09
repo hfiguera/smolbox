@@ -10,8 +10,6 @@ defmodule SmolBox.Embedded.UnbootedBranchDisposalCandidate do
     BranchCanonical,
     BranchPublication,
     BranchRequest,
-    NativeCollectedBranchPublication,
-    NativeUnbootedBranchDisposal,
     Shape
   }
 
@@ -24,19 +22,10 @@ defmodule SmolBox.Embedded.UnbootedBranchDisposalCandidate do
   def request?(creation),
     do: BranchRequest.valid?(creation) and byte_size(Jason.encode!(creation)) <= 16 * 1024
 
-  def from_wire(value) do
-    if valid?(value) and not is_struct(value),
-      do:
-        {:ok,
-         struct!(
-           __MODULE__,
-           Map.new(value, fn {key, field} -> {String.to_existing_atom(key), field} end)
-         )},
-      else: :error
-  end
+  def from_wire(value), do: BranchCanonical.from_wire(value, __MODULE__)
 
   def to_wire(%__MODULE__{} = value),
-    do: Map.new(Map.from_struct(value), fn {key, field} -> {Atom.to_string(key), field} end)
+    do: BranchCanonical.wire_fields(value)
 
   def valid?(%__MODULE__{} = value),
     do: Validation.struct_shape?(value, __MODULE__) and valid?(to_wire(value))
@@ -54,25 +43,6 @@ defmodule SmolBox.Embedded.UnbootedBranchDisposalCandidate do
         Validation.digest?(value["preparation_sha256"]) and
         value["proof_sha256"] == proof_digest(value) and
         byte_size(Jason.encode!(value)) <= 32 * 1024
-
-  # Selection evidence is transient and requires the original pinned helper and
-  # still-locked source/child pair. It never completes or disposes the child.
-  def bound?(%__MODULE__{} = candidate, parent, child, epoch, platform) do
-    with true <- NativeUnbootedBranchDisposal.pending?(parent, child),
-         true <- child.branch.native_authority.disposal == nil,
-         true <- matches?(candidate, child.branch.native_authority.request) do
-      intent = get_in(candidate.publication, ~w(change child_origin intent))
-
-      NativeCollectedBranchPublication.publication_pending?(parent, child, candidate.publication) and
-        intent["epoch"] == epoch and candidate.publication["change"]["platform"] == platform and
-        intent["source_pid"] == child.branch.source_machine.backend_identity.pid_identity and
-        NativeUnbootedBranchDisposal.plan?(candidate, child.spec.profile)
-    else
-      _ -> false
-    end
-  end
-
-  def bound?(_, _, _, _, _), do: false
 
   def proof_digest(value),
     do:
