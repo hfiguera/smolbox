@@ -810,8 +810,7 @@ mod tests {
                 boot: identity.clone(),
                 file_worker: identity,
                 library_directory: std::env::var_os("LIBKRUN_BUNDLE")
-                    .map(PathBuf::from)
-                    .unwrap(),
+                    .map_or_else(|| root.clone(), PathBuf::from),
             },
         )
         .unwrap();

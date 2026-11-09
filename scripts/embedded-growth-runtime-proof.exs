@@ -1,39 +1,17 @@
+Code.require_file("embedded-runtime-proof-support.exs", __DIR__)
+
 defmodule SmolBox.EmbeddedGrowthRuntimeProof do
   @moduledoc false
+  alias SmolBox.EmbeddedRuntimeProofSupport, as: ProofSupport
   alias SmolBox.Example.EmbeddedGrowth
 
   def run(arguments) do
-    {options, [], []} =
-      OptionParser.parse(arguments,
-        strict: [
-          package: :string,
-          fixture: :string,
-          sha256: :string,
-          domain_json: :string,
-          inventory_helper: :string,
-          output: :string,
-          without_rust: :boolean,
-          ordinary: :boolean,
-          settings: :string
-        ]
-      )
+    options = ProofSupport.parse(arguments, ordinary: :boolean, settings: :string)
 
     true = options[:without_rust] and options[:ordinary]
     nil = System.find_executable("rustc")
     nil = System.find_executable("cargo")
-    package = Path.expand(Keyword.fetch!(options, :package))
-    manifest = File.read!(Path.join(package, "package.json"))
-    digest = Base.encode16(:crypto.hash(:sha256, manifest), case: :lower)
-
-    for {name, value} <- [
-          {"SMOLBOX_EMBEDDED_PACKAGE", package},
-          {"SMOLBOX_EMBEDDED_MANIFEST_SHA256", digest},
-          {"SMOLBOX_EMBEDDED_DOMAIN_JSON", Keyword.fetch!(options, :domain_json)},
-          {"SMOLBOX_EMBEDDED_ARTIFACT", Keyword.fetch!(options, :fixture)},
-          {"SMOLBOX_EMBEDDED_ARTIFACT_SHA256", Keyword.fetch!(options, :sha256)},
-          {"SMOLBOX_EMBEDDED_INITIALIZE", "false"}
-        ],
-        do: System.put_env(name, value)
+    ProofSupport.configure_environment(options)
 
     tooling = Keyword.fetch!(options, :inventory_helper)
 
@@ -48,10 +26,10 @@ defmodule SmolBox.EmbeddedGrowthRuntimeProof do
       if path = options[:settings], do: EmbeddedGrowth.read_settings!(path), else: %{}
 
     {target, selection} = EmbeddedGrowth.configure_settings(target, settings)
-    before = inventory(tooling)
+    before = ProofSupport.inventory(tooling)
     output = Path.expand(Keyword.fetch!(options, :output))
     {:ok, evidence} = EmbeddedGrowth.run(target, output, selection)
-    after_run = inventory(tooling)
+    after_run = ProofSupport.inventory(tooling)
     true = before == after_run
 
     evidence =
@@ -71,17 +49,6 @@ defmodule SmolBox.EmbeddedGrowthRuntimeProof do
     File.chmod!(path <> ".new", 0o600)
     File.rename!(path <> ".new", path)
     IO.puts(Jason.encode!(evidence))
-  end
-
-  defp inventory(tooling) do
-    {body, 0} =
-      System.cmd(System.find_executable("python3"), [
-        "-c",
-        "import sys,json; sys.path.insert(0,sys.argv[1]); from native_proof import snapshot; print(json.dumps(snapshot()))",
-        tooling
-      ])
-
-    Jason.decode!(body)
   end
 end
 

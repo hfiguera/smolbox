@@ -247,32 +247,34 @@ defmodule SmolBox.CI.NativeConsumer do
         "native consumer did not qualify public source lifecycle"
       )
 
-      case evidence["source_kind"] do
-        "oci" ->
-          Util.ensure!(
-            get_in(evidence, ["image_operations", "approved_pull_observed"]) == true and
-              get_in(evidence, ["image_operations", "duplicate_pull_reused"]) == true and
-              get_in(evidence, ["image_operations", "creation_source_unchanged"]) == true,
-            "native consumer did not qualify approved OCI image operations"
-          )
-
-          Util.ensure!(
-            !evidence["configured_startup"] or evidence["startup_counts"] == [1, 2],
-            "native consumer did not qualify configured OCI startup"
-          )
-
-        "registry" ->
-          Util.ensure!(
-            evidence["cold_warm_registry"] == true and
-              get_in(evidence, ["image_operations", "imported_pull_rejected"]) == true,
-            "native consumer did not qualify cold/warm registry preparation"
-          )
-
-        _ ->
-          raise ArgumentError, "native source consumer reported an unsupported source"
-      end
+      verify_image_source(evidence["source_kind"], evidence)
     end
   end
+
+  defp verify_image_source("oci", evidence) do
+    Util.ensure!(
+      get_in(evidence, ["image_operations", "approved_pull_observed"]) == true and
+        get_in(evidence, ["image_operations", "duplicate_pull_reused"]) == true and
+        get_in(evidence, ["image_operations", "creation_source_unchanged"]) == true,
+      "native consumer did not qualify approved OCI image operations"
+    )
+
+    Util.ensure!(
+      !evidence["configured_startup"] or evidence["startup_counts"] == [1, 2],
+      "native consumer did not qualify configured OCI startup"
+    )
+  end
+
+  defp verify_image_source("registry", evidence) do
+    Util.ensure!(
+      evidence["cold_warm_registry"] == true and
+        get_in(evidence, ["image_operations", "imported_pull_rejected"]) == true,
+      "native consumer did not qualify cold/warm registry preparation"
+    )
+  end
+
+  defp verify_image_source(_, _),
+    do: raise(ArgumentError, "native source consumer reported an unsupported source")
 
   defp validate_growth!(options) do
     Util.ensure!(
@@ -544,6 +546,13 @@ defmodule SmolBox.CI.NativeConsumer do
       {"scripts/#{script}", Path.join(consumer, "native-proof.exs")},
       {"native/smolbox-port/tests/native_proof.py", Path.join(tooling, "native_proof.py")}
     ]
+
+    support = "embedded-runtime-proof-support.exs"
+
+    files =
+      if script in ~w(embedded-runtime-proof.exs embedded-growth-runtime-proof.exs embedded-images-runtime-proof.exs embedded-volume-runtime-proof.exs),
+        do: [{"scripts/#{support}", Path.join(consumer, support)} | files],
+        else: files
 
     proof_support(files, tooling, options)
   end
