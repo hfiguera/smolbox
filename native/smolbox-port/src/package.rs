@@ -938,14 +938,15 @@ mod tests {
         // These captured descriptors predate export admission. Keep them as
         // compatibility fixtures and check the additional limits separately.
         let mut fixture_sdk = sdk.clone();
-        let exports = fixture_sdk.feature_versions.remove("exports");
+        assert_eq!(fixture_sdk.feature_versions.remove("exports"), Some(1));
         assert!(hello.sdk.as_deref() == Some(&fixture_sdk));
         assert!(hello.capabilities == sdk.capabilities());
         let mut negotiated = smolbox_protocol::Limits::for_sdk(&sdk);
-        assert_eq!(
-            negotiated.exports.take().map(|limits| limits.staging_bytes),
-            exports.map(|_| smolbox_engine::JOB_EXPORT_STAGING_BYTES)
-        );
+        let export_limits = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/export-limits-v1.json"
+        ))
+        .unwrap();
+        assert!(negotiated.exports.take() == Some(export_limits));
         assert!(hello.limits == negotiated);
         let buffered = smolbox_protocol::Limits::for_sdk(&sdk_identity().ok().unwrap())
             .buffered

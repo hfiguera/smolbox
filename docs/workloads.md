@@ -8,7 +8,7 @@ Embedded Port translates this immutable intent for approved container packs and
 eligible OCI sources when the protocol-2 package declares `workloads: 1`. The
 public managed API supports console tail and bounded follow on the approved
 packages. See [Embedded Port setup](embedded-port.md) for package and approval
-requirements and [the parity matrix](design/embedded-port-http-parity-coverage.json)
+requirements and [the repository parity matrix](https://github.com/hfiguera/smolbox/blob/main/docs/design/embedded-port-http-parity-coverage.json)
 for qualification results.
 
 This feature exposes **console diagnostics**, not application stdout/stderr.

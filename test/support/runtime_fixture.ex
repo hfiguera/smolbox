@@ -1,7 +1,7 @@
 defmodule SmolBox.RuntimeFixture do
   @moduledoc false
   import ExUnit.Assertions, only: [assert: 2]
-  alias SmolBox.{Client, ManagedPeer, Runtime, TestArtifacts, Worker}
+  alias SmolBox.{Client, Machines, ManagedPeer, Runtime, TestArtifacts, Worker}
   alias SmolBox.Runtime.WorkerConfig
   alias SmolBox.Store.{Contract, Memory}
 
@@ -163,9 +163,9 @@ defmodule SmolBox.RuntimeFixture do
   # controller sharing the store, then read a version that stayed unchanged.
   def await_idle(runtimes, handle, deadline \\ System.monotonic_time(:millisecond) + 5000) do
     [runtime | _] = runtimes = List.wrap(runtimes)
-    {:ok, machine} = SmolBox.Machines.inspect(runtime, handle)
+    {:ok, machine} = Machines.inspect(runtime, handle)
     coordinators = Enum.map(runtimes, &:sys.get_state(Runtime.coordinator(&1)))
-    {:ok, fresh} = SmolBox.Machines.inspect(runtime, handle)
+    {:ok, fresh} = Machines.inspect(runtime, handle)
 
     if Enum.all?(coordinators, &(&1.active == %{} and &1.scan == nil)) and
          machine.version == fresh.version and
@@ -178,6 +178,20 @@ defmodule SmolBox.RuntimeFixture do
 
       Process.sleep(5)
       await_idle(runtimes, handle, deadline)
+    end
+  end
+
+  # A scheduler claim can refresh the version even while the machine is idle.
+  def request_machine(runtime, handle, request, attempts \\ 20) do
+    with {:ok, machine} <- Machines.inspect(runtime, handle) do
+      case request.(runtime, handle, machine.version) do
+        {:error, %{category: :stale_version, evidence: :not_dispatched}} when attempts > 0 ->
+          Process.sleep(5)
+          request_machine(runtime, handle, request, attempts - 1)
+
+        result ->
+          result
+      end
     end
   end
 

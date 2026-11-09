@@ -1,0 +1,13 @@
+{
+  "staging_bytes": 549755813888,
+  "metadata_bytes": 1048576,
+  "upload_chunk_bytes": 1048576,
+  "registry_requests": 1048576,
+  "record_bytes": 16384,
+  "records": 256,
+  "asset_file_bytes": 2147483648,
+  "asset_total_bytes": 4294967296,
+  "control_metadata_bytes": 262144,
+  "observation_metadata_bytes": 131072,
+  "retirement_metadata_bytes": 33554432
+}

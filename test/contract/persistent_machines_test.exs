@@ -774,12 +774,14 @@ defmodule SmolBox.PersistentMachinesTest do
     Agent.update(gate, &%{&1 | fired: false})
     :ok = Machines.reconcile(fixture.runtime, handle)
     assert_receive {:boundary, :inspect, :after, blocked}, 5000
-    {:ok, running} = Machines.inspect(fixture.runtime, handle)
 
-    assert {:ok, %{state: :stopping, phase: :pending}} =
-             Machines.stop(fixture.runtime, handle, running.version)
+    try do
+      assert {:ok, %{state: :stopping, phase: :pending}} =
+               RuntimeFixture.request_machine(fixture.runtime, handle, &Machines.stop/3)
+    after
+      send(blocked, :release_boundary)
+    end
 
-    send(blocked, :release_boundary)
     assert wait_machine(fixture, handle, &(&1.state == :stopped)).operation == nil
   end
 
