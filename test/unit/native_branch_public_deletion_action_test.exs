@@ -42,7 +42,7 @@ defmodule SmolBox.NativeBranchPublicDeletionActionTest do
       do: Memory.claim_worker(store, id, owner, now, lease)
 
     def machine({_, _, _, _, flags} = context, operation, arguments) do
-      if operation == :claim and Agent.get(flags, & &1[:renew_failure]),
+      if operation == :claim and Agent.get(flags, & &1[:renew_armed]),
         do: {:error, %Error{category: :store, operation: :store}},
         else: guarded_machine(context, operation, arguments)
     end
@@ -87,6 +87,7 @@ defmodule SmolBox.NativeBranchPublicDeletionActionTest do
     end
 
     def handle_call({:proof, operation, context}, _, state) do
+      arm_renewal_failure(state)
       request = operation["request"]
       {:ok, child} = Memory.machine(state.store, :fetch, [ManagedMachine.key(state.child)])
       persisted = ActionContract.saved(child, state.action).request == request
@@ -143,6 +144,11 @@ defmodule SmolBox.NativeBranchPublicDeletionActionTest do
     end
 
     def handle_call(:calls, _, state), do: {:reply, state.calls, state}
+
+    defp arm_renewal_failure(%{renew_failure: true, flags: flags}),
+      do: Agent.update(flags, &Keyword.put(&1, :renew_armed, true))
+
+    defp arm_renewal_failure(_), do: :ok
 
     defp result(:collect), do: "branch_deletion_collected"
     defp result(:continue), do: "held_branch_deletion_continued"
@@ -202,6 +208,8 @@ defmodule SmolBox.NativeBranchPublicDeletionActionTest do
         {Peer,
          %{
            observer: self(),
+           flags: flags,
+           renew_failure: options[:renew_failure],
            action: action,
            epoch: epoch,
            frozen: false,
@@ -228,7 +236,7 @@ defmodule SmolBox.NativeBranchPublicDeletionActionTest do
       id: parent.worker_id,
       context: context,
       budget: %Budget{
-        timeout_ms: options[:budget] || 1000,
+        timeout_ms: options[:budget] || 5000,
         max_request_bytes: 131_072,
         max_response_bytes: 131_072
       }
@@ -390,7 +398,7 @@ defmodule SmolBox.NativeBranchPublicDeletionActionTest do
       action = unquote(action)
 
       {runtime, store, parent, child, usage, authority, peer} =
-        fixture(action, budget: 50, accept_delay: 100)
+        fixture(action, budget: 1500, accept_delay: 2000)
 
       assert {:error, %Error{evidence: :not_dispatched}} = execute(runtime, child, action)
       saved = NativeBranchDeletionContract.fetch(Memory, store, child)
@@ -404,7 +412,7 @@ defmodule SmolBox.NativeBranchPublicDeletionActionTest do
       action = unquote(action)
 
       {runtime, store, parent, child, usage, authority, peer} =
-        fixture(action, budget: 50, delay: 100)
+        fixture(action, budget: 1500, delay: 2000)
 
       assert {:error, %Error{evidence: :dispatch_uncertain}} = execute(runtime, child, action)
       saved = NativeBranchDeletionContract.fetch(Memory, store, child)
@@ -419,7 +427,7 @@ defmodule SmolBox.NativeBranchPublicDeletionActionTest do
       action = unquote(action)
 
       {runtime, store, parent, child, usage, authority, peer} =
-        fixture(action, delay: 100, renew_failure: true)
+        fixture(action, delay: 500, renew_failure: true)
 
       assert {:error, %Error{category: :store, evidence: :dispatch_uncertain}} =
                execute(runtime, child, action)

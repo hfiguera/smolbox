@@ -4,6 +4,7 @@ defmodule SmolBox.Store.NativeBranchDeletionActionContract do
 
   alias SmolBox.Embedded.{
     BranchCanonical,
+    BranchDeletionCollection,
     BranchDeletionContinuation,
     BranchDeletionResolution,
     NativeBranchDeletionAction
@@ -14,7 +15,6 @@ defmodule SmolBox.Store.NativeBranchDeletionActionContract do
   alias SmolBox.Store.{
     Codec,
     Contract,
-    NativeBranchCollectionContract,
     NativeBranchDeletionContract
   }
 
@@ -40,8 +40,33 @@ defmodule SmolBox.Store.NativeBranchDeletionActionContract do
   def saved(child, action),
     do: Map.fetch!(child.branch.native_authority, NativeBranchDeletionAction.field(action))
 
-  def proof(request) when not is_map_key(request, "action"),
-    do: NativeBranchCollectionContract.proof(request)
+  def proof(request) when not is_map_key(request, "action") do
+    value = %{
+      "schema" => 1,
+      "child" => request["child"],
+      "operation_id" => request["operation_id"],
+      "request_sha256" => request["request_sha256"],
+      "completion_sha256" =>
+        BranchCanonical.digest(BranchCanonical.ordered(request["completion"], :completion)),
+      "deletion_sha256" => String.duplicate("a", 64),
+      "collection_sha256" => String.duplicate("b", 64)
+    }
+
+    value =
+      if request["release"],
+        do:
+          Map.put(
+            value,
+            "release_sha256",
+            BranchCanonical.digest(BranchCanonical.ordered(request["release"], :child_release))
+          ),
+        else: value
+
+    value = Map.put(value, "proof_sha256", BranchDeletionCollection.proof_digest(value))
+    assert {:ok, proof} = BranchDeletionCollection.from_wire(value)
+    assert BranchDeletionCollection.matches?(proof, request)
+    proof
+  end
 
   def proof(request) do
     {module, domain} =
@@ -82,7 +107,6 @@ defmodule SmolBox.Store.NativeBranchDeletionActionContract do
     assert {:ok, ^pending} = accept(adapter, store, pending, action, 1304)
     roundtrip(pending)
     proof = proof(frozen.request)
-    raw = Map.new(Map.from_struct(proof), fn {k, v} -> {Atom.to_string(k), v} end)
     wrong_action = if action == :continue, do: :cleanup, else: :continue
 
     different_request =
@@ -94,17 +118,14 @@ defmodule SmolBox.Store.NativeBranchDeletionActionContract do
         frozen.request["child"]
       )
 
-    for {kind, invalid} <- [
-          {action, :absent},
-          {action, raw},
-          {action, proof(different_request)},
-          {action, %{proof | deletion_sha256: String.duplicate("0", 64)}},
-          {wrong_action, proof}
-        ] do
-      assert {:error, _} = finish(adapter, store, pending, kind, invalid, 1304)
-      assert NativeBranchDeletionContract.fetch(adapter, store, pending) == pending
-      assert {:ok, ^usage} = adapter.usage(store, parent.worker_id)
-    end
+    reject_changes(
+      adapter,
+      store,
+      {pending, parent, usage},
+      {action, wrong_action},
+      proof,
+      proof(different_request)
+    )
 
     assert {:error, _} =
              NativeBranchDeletionContract.resolve(adapter, store, pending, proof, 1304)
@@ -147,5 +168,28 @@ defmodule SmolBox.Store.NativeBranchDeletionActionContract do
              Codec.decode("smolbox-record-v35\0" <> :erlang.term_to_binary(child, compressed: 9))
 
     bytes
+  end
+
+  def reject_changes(
+        adapter,
+        store,
+        {pending, parent, usage},
+        {action, wrong_action},
+        proof,
+        foreign_proof
+      ) do
+    raw = Map.new(Map.from_struct(proof), fn {k, v} -> {Atom.to_string(k), v} end)
+
+    for {kind, invalid} <- [
+          {action, :absent},
+          {action, raw},
+          {action, foreign_proof},
+          {action, %{proof | deletion_sha256: String.duplicate("0", 64)}},
+          {wrong_action, proof}
+        ] do
+      assert {:error, _} = finish(adapter, store, pending, kind, invalid, 1304)
+      assert NativeBranchDeletionContract.fetch(adapter, store, pending) == pending
+      assert {:ok, ^usage} = adapter.usage(store, parent.worker_id)
+    end
   end
 end

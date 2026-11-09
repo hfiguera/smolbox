@@ -28,7 +28,7 @@ defmodule SmolBox.Example.EmbeddedImages do
   }
 
   @scope "public-images-proof"
-  @startup "set -eu; test \"$SMOLBOX_STARTUP_WITNESS\" = configured-v1; test \"$PWD\" = /tmp; test \"$(id -u)\" = 0; mkdir -p /workspace; printf 'configured-v1:/tmp:0\\n' >> /workspace/ordinary-images-startups"
+  @startup ~S|set -eu; test "$SMOLBOX_STARTUP_WITNESS" = configured-v1; test "$PWD" = /tmp; test "$(id -u)" = 0; mkdir -p /workspace; printf 'configured-v1:/tmp:0\n' >> /workspace/ordinary-images-startups|
 
   def configure(%Config{platform: :linux} = target, settings) do
     true =

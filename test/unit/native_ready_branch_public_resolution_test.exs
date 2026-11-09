@@ -93,7 +93,7 @@ defmodule SmolBox.NativeReadyBranchPublicResolutionTest do
 
       response = response(operation, state)
 
-      if state.mode == :late, do: Process.sleep(90)
+      if state.mode == :late, do: Process.sleep(2000)
       state = if state.mode == :lost_once, do: %{state | mode: :normal}, else: state
       {:reply, response, state}
     end
@@ -254,7 +254,7 @@ defmodule SmolBox.NativeReadyBranchPublicResolutionTest do
       id: parent.worker_id,
       context: context,
       budget: %Budget{
-        timeout_ms: if(mode == :late, do: 50, else: 1000),
+        timeout_ms: if(mode == :late, do: 1500, else: 5000),
         max_request_bytes: 131_072,
         max_response_bytes: 131_072
       }
@@ -492,7 +492,8 @@ defmodule SmolBox.NativeReadyBranchPublicResolutionTest do
     leaf = %{"operation" => "inspect", "receipt" => result.completion.child}
 
     input =
-      Enum.sum(Enum.map([operation, source, leaf], &byte_size(Jason.encode!(&1)))) + 3 * 1024 - 1
+      Enum.reduce([operation, source, leaf], 0, &(byte_size(Jason.encode!(&1)) + &2)) + 3 * 1024 -
+        1
 
     assert {:error, %Error{category: :output_limit, evidence: :dispatch_uncertain}} =
              Adapter.invoke(context, :resolve_ready_branch, [parent, child], %{

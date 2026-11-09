@@ -3,27 +3,13 @@ defmodule SmolBox.Store.NativeReleasedBranchDeletionContract do
   import ExUnit.Assertions
   alias SmolBox.Embedded.{BranchCanonical, ReleasedBranchDeletionResolution}
   alias SmolBox.{ManagedMachine, Profile}
-  alias SmolBox.Store.{Codec, Contract, NativeBranchDeletionContract}
+  alias SmolBox.Store.{Codec, NativeBranchDeletionContract}
 
   def prepare(adapter, store, mode),
     do: NativeBranchDeletionContract.prepare(adapter, store, mode)
 
-  def accept(adapter, store, child, now),
-    do:
-      adapter.machine(store, :branch_delete_accept, [
-        ManagedMachine.key(child),
-        Contract.guard(child),
-        now
-      ])
-
-  def resolve(adapter, store, child, proof, now),
-    do:
-      adapter.machine(store, :resolve, [
-        ManagedMachine.key(child),
-        Contract.guard(child),
-        proof,
-        now
-      ])
+  defdelegate accept(adapter, store, child, now), to: NativeBranchDeletionContract
+  defdelegate resolve(adapter, store, child, proof, now), to: NativeBranchDeletionContract
 
   def fetch(adapter, store, child) do
     assert {:ok, child} = adapter.machine(store, :fetch, [ManagedMachine.key(child)])

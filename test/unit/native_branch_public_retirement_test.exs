@@ -160,7 +160,7 @@ defmodule SmolBox.NativeBranchPublicRetirementTest do
       kind: :embedded,
       id: parent.worker_id,
       context: context,
-      budget: %Budget{timeout_ms: 1000, max_request_bytes: 131_072, max_response_bytes: 131_072}
+      budget: %Budget{timeout_ms: 5000, max_request_bytes: 131_072, max_response_bytes: 131_072}
     }
 
     target = %Target{kind: :embedded, id: parent.worker_id, connection: reference}

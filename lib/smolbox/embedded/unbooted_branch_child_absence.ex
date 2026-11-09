@@ -38,19 +38,10 @@ defmodule SmolBox.Embedded.UnbootedBranchChildAbsence do
         request["quiesced"]
       ])
 
-  def from_wire(value) do
-    if valid?(value) and not is_struct(value),
-      do:
-        {:ok,
-         struct!(
-           __MODULE__,
-           Map.new(value, fn {key, field} -> {String.to_existing_atom(key), field} end)
-         )},
-      else: :error
-  end
+  def from_wire(value), do: BranchCanonical.from_wire(value, __MODULE__)
 
   def to_wire(%__MODULE__{} = value),
-    do: Map.new(Map.from_struct(value), fn {key, field} -> {Atom.to_string(key), field} end)
+    do: BranchCanonical.wire_fields(value)
 
   def valid?(%__MODULE__{} = value),
     do: Validation.struct_shape?(value, __MODULE__) and valid?(to_wire(value))

@@ -1,15 +1,13 @@
 defmodule SmolBox.Embedded.NativeCaptureCleanup do
   @moduledoc """
-  Correlated native checkpoint staging cleanup or abort evidence for store adapters.
+  Verified native staging cleanup evidence for a released checkpoint capture.
 
-  Bind the receipt to the saved source, capture ID and request before changing
-  staging accounting. Cleanup and pre-entry abort are distinct from a completed
-  capture or successful source resolution. Preserve material and artifact charges
-  according to the capture transaction contract. Inspect output omits the receipt;
-  this type cannot enroll a native manager or enable capture admission.
+  Store adapters bind the receipt to the capture and source identity before
+  releasing its reservation. The kind records whether staging was cleaned or
+  aborted before entry.
   """
-  alias SmolBox.Embedded.{CaptureStagingCleanupReceipt, NativeCapture, Shape}
   alias SmolBox.{CheckpointCapture, Validation}
+  alias SmolBox.Embedded.{CaptureStagingCleanupReceipt, CaptureTransition, Shape}
 
   @enforce_keys [:kind, :receipt]
   @derive {Inspect, only: [:kind]}
@@ -23,14 +21,14 @@ defmodule SmolBox.Embedded.NativeCaptureCleanup do
 
   def valid?(_), do: false
 
-  def bound?(proof, %CheckpointCapture{} = capture, previous),
+  def bound?(proof, %{__struct__: CheckpointCapture} = capture, previous),
     do:
       valid?(proof) and Shape.receipt?(previous, 2) and
         CaptureStagingCleanupReceipt.bound?(
           proof.receipt,
           previous,
           capture.spec.id,
-          NativeCapture.request(capture)
+          CaptureTransition.request(capture)
         ) and
         (proof.kind == :cleaned or
            (capture.state == :resolved_unknown and capture.native_transition == nil))

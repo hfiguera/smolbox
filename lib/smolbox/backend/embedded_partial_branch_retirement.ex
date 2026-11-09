@@ -4,6 +4,7 @@ defmodule SmolBox.Backend.EmbeddedPartialBranchRetirement do
 
   alias SmolBox.Embedded.{
     Call,
+    NativeBranchAdmission,
     NativeBranchRetirement,
     NativeGrowth,
     PartialBranchChildAbsence,
@@ -61,7 +62,7 @@ defmodule SmolBox.Backend.EmbeddedPartialBranchRetirement do
 
   defp scope?(context, parent, child),
     do:
-      pinned?(context) and NativeBranchRetirement.pair?(parent, child) and
+      pinned?(context) and NativeBranchAdmission.retirement_pair?(parent, child) and
         match?(
           %{partial_disposal: %{proof: %PartialBranchDisposal{}}},
           child.branch.native_authority

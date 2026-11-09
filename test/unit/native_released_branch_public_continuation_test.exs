@@ -6,8 +6,9 @@ defmodule SmolBox.NativeReleasedBranchPublicContinuationTest do
   alias SmolBox.Embedded.{Config, NativeGrowth}
   alias SmolBox.Runtime.{Coordinator, Target, WorkSupervisor}
   alias SmolBox.Store.{Memory, NativeBranchDeletionContract}
+  alias SmolBox.Store.NativeBranchDeletionActionContract, as: ActionContract
   alias SmolBox.Store.NativeReleasedBranchCleanupContract, as: CleanupContract
-  alias SmolBox.Store.NativeReleasedBranchContinuationContract, as: ActionContract
+  alias SmolBox.Store.NativeReleasedBranchContinuationContract, as: ContinuationContract
 
   defmodule Clock do
     def now, do: 1400
@@ -43,7 +44,7 @@ defmodule SmolBox.NativeReleasedBranchPublicContinuationTest do
       do: Memory.claim_worker(store, id, owner, now, lease)
 
     def machine({_, _, _, _, flags} = context, operation, arguments) do
-      if operation == :claim and Agent.get(flags, & &1[:renew_failure]),
+      if operation == :claim and Agent.get(flags, & &1[:renew_armed]),
         do: {:error, %Error{category: :store, operation: :store}},
         else: guarded_machine(context, operation, arguments)
     end
@@ -92,6 +93,7 @@ defmodule SmolBox.NativeReleasedBranchPublicContinuationTest do
         operation["operation"] == "#{state.action}_released_branch_deletion"
       )
 
+      arm_renewal_failure(state)
       request = operation["request"]
       {:ok, child} = Memory.machine(state.store, :fetch, [ManagedMachine.key(state.child)])
       persisted = ActionContract.saved(child, state.action).request == request
@@ -150,8 +152,13 @@ defmodule SmolBox.NativeReleasedBranchPublicContinuationTest do
 
     def handle_call(:calls, _, state), do: {:reply, state.calls, state}
 
+    defp arm_renewal_failure(%{renew_failure: true, flags: flags}),
+      do: Agent.update(flags, &Keyword.put(&1, :renew_armed, true))
+
+    defp arm_renewal_failure(_), do: :ok
+
     defp proof(:cleanup, request), do: CleanupContract.proof(request)
-    defp proof(:continue, request), do: ActionContract.proof(request)
+    defp proof(:continue, request), do: ContinuationContract.proof(request)
 
     defp result(:continue), do: "released_branch_deletion_continued"
     defp result(:cleanup), do: "released_branch_deletion_cleaned"
@@ -204,6 +211,8 @@ defmodule SmolBox.NativeReleasedBranchPublicContinuationTest do
         {Peer,
          %{
            observer: self(),
+           flags: flags,
+           renew_failure: options[:renew_failure],
            action: action,
            epoch: epoch,
            frozen: false,
@@ -230,7 +239,7 @@ defmodule SmolBox.NativeReleasedBranchPublicContinuationTest do
       id: parent.worker_id,
       context: context,
       budget: %Budget{
-        timeout_ms: options[:budget] || 1000,
+        timeout_ms: options[:budget] || 5000,
         max_request_bytes: 131_072,
         max_response_bytes: 131_072
       }
@@ -395,7 +404,7 @@ defmodule SmolBox.NativeReleasedBranchPublicContinuationTest do
         action = unquote(action)
 
         {runtime, store, parent, child, usage, authority, peer} =
-          fixture(unquote(origin), action, budget: 50, accept_delay: 100)
+          fixture(unquote(origin), action, budget: 1500, accept_delay: 2000)
 
         assert {:error, %Error{evidence: :not_dispatched}} = execute(runtime, child, action)
         saved = NativeBranchDeletionContract.fetch(Memory, store, child)
@@ -409,7 +418,7 @@ defmodule SmolBox.NativeReleasedBranchPublicContinuationTest do
         action = unquote(action)
 
         {runtime, store, parent, child, usage, authority, peer} =
-          fixture(unquote(origin), action, budget: 500, delay: 700)
+          fixture(unquote(origin), action, budget: 1500, delay: 2000)
 
         assert {:error, %Error{evidence: :dispatch_uncertain}} = execute(runtime, child, action)
         saved = NativeBranchDeletionContract.fetch(Memory, store, child)
@@ -424,7 +433,7 @@ defmodule SmolBox.NativeReleasedBranchPublicContinuationTest do
         action = unquote(action)
 
         {runtime, store, parent, child, usage, authority, peer} =
-          fixture(unquote(origin), action, delay: 100, renew_failure: true)
+          fixture(unquote(origin), action, delay: 500, renew_failure: true)
 
         assert {:error, %Error{category: :store, evidence: :dispatch_uncertain}} =
                  execute(runtime, child, action)

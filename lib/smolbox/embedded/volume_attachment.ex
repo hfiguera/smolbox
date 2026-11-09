@@ -8,7 +8,7 @@ defmodule SmolBox.Embedded.VolumeAttachment do
   @derive {Inspect, only: [:binding, :target, :readonly]}
   defstruct @enforce_keys
 
-  def new(%Volume{state: :ready, native_authority: authority} = volume, reference)
+  def new(%{__struct__: Volume, state: :ready, native_authority: authority} = volume, reference)
       when authority != nil do
     with :ok <- Volume.validate(volume),
          true <- VolumeMount.valid?(reference) and reference.volume_id == volume.id do
@@ -44,11 +44,12 @@ defmodule SmolBox.Embedded.VolumeAttachment do
 
   def valid?(_), do: false
 
-  def matches?(attachment, %Volume{native_authority: authority} = volume) when authority != nil,
-    do:
-      valid?(attachment) and Volume.validate(volume) == :ok and
-        attachment.volume_key == Volume.key(volume) and attachment.binding == authority.binding and
-        attachment.proof == authority.provision
+  def matches?(attachment, %{__struct__: Volume, native_authority: authority} = volume)
+      when authority != nil,
+      do:
+        valid?(attachment) and Volume.validate(volume) == :ok and
+          attachment.volume_key == Volume.key(volume) and attachment.binding == authority.binding and
+          attachment.proof == authority.provision
 
   def matches?(_, _), do: false
 

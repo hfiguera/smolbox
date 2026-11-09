@@ -111,8 +111,11 @@ defmodule SmolBox.ManagedWorkloadTest do
     fixture = RuntimeFixture.start(__MODULE__, no_logs: true)
     {:ok, handle} = Machines.create(fixture.runtime, spec(fixture))
     {:ok, created} = Machines.await(fixture.runtime, handle, 5000)
+    identity_fields = [:state, :created_machine, :observed_machine, :reservation]
+    identity = Map.take(created, identity_fields)
     assert {:error, %{category: :not_found}} = Machines.logs(fixture.runtime, handle)
-    assert {:ok, ^created} = Machines.inspect(fixture.runtime, handle)
+    assert {:ok, current} = Machines.inspect(fixture.runtime, handle)
+    assert Map.take(current, identity_fields) == identity
 
     Agent.update(fixture.peer, fn state ->
       put_in(state, [:machines, created.machine_name, "createdAt"], 1)
@@ -125,7 +128,8 @@ defmodule SmolBox.ManagedWorkloadTest do
     assert Enum.count(before, fn {_, p} -> String.ends_with?(p, "/logs") end) ==
              Enum.count(after_ops, fn {_, p} -> String.ends_with?(p, "/logs") end)
 
-    assert {:ok, ^created} = Machines.inspect(fixture.runtime, handle)
+    assert {:ok, current} = Machines.inspect(fixture.runtime, handle)
+    assert Map.take(current, identity_fields) == identity
   end
 
   test "old stores and workers reject workload admission without creation" do

@@ -33,7 +33,9 @@ defmodule Workspace.Connection do
         {:error, reason} -> %{state | status: reason}
       end
 
-    Process.send_after(self(), :connect, 5000)
+    if Application.get_env(:community_workspace, :connect_runtime, true),
+      do: Process.send_after(self(), :connect, 5000)
+
     {:noreply, next}
   end
 

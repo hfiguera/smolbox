@@ -20,7 +20,10 @@ defmodule SmolBox.Embedded.UnbootedBranchBackingRelease do
   defp binding?(request),
     do:
       not is_struct(request["disposal"]) and UnbootedBranchDisposal.valid?(request["disposal"]) and
-        head?(request["source"], get_in(request, ~w(disposal publication receipt))) and
+        BranchCanonical.current_head?(
+          request["source"],
+          get_in(request, ~w(disposal publication receipt))
+        ) and
         request["child"] == get_in(request, ~w(disposal publication change child))
 
   defp identity?(request),
@@ -28,15 +31,6 @@ defmodule SmolBox.Embedded.UnbootedBranchBackingRelease do
       BranchRequest.release?(Map.take(request, ~w(operation_id request_sha256))) and
         request["quiesced"] == true and request["backing_removed"] == true and distinct?(request) and
         request["request_sha256"] == request_digest(request)
-
-  defp head?(current, expected),
-    do:
-      Shape.receipt?(current, 2) and current["material"] != nil and
-        BranchCanonical.origin(current) == BranchCanonical.origin(expected) and
-        current["material"]["revision"] >= expected["material"]["revision"] and
-        (current["material"]["revision"] != expected["material"]["revision"] or
-           current["material"] == expected["material"]) and
-        (current["material"]["revision"] != 0 or BranchCanonical.root?(current))
 
   defp distinct?(request),
     do:

@@ -2,8 +2,8 @@ defmodule SmolBox.Store.NativeExportContract do
   @moduledoc false
   import ExUnit.Assertions
   alias SmolBox.Embedded.{ExportContract, ExportPublication, ExportStageCleanup}
-  alias SmolBox.Store.{Codec, Contract, ExportOps, NativeCaptureContract}
   alias SmolBox.{ExportDestination, ExportSpec, ManagedMachine}
+  alias SmolBox.Store.{Codec, Contract, ExportOps, NativeCaptureContract}
 
   def fixture do
     record = NativeCaptureContract.fixture()
@@ -74,10 +74,10 @@ defmodule SmolBox.Store.NativeExportContract do
     assert {:ok, _} =
              adapter.bind_backend(store, original.worker_id, original.backend_assignment.binding)
 
-    assert {:ok, _} = adapter.claim_worker(store, original.worker_id, "owner", 1000, 10000)
+    assert {:ok, _} = adapter.claim_worker(store, original.worker_id, "owner", 1000, 10_000)
     {:ok, initial} = ManagedMachine.new(original.spec, original.fingerprint, 1000)
     assert {:ok, _} = adapter.machine(store, :accept, [initial, 10])
-    assert {:ok, claimed} = adapter.machine(store, :claim, [key, "owner", 1000, 10000])
+    assert {:ok, claimed} = adapter.machine(store, :claim, [key, "owner", 1000, 10_000])
     capacity = %{slots: 16, cpus: 64, memory_mb: 131_072, disk_gb: 1024}
 
     assert {:ok, reserved} =

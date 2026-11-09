@@ -15,6 +15,7 @@ defmodule SmolBox.Embedded.NativeBranchReleaseResult do
   defstruct @enforce_keys
   @type t :: %__MODULE__{}
 
+  @doc false
   def bound?(%__MODULE__{} = result, authority) do
     release = authority.release
 

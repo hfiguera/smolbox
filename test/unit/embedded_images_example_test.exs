@@ -59,7 +59,7 @@ defmodule SmolBox.EmbeddedImagesExampleTest do
     assert Enum.map(configured.sources, & &1.id) == ~w(original pull)
     assert hd(configured.profiles).guest_paths.workdir_roots == ["/tmp"]
     assert hd(configured.profiles).network.hosts == ["registry.example"]
-    assert length(Launch.helper_config(configured)["approved_oci_sources"]) == 2
+    assert [_, _] = Launch.helper_config(configured)["approved_oci_sources"]
     assert EmbeddedPackage.received(target) == []
   end
 

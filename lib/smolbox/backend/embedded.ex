@@ -10,9 +10,9 @@ defmodule SmolBox.Backend.Embedded do
     EmbeddedBranchDeletionAction,
     EmbeddedBranchRetirement,
     EmbeddedCapture,
+    EmbeddedCaptureCleanup,
     EmbeddedCaptureObservation,
     EmbeddedCaptureResolution,
-    EmbeddedCaptureCleanup,
     EmbeddedContext,
     EmbeddedExport,
     EmbeddedGrowthObservation,
@@ -24,9 +24,9 @@ defmodule SmolBox.Backend.Embedded do
     EmbeddedPartialBranchRetirement,
     EmbeddedPreparation,
     EmbeddedPreparedBranchRetirement,
+    EmbeddedReply,
     EmbeddedUnbootedBranchDisposal,
     EmbeddedUnbootedBranchRetirement,
-    EmbeddedReply,
     EmbeddedVolume,
     Features,
     Reference
@@ -309,14 +309,17 @@ defmodule SmolBox.Backend.Embedded do
   def invoke(context, :capture_checkpoint, arguments, budget),
     do: EmbeddedCapture.run(context, arguments, budget)
 
-  def invoke(context, :export_machine, arguments, budget),
-    do: EmbeddedExport.run(context, arguments, budget)
+  def invoke(context, :export_machine, [_, _, _] = arguments, budget),
+    do: EmbeddedExport.invoke(context, :export_machine, arguments, budget)
 
-  def invoke(context, :qualify_export, [], budget), do: EmbeddedExport.qualify(context, budget)
-  def invoke(context, :inspect_export, [], budget), do: EmbeddedExport.lookup(context, budget)
+  def invoke(_context, :export_machine, _arguments, _budget),
+    do: EmbeddedExport.failure(:validation, :not_dispatched)
 
-  def invoke(context, :cleanup_export, [export, true], budget),
-    do: EmbeddedExport.cleanup(context, export, budget)
+  def invoke(context, operation, [], budget) when operation in [:qualify_export, :inspect_export],
+    do: EmbeddedExport.invoke(context, operation, [], budget)
+
+  def invoke(context, :cleanup_export, [_, true] = arguments, budget),
+    do: EmbeddedExport.invoke(context, :cleanup_export, arguments, budget)
 
   def invoke(_context, :cleanup_export, _arguments, _budget),
     do: EmbeddedExport.failure(:validation, :not_dispatched)

@@ -275,7 +275,7 @@ defmodule SmolBox.PersistentMachinesTest do
       handle = start_machine(fixture, @mappings)
       {:ok, idle} = Machines.inspect(fixture.runtime, handle)
       {:ok, _} = Machines.delete(fixture.runtime, handle, idle.version)
-      wait_machine(fixture, handle, &(&1.state == :unknown))
+      wait_machine(fixture, handle, &(&1.state in [:unknown, :deleted]))
       assert :ok = Machines.reconcile(fixture.runtime, handle)
       gone = wait_machine(fixture, handle, &(&1.state == :deleted))
       assert gone.reservation == nil and gone.absence_at_ms != nil
@@ -484,8 +484,14 @@ defmodule SmolBox.PersistentMachinesTest do
       &%{&1 | options: Keyword.put(&1.options, :start_port_conflict, false)}
     )
 
+    # A scan that saw the pending start can still claim the unknown record.
+    # Read the version after the in-flight scan and machine work have finished.
+    coordinator = SmolBox.Runtime.coordinator(fixture.runtime)
+    wait(fn -> {:ok, :sys.get_state(coordinator)} end, &(&1.active == %{} and &1.scan == nil))
+    assert {:ok, %{state: :unknown} = current} = Machines.inspect(fixture.runtime, handle)
+
     assert {:ok, resolved} =
-             Machines.resolve(fixture.runtime, handle, blocked.version, quiesced: true)
+             Machines.resolve(fixture.runtime, handle, current.version, quiesced: true)
 
     assert resolved.reserved_ports == [28_731] and resolved.state == :created
     assert {:ok, _} = Machines.start(fixture.runtime, handle, resolved.version)

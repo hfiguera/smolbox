@@ -1,5 +1,7 @@
 defmodule SmolBox.Store.NativeBranchBackingOps do
   @moduledoc false
+  alias SmolBox.Embedded.NativeBranchAdmission
+
   alias SmolBox.Embedded.{
     BranchBackingRelease,
     NativeBranchBacking,
@@ -80,7 +82,7 @@ defmodule SmolBox.Store.NativeBranchBackingOps do
 
   defp pair(parent, child, now),
     do:
-      if(Validation.timestamp?(now) and NativeBranchBacking.pair?(parent, child),
+      if(Validation.timestamp?(now) and NativeBranchAdmission.backing_pair?(parent, child),
         do: :ok,
         else: error()
       )

@@ -3,8 +3,15 @@ defmodule SmolBox.DurableHost.NativeCheckpointStoreTest do
   alias SmolBox.Backend.{Assignment, Binding}
   alias SmolBox.{Checkpoint, ManagedMachine, ManagedMachineSpec, Profile}
   alias SmolBox.DurableHost.{Database, Repo, Store}
-  alias SmolBox.Embedded.CheckpointContract
-  alias SmolBox.Store.{Codec, NativeCaptureContract}
+
+  alias SmolBox.Embedded.{
+    CaptureStagingCleanupReceipt,
+    CheckpointContract,
+    NativeCapture,
+    NativeCaptureCleanup
+  }
+
+  alias SmolBox.Store.{Codec, Contract, NativeCaptureContract}
 
   setup do
     partition = "checkpoint-" <> Base.url_encode64(:crypto.strong_rand_bytes(12), padding: false)
@@ -57,15 +64,15 @@ defmodule SmolBox.DurableHost.NativeCheckpointStoreTest do
     record = NativeCaptureContract.entered_resolution(Store, store, false)
     capture = record.captures["resolve-1"]
     key = ManagedMachine.key(record)
-    guard = SmolBox.Store.Contract.guard(record)
+    guard = Contract.guard(record)
 
-    proof = %SmolBox.Embedded.NativeCaptureCleanup{
+    proof = %NativeCaptureCleanup{
       kind: :cleaned,
-      receipt: %SmolBox.Embedded.CaptureStagingCleanupReceipt{
+      receipt: %CaptureStagingCleanupReceipt{
         schema: 1,
         previous: capture.native_source_receipt,
         operation_id: capture.spec.id,
-        request: SmolBox.Embedded.NativeCapture.request(capture),
+        request: NativeCapture.request(capture),
         stage_sha256: String.duplicate("e", 64)
       }
     }

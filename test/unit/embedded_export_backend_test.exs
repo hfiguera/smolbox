@@ -1,8 +1,33 @@
 defmodule SmolBox.EmbeddedExportBackendTest do
   use ExUnit.Case, async: true
   alias SmolBox.Backend.{Budget, Embedded, EmbeddedContext, EmbeddedExport, HTTP}
-  alias SmolBox.Embedded.{Config, ExportContract}
+  alias SmolBox.Embedded.{Config, ExportAuthority, ExportContract}
   alias SmolBox.Store.{ExportOps, NativeExportContract}
+  alias SmolBox.Test.EmbeddedPackage, as: Package
+
+  defmodule Peer do
+    use GenServer
+
+    def start_link(state), do: GenServer.start_link(__MODULE__, state)
+    def init(state), do: {:ok, state}
+
+    def handle_call(:health, _, {health, _, _} = state), do: {:reply, {:ok, health}, state}
+
+    def handle_call({:export_approval, id, epoch}, _, {health, approval, _} = state) do
+      %{epoch: ^epoch} = health
+      %{"id" => ^id} = approval
+      {:reply, {:ok, approval}, state}
+    end
+
+    def handle_call({:submit, request, _budget, observer, _deadline, epoch}, _, state) do
+      {%{epoch: ^epoch} = health, approval, [{^request, outcome} | remaining]} = state
+      handle = make_ref()
+      send(observer, {:smolbox_embedded, handle, {:terminal, outcome, nil}})
+      {:reply, {:ok, handle}, {health, approval, remaining}}
+    end
+
+    def handle_call(:remaining, _, {_, _, remaining} = state), do: {:reply, remaining, state}
+  end
 
   defp fixture do
     {_, accepted, spec, request, proof} = NativeExportContract.fixture()
@@ -19,6 +44,8 @@ defmodule SmolBox.EmbeddedExportBackendTest do
     context = %EmbeddedContext{
       config: struct(Config),
       server: self(),
+      assignment: sent.backend_assignment,
+      name: sent.machine_name,
       spec: sent.spec,
       export: sent.exports[spec.id]
     }
@@ -40,7 +67,153 @@ defmodule SmolBox.EmbeddedExportBackendTest do
   defp empty, do: %{stdout: <<>>, stderr: <<>>, file: <<>>}
 
   defp budget,
-    do: %Budget{timeout_ms: 1000, max_request_bytes: 1_048_576, max_response_bytes: 16384}
+    do: %Budget{timeout_ms: 1000, max_request_bytes: 1_048_576, max_response_bytes: 16_384}
+
+  defp connect(context, replies, approval \\ nil) do
+    config = Package.create(protocol_major: 2)
+    config = %{config | export_destinations: [context.export.spec.destination]}
+
+    on_exit(fn -> File.rm_rf!(config.package_path) end)
+
+    health = %{
+      status: :ready,
+      epoch: String.duplicate("a", 32),
+      target_id: config.id,
+      generation: config.domain_generation,
+      package_identity: config.package_identity,
+      package_manifest_sha256: config.package_manifest_sha256
+    }
+
+    %{context | config: config, server: start_supervised!({Peer, {health, approval, replies}})}
+  end
+
+  defp cleanup_wire do
+    "../../native/smolbox-protocol/fixtures/export-cleanups-v1.json"
+    |> Path.expand(__DIR__)
+    |> File.read!()
+    |> Jason.decode!()
+    |> hd()
+  end
+
+  test "qualification requests approval before qualifying and admitting the same reservation" do
+    {accepted, context, operation, _} = fixture()
+    context = %{context | export: accepted.exports[accepted.active_export]}
+
+    [approval] =
+      ExportContract.approvals(%{export_destinations: [context.export.spec.destination]})
+
+    approval =
+      Map.take(approval, ~w(id destination_sha256 max_artifact_bytes max_staging_bytes))
+
+    expected =
+      Map.put(
+        operation["request"],
+        "max_artifact_bytes",
+        approval["max_staging_bytes"] - 2 * 1_073_741_824
+      )
+
+    qualification = %{
+      "operation" => "qualify_export",
+      "receipt" => operation["receipt"],
+      "request" => expected
+    }
+
+    admission =
+      Map.merge(qualification, %{
+        "operation" => "admit_export",
+        "operation_id" => context.export.spec.id
+      })
+
+    qualified = %{"result" => "qualified"}
+    rejected = %{"result" => "error", "code" => "unsupported", "dispatch" => "not_dispatched"}
+    remaining = [{qualification, qualified}, {admission, qualified}]
+    context = connect(context, [{qualification, rejected} | remaining], approval)
+
+    assert {:error, %{category: :unsupported_capability, evidence: :not_dispatched}} =
+             Embedded.invoke(context, :qualify_export, [], budget())
+
+    assert {:error,
+            %{category: :unsupported_capability, operation: :export, evidence: :not_dispatched}} =
+             EmbeddedExport.execute_authorized(context, :qualify_export, [], budget())
+
+    assert GenServer.call(context.server, :remaining) == remaining
+
+    assert {:error, %{category: :unsupported_capability, evidence: :not_dispatched}} =
+             EmbeddedExport.execute_authorized(context, :inspect_export, [], budget())
+
+    assert {:ok, ^expected} =
+             EmbeddedExport.execute_authorized(context, :qualify_export, [], budget())
+
+    assert GenServer.call(context.server, :remaining) == []
+  end
+
+  test "transfer separates publication, read-only inspection and quiesced staging cleanup" do
+    {_, context, operation, wire} = fixture()
+    inspection = EmbeddedExport.control(context.export, "inspect_export")
+
+    cleanup =
+      EmbeddedExport.control(context.export, "cleanup_export_staging")
+      |> Map.put("quiesced", true)
+
+    replies = [
+      {operation, %{"result" => "exported", "publication" => wire}},
+      {inspection, %{"result" => "export_presence", "publication" => nil}},
+      {cleanup, %{"result" => "export_staging_cleaned", "cleanup" => cleanup_wire()}}
+    ]
+
+    context = connect(context, replies)
+    spec = context.export.spec
+
+    assert {:error, %{evidence: :not_dispatched}} =
+             EmbeddedExport.execute_authorized(
+               context,
+               :export_machine,
+               [context.name, spec, nil],
+               budget()
+             )
+
+    assert {:ok, receipt} =
+             EmbeddedExport.execute_authorized(
+               context,
+               :export_machine,
+               [context.name, spec, operation["push_token"]],
+               budget()
+             )
+
+    assert receipt.manifest_sha256 == wire["identity"]["manifest_sha256"]
+
+    assert {:ok, nil} = EmbeddedExport.execute_authorized(context, :inspect_export, [], budget())
+
+    assert {:error, %{evidence: :not_dispatched}} =
+             EmbeddedExport.execute_authorized(
+               context,
+               :cleanup_export,
+               [context.export, true],
+               budget()
+             )
+
+    unknown = %{context.export | state: :unknown}
+    context = %{context | export: unknown}
+
+    assert {:ok, proof} =
+             EmbeddedExport.execute_authorized(
+               context,
+               :cleanup_export,
+               [unknown, true],
+               budget()
+             )
+
+    assert proof.operation_id == spec.id
+    assert GenServer.call(context.server, :remaining) == []
+
+    assert {:error, %{category: :unknown, evidence: :not_dispatched}} =
+             EmbeddedExport.execute_authorized(
+               %{context | server: nil},
+               :inspect_export,
+               [],
+               budget()
+             )
+  end
 
   test "request construction shares exact approved scratch across source logical disks and artifact" do
     {accepted, _, _, _} = fixture()
@@ -106,7 +279,7 @@ defmodule SmolBox.EmbeddedExportBackendTest do
 
     frozen = dispatching.exports[export.spec.id]
     assert frozen.native_authority.request == request
-    assert :error = SmolBox.Embedded.ExportAuthority.freeze_request(frozen, old)
+    assert :error = ExportAuthority.freeze_request(frozen, old)
   end
 
   test "public receipt retains only exact acknowledged authority and rejects output or overlay" do
@@ -212,12 +385,23 @@ defmodule SmolBox.EmbeddedExportBackendTest do
                {:ok, %{"result" => "exported", "publication" => wire}, empty(), nil}
              )
 
-    cleanup =
-      "../../native/smolbox-protocol/fixtures/export-cleanups-v1.json"
-      |> Path.expand(__DIR__)
-      |> File.read!()
-      |> Jason.decode!()
-      |> hd()
+    absence = {:ok, %{"result" => "export_presence", "publication" => nil}, empty(), nil}
+
+    assert {:error, %{category: :identity_conflict, evidence: :dispatch_uncertain}} =
+             EmbeddedExport.decode(
+               context,
+               :inspect_export,
+               %{request | "operation_id" => "foreign"},
+               absence
+             )
+
+    assert {:error, %{category: :identity_conflict, evidence: :dispatch_uncertain}} =
+             EmbeddedExport.decode(
+               context,
+               :inspect_export,
+               request,
+               {:ok, %{"result" => "export_presence", "publication" => %{}}, empty(), nil}
+             )
 
     request =
       EmbeddedExport.control(context.export, "cleanup_export_staging")
@@ -228,7 +412,8 @@ defmodule SmolBox.EmbeddedExportBackendTest do
                context,
                :cleanup_export,
                request,
-               {:ok, %{"result" => "export_staging_cleaned", "cleanup" => cleanup}, empty(), nil}
+               {:ok, %{"result" => "export_staging_cleaned", "cleanup" => cleanup_wire()},
+                empty(), nil}
              )
 
     assert {:error, _} =
@@ -251,15 +436,18 @@ defmodule SmolBox.EmbeddedExportBackendTest do
     refute HTTP.supports_operation?(nil, :cleanup_export)
 
     assert {:error, %{evidence: :not_dispatched}} =
-             EmbeddedExport.run(
+             Embedded.invoke(
                context,
+               :export_machine,
                [context.name, context.export.spec, request["push_token"]],
                budget()
              )
 
-    assert {:error, _} = EmbeddedExport.qualify(context, budget())
-    assert {:error, _} = EmbeddedExport.lookup(context, budget())
-    assert {:error, _} = EmbeddedExport.cleanup(context, context.export, budget())
+    assert {:error, _} = Embedded.invoke(context, :qualify_export, [], budget())
+    assert {:error, _} = Embedded.invoke(context, :inspect_export, [], budget())
+
+    assert {:error, _} =
+             Embedded.invoke(context, :cleanup_export, [context.export, true], budget())
 
     assert {:error, %{operation: :export, evidence: :not_dispatched}} =
              EmbeddedExport.decode(

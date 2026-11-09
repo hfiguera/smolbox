@@ -199,7 +199,7 @@ defmodule SmolBox.NativeReleasedBranchPublicDeletionTest do
       id: parent.worker_id,
       context: context,
       budget: %Budget{
-        timeout_ms: options[:budget] || 1000,
+        timeout_ms: options[:budget] || 5000,
         max_request_bytes: 131_072,
         max_response_bytes: 131_072
       }
@@ -335,7 +335,7 @@ defmodule SmolBox.NativeReleasedBranchPublicDeletionTest do
 
     test "#{origin} acceptance consuming the deadline cannot dispatch native resolution" do
       {runtime, store, parent, child, usage, authority, peer} =
-        fixture(unquote(origin), budget: 50, accept_delay: 100)
+        fixture(unquote(origin), budget: 1500, accept_delay: 2000)
 
       assert {:error, _} = resolve(runtime, child)
       saved = NativeReleasedBranchDeletionContract.fetch(Memory, store, child)

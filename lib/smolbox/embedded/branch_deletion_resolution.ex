@@ -54,27 +54,16 @@ defmodule SmolBox.Embedded.BranchDeletionResolution do
         request["quiesced"]
       ])
 
-  def from_wire(value) do
-    if Shape.keys?(
-         value,
-         ~w(schema child operation_id request_sha256 deletion_sha256 proof_sha256)
-       ) and valid?(value),
-       do:
-         {:ok,
-          struct!(
-            __MODULE__,
-            Map.new(value, fn {key, field} -> {String.to_existing_atom(key), field} end)
-          )},
-       else: :error
-  end
-
-  def to_wire(%__MODULE__{} = value),
-    do: Map.new(Map.from_struct(value), fn {key, field} -> {Atom.to_string(key), field} end)
+  def from_wire(value), do: BranchCanonical.from_wire(value, __MODULE__)
+  def to_wire(%__MODULE__{} = value), do: BranchCanonical.wire_fields(value)
 
   def valid?(%__MODULE__{} = value),
     do: Validation.struct_shape?(value, __MODULE__) and valid?(to_wire(value))
 
-  def valid?(value),
+  def valid?(value), do: valid_wire?(value, "smolbox-held-child-delete-resolution-v1")
+
+  @doc false
+  def valid_wire?(value, domain),
     do:
       Shape.keys?(
         value,
@@ -86,7 +75,7 @@ defmodule SmolBox.Embedded.BranchDeletionResolution do
         Validation.digest?(value["deletion_sha256"]) and
         value["proof_sha256"] ==
           BranchCanonical.digest([
-            "smolbox-held-child-delete-resolution-v1",
+            domain,
             1,
             BranchCanonical.ordered(value["child"], :receipt),
             value["operation_id"],

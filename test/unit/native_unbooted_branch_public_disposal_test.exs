@@ -438,8 +438,8 @@ defmodule SmolBox.NativeUnbootedBranchPublicDisposalTest do
     # The final source observation consumes only what remains of disposal's
     # already offered allowance; exclude it when summing independent stages.
     stages = Enum.reject(events, &(elem(&1, 1) == "inspect"))
-    assert Enum.sum(Enum.map(stages, &elem(&1, 6).max_request_bytes)) <= 262_144
-    assert Enum.sum(Enum.map(stages, &elem(&1, 6).max_response_bytes)) <= 262_144
+    assert Enum.reduce(stages, 0, &(elem(&1, 6).max_request_bytes + &2)) <= 262_144
+    assert Enum.reduce(stages, 0, &(elem(&1, 6).max_response_bytes + &2)) <= 262_144
     assert Enum.all?(events, &(elem(&1, 6).timeout_ms <= 1000))
   end
 
