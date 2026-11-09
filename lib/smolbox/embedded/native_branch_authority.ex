@@ -6,7 +6,6 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
     BranchCanonical,
     BranchCompletion,
     BranchCreation,
-    BranchReleaseTransition,
     BranchRequest,
     Identity
   }
@@ -15,13 +14,14 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
     NativeBranchBacking,
     NativeBranchDeletion,
     NativeBranchDeletionAction,
+    NativeBranchHistory,
     NativeBranchRelease,
     NativeBranchRetirement,
     NativePreparedBranchRetirement,
     NativeUnbootedBranchDisposal
   }
 
-  alias SmolBox.{BranchSpec, Profile, Validation}
+  alias SmolBox.{Branch, BranchSpec, Profile, Validation}
 
   @enforce_keys [:source, :request, :fingerprint]
   @derive {Inspect, only: []}
@@ -118,8 +118,8 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
         fn {proof, module} -> proof == nil or module.valid?(proof, authority) end
       )
 
-  def assignment(%__MODULE__{} = authority, artifact, profile),
-    do: %Assignment{
+  def assignment_fields(%__MODULE__{} = authority, artifact, profile),
+    do: %{
       version: 2,
       binding: %Binding{
         kind: :embedded,
@@ -129,10 +129,35 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
       creation: BranchCreation.from_request(authority.request, artifact, profile)
     }
 
+  def history_valid?(%{backend_assignment: nil} = record),
+    do:
+      Map.get(record, :native_branch_history, %{}) == %{} and
+        (Map.get(record, :branch) == nil or
+           match?(%{__struct__: Branch, native_authority: nil}, Map.get(record, :branch)))
+
+  def history_valid?(%{backend_assignment: %{version: 2}, branch: %{}} = record),
+    do: record.native_branch_history == %{} and child?(record)
+
+  def history_valid?(%{backend_assignment: %{version: 2}, branch: nil} = record),
+    do: NativeBranchHistory.source?(record)
+
+  def history_valid?(%{backend_assignment: %{version: 2}} = record),
+    do:
+      not BranchCreation.valid?(record.backend_assignment.creation) or
+        (Map.get(record, :managed_machine) != nil and BranchCreation.command?(record))
+
+  def history_valid?(record),
+    do:
+      Map.get(record, :native_branch_history, %{}) == %{} and
+        Map.get(record, :branch_children, %{}) == %{} and Map.get(record, :branch) == nil and
+        Map.get(record, :active_branch) == nil
+
   def child?(
         %{
+          backend_assignment: %{__struct__: Assignment} = assignment,
           branch:
-            %SmolBox.Branch{
+            %{
+              __struct__: Branch,
               source_machine: %SmolBox.Machine{},
               native_authority: %__MODULE__{} = authority
             } = branch
@@ -144,7 +169,7 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
     valid?(authority) and branch_spec?(branch.spec, request, profile) and
       authority.source == branch.source and authority.fingerprint == child.fingerprint and
       child.id == request["child"]["operation_id"] and
-      child.backend_assignment == assignment(authority, child.spec.artifact, profile) and
+      Map.from_struct(assignment) == assignment_fields(authority, child.spec.artifact, profile) and
       source?(branch.source_machine, request["source"], profile) and
       proof_records?(child, authority.completion)
   end
@@ -175,7 +200,8 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
       completion_record?(child, completion) and NativePreparedBranchRetirement.record?(child) and
         NativeUnbootedBranchDisposal.record?(child) and
         NativeBranchRetirement.record?(child) and
-        NativeBranchBacking.record?(child) and NativeBranchDeletion.record?(child) and
+        NativeBranchBacking.record?(child) and
+        NativeBranchDeletion.record?(child, &NativeBranchDeletionAction.historical?/2) and
         NativeBranchDeletionAction.record?(child)
 
   defp proofs_preserved?(original, saved, record, next),
@@ -214,19 +240,7 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
   def root(%__MODULE__{completion: %BranchCompletion{} = completion}),
     do: %Identity{receipt: completion.publication["change"]["child"]}
 
-  def transitions(%{
-        branch: %{native_authority: %__MODULE__{release: %NativeBranchRelease{transition: proof}}}
-      })
-      when not is_nil(proof), do: {:ok, [proof]}
-
-  def transitions(%{
-        branch: %{native_authority: %__MODULE__{completion: %BranchCompletion{release: release}}}
-      })
-      when not is_nil(release) do
-    with {:ok, proof} <- BranchReleaseTransition.from_wire(release), do: {:ok, [proof]}
-  end
-
-  def transitions(_), do: {:ok, []}
+  defdelegate transitions(record), to: NativeBranchHistory, as: :release_transitions
 
   defp completion_record?(child, nil),
     do:

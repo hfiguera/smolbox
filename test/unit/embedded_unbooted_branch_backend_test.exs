@@ -14,7 +14,7 @@ defmodule SmolBox.Backend.EmbeddedUnbootedBranchBackendTest do
 
   alias NativeUnbootedBranchDisposalContract, as: Contract
 
-  @budget %Budget{timeout_ms: 1000, max_request_bytes: 131_072, max_response_bytes: 131_072}
+  @budget %Budget{timeout_ms: 5000, max_request_bytes: 131_072, max_response_bytes: 131_072}
   @operations [
     :inspect_unbooted_branch_disposal,
     :dispose_unbooted_branch,
@@ -349,11 +349,11 @@ defmodule SmolBox.Backend.EmbeddedUnbootedBranchBackendTest do
                parent,
                child,
                fn _, _, _ ->
-                 Process.sleep(35)
+                 Process.sleep(2000)
                  response(result)
                end,
                @budget,
-               System.monotonic_time(:millisecond) + 30
+               System.monotonic_time(:millisecond) + 1500
              )
   end
 

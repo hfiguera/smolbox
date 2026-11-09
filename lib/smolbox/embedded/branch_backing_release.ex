@@ -49,8 +49,11 @@ defmodule SmolBox.Embedded.BranchBackingRelease do
         ~w(completion source child operation_id request_sha256 quiesced backing_removed)
       ) and
         BranchCompletion.wire?(request["completion"]) and
-        current_head?(request["source"], get_in(request, ~w(completion publication receipt))) and
-        current_head?(request["child"], get_in(request, ~w(completion child))) and
+        BranchCanonical.current_head?(
+          request["source"],
+          get_in(request, ~w(completion publication receipt))
+        ) and
+        BranchCanonical.current_head?(request["child"], get_in(request, ~w(completion child))) and
         request["quiesced"] == true and request["backing_removed"] == true and
         request_identity?(request) and
         request["request_sha256"] == request_digest(request) and
@@ -66,15 +69,6 @@ defmodule SmolBox.Embedded.BranchBackingRelease do
           ) and
         request["operation_id"] !=
           get_in(request, ~w(completion release change request operation_id))
-
-  defp current_head?(current, expected),
-    do:
-      Shape.receipt?(current, 2) and current["material"] != nil and
-        BranchCanonical.origin(current) == BranchCanonical.origin(expected) and
-        current["material"]["revision"] >= expected["material"]["revision"] and
-        (current["material"]["revision"] != expected["material"]["revision"] or
-           current["material"] == expected["material"]) and
-        (current["material"]["revision"] != 0 or BranchCanonical.root?(current))
 
   def request_digest(request),
     do:

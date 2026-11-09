@@ -1,6 +1,7 @@
 defmodule SmolBox.DurableHost.NativeExportStoreTest do
   use ExUnit.Case, async: false
   alias SmolBox.DurableHost.{Database, Repo, Store}
+  alias SmolBox.Store.NativeExportContract
 
   test "PostgreSQL atomically retains unknown exports and releases only matching cleanup" do
     partition =
@@ -12,6 +13,6 @@ defmodule SmolBox.DurableHost.NativeExportStoreTest do
       Database.query(store, "DELETE FROM smolbox_partitions WHERE partition=$1", [partition])
     end)
 
-    SmolBox.Store.NativeExportContract.lifecycle(Store, store)
+    NativeExportContract.lifecycle(Store, store)
   end
 end

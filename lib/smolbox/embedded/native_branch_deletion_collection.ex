@@ -5,10 +5,8 @@ defmodule SmolBox.Embedded.NativeBranchDeletionCollection do
     BranchCompletion,
     BranchDeletionCollection,
     NativeBranchDeletion,
-    NativeBranchDeletionAction,
-    NativeGrowth,
-    NativeReleasedBranchDeletion,
-    NativeReleasedBranchDeletionContinuation
+    NativeBranchDeletionState,
+    NativeReleasedBranchDeletion
   }
 
   alias SmolBox.Validation
@@ -67,29 +65,18 @@ defmodule SmolBox.Embedded.NativeBranchDeletionCollection do
 
   def record?(
         %{branch: %{native_authority: %{delete_collection: %__MODULE__{} = saved} = authority}} =
-          child
-      ) do
-    with true <- valid?(saved, authority, :collect) and saved.version < child.version,
-         true <- child.last_request == {:delete, saved.delete_version},
-         {:ok, receipt, _, _} <- NativeGrowth.head(child),
-         true <- receipt == saved.request["child"],
-         do: eligible?(child) or historical?(child),
-         else: (_ -> false)
-  end
+          child,
+        historical?
+      ),
+      do:
+        valid?(saved, authority, :collect) and
+          NativeBranchDeletionState.bound_record?(child, saved) and
+          (eligible?(child) or historical?.(child, :held) or historical?.(child, :released))
 
-  def record?(_), do: false
+  def record?(_, _), do: false
 
-  defp historical?(child),
-    do:
-      NativeBranchDeletionAction.historical?(child) or
-        NativeReleasedBranchDeletionContinuation.historical?(child)
+  def preserved?(before, after_record, version),
+    do: NativeBranchDeletionState.preserves?(before, after_record, version, __MODULE__)
 
-  def preserved?(nil, %__MODULE__{version: version, proof: nil}, version), do: true
-
-  def preserved?(%__MODULE__{proof: nil} = before, %__MODULE__{} = after_action, _),
-    do: %{after_action | proof: nil} == before
-
-  def preserved?(%__MODULE__{} = saved, saved, _), do: true
-  def preserved?(_, _, _), do: false
   defp version?(value), do: Validation.integer?(value, 1, 9_007_199_254_740_991)
 end

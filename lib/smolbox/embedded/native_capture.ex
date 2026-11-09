@@ -6,7 +6,8 @@ defmodule SmolBox.Embedded.NativeCapture do
     CaptureTransition,
     Identity,
     NativeCaptureResolution,
-    NativeGrowth
+    NativeGrowth,
+    Shape
   }
 
   alias SmolBox.{
@@ -16,8 +17,65 @@ defmodule SmolBox.Embedded.NativeCapture do
     ManagedMachine
   }
 
-  def request(capture),
-    do: %{"max_bytes" => capture.spec.policy.max_bytes, "idle" => capture.spec.idle}
+  defdelegate request(capture), to: CaptureTransition
+
+  def history_valid?(m) do
+    is_map(m.captures) and map_size(m.captures) <= 256 and
+      Enum.all?(m.captures, fn {id, r} ->
+        entry_valid?(r, id, m)
+      end) and active?(m)
+  end
+
+  defp entry_valid?(r, id, m),
+    do:
+      CheckpointCapture.validate(r) == :ok and r.spec.id == id and
+        r.machine == {m.scope, m.id} and source_result?(r, m) and source_enrolled?(r, m) and
+        native_fields?(r, m) and
+        (CheckpointCapture.terminal?(r) or m.active_capture == id)
+
+  defp native_fields?(_r, %{backend_assignment: %{version: 2}}), do: true
+
+  defp native_fields?(r, _m),
+    do:
+      r.native_transition == nil and r.native_source_receipt == nil and
+        r.native_cleanup == nil and r.native_abort_source == nil
+
+  defp source_enrolled?(%{native_source_receipt: nil}, _), do: true
+
+  defp source_enrolled?(r, %{created_machine: %{backend_identity: %{receipt: origin}}} = m) do
+    source = r.native_source_receipt
+
+    receipts =
+      [origin] ++
+        Enum.flat_map(Map.values(m.captures) ++ Map.values(m.disk_expansions), fn
+          %{native_transition: %{receipt: receipt}} -> [receipt]
+          _ -> []
+        end)
+
+    Shape.receipt?(origin, 2) and Map.delete(source, "material") == Map.delete(origin, "material") and
+      source in receipts
+  end
+
+  defp source_enrolled?(_, _), do: false
+
+  defp source_result?(%{result: nil}, _), do: true
+
+  defp source_result?(r, %{backend_assignment: %{version: 2}} = m),
+    do:
+      r.result.profile == NativeGrowth.capture_profile(m, r) and
+        r.result.architecture == m.spec.artifact["architecture"]
+
+  defp source_result?(%{result: result}, %{spec: spec}),
+    do: result.profile == spec.profile and result.architecture == spec.artifact["architecture"]
+
+  defp active?(%{active_capture: nil, operation: op}), do: op != :capture
+
+  defp active?(m),
+    do:
+      is_struct(m.captures[m.active_capture], CheckpointCapture) and
+        not CheckpointCapture.terminal?(m.captures[m.active_capture]) and m.operation == :capture and
+        m.active_execution == nil and
+        m.state in [:running, :unknown, :missing, :conflict]
 
   def source_receipt(record, capture) do
     cond do
@@ -29,7 +87,7 @@ defmodule SmolBox.Embedded.NativeCapture do
 
   def resolution_valid?(
         record,
-        %CheckpointCapture{} = capture,
+        %{__struct__: CheckpointCapture} = capture,
         %NativeCaptureResolution{} = resolution
       ) do
     observed = resolution.observed
@@ -60,7 +118,7 @@ defmodule SmolBox.Embedded.NativeCapture do
 
   def resolution_valid?(
         record,
-        %CheckpointCapture{} = capture,
+        %{__struct__: CheckpointCapture} = capture,
         %Machine{backend_identity: %Identity{} = identity} = observed
       ) do
     with true <- match?(%{backend_assignment: %{version: 2}}, record),
@@ -101,7 +159,7 @@ defmodule SmolBox.Embedded.NativeCapture do
 
   def resolution_state?(_, _), do: false
 
-  def observation_valid?(%ManagedMachine{} = record, observed) do
+  def observation_valid?(%{__struct__: ManagedMachine} = record, observed) do
     DiskExpansion.matches?(record, observed) or
       resolution_valid?(
         record,

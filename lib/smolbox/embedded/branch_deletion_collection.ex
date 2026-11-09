@@ -64,16 +64,7 @@ defmodule SmolBox.Embedded.BranchDeletionCollection do
   defp ordered_release(nil), do: nil
   defp ordered_release(release), do: BranchCanonical.ordered(release, :child_release)
 
-  def from_wire(value) do
-    if valid?(value) and not is_struct(value),
-      do:
-        {:ok,
-         struct!(
-           __MODULE__,
-           Map.new(value, fn {key, field} -> {String.to_existing_atom(key), field} end)
-         )},
-      else: :error
-  end
+  def from_wire(value), do: BranchCanonical.from_wire(value, __MODULE__)
 
   def to_wire(%__MODULE__{} = proof),
     do:

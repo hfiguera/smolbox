@@ -30,7 +30,6 @@ strip = true
 [profile.dev]
 debug = 1
 
-# Full SDK test harnesses can exceed the executable approval bound even with
-# limited dependency DWARF. Keep the production bound and release profile intact.
+# Keep SDK test harnesses below the executable verification limit.
 [profile.test]
 debug = 0

@@ -272,6 +272,31 @@ defmodule SmolBox.Embedded.ExportWireTest do
 
     assert approval["ca_cert_file"] == nil
     refute Jason.encode!(approval) =~ "private-fixture-token"
+
+    suffix = Base.url_encode64(:crypto.strong_rand_bytes(12), padding: false)
+    path = Path.join(System.tmp_dir!(), "smolbox-export-approval-" <> suffix <> ".pem")
+    bytes = "fixture CA bytes"
+    File.write!(path, bytes, [:exclusive])
+    on_exit(fn -> File.rm(path) end)
+    catalog = %{export_destinations: [%{destination | ca_cert_file: path}]}
+    [with_ca] = ExportContract.approvals(catalog)
+
+    assert with_ca["ca_cert_file"] == path
+
+    assert with_ca["ca_certificate_sha256"] ==
+             Base.encode16(:crypto.hash(:sha256, bytes), case: :lower)
+
+    refute with_ca["destination_sha256"] == approval["destination_sha256"]
+
+    operation =
+      put_in(operation(proof()), ["request", "destination_sha256"], with_ca["destination_sha256"])
+
+    File.write!(path, <<>>)
+    assert ExportContract.approved_cached?([with_ca], operation)
+
+    assert_raise ArgumentError, "invalid export trust input", fn ->
+      ExportContract.approvals(catalog)
+    end
   end
 
   test "export bounds negotiate only with future capability and current public admission remains closed" do

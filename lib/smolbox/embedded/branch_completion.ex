@@ -19,6 +19,7 @@ defmodule SmolBox.Embedded.BranchCompletion do
 
   @type t :: %__MODULE__{}
 
+  @doc false
   def from_wire(value) do
     if wire?(value) do
       {:ok,
@@ -31,16 +32,19 @@ defmodule SmolBox.Embedded.BranchCompletion do
     end
   end
 
+  @doc false
   def valid?(%__MODULE__{} = value),
     do: Validation.struct_shape?(value, __MODULE__) and wire?(to_wire(value))
 
   def valid?(_), do: false
 
+  @doc false
   def to_wire(%__MODULE__{} = value) do
     wire = Map.new(Map.from_struct(value), fn {key, field} -> {Atom.to_string(key), field} end)
     if value.release == nil, do: Map.delete(wire, "release"), else: wire
   end
 
+  @doc false
   def wire?(value) when is_map(value),
     do:
       Shape.keys?(Map.delete(value, "release"), ~w(schema publication child identity_sha256 held)) and
@@ -49,6 +53,7 @@ defmodule SmolBox.Embedded.BranchCompletion do
 
   def wire?(_), do: false
 
+  @doc false
   def matches?(value, request) do
     wire?(value) and BranchRequest.valid?(request) and request_matches?(value, request)
   end

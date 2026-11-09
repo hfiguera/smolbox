@@ -2,11 +2,9 @@ defmodule SmolBox.Embedded.VolumeAuthority do
   @moduledoc """
   Enrolled native volume binding and immutable lifecycle evidence for store adapters.
 
-  Provision, deletion and staging-abort proofs are retained separately. A custom
-  store must validate each proof against the saved volume and binding before
-  updating state or accounting; existing evidence cannot be replaced. Inspect
-  output includes only the binding. Constructing this value does not provision a
-  volume, establish live ownership or enable a native feature.
+  Store adapters retain separate proofs for provisioning, deletion and staging
+  abort. Each proof must match the saved volume and its binding before the store
+  updates state or accounting. Inspect output includes only the binding.
   """
   alias SmolBox.Backend.Binding
   alias SmolBox.Embedded.VolumeContract

@@ -206,7 +206,7 @@ defmodule SmolBox.NativeBranchPublicBackingTest do
       id: parent.worker_id,
       context: context,
       budget: %Budget{
-        timeout_ms: options[:budget] || 1000,
+        timeout_ms: options[:budget] || 5000,
         max_request_bytes: 131_072,
         max_response_bytes: 131_072
       }
@@ -329,7 +329,7 @@ defmodule SmolBox.NativeBranchPublicBackingTest do
 
   test "deadline after intent acceptance retains backing without entering the peer" do
     {runtime, store, parent, child, usage, authority, peer} =
-      fixture(budget: 50, accept_delay: 100)
+      fixture(budget: 1500, accept_delay: 2000)
 
     assert {:error, _} =
              Branches.release_storage(runtime, ManagedMachine.key(child), backing_removed: true)

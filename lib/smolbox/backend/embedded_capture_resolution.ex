@@ -27,8 +27,14 @@ defmodule SmolBox.Backend.EmbeddedCaptureResolution do
   def run(context, name, budget) do
     deadline = System.monotonic_time(:millisecond) + min(budget.timeout_ms, 30_000)
 
-    with {:ok, budget} <- prepare(context, name, budget),
-         {:ok, budget} <- remaining(budget, deadline),
+    case prepare(context, name, budget) do
+      {:ok, budget} -> resolve(context, name, budget, deadline)
+      {:error, %Error{} = error} -> {:error, %{error | operation: :checkpoint}}
+    end
+  end
+
+  def resolve(context, name, budget, deadline) do
+    with {:ok, budget} <- remaining(budget, deadline),
          context = Call.pin(context, budget),
          {:ok, promoted, qualification} <- qualify(context, budget, deadline),
          {:ok, budget} <- remaining(budget, deadline),
@@ -45,9 +51,14 @@ defmodule SmolBox.Backend.EmbeddedCaptureResolution do
   end
 
   def prepare(context, name, budget) do
-    with true <- name == context.name and EmbeddedContext.scoped?(context),
-         true <- Features.supports?(context.config, :checkpoints),
-         %CheckpointCapture{state: :unknown} = capture <- context.capture,
+    if name == context.name and EmbeddedContext.scoped?(context) and
+         Features.supports?(context.config, :checkpoints),
+       do: prepare_capture(context, budget),
+       else: unsupported()
+  end
+
+  def prepare_capture(context, budget) do
+    with %CheckpointCapture{state: :unknown} = capture <- context.capture,
          :ok <- CheckpointCapture.validate(capture),
          true <- capture.machine == {context.spec.scope, context.spec.id},
          true <-
@@ -55,13 +66,7 @@ defmodule SmolBox.Backend.EmbeddedCaptureResolution do
              capture.spec.policy in context.config.checkpoint_policies do
       Budget.constrain(budget, timeout_ms: 30_000, max_response_bytes: 16_384)
     else
-      _ ->
-        {:error,
-         %Error{
-           category: :unsupported_capability,
-           operation: :checkpoint,
-           evidence: :not_dispatched
-         }}
+      _ -> unsupported()
     end
   end
 
@@ -203,4 +208,13 @@ defmodule SmolBox.Backend.EmbeddedCaptureResolution do
     do:
       {:error,
        %Error{category: :identity_conflict, operation: :checkpoint, evidence: :dispatch_uncertain}}
+
+  defp unsupported,
+    do:
+      {:error,
+       %Error{
+         category: :unsupported_capability,
+         operation: :checkpoint,
+         evidence: :not_dispatched
+       }}
 end
