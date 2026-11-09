@@ -76,6 +76,85 @@ source artifacts. The release workflow requires an approved input catalog.
   system skeleton.
   [ARM64 image recipe](https://github.com/docker-library/busybox/tree/54028ab642a011c458878f7393b1483f23ee1057/latest-1/glibc) · [x86_64 image recipe](https://github.com/docker-library/busybox/tree/7f8c76693ac4a64018eb67cf2768e5792d24bf6e/latest-1/glibc) · [Debian glibc source](https://deb.debian.org/debian/pool/main/g/glibc/)
 
+## Rebuilding and approving replacement firmware
+
+1. Verify the `libkrunfw` and Linux source archives against the
+   [source downloads index](../../native/release-sources/downloads.tsv).
+   Extract the firmware archive and put `linux-6.12.95.tar.xz` in its
+   `tarballs/` directory. On the matching Linux architecture, run
+   `make -j N LOCALVERSION=-smolbox-relink`, using the number of build
+   jobs for `N`. The upstream recipe applies its patches and produces
+   `libkrunfw.so.5.5.0` with SONAME `libkrunfw.so.5`. The marker lets
+   the guest report which build it booted. The build needs the usual
+   Linux kernel tools, including GCC, make, bc, bison, flex, OpenSSL and
+   libelf headers, and Python with pyelftools.
+2. For Apple Silicon, generate Darwin's `kernel.c` from the rebuilt
+   Linux ARM64 `arch/arm64/boot/Image` with the firmware source's
+   `bin2cbundle.py --os Darwin -t Image IMAGE kernel.c`. On the Mac,
+   place it in a fresh copy of the same firmware source and run
+   `make OS=Darwin`. The preview workflow ad-hoc signs
+   `libkrunfw.5.dylib` and verifies that its install name matches the
+   original.
+3. On the target OS, work in a private copy of the original native
+   package. Replace every `libkrunfw` filename listed under `lib/` in
+   the original manifest with the rebuilt library, preserving file
+   modes. The original approval binds the original bytes. From the
+   corresponding SmolBox checkout, materialize the pinned SDK inputs
+   with `python3 native/bootstrap.py`, then run
+   `python3 native/package.py --executable COPY/smolbox-port --assets COPY --output NEW/package`.
+   This reuses the compatible Port executable and writes a fresh native
+   manifest. On macOS the builder applies its preview signature and
+   hypervisor entitlement to the packaged helper.
+4. Use [the release bundle builder](../../native/release_bundle.py)
+   with the new package and the same demo. Approve the digest printed
+   by the builder and install into a fresh directory.
+
+   ```sh
+   mix smolbox.embedded.install --tag TAG --install-dir NEW_INSTALL \
+     --archive NEW_ARCHIVE --sha256 NEW_ARCHIVE_SHA256
+   ```
+
+   Set the Embedded Port target's manifest pin and identity from the
+   new package. In a fresh domain, run the quickstart with a guest
+   command that checks `uname -r` for `6.12.95-smolbox-relink`, then
+   verify that SmolBox collects the command result, deletes the VM and
+   releases its reservation.
+
+This workflow covers firmware loaded by the Embedded Port. The standalone
+demo stays byte-identical and its bundled libraries remain subject to the
+source-delivery review.
+
+### Local qualification
+
+The replacement packages use the preview helpers and the unmodified SDK
+revision recorded above. The native helper checks the old manifest before
+starting an SDK domain. It returned a package preflight rejection when the
+approved manifest was paired with the replacement library. For successful
+consumer lanes, the installer verified the new archive digest, the guest
+checked the kernel release marker and returned `42`, and SmolBox reported
+complete collection and cleanup with zero reserved slots.
+
+| Target | Rebuilt firmware SHA-256 | New manifest SHA-256 | New archive SHA-256 |
+| --- | --- | --- | --- |
+| Apple Silicon | `0661bacc00bd84744ea1d932a29dc0eb6f5f211125e1b7a0560875a101e84f3c` | `dc899c1423ae246c3ee5362d7040271cd1b8fded96b027ef37c014a6815cc85f` | `6f8351b8bbf388596e661235002853f70828ca18f568891d249b513c17d1b3ea` |
+| Linux x86_64 | `8d2ad3458fb3a001b107a314703ebf767f8f32ef3e0c723e07392f2be10dfb4d` | `9e8720cc0a865a8a0d8c4e185c77272f3e754520dfc452ee01add86ca438b8ff` | `ff0358fcb7ac1b30ab3396690533b4783fcb8b50077cf72aa2b0becbb56d1c5a` |
+| Linux ARM64 | `a5e3ad25f38eb217c44d22551ac626af2e8783912f6e95e90dd67240e0f42b15` | `cbd33001c45fa1baf12ec630d0b0bb770f3475fa65c9ad48d576ca471620ae3f` | `aba02a170be644e137c0312fcfa3472a47b6cf616951192d637451d609622223` |
+
+Linux x86_64 and ARM64 both passed with Elixir 1.20.4 / OTP 29.0.6 and
+Elixir 1.18.4 / OTP 27.3.4.15 in fresh standard accounts with KVM access.
+The ARM64 runs used Lima. Each consumer environment ran without Rust,
+and the test accounts had no remaining helper or VM processes after
+normal shutdown.
+
+The macOS replacement has the original install name and exported symbols,
+verifies under ad-hoc signing, and changes only the two firmware entries
+in the native asset inventory. Both toolchains passed the local archive
+install and live guest checks in separate fresh standard macOS accounts,
+with Gatekeeper enabled and without Rust. Both guests reported the rebuilt
+kernel and returned `42`. SmolBox completed VM cleanup and released the
+reservations, and neither account had a remaining helper or VM process.
+Crash and CLI-race validation remains deferred.
+
 ## Publication checks still open
 
 1. Review the assembled notices for the final binaries, including embedded
@@ -87,9 +166,8 @@ source artifacts. The release workflow requires an approved input catalog.
 3. Put the matching source downloads alongside the binaries and keep them
    available for as long as the binaries are offered. The package verifier
    binds native library digests to the approved manifest. Review the LGPL
-   relinking terms against a documented workflow for rebuilding the helper
-   and approving a new manifest with the modified library. Verify that
-   workflow with the final macOS signing policy.
+   relinking terms against the replacement workflow above. Verify that
+   workflow with the final macOS signing policy and public download.
    [LGPL-2.1 terms](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html)
 4. Repeat inventory and digest checks on the final signed or attested
    archives, then approve the exact catalog inputs.
