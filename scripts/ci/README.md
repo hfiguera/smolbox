@@ -11,11 +11,13 @@ remain pinned; this maintainer CI requirement does not add Rust, native assets o
 a hypervisor to HTTP-only or prebuilt Port package consumption. Live platform
 qualification and distributable signing remain separate gates.
 
-Main checks use Elixir 1.20.4 with OTP 29.0.6, matching `.tool-versions`.
-Compatibility jobs retain Elixir 1.18.4/OTP 27.3.4.15, Elixir 1.19.5/OTP 28.5
-and Elixir 1.20.4/OTP 28.5. Cache keys include the exact main toolchain so OTP 28
-builds and PLTs are not reused for OTP 29. The optional live workflow uses the
-same main pair; changing its configuration does not supply a successful run.
+Main CI and the blog workflow use Elixir 1.20.5 with OTP 29.1.2, matching
+`.tool-versions`. Compatibility jobs use Elixir 1.18.4/OTP 27.3.4.15,
+Elixir 1.19.5/OTP 28.5 and Elixir 1.20.4/OTP 28.5. Main CI cache keys include
+the exact toolchain versions to separate builds and PLTs across upgrades.
+
+The protected live worker workflow and the runtime qualification gate use
+Elixir 1.20.4 with OTP 29.0.6.
 
 For local validation, run `mise install`, then `mise exec -- elixir --version`.
 A newly installed Elixir distribution may need its own Hex/Rebar installations:
