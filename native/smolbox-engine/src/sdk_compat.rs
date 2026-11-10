@@ -28,6 +28,71 @@ pub(crate) fn launch_error(error: &smolvm::Error) -> ErrorCode {
     }
 }
 
+/// On macOS arm64 the SDK may attach the empty layers share of a bare VM
+/// when its extraction cache is present. A zero window in the launch record
+/// means a share without DAX. The SDK omits zero windows from fork snapshots,
+/// so read the source record bound to the original VMM's PID and birth.
+pub(crate) fn macos_bare_branch_layers(
+    source: &Path,
+    pid: (i32, u64),
+) -> Result<Option<crate::export_source::Root>> {
+    use std::io::Read;
+
+    let path = source.join("packed-layers-dax-window");
+    match std::fs::symlink_metadata(&path) {
+        Ok(_) => {}
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+        Err(_) => return Err(Error::before(ErrorCode::Io)),
+    }
+    const MAX_BYTES: u64 = 64;
+    let file = crate::artifact::open_regular(&path)?;
+    let metadata = file.metadata().map_err(|_| Error::before(ErrorCode::Io))?;
+    if metadata.uid() != unsafe { libc::geteuid() }
+        || metadata.mode() & 0o022 != 0
+        || metadata.nlink() != 1
+        || metadata.len() > MAX_BYTES
+    {
+        return Err(Error::before(ErrorCode::Ownership));
+    }
+    let mut text = String::new();
+    file.take(MAX_BYTES + 1)
+        .read_to_string(&mut text)
+        .map_err(|_| Error::before(ErrorCode::Io))?;
+    let fields: Vec<_> = text.split_whitespace().collect();
+    let [window, recorded_pid, birth] = fields.as_slice() else {
+        return Err(Error::before(ErrorCode::Ownership));
+    };
+    if text.len() as u64 > MAX_BYTES {
+        return Err(Error::before(ErrorCode::Ownership));
+    }
+    let recorded_pid = recorded_pid
+        .parse()
+        .map_err(|_| Error::before(ErrorCode::Ownership))?;
+    let birth = birth
+        .parse()
+        .map_err(|_| Error::before(ErrorCode::Ownership))?;
+    if (recorded_pid, birth) != pid {
+        return Ok(None);
+    }
+    if *window != "0" {
+        return Err(Error::before(ErrorCode::Unsupported));
+    }
+    let layers = crate::export_source::Root::open(&source.join("pack/layers"))?;
+    verify_empty_layers(&layers)?;
+    Ok(Some(layers))
+}
+
+pub(crate) fn verify_empty_layers(layers: &crate::export_source::Root) -> Result<()> {
+    if std::fs::read_dir(layers.path())
+        .map_err(|_| Error::before(ErrorCode::Io))?
+        .next()
+        .is_some()
+    {
+        return Err(Error::before(ErrorCode::Ownership));
+    }
+    layers.verify()
+}
+
 #[derive(serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Schema {
@@ -160,15 +225,7 @@ pub(crate) fn stopped_branch_deletion_cache(directory: &Path) -> Result<()> {
                 crate::export_source::Root::open(&path)?.verify()?;
             }
             Some("layers") if metadata.is_dir() => {
-                let layers = crate::export_source::Root::open(&path)?;
-                if std::fs::read_dir(layers.path())
-                    .map_err(|_| Error::before(ErrorCode::Io))?
-                    .next()
-                    .is_some()
-                {
-                    return Err(Error::before(ErrorCode::Ownership));
-                }
-                layers.verify()?;
+                verify_empty_layers(&crate::export_source::Root::open(&path)?)?;
             }
             Some("agent-rootfs.tar" | "overlay.raw" | "storage.ext4") if metadata.is_file() => {}
             Some(".smolvm-extracted") if metadata.is_file() && metadata.len() == 0 => {}
@@ -736,6 +793,33 @@ mod tests {
         assert!(branch_deletion_cache(&root).is_ok());
         assert!(stopped_branch_deletion_cache(&root).is_ok());
         assert_eq!(std::fs::read(&marker).unwrap(), b"source remains");
+    }
+
+    #[test]
+    fn macos_bare_branch_reuses_only_the_running_sources_empty_layers() {
+        let temporary = tempfile::tempdir().unwrap();
+        let source = temporary.path().canonicalize().unwrap();
+        let layers = source.join("pack/layers");
+        std::fs::create_dir_all(&layers).unwrap();
+        let launch = source.join("packed-layers-dax-window");
+        let pid = (123, 456);
+
+        assert!(macos_bare_branch_layers(&source, pid).unwrap().is_none());
+        std::fs::write(&launch, b"0 123 455\n").unwrap();
+        assert!(macos_bare_branch_layers(&source, pid).unwrap().is_none());
+
+        std::fs::write(&launch, b"0 123 456\n").unwrap();
+        let share = macos_bare_branch_layers(&source, pid).unwrap().unwrap();
+        assert_eq!(share.path(), layers);
+        std::fs::write(layers.join("unexpected"), b"layer").unwrap();
+        assert!(verify_empty_layers(&share).is_err());
+        assert!(macos_bare_branch_layers(&source, pid).is_err());
+
+        std::fs::write(&launch, b"536870912 123 456\n").unwrap();
+        assert_eq!(
+            macos_bare_branch_layers(&source, pid).err().unwrap().code,
+            ErrorCode::Unsupported
+        );
     }
 
     #[test]

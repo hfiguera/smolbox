@@ -503,16 +503,31 @@ impl RetainedBranchPreparation {
             snapshot: Directory::capture(&snapshot._snapshot)?,
             rootfs: Directory::capture(&rootfs)?,
         };
-        let (resources, features) = plan.sdk_config(&record)?;
+        let (resources, mut features) = plan.sdk_config(&record)?;
         let lifecycle = Lifecycle::at(&plan.child.path);
         lifecycle.prepare(&plan)?;
         let pack = BarePack::qualify(engine, &record, budget)?;
-        let features = features
-            .with_packed_layers(
-                &smolvm::agent::machine_layers_cache_dir(&record.name),
-                record.source_smolmachine.as_deref(),
-            )
-            .map_err(|_| Error::uncertain(ErrorCode::Native))?;
+        let source_layers =
+            if cfg!(all(target_os = "macos", target_arch = "aarch64")) && pack.is_some() {
+                crate::sdk_compat::macos_bare_branch_layers(
+                    &plan.source.path,
+                    original.intent.source_pid,
+                )?
+            } else {
+                None
+            };
+        if let Some(layers) = &source_layers {
+            // Restore must recreate the source's device, even for an empty
+            // pack. Reuse its backing directory so guest handles still match.
+            features.packed_layers_dir = Some(layers.path().to_path_buf());
+        } else {
+            features = features
+                .with_packed_layers(
+                    &smolvm::agent::machine_layers_cache_dir(&record.name),
+                    record.source_smolmachine.as_deref(),
+                )
+                .map_err(|_| Error::uncertain(ErrorCode::Native))?;
+        }
         if let Some(pack) = &pack {
             pack.verify(budget)?;
         }
@@ -593,6 +608,9 @@ impl RetainedBranchPreparation {
                 overlay.verify(&check_budget)?;
                 if let Some(pack) = &pack {
                     pack.verify(&check_budget)?;
+                }
+                if let Some(layers) = &source_layers {
+                    crate::sdk_compat::verify_empty_layers(layers)?;
                 }
                 plan.verify().map_err(|e| Error::uncertain(e.code))?;
                 {
