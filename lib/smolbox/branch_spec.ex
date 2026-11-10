@@ -4,7 +4,8 @@ defmodule SmolBox.BranchSpec do
   `id` is the new managed machine ID, never a worker name. `idle: true` attests that
   captured work is safe to duplicate. `hold: true` additionally requires the host
   to prepare the upstream guest branchpoint; it does not pause an arbitrary shell.
-  No nested branches, frozen sources, injected environment, ports or secrets.
+  Creation supports a leaf child from an idle source. Use
+  `SmolBox.Branches.release/4` to supply non-secret parameters to a held child.
   """
   alias SmolBox.{BranchPolicy, Error, Validation}
   @enforce_keys [:id, :policy, :idle]

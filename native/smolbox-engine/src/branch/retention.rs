@@ -1196,6 +1196,7 @@ mod tests {
                     Some(crate::BranchReleaseRequest {
                         operation_id: "original-activation".into(),
                         request_sha256: "a".repeat(64),
+                        env: Vec::new(),
                     })
                 },
             }

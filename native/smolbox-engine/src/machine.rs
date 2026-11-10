@@ -3982,6 +3982,7 @@ pub(crate) mod tests {
         let request = crate::BranchReleaseRequest {
             operation_id: "recover-release-model".into(),
             request_sha256: "e".repeat(64),
+            env: Vec::new(),
         };
         let release = crate::branch_release::Intent::issue(
             &model.plan.publication,

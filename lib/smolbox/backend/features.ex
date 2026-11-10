@@ -33,6 +33,7 @@ defmodule SmolBox.Backend.Features do
     checkpoints: @current,
     exports: @current,
     branches: @current,
+    branch_release_env: ~w(1.34.0),
     disk_growth: ~w(1.20.2 1.22.0 1.34.0),
     volumes: ~w(1.20.2 1.22.0 1.34.0),
     ports: @extended

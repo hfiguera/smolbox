@@ -101,11 +101,32 @@ impl BranchChildIntent {
 pub struct BranchReleaseRequest {
     pub operation_id: String,
     pub request_sha256: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub env: Vec<(String, String)>,
 }
 impl BranchReleaseRequest {
     fn validate(&self) -> Result<(), InvalidMessage> {
         crate::wire::id(&self.operation_id)?;
-        crate::wire::hex(&self.request_sha256, 64)
+        crate::wire::hex(&self.request_sha256, 64)?;
+        check(
+            self.env.len() <= 64
+                && self.env.windows(2).all(|pair| pair[0].0 < pair[1].0)
+                && self.env.iter().all(|(key, value)| {
+                    key.len() <= 128
+                        && key
+                            .bytes()
+                            .next()
+                            .is_some_and(|c| c.is_ascii_alphabetic() || c == b'_')
+                        && key.bytes().all(|c| c.is_ascii_alphanumeric() || c == b'_')
+                        && !value.contains(['\0', '\r', '\n'])
+                })
+                && self
+                    .env
+                    .iter()
+                    .map(|(key, value)| key.len() + value.len() + 2)
+                    .sum::<usize>()
+                    <= 4096,
+        )
     }
 }
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -146,7 +167,7 @@ impl BranchCreateRequest {
             (true, None) => Ok(()),
             (false, Some(release)) => {
                 release.validate()?;
-                check(release.operation_id != self.child.operation_id)
+                check(release.env.is_empty() && release.operation_id != self.child.operation_id)
             }
             _ => Err(InvalidMessage),
         }
@@ -375,6 +396,8 @@ impl BranchReleaseTransition {
                     != self.change.binding.intent.child.operation_id
                 && (self.change.mode == BranchReleaseMode::Explicit)
                     == self.change.binding.intent.child.hold
+                && (self.change.mode == BranchReleaseMode::Explicit
+                    || self.change.request.env.is_empty())
                 && before.record_sha256 != after.record_sha256
                 && after.revision == 1
                 && after.operation_id.as_deref() == Some(&self.change.request.operation_id)

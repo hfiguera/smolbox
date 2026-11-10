@@ -18,6 +18,11 @@ defmodule SmolBox.DurableHost.BranchStore do
     def capabilities do
       supported = %{managed_branches: 1}
 
+      supported =
+        if Code.ensure_loaded?(BranchOps) and function_exported?(BranchOps, :release, 4),
+          do: Map.put(supported, :branch_release_env, 1),
+          else: supported
+
       readers = [
         {:native_collected_branch_publications, CodecNativeCollectedBranchPublications},
         {:native_partial_branch_collections, CodecNativePartialBranchCollections},
@@ -110,7 +115,12 @@ defmodule SmolBox.DurableHost.BranchStore do
 
     def run(context, :branch_release, [key, version, now]) do
       with {:ok, c} <- Database.read(context, key, :machine),
-           do: accept_release(context, c, version, now)
+           do: accept_release(context, c, [version, now])
+    end
+
+    def run(context, :branch_release, [key, version, env, now]) do
+      with {:ok, c} <- Database.read(context, key, :machine),
+           do: accept_release(context, c, [version, env, now])
     end
 
     def run(context, :branch_release_advance, [key, guard, expected, change, now]) do
@@ -118,12 +128,12 @@ defmodule SmolBox.DurableHost.BranchStore do
            do: advance_release(context, c, expected, change, now)
     end
 
-    defp accept_release(context, %{branch: %{native_authority: authority}} = c, version, now)
+    defp accept_release(context, %{branch: %{native_authority: authority}} = c, arguments)
          when not is_nil(authority),
-         do: native_release(context, c, :accept, [version, now])
+         do: native_release(context, c, :accept, arguments)
 
-    defp accept_release(_context, c, version, now),
-      do: with({:ok, c} <- BranchOps.release(c, version, now), do: {:ok, nil, c})
+    defp accept_release(_context, c, arguments),
+      do: with({:ok, c} <- apply(BranchOps, :release, [c | arguments]), do: {:ok, nil, c})
 
     defp advance_release(
            context,

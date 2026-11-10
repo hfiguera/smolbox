@@ -177,8 +177,8 @@ defmodule SmolBox.ManagedPeer do
   end
 
   defp machine_route("POST", ["branch-release"], body, machine, state) do
-    %{"env" => []} = Jason.decode!(body)
-    child = Map.put(machine, "branchpointHeld", false)
+    %{"env" => env} = Jason.decode!(body)
+    child = machine |> Map.put("branchpointHeld", false) |> Map.put("release_env", env)
     state = %{state | machines: Map.put(state.machines, child["name"], child)}
     response = if state.options[:release_lost], do: {:json, 503, %{}}, else: {:json, 200, child}
     {response, state}

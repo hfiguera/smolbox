@@ -1,6 +1,7 @@
 defmodule SmolBox.Branches do
   @moduledoc """
-  Create managed leaf machines from idle offline bare sources on smolvm 1.19.0, 1.20.2 or 1.22.0.
+  Create managed leaf machines from idle offline bare sources on smolvm
+  1.19.0, 1.20.2, 1.22.0 or 1.34.0.
 
   Source and child identity, exclusion and capacity are persisted atomically.
   Children run on the source worker and retain a disk dependency on it. Delete
@@ -10,6 +11,7 @@ defmodule SmolBox.Branches do
   uncertain worker response.
   """
   alias SmolBox.{
+    BranchReleaseEnv,
     BranchSpec,
     Error,
     Identity,
@@ -148,18 +150,39 @@ defmodule SmolBox.Branches do
     end
   end
 
-  @doc "Release a held child exactly once. A lost response is never retried; retain the submitted version for deduplication."
-  @spec release(SmolBox.runtime(), ManagedMachine.key(), pos_integer()) ::
+  @doc """
+  Release a held child once, optionally supplying non-secret `:env` pairs to its
+  branchpoint workload. The single-line values are stored with the release.
+  Retry with the same version and environment to observe the original request.
+  A lost worker response never triggers a second activation.
+  """
+  @spec release(SmolBox.runtime(), ManagedMachine.key(), pos_integer(), keyword()) ::
           {:ok, ManagedMachine.t()} | {:error, Error.t()}
-  def release(runtime, handle, version) do
+  def release(runtime, handle, version, options \\ []) do
     with true <- Validation.integer?(version, 1, 9_007_199_254_740_991),
-         {:ok, _} <- fetch(runtime, handle),
-         {:ok, config} <- config(runtime),
-         do: MachineSession.store(config, :branch_release, [handle, version, config.clock.now()]),
-         else: (
-           false -> Session.error(:validation, :branch)
-           error -> error
-         )
+         true <- Validation.keys?(options, [:env]),
+         {:ok, env} <- BranchReleaseEnv.normalize(Keyword.get(options, :env, [])),
+         {:ok, child} <- fetch(runtime, handle),
+         {:ok, config} <- config(runtime) do
+      accept_release(config, child, handle, version, env)
+    else
+      invalid when invalid in [false, :error] -> Session.error(:validation, :branch)
+      error -> error
+    end
+  end
+
+  defp accept_release(config, _child, handle, version, []),
+    do: MachineSession.store(config, :branch_release, [handle, version, config.clock.now()])
+
+  defp accept_release(config, child, handle, version, env) do
+    with {:ok, %{branch_release_env: 1}} <- Session.store(config, :capabilities, []),
+         {:ok, worker} <- MachineSession.worker(config, child),
+         true <- Target.supports_feature?(worker, :branch_release_env) do
+      MachineSession.store(config, :branch_release, [handle, version, env, config.clock.now()])
+    else
+      {:error, _} = error -> error
+      _ -> Session.error(:unsupported_capability, :branch)
+    end
   end
 
   @doc """

@@ -134,7 +134,8 @@ defmodule SmolBox.Command do
 
   defp valid_argv?(_argv), do: false
 
-  defp valid_env?(env) do
+  @doc false
+  def valid_env?(env) do
     within_limit?(env, 64) and Enum.all?(env, &valid_env_entry?/1) and
       length(env) == MapSet.size(MapSet.new(env, &elem(&1, 0)))
   end

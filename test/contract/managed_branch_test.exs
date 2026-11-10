@@ -11,7 +11,7 @@ defmodule SmolBox.ManagedBranchTest do
     RuntimeFixture
   }
 
-  alias SmolBox.Store.{MachineOps, Memory}
+  alias SmolBox.Store.{Codec, MachineOps, Memory}
 
   for {reason, changes} <- [version: [runtime_version: "1.20.2"], readiness: [unready: true]] do
     test "#{reason} drift rejects a branch before dispatch" do
@@ -137,6 +137,55 @@ defmodule SmolBox.ManagedBranchTest do
     assert {:ok, ^child} = Branches.create(runtime, source, spec)
   end
 
+  test "held siblings receive only their own environment and release is deduplicated" do
+    {f, source, spec} = fixture(runtime_version: "1.34.0", expected_runtime_version: "1.34.0")
+
+    versions =
+      for {id, value} <- [{"left", "one = 'literal'"}, {"right", "two"}] do
+        assert {:ok, child} = Branches.create(f.runtime, source, %{spec | id: id, hold: true})
+        assert {:ok, %{branch: %{state: :held}}} = Branches.await(f.runtime, child, 5000)
+        current = RuntimeFixture.await_idle(f.runtime, child)
+        env = [{"SIDE", value}, {"MODE", "worker"}]
+
+        for invalid <- [
+              [{"SIDE", "x\ny"}],
+              [{"SIDE", "x"}, {"SIDE", "y"}],
+              [{"SIDE", String.duplicate("x", 4096)}]
+            ] do
+          assert {:error, %{category: :validation}} =
+                   Branches.release(f.runtime, child, current.version, env: invalid)
+        end
+
+        assert {:ok, _} = Branches.release(f.runtime, child, current.version, env: env)
+
+        assert {:ok, %{branch: %{state: :released}} = released} =
+                 Branches.await(f.runtime, child, 5000)
+
+        assert {:ok, <<"smolbox-record-v51\0", _::binary>> = bytes} =
+                 Codec.encode(released)
+
+        assert {:ok, ^released} = Codec.decode(bytes)
+
+        assert {:ok, _} =
+                 Branches.release(f.runtime, child, current.version, env: Enum.reverse(env))
+
+        assert {:error, %{category: :identity_conflict}} =
+                 Branches.release(f.runtime, child, current.version, env: [{"SIDE", "changed"}])
+
+        assert {:error, %{category: :identity_conflict}} =
+                 Branches.release(f.runtime, child, current.version)
+
+        {released.machine_name, ["MODE=worker", "SIDE=" <> value]}
+      end
+
+    assert count(f.peer, "/branch-release") == 2
+    assert {:ok, parent} = Machines.inspect(f.runtime, source)
+    machines = ManagedPeer.snapshot(f.peer).machines
+    refute Map.has_key?(machines[parent.machine_name], "release_env")
+
+    for {name, env} <- versions, do: assert(machines[name]["release_env"] == env)
+  end
+
   test "a held child cannot accept work until explicit release, which is deduplicated" do
     {f, source, spec} = fixture()
     {:ok, child} = Branches.create(f.runtime, source, %{spec | hold: true})
@@ -144,6 +193,10 @@ defmodule SmolBox.ManagedBranchTest do
     current = RuntimeFixture.await_idle(f.runtime, child)
     assert {:error, _} = Machines.submit(f.runtime, child, %{f.spec | id: "held-command"})
     assert {:error, _} = Machines.stop(f.runtime, child, current.version)
+
+    assert {:error, %{category: :unsupported_capability}} =
+             Branches.release(f.runtime, child, current.version, env: [{"MODE", "worker"}])
+
     assert {:ok, _} = Branches.release(f.runtime, child, current.version)
     assert {:ok, %{branch: %{state: :released}}} = Branches.await(f.runtime, child, 5000)
     assert {:ok, _} = Branches.release(f.runtime, child, current.version)

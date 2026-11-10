@@ -1,6 +1,6 @@
 defmodule SmolBox.Store.BranchOps do
   @moduledoc "Atomic source/child transactions; adapters serialize both identities and worker capacity."
-  alias SmolBox.{Branch, BranchSpec, Error, Machine, ManagedMachine, Validation}
+  alias SmolBox.{Branch, BranchReleaseEnv, BranchSpec, Error, Machine, ManagedMachine, Validation}
 
   alias SmolBox.Embedded.{
     NativeBranchReleaseResult,
@@ -289,16 +289,18 @@ defmodule SmolBox.Store.BranchOps do
 
   defp resolve_child(_, _, _), do: error(:identity_conflict)
 
-  def release(%{branch: %{native_authority: authority}}, _version, _now)
+  def release(c, version, now), do: release(c, version, [], now)
+
+  def release(%{branch: %{native_authority: authority}}, _version, _env, _now)
       when not is_nil(authority), do: error(:unsupported_capability)
 
-  def release(c, version, now) do
+  def release(c, version, env, now) do
     cond do
-      c.branch == nil ->
+      not valid_release?(c, env) ->
         error(:validation)
 
       c.branch.release_version == version ->
-        {:ok, c}
+        if c.branch.release_env == env, do: {:ok, c}, else: error(:identity_conflict)
 
       c.version != version ->
         error(:stale_version)
@@ -307,7 +309,12 @@ defmodule SmolBox.Store.BranchOps do
         error(:admission_exhausted)
 
       true ->
-        b = %{c.branch | release_version: version, deadline_ms: now + c.branch.spec.timeout_ms}
+        b = %{
+          c.branch
+          | release_version: version,
+            release_env: env,
+            deadline_ms: now + c.branch.spec.timeout_ms
+        }
 
         update(
           %{c | branch: b},
@@ -322,6 +329,8 @@ defmodule SmolBox.Store.BranchOps do
         )
     end
   end
+
+  defp valid_release?(c, env), do: c.branch != nil and BranchReleaseEnv.valid?(env)
 
   def release_advance(%{branch: %{native_authority: authority}}, _expected, _action, _now)
       when not is_nil(authority), do: error(:unsupported_capability)

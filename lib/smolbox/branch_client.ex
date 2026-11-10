@@ -29,8 +29,10 @@ defmodule SmolBox.BranchClient do
     mutate(client, source.machine_name <> "/branches", wire, child, child.branch.spec.hold)
   end
 
-  def release(client, child),
-    do: mutate(client, child.machine_name <> "/branch-release", %{"env" => []}, child, false)
+  def release(client, child) do
+    env = Enum.map(child.branch.release_env, fn {name, value} -> name <> "=" <> value end)
+    mutate(client, child.machine_name <> "/branch-release", %{"env" => env}, child, false)
+  end
 
   def inspect_child(client, child, held) do
     with {:ok, raw} <- request(client, :get, child.machine_name, nil),

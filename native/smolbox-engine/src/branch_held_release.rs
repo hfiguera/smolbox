@@ -496,6 +496,7 @@ mod tests {
         BranchReleaseRequest {
             operation_id: "later-held-release".into(),
             request_sha256: "e".repeat(64),
+            env: Vec::new(),
         }
     }
     // Private file/row/accounting model only; no SDK manager or VMM is created.

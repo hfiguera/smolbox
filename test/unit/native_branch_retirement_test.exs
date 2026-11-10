@@ -101,6 +101,9 @@ defmodule SmolBox.NativeBranchRetirementTest do
                        |> Map.delete(:disposal))
                    )
                    |> strip_release(mode)
+                   |> then(
+                     &update_in(&1.branch, fn branch -> Map.delete(branch, :release_env) end)
+                   )
                  )
 
       assert {:ok, ^prior} = Codec.decode(bytes)

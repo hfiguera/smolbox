@@ -77,6 +77,7 @@ class PackageMetadataTests(unittest.TestCase):
         expected['volume_limits'] = hello['limits']['volumes']
         self.assertEqual(linux, expected)
         hello['sdk']['feature_versions']['exports'] = 1
+        hello['sdk']['feature_versions']['branch_release_env'] = 1
         self.assertEqual(linux['sdk']['feature_versions'], hello['sdk']['feature_versions'])
         with (package.ROOT / 'Cargo.toml').open('rb') as manifest:
             version = package.tomllib.load(manifest)['workspace']['dependencies']['smolvm']['version']

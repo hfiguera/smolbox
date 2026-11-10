@@ -138,6 +138,8 @@ defmodule SmolBox.Runtime.Branches do
   defp release_preflight(config, child) do
     with {:ok, worker} <- MachineSession.worker(config, child),
          true <- approved?(worker, child, child.branch.spec),
+         true <-
+           child.branch.release_env == [] or Target.supports_feature?(worker, :branch_release_env),
          worker = Target.pin(worker),
          {:ok, _} <-
            MachineSession.io(config, child, fn ->

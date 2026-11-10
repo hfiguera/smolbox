@@ -108,7 +108,7 @@ defmodule SmolBox.Embedded.BranchCanonical do
          "publication" => :publication,
          "release" => :child_release
        }},
-    release_request: {~w(operation_id request_sha256), %{}},
+    release_request: {~w(operation_id request_sha256 env), %{}},
     plan:
       {~w(ordinary_child total_additional minimum_extra_memory_mb minimum_extra_disk_gb),
        %{"ordinary_child" => :resources, "total_additional" => :resources}},

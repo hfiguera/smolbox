@@ -2,25 +2,30 @@ defmodule SmolBox.Store.NativeBranchReleaseOps do
   @moduledoc false
   alias SmolBox.Embedded.{NativeBranchRelease, NativeBranchReleaseResult, NativeGrowth}
 
-  alias SmolBox.{DiskExpansion, Error, Machine, ManagedMachine, Validation}
+  alias SmolBox.{BranchReleaseEnv, DiskExpansion, Error, Machine, ManagedMachine, Validation}
 
-  def accept(parent, child, version, now) do
+  def accept(parent, child, version, now), do: accept(parent, child, version, [], now)
+
+  def accept(parent, child, version, env, now) do
     cond do
-      not Validation.integer?(version, 1, 9_007_199_254_740_991) or not Validation.timestamp?(now) ->
+      not (Validation.integer?(version, 1, 9_007_199_254_740_991) and
+             Validation.timestamp?(now) and BranchReleaseEnv.valid?(env)) ->
         error(:validation)
 
       child.branch.release_version == version ->
-        {:ok, parent, child}
+        if child.branch.release_env == env,
+          do: {:ok, parent, child},
+          else: error(:identity_conflict)
 
       child.version != version ->
         error(:stale_version)
 
       true ->
-        insert(parent, child, version, now)
+        insert(parent, child, version, env, now)
     end
   end
 
-  defp insert(parent, child, version, now) do
+  defp insert(parent, child, version, env, now) do
     with :ok <- ManagedMachine.validate(parent),
          :ok <- ManagedMachine.validate(child),
          true <- related?(parent, child) and parent.state == :running and child.state == :running,
@@ -33,7 +38,7 @@ defmodule SmolBox.Store.NativeBranchReleaseOps do
          true <-
            receipt == parent.observed_machine.backend_identity.receipt and
              Machine.same_incarnation?(DiskExpansion.expected(parent), parent.observed_machine),
-         release = NativeBranchRelease.new(parent, child, version),
+         release = NativeBranchRelease.new(parent, child, version, env),
          authority = %{child.branch.native_authority | release: release},
          deadline = now + child.branch.spec.timeout_ms,
          {:ok, parent} <-
@@ -56,6 +61,7 @@ defmodule SmolBox.Store.NativeBranchReleaseOps do
                  child.branch
                  | state: :release_pending,
                    release_version: version,
+                   release_env: env,
                    deadline_ms: deadline,
                    native_authority: authority
                },

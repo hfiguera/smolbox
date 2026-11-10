@@ -2906,6 +2906,7 @@ mod tests {
         // must not silently turn on the negative (missing-feature) fixtures.
         for feature in [
             "branches",
+            "branch_release_env",
             "partial_collection_preflight",
             "partial_cleanup_resolution",
         ] {

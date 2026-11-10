@@ -4,7 +4,7 @@ A branch creates another running machine from a prepared source, including its
 memory and disks. Prepare once, then give separate tasks their own copies. Changes
 to one child's guest memory or disks do not change its siblings or source.
 
-This first contract supports **idle, offline bare guests on smolvm 1.19.0, 1.20.2 or 1.22.0**, on the
+This contract supports **idle, offline bare guests on smolvm 1.19.0, 1.20.2, 1.22.0 or 1.34.0**, on the
 source's worker. It creates one leaf child per request. It does not add nested
 branches, source freezing, migration, branch pools, network restoration or arbitrary
 application cloning. A branch is a managed machine, not a Git branch or a portable
@@ -22,7 +22,8 @@ upstream's branchable mode. Finish preparation commands before branching.
 SmolBox command slot does not prove idleness: background processes can still run.
 The host must account for captured processes, credentials and external effects.
 SmolBox cannot determine whether arbitrary RAM contains secrets. The API rejects
-containers, networked sources, and requests to inject environment, secrets or ports.
+containers, networked sources, and requests to inject environment, secrets or ports
+at creation.
 
 Approve additional preparation and backing capacity on the owning worker:
 
@@ -109,6 +110,19 @@ allowance remains until the cleanup sequence below.
 Retain the submitted `release_version` when retrying the public call: that exact
 version deduplicates the release. A changed version does not request a second
 release. The controller persists intent before sending the worker mutation.
+
+Supply non-secret parameters to the held child's branchpoint workload with
+`Branches.release(runtime, handle, release_version, env: [{"MODE", "worker"}])`.
+This requires a SmolVM 1.34.0 HTTP worker or an Embedded Port package advertising
+`branch_release_env: 1`. The store must also advertise `branch_release_env: 1`.
+Upgrade shared store readers and writers before use. Releases with an environment
+use record format v51. Empty releases retain their existing record formats.
+
+The release accepts up to 64 distinct names and 4 KiB of single-line assignments.
+The environment is persisted. Pass only non-secret values. Reuse the same version
+and values on retry. A different environment conflicts with the accepted release.
+The branchpoint continuation receives the values. Already running processes keep
+their original environment. Use `SmolBox.Command` for command-specific parameters.
 
 ## Read evidence and handle uncertainty
 

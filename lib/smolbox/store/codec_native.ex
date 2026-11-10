@@ -1,6 +1,7 @@
 defmodule SmolBox.Store.CodecNative do
   @moduledoc false
   alias SmolBox.Store.{
+    CodecBranches,
     CodecFields,
     CodecMaterial,
     CodecNativeCaptures,
@@ -27,7 +28,12 @@ defmodule SmolBox.Store.CodecNative do
   def upgrade(record), do: CodecFields.transform(record, @defaults, :upgrade)
 
   def payload(record),
-    do: record |> strip() |> CodecNativeCaptures.strip() |> :erlang.term_to_binary()
+    do:
+      record
+      |> strip()
+      |> CodecNativeCaptures.strip()
+      |> CodecBranches.strip_release_env()
+      |> :erlang.term_to_binary()
 
   def legacy_term(payload) do
     {record, used} = :erlang.binary_to_term(payload, [:safe, :used])
@@ -37,6 +43,7 @@ defmodule SmolBox.Store.CodecNative do
      |> CodecNativeVolumes.upgrade()
      |> CodecMaterial.upgrade()
      |> upgrade()
-     |> CodecNativeCaptures.upgrade(), used}
+     |> CodecNativeCaptures.upgrade()
+     |> CodecBranches.upgrade_release_env(), used}
   end
 end

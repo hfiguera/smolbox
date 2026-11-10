@@ -53,7 +53,7 @@ impl BranchCreateRequest {
             (true, None) => Ok(()),
             (false, Some(request)) => {
                 request.validate()?;
-                if request.operation_id == self.child.operation_id {
+                if request.operation_id == self.child.operation_id || !request.env.is_empty() {
                     return Err(Error::before(ErrorCode::Validation));
                 }
                 Ok(())
@@ -192,6 +192,7 @@ mod tests {
                 Some(crate::BranchReleaseRequest {
                     operation_id: "initial-release".into(),
                     request_sha256: "d".repeat(64),
+                    env: Vec::new(),
                 })
             },
         };
@@ -230,6 +231,7 @@ mod tests {
             let release = crate::BranchReleaseRequest {
                 operation_id: "initial-release".into(),
                 request_sha256: "d".repeat(64),
+                env: Vec::new(),
             };
             let mut crossed = request.clone();
             crossed.initial_release = if hold { Some(release.clone()) } else { None };

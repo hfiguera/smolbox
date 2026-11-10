@@ -390,6 +390,7 @@ defmodule SmolBox.Store.Codec do
   }
 
   @max_bytes 16_777_216
+  @branch_release_env_prefix "smolbox-record-v51\0"
   @native_collected_branch_publications_prefix "smolbox-record-v50\0"
   @native_partial_branch_cleanup_resolutions_prefix "smolbox-record-v49\0"
   @native_partial_branch_cleanups_prefix "smolbox-record-v48\0"
@@ -532,6 +533,13 @@ defmodule SmolBox.Store.Codec do
 
   @spec encode(Execution.t() | SmolBox.ManagedMachine.t() | SmolBox.Volume.t()) ::
           {:ok, binary()} | {:error, Error.t()}
+  def encode(%SmolBox.ManagedMachine{branch: %{release_env: [_ | _]}} = record) do
+    with :ok <- validate_extended(record) do
+      bytes = @branch_release_env_prefix <> :erlang.term_to_binary(record)
+      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
+    end
+  end
+
   def encode(%SmolBox.Volume{} = record),
     do:
       if(CodecNativeVolumes.required?(record),
@@ -727,6 +735,21 @@ defmodule SmolBox.Store.Codec do
   @spec decode(binary()) ::
           {:ok, Execution.t() | SmolBox.ManagedMachine.t() | SmolBox.Volume.t()}
           | {:error, Error.t()}
+  def decode(<<@branch_release_env_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+    <<@branch_release_env_prefix, payload::binary>> = bytes
+
+    with {%SmolBox.ManagedMachine{branch: %{release_env: [_ | _]}} = record, used} <-
+           :erlang.binary_to_term(payload, [:safe, :used]),
+         true <- used == byte_size(payload),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
   def decode(<<@native_collected_branch_publications_prefix, 131, tag, _rest::binary>> = bytes)
       when tag != 80 and byte_size(bytes) <= @max_bytes,
       do: decode_native_collected_branch_publications(bytes)
@@ -917,10 +940,18 @@ defmodule SmolBox.Store.Codec do
 
   def decode(_bytes), do: invalid()
 
-  defp old_payload(record), do: record |> CodecNativeCaptures.strip() |> :erlang.term_to_binary()
+  defp legacy_branch_payload(record),
+    do: record |> CodecBranches.strip_release_env() |> :erlang.term_to_binary()
+
+  defp legacy_branch_term(payload) do
+    {record, used} = :erlang.binary_to_term(payload, [:safe, :used])
+    {CodecBranches.upgrade_release_env(record), used}
+  end
+
+  defp old_payload(record), do: legacy_branch_payload(CodecNativeCaptures.strip(record))
 
   defp old_term(payload) do
-    {record, used} = :erlang.binary_to_term(payload, [:safe, :used])
+    {record, used} = legacy_branch_term(payload)
     {CodecNativeCaptures.upgrade(record), used}
   end
 
@@ -940,7 +971,7 @@ defmodule SmolBox.Store.Codec do
 
   defp encode_native_record(record, prefix, strip) do
     with :ok <- validate_extended(record) do
-      bytes = prefix <> :erlang.term_to_binary(strip.(record))
+      bytes = prefix <> legacy_branch_payload(strip.(record))
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
   end
@@ -948,7 +979,7 @@ defmodule SmolBox.Store.Codec do
   defp decode_native_branch_authority(<<@native_branch_authority_prefix, payload::binary>>) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- legacy_branch_term(payload),
          true <- used == byte_size(payload) and CodecNativeBranchAuthority.required?(record),
          record = CodecNativeBranchReleases.upgrade(record),
          :ok <- validate_extended(record),
@@ -969,7 +1000,7 @@ defmodule SmolBox.Store.Codec do
   defp decode_native_branch_releases(<<@native_branch_releases_prefix, payload::binary>>) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- legacy_branch_term(payload),
          true <- used == byte_size(payload) and CodecNativeBranchReleases.required?(record),
          record = CodecNativeBranchRetirements.upgrade(record),
          :ok <- validate_extended(record),
@@ -990,7 +1021,7 @@ defmodule SmolBox.Store.Codec do
   defp decode_native_branch_retirements(<<@native_branch_retirements_prefix, payload::binary>>) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- legacy_branch_term(payload),
          true <- used == byte_size(payload) and CodecNativeBranchRetirements.required?(record),
          record = CodecNativeBranchBackings.upgrade(record),
          :ok <- validate_extended(record),
@@ -1011,7 +1042,7 @@ defmodule SmolBox.Store.Codec do
   defp decode_native_branch_backings(<<@native_branch_backings_prefix, payload::binary>>) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- legacy_branch_term(payload),
          true <- used == byte_size(payload) and CodecNativeBranchBackings.required?(record),
          record = CodecNativeBranchDeletions.upgrade(record),
          :ok <- validate_extended(record),
@@ -1034,7 +1065,7 @@ defmodule SmolBox.Store.Codec do
        ) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- legacy_branch_term(payload),
          true <-
            used == byte_size(payload) and CodecNativeUnbootedBranchBackings.required?(record),
          record = CodecNativeBranchCollections.upgrade(record),
@@ -1058,7 +1089,7 @@ defmodule SmolBox.Store.Codec do
        ) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- legacy_branch_term(payload),
          true <-
            used == byte_size(payload) and CodecNativeUnbootedBranchRetirements.required?(record) and
              not CodecNativeUnbootedBranchBackings.required?(record),
@@ -1083,7 +1114,7 @@ defmodule SmolBox.Store.Codec do
        ) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- legacy_branch_term(payload),
          true <-
            used == byte_size(payload) and CodecNativeUnbootedBranchDisposals.required?(record) and
              not CodecNativeUnbootedBranchRetirements.required?(record),
@@ -1108,7 +1139,7 @@ defmodule SmolBox.Store.Codec do
        ) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- legacy_branch_term(payload),
          true <-
            used == byte_size(payload) and CodecNativePreparedBranchRetirements.required?(record),
          record = CodecNativeUnbootedBranchDisposals.upgrade(record),
@@ -1132,7 +1163,7 @@ defmodule SmolBox.Store.Codec do
        ) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- legacy_branch_term(payload),
          true <- used == byte_size(payload) and CodecNativeBranchDeletionActions.required?(record),
          false <- CodecNativeReleasedBranchContinuations.required?(record),
          false <- CodecNativeReleasedBranchCleanups.required?(record),
@@ -1155,7 +1186,7 @@ defmodule SmolBox.Store.Codec do
   defp decode_native_branch_deletions(<<@native_branch_deletions_prefix, payload::binary>>) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- legacy_branch_term(payload),
          true <- used == byte_size(payload) and CodecNativeBranchDeletions.required?(record),
          false <- CodecNativeReleasedBranchDeletions.required?(record),
          record = CodecNativeBranchDeletionActions.upgrade(record),
@@ -1179,7 +1210,7 @@ defmodule SmolBox.Store.Codec do
        ) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- legacy_branch_term(payload),
          true <-
            used == byte_size(payload) and CodecNativeReleasedBranchDeletions.required?(record),
          false <- CodecNativeReleasedBranchContinuations.required?(record),
@@ -1205,7 +1236,7 @@ defmodule SmolBox.Store.Codec do
        ) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- legacy_branch_term(payload),
          true <-
            used == byte_size(payload) and CodecNativeReleasedBranchContinuations.required?(record),
          false <- CodecNativeReleasedBranchCleanups.required?(record),
@@ -1230,7 +1261,7 @@ defmodule SmolBox.Store.Codec do
        ) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- legacy_branch_term(payload),
          true <-
            used == byte_size(payload) and CodecNativeCollectedBranchPublications.required?(record),
          :ok <- validate_extended(record),
@@ -1253,7 +1284,7 @@ defmodule SmolBox.Store.Codec do
        ) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- legacy_branch_term(payload),
          true <-
            used == byte_size(payload) and
              CodecNativePartialBranchCleanupResolutions.required?(record),
@@ -1278,7 +1309,7 @@ defmodule SmolBox.Store.Codec do
        ) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- legacy_branch_term(payload),
          true <- used == byte_size(payload) and CodecNativePartialBranchCleanups.required?(record),
          record = CodecNativePartialBranchCleanupResolutions.transform(record, :upgrade),
          :ok <- validate_extended(record),
@@ -1301,7 +1332,7 @@ defmodule SmolBox.Store.Codec do
        ) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- legacy_branch_term(payload),
          true <-
            used == byte_size(payload) and CodecNativePartialBranchBackings.required?(record),
          record = CodecNativePartialBranchCleanups.transform(record, :upgrade),
@@ -1325,7 +1356,7 @@ defmodule SmolBox.Store.Codec do
        ) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- legacy_branch_term(payload),
          true <-
            used == byte_size(payload) and CodecNativePartialBranchRetirements.required?(record),
          false <- CodecNativePartialBranchBackings.required?(record),
@@ -1350,7 +1381,7 @@ defmodule SmolBox.Store.Codec do
        ) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- legacy_branch_term(payload),
          true <-
            used == byte_size(payload) and CodecNativePartialBranchDisposals.required?(record),
          false <- CodecNativePartialBranchRetirements.required?(record),
@@ -1375,7 +1406,7 @@ defmodule SmolBox.Store.Codec do
        ) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- legacy_branch_term(payload),
          true <-
            used == byte_size(payload) and CodecNativePartialBranchCollections.required?(record),
          record = CodecNativePartialBranchDisposals.transform(record, :upgrade),
@@ -1397,7 +1428,7 @@ defmodule SmolBox.Store.Codec do
   defp decode_native_branch_collections(<<@native_branch_collections_prefix, payload::binary>>) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- legacy_branch_term(payload),
          record = CodecNativePartialBranchCollections.upgrade(record),
          true <- used == byte_size(payload) and CodecNativeBranchCollections.required?(record),
          :ok <- validate_extended(record),
@@ -1420,7 +1451,7 @@ defmodule SmolBox.Store.Codec do
        ) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- legacy_branch_term(payload),
          true <-
            used == byte_size(payload) and CodecNativeReleasedBranchCleanups.required?(record),
          record = CodecNativeBranchCollections.upgrade(record),
@@ -1434,7 +1465,7 @@ defmodule SmolBox.Store.Codec do
   defp decode_native_branches(<<@native_branches_prefix, payload::binary>>) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- legacy_branch_term(payload),
          true <- used == byte_size(payload) and CodecNativeBranches.required?(record),
          record = CodecNativeBranchAuthority.upgrade(record),
          :ok <- validate_extended(record),
@@ -1447,7 +1478,7 @@ defmodule SmolBox.Store.Codec do
   defp decode_native_exports(<<@native_exports_prefix, payload::binary>>) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- legacy_branch_term(payload),
          true <- used == byte_size(payload) and CodecNativeExports.required?(record),
          record = CodecNativeBranchAuthority.upgrade(record),
          false <- CodecNativeBranches.required?(record),
@@ -1462,7 +1493,7 @@ defmodule SmolBox.Store.Codec do
     with :ok <- validate_extended(record) do
       bytes =
         @native_capture_abort_sources_prefix <>
-          :erlang.term_to_binary(CodecNativeExports.strip(record))
+          legacy_branch_payload(CodecNativeExports.strip(record))
 
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
@@ -1473,7 +1504,7 @@ defmodule SmolBox.Store.Codec do
        ) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- legacy_branch_term(payload),
          record = CodecNativeExports.upgrade(record),
          true <- used == byte_size(payload) and CodecNativeCaptureAbortSources.required?(record),
          false <- CodecNativeBranches.required?(record),
@@ -1488,7 +1519,7 @@ defmodule SmolBox.Store.Codec do
     with :ok <- validate_extended(record) do
       bytes =
         @native_capture_cleanup_prefix <>
-          :erlang.term_to_binary(CodecNativeCaptureAbortSources.strip(record))
+          legacy_branch_payload(CodecNativeCaptureAbortSources.strip(record))
 
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
@@ -1497,7 +1528,7 @@ defmodule SmolBox.Store.Codec do
   defp decode_native_capture_cleanup(<<@native_capture_cleanup_prefix, payload::binary>>) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- legacy_branch_term(payload),
          record = CodecNativeCaptureAbortSources.upgrade(record),
          true <- used == byte_size(payload) and CodecNativeCaptureCleanup.required?(record),
          false <- CodecNativeBranches.required?(record),
@@ -1516,7 +1547,7 @@ defmodule SmolBox.Store.Codec do
 
   defp encode_capture_history(record, prefix) do
     with :ok <- validate_extended(record) do
-      bytes = prefix <> :erlang.term_to_binary(CodecNativeCaptureCleanup.strip(record))
+      bytes = prefix <> legacy_branch_payload(CodecNativeCaptureCleanup.strip(record))
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
   end
@@ -1524,7 +1555,7 @@ defmodule SmolBox.Store.Codec do
   defp decode_native_capture_resolutions(<<@native_capture_resolutions_prefix, payload::binary>>) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- legacy_branch_term(payload),
          record = CodecNativeCaptureCleanup.upgrade(record),
          true <- used == byte_size(payload) and CodecNativeCaptureResolutions.required?(record),
          false <- CodecNativeBranches.required?(record),
@@ -1538,7 +1569,7 @@ defmodule SmolBox.Store.Codec do
   defp decode_native_captures(<<@native_captures_prefix, payload::binary>>) do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
 
-    with {record, used} <- :erlang.binary_to_term(payload, [:safe, :used]),
+    with {record, used} <- legacy_branch_term(payload),
          record = CodecNativeCaptureCleanup.upgrade(record),
          true <- used == byte_size(payload) and CodecNativeCaptures.required?(record),
          false <- CodecNativeBranches.required?(record),

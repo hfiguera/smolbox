@@ -16,6 +16,7 @@ impl Model {
         let request = crate::BranchReleaseRequest {
             operation_id: "released-delete-model".into(),
             request_sha256: "c".repeat(64),
+            env: Vec::new(),
         };
         let release = crate::branch_release::Intent::issue(
             &original.plan.publication,
