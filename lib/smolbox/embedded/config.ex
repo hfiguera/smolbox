@@ -33,11 +33,14 @@ defmodule SmolBox.Embedded.Config do
   descriptor. This option defaults to false. A store must fence domain changes
   while assignments or reservations exist.
 
-  Optional `:bridge` defaults to `:port`. The legacy `:qualification` field uses
-  `:development` for compatibility. `:draining` defaults to false,
+  Optional `:bridge` defaults to `:port`. `:draining` defaults to false,
   `:limits` defaults to `SmolBox.Embedded.Limits`, and `:budget` defaults to a
   24-hour operation budget with 1-MiB request frames and 16-MiB response allowance.
   Profile and remaining operation budgets further constrain individual requests.
+
+  The deprecated `:qualification` option accepts `:development` for compatibility.
+  Omit it in new configurations. Use [Validated configurations](supported-platforms.html#validated-configurations)
+  to assess deployment support.
 
   Optional source/checkpoint/export/branch/volume catalogs and registry credential
   resolution use the shared HTTP approval rules. `:registry_policy` supplies explicit host
@@ -114,7 +117,7 @@ defmodule SmolBox.Embedded.Config do
     :publish_address
   ]
   @enforce_keys @required
-  @derive {Inspect, only: [:id, :bridge, :platform, :architecture, :qualification, :draining]}
+  @derive {Inspect, only: [:id, :bridge, :platform, :architecture, :draining]}
   defstruct @required ++
               [
                 bridge: :port,

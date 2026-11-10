@@ -242,7 +242,8 @@ defmodule SmolBox do
   Read configured workers, cached health and current store admission modes.
 
   Results include configured capacity, allocation floor, platform, architecture,
-  version, qualification and status. Capacity is declared admission capacity,
+  version and status. The deprecated `:qualification` field remains in reports
+  for compatibility. Capacity is declared admission capacity,
   not a live host free-memory/disk measurement. Use `worker_report/2` for live
   utilization and store accounting, or `admission_report/2` to explain a request.
   Store control failures make admission unavailable. Reads run outside the coordinator;

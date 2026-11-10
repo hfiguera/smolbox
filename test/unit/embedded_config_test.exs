@@ -43,6 +43,9 @@ defmodule SmolBox.Embedded.ConfigTest do
     assert :ok = Config.validate(config)
     assert config.bridge == :port
     refute config.allow_initialize
+    assert {:ok, ^config} = Config.new(Keyword.put(options(), :qualification, :development))
+    refute inspect(config) =~ "qualification"
+    refute inspect(Target.normalize(config)) =~ "qualification"
     assert Config.executable(config) == "/nonexistent/approved-native-package/smolbox-port"
 
     assert Config.domain_binding(config) == %{

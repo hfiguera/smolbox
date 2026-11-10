@@ -45,6 +45,29 @@ Use `runtime_version` in `SmolBox.Runtime.WorkerConfig.new/1` to retain an older
 worker. Pin checkpoint approvals to the version that captured them as well.
 Worker installation and upgrades are separate from the Elixir dependency.
 
+## Validated configurations
+
+SmolBox supports production use on documented configurations. The attested
+SmolBox 0.5.1 Embedded Port bundles passed installation, offline execution and
+cleanup on all three published targets. Managed HTTP workers on SmolVM 1.34.0
+support Linux x86_64 and Apple Silicon. The live campaigns also covered the
+following workloads.
+[Release validation](https://github.com/hfiguera/smolbox/releases/tag/v0.5.1)
+· [Live test configurations and results](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/evidence/smolvm-1.34.0-qualification.md)
+
+| Host | HTTP worker | Embedded Port |
+| --- | --- | --- |
+| Linux x86_64 | Runtime and checkpoint recovery with PostgreSQL, held branches, stopped disk growth, persistent volumes, registry warm and export/reimport | Managed terminal I/O and resize, held branches and backing cleanup, checkpoint capture and restore |
+| Linux ARM64 | — | Ordinary VM lifecycle and retained files across graceful helper restart |
+| Apple Silicon | File transfer, terminals, startup workloads, port policy and checkpoints | Disposable and retained VM lifecycle, terminal I/O and resize, checkpoint capture and restore |
+
+Use a durable store when records must survive controller restarts. The Memory
+store is ephemeral. Check the feature guide for its required store capabilities
+and host and source limits. Live Embedded Port crash and independent CLI race
+qualification remain deferred.
+[Persistence and recovery](recovery.md)
+· [Embedded Port qualification scope](embedded-port.md#maintainer-qualification)
+
 ## Host prerequisites
 
 Install the complete matching smolvm distribution; do not combine an agent or VMM

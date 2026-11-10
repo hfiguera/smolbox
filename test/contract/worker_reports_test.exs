@@ -117,7 +117,7 @@ defmodule SmolBox.WorkerReportsTest do
     Agent.update(faults, &Map.merge(&1, %{event: :capacity, phase: :before, fired: false}))
     task = Task.async(fn -> SmolBox.worker_report(fixture.runtime, "peer") end)
     assert_receive {:boundary, :capacity, :before, handler}, 2000
-    assert {:ok, [%{id: "peer"}]} = SmolBox.workers(fixture.runtime)
+    assert {:ok, [%{id: "peer", qualification: :development}]} = SmolBox.workers(fixture.runtime)
     assert :ok = SmolBox.drain_worker(fixture.runtime, "peer")
     assert {:ok, report} = Task.await(task, 3000)
     assert report.capacity_error.category == :transport
