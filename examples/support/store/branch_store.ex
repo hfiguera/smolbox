@@ -24,7 +24,7 @@ defmodule SmolBox.DurableHost.BranchStore do
           do: Map.put(supported, :branch_release_env, 1),
           else: supported
 
-      readers = [
+      native_readers = [
         {:native_collected_branch_publications, CodecNativeCollectedBranchPublications},
         {:native_partial_branch_collections, CodecNativePartialBranchCollections},
         {:native_partial_branch_disposals, CodecNativePartialBranchDisposals},
@@ -34,10 +34,7 @@ defmodule SmolBox.DurableHost.BranchStore do
         {:native_partial_branch_cleanup_resolutions, CodecNativePartialBranchCleanupResolutions}
       ]
 
-      supported =
-        if Code.ensure_loaded?(CodecStaticBranchEgress),
-          do: Map.put(supported, :branch_static_egress, CodecStaticBranchEgress.reader()),
-          else: supported
+      readers = [{:branch_static_egress, CodecStaticBranchEgress} | native_readers]
 
       supported =
         Enum.reduce(
@@ -49,7 +46,7 @@ defmodule SmolBox.DurableHost.BranchStore do
         )
 
       if Code.ensure_loaded?(NativeBranchReleaseOps) and
-           Enum.all?(readers, fn {marker, _reader} -> supported[marker] == 1 end),
+           Enum.all?(native_readers, fn {marker, _reader} -> supported[marker] == 1 end),
          do: Map.put(supported, :native_branches, 1),
          else: supported
     end
