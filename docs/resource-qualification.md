@@ -2,7 +2,7 @@
 
 SmolBox relies on smolvm for VM isolation and on the deployment for host resource
 enforcement. Execution profiles declare guest allocations and controller admission
-reservations; the supported worker qualification remains `:development`.
+reservations.
 The library rejects requested CPU-time, host-RSS,
 process-count and host-disk-byte controls; a matching worker API reply is not
 proof of enforcement. See [Deployment boundaries](security.md) for the division

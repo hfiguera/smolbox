@@ -69,7 +69,7 @@ defmodule SmolBox.EmbeddedObservabilityTest do
       match?({:ok, [%{health: %{inventory: %{total: 0}}}]}, SmolBox.workers(context.runtime))
     end)
 
-    assert {:ok, [worker]} = SmolBox.workers(context.runtime)
+    assert {:ok, [%{qualification: :development} = worker]} = SmolBox.workers(context.runtime)
     assert worker.health.inventory.total == 0
   end
 

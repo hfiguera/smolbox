@@ -83,7 +83,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
     :capacity,
     :allocation_floor
   ]
-  @derive {Inspect, only: [:architecture, :platform, :runtime_version, :qualification]}
+  @derive {Inspect, only: [:architecture, :platform, :runtime_version]}
   defstruct @enforce_keys ++
               [
                 runtime_version: "1.34.0",
@@ -143,9 +143,8 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   Other optional fields are `:runtime_version` (default `"1.34.0"` for Linux x86_64 or
   macOS Apple Silicon; explicitly select `"1.22.0"`, `"1.20.2"`, `"1.19.0"`, `"1.17.0"`, `"1.16.1"`, `"1.16.0"`, `"1.14.1"` or `"1.14.6"`
-  for another supported worker) and `:draining` (default `false`). The legacy
-  `:qualification` field uses `:development` for compatibility. Artifact IDs must be
-  unique and architectures must match this worker. Construction makes no worker
+  for another supported worker) and `:draining` (default `false`). Artifact IDs must
+  be unique and architectures must match this worker. Construction makes no worker
   request or remote digest check. Profiles below the floor cannot support execution.
   Set `:runtime_version` to the version installed on the worker; the library does
   not install or upgrade it. Explicit `"1.34.0"` selection is available for HTTP
@@ -154,6 +153,10 @@ defmodule SmolBox.Runtime.WorkerConfig do
   [Upgrading SmolBox](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/upgrading.md)
   before changing an existing deployment.
   See [Getting started](getting-started.html) for a complete configuration.
+
+  The deprecated `:qualification` option accepts `:development` for compatibility.
+  Omit it in new configurations. Use [Validated configurations](supported-platforms.html#validated-configurations)
+  to assess deployment support.
   """
   @spec new(keyword()) :: {:ok, t()} | {:error, Error.t()}
   def new(options) do

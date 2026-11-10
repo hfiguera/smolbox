@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Document production support by backend, host, feature and store.
+  [Validated configurations](docs/supported-platforms.md#validated-configurations)
+- Deprecate worker `qualification` as a deployment label. Existing
+  `qualification: :development` configuration and worker report fields remain
+  supported for compatibility.
+
 ## 0.5.1
 
 SmolVM **1.34.0** is the default for the HTTP worker, checkpoint approvals and

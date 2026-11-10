@@ -24,8 +24,7 @@ defmodule SmolBox.Runtime.Target do
     :volume_policy,
     :registry_credentials
   ]
-  @derive {Inspect,
-           only: [:kind, :id, :architecture, :platform, :runtime_version, :qualification]}
+  @derive {Inspect, only: [:kind, :id, :architecture, :platform, :runtime_version]}
   defstruct [:kind, :id, :connection, :domain_binding, :native_config] ++ @worker_fields
 
   @type t :: %__MODULE__{}

@@ -96,14 +96,15 @@ persistent machines, commands, a terminal and PostgreSQL recovery. The
 
 ## Deployment and support
 
+SmolBox is ready for production use on documented configurations. Check the
+[validated configurations](docs/supported-platforms.md#validated-configurations)
+for the backend, host, features and storage you plan to deploy.
+
 SmolBox relies on smolvm for VM isolation. Your deployment controls worker access,
 image approval, host resource limits, networking, credentials and storage.
 Admission reservations do not enforce host quotas. Offline networking is the
 default, and retained machines remain until explicitly deleted. Read
 [Deployment boundaries](docs/security.md) before operating workers.
-
-Check the host, toolchain and feature requirements before selecting a backend.
-[Supported platforms](docs/supported-platforms.md)
 
 ## Contributing
 
