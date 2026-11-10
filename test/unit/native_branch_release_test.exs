@@ -72,6 +72,19 @@ defmodule SmolBox.NativeBranchReleaseTest do
              Memory.machine(store, :branch_release, [
                ManagedMachine.key(first),
                first.version,
+               [{"MODE", "first"}],
+               1200
+             ])
+
+    assert pending.branch.native_authority.release.request["env"] == [["MODE", "first"]]
+    assert {:ok, <<"smolbox-record-v51\0", _::binary>> = bytes} = Codec.encode(pending)
+    assert {:ok, ^pending} = Codec.decode(bytes)
+
+    assert {:error, %{category: :identity_conflict}} =
+             Memory.machine(store, :branch_release, [
+               ManagedMachine.key(first),
+               first.version,
+               [{"MODE", "different"}],
                1200
              ])
 
@@ -99,7 +112,7 @@ defmodule SmolBox.NativeBranchReleaseTest do
     assert {:ok, source} = Memory.machine(store, :fetch, [key])
     result = NativeBranchReleaseContract.result(source, sent)
 
-    assert {:ok, _} =
+    assert {:ok, released} =
              NativeBranchReleaseContract.advance(
                Memory,
                store,
@@ -108,6 +121,8 @@ defmodule SmolBox.NativeBranchReleaseTest do
                1202
              )
 
+    assert {:ok, bytes} = Codec.encode(released)
+    assert {:ok, ^released} = Codec.decode(bytes)
     assert {:ok, ^sibling} = Memory.machine(store, :fetch, [ManagedMachine.key(sibling)])
     assert {:ok, ^usage} = Memory.usage(store, source.worker_id)
     assert {:ok, %{active_branch: nil}} = Memory.machine(store, :fetch, [key])

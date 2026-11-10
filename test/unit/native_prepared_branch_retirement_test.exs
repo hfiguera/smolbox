@@ -269,7 +269,10 @@ defmodule SmolBox.NativePreparedBranchRetirementTest do
           |> Map.delete(:delete_collection))
       )
 
-    assert bytes == "smolbox-record-v35\0" <> :erlang.term_to_binary(old)
+    assert bytes ==
+             "smolbox-record-v35\0" <>
+               :erlang.term_to_binary(update_in(old.branch, &Map.delete(&1, :release_env)))
+
     assert {:ok, ^child} = Codec.decode(bytes)
     assert {:error, _} = Codec.decode("smolbox-record-v35\0" <> :erlang.term_to_binary(child))
     stop_supervised!(Memory)

@@ -11,11 +11,26 @@ use std::path::Path;
 pub struct BranchReleaseRequest {
     pub operation_id: String,
     pub request_sha256: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub env: Vec<(String, String)>,
 }
 impl BranchReleaseRequest {
     pub fn validate(&self) -> Result<()> {
         if !crate::domain::valid_id(&self.operation_id)
             || !crate::domain::valid_hex(&self.request_sha256, 64)
+            || self.env.len() > 64
+            || self.env.windows(2).any(|pair| pair[0].0 >= pair[1].0)
+            || self
+                .env
+                .iter()
+                .any(|(key, value)| key.len() > 128 || value.contains('\0'))
+            || self
+                .env
+                .iter()
+                .map(|(key, value)| key.len() + value.len() + 2)
+                .sum::<usize>()
+                > 4096
+            || smolvm::agent::fork::validate_fork_env(&self.env).is_err()
         {
             return Err(Error::before(ErrorCode::Validation));
         }
@@ -82,6 +97,7 @@ impl BranchReleaseTransition {
             || *before != crate::material::root_proof(&origin)?
             || self.change.request.operation_id == self.change.binding.intent.child.operation_id
             || (self.change.mode == Mode::Explicit) != self.change.binding.intent.child.hold
+            || (self.change.mode == Mode::Initial && !self.change.request.env.is_empty())
             || [
                 &self.change.identity_sha256,
                 &self.change.boot_sha256,
@@ -237,8 +253,12 @@ impl Intent {
                 env_dotenv: Some(String::new()),
             },
             Mode::Explicit => smolvm_protocol::AgentRequest::BranchpointActivate {
-                env_dotenv: String::new(),
-                env_sourceable: String::new(),
+                env_dotenv: smolvm::agent::fork::render_fork_env(
+                    &self.transition.change.request.env,
+                ),
+                env_sourceable: smolvm::agent::fork::render_branch_env(
+                    &self.transition.change.request.env,
+                ),
                 env_path: smolvm_protocol::forkpoint::FORK_ENV_PATH.into(),
                 branch_env_path: smolvm_protocol::forkpoint::BRANCH_ENV_PATH.into(),
                 require_dir: None,
@@ -419,6 +439,7 @@ pub(crate) mod tests {
         BranchReleaseRequest {
             operation_id: "release-original-child".into(),
             request_sha256: "e".repeat(64),
+            env: Vec::new(),
         }
     }
     fn intent(model: &crate::branch_boot::tests::IdentityModel) -> Intent {
@@ -515,10 +536,28 @@ pub(crate) mod tests {
     fn exact_agent_protocol_distinguishes_initial_ack_from_explicit_activation_without_retry() {
         for hold in [false, true] {
             let model = identity_model(hold);
-            let intent = intent(&model);
+            let mut request = request();
+            if hold {
+                request.env = vec![("SIDE".into(), "one = 'literal'".into())];
+            }
+            let intent = Intent::issue(
+                &model.plan.publication,
+                &model.record,
+                &model.enrollment,
+                &model.identity_sha256,
+                &request,
+            )
+            .unwrap();
             let socket = model.plan.child.path.join("agent.sock");
             let listener = UnixListener::bind(&socket).unwrap();
             let expected = serde_json::to_value(intent.request()).unwrap();
+            if hold {
+                assert_eq!(expected["env_dotenv"], "SIDE=one = 'literal'\n");
+                assert_eq!(
+                    expected["env_sourceable"],
+                    "export SIDE='one = '\\''literal'\\'''\n"
+                );
+            }
             let response = match intent.transition.change.mode {
                 Mode::Initial => None,
                 Mode::Explicit => Some(serde_json::json!({"already_done": false})),

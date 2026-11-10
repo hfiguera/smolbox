@@ -101,6 +101,7 @@ impl Model {
                     .unwrap_or(crate::BranchReleaseRequest {
                         operation_id: "partial-release-model".into(),
                         request_sha256: "d".repeat(64),
+                        env: Vec::new(),
                     });
                 let intent = crate::branch_release::Intent::issue(
                     &original.publication,

@@ -165,6 +165,7 @@ pub(crate) mod tests {
             initial_release: (!intent.child.hold).then_some(crate::BranchReleaseRequest {
                 operation_id: "initial-activation".into(),
                 request_sha256: "d".repeat(64),
+                env: Vec::new(),
             }),
         };
         let mut request = PreparedBranchRetirementRequest {
@@ -201,6 +202,7 @@ pub(crate) mod tests {
                             Some(crate::BranchReleaseRequest {
                                 operation_id: "unused".into(),
                                 request_sha256: "e".repeat(64),
+                                env: Vec::new(),
                             })
                         } else {
                             None

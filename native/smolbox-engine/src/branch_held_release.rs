@@ -479,16 +479,27 @@ mod tests {
             "../../smolbox-protocol/fixtures/branch-held-release-v1.json"
         ))
         .unwrap();
-        for row in rows {
+        let env_fixture: serde_json::Value = serde_json::from_str(include_str!(
+            "../../smolbox-protocol/fixtures/branch-held-release-env-v1.json"
+        ))
+        .unwrap();
+        for (index, row) in rows.into_iter().enumerate() {
             let completion: crate::BranchCompletion =
                 serde_json::from_value(row["request"]["completion"].clone()).unwrap();
-            let proof: crate::BranchReleaseTransition =
+            let mut proof: crate::BranchReleaseTransition =
                 serde_json::from_value(row["transition"].clone()).unwrap();
             completion.validate().unwrap();
             proof.validate().unwrap();
             assert_eq!(proof.previous, completion.child);
             assert!(proof.change.mode == crate::branch_release::Mode::Explicit);
             assert!(proof.change.binding == completion.publication.change.child_origin);
+            if index == 0 {
+                proof.change.request.env =
+                    serde_json::from_value(env_fixture["env"].clone()).unwrap();
+                proof.receipt.material.as_mut().unwrap().chain_sha256 =
+                    env_fixture["chain_sha256"].as_str().unwrap().into();
+                proof.validate().unwrap();
+            }
         }
     }
 
@@ -496,6 +507,7 @@ mod tests {
         BranchReleaseRequest {
             operation_id: "later-held-release".into(),
             request_sha256: "e".repeat(64),
+            env: Vec::new(),
         }
     }
     // Private file/row/accounting model only; no SDK manager or VMM is created.

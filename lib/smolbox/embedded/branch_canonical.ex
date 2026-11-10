@@ -108,7 +108,7 @@ defmodule SmolBox.Embedded.BranchCanonical do
          "publication" => :publication,
          "release" => :child_release
        }},
-    release_request: {~w(operation_id request_sha256), %{}},
+    release_request: {~w(operation_id request_sha256 env), %{}},
     plan:
       {~w(ordinary_child total_additional minimum_extra_memory_mb minimum_extra_disk_gb),
        %{"ordinary_child" => :resources, "total_additional" => :resources}},
@@ -163,9 +163,17 @@ defmodule SmolBox.Embedded.BranchCanonical do
     %Jason.OrderedObject{values: pairs}
   end
 
-  def digest(value),
-    do:
-      value |> Jason.encode!() |> then(&:crypto.hash(:sha256, &1)) |> Base.encode16(case: :lower)
+  # serde_json uses lowercase hex for JSON control escapes. Consume escaped
+  # backslashes as pairs so a literal backslash followed by "u000B" stays intact.
+  @json_control_escape ~r/\\(?:\\|u00[01][0-9A-F])/
+
+  def digest(value) do
+    value
+    |> Jason.encode!()
+    |> String.replace(@json_control_escape, &String.downcase/1)
+    |> then(&:crypto.hash(:sha256, &1))
+    |> Base.encode16(case: :lower)
+  end
 
   def origin(receipt), do: Map.delete(receipt, "material")
 

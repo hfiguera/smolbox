@@ -426,11 +426,16 @@ impl SdkIdentity {
                     | "checkpoints"
                     | "exports"
                     | "branches"
+                    | "branch_release_env"
                     | "partial_cleanup_resolution"
                     | "partial_collection_preflight"
             ))?;
             require(*version == if feature == "material_proofs" { 2 } else { 1 })?;
         }
+        require(
+            self.feature_versions.get("branch_release_env") != Some(&1)
+                || self.feature_versions.get("branches") == Some(&1),
+        )?;
         require(
             self.feature_versions.get("partial_collection_preflight") != Some(&1)
                 || self.feature_versions.get("branches") == Some(&1),

@@ -28,6 +28,7 @@
       "images": 1,
       "checkpoints": 1,
       "branches": 1,
+      "branch_release_env": 1,
       "partial_collection_preflight": 1,
       "exports": 1
     }

@@ -249,6 +249,7 @@ fn released_stopped_projection_accepts_only_original_pid_or_exact_stopped_row() 
             &crate::BranchReleaseRequest {
                 operation_id: "stop-released-model".into(),
                 request_sha256: "c".repeat(64),
+                env: Vec::new(),
             },
         )
         .unwrap();
@@ -291,6 +292,7 @@ fn released_model(
         &crate::BranchReleaseRequest {
             operation_id: "stop-ack-model".into(),
             request_sha256: "e".repeat(64),
+            env: Vec::new(),
         },
     )
     .unwrap();

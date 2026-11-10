@@ -3,6 +3,29 @@ use crate::*;
 fn rows() -> Vec<serde_json::Value> {
     serde_json::from_str(include_str!("../fixtures/branch-held-release-v1.json")).unwrap()
 }
+
+#[test]
+fn release_proof_hash_preserves_vertical_tab_and_literal_unicode_escape() {
+    let row = &rows()[0];
+    let fixture: serde_json::Value =
+        serde_json::from_str(include_str!("../fixtures/branch-held-release-env-v1.json")).unwrap();
+    let env: Vec<(String, String)> = serde_json::from_value(fixture["env"].clone()).unwrap();
+    assert_eq!(env[0].1, "before\u{b}after");
+    assert_eq!(env[1].1, r"literal\u000B");
+
+    let mut request: BranchHeldReleaseRequest =
+        serde_json::from_value(row["request"].clone()).unwrap();
+    request.request.env = env;
+    let mut proof: BranchReleaseTransition =
+        serde_json::from_value(row["transition"].clone()).unwrap();
+    proof.change.request = request.request.clone();
+    proof.receipt.material.as_mut().unwrap().chain_sha256 =
+        fixture["chain_sha256"].as_str().unwrap().into();
+
+    proof.validate().unwrap();
+    request.matches(&proof).unwrap();
+}
+
 fn hello(request: &BranchHeldReleaseRequest) -> Hello {
     let ServerMessage::Hello { mut hello } = ServerMessage::decode(
         serde_json::from_str(include_str!("../fixtures/hello-v2.json")).unwrap(),
@@ -39,6 +62,43 @@ fn admit(session: &mut Session, h: &Hello, operation: Operation) -> ServerMessag
         })
         .unwrap()
 }
+
+#[test]
+fn release_environment_requires_negotiated_support() {
+    let mut request: BranchHeldReleaseRequest =
+        serde_json::from_value(rows()[0]["request"].clone()).unwrap();
+    request.request.env = vec![("MODE".into(), "one = 'literal'".into())];
+    request.validate().unwrap();
+    let operation = Operation::ReleaseHeldBranch {
+        request: Box::new(request.clone()),
+    };
+    let mut h = hello(&request);
+    let mut session = Session::new(h.clone()).unwrap();
+    session.approve(&h).unwrap();
+    assert!(matches!(
+        admit(&mut session, &h, operation.clone()),
+        ServerMessage::Terminal {
+            outcome: Outcome::Error {
+                code: SafeCode::Unsupported,
+                dispatch: Dispatch::NotDispatched
+            },
+            ..
+        }
+    ));
+
+    h.sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .insert("branch_release_env".into(), 1);
+    let mut session = Session::new(h.clone()).unwrap();
+    session.approve(&h).unwrap();
+    assert!(matches!(
+        admit(&mut session, &h, operation),
+        ServerMessage::Accepted { .. }
+    ));
+}
+
 #[test]
 fn shared_explicit_request_and_transition_preserve_both_platforms_and_finite_budgets() {
     for row in rows() {

@@ -352,9 +352,15 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
        do: version == nil
 
   defp release_version?(%{
-         branch: %{native_authority: %{release: release}, release_version: version}
+         branch: %{
+           native_authority: %{release: release},
+           release_version: version,
+           release_env: env
+         }
        }),
-       do: release.version == version
+       do:
+         release.version == version and
+           Map.get(release.request, "env", []) == Enum.map(env, &Tuple.to_list/1)
 
   defp completed_state?(state, %{release: %NativeBranchRelease{transition: nil}}),
     do: state in [:release_pending, :release_dispatching, :unknown, :resolved, :retired, :closed]

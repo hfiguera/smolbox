@@ -31,6 +31,7 @@ defmodule SmolBox.Embedded.BranchReleaseTransition do
   defp mode?(change),
     do:
       change["mode"] in ~w(initial explicit) and
+        (change["mode"] == "explicit" or not Map.has_key?(change["request"], "env")) and
         change["mode"] == "explicit" == change["binding"]["intent"]["child"]["hold"] and
         change["request"]["operation_id"] !=
           change["binding"]["intent"]["child"]["operation_id"]

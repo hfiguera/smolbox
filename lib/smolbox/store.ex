@@ -312,7 +312,9 @@ defmodule SmolBox.Store do
   the source if child persistence fails. Guarded pair operations validate the
   source guard, recorded relationship and expected child state, never trusting a
   name alone. Release advances use the child's guard and expected branch state.
-  A repeated release with its original submitted version returns stored evidence.
+  A repeated release with its original submitted version and environment returns
+  stored evidence. Advertise `branch_release_env: 1` only after upgrading the
+  codec to read v51 and supporting the four-argument release transaction.
   These transactions must serialize with commands, files, PTYs, capture, export
   and lifecycle admission across controllers sharing the store.
 
@@ -737,7 +739,10 @@ defmodule SmolBox.Store do
               | non_neg_integer()
             ]) :: machine_result()
   @callback machine(context(), :branch_release, [
-              ManagedMachine.key() | pos_integer() | non_neg_integer()
+              ManagedMachine.key()
+              | pos_integer()
+              | [{String.t(), String.t()}]
+              | non_neg_integer()
             ]) :: machine_result()
   @callback machine(context(), :branch_release_advance, [
               ManagedMachine.key()

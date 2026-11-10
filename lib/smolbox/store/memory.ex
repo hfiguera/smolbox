@@ -203,6 +203,7 @@ defmodule SmolBox.Store.Memory do
           native_partial_branch_cleanups: 1,
           native_partial_branch_cleanup_resolutions: 1,
           managed_branches: 1,
+          branch_release_env: 1,
           guest_files: 1,
           interactive_terminal: 1,
           extended_execution: 1
@@ -814,8 +815,12 @@ defmodule SmolBox.Store.Memory do
          do: machine_save(state, c)
   end
 
-  defp machine_operation(state, :branch_release, [key, version, now]) do
-    with {:ok, c} <- machine_lookup(state, key), do: accept_branch_release(state, c, version, now)
+  defp machine_operation(state, :branch_release, [key, version, now]),
+    do: machine_operation(state, :branch_release, [key, version, [], now])
+
+  defp machine_operation(state, :branch_release, [key, version, env, now]) do
+    with {:ok, c} <- machine_lookup(state, key),
+         do: accept_branch_release(state, c, version, env, now)
   end
 
   defp machine_operation(state, :branch_release_advance, [key, guard, expected, change, now]) do
@@ -825,15 +830,21 @@ defmodule SmolBox.Store.Memory do
 
   defp machine_operation(_state, _operation, _arguments), do: error(:validation)
 
-  defp accept_branch_release(state, %{branch: %{native_authority: authority}} = c, version, now)
+  defp accept_branch_release(
+         state,
+         %{branch: %{native_authority: authority}} = c,
+         version,
+         env,
+         now
+       )
        when not is_nil(authority) do
     with {:ok, p} <- machine_lookup(state, c.branch.source),
-         {:ok, p, c} <- NativeBranchReleaseOps.accept(p, c, version, now),
+         {:ok, p, c} <- NativeBranchReleaseOps.accept(p, c, version, env, now),
          do: branch_save(state, p, c)
   end
 
-  defp accept_branch_release(state, c, version, now),
-    do: with({:ok, c} <- BranchOps.release(c, version, now), do: machine_save(state, c))
+  defp accept_branch_release(state, c, version, env, now),
+    do: with({:ok, c} <- BranchOps.release(c, version, env, now), do: machine_save(state, c))
 
   defp advance_branch_release(
          state,

@@ -14,7 +14,7 @@ defmodule SmolBox.Embedded.NativeBranchRelease do
   @derive {Inspect, only: [:version]}
   defstruct @enforce_keys ++ [transition: nil]
 
-  def new(parent, child, version) do
+  def new(parent, child, version, env \\ []) do
     source = parent.observed_machine.backend_identity
     owned = child.observed_machine.backend_identity
     id = "release-" <> Base.encode16(:crypto.strong_rand_bytes(16), case: :lower)
@@ -25,21 +25,26 @@ defmodule SmolBox.Embedded.NativeBranchRelease do
       child: owned.receipt,
       source_pid: source.pid_identity,
       child_pid: owned.pid_identity,
-      request: %{
-        "operation_id" => id,
-        "request_sha256" =>
-          BranchCanonical.digest([
-            "smolbox-explicit-native-branch-release-v1",
-            child.fingerprint,
-            version,
-            id,
-            BranchCanonical.ordered(source.receipt, :receipt),
-            BranchCanonical.ordered(owned.receipt, :receipt),
-            source.pid_identity,
-            owned.pid_identity
-          ])
-      }
+      request:
+        request(id, env, [
+          "smolbox-explicit-native-branch-release-v1",
+          child.fingerprint,
+          version,
+          id,
+          BranchCanonical.ordered(source.receipt, :receipt),
+          BranchCanonical.ordered(owned.receipt, :receipt),
+          source.pid_identity,
+          owned.pid_identity
+        ])
     }
+  end
+
+  defp request(id, [], identity),
+    do: %{"operation_id" => id, "request_sha256" => BranchCanonical.digest(identity)}
+
+  defp request(id, env, identity) do
+    env = Enum.map(env, &Tuple.to_list/1)
+    Map.put(request(id, [], identity ++ [env]), "env", env)
   end
 
   def valid?(%__MODULE__{} = release, %{completion: %BranchCompletion{held: true}} = authority) do

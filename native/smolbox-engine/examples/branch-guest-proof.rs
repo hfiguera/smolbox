@@ -740,6 +740,7 @@ fn release_request(kind: &str) -> ProofResult<BranchReleaseRequest> {
     Ok(BranchReleaseRequest {
         operation_id: format!("{kind}-{}", support::random(12)?),
         request_sha256: support::random(32)?,
+        env: Vec::new(),
     })
 }
 fn backing_request(

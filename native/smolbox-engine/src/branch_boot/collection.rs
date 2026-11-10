@@ -236,6 +236,7 @@ mod tests {
                     Some(crate::BranchReleaseRequest {
                         operation_id: "initial-release-model".into(),
                         request_sha256: "d".repeat(64),
+                        env: Vec::new(),
                     })
                 },
             },

@@ -18,6 +18,7 @@ fn request(model: &crate::branch_boot::tests::IdentityModel) -> BranchCreateRequ
             Some(crate::BranchReleaseRequest {
                 operation_id: "initial-ready-release".into(),
                 request_sha256: "d".repeat(64),
+                env: Vec::new(),
             })
         },
     }
@@ -162,6 +163,7 @@ fn changed_frozen_creation_or_identity_cannot_qualify_an_original_ready_result()
                 changed.initial_release = Some(crate::BranchReleaseRequest {
                     operation_id: "different-release".into(),
                     request_sha256: "d".repeat(64),
+                    env: Vec::new(),
                 });
             }
         }

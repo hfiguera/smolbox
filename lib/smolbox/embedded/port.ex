@@ -858,6 +858,8 @@ defmodule SmolBox.Embedded.Port do
        when name in ~w(release_held_branch qualify_held_branch_release),
        do:
          Features.supports?(config, :branches) and
+           (not Map.has_key?(request["request"], "env") or
+              Features.supports?(config, :branch_release_env)) and
            HeldBranchReleaseRequest.approval(request) in BranchRequest.approvals(config)
 
   defp operation_approved?(config, %{"operation" => name, "request" => request})

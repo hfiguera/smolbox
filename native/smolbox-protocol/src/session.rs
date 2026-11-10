@@ -120,6 +120,15 @@ impl Session {
                     && self.hello.sdk.as_ref().is_none_or(|sdk| {
                         sdk.feature_versions.get("partial_collection_preflight") != Some(&1)
                     }))
+                || (matches!(&operation,
+                    Operation::ReleaseHeldBranch { request }
+                    | Operation::QualifyHeldBranchRelease { request }
+                    if !request.request.env.is_empty()
+                ) && self
+                    .hello
+                    .sdk
+                    .as_ref()
+                    .is_none_or(|sdk| sdk.feature_versions.get("branch_release_env") != Some(&1)))
                 || (operation.requires_branches()
                     && (self.hello.major != 2
                         || self

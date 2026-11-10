@@ -7,11 +7,17 @@ defmodule SmolBox.Branch do
   lineage attestation. Namespace exclusivity remains required; an unknown child
   without a recorded creation response is never adopted by name.
   """
-  alias SmolBox.{BranchSpec, Error, ManagedMachine, Validation}
+  alias SmolBox.{BranchReleaseEnv, BranchSpec, Error, ManagedMachine, Validation}
   alias SmolBox.Embedded.NativeBranchAuthority
   @enforce_keys [:source, :source_machine, :spec, :accepted_at_ms, :deadline_ms]
   defstruct @enforce_keys ++
-              [state: :accepted, release_version: nil, retired_at_ms: nil, native_authority: nil]
+              [
+                state: :accepted,
+                release_version: nil,
+                release_env: [],
+                retired_at_ms: nil,
+                native_authority: nil
+              ]
 
   @type state ::
           :accepted
@@ -40,6 +46,7 @@ defmodule SmolBox.Branch do
           deadline_ms: non_neg_integer(),
           state: state(),
           release_version: pos_integer() | nil,
+          release_env: [{String.t(), String.t()}],
           retired_at_ms: non_neg_integer() | nil
         }
   @states [
@@ -74,9 +81,7 @@ defmodule SmolBox.Branch do
          true <- b.state in @states and disposal_state?(b),
          true <- Validation.timestamp?(b.accepted_at_ms) and Validation.timestamp?(b.deadline_ms),
          true <- b.deadline_ms >= b.accepted_at_ms + b.spec.timeout_ms,
-         true <-
-           b.release_version == nil or
-             Validation.integer?(b.release_version, 1, 9_007_199_254_740_991),
+         true <- release?(b),
          true <- b.retired_at_ms == nil or Validation.timestamp?(b.retired_at_ms),
          true <- b.state in [:retired, :backing_pending, :closed] == (b.retired_at_ms != nil),
          do: :ok,
@@ -84,6 +89,13 @@ defmodule SmolBox.Branch do
   end
 
   def validate(_), do: invalid()
+
+  defp release?(%{release_version: nil, release_env: env}), do: env == []
+
+  defp release?(b),
+    do:
+      Validation.integer?(b.release_version, 1, 9_007_199_254_740_991) and
+        BranchReleaseEnv.valid?(b.release_env) and (b.release_env == [] or b.spec.hold)
 
   defp disposal_state?(%{
          state: :disposal_cleanup_pending,

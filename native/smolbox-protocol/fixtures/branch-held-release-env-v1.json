@@ -1,0 +1,7 @@
+{
+  "chain_sha256": "c1149362393a0e81994cae2b96df9b95e4cf5e0e75c740fc0522b401c695cd84",
+  "env": [
+    ["MODE", "before\u000bafter"],
+    ["TEXT", "literal\\u000B"]
+  ]
+}

@@ -282,6 +282,7 @@ mod tests {
                             Some(BranchReleaseRequest {
                                 operation_id: "unused-release".into(),
                                 request_sha256: "d".repeat(64),
+                                env: Vec::new(),
                             })
                         } else {
                             None
