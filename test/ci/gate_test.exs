@@ -55,7 +55,7 @@ defmodule SmolBox.CI.GateTest do
     root = Path.expand("../..", __DIR__)
 
     for {scope, command, job} <- [
-          {:ci, "required", "smolbox-tests"},
+          {:ci, "required", "smolbox-coverage"},
           {:runtime, "runtime-required", "smolbox-linux-runtime"}
         ],
         {status, expected} <- [{"success", 0}, {"skipped", 1}] do

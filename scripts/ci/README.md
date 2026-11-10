@@ -1,8 +1,9 @@
 # SmolBox CI infrastructure contract
 
 `SmolBox CI` (`smolbox-ci.yml`) runs quality, deterministic, durable-store and
-package checks on disposable hosted runners for every push and pull request.
-It can also be dispatched manually. It contains no real-worker jobs.
+package checks on disposable hosted runners for pushes to `main` and pull
+requests. A newer run cancels any in-progress CI for the same pull request.
+The workflow also supports manual dispatch.
 
 The required `smolbox-native` Linux lane runs the verified SDK bootstrap,
 source-integrity checks, workspace formatting, Rust tests, Clippy and Rustdoc
@@ -11,10 +12,18 @@ remain pinned; this maintainer CI requirement does not add Rust, native assets o
 a hypervisor to HTTP-only or prebuilt Port package consumption. Live platform
 qualification and distributable signing remain separate gates.
 
+The native job restores `sccache` compiler outputs as one archive keyed by the
+runner platform, Rust toolchain, and native dependency inputs. Main and manual
+runs can populate the cache, and pull requests read from it. Every run executes
+the full `native/check.sh` script, including source verification.
+
 Main CI and the blog workflow use Elixir 1.20.5 with OTP 29.1.2, matching
 `.tool-versions`. Compatibility jobs use Elixir 1.18.4/OTP 27.3.4.15,
 Elixir 1.19.5/OTP 28.5 and Elixir 1.20.4/OTP 28.5. Main CI cache keys include
 the exact toolchain versions to separate builds and PLTs across upgrades.
+The coverage job runs the primary test suite and enforces its coverage floor.
+The quality canaries job runs Dialyzer on the project before checking the
+analyzers against fixture projects.
 
 The protected live worker workflow and the runtime qualification gate use
 Elixir 1.20.4 with OTP 29.0.6.
