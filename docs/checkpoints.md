@@ -254,4 +254,4 @@ filename does not determine format compatibility; metadata and the exact capture
 runtime still have to match the approval.
 
 See [Supported platforms](supported-platforms.md) for current worker selection
-and [Testing reports](testing.md) for recorded checks and their limits.
+and [Testing reports](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/testing.md) for recorded checks and their limits.

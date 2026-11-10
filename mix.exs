@@ -2,7 +2,7 @@ defmodule SmolBox.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/hfiguera/smolbox"
-  @version "0.5.1-rc.1"
+  @version "0.5.1"
 
   def project do
     [
@@ -103,6 +103,7 @@ defmodule SmolBox.MixProject do
         groups_for_extras: [
           "Start here": [
             "README.md",
+            "docs/embedded-quickstart.md",
             "docs/getting-started.md",
             "docs/supported-platforms.md"
           ],
@@ -111,7 +112,6 @@ defmodule SmolBox.MixProject do
             "docs/persistent-machines.md",
             "docs/client.md",
             "docs/embedded-port.md",
-            "docs/embedded-quickstart.md",
             "docs/images-and-registry-artifacts.md",
             "docs/workloads.md",
             "docs/long-running-exec.md",
@@ -135,40 +135,6 @@ defmodule SmolBox.MixProject do
             "docs/disk-expansion.md",
             "docs/telemetry.md",
             "docs/security.md"
-          ],
-          "Upgrades and compatibility": [
-            "docs/upgrading.md"
-          ],
-          "Upgrade history": [
-            "docs/upgrading-within-0.1.x.md",
-            "docs/upgrading-to-0.2.0.md",
-            "docs/upgrading-to-0.2.1.md",
-            "docs/upgrading-to-0.3.0.md",
-            "docs/upgrading-to-0.3.1.md",
-            "docs/upgrading-to-0.4.0.md",
-            "docs/upgrading-to-0.4.1.md",
-            "docs/upgrading-to-0.4.2.md",
-            "docs/upgrading-to-0.4.3.md"
-          ],
-          "Testing reports": [
-            "docs/testing.md",
-            "docs/compatibility.md",
-            "docs/persistent-machines-validation.md",
-            "docs/port-mappings-validation.md",
-            "docs/long-running-exec-validation.md",
-            "docs/interactive-terminals-validation.md",
-            "docs/workloads-validation.md",
-            "docs/guest-files-validation.md",
-            "docs/images-and-registry-artifacts-validation.md",
-            "docs/network-access-validation.md",
-            "docs/worker-measurements-validation.md",
-            "docs/worker-draining-validation.md",
-            "docs/resource-qualification.md",
-            "docs/provisioning-performance.md",
-            "docs/runtime-1.22.0-qualification.md",
-            "docs/runtime-1.20.2-qualification.md",
-            "docs/runtime-1.19.0-qualification.md",
-            "docs/runtime-1.17.0-qualification.md"
           ]
         ],
         groups_for_modules: [
@@ -262,13 +228,13 @@ defmodule SmolBox.MixProject do
         ],
         extras: [
           "README.md",
+          "docs/embedded-quickstart.md",
           "docs/getting-started.md",
           "docs/supported-platforms.md",
           {"docs/host-integration.md", title: "Host integration"},
           {"docs/persistent-machines.md", title: "Persistent machines"},
           "docs/client.md",
           "docs/embedded-port.md",
-          "docs/embedded-quickstart.md",
           "docs/images-and-registry-artifacts.md",
           {"docs/workloads.md", title: "Startup workloads"},
           {"docs/long-running-exec.md", title: "Long commands"},
@@ -287,35 +253,7 @@ defmodule SmolBox.MixProject do
           "docs/worker-draining.md",
           {"docs/disk-expansion.md", title: "Disk expansion"},
           {"docs/telemetry.md", title: "Telemetry"},
-          {"docs/security.md", title: "Deployment boundaries"},
-          "docs/upgrading.md",
-          "docs/upgrading-within-0.1.x.md",
-          "docs/upgrading-to-0.2.0.md",
-          "docs/upgrading-to-0.2.1.md",
-          "docs/upgrading-to-0.3.0.md",
-          "docs/upgrading-to-0.3.1.md",
-          "docs/upgrading-to-0.4.0.md",
-          "docs/upgrading-to-0.4.1.md",
-          "docs/upgrading-to-0.4.2.md",
-          "docs/upgrading-to-0.4.3.md",
-          "docs/testing.md",
-          "docs/compatibility.md",
-          {"docs/persistent-machines-validation.md", title: "Persistent machine tests"},
-          {"docs/port-mappings-validation.md", title: "Port mapping tests"},
-          {"docs/long-running-exec-validation.md", title: "Long command tests"},
-          {"docs/interactive-terminals-validation.md", title: "Terminal tests"},
-          {"docs/workloads-validation.md", title: "Startup workload tests"},
-          {"docs/guest-files-validation.md", title: "Guest file tests"},
-          {"docs/images-and-registry-artifacts-validation.md", title: "Image and registry tests"},
-          {"docs/network-access-validation.md", title: "Network access tests"},
-          {"docs/worker-measurements-validation.md", title: "Measurement and capacity tests"},
-          {"docs/worker-draining-validation.md", title: "Worker draining tests"},
-          {"docs/resource-qualification.md", title: "Resource and deployment tests"},
-          {"docs/provisioning-performance.md", title: "Provisioning measurements"},
-          "docs/runtime-1.22.0-qualification.md",
-          "docs/runtime-1.20.2-qualification.md",
-          "docs/runtime-1.19.0-qualification.md",
-          "docs/runtime-1.17.0-qualification.md"
+          {"docs/security.md", title: "Deployment boundaries"}
         ]
       ],
       dialyzer: [

@@ -1,8 +1,8 @@
 # Embedded Port setup and operation
 
-The embedded Port bridge is available for development through the public
-`SmolBox.Runtime` API. A separately approved helper runs locally under Elixir
-supervision. Existing HTTP workers can be used in the same Runtime.
+The Embedded Port backend runs a locally approved helper under Elixir
+supervision through `SmolBox.Runtime`. A Runtime can use Embedded Port and
+HTTP workers together.
 
 The public installer provides the attested SmolVM 1.34.0 bundle for Apple
 Silicon, Linux x86_64 and Linux ARM64. The helper and its assets install
@@ -10,8 +10,8 @@ separately from the Elixir package. [Embedded Port quickstart](embedded-quicksta
 
 For an HTTP-only application, follow the [Getting started guide](getting-started.md).
 
-HTTP feature parity is in progress. Current protocol-2 helpers advertise their
-supported features in the approved package manifest. Linux x86-64 and macOS
+Protocol-2 helpers advertise their supported features in the approved package
+manifest. Linux x86-64 and macOS
 Apple Silicon packages have scoped evidence for remote sources, networking,
 managed terminals, checkpoints, branches and exports. Managed volumes and
 stopped disk growth have Linux qualification. Use the package and feature
@@ -570,7 +570,7 @@ the helper, libraries, root filesystem, disk templates and manifest. Consumers d
 not need Rust. Maintainers build it with `native/package.py` from the verified SDK
 source described in `native/vendor/source.json`.
 
-The [quickstart preview](embedded-quickstart.md) includes Linux ARM64 with
+The [quickstart](embedded-quickstart.md) includes Linux ARM64 with
 accessible `/dev/kvm`, alongside Linux x86_64 and macOS ARM64. The broader
 feature evidence on this page applies to its recorded package and host.
 Prepare approved offline `.smolmachine` artifacts and the manifest's
@@ -615,7 +615,7 @@ example at `examples/embedded_port/config.example.exs` validates this configurat
 without launching a helper. Pass the resulting target in the Runtime `:workers`
 list to launch the Port bridge.
 
-## Supported development surface
+## Supported operations
 
 | Operation | Qualification scope |
 | --- | --- |
@@ -1163,10 +1163,10 @@ The unmodified SDK requires one cooperating owner for the dedicated domain;
 independent SDK/CLI writers and simultaneous Port/Rustler owners are unsupported.
 Crash and destructive CLI-race validation remain deferred.
 
-The public development flow is covered by ordinary lifecycle qualification.
-The 1.34.0 prerelease passed public installer and source delivery checks on all
-three targets. Production crash and independent CLI race validation remain
-deferred. [1.34.0 qualification](evidence/smolvm-1.34.0-qualification.md)
+The 1.34.0 qualification covered ordinary lifecycle, public installation and
+source delivery. Follow the documented recovery procedure for uncertain
+operations, and keep independent SDK or CLI writers out of the enrolled domain.
+[1.34.0 qualification](evidence/smolvm-1.34.0-qualification.md)
 
 Store readers also recognize selective v19 typed native OCI and registry creation intent and
 retained image-pull records. Upgrade every reader and reservation writer before

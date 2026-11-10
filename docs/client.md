@@ -10,7 +10,7 @@ for its architecture and start a private `smolvm serve` endpoint. For bounded
 small-file workloads, set `SMOLVM_FILE_TRANSFER_MAX_BYTES=1048576` before starting
 the server. Check [host prerequisites](supported-platforms.md#host-prerequisites),
 including `resize2fs`, before requesting disks below the worker's template sizes.
-For an existing deployment, follow [Upgrading SmolBox](upgrading.md).
+For an existing deployment, follow [Upgrading SmolBox](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/upgrading.md).
 
 ```elixir
 {:ok, worker} = SmolBox.Worker.new("worker-1", "https://worker.internal.example",
@@ -21,7 +21,7 @@ For an existing deployment, follow [Upgrading SmolBox](upgrading.md).
 
 Remote workers require an authenticated TLS proxy. The operator supplies it;
 SmolBox supplies no public worker service. TLS peer and hostname verification
-cannot be disabled. Loopback development requires `allow_insecure_loopback: true`.
+cannot be disabled. HTTP loopback connections require `allow_insecure_loopback: true`.
 A local Unix socket can instead use `unix_socket: "/private/run/smolvm.sock"`
 with `http://localhost`. Client construction makes no network request.
 
@@ -207,7 +207,7 @@ do not by themselves establish the same behavior through the HTTP API.
 The released templates measured 20/10 GiB. Validate them and any larger artifact
 templates before setting `allocation_floor`; do not infer physical disk capacity
 from a smaller create request or initially sparse files. Keep preparation caches
-under a separate host budget. See [resource qualification](resource-qualification.md).
+under a separate host budget. See [resource qualification](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/resource-qualification.md).
 
 Start a separately provisioned private worker with the tested file cap:
 

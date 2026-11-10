@@ -141,5 +141,5 @@ across the worker; these APIs never call it.
 
 Field availability and metric accuracy depend on the worker and host. Passing
 decoder tests does not establish live counter accuracy or hard resource enforcement.
-See [Measurements and worker capacity tests](worker-measurements-validation.md)
+See [Measurements and worker capacity tests](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/worker-measurements-validation.md)
 for simulated checks, the recorded Linux run and its unavailable counters.

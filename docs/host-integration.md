@@ -6,7 +6,7 @@ durable storage and worker configuration. Constructor options are documented in
 `SmolBox.child_spec/1` and `SmolBox.Runtime.WorkerConfig.new/1`.
 
 Use [Supported platforms](supported-platforms.md) to select a worker and
-[Upgrading SmolBox](upgrading.md) for an existing deployment. Worker installation
+[Upgrading SmolBox](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/upgrading.md) for an existing deployment. Worker installation
 is separate from the library dependency. Read [Deployment boundaries](security.md)
 for access controls and host resource limits; this guide does not install them.
 See [Telemetry](telemetry.md) for lifecycle observations and operator inspection.
@@ -86,7 +86,7 @@ Set `runtime_version` to the version installed on the worker. This example uses 
 matching Getting Started. See
 [Supported platforms](supported-platforms.md#worker-hosts-and-versions)
 for other selectable versions and their feature limits, or [Upgrading
-SmolBox](upgrading.md) when changing an existing deployment. This is a host
+SmolBox](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/upgrading.md) when changing an existing deployment. This is a host
 configuration fragment, not a self-provisioning script. The host must verify artifact
 bytes on the worker and retain that immutable artifact. This disposable execution setup
 requires neutral `/bin/true` startup and no automatic workload restart. Retained image
@@ -353,7 +353,7 @@ Use your installed version instead of the example value. See
 [Supported platforms](supported-platforms.md#worker-hosts-and-versions) for the
 exact selectable versions and feature limits. A version mismatch prevents new
 execution; health checks require an exact match without fallback.
-Follow [Upgrading SmolBox](upgrading.md) separately for controller and store
+Follow [Upgrading SmolBox](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/upgrading.md) separately for controller and store
 changes, including checkpoint compatibility. Pinning a worker does not upgrade
 stored records or convert checkpoints.
 

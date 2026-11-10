@@ -200,8 +200,8 @@ The example requests 2 GiB storage and 2 GiB overlay and needs a prepared image
 qualified for these sizes plus a working worker `resize2fs`. Use dedicated test
 ports and a private database partition. Do not run it against an unrelated service.
 
-See [validation evidence](port-mappings-validation.md) for the tested platforms,
+See [validation evidence](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/port-mappings-validation.md) for the tested platforms,
 source/runtime identities, initial failures and cleanup.
 
 See [Supported platforms](supported-platforms.md) for current worker selection
-and [Testing reports](testing.md) for recorded checks and their limits.
+and [Testing reports](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/testing.md) for recorded checks and their limits.

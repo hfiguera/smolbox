@@ -6,7 +6,7 @@ defmodule SmolBox.Embedded.Config do
   launching a helper, or probing a hypervisor. Runtime startup must separately
   verify the package and approve its exact handshake before admitting work.
   Pass the validated configuration in `SmolBox.child_spec/1`'s `:workers` option
-  to start the development Port backend. This constructor alone starts no helper.
+  to start the Port backend. This constructor alone starts no helper.
   A runtime supports one embedded domain per BEAM node alongside HTTP workers;
   startup requires store backend-binding, recovery and managed-machine support.
 
@@ -33,8 +33,8 @@ defmodule SmolBox.Embedded.Config do
   descriptor. This option defaults to false. A store must fence domain changes
   while assignments or reservations exist.
 
-  Optional `:bridge` defaults to `:port`; Rustler remains an additive future
-  bridge. `:qualification` is `:development`, `:draining` defaults to false,
+  Optional `:bridge` defaults to `:port`. The legacy `:qualification` field uses
+  `:development` for compatibility. `:draining` defaults to false,
   `:limits` defaults to `SmolBox.Embedded.Limits`, and `:budget` defaults to a
   24-hour operation budget with 1-MiB request frames and 16-MiB response allowance.
   Profile and remaining operation budgets further constrain individual requests.

@@ -1,8 +1,9 @@
-# Getting started
+# Getting started with an HTTP worker
 
 Run a Python program in a disposable VM, read `42` from its output file, and
-wait for the VM to be deleted. You can use the downloadable Livebook or a Mix
-application. Both run the same example with SmolBox **0.4.3** and smolvm **1.22.0**.
+wait for the VM to be deleted. The Mix example uses SmolBox **0.5.1** and
+SmolVM **1.34.0**. The downloadable Livebook has its own pins to SmolBox 0.4.3
+and SmolVM 1.22.0.
 
 Choose one path before preparing the worker:
 
@@ -22,10 +23,10 @@ read it. A different port or `SMOLVM_DATA_DIR` does not isolate macOS worker sta
 
 This is a local demo with an in-memory store. See
 [Supported platforms](supported-platforms.md#host-prerequisites) for host
-requirements. Existing deployments should use [Upgrading SmolBox](upgrading.md).
+requirements. Existing deployments should use [Upgrading SmolBox](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/upgrading.md).
 
 For local execution through a supervised helper, see the
-[Embedded Port quickstart preview](embedded-quickstart.md).
+[Embedded Port quickstart](embedded-quickstart.md).
 
 ## Open the Livebook
 
@@ -44,22 +45,22 @@ The Mix steps below are the alternative path; the notebook includes its own setu
 
 ## 1. Install smolvm and SmolBox
 
-### Install smolvm 1.22.0
+### Install smolvm 1.34.0
 
-If `smolvm --version` already reports `1.22.0`, skip installation. Otherwise,
-run the [upstream installer from the 1.22.0 release](https://github.com/smol-machines/smolvm/blob/v1.22.0/scripts/install.sh)
+If `smolvm --version` already reports `1.34.0`, skip installation. Otherwise,
+run the [upstream installer from the 1.34.0 release](https://github.com/smol-machines/smolvm/blob/v1.34.0/scripts/install.sh)
 in a Bash terminal as your normal user, with `curl` and `tar` available:
 
 ```bash
 SMOLBOX_INSTALLER="$(mktemp)"
-curl -fsSL https://raw.githubusercontent.com/smol-machines/smolvm/v1.22.0/scripts/install.sh \
+curl -fsSL https://raw.githubusercontent.com/smol-machines/smolvm/v1.34.0/scripts/install.sh \
   -o "$SMOLBOX_INSTALLER" &&
-  bash "$SMOLBOX_INSTALLER" --version 1.22.0
+  bash "$SMOLBOX_INSTALLER" --version 1.34.0
 export PATH="$HOME/.local/bin:$PATH"
 smolvm --version
 ```
 
-Continue only when the version reports `1.22.0`. The installer selects the host
+Continue only when the version reports `1.34.0`. The installer selects the host
 distribution and installs its matching libraries, agent and disk templates.
 It replaces the smolvm installation for this account. To preserve a different
 installed version, use a separate account or follow
@@ -73,7 +74,7 @@ test -r /dev/kvm && test -w /dev/kvm && echo "KVM access ready"
 
 If the check does not print `KVM access ready`, resolve KVM availability and
 permissions before preparing the image. See the
-[upstream platform requirements](https://github.com/smol-machines/smolvm/blob/v1.22.0/README.md#platform-support)
+[upstream platform requirements](https://github.com/smol-machines/smolvm/blob/v1.34.0/README.md#platform-support)
 and [host prerequisites](supported-platforms.md#host-prerequisites).
 
 ### Install the Elixir dependency
@@ -82,7 +83,7 @@ Run `mix new smolbox_demo`, enter that directory, and add the following to `deps
 in `mix.exs`. Then run `mix deps.get`.
 
 ```elixir
-{:smolbox, "~> 0.4.3"}
+{:smolbox, "~> 0.5.1"}
 ```
 
 ## 2. Prepare one local worker
@@ -102,7 +103,7 @@ Preparation downloads Python; the demo guest later runs offline.
 
 For Linux, run these commands in **Bash on the worker host**, inside your Nix
 development shell if applicable. macOS users should use the separate recipe below.
-`smolvm --version` should report `1.22.0`. Use a new directory for the image, worker
+`smolvm --version` should report `1.34.0`. Use a new directory for the image, worker
 state and demo output:
 
 ```bash
@@ -194,7 +195,7 @@ if this check fails.
 
 This section continues the Mix application path. For Livebook, use the complete
 [notebook](notebooks/getting-started.livemd) instead. Recorded checks are available
-separately in [Testing reports](testing.md#feature-checks).
+separately in [Testing reports](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/testing.md#feature-checks).
 
 In your application's terminal, set the directory printed in step 2 and its
 approved digest:
@@ -202,7 +203,7 @@ approved digest:
 ```bash
 export SMOLBOX_DEMO_ROOT=/absolute/path/printed/in_step_2
 export SMOLBOX_RUNTIME_URL=http://127.0.0.1:19471
-export SMOLBOX_RUNTIME_VERSION=1.22.0
+export SMOLBOX_RUNTIME_VERSION=1.34.0
 export SMOLBOX_PYTHON_ARTIFACT="$SMOLBOX_DEMO_ROOT/images/python.smolmachine"
 export SMOLBOX_PYTHON_SHA256=paste_the_sha256_printed_in_step_2
 export SMOLBOX_DEMO_DIR="$SMOLBOX_DEMO_ROOT/objects"
@@ -251,7 +252,7 @@ worker_options =
   Worker.new("demo-worker", System.fetch_env!("SMOLBOX_RUNTIME_URL"), worker_options)
 
 {:ok, client} = SmolBox.Client.new(worker)
-runtime_version = System.get_env("SMOLBOX_RUNTIME_VERSION", "1.22.0")
+runtime_version = System.get_env("SMOLBOX_RUNTIME_VERSION", "1.34.0")
 {:ok, %{version: ^runtime_version}} = SmolBox.Client.health(client)
 :ok = SmolBox.Client.readiness(client)
 case SmolBox.Client.list(client) do

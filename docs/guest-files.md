@@ -229,7 +229,7 @@ configuration file, executes with that cwd, and collects/verifies the binary.
 machine and policy, reads the files, stops/starts, reads again, then explicitly
 deletes and verifies absence and released reservations. The `delete` phase is
 available for explicit cleanup of an interrupted demonstration. Test coverage and
-real-worker receipts are in [validation](guest-files-validation.md).
+real-worker receipts are in [validation](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/guest-files-validation.md).
 
 See [Supported platforms](supported-platforms.md) for current worker selection
-and [Testing reports](testing.md) for recorded checks and their limits.
+and [Testing reports](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/testing.md) for recorded checks and their limits.
