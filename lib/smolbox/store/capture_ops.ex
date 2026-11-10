@@ -42,8 +42,7 @@ defmodule SmolBox.Store.CaptureOps do
       2 * (profile.storage_gb + profile.overlay_gb) + div(profile.memory_mb + 1023, 1024) +
         div(spec.policy.max_bytes + 1_073_741_823, 1_073_741_824)
 
-    with true <- m.branch == nil and SmolBox.Branch.children_retired?(m),
-         true <- m.state == :running and ManagedMachine.idle?(m) and m.spec.checkpointable,
+    with true <- capture_eligible?(m),
          true <- map_size(m.captures) < 256,
          true <- id_available?(m, spec.id),
          true <- needed.disk_gb >= disk_floor and needed.memory_mb >= profile.memory_mb,
@@ -73,6 +72,11 @@ defmodule SmolBox.Store.CaptureOps do
       _ -> error(:admission_exhausted)
     end
   end
+
+  defp capture_eligible?(m),
+    do:
+      m.branch == nil and SmolBox.Branch.children_retired?(m) and m.state == :running and
+        ManagedMachine.idle?(m) and m.spec.checkpointable and m.spec.profile.network == :offline
 
   defp capture_source(m) do
     if native?(m) do

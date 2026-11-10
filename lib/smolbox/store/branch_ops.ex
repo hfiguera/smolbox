@@ -344,6 +344,24 @@ defmodule SmolBox.Store.BranchOps do
   defp release_step(c, :dispatching, now) when c.branch.state == :release_pending,
     do: update(c, :release_dispatching, %{phase: :dispatching}, now)
 
+  defp release_step(c, :credential_unavailable, now)
+       when c.branch.state == :release_dispatching and c.spec.profile.network != :offline do
+    {:error, error} = SmolBox.BranchHTTPSCredentials.unavailable()
+
+    update(
+      %{c | branch: %{c.branch | release_version: nil, release_env: []}},
+      :held,
+      %{
+        operation: nil,
+        phase: nil,
+        operation_deadline_ms: nil,
+        last_error: error,
+        next_due_at_ms: now + 60_000
+      },
+      now
+    )
+  end
+
   defp release_step(c, {:complete, observed}, now) when c.branch.state == :release_dispatching do
     if observed.state == :running and Machine.same_incarnation?(c.created_machine, observed),
       do:

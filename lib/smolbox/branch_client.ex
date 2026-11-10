@@ -1,9 +1,10 @@
 defmodule SmolBox.BranchClient do
   @moduledoc false
-  alias SmolBox.{Client, Error, Machine}
+  alias SmolBox.{BranchHTTPSCredentials, Client, Error, Machine}
 
   def source(client, parent) do
-    with {:ok, observed} <- Client.checkpoint_preflight(client, parent.machine_name),
+    with {:ok, observed} <-
+           Client.checkpoint_preflight(client, parent.machine_name, parent.spec.profile.network),
          true <- Machine.same_incarnation?(parent.created_machine, observed),
          do: {:ok, observed},
          else: (
@@ -34,9 +35,33 @@ defmodule SmolBox.BranchClient do
     mutate(client, child.machine_name <> "/branch-release", %{"env" => env}, child, false)
   end
 
+  def install_https_credential(client, child, token) do
+    if BranchHTTPSCredentials.secure_transport?(client.worker) do
+      case client.transport.request(client.worker, %{
+             method: :put,
+             path: "/api/v1/machines/" <> child.machine_name <> "/credential-values",
+             body: Jason.encode!(BranchHTTPSCredentials.values(token)),
+             content_type: "application/json",
+             accept: "*/*",
+             max_bytes: 1,
+             expected_status: 204,
+             mode: :empty
+           }) do
+        {:ok, ""} -> :ok
+        _ -> error(:authentication, :dispatch_uncertain)
+      end
+    else
+      BranchHTTPSCredentials.unavailable()
+    end
+  rescue
+    _ -> BranchHTTPSCredentials.unavailable()
+  catch
+    _, _ -> BranchHTTPSCredentials.unavailable()
+  end
+
   def inspect_child(client, child, held) do
     with {:ok, raw} <- request(client, :get, child.machine_name, nil),
-         {:ok, observed} <- observation(raw, child.machine_name, held),
+         {:ok, observed} <- observation(raw, child, held),
          true <-
            child.created_machine != nil and
              Machine.same_incarnation?(child.created_machine, observed),
@@ -57,7 +82,7 @@ defmodule SmolBox.BranchClient do
 
   defp mutate(client, suffix, wire, child, held) do
     with {:ok, body} <- request(client, :post, suffix, wire),
-         {:ok, observed} <- observation(body, child.machine_name, held),
+         {:ok, observed} <- observation(body, child, held),
          do: {:ok, observed},
          else: (_ -> error(:unknown, :dispatch_uncertain))
   end
@@ -81,11 +106,15 @@ defmodule SmolBox.BranchClient do
          )
   end
 
-  defp observation(raw, name, held) when is_map(raw) do
+  defp observation(raw, child, held) when is_map(raw) do
+    name = child.machine_name
+    network = child.spec.profile.network
+
     with true <-
            raw["image"] in [nil, ""] and raw["branchable"] == false and
-             raw["branchpointHeld"] == held,
-         {:ok, %{name: ^name, state: :running, network: :offline, ports: []} = m} <-
+             raw["branchpointHeld"] == held and
+             (network == :offline or raw["parentMachine"] == child.branch.source_machine.name),
+         {:ok, %{name: ^name, state: :running, network: ^network, ports: []} = m} <-
            Machine.from_wire(raw),
          do: {:ok, m},
          else: (_ -> error(:protocol, :dispatch_uncertain))

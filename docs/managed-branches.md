@@ -5,16 +5,18 @@ memory and disks. Prepare once, then give separate tasks their own copies. Chang
 to one child's guest memory or disks do not change its siblings or source.
 
 This contract supports **idle, offline bare guests on smolvm 1.19.0, 1.20.2, 1.22.0 or 1.34.0**, on the
-source's worker. It creates one leaf child per request. It does not add nested
-branches, source freezing, migration, branch pools, network restoration or arbitrary
-application cloning. A branch is a managed machine, not a Git branch or a portable
+source's worker. An opt-in HTTP configuration on 1.34.0 also supports held children
+with a credential for one approved HTTPS host. It creates one leaf child per request.
+It does not add nested branches, source freezing, migration, branch pools, network
+restoration or arbitrary application cloning. A branch is a managed machine, not a
+Git branch or a portable
 artifact. Use [exports](machine-exports.md) for supported disk artifacts and
 [checkpoints](managed-checkpoints.md) for explicit saved memory and independent restore.
 
 ## Prepare and approve
 
 Create a source with `checkpointable: true` in `SmolBox.ManagedMachineSpec`, then
-start it. The source must have offline networking, no ports or startup workload,
+start it. The source defaults to offline networking and must have no ports or startup workload,
 and an approved local bare artifact or checkpoint. Checkpointable startup uses
 upstream's branchable mode. Finish preparation commands before branching.
 
@@ -22,8 +24,8 @@ upstream's branchable mode. Finish preparation commands before branching.
 SmolBox command slot does not prove idleness: background processes can still run.
 The host must account for captured processes, credentials and external effects.
 SmolBox cannot determine whether arbitrary RAM contains secrets. The API rejects
-containers, networked sources, and requests to inject environment, secrets or ports
-at creation.
+containers and requests to inject environment, secrets or ports at creation.
+Networked sources require the explicit HTTPS configuration below.
 
 Approve additional preparation and backing capacity on the owning worker:
 
@@ -123,6 +125,32 @@ The environment is persisted. Pass only non-secret values. Reuse the same versio
 and values on retry. A different environment conflicts with the accepted release.
 The branchpoint continuation receives the values. Already running processes keep
 their original environment. Use `SmolBox.Command` for command-specific parameters.
+
+### Per-child HTTPS credentials
+
+Use an HTTP worker running SmolVM 1.34.0 over TLS or a local Unix socket. Set
+`branch_https_credentials: {Resolver, context}` on its `SmolBox.Runtime.WorkerConfig`.
+Approve a profile whose `SmolBox.NetworkPolicy` lists exactly one hostname and no
+CIDRs. Use that profile on a checkpointable source backed by an approved local
+bare artifact. Only held children are supported with this profile. Keep the
+source free of real credentials, including any values supplied directly through
+the worker API. SmolVM can fall back to a source's API-supplied values at child boot.
+As with other managed branches, give SmolBox exclusive control of these machines.
+
+Implement `c:SmolBox.BranchHTTPSCredentials.resolve/2` to authorize the request's
+scope, child ID, worker machine name and HTTPS host against your host-side grants.
+Return `{:ok, token}` for an authorized child or `:error` to leave it held. Call
+`Branches.release/4` normally. SmolBox sends the token over the protected worker
+connection. The worker injects the Bearer header for that exact hostname after
+installation. Keep the token out of the release environment, durable records,
+and HTTP body telemetry. Use an endpoint you trust with the token, since its
+response can be read by the guest.
+
+A missing binding returns the child to `:held` with a redacted authentication error.
+Fetch its current version before trying again. An uncertain install or release
+retains `:unknown` evidence and requires the existing branch recovery flow.
+Tokens live in the worker's memory. Worker process replacement clears them.
+Upgrade shared store readers and writers before enabling this profile.
 
 ## Read evidence and handle uncertainty
 

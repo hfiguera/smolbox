@@ -22,7 +22,8 @@ defmodule SmolBox.Runtime.Target do
     :checkpoint_policies,
     :branch_policies,
     :volume_policy,
-    :registry_credentials
+    :registry_credentials,
+    :branch_https_credentials
   ]
   @derive {Inspect, only: [:kind, :id, :architecture, :platform, :runtime_version]}
   defstruct [:kind, :id, :connection, :domain_binding, :native_config] ++ @worker_fields
@@ -164,6 +165,11 @@ defmodule SmolBox.Runtime.Target do
 
   def supports?(%Config{} = config, spec), do: Assignment.supports?(config, spec)
   def supports?(target, spec), do: WorkerConfig.supports?(worker_definition(target), spec)
+
+  def https_branches?(%__MODULE__{kind: :http} = target, profile),
+    do: WorkerConfig.https_branches?(worker_definition(target), profile)
+
+  def https_branches?(_target, _profile), do: false
 
   def allocation_record(
         %__MODULE__{kind: :embedded, native_config: config} = target,

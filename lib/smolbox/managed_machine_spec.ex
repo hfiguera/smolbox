@@ -6,6 +6,9 @@ defmodule SmolBox.ManagedMachineSpec do
   profile approvals have the same meaning as in `SmolBox.ExecutionSpec`.
   Optional `checkpointable: true` opts an idle, offline bare guest into 1.19.0, 1.20.2 or 1.22.0
   checkpoint-capable startup. No ports, workloads or remote sources are admitted.
+  An HTTP worker with a branch HTTPS credential resolver also accepts a
+  checkpointable local bare artifact with a network policy for exactly one host.
+  That source supports held branching and is ineligible for checkpoint capture.
   This changes immutable identity and requires codec v12/store capability
   `managed_checkpoints: 1`. See `SmolBox.Checkpoints`.
 
@@ -67,7 +70,7 @@ defmodule SmolBox.ManagedMachineSpec do
              (not spec.checkpointable and spec.artifact["kind"] != "checkpoint"),
          true <-
            not spec.checkpointable or
-             (spec.profile.network == :offline and spec.ports == [] and spec.workload == nil and
+             (branch_source_network?(spec) and spec.ports == [] and spec.workload == nil and
                 not SmolBox.Source.remote?(spec.artifact)),
          true <- SmolBox.Workload.optional?(spec.workload),
          true <- spec.workload == nil or spec.artifact["kind"] != "checkpoint",
@@ -81,6 +84,13 @@ defmodule SmolBox.ManagedMachineSpec do
   end
 
   def validate(_spec), do: invalid()
+
+  defp branch_source_network?(%{profile: %{network: :offline}}), do: true
+
+  defp branch_source_network?(spec),
+    do:
+      spec.artifact["kind"] != "checkpoint" and
+        SmolBox.BranchHTTPSCredentials.network?(spec.profile.network)
 
   @doc false
   def execution_spec(spec) do

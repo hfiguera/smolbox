@@ -16,11 +16,7 @@ defmodule SmolBox.RuntimeFixture do
         {Agent, fn -> %{{"contract", "input"} => <<0, 255>>} end}
       )
 
-    {:ok, endpoint} =
-      Worker.new("peer", "http://127.0.0.1:#{port}",
-        allow_insecure_loopback: true,
-        max_request_bytes: Keyword.get(options, :max_file_bytes, 1_048_576)
-      )
+    {:ok, endpoint} = endpoint(port, options)
 
     {:ok, client} =
       Client.new(endpoint,
@@ -97,6 +93,7 @@ defmodule SmolBox.RuntimeFixture do
               Keyword.get(options, :pull_sources, []),
           checkpoint_policies: Keyword.get(options, :checkpoint_policies, []),
           branch_policies: Keyword.get(options, :branch_policies, []),
+          branch_https_credentials: options[:branch_https_credentials],
           export_destinations: Keyword.get(options, :export_destinations, []),
           volume_policy: options[:volume_policy],
           registry_credentials: options[:registry_credentials]
@@ -136,6 +133,26 @@ defmodule SmolBox.RuntimeFixture do
       spec: spec,
       options: config
     }
+  end
+
+  defp endpoint(port, options) do
+    endpoint_options = [max_request_bytes: Keyword.get(options, :max_file_bytes, 1_048_576)]
+
+    case options[:peer_ca] do
+      nil ->
+        Worker.new(
+          "peer",
+          "http://127.0.0.1:#{port}",
+          [allow_insecure_loopback: true] ++ endpoint_options
+        )
+
+      ca ->
+        Worker.new(
+          "peer",
+          "https://localhost:#{port}",
+          [token: "fixture-token", ca_cert_file: ca] ++ endpoint_options
+        )
+    end
   end
 
   defp source_spec(spec, nil), do: spec

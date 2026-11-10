@@ -265,14 +265,20 @@ defmodule SmolBox.Runtime.Machines do
 
   defp mutate(worker, %{operation: :create} = record) do
     with {:ok, spec} <- Target.machine_spec(worker, record.spec, record.machine_name),
-         do:
-           create(
-             worker,
-             Target.connection(worker, record),
-             %{spec | mounts: record.mounts},
-             record.preparation
-           )
+         do: create(worker, record, %{spec | mounts: record.mounts})
   end
+
+  defp mutate(
+         worker,
+         %{operation: :start, spec: %{checkpointable: true, profile: profile}} = record
+       )
+       when profile.network != :offline,
+       do:
+         Backend.start_https_branch_source(
+           Target.connection(worker, record),
+           record.machine_name,
+           profile.network
+         )
 
   defp mutate(worker, %{operation: :start, spec: %{checkpointable: true}} = record),
     do: Backend.start_checkpointable(Target.connection(worker, record), record.machine_name)
@@ -280,18 +286,23 @@ defmodule SmolBox.Runtime.Machines do
   defp mutate(worker, record),
     do: apply(Backend, record.operation, [Target.connection(worker, record), record.machine_name])
 
-  defp create(
-         worker,
-         reference,
-         %{source: %SmolBox.Source{kind: :registry} = source} = spec,
-         preparation
-       ) do
+  defp create(worker, record, %{source: %SmolBox.Source{kind: :registry} = source} = spec) do
     with {:ok, credentials} <-
            SmolBox.RegistryCredentials.resolve(worker.registry_credentials, source),
-         do: Backend.create_prepared(reference, spec, preparation, credentials)
+         do:
+           Backend.create_prepared(
+             Target.connection(worker, record),
+             spec,
+             record.preparation,
+             credentials
+           )
   end
 
-  defp create(_worker, reference, spec, _preparation), do: Backend.create(reference, spec)
+  defp create(worker, %{spec: %{checkpointable: true}} = record, %{network: network} = spec)
+       when network != :offline,
+       do: Backend.create(Target.connection(worker, record), spec, branch_https: true)
+
+  defp create(worker, record, spec), do: Backend.create(Target.connection(worker, record), spec)
 
   defp complete_response(config, record, {:ok, %Machine{} = observed}) do
     with {:ok, current} <- claim(config, ManagedMachine.key(record)),

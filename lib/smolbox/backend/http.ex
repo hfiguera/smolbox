@@ -92,6 +92,9 @@ defmodule SmolBox.Backend.HTTP do
   defp dispatch(client, :branch_release, arguments),
     do: apply(BranchClient, :release, [client | arguments])
 
+  defp dispatch(client, :branch_install_https_credential, [child, token]),
+    do: BranchClient.install_https_credential(client, child, token)
+
   defp dispatch(client, operation, arguments), do: apply(Client, operation, [client | arguments])
 
   defp bounded_client(client, budget) do
