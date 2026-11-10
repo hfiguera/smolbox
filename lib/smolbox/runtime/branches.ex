@@ -1,14 +1,16 @@
 defmodule SmolBox.Runtime.Branches do
   alias SmolBox.Runtime.Target
   @moduledoc false
-  alias SmolBox.{Backend, ManagedMachine}
+  alias SmolBox.{Backend, BranchHTTPSCredentials, ManagedMachine}
   alias SmolBox.Embedded.{NativeBranchReleaseResult, NativeBranchResult}
   alias SmolBox.Runtime.{MachineSession, Session, WorkerHealth}
 
   def approved?(worker, parent, spec),
     do:
       Target.supports_feature?(worker, :branches) and
-        spec.policy in worker.branch_policies and Target.supports?(worker, parent.spec)
+        spec.policy in worker.branch_policies and Target.supports?(worker, parent.spec) and
+        (parent.spec.profile.network == :offline or
+           (spec.hold and Target.https_branches?(worker, parent.spec.profile)))
 
   def supported(_config, %{branch: nil, branch_children: children}) when map_size(children) == 0,
     do: :ok
@@ -158,16 +160,33 @@ defmodule SmolBox.Runtime.Branches do
         {:branch_result, {:ok, observed}} ->
           release_advance(config, pending, {:complete, observed})
 
+        :credential_unavailable ->
+          release_advance(config, pending, :credential_unavailable)
+
         _ ->
           release_advance(config, pending, :unknown)
       end
     else
-      _ -> release_advance(config, child, :unknown)
+      _ ->
+        release_advance(config, child, :unknown)
+    end
+  end
+
+  defp install_https_credential(_worker, %{spec: %{profile: %{network: :offline}}}), do: :ok
+
+  defp install_https_credential(worker, child) do
+    case BranchHTTPSCredentials.resolve(worker.branch_https_credentials, child) do
+      {:ok, token} ->
+        Backend.branch_install_https_credential(Target.connection(worker, child), child, token)
+
+      {:error, _} ->
+        :credential_unavailable
     end
   end
 
   defp release_call(config, worker, pending) do
-    with {:ok, source} <- release_source(config, pending) do
+    with {:ok, source} <- release_source(config, pending),
+         :ok <- install_https_credential(worker, pending) do
       {:branch_result,
        Backend.branch_release(connection(worker, source, pending, config.clock), pending)}
     end

@@ -20,7 +20,7 @@ defmodule SmolBox.ManagedPeer do
         id: make_ref()
       )
 
-    port = TestPeer.start(&handle(&1, agent))
+    port = TestPeer.start(&handle(&1, agent), Keyword.get(options, :peer_listener, []))
     {agent, port}
   end
 
@@ -168,12 +168,21 @@ defmodule SmolBox.ManagedPeer do
     child =
       machine
       |> Map.put("name", name)
+      |> Map.put("parentMachine", machine["name"])
       |> Map.put("branchable", false)
       |> Map.put("branchpointHeld", hold)
 
     state = %{state | machines: Map.put(state.machines, name, child)}
     response = if state.options[:branch_lost], do: {:json, 503, %{}}, else: {:json, 200, child}
     {response, state}
+  end
+
+  defp machine_route("PUT", ["credential-values"], body, machine, state) do
+    %{"values" => values} = Jason.decode!(body)
+    name = machine["name"]
+    send(state.options[:credential_observer], {:credential_values, name, values})
+    status = if state.options[:credential_install_lost], do: 503, else: 204
+    {{:empty, status}, state}
   end
 
   defp machine_route("POST", ["branch-release"], body, machine, state) do

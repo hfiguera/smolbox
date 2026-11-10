@@ -177,7 +177,14 @@ defmodule SmolBox.Branch do
   defp child_spec?(m),
     do:
       m.spec.volumes == [] and m.branch_children == %{} and not m.spec.checkpointable and
-        m.spec.workload == nil and m.spec.ports == [] and m.spec.profile.network == :offline
+        m.spec.workload == nil and m.spec.ports == [] and branch_network?(m)
+
+  defp branch_network?(%{spec: %{profile: %{network: :offline}}}), do: true
+
+  defp branch_network?(%{branch: %{native_authority: nil, spec: %{hold: true}}} = m),
+    do: SmolBox.BranchHTTPSCredentials.network?(m.spec.profile.network)
+
+  defp branch_network?(_), do: false
 
   defp phase?(%{branch: nil, operation: op}), do: op not in [:branch_child, :branch_release]
 

@@ -199,11 +199,19 @@ defmodule SmolBox.Client do
   def create(client, spec, options \\ []) do
     with {:ok, wire} <- MachineSpec.to_wire(spec),
          {:ok, wire} <- creation_credentials(spec, wire, options),
-         {:ok, client} <- creation_runtime(client, spec),
+         {:ok, client} <- create_runtime(client, spec, options),
          {:ok, client} <- prepare_creation(client, spec, options) do
       send_create(client, spec, wire)
     end
   end
+
+  defp create_runtime(client, _spec, branch_https: true) do
+    if SmolBox.BranchHTTPSCredentials.secure_transport?(client.worker),
+      do: creation_runtime_versions(client, ["1.34.0"]),
+      else: error(:unsupported_capability, :create)
+  end
+
+  defp create_runtime(client, spec, _options), do: creation_runtime(client, spec)
 
   @doc false
   def create_prepared(
@@ -246,6 +254,16 @@ defmodule SmolBox.Client do
               wire,
               Map.new(credentials, fn {_key, value} -> {"registryIdentityToken", value} end)
             )}
+  end
+
+  defp creation_credentials(
+         %{source: :image, network: network, ports: [], mounts: [], workload: nil},
+         wire,
+         branch_https: true
+       ) do
+    if SmolBox.BranchHTTPSCredentials.network?(network),
+      do: {:ok, Map.put(wire, "credentials", SmolBox.BranchHTTPSCredentials.policy(network))},
+      else: error(:validation, :create)
   end
 
   defp creation_credentials(_spec, wire, []), do: {:ok, wire}
@@ -522,14 +540,24 @@ defmodule SmolBox.Client do
 
   @doc "Start an owned idle offline machine with checkpoint support on 1.19.0, 1.20.2 or 1.22.0."
   @spec start_checkpointable(t(), String.t()) :: {:ok, Machine.t()} | {:error, Error.t()}
-  def start_checkpointable(client, name) do
+  def start_checkpointable(client, name), do: start_checkpointable(client, name, :offline)
+
+  @doc false
+  def start_https_branch_source(client, name, network) do
+    if SmolBox.BranchHTTPSCredentials.network?(network) and
+         SmolBox.BranchHTTPSCredentials.secure_transport?(client.worker),
+       do: start_checkpointable(client, name, network),
+       else: error(:unsupported_capability, :start)
+  end
+
+  defp start_checkpointable(client, name, network) do
     deadline = System.monotonic_time(:millisecond) + client.worker.operation_timeout_ms
 
     with {:ok, path} <- machine_path(name),
          {:ok, client} <-
-           creation_runtime_versions(client, ["1.19.0", "1.20.2", "1.22.0", "1.34.0"]),
+           creation_runtime_versions(client, branch_runtime_versions(network)),
          {:ok, body} <- json(client, :get, path, nil, :inspect),
-         {:ok, %{network: :offline, ports: []}} <- decode_machine(body, name, :inspect),
+         {:ok, %{network: ^network, ports: []}} <- decode_machine(body, name, :inspect),
          true <- body["image"] in [nil, ""],
          {:ok, client} <- remaining_create_budget(client, deadline) do
       checkpoint_start(client, path, name)
@@ -551,13 +579,16 @@ defmodule SmolBox.Client do
   end
 
   @doc false
-  def checkpoint_preflight(client, name) do
+  def checkpoint_preflight(client, name), do: checkpoint_preflight(client, name, :offline)
+
+  @doc false
+  def checkpoint_preflight(client, name, network) do
     with {:ok, path} <- machine_path(name),
          {:ok, client} <-
-           creation_runtime_versions(client, ["1.19.0", "1.20.2", "1.22.0", "1.34.0"]),
+           creation_runtime_versions(client, branch_runtime_versions(network)),
          {:ok, body} <- json(client, :get, path, nil, :inspect),
          true <- body["branchable"] == true and body["image"] in [nil, ""],
-         {:ok, %{state: :running, network: :offline, ports: []} = machine} <-
+         {:ok, %{state: :running, network: ^network, ports: []} = machine} <-
            decode_machine(body, name, :inspect) do
       {:ok, machine}
     else
@@ -565,6 +596,9 @@ defmodule SmolBox.Client do
       _ -> error(:unsupported_capability, :checkpoint)
     end
   end
+
+  defp branch_runtime_versions(:offline), do: ["1.19.0", "1.20.2", "1.22.0", "1.34.0"]
+  defp branch_runtime_versions(_network), do: ["1.34.0"]
 
   @doc """
   Stream a running idle checkpointable guest into a new private directory on the

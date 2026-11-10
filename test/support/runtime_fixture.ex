@@ -16,11 +16,7 @@ defmodule SmolBox.RuntimeFixture do
         {Agent, fn -> %{{"contract", "input"} => <<0, 255>>} end}
       )
 
-    {:ok, endpoint} =
-      Worker.new("peer", "http://127.0.0.1:#{port}",
-        allow_insecure_loopback: true,
-        max_request_bytes: Keyword.get(options, :max_file_bytes, 1_048_576)
-      )
+    {:ok, endpoint} = endpoint(port, options)
 
     {:ok, client} =
       Client.new(endpoint,
@@ -97,6 +93,7 @@ defmodule SmolBox.RuntimeFixture do
               Keyword.get(options, :pull_sources, []),
           checkpoint_policies: Keyword.get(options, :checkpoint_policies, []),
           branch_policies: Keyword.get(options, :branch_policies, []),
+          branch_https_credentials: options[:branch_https_credentials],
           export_destinations: Keyword.get(options, :export_destinations, []),
           volume_policy: options[:volume_policy],
           registry_credentials: options[:registry_credentials]
@@ -126,7 +123,7 @@ defmodule SmolBox.RuntimeFixture do
     runtime = ExUnit.Callbacks.start_supervised!({Runtime, config})
 
     if Keyword.get(options, :wait_ready, true),
-      do: wait_ready(runtime, System.monotonic_time(:millisecond) + 30_000)
+      do: wait_for_worker_status(runtime, :ready)
 
     %{
       runtime: runtime,
@@ -138,6 +135,26 @@ defmodule SmolBox.RuntimeFixture do
     }
   end
 
+  defp endpoint(port, options) do
+    endpoint_options = [max_request_bytes: Keyword.get(options, :max_file_bytes, 1_048_576)]
+
+    case options[:peer_ca] do
+      nil ->
+        Worker.new(
+          "peer",
+          "http://127.0.0.1:#{port}",
+          [allow_insecure_loopback: true] ++ endpoint_options
+        )
+
+      ca ->
+        Worker.new(
+          "peer",
+          "https://localhost:#{port}",
+          [token: "fixture-token", ca_cert_file: ca] ++ endpoint_options
+        )
+    end
+  end
+
   defp source_spec(spec, nil), do: spec
   defp source_spec(spec, source), do: %{spec | artifact: SmolBox.Source.artifact(source)}
 
@@ -145,17 +162,23 @@ defmodule SmolBox.RuntimeFixture do
   # two failures already put the third probe beyond a ten-second deadline.
   # Return as soon as ready, before command/machine observation budgets begin.
   # Unavailable/draining-worker tests opt out explicitly with wait_ready: false.
-  def wait_ready(runtime, deadline) do
+  def wait_ready(runtime, deadline), do: wait_for_worker_status(runtime, :ready, deadline)
+
+  def wait_for_worker_status(
+        runtime,
+        expected,
+        deadline \\ System.monotonic_time(:millisecond) + 30_000
+      ) do
     case SmolBox.workers(runtime) do
-      {:ok, [%{status: :ready}]} ->
+      {:ok, [%{status: ^expected}]} ->
         :ok
 
       report ->
         assert System.monotonic_time(:millisecond) < deadline,
-               "fixture worker did not become ready: #{inspect(report)}"
+               "fixture worker did not reach #{inspect(expected)}: #{inspect(report)}"
 
         Process.sleep(20)
-        wait_ready(runtime, deadline)
+        wait_for_worker_status(runtime, expected, deadline)
     end
   end
 

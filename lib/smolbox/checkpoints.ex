@@ -46,7 +46,8 @@ defmodule SmolBox.Checkpoints do
   end
 
   defp accept(config, m, spec, fingerprint) do
-    with {:ok, worker} <- MachineSession.worker(config, m),
+    with true <- m.spec.profile.network == :offline,
+         {:ok, worker} <- MachineSession.worker(config, m),
          true <- CaptureRuntime.approved?(worker, spec),
          {:ok, saved} <-
            MachineSession.store(config, :capture_accept, [

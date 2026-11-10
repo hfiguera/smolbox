@@ -14,6 +14,10 @@ defmodule SmolBox.Runtime.WorkerConfig do
   Optional `:registry_credentials` is `{resolver_module, host_context}`; see
   `SmolBox.RegistryCredentials`. Only safe references appear in stored sources.
 
+  Optional `:branch_https_credentials` is a host resolver for held branches on
+  SmolVM 1.34.0 over HTTPS or a local Unix socket. See
+  `SmolBox.BranchHTTPSCredentials`.
+
   On 1.22.0, eligible OCI creation can use a shared image seed and temporary
   network-enabled builder. Budget that preparation and retained host cache
   separately; machine reservations and guest egress rules do not bound them.
@@ -64,6 +68,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   alias SmolBox.Runtime.Approvals
 
   alias SmolBox.{
+    BranchHTTPSCredentials,
     Checkpoint,
     Client,
     Error,
@@ -95,7 +100,8 @@ defmodule SmolBox.Runtime.WorkerConfig do
                 checkpoint_policies: [],
                 branch_policies: [],
                 volume_policy: nil,
-                registry_credentials: nil
+                registry_credentials: nil,
+                branch_https_credentials: nil
               ]
 
   @type t :: %__MODULE__{
@@ -107,6 +113,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
           checkpoints: [Checkpoint.t()],
           sources: [SmolBox.Source.t()],
           registry_credentials: {module(), term()} | nil,
+          branch_https_credentials: {module(), term()} | nil,
           export_destinations: [SmolBox.ExportDestination.t()],
           checkpoint_policies: [SmolBox.CheckpointPolicy.t()],
           branch_policies: [SmolBox.BranchPolicy.t()],
@@ -170,6 +177,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
              :checkpoints,
              :sources,
              :registry_credentials,
+             :branch_https_credentials,
              :export_destinations,
              :checkpoint_policies,
              :branch_policies,
@@ -280,7 +288,24 @@ defmodule SmolBox.Runtime.WorkerConfig do
   end
 
   defp network_supported?(worker, spec),
-    do: spec.profile.network == :offline or Features.supports?(worker, :networking)
+    do:
+      spec.profile.network == :offline or
+        (Features.supports?(worker, :networking) and
+           (not Map.get(spec, :checkpointable, false) or https_branches?(worker, spec.profile)))
+
+  @doc false
+  def https_branches?(worker, profile),
+    do:
+      worker.branch_https_credentials != nil and
+        https_resolver?(worker) and BranchHTTPSCredentials.network?(profile.network)
+
+  defp https_resolver?(worker),
+    do:
+      BranchHTTPSCredentials.configured?(
+        worker.branch_https_credentials,
+        worker.client.worker,
+        worker.runtime_version
+      )
 
   defp file_support?(worker, spec),
     do:
@@ -321,7 +346,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
     valid_client?(worker.client) and supported_runtime?(worker) and
       worker.qualification == :development and valid_platform?(worker) and
       is_boolean(worker.draining) and capacity?(worker.capacity) and catalogs?(worker) and
-      allocation_floor?(worker.allocation_floor) and export_access?(worker)
+      allocation_floor?(worker.allocation_floor) and operator_policies?(worker)
   end
 
   defp supported_runtime?(%{runtime_version: "1.14.1"}), do: true
@@ -369,11 +394,12 @@ defmodule SmolBox.Runtime.WorkerConfig do
       unique?(worker.artifacts, & &1["id"])
   end
 
-  defp export_access?(worker),
+  defp operator_policies?(worker),
     do:
       volume_policy?(worker) and
         exports?(worker) and capture_policies?(worker) and branch_policies?(worker) and
-        SmolBox.RegistryCredentials.valid?(worker.registry_credentials)
+        SmolBox.RegistryCredentials.valid?(worker.registry_credentials) and
+        https_resolver?(worker)
 
   defp branch_policies?(worker),
     do: Approvals.branch_policies?(worker.branch_policies, worker.runtime_version)

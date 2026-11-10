@@ -13,6 +13,101 @@ defmodule SmolBox.ManagedBranchTest do
 
   alias SmolBox.Store.{Codec, MachineOps, Memory}
 
+  defmodule HTTPSResolver do
+    @behaviour SmolBox.BranchHTTPSCredentials
+
+    def resolve(%{id: id, host: "api.example.com"} = request, {observer, keys}) do
+      send(observer, {:credential_resolved, request})
+      Map.fetch(keys, id)
+    end
+  end
+
+  @tag :tmp_dir
+  test "only a bound held child activates after the worker accepts its own HTTPS credential",
+       ctx do
+    on_exit(fn -> File.rm_rf!(ctx.tmp_dir) end)
+    tls = SmolBox.TestTLS.create(ctx.tmp_dir)
+    {:ok, network} = SmolBox.NetworkPolicy.new(hosts: ["api.example.com"])
+    keys = %{"left" => "left-key", "right" => "right-key", "lost" => "lost-key"}
+
+    {f, source, spec} =
+      fixture(
+        network: network,
+        runtime_version: "1.34.0",
+        expected_runtime_version: "1.34.0",
+        peer_ca: tls.ca,
+        peer_listener: [scheme: :https, certfile: tls.cert, keyfile: tls.key],
+        branch_https_credentials: {HTTPSResolver, {self(), keys}},
+        credential_observer: self(),
+        capacity: %{slots: 12, cpus: 24, memory_mb: 24_576, disk_gb: 160}
+      )
+
+    [creation] = ManagedPeer.snapshot(f.peer).creations
+
+    assert %{
+             "credentials" => [
+               %{"allowed_hosts" => ["api.example.com"], "set_header" => "authorization"}
+             ]
+           } =
+             creation["credentials"]
+
+    assert {:error, %{category: :unsupported_capability}} =
+             Branches.create(f.runtime, source, spec)
+
+    held =
+      for id <- ~w(left right unbound lost), into: %{} do
+        assert {:ok, child} = Branches.create(f.runtime, source, %{spec | id: id, hold: true})
+        assert {:ok, %{branch: %{state: :held}}} = Branches.await(f.runtime, child, 5000)
+        {id, {child, RuntimeFixture.await_idle(f.runtime, child)}}
+      end
+
+    for id <- ~w(left right) do
+      {child, current} = held[id]
+      name = current.machine_name
+      value = "Bearer " <> keys[id]
+      assert {:ok, _} = Branches.release(f.runtime, child, current.version)
+
+      assert {:ok, %{branch: %{state: :released}} = released} =
+               Branches.await(f.runtime, child, 5000)
+
+      assert_receive {:credential_resolved,
+                      %{id: ^id, machine_name: ^name, host: "api.example.com"}}
+
+      assert_receive {:credential_values, ^name, %{"smolbox-branch-https" => ^value}}
+      assert {:ok, bytes} = Codec.encode(released)
+      refute :binary.match(bytes, keys[id]) != :nomatch
+      assert {:ok, ^released} = Codec.decode(bytes)
+      assert {:ok, _} = Branches.release(f.runtime, child, current.version)
+
+      assert ["POST", "PUT"] ==
+               for(
+                 {method, path} <- ManagedPeer.snapshot(f.peer).operations,
+                 String.contains?(path, name) and
+                   String.ends_with?(path, ["/credential-values", "/branch-release"]),
+                 do: method
+               )
+    end
+
+    {child, current} = held["unbound"]
+    assert {:ok, _} = Branches.release(f.runtime, child, current.version)
+
+    assert {:ok, %{branch: %{state: :held}, last_error: %{category: :authentication}}} =
+             Branches.await(f.runtime, child, 5000)
+
+    assert_receive {:credential_resolved, %{id: "unbound"}}
+    refute_receive {:credential_values, _, _}
+
+    Agent.update(
+      f.peer,
+      &%{&1 | options: Keyword.put(&1.options, :credential_install_lost, true)}
+    )
+
+    {child, current} = held["lost"]
+    assert {:ok, _} = Branches.release(f.runtime, child, current.version)
+    assert {:ok, %{branch: %{state: :unknown}}} = Branches.await(f.runtime, child, 5000)
+    assert count(f.peer, "/branch-release") == 2
+  end
+
   for {reason, changes} <- [version: [runtime_version: "1.20.2"], readiness: [unready: true]] do
     test "#{reason} drift rejects a branch before dispatch" do
       {f, source, spec} = fixture()

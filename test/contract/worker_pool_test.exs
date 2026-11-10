@@ -4,7 +4,7 @@ defmodule SmolBox.WorkerPoolTest do
   alias SmolBox.Runtime.{Clock, WorkerHealth}
 
   for {options, status} <- [
-        {[runtime_version: "1.14.1"], :incompatible},
+        {[runtime_version: "1.14.1", health_failures: 1], :incompatible},
         {[runtime_version: "1.14.6", expected_runtime_version: "1.14.1"], :incompatible},
         {[runtime_version: "1.14.6"], :incompatible},
         {[runtime_version: "1.16.0", expected_runtime_version: "1.14.6"], :incompatible},
@@ -24,8 +24,7 @@ defmodule SmolBox.WorkerPoolTest do
       context =
         RuntimeFixture.start(__MODULE__, Keyword.put(unquote(options), :wait_ready, false))
 
-      status = unquote(status)
-      wait_status(context.runtime, status)
+      RuntimeFixture.wait_for_worker_status(context.runtime, unquote(status))
       spec = %{context.spec | queue_ms: 50}
       assert {:ok, handle} = SmolBox.submit(context.runtime, spec)
       assert {:ok, expired} = SmolBox.await(context.runtime, handle, 5000)
@@ -54,7 +53,6 @@ defmodule SmolBox.WorkerPoolTest do
       ] do
     test "#{label} admission preserves identity, collection and cleanup" do
       context = RuntimeFixture.start(__MODULE__, unquote(options))
-      wait_status(context.runtime, :ready)
       assert {:ok, handle} = SmolBox.submit(context.runtime, context.spec)
       assert {:ok, record} = SmolBox.await(context.runtime, handle, 5000)
       assert record.state == :completed and record.collection == :complete
@@ -91,7 +89,6 @@ defmodule SmolBox.WorkerPoolTest do
 
   test "fresh admission checks reject a version changed after the cached readiness observation" do
     context = RuntimeFixture.start(__MODULE__)
-    wait_status(context.runtime, :ready)
 
     Agent.update(context.peer, fn state ->
       %{state | options: Keyword.put(state.options, :runtime_version, "1.14.1")}
@@ -260,22 +257,6 @@ defmodule SmolBox.WorkerPoolTest do
         receive do
         after
           20 -> wait_cleanup(runtime, handle, remaining - 1)
-        end
-    end
-  end
-
-  defp wait_status(runtime, expected, remaining \\ 100)
-  defp wait_status(_runtime, _expected, 0), do: flunk("worker health observation did not arrive")
-
-  defp wait_status(runtime, expected, remaining) do
-    case SmolBox.workers(runtime) do
-      {:ok, [%{status: ^expected}]} ->
-        :ok
-
-      _pending ->
-        receive do
-        after
-          20 -> wait_status(runtime, expected, remaining - 1)
         end
     end
   end
