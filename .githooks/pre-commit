@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -e
+
+git diff --cached --check
+
+scratch=$(mktemp -d "${TMPDIR:-/tmp}/smolbox-pre-commit.XXXXXX")
+trap 'rm -rf -- "$scratch"' EXIT
+
+git diff --cached --name-only --diff-filter=ACMRT -z -- '*.ex' '*.exs' > "$scratch/paths"
+[[ -s "$scratch/paths" ]] || exit 0
+
+if ! command -v mix >/dev/null; then
+  echo 'pre-commit: put Mix on PATH using the toolchain in .tool-versions.' >&2
+  exit 1
+fi
+
+# Check only the proposed commit, including its formatter and toolchain configuration.
+mkdir "$scratch/staged"
+git checkout-index --prefix="$scratch/staged/" --stdin -z < "$scratch/paths"
+git checkout-index --prefix="$scratch/" -- .formatter.exs
+git checkout-index --prefix="$scratch/staged/" -- .tool-versions
+
+if ! (cd "$scratch/staged" && MIX_ENV=test mix format --check-formatted --dot-formatter "$scratch/.formatter.exs"); then
+  echo 'pre-commit: run mix format <file>, then stage the formatting fix.' >&2
+  exit 1
+fi

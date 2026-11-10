@@ -1,8 +1,9 @@
 # SmolBox CI infrastructure contract
 
 `SmolBox CI` (`smolbox-ci.yml`) runs quality, deterministic, durable-store and
-package checks on disposable hosted runners for every push and pull request.
-It can also be dispatched manually. It contains no real-worker jobs.
+package checks on disposable hosted runners for pushes to `main` and pull
+requests. A newer run cancels any in-progress CI for the same pull request.
+The workflow also supports manual dispatch.
 
 The required `smolbox-native` Linux lane runs the verified SDK bootstrap,
 source-integrity checks, workspace formatting, Rust tests, Clippy and Rustdoc
@@ -11,11 +12,21 @@ remain pinned; this maintainer CI requirement does not add Rust, native assets o
 a hypervisor to HTTP-only or prebuilt Port package consumption. Live platform
 qualification and distributable signing remain separate gates.
 
-Main checks use Elixir 1.20.4 with OTP 29.0.6, matching `.tool-versions`.
-Compatibility jobs retain Elixir 1.18.4/OTP 27.3.4.15, Elixir 1.19.5/OTP 28.5
-and Elixir 1.20.4/OTP 28.5. Cache keys include the exact main toolchain so OTP 28
-builds and PLTs are not reused for OTP 29. The optional live workflow uses the
-same main pair; changing its configuration does not supply a successful run.
+The native job restores `sccache` compiler outputs as one archive keyed by the
+runner platform, Rust toolchain, and native dependency inputs. Main and manual
+runs can populate the cache, and pull requests read from it. Every run executes
+the full `native/check.sh` script, including source verification.
+
+Main CI and the blog workflow use Elixir 1.20.5 with OTP 29.1.2, matching
+`.tool-versions`. Compatibility jobs use Elixir 1.18.4/OTP 27.3.4.15,
+Elixir 1.19.5/OTP 28.5 and Elixir 1.20.4/OTP 28.5. Main CI cache keys include
+the exact toolchain versions to separate builds and PLTs across upgrades.
+The coverage job runs the primary test suite and enforces its coverage floor.
+The quality canaries job runs Dialyzer on the project before checking the
+analyzers against fixture projects.
+
+The protected live worker workflow and the runtime qualification gate use
+Elixir 1.20.4 with OTP 29.0.6.
 
 For local validation, run `mise install`, then `mise exec -- elixir --version`.
 A newly installed Elixir distribution may need its own Hex/Rebar installations:
@@ -23,6 +34,27 @@ A newly installed Elixir distribution may need its own Hex/Rebar installations:
 Use `mise exec --` before the commands below to select the repository pin without
 changing the user's global toolchain. Compatibility evidence records actual
 results separately from workflow configuration.
+
+### Local Git hooks
+
+Run `sh scripts/install-hooks.sh` once per checkout. The installer preserves
+the existing Git LFS pre-push hook and leaves the other Git hooks in place.
+Use the toolchain in `.tool-versions` and fetch Mix dependencies during local
+setup so validation can reuse them.
+
+- **Pre-commit** checks whitespace and formats the staged Elixir snapshot in
+  check mode. To fix a formatting failure, run `mix format <file>` and stage the
+  fix before retrying the commit.
+- **Pre-push** selects checks from the outgoing branch changes. Elixir changes
+  run warning-as-error compilation, xref, Credo/ExSlop, and changed root test
+  files. Blog and CI-tooling changes also run their focused suites. Native Rust
+  changes run the pinned formatter after the native workspace is prepared.
+  Ordinary Markdown changes can push without running Mix. Run the printed
+  command to reproduce a failure. For code checks, push the checked-out branch
+  with clean validation inputs so the checks see the code being pushed.
+
+Run `mix ci` for the broader deterministic checks. GitHub's `smolbox-required`
+job remains the merge gate.
 
 Run dependency audits sequentially when several projects share one development
 host. MixAudit 2.1 uses a shared advisory checkout; concurrent updates can fail

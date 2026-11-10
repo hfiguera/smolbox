@@ -27,8 +27,8 @@ jobs:
           persist-credentials: false
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
         with:
-          otp-version: '29.0.6'
-          elixir-version: '1.20.4'
+          otp-version: '29.1.2'
+          elixir-version: '1.20.5'
       - run: mix deps.get
       - run: mix compile --warnings-as-errors
       - run: mix run --no-start scripts/build_blog.exs --analytics

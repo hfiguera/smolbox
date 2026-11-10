@@ -257,7 +257,7 @@ defmodule SmolBox.MixProject do
         ]
       ],
       dialyzer: [
-        plt_add_apps: [:mix, :ex_unit, :credence, :dialyxir, :ex_doc, :makeup],
+        plt_add_apps: [:mix, :ex_unit, :eex, :credence, :dialyxir, :ex_doc, :makeup],
         plt_local_path: "_build/plts"
       ],
       # Canaries exercise developer tasks. Peer fixtures and shared adapter tests

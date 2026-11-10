@@ -298,9 +298,9 @@ if hello["major"] == 2:
 if META.get("wrong_hello"):
     hello["domain"]["generation"] = "0" * 32
 log(dict(launch=True, config_mode=Path(sys.argv[2]).stat().st_mode & 0o777))
-send(dict(type="hello", hello=hello))
 approved = False
 try:
+    send(dict(type="hello", hello=hello))
     while True:
         size = struct.unpack(">I", read_exact(4))[0]
         message = json.loads(read_exact(size))
@@ -602,7 +602,7 @@ try:
                     send(correlated("terminal", identifier, 1, outcome=dict(
                         result="file", completion="completed", dispatch="may_have_dispatched",
                         observed_bytes=entry["total"], native_acknowledged=True)))
-except EOFError:
+except (EOFError, BrokenPipeError):
     pass
 finally:
     if VM:
