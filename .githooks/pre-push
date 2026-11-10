@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+scratch=$(mktemp -d "${TMPDIR:-/tmp}/smolbox-pre-push.XXXXXX")
+trap 'rm -rf -- "$scratch"' EXIT
+
+# Git LFS needs the same ref updates after validation has consumed them.
+cat > "$scratch/refs"
+head=$(git rev-parse --verify HEAD)
+mix_checks=false
+blog_checks=false
+ci_checks=false
+rust_format=false
+tests=()
+
+fail() {
+  printf 'pre-push: %s\n' "$*" >&2
+  exit 1
+}
+
+add_test() {
+  local path=$1 test
+  [[ -f "$path" ]] || return 0
+  for test in "${tests[@]}"; do
+    [[ "$test" != "$path" ]] || return 0
+  done
+  tests+=("$path")
+}
+
+while read -r local_ref local_oid remote_ref remote_oid; do
+  [[ "$remote_ref" == refs/heads/* && ! "$local_oid" =~ ^0+$ ]] || continue
+
+  if git cat-file -e "$remote_oid^{commit}" 2>/dev/null; then
+    git diff --no-renames --name-only -z "$remote_oid" "$local_oid" > "$scratch/paths"
+  elif base=$(git merge-base "$local_oid" "refs/remotes/$1/main" 2>/dev/null); then
+    git diff --no-renames --name-only -z "$base" "$local_oid" > "$scratch/paths"
+  else
+    git ls-tree -r --name-only -z "$local_oid" > "$scratch/paths"
+  fi
+
+  while IFS= read -r -d '' path; do
+    case "$path" in
+      docs/blog/*|.github/workflows/blog.yml)
+        blog_checks=true ;;
+      .github/workflows/smolbox-ci.yml|.githooks/*|scripts/install-hooks.sh)
+        ci_checks=true ;;
+      native/*.rs|native/*Cargo.toml|native/Cargo.lock)
+        rust_format=true ;;
+      *.ex|*.exs|mix.lock|.tool-versions)
+        mix_checks=true
+        case "$path" in
+          dev/smolbox/blog.ex|dev/smolbox/blog/*|scripts/*blog.exs|test/unit/blog_test.exs|mix.exs|mix.lock)
+            blog_checks=true ;;
+        esac
+        case "$path" in
+          scripts/ci.exs|scripts/ci_test.exs|scripts/ci/*.exs|dev/smolbox/ci/*|dev/mix/tasks/smolbox.ci.*|test/ci/*)
+            ci_checks=true ;;
+          test/*_test.exs)
+            add_test "$path" ;;
+        esac ;;
+      *) continue ;;
+    esac
+
+    [[ "$local_oid" == "$head" ]] || fail "check out $local_ref and push it separately to validate its code."
+  done < "$scratch/paths"
+done < "$scratch/refs"
+
+if $mix_checks || $blog_checks || $ci_checks || $rust_format; then
+  inputs=()
+  if $mix_checks || $blog_checks || $ci_checks; then
+    inputs+=(':(glob)**/*.ex' ':(glob)**/*.exs' mix.lock .tool-versions)
+  fi
+  if $blog_checks; then inputs+=(docs/blog); fi
+  if $rust_format; then inputs+=(native); fi
+  dirty=$(git status --porcelain --untracked-files=all -- "${inputs[@]}")
+  [[ -z "$dirty" ]] || fail 'commit or stash local changes to validation inputs before pushing.'
+fi
+
+run_check() {
+  printf 'pre-push: %s\n' "$*" >&2
+  "$@" || fail "fix the failure and rerun $*."
+}
+
+if $mix_checks || $blog_checks || $ci_checks; then
+  command -v mix >/dev/null || fail 'put Mix on PATH using the toolchain in .tool-versions.'
+fi
+
+if $mix_checks; then
+  run_check env MIX_ENV=test mix compile --warnings-as-errors
+  run_check env MIX_ENV=test mix xref graph --format cycles --fail-above 0
+  run_check env MIX_ENV=test mix credo --strict
+fi
+
+if $blog_checks; then add_test test/unit/blog_test.exs; fi
+if ((${#tests[@]} > 0)); then
+  run_check env MIX_ENV=test mix test --warnings-as-errors "${tests[@]}"
+fi
+
+if $ci_checks; then run_check elixir scripts/ci_test.exs; fi
+
+if $rust_format; then
+  if [[ -f native/target/upstream/smolvm/Cargo.toml ]]; then
+    run_check cargo +1.98.1 fmt --manifest-path native/Cargo.toml \
+      -p smolbox-engine -p smolbox-protocol -p smolbox-port --check
+  else
+    echo 'pre-push: prepare native formatting with python3 native/bootstrap.py.' >&2
+  fi
+fi
+
+previous=$(git rev-parse --git-path hooks/pre-push.smolbox-original)
+if [[ -x "$previous" ]]; then
+  "$previous" "$@" < "$scratch/refs"
+fi

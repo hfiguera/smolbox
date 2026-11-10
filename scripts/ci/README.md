@@ -35,6 +35,27 @@ Use `mise exec --` before the commands below to select the repository pin withou
 changing the user's global toolchain. Compatibility evidence records actual
 results separately from workflow configuration.
 
+### Local Git hooks
+
+Run `sh scripts/install-hooks.sh` once per checkout. The installer preserves
+the existing Git LFS pre-push hook and leaves the other Git hooks in place.
+Use the toolchain in `.tool-versions` and fetch Mix dependencies during local
+setup so validation can reuse them.
+
+- **Pre-commit** checks whitespace and formats the staged Elixir snapshot in
+  check mode. To fix a formatting failure, run `mix format <file>` and stage the
+  fix before retrying the commit.
+- **Pre-push** selects checks from the outgoing branch changes. Elixir changes
+  run warning-as-error compilation, xref, Credo/ExSlop, and changed root test
+  files. Blog and CI-tooling changes also run their focused suites. Native Rust
+  changes run the pinned formatter after the native workspace is prepared.
+  Ordinary Markdown changes can push without running Mix. Run the printed
+  command to reproduce a failure. For code checks, push the checked-out branch
+  with clean validation inputs so the checks see the code being pushed.
+
+Run `mix ci` for the broader deterministic checks. GitHub's `smolbox-required`
+job remains the merge gate.
+
 Run dependency audits sequentially when several projects share one development
 host. MixAudit 2.1 uses a shared advisory checkout; concurrent updates can fail
 while the command still returns zero. A Git refresh error invalidates that audit
