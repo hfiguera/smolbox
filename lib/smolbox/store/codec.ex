@@ -337,6 +337,10 @@ defmodule SmolBox.Store.Codec do
   even an explicitly nil new field. Upgrade every reader/projector before
   advertising `native_collected_branch_publications: 1`. This marker enables
   neither native publication dispatch nor public branch admission.
+
+  Static branch egress sources and children use v52 to retain the approved
+  mode across controller replacement. Earlier envelopes omit this field and
+  restore it as false. Upgrade readers and writers before enabling the mode.
   """
 
   alias SmolBox.{Error, Execution, ExecutionFeatures}
@@ -385,11 +389,13 @@ defmodule SmolBox.Store.Codec do
     CodecNativeVolumes,
     CodecPorts,
     CodecSources,
+    CodecStaticBranchEgress,
     CodecVolumes,
     CodecWorkload
   }
 
   @max_bytes 16_777_216
+  @branch_static_egress_prefix "smolbox-record-v52\0"
   @branch_release_env_prefix "smolbox-record-v51\0"
   @native_collected_branch_publications_prefix "smolbox-record-v50\0"
   @native_partial_branch_cleanup_resolutions_prefix "smolbox-record-v49\0"
@@ -533,9 +539,19 @@ defmodule SmolBox.Store.Codec do
 
   @spec encode(Execution.t() | SmolBox.ManagedMachine.t() | SmolBox.Volume.t()) ::
           {:ok, binary()} | {:error, Error.t()}
+  def encode(%SmolBox.ManagedMachine{spec: %{branch_static_egress: true}} = record) do
+    with :ok <- validate_extended(record) do
+      bytes = @branch_static_egress_prefix <> :erlang.term_to_binary(record)
+      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
+    end
+  end
+
   def encode(%SmolBox.ManagedMachine{branch: %{release_env: [_ | _]}} = record) do
     with :ok <- validate_extended(record) do
-      bytes = @branch_release_env_prefix <> :erlang.term_to_binary(record)
+      bytes =
+        @branch_release_env_prefix <>
+          :erlang.term_to_binary(CodecStaticBranchEgress.strip(record))
+
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
   end
@@ -735,6 +751,21 @@ defmodule SmolBox.Store.Codec do
   @spec decode(binary()) ::
           {:ok, Execution.t() | SmolBox.ManagedMachine.t() | SmolBox.Volume.t()}
           | {:error, Error.t()}
+  def decode(<<@branch_static_egress_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+    <<@branch_static_egress_prefix, payload::binary>> = bytes
+
+    with {%SmolBox.ManagedMachine{spec: %{branch_static_egress: true}} = record, used} <-
+           :erlang.binary_to_term(payload, [:safe, :used]),
+         true <- used == byte_size(payload),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
   def decode(<<@branch_release_env_prefix, 131, tag, _rest::binary>> = bytes)
       when tag != 80 and byte_size(bytes) <= @max_bytes do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
@@ -743,6 +774,7 @@ defmodule SmolBox.Store.Codec do
     with {%SmolBox.ManagedMachine{branch: %{release_env: [_ | _]}} = record, used} <-
            :erlang.binary_to_term(payload, [:safe, :used]),
          true <- used == byte_size(payload),
+         record = CodecStaticBranchEgress.upgrade(record),
          :ok <- validate_extended(record),
          do: {:ok, record},
          else: (_ -> invalid())
@@ -941,11 +973,15 @@ defmodule SmolBox.Store.Codec do
   def decode(_bytes), do: invalid()
 
   defp legacy_branch_payload(record),
-    do: record |> CodecBranches.strip_release_env() |> :erlang.term_to_binary()
+    do:
+      record
+      |> CodecBranches.strip_release_env()
+      |> CodecStaticBranchEgress.strip()
+      |> :erlang.term_to_binary()
 
   defp legacy_branch_term(payload) do
     {record, used} = :erlang.binary_to_term(payload, [:safe, :used])
-    {CodecBranches.upgrade_release_env(record), used}
+    {record |> CodecBranches.upgrade_release_env() |> CodecStaticBranchEgress.upgrade(), used}
   end
 
   defp old_payload(record), do: legacy_branch_payload(CodecNativeCaptures.strip(record))

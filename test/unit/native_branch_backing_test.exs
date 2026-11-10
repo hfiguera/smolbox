@@ -66,6 +66,7 @@ defmodule SmolBox.NativeBranchBackingTest do
                      |> Map.delete(:disposal))
                  )
                  |> then(&update_in(&1.branch, fn branch -> Map.delete(branch, :release_env) end))
+                 |> update_in([Access.key!(:spec)], &Map.delete(&1, :branch_static_egress))
                )
 
     assert {:error, _} = Codec.decode("smolbox-record-v32\0" <> :erlang.term_to_binary(child))

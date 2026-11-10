@@ -10,7 +10,9 @@ defmodule SmolBox.Runtime.Branches do
       Target.supports_feature?(worker, :branches) and
         spec.policy in worker.branch_policies and Target.supports?(worker, parent.spec) and
         (parent.spec.profile.network == :offline or
-           (spec.hold and Target.https_branches?(worker, parent.spec.profile)))
+           (spec.hold and
+              (parent.spec.branch_static_egress or
+                 Target.https_branches?(worker, parent.spec.profile))))
 
   def supported(_config, %{branch: nil, branch_children: children}) when map_size(children) == 0,
     do: :ok
@@ -173,6 +175,7 @@ defmodule SmolBox.Runtime.Branches do
   end
 
   defp install_https_credential(_worker, %{spec: %{profile: %{network: :offline}}}), do: :ok
+  defp install_https_credential(_worker, %{spec: %{branch_static_egress: true}}), do: :ok
 
   defp install_https_credential(worker, child) do
     case BranchHTTPSCredentials.resolve(worker.branch_https_credentials, child) do

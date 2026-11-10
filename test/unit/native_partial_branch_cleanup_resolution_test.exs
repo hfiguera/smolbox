@@ -130,7 +130,11 @@ defmodule SmolBox.NativePartialBranchCleanupResolutionTest do
     assert bytes ==
              "smolbox-record-v49" <>
                <<0>> <>
-               :erlang.term_to_binary(update_in(old.branch, &Map.delete(&1, :release_env)))
+               :erlang.term_to_binary(
+                 old
+                 |> update_in([Access.key!(:branch)], &Map.delete(&1, :release_env))
+                 |> update_in([Access.key!(:spec)], &Map.delete(&1, :branch_static_egress))
+               )
 
     for version <- 1..48,
         do: assert({:error, _} = Codec.decode("smolbox-record-v#{version}" <> <<0>> <> payload))
@@ -172,7 +176,9 @@ defmodule SmolBox.NativePartialBranchCleanupResolutionTest do
       old = update_in(expected.branch.native_authority, &Map.delete(&1, :collected_publication))
 
       assert :erlang.binary_to_term(payload) ==
-               update_in(old.branch, &Map.delete(&1, :release_env))
+               old
+               |> update_in([Access.key!(:branch)], &Map.delete(&1, :release_env))
+               |> update_in([Access.key!(:spec)], &Map.delete(&1, :branch_static_egress))
 
       assert {:ok, ^record} = Codec.decode(bytes)
 

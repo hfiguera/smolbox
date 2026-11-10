@@ -11,6 +11,7 @@ defmodule SmolBox.ManagedBranchTest do
     RuntimeFixture
   }
 
+  alias SmolBox.Runtime.WorkerConfig
   alias SmolBox.Store.{Codec, MachineOps, Memory}
 
   defmodule HTTPSResolver do
@@ -106,6 +107,65 @@ defmodule SmolBox.ManagedBranchTest do
     assert {:ok, _} = Branches.release(f.runtime, child, current.version)
     assert {:ok, %{branch: %{state: :unknown}}} = Branches.await(f.runtime, child, 5000)
     assert count(f.peer, "/branch-release") == 2
+  end
+
+  test "static egress holds, releases and restarts with the approved policy and no credential" do
+    {:ok, network} =
+      SmolBox.NetworkPolicy.new(hosts: ["api.example.com"], cidrs: ["192.0.2.1/32"])
+
+    {f, source, spec} =
+      fixture(
+        network: network,
+        runtime_version: "1.34.0",
+        expected_runtime_version: "1.34.0",
+        branch_static_egress: true
+      )
+
+    assert {:ok, %{spec: source_spec, observed_machine: %{network: ^network}} = parent} =
+             Machines.inspect(f.runtime, source)
+
+    assert {:ok, <<"smolbox-record-v52\0", _::binary>> = bytes} = Codec.encode(parent)
+    assert {:ok, ^parent} = Codec.decode(bytes)
+    assert {:error, _} = ManagedMachineSpec.validate(%{source_spec | checkpointable: true})
+    [worker] = f.options[:workers]
+    refute WorkerConfig.supports?(%{worker | platform: :macos}, source_spec)
+    refute WorkerConfig.supports?(%{worker | runtime_version: "1.22.0"}, source_spec)
+
+    assert [creation] = ManagedPeer.snapshot(f.peer).creations
+    refute Map.has_key?(creation, "credentials")
+
+    assert {:error, %{category: :unsupported_capability}} =
+             Branches.create(f.runtime, source, spec)
+
+    assert {:ok, child} = Branches.create(f.runtime, source, %{spec | hold: true})
+
+    assert {:ok, %{branch: %{state: :held}, observed_machine: %{network: ^network}}} =
+             Branches.await(f.runtime, child, 5000)
+
+    held = RuntimeFixture.await_idle(f.runtime, child)
+    assert {:ok, _} = Branches.release(f.runtime, child, held.version, env: [{"TASK", "static"}])
+    assert {:ok, %{branch: %{state: :released}}} = Branches.await(f.runtime, child, 5000)
+
+    for {action, state} <- [{:stop, :stopped}, {:start, :running}] do
+      assert {:ok, _} =
+               RuntimeFixture.request_machine(
+                 f.runtime,
+                 child,
+                 &apply(Machines, action, [&1, &2, &3])
+               )
+
+      assert {:ok, %{state: ^state, observed_machine: %{network: ^network}}} =
+               Machines.await(f.runtime, child, 5000)
+    end
+
+    assert {:ok, running} = Machines.inspect(f.runtime, child)
+    assert {:ok, <<"smolbox-record-v52\0", _::binary>> = bytes} = Codec.encode(running)
+    assert {:ok, ^running} = Codec.decode(bytes)
+    assert count(f.peer, "/branch-release") == 1
+
+    refute Enum.any?(ManagedPeer.snapshot(f.peer).operations, fn {_, path} ->
+             String.ends_with?(path, "/credential-values")
+           end)
   end
 
   for {reason, changes} <- [version: [runtime_version: "1.20.2"], readiness: [unready: true]] do
@@ -546,13 +606,16 @@ defmodule SmolBox.ManagedBranchTest do
           ]
       )
 
+    static_egress = Keyword.get(options, :branch_static_egress, false)
+
     {:ok, spec} =
       ManagedMachineSpec.new(
         scope: f.spec.scope,
         id: "source",
         artifact: f.spec.artifact,
         profile: f.spec.profile,
-        checkpointable: true
+        checkpointable: not static_egress,
+        branch_static_egress: static_egress
       )
 
     {:ok, source} = Machines.create(f.runtime, spec)

@@ -12,6 +12,7 @@ defmodule SmolBox.DurableHost.BranchStore do
       CodecNativePartialBranchCollections,
       CodecNativePartialBranchDisposals,
       CodecNativePartialBranchRetirements,
+      CodecStaticBranchEgress,
       NativeBranchReleaseOps
     }
 
@@ -32,6 +33,11 @@ defmodule SmolBox.DurableHost.BranchStore do
         {:native_partial_branch_cleanups, CodecNativePartialBranchCleanups},
         {:native_partial_branch_cleanup_resolutions, CodecNativePartialBranchCleanupResolutions}
       ]
+
+      supported =
+        if Code.ensure_loaded?(CodecStaticBranchEgress),
+          do: Map.put(supported, :branch_static_egress, CodecStaticBranchEgress.reader()),
+          else: supported
 
       supported =
         Enum.reduce(

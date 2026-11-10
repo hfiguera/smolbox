@@ -5,12 +5,9 @@ memory and disks. Prepare once, then give separate tasks their own copies. Chang
 to one child's guest memory or disks do not change its siblings or source.
 
 This contract supports **idle, offline bare guests on smolvm 1.19.0, 1.20.2, 1.22.0 or 1.34.0**, on the
-source's worker. An opt-in HTTP configuration on 1.34.0 also supports held children
-with a credential for one approved HTTPS host. It creates one leaf child per request.
-It does not add nested branches, source freezing, migration, branch pools, network
-restoration or arbitrary application cloning. A branch is a managed machine, not a
-Git branch or a portable
-artifact. Use [exports](machine-exports.md) for supported disk artifacts and
+source's worker. On the 1.34.0 HTTP worker, held children can also use
+[static egress](#static-egress) or a [per-child HTTPS credential](#per-child-https-credentials).
+Each request creates one leaf child. Use [exports](machine-exports.md) for supported disk artifacts and
 [checkpoints](managed-checkpoints.md) for explicit saved memory and independent restore.
 
 ## Prepare and approve
@@ -25,7 +22,7 @@ SmolBox command slot does not prove idleness: background processes can still run
 The host must account for captured processes, credentials and external effects.
 SmolBox cannot determine whether arbitrary RAM contains secrets. The API rejects
 containers and requests to inject environment, secrets or ports at creation.
-Networked sources require the explicit HTTPS configuration below.
+Networked sources require one of the explicit configurations below.
 
 Approve additional preparation and backing capacity on the owning worker:
 
@@ -125,6 +122,33 @@ The environment is persisted. Pass only non-secret values. Reuse the same versio
 and values on retry. A different environment conflicts with the accepted release.
 The branchpoint continuation receives the values. Already running processes keep
 their original environment. Use `SmolBox.Command` for command-specific parameters.
+
+### Static egress
+
+On a Linux x86_64 HTTP worker running SmolVM 1.34.0, approve a profile with a
+nonempty `SmolBox.NetworkPolicy` and a local bare artifact. Create the source
+with that profile and `branch_static_egress: true` in
+`SmolBox.ManagedMachineSpec`. Start it in the usual way and request children
+with `hold: true`. The worker boots the source with `virtio-net` and applies
+the source's allowlist when booting each child. The same policy applies after
+child stop/start. Release the held child through `SmolBox.Branches.release/4`.
+
+The held state gates the prepared workload's continuation. The network policy
+applies as soon as the guest boots. Each child receives the same approved
+policy, and the branch request cannot widen it. See [controlled network access](network-access.md)
+for DNS, shared-IP, and host network boundaries.
+
+Static egress uses no credential resolver. Omit `checkpointable` for this
+source. The static mode excludes portable checkpoint capture, remote artifacts,
+ports, startup workloads, local volumes, and Embedded Port workers. Upgrade
+shared store readers and writers to v52 before opting in.
+
+To reproduce the Linux x86_64 check, start a dedicated SmolVM 1.34.0 HTTP
+worker on a Unix socket with its own `--state-dir`. With an approved local
+bare `.smolmachine`, run `MIX_ENV=test mix run scripts/lab/branch-static-egress.exs SOCKET ARTIFACT STATE_DIR`.
+The probe checks both held siblings after release and after stop/start. A
+control VM with both IPs allowlisted verifies that both endpoints are reachable
+from the worker before and after the sibling checks.
 
 ### Per-child HTTPS credentials
 

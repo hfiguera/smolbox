@@ -199,6 +199,7 @@ defmodule SmolBox.Store.NativeCodecTest do
       put_in(record.backend_assignment, Map.delete(record.backend_assignment, :version))
       |> Map.delete(:native_mounts)
       |> Map.delete(:native_branch_history)
+      |> update_in([Access.key!(:spec)], &Map.delete(&1, :branch_static_egress))
 
     expected = "smolbox-record-v16\0" <> :erlang.term_to_binary(historical)
     assert {:ok, ^expected} = Codec.encode(record)

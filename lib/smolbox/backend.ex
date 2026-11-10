@@ -53,6 +53,7 @@ defmodule SmolBox.Backend do
     expand_disks: 3,
     start: 2,
     start_checkpointable: 2,
+    start_static_branch_source: 3,
     start_https_branch_source: 3,
     checkpoint_preflight: 2,
     capture_checkpoint: 4,

@@ -10,7 +10,7 @@
   "parity_complete": false,
   "http_parity": {
     "qualified_operations": 34,
-    "total_operations": 37,
+    "total_operations": 38,
     "remaining_gaps": [
       {
         "id": "private-production-tls",
@@ -22,6 +22,12 @@
         "id": "held-branch-https-credentials",
         "status": "pending",
         "operations": ["start_https_branch_source", "branch_install_https_credential"],
+        "specifications": []
+      },
+      {
+        "id": "held-branch-static-egress",
+        "status": "pending",
+        "operations": ["start_static_branch_source"],
         "specifications": []
       }
     ]
@@ -779,6 +785,23 @@
       "review": {
         "evidence": ["test/contract/managed_branch_test.exs"],
         "remaining": ["Embedded Port credential-enabled source startup and live qualification."]
+      }
+    },
+    {
+      "name": "start_static_branch_source",
+      "arities": [3],
+      "contract": "branches",
+      "http_supported": true,
+      "port_operation_supported": false,
+      "parity_status": "pending",
+      "acceptance": [
+        "branches:validation-and-dispatch",
+        "branches:ordinary-public-behavior",
+        "branches:durable-accounting-and-no-replay"
+      ],
+      "review": {
+        "evidence": ["test/contract/managed_branch_test.exs", "scripts/lab/branch-static-egress.exs"],
+        "remaining": ["Embedded Port static egress for held branch sources and live qualification."]
       }
     },
     {
