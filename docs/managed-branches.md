@@ -146,9 +146,10 @@ shared store readers and writers to v52 before opting in.
 To reproduce the Linux x86_64 check, start a dedicated SmolVM 1.34.0 HTTP
 worker on a Unix socket with its own `--state-dir`. With an approved local
 bare `.smolmachine`, run `MIX_ENV=test mix run scripts/lab/branch-static-egress.exs SOCKET ARTIFACT STATE_DIR`.
-The probe checks both held siblings after release and after stop/start. A
-control VM with both IPs allowlisted verifies that both endpoints are reachable
-from the worker before and after the sibling checks.
+Append `hostnames` to test a DNS hostname policy with no CIDRs. The probe
+checks both held siblings after release and after stop/start. A control VM
+with both destinations allowlisted verifies that both endpoints are reachable
+before and after the sibling checks.
 
 ### Per-child HTTPS credentials
 

@@ -22,16 +22,17 @@ defmodule SmolBox.Lab.BranchStaticEgress do
 
   @timeout 120_000
   @scope "static-egress-proof"
-  @approved "1.1.1.1"
-  @denied "1.0.0.1"
   @probe ~S"""
   command -v nc >/dev/null || exit 1
+  errors=$(mktemp) || exit 1
+  trap 'rm -f "$errors"' EXIT
   for address in "$@"; do
-    response=$(printf 'GET / HTTP/1.0\r\nHost: %s\r\n\r\n' "$address" |
-      timeout 6 nc -w 4 "$address" 80 2>/dev/null)
+    # Keep nc's input open long enough for the gateway to relay the response.
+    response=$({ printf 'GET / HTTP/1.0\r\nHost: %s\r\n\r\n' "$address"; sleep 1; } |
+      timeout 6 nc -w 4 "$address" 80 2>"$errors")
     status=$?
     if [ "$status" -ne 0 ] && [ -z "$response" ]; then
-      printf '%s blocked (exit %s)\n' "$address" "$status"
+      printf '%s blocked (exit %s) %s\n' "$address" "$status" "$(head -n 1 "$errors")"
     else
       printf '%s ' "$address"
       printf '%s\n' "$response" | head -n 1 | tr -d '\r'
@@ -39,14 +40,16 @@ defmodule SmolBox.Lab.BranchStaticEgress do
   done
   """
 
-  def run(socket, artifact_path, state_dir) do
+  def run(socket, artifact_path, state_dir, mode) do
     {"Linux x86_64\n", 0} = System.cmd("uname", ["-sm"])
     {:ok, endpoint} = Worker.new("proof", "http://localhost", unix_socket: socket)
     {:ok, client} = Client.new(endpoint)
     {:ok, %{version: "1.34.0"}} = Client.health(client)
     {:ok, []} = Client.list(client)
-    {:ok, restricted} = NetworkPolicy.new(cidrs: [@approved <> "/32"])
-    {:ok, control} = NetworkPolicy.new(cidrs: [@approved <> "/32", @denied <> "/32"])
+    [approved, _denied] = destinations = destinations(mode)
+    {:ok, restricted} = policy(mode, [approved])
+    {:ok, control} = policy(mode, destinations)
+    IO.puts("Restricted policy #{inspect(restricted)}")
     {:ok, profile} = Profile.new("branch-egress", memory_mb: 512, network: restricted)
 
     {:ok, control_profile} =
@@ -92,7 +95,7 @@ defmodule SmolBox.Lab.BranchStaticEgress do
       )
 
     try do
-      exercise(runtime, artifact, profile, control_profile, policy, state_dir)
+      exercise(runtime, artifact, {profile, control_profile}, policy, state_dir, destinations)
       {:ok, []} = Client.list(client)
       {:ok, %{slots: 0, disk_gb: 0}} = Memory.usage(store, "proof")
       IO.puts("PASS: worker inventory empty and reservations released")
@@ -101,9 +104,17 @@ defmodule SmolBox.Lab.BranchStaticEgress do
     end
   end
 
-  defp exercise(runtime, artifact, profile, control_profile, policy, state_dir) do
+  defp destinations(:cidrs), do: ["1.1.1.1", "1.0.0.1"]
+  defp destinations(:hostnames), do: ["one.one.one.one", "example.com"]
+
+  defp policy(:cidrs, destinations),
+    do: NetworkPolicy.new(cidrs: Enum.map(destinations, &(&1 <> "/32")))
+
+  defp policy(:hostnames, destinations), do: NetworkPolicy.new(hosts: destinations)
+
+  defp exercise(runtime, artifact, {profile, control_profile}, policy, state_dir, destinations) do
     control = boot(runtime, "control", artifact, control_profile, false)
-    expect_probe(runtime, control, "control before branching", :both_reachable)
+    expect_probe(runtime, control, destinations, "control before branching", :both_reachable)
 
     source = boot(runtime, "source", artifact, profile, true)
 
@@ -134,10 +145,10 @@ defmodule SmolBox.Lab.BranchStaticEgress do
     for {_, id} = child <- children do
       {:ok, _} = Branches.release(runtime, child, machine(runtime, child).version)
       {:ok, %{branch: %{state: :released}}} = Branches.await(runtime, child, @timeout)
-      expect_probe(runtime, child, id <> " after release", :restricted)
+      expect_probe(runtime, child, destinations, id <> " after release", :restricted)
       transition(runtime, child, :stop, :stopped)
       transition(runtime, child, :start, :running)
-      expect_probe(runtime, child, id <> " after stop/start", :restricted)
+      expect_probe(runtime, child, destinations, id <> " after stop/start", :restricted)
       transition(runtime, child, :stop, :stopped)
       transition(runtime, child, :delete, :deleted)
       {:ok, _} = Branches.retire(runtime, child, quiesced: true)
@@ -145,7 +156,7 @@ defmodule SmolBox.Lab.BranchStaticEgress do
 
     transition(runtime, source, :stop, :stopped)
     transition(runtime, source, :delete, :deleted)
-    expect_probe(runtime, control, "control after restart probes", :both_reachable)
+    expect_probe(runtime, control, destinations, "control after restart probes", :both_reachable)
     transition(runtime, control, :stop, :stopped)
     transition(runtime, control, :delete, :deleted)
 
@@ -179,25 +190,25 @@ defmodule SmolBox.Lab.BranchStaticEgress do
     handle
   end
 
-  defp expect_probe(runtime, handle, label, expected) do
+  defp expect_probe(runtime, handle, [approved, denied] = destinations, label, expected) do
     result =
       execute(
         runtime,
         handle,
         "probe-" <> Integer.to_string(System.unique_integer([:positive])),
-        ["/bin/sh", "-c", @probe, "probe", @approved, @denied]
+        ["/bin/sh", "-c", @probe, "probe" | destinations]
       )
 
     IO.puts("#{label}\n#{result}")
-    [approved, denied] = String.split(result, "\n", trim: true)
-    true = String.starts_with?(approved, @approved <> " HTTP/")
+    [approved_result, denied_result] = String.split(result, "\n", trim: true)
+    true = String.starts_with?(approved_result, approved <> " HTTP/")
 
     case expected do
       :both_reachable ->
-        true = String.starts_with?(denied, @denied <> " HTTP/")
+        true = String.starts_with?(denied_result, denied <> " HTTP/")
 
       :restricted ->
-        true = String.starts_with?(denied, @denied <> " blocked (exit ")
+        true = String.starts_with?(denied_result, denied <> " blocked (exit ")
     end
   end
 
@@ -237,5 +248,13 @@ defmodule SmolBox.Lab.BranchStaticEgress do
   end
 end
 
-[socket, artifact, state_dir] = System.argv()
-SmolBox.Lab.BranchStaticEgress.run(socket, artifact, state_dir)
+case System.argv() do
+  [socket, artifact, state_dir] ->
+    SmolBox.Lab.BranchStaticEgress.run(socket, artifact, state_dir, :cidrs)
+
+  [socket, artifact, state_dir, "hostnames"] ->
+    SmolBox.Lab.BranchStaticEgress.run(socket, artifact, state_dir, :hostnames)
+
+  _ ->
+    raise ArgumentError, "expected SOCKET ARTIFACT STATE_DIR [hostnames]"
+end
