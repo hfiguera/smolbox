@@ -159,6 +159,24 @@ defmodule SmolBox.Embedded.BranchPreflightTest do
 
     assert :error =
              Channel.receive_message(channel, %{reply | "outcome" => %{"result" => "qualified"}})
+
+    hello =
+      update_in(hello, ~w(sdk feature_versions), fn features ->
+        Map.merge(features, %{"branches" => 1, "checkpoints" => 1, "branch_static_egress" => 1})
+      end)
+
+    assert {:ok, 1, channel} = Channel.register(Channel.new(hello), @source["operation"], 1024, 1)
+    assert {:ok, channel, {1, :accepted}} = Channel.receive_message(channel, accepted)
+
+    networked =
+      put_in(reply, ~w(outcome observation configuration), %{
+        "backend" => "virtio-net",
+        "network" => %{"enabled" => true, "hosts" => ["example.invalid"], "cidrs" => []},
+        "ports" => []
+      })
+
+    assert {:ok, _, {1, {:terminal, %{"result" => "observed"}}}} =
+             Channel.receive_message(channel, networked)
   end
 
   test "scoped reply keeps source receipt and rejects changed authority resources or output" do

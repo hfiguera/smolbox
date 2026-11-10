@@ -154,3 +154,28 @@ fn source_reply_is_running_offline_unmounted_and_never_stream_or_creation_author
     assert!(session.terminal(1, Outcome::Qualified).is_err());
     assert!(session.terminal(1, outcome).is_ok());
 }
+
+#[test]
+fn source_reply_accepts_a_network_allowlist_when_static_egress_is_negotiated() {
+    let (operation, mut outcome) = fixture();
+    let mut hello = hello();
+    let features = &mut hello.sdk.as_mut().unwrap().feature_versions;
+    for feature in [
+        "branches",
+        "checkpoints",
+        "networking",
+        "branch_static_egress",
+    ] {
+        features.insert(feature.into(), 1);
+    }
+    if let Outcome::Observed { observation } = &mut outcome {
+        let config = observation.configuration.as_mut().unwrap();
+        config.backend = Some("virtio-net".into());
+        config.network.enabled = true;
+        config.network.hosts = vec!["example.invalid".into()];
+    }
+    let mut session = Session::new(hello.clone()).unwrap();
+    session.approve(&hello).unwrap();
+    session.admit(request(&hello, operation)).unwrap();
+    assert!(session.terminal(1, outcome).is_ok());
+}

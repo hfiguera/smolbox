@@ -51,7 +51,7 @@ defmodule SmolBox.Embedded.NativeBranchHistory do
   def source?(record) do
     with true <- is_map(record.branch_children) and map_size(record.branch_children) <= 256,
          {:ok, history} <- transitions(record),
-         true <- history == [] or record.spec.checkpointable do
+         true <- history == [] or source_features?(record.spec) do
       Enum.all?(record.branch_children, fn {id, retired} ->
         is_boolean(retired) and
           (retired or id == record.active_branch or Map.has_key?(record.native_branch_history, id))
@@ -65,7 +65,7 @@ defmodule SmolBox.Embedded.NativeBranchHistory do
 
   defp source_features?(spec),
     do:
-      spec.checkpointable and spec.profile.network == :offline and
+      ((spec.checkpointable and spec.profile.network == :offline) or spec.branch_static_egress) and
         spec.ports == [] and spec.volumes == [] and spec.workload == nil
 
   defp entry?(record, id, %{__struct__: NativePreparedBranchRetirement} = saved),

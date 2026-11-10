@@ -1,5 +1,5 @@
-//! Shared bare/offline capture eligibility. This is neither guest-idleness
-//! evidence nor permission to adopt a record or change its material fields.
+//! Bare guest eligibility for checkpoint capture and managed branching.
+//! Eligibility leaves guest idleness and material authority to the caller.
 use crate::{Error, ErrorCode, Resources, Result};
 use smolvm::config::{RestartPolicy, VmRecord};
 use smolvm_pack::format::{PackManifest, PackMode};
@@ -16,10 +16,36 @@ pub(crate) fn validate_pack(manifest: &PackManifest) -> Result<()> {
 }
 
 pub(crate) fn validate_record(record: &VmRecord) -> Result<Resources> {
+    validate_bare_record(record, false)
+}
+
+pub(crate) fn validate_branch_record(record: &VmRecord) -> Result<Resources> {
+    let networked = record.network;
+    if networked {
+        if !cfg!(target_os = "linux")
+            || record.network_backend != Some(smolvm::network::NetworkBackend::VirtioNet)
+            || record.dns_filter_hosts.is_none()
+            || record.allowed_cidrs.is_none()
+            || record.guest_subnet.is_some()
+        {
+            return Err(Error::before(ErrorCode::Unsupported));
+        }
+        let observed = crate::MachineConfiguration::observe_explicit(record);
+        crate::CreationFeatures {
+            network: observed.network,
+            ports: vec![],
+            workload: None,
+        }
+        .validate()?;
+    }
+    validate_bare_record(record, networked)
+}
+
+fn validate_bare_record(record: &VmRecord, static_egress: bool) -> Result<Resources> {
     smolvm::portable_checkpoint::validate_capture_profile(record, false)
         .map_err(|_| Error::before(ErrorCode::Unsupported))?;
     if record.image.is_some()
-        || record.launch_network_plan().has_network()
+        || record.launch_network_plan().has_network() != static_egress
         || !record.ports.is_empty()
         || !record.udp_ports.is_empty()
         || !record.disks.is_empty()
@@ -27,15 +53,17 @@ pub(crate) fn validate_record(record: &VmRecord) -> Result<Resources> {
         || !record.disk_volumes.is_empty()
         || record.disk_durability != smolvm::data::resources::DiskDurability::Full
         || record.nested_virt.unwrap_or(false)
-        || record.network_backend.is_some()
+        || (!static_egress && record.network_backend.is_some())
         || !record.egress_rules.is_empty()
         || !record.dns_options.is_empty()
         || record.block_private.is_some()
         || record.mediated_egress_required
-        || record
-            .dns_filter_hosts
-            .as_ref()
-            .is_some_and(|values| !values.is_empty())
+        || record.external_interceptor_required
+        || (!static_egress
+            && record
+                .dns_filter_hosts
+                .as_ref()
+                .is_some_and(|values| !values.is_empty()))
         || record.credential_policy.is_some()
         || !record.credential_placeholders.is_empty()
         || record.credentials_supplied_by_api

@@ -57,7 +57,7 @@ defmodule SmolBox.Embedded.NativePreparedBranchRetirementResult do
         Machine.same_incarnation?(SmolBox.DiskExpansion.expected(parent), source) and
         {source.cpus, source.memory_mb, source.storage_gb, source.overlay_gb} ==
           {profile.cpus, profile.memory_mb, profile.storage_gb, profile.overlay_gb} and
-        source.network == :offline and source.ports == [] and source.mounts == []
+        source.network == profile.network and source.ports == [] and source.mounts == []
 
   defp observed_state?(:running, pid), do: pid != nil
   defp observed_state?(:stopped, pid), do: pid == nil

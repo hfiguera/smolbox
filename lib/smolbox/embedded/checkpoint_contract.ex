@@ -21,13 +21,15 @@ defmodule SmolBox.Embedded.CheckpointContract do
     not Map.has_key?(value, "volume_mounts") and value["source"]["kind"] != "oci" and
       (features == nil or
          (is_map(features) and is_map(features["network"]) and
-            features["network"]["enabled"] == false and
+            (features["network"]["enabled"] == false or Map.has_key?(value, "artifact")) and
             features["ports"] == [] and features["workload"] == nil))
   end
 
+  # The protocol marker makes a local pack forkable. With an allowlist it
+  # selects held branching only. Portable capture still requires offline mode.
   def attach(value, spec),
     do:
-      if(Map.get(spec, :checkpointable, false),
+      if(forkable?(spec),
         do: Map.put(value, "checkpointable", true),
         else: value
       )
@@ -35,14 +37,27 @@ defmodule SmolBox.Embedded.CheckpointContract do
   def matches?(value, spec, retained),
     do:
       if(retained == nil,
-        do: Map.get(value, "checkpointable", false) == Map.get(spec, :checkpointable, false),
+        do: Map.get(value, "checkpointable", false) == forkable?(spec),
         else: marker?(value, 2)
       )
 
   def opt_in_approved?(config, value),
     do:
       marker?(value, 2) and
-        (not Map.has_key?(value, "checkpointable") or Features.supports?(config, :checkpoints))
+        (not Map.has_key?(value, "checkpointable") or creation_feature?(config, value))
+
+  defp creation_feature?(config, %{"features" => %{"network" => %{"enabled" => true}}}),
+    do: static_egress_approved?(config)
+
+  defp creation_feature?(config, _value), do: Features.supports?(config, :checkpoints)
+
+  def static_egress_approved?(config),
+    do:
+      config.platform == :linux and config.architecture == "x86_64" and
+        Features.supports?(config, :branch_static_egress)
+
+  defp forkable?(spec),
+    do: Map.get(spec, :checkpointable, false) or Map.get(spec, :branch_static_egress, false)
 
   def source?(source) do
     Shape.keys?(source, ~w(kind id sha256 architecture)) and source["kind"] == "checkpoint" and

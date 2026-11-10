@@ -609,7 +609,10 @@ impl InitialBranchJournal {
     pub(crate) fn verify_material(&self, record: &smolvm::config::VmRecord) -> Result<()> {
         self.validate()?;
         let resources = source_profile(record)?;
-        if !self.source.matches(record)? || self.plan != self.approval.plan(resources)? {
+        if !self.source.matches(record)?
+            || self.plan != self.approval.plan(resources)?
+            || (record.network && !self.child.hold)
+        {
             return Err(Error::before(ErrorCode::Ownership));
         }
         Ok(())
@@ -683,7 +686,7 @@ fn eligible_record(record: &smolvm::config::VmRecord) -> Result<Resources> {
     Ok(resources)
 }
 fn source_profile(record: &smolvm::config::VmRecord) -> Result<Resources> {
-    let resources = crate::checkpoint_capture::validate_record(record)?;
+    let resources = crate::checkpoint_capture::validate_branch_record(record)?;
     if !record.forkable
         || record.golden.is_some()
         || record.forkpoint_held
@@ -925,6 +928,14 @@ impl Engine {
         // Existing guarded preflight authenticates actual agent readiness and
         // original engine enrollment, without promoting inventory ownership.
         let observed = self.branch_preflight(source, budget)?;
+        if !child.hold
+            && observed
+                .configuration
+                .as_ref()
+                .is_some_and(|config| config.network.enabled)
+        {
+            return Err(Error::before(ErrorCode::Unsupported));
+        }
         let pid = observed
             .pid_identity
             .ok_or(Error::before(ErrorCode::Ownership))?;

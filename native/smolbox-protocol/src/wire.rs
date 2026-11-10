@@ -427,6 +427,7 @@ impl SdkIdentity {
                     | "exports"
                     | "branches"
                     | "branch_release_env"
+                    | "branch_static_egress"
                     | "partial_cleanup_resolution"
                     | "partial_collection_preflight"
             ))?;
@@ -435,6 +436,12 @@ impl SdkIdentity {
         require(
             self.feature_versions.get("branch_release_env") != Some(&1)
                 || self.feature_versions.get("branches") == Some(&1),
+        )?;
+        require(
+            self.feature_versions.get("branch_static_egress") != Some(&1)
+                || (self.feature_versions.get("branches") == Some(&1)
+                    && self.feature_versions.get("checkpoints") == Some(&1)
+                    && self.feature_versions.get("networking") == Some(&1)),
         )?;
         require(
             self.feature_versions.get("partial_collection_preflight") != Some(&1)
@@ -2148,6 +2155,13 @@ impl Operation {
             _ => None,
         }
     }
+    pub(crate) fn branch_static_egress(&self) -> bool {
+        self.checkpointable() == Some(true)
+            && self
+                .creation_features()
+                .is_some_and(|features| features.network.enabled)
+    }
+
     pub fn capability(&self) -> Capability {
         match self {
             Self::QualifyUnbootedBranchChildAbsence { .. }
@@ -2335,6 +2349,15 @@ impl Operation {
     }
     pub fn validate(&self, budget_ms: u64) -> Result<()> {
         require(budget_ms > 0 && budget_ms <= 86_400_000)?;
+        require(
+            !self.branch_static_egress()
+                || matches!(
+                    self,
+                    Self::QualifyCreation { .. }
+                        | Self::Create { .. }
+                        | Self::InspectCreation { .. }
+                ),
+        )?;
         checkpointable_mode(
             self.checkpointable(),
             self.creation_features(),
@@ -3719,9 +3742,7 @@ fn checkpointable_mode(
     if flag == Some(true) {
         require(
             mounts.is_none()
-                && features.is_none_or(|value| {
-                    !value.network.enabled && value.ports.is_empty() && value.workload.is_none()
-                }),
+                && features.is_none_or(|value| value.ports.is_empty() && value.workload.is_none()),
         )?;
     }
     Ok(())

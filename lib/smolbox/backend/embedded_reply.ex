@@ -54,8 +54,7 @@ defmodule SmolBox.Backend.EmbeddedReply do
        ) do
     with true <- Protocol.valid_outcome?(outcome, 2),
          {:ok, ^receipt} <- EmbeddedContext.receipt(context),
-         %{"configuration" => %{"network" => %{"enabled" => false}, "ports" => []} = config} <-
-           observed,
+         %{"configuration" => %{"ports" => []} = config} <- observed,
          true <- Map.get(config, "mounts") == nil,
          do: observation(context, :branch_source, observed),
          else: (_ -> error(:identity_conflict, :branch_source, :dispatch_uncertain))

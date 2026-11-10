@@ -52,6 +52,7 @@ defmodule SmolBox.Embedded.Channel do
     :platform,
     major: 1,
     unavailable: false,
+    branch_static_egress: false,
     partial_cleanup_resolution: false,
     partial_collection_preflight: false,
     last_id: 0,
@@ -66,6 +67,7 @@ defmodule SmolBox.Embedded.Channel do
       domain: hello["domain"],
       minor: hello["minor"],
       major: Map.get(hello, "major", 1),
+      branch_static_egress: get_in(hello, ~w(sdk feature_versions branch_static_egress)) == 1,
       partial_cleanup_resolution:
         match?(
           %{"branches" => 1, "partial_cleanup_resolution" => 1},
@@ -320,6 +322,7 @@ defmodule SmolBox.Embedded.Channel do
         branch_platform?(channel.platform, outcome) and
         branch_epoch?(channel.epoch, outcome) and
         ready_epoch?(channel.epoch, pending, outcome) and
+        branch_preflight_network?(channel, pending.operation, outcome) and
         terminal_matches?(channel.domain, pending, outcome),
       do: {:ok, %{pending | sequence: next, done: true}, {:terminal, outcome}},
       else: :error
@@ -327,6 +330,15 @@ defmodule SmolBox.Embedded.Channel do
   end
 
   defp advance(_channel, _pending, _message), do: :error
+
+  defp branch_preflight_network?(
+         channel,
+         %{"operation" => "branch_preflight"},
+         %{"observation" => %{"configuration" => %{"network" => %{"enabled" => true}}}}
+       ),
+       do: channel.branch_static_egress
+
+  defp branch_preflight_network?(_channel, _operation, _outcome), do: true
 
   defp terminal_sequence?(nil, 0), do: true
   defp terminal_sequence?(previous, next) when is_integer(previous), do: next == previous + 1
@@ -1180,7 +1192,7 @@ defmodule SmolBox.Embedded.Channel do
              "state" => "running",
              "resources" => resources,
              "pid_identity" => [_pid, _birth],
-             "configuration" => %{"network" => %{"enabled" => false}, "ports" => []} = config
+             "configuration" => %{"ports" => []} = config
            }
          }
        ),

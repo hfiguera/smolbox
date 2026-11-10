@@ -557,10 +557,11 @@ pub fn run_with_policy(
                     max_bytes: artifact.max_bytes,
                     guest_platform: artifact.guest_platform,
                 };
+            let features = requested.map(|value| features(*value));
             let result = if checkpointable == Some(true) {
-                engine.qualify_checkpointable_creation(&approved, resources(&admitted), user.as_deref())
+                engine.qualify_branchable_creation(&approved, resources(&admitted), user.as_deref(), features.as_ref())
             } else {
-                engine.qualify_creation_with_features(&approved, resources(&admitted), user.as_deref(), requested.map(|value| features(*value)).as_ref())
+                engine.qualify_creation_with_features(&approved, resources(&admitted), user.as_deref(), features.as_ref())
             };
             result.map(|()| wire::Outcome::Qualified)
         },
@@ -588,7 +589,7 @@ pub fn run_with_policy(
                     }),
                 None if create.checkpointable == Some(true) => operation_deadline
                     .ok_or(engine::Error { code: engine::ErrorCode::Validation, dispatch: engine::Dispatch::NotDispatched })
-                    .and_then(|deadline| engine.create_checkpointable(request, deadline, &cancel)),
+                    .and_then(|deadline| engine.create_branchable(request, requested.as_ref(), deadline, &cancel)),
                 None => match requested {
                     Some(features) => engine.create_with_features(request, features),
                     None => engine.create_versioned(request),

@@ -941,6 +941,9 @@ mod tests {
         let mut fixture_features = sdk.feature_versions.clone();
         assert_eq!(fixture_features.remove("exports"), Some(1));
         assert_eq!(fixture_features.remove("branch_release_env"), Some(1));
+        if cfg!(target_os = "linux") {
+            assert_eq!(fixture_features.remove("branch_static_egress"), Some(1));
+        }
         assert_eq!(
             hello.sdk.as_deref().unwrap().feature_versions,
             fixture_features

@@ -41,6 +41,7 @@ defmodule SmolBox.Backend.Features do
   @native_names Map.new(
                   [
                     :material_proofs,
+                    :branch_static_egress,
                     :partial_cleanup_resolution,
                     :partial_collection_preflight,
                     :observability,

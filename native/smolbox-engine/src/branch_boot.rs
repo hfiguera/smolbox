@@ -99,7 +99,6 @@ impl Plan {
             || !record.forkpoint_held
             || !record.fork_env.is_empty()
             || record.image.is_some()
-            || record.network
             || !record.ports.is_empty()
             || !record.mounts.is_empty()
             || !record.staged_mounts.is_empty()
@@ -109,12 +108,14 @@ impl Plan {
         {
             return Err(Error::before(ErrorCode::Ownership));
         }
+        crate::checkpoint_capture::validate_branch_record(record)?;
         let resources = record.vm_resources();
         resources
             .validate()
             .map_err(|_| Error::before(ErrorCode::Validation))?;
         let features = smolvm::agent::LaunchFeatures {
             snapshot_dir: Some(self.snapshot.path.clone()),
+            dns_filter_hosts: record.dns_filter_hosts.clone(),
             uid_share_dir: Some(self.source.path.clone()),
             watch_parent: Some(true),
             ..Default::default()
