@@ -123,7 +123,7 @@ defmodule SmolBox.RuntimeFixture do
     runtime = ExUnit.Callbacks.start_supervised!({Runtime, config})
 
     if Keyword.get(options, :wait_ready, true),
-      do: wait_ready(runtime, System.monotonic_time(:millisecond) + 30_000)
+      do: wait_for_worker_status(runtime, :ready)
 
     %{
       runtime: runtime,
@@ -162,17 +162,23 @@ defmodule SmolBox.RuntimeFixture do
   # two failures already put the third probe beyond a ten-second deadline.
   # Return as soon as ready, before command/machine observation budgets begin.
   # Unavailable/draining-worker tests opt out explicitly with wait_ready: false.
-  def wait_ready(runtime, deadline) do
+  def wait_ready(runtime, deadline), do: wait_for_worker_status(runtime, :ready, deadline)
+
+  def wait_for_worker_status(
+        runtime,
+        expected,
+        deadline \\ System.monotonic_time(:millisecond) + 30_000
+      ) do
     case SmolBox.workers(runtime) do
-      {:ok, [%{status: :ready}]} ->
+      {:ok, [%{status: ^expected}]} ->
         :ok
 
       report ->
         assert System.monotonic_time(:millisecond) < deadline,
-               "fixture worker did not become ready: #{inspect(report)}"
+               "fixture worker did not reach #{inspect(expected)}: #{inspect(report)}"
 
         Process.sleep(20)
-        wait_ready(runtime, deadline)
+        wait_for_worker_status(runtime, expected, deadline)
     end
   end
 
