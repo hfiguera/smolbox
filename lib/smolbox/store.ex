@@ -315,6 +315,8 @@ defmodule SmolBox.Store do
   A repeated release with its original submitted version and environment returns
   stored evidence. Advertise `branch_release_env: 1` only after upgrading the
   codec to read v51 and supporting the four-argument release transaction.
+  Advertise `branch_static_egress: 1` after upgrading to read and write v52
+  source and child records and preserving the static egress intent in branch transactions.
   These transactions must serialize with commands, files, PTYs, capture, export
   and lifecycle admission across controllers sharing the store.
 

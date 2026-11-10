@@ -50,7 +50,8 @@ defmodule SmolBox.Store.BranchOps do
     with :ok <- BranchSpec.validate(spec),
          true <- Validation.digest?(fingerprint),
          true <- parent.state == :running and ManagedMachine.idle?(parent),
-         true <- parent.branch == nil and parent.spec.checkpointable and parent.id != spec.id,
+         true <- parent.branch == nil and parent.id != spec.id,
+         true <- parent.spec.checkpointable or parent.spec.branch_static_egress,
          true <-
            map_size(parent.branch_children) < 256 and
              not Map.has_key?(parent.branch_children, spec.id),
@@ -448,7 +449,8 @@ defmodule SmolBox.Store.BranchOps do
   defp related?(p, c),
     do:
       c.branch != nil and c.branch.source == ManagedMachine.key(p) and
-        p.worker_id == c.worker_id and Map.has_key?(p.branch_children, c.id)
+        p.worker_id == c.worker_id and p.spec.branch_static_egress == c.spec.branch_static_egress and
+        Map.has_key?(p.branch_children, c.id)
 
   defp owned_source?(_, _, :absent), do: false
 

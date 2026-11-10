@@ -1,7 +1,8 @@
 defmodule SmolBox.Branches do
   @moduledoc """
   Create managed leaf machines from idle offline bare sources on smolvm
-  1.19.0, 1.20.2, 1.22.0 or 1.34.0.
+  1.19.0, 1.20.2, 1.22.0 or 1.34.0. See [managed branches](managed-branches.html)
+  for opt-in network policies on HTTP workers.
 
   Source and child identity, exclusion and capacity are persisted atomically.
   Children run on the source worker and retain a disk dependency on it. Delete

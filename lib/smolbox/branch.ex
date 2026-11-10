@@ -182,7 +182,9 @@ defmodule SmolBox.Branch do
   defp branch_network?(%{spec: %{profile: %{network: :offline}}}), do: true
 
   defp branch_network?(%{branch: %{native_authority: nil, spec: %{hold: true}}} = m),
-    do: SmolBox.BranchHTTPSCredentials.network?(m.spec.profile.network)
+    do:
+      m.spec.branch_static_egress or
+        SmolBox.BranchHTTPSCredentials.network?(m.spec.profile.network)
 
   defp branch_network?(_), do: false
 

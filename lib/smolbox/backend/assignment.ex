@@ -352,6 +352,8 @@ defmodule SmolBox.Backend.Assignment do
       is_map(expected) and map_size(expected) == 3 and
         artifact_matches?(creation["artifact"], expected)
 
+  defp supported_spec?(%{branch_static_egress: true}, _version), do: false
+
   defp supported_spec?(spec, version) do
     is_map(spec) and native_profile?(spec.profile, version) and
       supported_artifact?(spec.artifact, version) and

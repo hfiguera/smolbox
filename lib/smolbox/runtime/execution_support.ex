@@ -4,12 +4,23 @@ defmodule SmolBox.Runtime.ExecutionSupport do
   alias SmolBox.Runtime.Session
 
   def check(config, spec) do
-    with :ok <- capture_capability(config, spec),
+    with :ok <- static_branch_capability(config, spec),
+         :ok <- capture_capability(config, spec),
          :ok <- image_capability(config, spec),
          :ok <- source_capability(config, spec),
          :ok <- file_capability(config, spec.profile),
          do: check_existing(config, spec)
   end
+
+  defp static_branch_capability(config, %{branch_static_egress: true}) do
+    case Session.store(config, :capabilities, []) do
+      {:ok, %{managed_branches: 1, branch_static_egress: 1}} -> :ok
+      {:ok, _} -> Session.error(:unsupported_capability, :branch)
+      error -> error
+    end
+  end
+
+  defp static_branch_capability(_config, _spec), do: :ok
 
   defp capture_capability(config, %{checkpointable: true}) do
     case Session.store(config, :capabilities, []) do

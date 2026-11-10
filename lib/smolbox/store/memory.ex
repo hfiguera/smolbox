@@ -204,6 +204,7 @@ defmodule SmolBox.Store.Memory do
           native_partial_branch_cleanup_resolutions: 1,
           managed_branches: 1,
           branch_release_env: 1,
+          branch_static_egress: 1,
           guest_files: 1,
           interactive_terminal: 1,
           extended_execution: 1

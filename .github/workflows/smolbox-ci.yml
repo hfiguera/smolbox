@@ -411,6 +411,8 @@ jobs:
           key: smolbox-durable-${{ runner.os }}-${{ runner.arch }}-otp29.1.2-ex1.20.5-test-${{ hashFiles('examples/durable_host/mix.lock', 'examples/durable_host/mix.exs') }}
       - run: mix deps.get
       - run: elixir --version
+      - name: Rebuild store fixtures against the current SmolBox structs
+        run: mix clean
       - run: mix quality
       - run: mix ecto.migrate
       - run: mix xref graph --format cycles --fail-above 0

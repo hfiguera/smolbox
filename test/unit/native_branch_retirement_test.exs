@@ -104,6 +104,7 @@ defmodule SmolBox.NativeBranchRetirementTest do
                    |> then(
                      &update_in(&1.branch, fn branch -> Map.delete(branch, :release_env) end)
                    )
+                   |> update_in([Access.key!(:spec)], &Map.delete(&1, :branch_static_egress))
                  )
 
       assert {:ok, ^prior} = Codec.decode(bytes)

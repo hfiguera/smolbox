@@ -6,7 +6,8 @@ defmodule SmolBox.Store.CodecNative do
     CodecMaterial,
     CodecNativeCaptures,
     CodecNativeMounts,
-    CodecNativeVolumes
+    CodecNativeVolumes,
+    CodecStaticBranchEgress
   }
 
   @defaults %{
@@ -23,9 +24,11 @@ defmodule SmolBox.Store.CodecNative do
       |> CodecNativeMounts.strip()
       |> CodecNativeVolumes.strip()
       |> CodecMaterial.strip()
+      |> CodecStaticBranchEgress.strip()
       |> CodecFields.transform(@defaults, :strip)
 
-  def upgrade(record), do: CodecFields.transform(record, @defaults, :upgrade)
+  def upgrade(record),
+    do: record |> CodecFields.transform(@defaults, :upgrade) |> CodecStaticBranchEgress.upgrade()
 
   def payload(record),
     do:

@@ -111,7 +111,11 @@ defmodule SmolBox.NativeBranchDeletionTest do
 
     assert bytes ==
              "smolbox-record-v30\0" <>
-               :erlang.term_to_binary(update_in(old.branch, &Map.delete(&1, :release_env)))
+               :erlang.term_to_binary(
+                 old
+                 |> update_in([Access.key!(:branch)], &Map.delete(&1, :release_env))
+                 |> update_in([Access.key!(:spec)], &Map.delete(&1, :branch_static_egress))
+               )
 
     assert {:error, _} =
              Codec.decode(

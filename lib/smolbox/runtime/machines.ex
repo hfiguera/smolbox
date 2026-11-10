@@ -270,6 +270,17 @@ defmodule SmolBox.Runtime.Machines do
 
   defp mutate(
          worker,
+         %{operation: :start, branch: nil, spec: %{branch_static_egress: true}} = record
+       ) do
+    Backend.start_static_branch_source(
+      Target.connection(worker, record),
+      record.machine_name,
+      record.spec.profile.network
+    )
+  end
+
+  defp mutate(
+         worker,
          %{operation: :start, spec: %{checkpointable: true, profile: profile}} = record
        )
        when profile.network != :offline,

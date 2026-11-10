@@ -287,6 +287,11 @@ defmodule SmolBox.Runtime.WorkerConfig do
     end
   end
 
+  defp network_supported?(worker, %{branch_static_egress: true}),
+    do:
+      worker.platform == :linux and worker.architecture == "x86_64" and
+        worker.runtime_version == "1.34.0"
+
   defp network_supported?(worker, spec),
     do:
       spec.profile.network == :offline or

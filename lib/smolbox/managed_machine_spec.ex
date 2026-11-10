@@ -12,6 +12,11 @@ defmodule SmolBox.ManagedMachineSpec do
   This changes immutable identity and requires codec v12/store capability
   `managed_checkpoints: 1`. See `SmolBox.Checkpoints`.
 
+  `branch_static_egress: true` prepares an approved local bare guest for held
+  branches with its explicit network allowlist on a Linux x86_64 HTTP worker
+  running smolvm 1.34.0. It is independent of `:checkpointable` and retains the
+  same allowlist on the source and its children.
+
   Optional `ports: [SmolBox.PortMapping.t()]` adds fixed TCP forwarding on image
   sources and smolvm 1.17.0, 1.19.0, 1.20.2 or 1.22.0. The constructor canonicalizes mappings; they are part
   of immutable identity, independent of commands and outbound profile policy.
@@ -30,7 +35,14 @@ defmodule SmolBox.ManagedMachineSpec do
 
   @enforce_keys [:scope, :id, :artifact, :profile]
   @derive {Inspect, only: [:scope, :id]}
-  defstruct @enforce_keys ++ [volumes: [], ports: [], workload: nil, checkpointable: false]
+  defstruct @enforce_keys ++
+              [
+                volumes: [],
+                ports: [],
+                workload: nil,
+                checkpointable: false,
+                branch_static_egress: false
+              ]
 
   @type t :: %__MODULE__{
           scope: String.t(),
@@ -40,12 +52,16 @@ defmodule SmolBox.ManagedMachineSpec do
           volumes: [SmolBox.VolumeMount.t()],
           ports: [SmolBox.PortMapping.t()],
           workload: SmolBox.Workload.t() | nil,
-          checkpointable: boolean()
+          checkpointable: boolean(),
+          branch_static_egress: boolean()
         }
 
   @spec new(keyword()) :: {:ok, t()} | {:error, Error.t()}
   def new(options) do
-    if Validation.keys?(options, @enforce_keys ++ [:ports, :workload, :checkpointable, :volumes]) and
+    if Validation.keys?(
+         options,
+         @enforce_keys ++ [:ports, :workload, :checkpointable, :branch_static_egress, :volumes]
+       ) and
          Enum.all?(@enforce_keys, &Keyword.has_key?(options, &1)) do
       with {:ok, ports} <- SmolBox.PortMapping.normalize(Keyword.get(options, :ports, [])),
            {:ok, volumes} <- SmolBox.VolumeMount.normalize(Keyword.get(options, :volumes, [])),
@@ -64,6 +80,7 @@ defmodule SmolBox.ManagedMachineSpec do
          true <- is_map(spec.artifact),
          :ok <- SmolBox.Profile.validate(spec.profile),
          true <- is_boolean(spec.checkpointable),
+         true <- static_egress?(spec),
          true <- SmolBox.VolumeMount.valid_list?(spec.volumes),
          true <-
            spec.volumes == [] or
@@ -84,6 +101,16 @@ defmodule SmolBox.ManagedMachineSpec do
   end
 
   def validate(_spec), do: invalid()
+
+  defp static_egress?(%{branch_static_egress: false}), do: true
+
+  defp static_egress?(%{branch_static_egress: true, checkpointable: false} = spec),
+    do:
+      match?(%SmolBox.NetworkPolicy{}, spec.profile.network) and
+        map_size(spec.artifact) == 3 and spec.ports == [] and spec.volumes == [] and
+        spec.workload == nil
+
+  defp static_egress?(_spec), do: false
 
   defp branch_source_network?(%{profile: %{network: :offline}}), do: true
 
@@ -128,6 +155,11 @@ defmodule SmolBox.ManagedMachineSpec do
         if spec.volumes == [],
           do: payload,
           else: :erlang.term_to_binary({"smolbox-volumes-v1", payload, spec.volumes})
+
+      payload =
+        if spec.branch_static_egress,
+          do: :erlang.term_to_binary({"smolbox-branch-static-egress-v1", payload}),
+          else: payload
 
       {:ok,
        :crypto.mac(:hmac, :sha256, key, payload)

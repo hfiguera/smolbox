@@ -543,6 +543,10 @@ defmodule SmolBox.Client do
   def start_checkpointable(client, name), do: start_checkpointable(client, name, :offline)
 
   @doc false
+  def start_static_branch_source(client, name, %SmolBox.NetworkPolicy{} = network),
+    do: start_checkpointable(client, name, network)
+
+  @doc false
   def start_https_branch_source(client, name, network) do
     if SmolBox.BranchHTTPSCredentials.network?(network) and
          SmolBox.BranchHTTPSCredentials.secure_transport?(client.worker),
