@@ -3,6 +3,29 @@ use crate::*;
 fn rows() -> Vec<serde_json::Value> {
     serde_json::from_str(include_str!("../fixtures/branch-held-release-v1.json")).unwrap()
 }
+
+#[test]
+fn release_proof_hash_preserves_vertical_tab_and_literal_unicode_escape() {
+    let row = &rows()[0];
+    let fixture: serde_json::Value =
+        serde_json::from_str(include_str!("../fixtures/branch-held-release-env-v1.json")).unwrap();
+    let env: Vec<(String, String)> = serde_json::from_value(fixture["env"].clone()).unwrap();
+    assert_eq!(env[0].1, "before\u{b}after");
+    assert_eq!(env[1].1, r"literal\u000B");
+
+    let mut request: BranchHeldReleaseRequest =
+        serde_json::from_value(row["request"].clone()).unwrap();
+    request.request.env = env;
+    let mut proof: BranchReleaseTransition =
+        serde_json::from_value(row["transition"].clone()).unwrap();
+    proof.change.request = request.request.clone();
+    proof.receipt.material.as_mut().unwrap().chain_sha256 =
+        fixture["chain_sha256"].as_str().unwrap().into();
+
+    proof.validate().unwrap();
+    request.matches(&proof).unwrap();
+}
+
 fn hello(request: &BranchHeldReleaseRequest) -> Hello {
     let ServerMessage::Hello { mut hello } = ServerMessage::decode(
         serde_json::from_str(include_str!("../fixtures/hello-v2.json")).unwrap(),

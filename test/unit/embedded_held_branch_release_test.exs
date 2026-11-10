@@ -12,7 +12,9 @@ defmodule SmolBox.Embedded.HeldBranchReleaseTest do
   alias SmolBox.Store.{Memory, NativeBranchReleaseContract}
   @fixtures Path.expand("../../native/smolbox-protocol/fixtures", __DIR__)
   @fixture Path.join(@fixtures, "branch-held-release-v1.json")
+  @env_fixture Path.join(@fixtures, "branch-held-release-env-v1.json")
   @external_resource @fixture
+  @external_resource @env_fixture
   @rows Jason.decode!(File.read!(@fixture))
   @hello @fixtures
          |> Path.join("hello-v2.json")
@@ -75,6 +77,26 @@ defmodule SmolBox.Embedded.HeldBranchReleaseTest do
                  "approval"
                ]
     end
+  end
+
+  test "accepts the Rust release proof for a vertical tab and a literal Unicode escape" do
+    [row | _] = @rows
+    %{"env" => env, "chain_sha256" => digest} = Jason.decode!(File.read!(@env_fixture))
+    assert env == [["MODE", "before\vafter"], ["TEXT", ~S(literal\u000B)]]
+
+    request = put_in(row["request"], ~w(request env), env)
+
+    proof =
+      row["transition"]
+      |> put_in(~w(change request env), env)
+      |> put_in(~w(receipt material chain_sha256), digest)
+
+    assert HeldBranchReleaseRequest.matches?(proof, request)
+
+    assert Protocol.valid_outcome?(
+             %{"result" => "held_branch_released", "transition" => proof},
+             2
+           )
   end
 
   test "valid shape substitutions cannot change completion identity original release request or namespace" do
