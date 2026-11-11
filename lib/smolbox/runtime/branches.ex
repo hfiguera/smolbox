@@ -145,11 +145,10 @@ defmodule SmolBox.Runtime.Branches do
          true <-
            child.branch.release_env == [] or Target.supports_feature?(worker, :branch_release_env),
          worker = Target.pin(worker),
-         {:ok, _} <-
+         {:ok, credential} <-
            MachineSession.io(config, child, fn ->
-             release_evidence(config, worker, child)
+             prepare_release(config, worker, child)
            end),
-         {:ok, credential} <- release_credential(worker, child),
          {:ok, pending} <- release_advance(config, child, :dispatching) do
       result =
         MachineSession.io(config, pending, fn ->
@@ -173,6 +172,11 @@ defmodule SmolBox.Runtime.Branches do
       :credential_unavailable -> release_advance(config, child, :credential_unavailable)
       _ -> release_advance(config, child, :unknown)
     end
+  end
+
+  defp prepare_release(config, worker, child) do
+    with {:ok, _} <- release_evidence(config, worker, child),
+         do: release_credential(worker, child)
   end
 
   defp release_credential(%{kind: :embedded} = worker, child) do
