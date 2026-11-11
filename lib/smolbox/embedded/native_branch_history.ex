@@ -65,7 +65,8 @@ defmodule SmolBox.Embedded.NativeBranchHistory do
 
   defp source_features?(spec),
     do:
-      ((spec.checkpointable and spec.profile.network == :offline) or spec.branch_static_egress) and
+      ((spec.checkpointable and spec.profile.network == :offline) or spec.branch_static_egress or
+         SmolBox.BranchHTTPSCredentials.source?(spec)) and
         spec.ports == [] and spec.volumes == [] and spec.workload == nil
 
   defp entry?(record, id, %{__struct__: NativePreparedBranchRetirement} = saved),

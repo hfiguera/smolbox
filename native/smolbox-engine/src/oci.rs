@@ -285,6 +285,7 @@ pub(crate) mod tests {
     }
     pub(crate) fn features() -> CreationFeatures {
         CreationFeatures {
+            branch_https: false,
             network: crate::NetworkPolicy {
                 enabled: true,
                 hosts: vec!["registry.example".into()],

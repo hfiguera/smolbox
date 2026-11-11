@@ -42,6 +42,7 @@ defmodule SmolBox.Backend.Features do
                   [
                     :material_proofs,
                     :branch_static_egress,
+                    :branch_https_credentials,
                     :partial_cleanup_resolution,
                     :partial_collection_preflight,
                     :observability,

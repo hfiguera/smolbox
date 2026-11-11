@@ -629,6 +629,7 @@ impl RetainedBranchPreparation {
                 if !epoch.launcher_selected() {
                     return Err(Error::uncertain(ErrorCode::Ownership));
                 }
+                crate::branch_credentials::prepare_held(&record)?;
                 let started = manager
                     .lock()
                     .map_err(|_| Error::uncertain(ErrorCode::Native))?

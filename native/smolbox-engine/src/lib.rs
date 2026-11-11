@@ -20,6 +20,7 @@ pub use branch_backing::{
 };
 mod branch_agent;
 mod branch_boot;
+mod branch_credentials;
 mod branch_delete_action;
 pub use branch_delete_action::{HeldBranchDeletionAction, HeldBranchDeletionActionRequest};
 mod branch_delete_request;

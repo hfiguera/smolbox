@@ -428,6 +428,7 @@ impl SdkIdentity {
                     | "branches"
                     | "branch_release_env"
                     | "branch_static_egress"
+                    | "branch_https_credentials"
                     | "partial_cleanup_resolution"
                     | "partial_collection_preflight"
             ))?;
@@ -438,10 +439,15 @@ impl SdkIdentity {
                 || self.feature_versions.get("branches") == Some(&1),
         )?;
         require(
-            self.feature_versions.get("branch_static_egress") != Some(&1)
+            (self.feature_versions.get("branch_static_egress") != Some(&1)
+                && self.feature_versions.get("branch_https_credentials") != Some(&1))
                 || (self.feature_versions.get("branches") == Some(&1)
                     && self.feature_versions.get("checkpoints") == Some(&1)
                     && self.feature_versions.get("networking") == Some(&1)),
+        )?;
+        require(
+            self.feature_versions.get("branch_https_credentials") != Some(&1)
+                || self.feature_versions.get("branch_static_egress") == Some(&1),
         )?;
         require(
             self.feature_versions.get("partial_collection_preflight") != Some(&1)
@@ -1035,6 +1041,8 @@ pub struct StartupWorkload {
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct CreationFeatures {
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub branch_https: bool,
     #[serde(skip)]
     pub compact: bool,
     pub network: NetworkPolicy,
@@ -1043,6 +1051,14 @@ pub struct CreationFeatures {
 }
 impl CreationFeatures {
     pub fn validate(&self) -> Result<()> {
+        require(
+            !self.branch_https
+                || (self.network.enabled
+                    && self.network.hosts.len() == 1
+                    && self.network.cidrs.is_empty()
+                    && self.ports.is_empty()
+                    && self.workload.is_none()),
+        )?;
         require(
             self.network.hosts.len() <= 32
                 && self.network.cidrs.len() <= 32
@@ -1177,6 +1193,7 @@ impl MachineConfiguration {
             ObservedMount::validate_set(mounts)?;
         }
         CreationFeatures {
+            branch_https: false,
             compact: false,
             network: self.network.clone(),
             ports: self.ports.clone(),
@@ -1503,6 +1520,8 @@ pub enum Operation {
     },
     ReleaseHeldBranch {
         request: Box<crate::BranchHeldReleaseRequest>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        credential: Option<RegistryToken>,
     },
     QualifyHeldBranchRelease {
         request: Box<crate::BranchHeldReleaseRequest>,
@@ -1763,6 +1782,8 @@ pub enum Operation {
     },
     Start {
         receipt: Receipt,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        credential: Option<RegistryToken>,
     },
     Stop {
         receipt: Receipt,
@@ -1953,9 +1974,8 @@ impl Operation {
     }
     pub fn held_branch_request(&self) -> Option<&crate::BranchHeldReleaseRequest> {
         match self {
-            Self::ReleaseHeldBranch { request } | Self::QualifyHeldBranchRelease { request } => {
-                Some(request)
-            }
+            Self::ReleaseHeldBranch { request, .. }
+            | Self::QualifyHeldBranchRelease { request } => Some(request),
             _ => None,
         }
     }
@@ -1984,6 +2004,14 @@ impl Operation {
     }
     pub fn sanitized(&self) -> Self {
         match self {
+            Self::Start { receipt, .. } => Self::Start {
+                receipt: receipt.clone(),
+                credential: None,
+            },
+            Self::ReleaseHeldBranch { request, .. } => Self::ReleaseHeldBranch {
+                request: request.clone(),
+                credential: None,
+            },
             Self::ExportMachine {
                 receipt,
                 operation_id,
@@ -2155,6 +2183,21 @@ impl Operation {
             _ => None,
         }
     }
+    pub(crate) fn requires_branch_credentials(&self) -> bool {
+        self.creation_features()
+            .is_some_and(|features| features.branch_https)
+            || matches!(
+                self,
+                Self::Start {
+                    credential: Some(_),
+                    ..
+                } | Self::ReleaseHeldBranch {
+                    credential: Some(_),
+                    ..
+                }
+            )
+    }
+
     pub(crate) fn branch_static_egress(&self) -> bool {
         self.checkpointable() == Some(true)
             && self
@@ -2289,9 +2332,8 @@ impl Operation {
             Self::ResolveHeldBranchDeletion { request } => Some(&request.child),
             Self::ContinueHeldBranchDeletion { request }
             | Self::CleanupHeldBranchDeletion { request } => Some(&request.child),
-            Self::ReleaseHeldBranch { request } | Self::QualifyHeldBranchRelease { request } => {
-                Some(&request.source)
-            }
+            Self::ReleaseHeldBranch { request, .. }
+            | Self::QualifyHeldBranchRelease { request } => Some(&request.source),
             Self::CreateBranch { request }
             | Self::InspectBranchCompletion { request }
             | Self::PublishCollectedBranchMaterial { request, .. }
@@ -2334,7 +2376,7 @@ impl Operation {
             | Self::Inspect { receipt }
             | Self::Logs { receipt, .. }
             | Self::Measurements { receipt }
-            | Self::Start { receipt }
+            | Self::Start { receipt, .. }
             | Self::Stop { receipt }
             | Self::Delete { receipt }
             | Self::Exec { receipt, .. }
@@ -2348,6 +2390,17 @@ impl Operation {
         }
     }
     pub fn validate(&self, budget_ms: u64) -> Result<()> {
+        if let Self::Start {
+            credential: Some(token),
+            ..
+        }
+        | Self::ReleaseHeldBranch {
+            credential: Some(token),
+            ..
+        } = self
+        {
+            token.validate()?;
+        }
         require(budget_ms > 0 && budget_ms <= 86_400_000)?;
         require(
             !self.branch_static_egress()
@@ -2468,7 +2521,8 @@ impl Operation {
                 request.validate()?;
                 require(budget_ms <= 30000)?;
             }
-            Self::ReleaseHeldBranch { request } | Self::QualifyHeldBranchRelease { request } => {
+            Self::ReleaseHeldBranch { request, .. }
+            | Self::QualifyHeldBranchRelease { request } => {
                 request.validate()?;
                 require(
                     budget_ms

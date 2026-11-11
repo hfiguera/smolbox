@@ -131,6 +131,7 @@ fn decode(bytes: &[u8]) -> Result<CreationFeatures, InvalidMessage> {
         return Err(InvalidMessage);
     }
     let features = CreationFeatures {
+        branch_https: false,
         network,
         ports,
         workload,

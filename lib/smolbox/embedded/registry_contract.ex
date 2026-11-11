@@ -74,5 +74,5 @@ defmodule SmolBox.Embedded.RegistryContract do
   def sanitize(%{"operation" => "export_machine"} = request),
     do: Map.delete(request, "push_token")
 
-  def sanitize(request), do: request
+  def sanitize(request), do: Map.delete(request, "credential")
 end

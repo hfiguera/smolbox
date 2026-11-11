@@ -10,6 +10,8 @@ use std::net::IpAddr;
 #[derive(Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct CreationFeatures {
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub branch_https: bool,
     pub network: NetworkPolicy,
     pub ports: Vec<PortMapping>,
     pub workload: Option<StartupWorkload>,
@@ -104,6 +106,16 @@ impl MachineConfiguration {
 
 impl CreationFeatures {
     pub fn validate(&self) -> Result<()> {
+        if self.branch_https
+            && (!cfg!(target_os = "linux")
+                || !self.network.enabled
+                || self.network.hosts.len() != 1
+                || !self.network.cidrs.is_empty()
+                || !self.ports.is_empty()
+                || self.workload.is_some())
+        {
+            return Err(Error::before(ErrorCode::Unsupported));
+        }
         if self.network.hosts.len() > 32
             || self.network.cidrs.len() > 32
             || (!self.network.enabled
@@ -147,6 +159,9 @@ impl CreationFeatures {
 
     pub fn qualify(&self, manifest: &PackManifest) -> Result<()> {
         self.validate()?;
+        if self.branch_https && manifest.mode != PackMode::Vm {
+            return Err(Error::before(ErrorCode::Unsupported));
+        }
         if let Some(workload) = &self.workload {
             if manifest.mode != PackMode::Container || !manifest.secret_refs.is_empty() {
                 return Err(Error::before(ErrorCode::Unsupported));
@@ -176,6 +191,14 @@ impl CreationFeatures {
             network_device.then_some(smolvm::network::NetworkBackend::VirtioNet);
         record.allowed_cidrs = network_device.then(|| self.network.cidrs.clone());
         record.dns_filter_hosts = network_device.then(|| self.network.hosts.clone());
+        if self.branch_https {
+            let policy = crate::branch_credentials::policy(&self.network.hosts[0])?;
+            record.credential_placeholders =
+                smolvm::credentials::prepare_policy(&policy, record.dns_filter_hosts.as_deref())
+                    .map_err(|_| Error::before(ErrorCode::Validation))?;
+            record.credential_policy = Some(policy);
+            record.credentials_supplied_by_api = true;
+        }
         record.ports = self.ports.iter().map(|p| (p.host, p.guest)).collect();
         if let Some(workload) = &self.workload {
             let resolved = resolved_workload(workload, manifest)?;
@@ -382,6 +405,7 @@ mod tests {
 
     fn features() -> CreationFeatures {
         CreationFeatures {
+            branch_https: false,
             network: NetworkPolicy {
                 enabled: false,
                 hosts: vec![],

@@ -32,6 +32,7 @@ pub(crate) fn validate_branch_record(record: &VmRecord) -> Result<Resources> {
         }
         let observed = crate::MachineConfiguration::observe_explicit(record);
         crate::CreationFeatures {
+            branch_https: false,
             network: observed.network,
             ports: vec![],
             workload: None,
@@ -64,9 +65,10 @@ fn validate_bare_record(record: &VmRecord, static_egress: bool) -> Result<Resour
                 .dns_filter_hosts
                 .as_ref()
                 .is_some_and(|values| !values.is_empty()))
-        || record.credential_policy.is_some()
-        || !record.credential_placeholders.is_empty()
-        || record.credentials_supplied_by_api
+        || (!static_egress
+            && (record.credential_policy.is_some()
+                || !record.credential_placeholders.is_empty()
+                || record.credentials_supplied_by_api))
         || record.entrypoint != ["/bin/true"]
         || !record.cmd.is_empty()
         || !record.env.is_empty()
@@ -87,6 +89,9 @@ fn validate_bare_record(record: &VmRecord, static_egress: bool) -> Result<Resour
             .overlay_gb
             .ok_or(Error::before(ErrorCode::Validation))?,
     };
+    if static_egress {
+        crate::branch_credentials::validate_record(record)?;
+    }
     resources.validate()?;
     Ok(resources)
 }

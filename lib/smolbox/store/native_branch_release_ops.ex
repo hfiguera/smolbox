@@ -99,6 +99,50 @@ defmodule SmolBox.Store.NativeBranchReleaseOps do
          else: (_ -> error(:expired))
   end
 
+  defp step(
+         parent,
+         %{branch: %{state: :release_pending}} = child,
+         :credential_unavailable,
+         now
+       ) do
+    {:error, error} = SmolBox.BranchHTTPSCredentials.unavailable()
+    error = %{error | evidence: :not_dispatched}
+    authority = %{child.branch.native_authority | release: nil}
+
+    with {:ok, parent} <-
+           ManagedMachine.update(
+             parent,
+             %{
+               active_branch: nil,
+               operation: nil,
+               phase: nil,
+               operation_deadline_ms: nil,
+               next_due_at_ms: now + 60_000
+             },
+             now
+           ),
+         {:ok, child} <-
+           ManagedMachine.update(
+             child,
+             %{
+               branch: %{
+                 child.branch
+                 | state: :held,
+                   release_version: nil,
+                   release_env: [],
+                   native_authority: authority
+               },
+               operation: nil,
+               phase: nil,
+               operation_deadline_ms: nil,
+               last_error: error,
+               next_due_at_ms: now + 60_000
+             },
+             now
+           ),
+         do: {:ok, parent, child}
+  end
+
   defp step(parent, child, :unknown, now)
        when child.branch.state in [:release_pending, :release_dispatching] do
     with {:ok, parent} <-

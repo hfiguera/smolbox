@@ -69,7 +69,8 @@ defmodule SmolBox.Store.NativeBranchOps do
                    NativeBranchAuthority.assignment_fields(
                      authority,
                      child.spec.artifact,
-                     profile
+                     profile,
+                     SmolBox.BranchHTTPSCredentials.source?(parent.spec)
                    )
                  ),
                worker_id: parent.worker_id,
@@ -103,7 +104,7 @@ defmodule SmolBox.Store.NativeBranchOps do
   defp source_mode?(spec, hold),
     do:
       (spec.checkpointable and spec.profile.network == :offline) or
-        (spec.branch_static_egress and hold)
+        (hold and (spec.branch_static_egress or SmolBox.BranchHTTPSCredentials.source?(spec)))
 
   defp unused?(parent, id) do
     not Map.has_key?(parent.native_branch_history, id) and

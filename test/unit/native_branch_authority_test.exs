@@ -109,25 +109,7 @@ defmodule SmolBox.NativeBranchAuthorityTest do
   test "static egress requires a held branch and preserves the source allowlist in the assignment" do
     original = source()
     {:ok, network} = NetworkPolicy.new(hosts: ["example.com"], cidrs: ["192.0.2.1/32"])
-    profile = %{original.spec.profile | network: network}
-    spec = %{original.spec | profile: profile, checkpointable: false, branch_static_egress: true}
-    {:ok, fingerprint} = ManagedMachineSpec.fingerprint(spec, String.duplicate("k", 32))
-
-    creation =
-      CreationFeatures.attach(
-        original.backend_assignment.creation,
-        CreationFeatures.from_spec(spec)
-      )
-
-    parent = %{
-      original
-      | spec: spec,
-        fingerprint: fingerprint,
-        created_machine: %{original.created_machine | network: network},
-        observed_machine: %{original.observed_machine | network: network},
-        backend_assignment: %{original.backend_assignment | creation: creation}
-    }
-
+    parent = networked_source(original, network, false)
     assert :ok = ManagedMachine.validate(parent)
     assert {:error, _} = accept(parent, false)
     assert {:ok, _, child} = accept(parent, true)
@@ -138,6 +120,166 @@ defmodule SmolBox.NativeBranchAuthorityTest do
     assert BranchCreation.matches?(child.backend_assignment.creation, child.spec)
     assert {:ok, different} = NetworkPolicy.new(hosts: ["example.org"])
     assert {:error, _} = Codec.encode(put_in(child.spec.profile.network, different))
+  end
+
+  defp networked_source(original, network, credentialed) do
+    profile = %{original.spec.profile | network: network}
+
+    spec = %{
+      original.spec
+      | profile: profile,
+        checkpointable: credentialed,
+        branch_static_egress: not credentialed
+    }
+
+    {:ok, fingerprint} = ManagedMachineSpec.fingerprint(spec, String.duplicate("k", 32))
+
+    creation =
+      CreationFeatures.attach(
+        original.backend_assignment.creation,
+        CreationFeatures.from_spec(spec)
+      )
+
+    %{
+      original
+      | spec: spec,
+        fingerprint: fingerprint,
+        created_machine: %{original.created_machine | network: network},
+        observed_machine: %{original.observed_machine | network: network},
+        backend_assignment: %{original.backend_assignment | creation: creation}
+    }
+  end
+
+  test "credential sources require held children and roundtrip source and child as v53" do
+    {:ok, network} = NetworkPolicy.new(hosts: ["api.example.test"])
+    parent = networked_source(source(), network, true)
+    assert :ok = ManagedMachine.validate(parent)
+    assert parent.backend_assignment.creation["features"]["branch_https"]
+    assert {:ok, <<"smolbox-record-v53\0", _::binary>> = bytes} = Codec.encode(parent)
+    assert {:ok, ^parent} = Codec.decode(bytes)
+    assert {:error, _} = accept(parent, false)
+    assert {:ok, _, child} = accept(parent, true)
+    assert SmolBox.BranchHTTPSCredentials.child?(child)
+    assert {:ok, <<"smolbox-record-v53\0", _::binary>> = bytes} = Codec.encode(child)
+    assert {:ok, ^child} = Codec.decode(bytes)
+    assert {:error, _} = Codec.encode(put_in(child.spec.profile.network, :offline))
+  end
+
+  test "credential denial cancels only an undispatched release and leaves the held child retryable" do
+    alias SmolBox.Store.{NativeBranchContract, NativeBranchReleaseOps}
+    {parent, held, _, _} = NativeBranchContract.complete(Memory, start_supervised!(Memory), true)
+
+    assert {:ok, parent, pending} =
+             NativeBranchReleaseOps.accept(parent, held, held.version, 1103)
+
+    assert {:ok, saved_parent, saved_child} =
+             NativeBranchReleaseOps.advance(
+               parent,
+               pending,
+               :release_pending,
+               :credential_unavailable,
+               1104
+             )
+
+    assert saved_child.branch.state == :held
+    assert saved_child.branch.native_authority.release == nil
+    assert saved_child.last_error.category == :authentication
+    assert saved_parent.active_branch == nil
+
+    assert {:ok, _, _} =
+             NativeBranchReleaseOps.accept(saved_parent, saved_child, saved_child.version, 1105)
+
+    assert {:ok, parent, dispatched} =
+             NativeBranchReleaseOps.advance(parent, pending, :release_pending, :dispatching, 1104)
+
+    assert {:error, _} =
+             NativeBranchReleaseOps.advance(
+               parent,
+               dispatched,
+               :release_dispatching,
+               :credential_unavailable,
+               1105
+             )
+  end
+
+  defmodule DeniedCredentialResolver do
+    @behaviour SmolBox.BranchHTTPSCredentials
+    @impl true
+    def resolve(_, _), do: :error
+  end
+
+  test "retained commands preserve the frozen static and credential branch modes" do
+    for credentialed <- [false, true] do
+      alias SmolBox.Embedded.Config
+      alias SmolBox.Test.EmbeddedPackage, as: Package
+      {:ok, network} = NetworkPolicy.new(hosts: ["api.example.test"])
+      original = source()
+      artifact = Map.put(original.spec.artifact, "architecture", "x86_64")
+      original = %{original | spec: %{original.spec | artifact: artifact}}
+
+      original =
+        put_in(original.backend_assignment.creation["artifact"]["guest_platform"], "linux/amd64")
+
+      parent = networked_source(original, network, credentialed)
+      assert {:ok, _, child} = accept(parent, true)
+
+      sdk = "native/policy-linux.json" |> File.read!() |> Jason.decode!() |> get_in(["sdk"])
+
+      native =
+        Package.create(
+          protocol_major: 2,
+          platform: :linux,
+          smolvm_revision: sdk["source_revision"],
+          sdk_identity: sdk
+        )
+
+      on_exit(fn -> Package.remove!(native) end)
+
+      native = %{
+        native
+        | id: parent.worker_id,
+          domain_generation: parent.backend_assignment.binding.generation,
+          profiles: [parent.spec.profile],
+          artifacts: [
+            Map.merge(artifact, %{"path" => "/fixture.smolmachine", "max_bytes" => 1024})
+          ],
+          branch_policies: [child.branch.spec.policy],
+          branch_https_credentials:
+            if(credentialed, do: {DeniedCredentialResolver, nil}, else: nil)
+      }
+
+      assert :ok = Config.validate(native)
+      assert Assignment.approved?(child.backend_assignment, native, child.spec)
+      {:ok, command} = Command.new(["/bin/true"])
+
+      {:ok, execution} =
+        ExecutionSpec.new(
+          scope: child.scope,
+          id: "retained-command",
+          artifact: child.spec.artifact,
+          profile: child.spec.profile,
+          command: command
+        )
+
+      assert Assignment.approved?(
+               child.backend_assignment,
+               native,
+               execution,
+               ManagedMachine.key(child)
+             )
+
+      assert get_in(child.backend_assignment.creation, ["features", "branch_https"]) ==
+               if(credentialed, do: true)
+
+      if credentialed do
+        refute Assignment.approved?(
+                 child.backend_assignment,
+                 %{native | branch_https_credentials: nil},
+                 execution,
+                 ManagedMachine.key(child)
+               )
+      end
+    end
   end
 
   test "checkpointable native branch sources retain the shared disk-growth exclusion" do

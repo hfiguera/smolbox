@@ -109,6 +109,23 @@ impl Engine {
         self.release_held_branch(source, &completion.child, request, budget)
     }
 
+    pub fn release_held_branch_with_credential(
+        &self,
+        completion: &crate::BranchCompletion,
+        source: &CreationReceipt,
+        request: &BranchReleaseRequest,
+        budget: &ReadBudget,
+        credential: &str,
+    ) -> Result<BranchReleaseTransition> {
+        budget.check()?;
+        completion.validate()?;
+        source.validate(self.binding())?;
+        request.validate()?;
+        let context = self.retained_branch_context(&completion.child)?;
+        verify_completion(&context.plan, &context.identity_sha256, completion, source)?;
+        self.release_held_branch_mode(source, &completion.child, request, budget, Some(credential))
+    }
+
     /// Qualify only an original completed attempt. No SDK call or ownership
     /// reconstruction occurs. None grants neither absence nor retry authority.
     /// Both recorded completions and collected original work may promote an
@@ -148,6 +165,17 @@ impl Engine {
         child: &CreationReceipt,
         request: &BranchReleaseRequest,
         budget: &ReadBudget,
+    ) -> Result<BranchReleaseTransition> {
+        self.release_held_branch_mode(source, child, request, budget, None)
+    }
+
+    fn release_held_branch_mode(
+        &self,
+        source: &CreationReceipt,
+        child: &CreationReceipt,
+        request: &BranchReleaseRequest,
+        budget: &ReadBudget,
+        credential: Option<&str>,
     ) -> Result<BranchReleaseTransition> {
         request.validate()?;
         source.validate(self.binding())?;
@@ -222,6 +250,7 @@ impl Engine {
         {
             return Err(Error::before(ErrorCode::Ownership));
         }
+        crate::branch_credentials::install_held(&record, credential)?;
         let intent = crate::branch_release::Intent::issue(
             &context.plan.publication,
             &record,

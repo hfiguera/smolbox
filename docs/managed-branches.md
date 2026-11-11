@@ -6,8 +6,8 @@ to one child's guest memory or disks do not change its siblings or source.
 
 This contract supports **idle, offline bare guests on smolvm 1.19.0, 1.20.2, 1.22.0 or 1.34.0**, on the
 source's worker. Held children can also use [static egress](#static-egress) on
-supported HTTP and Embedded Port workers. The 1.34.0 HTTP worker also supports a
-[per-child HTTPS credential](#per-child-https-credentials).
+supported HTTP and Embedded Port workers. Both support
+[per-child HTTPS credentials](#per-child-https-credentials) on their documented configurations.
 Each request creates one leaf child. Use [exports](machine-exports.md) for supported disk artifacts and
 [checkpoints](managed-checkpoints.md) for explicit saved memory and independent restore.
 
@@ -160,8 +160,10 @@ before and after the sibling checks.
 
 ### Per-child HTTPS credentials
 
-Use an HTTP worker running SmolVM 1.34.0 over TLS or a local Unix socket. Set
-`branch_https_credentials: {Resolver, context}` on its `SmolBox.Runtime.WorkerConfig`.
+Use an HTTP worker running SmolVM 1.34.0 over TLS or a local Unix socket, or an
+Embedded Port package advertising `branch_https_credentials: 1` on Linux x86_64.
+Set `branch_https_credentials: {Resolver, context}` on the worker's
+`SmolBox.Runtime.WorkerConfig` or `SmolBox.Embedded.Config`.
 Approve a profile whose `SmolBox.NetworkPolicy` lists exactly one hostname and no
 CIDRs. Use that profile on a checkpointable source backed by an approved local
 bare artifact. Only held children are supported with this profile. Keep the
@@ -183,6 +185,27 @@ Fetch its current version before trying again. An uncertain install or release
 retains `:unknown` evidence and requires the existing branch recovery flow.
 Tokens live in the worker's memory. Worker process replacement clears them.
 Upgrade shared store readers and writers before enabling this profile.
+
+Embedded Port binds the credential policy and placeholders to the native creation
+receipt. The source starts with an empty credential source. Held children inherit
+its TLS trust and credential policy, then receive their own key when released.
+Native commands receive the placeholder and public trust-bundle environment.
+The host injects the Bearer header only for the binding's approved HTTPS host.
+
+Embedded Port resolves the child's key again before each restart. A missing or
+revoked binding keeps a held child held or a stopped child stopped. Reauthorize
+the binding and retry using the current machine version. A running VM retains
+its installed key until stopped. Host application code owns key rotation and
+revocation. Upgrade native stores to record format v53 and advertise
+`native_branch_https_credentials: 1` before enabling this mode.
+
+To reproduce the Linux Embedded Port check, prepare the isolated environment
+described in [Static egress](#static-egress), then run
+`MIX_ENV=test mix run scripts/lab/branch-static-egress.exs --embedded PACKAGE ARTIFACT STATE_DIR credentials`.
+The harness sends distinct dummy keys from two held siblings to
+`https://httpbingo.org/headers`. It checks the approved host and denied
+`example.com` after release and after stop/start, verifies denial of an unbound
+child's release and a revoked child's restart, and cleans up the VMs and reservations.
 
 ## Read evidence and handle uncertainty
 

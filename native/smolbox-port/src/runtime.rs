@@ -3849,6 +3849,7 @@ mod tests {
                 request(
                     4,
                     wire::Operation::Start {
+                        credential: None,
                         receipt: start_receipt.clone(),
                     },
                 ),
@@ -4709,6 +4710,7 @@ mod tests {
                         }
                     } else {
                         wire::Operation::ReleaseHeldBranch {
+                            credential: None,
                             request: Box::new(wanted),
                         }
                     };

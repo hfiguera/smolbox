@@ -46,6 +46,9 @@ defmodule SmolBox.Embedded.CheckpointContract do
       marker?(value, 2) and
         (not Map.has_key?(value, "checkpointable") or creation_feature?(config, value))
 
+  defp creation_feature?(config, %{"features" => %{"branch_https" => true}}),
+    do: https_approved?(config)
+
   defp creation_feature?(config, %{"features" => %{"network" => %{"enabled" => true}}}),
     do: static_egress_approved?(config)
 
@@ -55,6 +58,12 @@ defmodule SmolBox.Embedded.CheckpointContract do
     do:
       config.platform == :linux and config.architecture == "x86_64" and
         Features.supports?(config, :branch_static_egress)
+
+  def https_approved?(config),
+    do:
+      config.platform == :linux and config.architecture == "x86_64" and
+        Features.supports?(config, :branch_https_credentials) and
+        SmolBox.BranchHTTPSCredentials.resolver?(config.branch_https_credentials)
 
   defp forkable?(spec),
     do: Map.get(spec, :checkpointable, false) or Map.get(spec, :branch_static_egress, false)
