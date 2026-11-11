@@ -269,7 +269,7 @@ defmodule SmolBox.Runtime.Machines do
   end
 
   defp mutate(
-         worker,
+         %{kind: :http} = worker,
          %{operation: :start, branch: nil, spec: %{branch_static_egress: true}} = record
        ) do
     Backend.start_static_branch_source(

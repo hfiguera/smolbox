@@ -1,22 +1,39 @@
 defmodule SmolBox.Embedded.BranchCreation do
   @moduledoc false
-  alias SmolBox.Embedded.{BranchReleaseTransition, BranchRequest, CheckpointContract, Shape}
+  alias SmolBox.Embedded.{
+    BranchReleaseTransition,
+    BranchRequest,
+    CheckpointContract,
+    CreationFeatures,
+    Shape
+  }
+
   alias SmolBox.Validation
 
   # A branch assignment is not a fresh pack/OCI/checkpoint creation request.
   # The inherited artifact is metadata; only its frozen branch request dispatches.
-  def valid?(create),
+  def valid?(create) when is_map(create),
     do:
       Shape.keys?(
-        create,
+        Map.drop(create, ["features"]),
         ~w(name owner_token incarnation branch artifact_identity resources labels)
       ) and
-        BranchRequest.valid?(create["branch"]) and Shape.resources?(create["resources"]) and
+        BranchRequest.valid?(create["branch"]) and features?(create) and
+        Shape.resources?(create["resources"]) and
         create["labels"] == %{} and artifact?(create["artifact_identity"]) and
         Enum.all?(
           ~w(name owner_token incarnation),
           &(create[&1] == create["branch"]["child"][&1])
         )
+
+  def valid?(_), do: false
+
+  defp features?(%{"features" => features, "branch" => %{"child" => %{"hold" => true}}}),
+    do:
+      CreationFeatures.valid?(features) and features["network"]["enabled"] and
+        features["ports"] == [] and features["workload"] == nil
+
+  defp features?(create), do: not Map.has_key?(create, "features")
 
   def artifact?(artifact),
     do:
@@ -27,18 +44,21 @@ defmodule SmolBox.Embedded.BranchCreation do
   def matches?(create, spec),
     do:
       valid?(create) and create["artifact_identity"] == spec.artifact and
-        create["resources"] == resources(spec.profile) and spec.profile.network == :offline and
+        create["resources"] == resources(spec.profile) and CreationFeatures.matches?(create, spec) and
         Map.get(spec, :ports, []) == [] and Map.get(spec, :volumes, []) == [] and
         Map.get(spec, :workload) == nil and not Map.get(spec, :checkpointable, false)
 
   def from_request(request, artifact, profile),
     do:
-      Map.merge(Map.take(request["child"], ~w(name owner_token incarnation)), %{
-        "branch" => request,
-        "artifact_identity" => artifact,
-        "resources" => resources(profile),
-        "labels" => %{}
-      })
+      CreationFeatures.attach(
+        Map.merge(Map.take(request["child"], ~w(name owner_token incarnation)), %{
+          "branch" => request,
+          "artifact_identity" => artifact,
+          "resources" => resources(profile),
+          "labels" => %{}
+        }),
+        CreationFeatures.from_spec(%{profile: profile})
+      )
 
   def command?(record) do
     request = record.backend_assignment.creation["branch"]

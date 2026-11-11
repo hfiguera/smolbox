@@ -9,6 +9,7 @@ defmodule SmolBox.NativeBranchAuthorityTest do
     ExecutionSpec,
     ManagedMachine,
     ManagedMachineSpec,
+    NetworkPolicy,
     Profile
   }
 
@@ -17,6 +18,7 @@ defmodule SmolBox.NativeBranchAuthorityTest do
   alias SmolBox.Embedded.{
     BranchCreation,
     BranchPublication,
+    CreationFeatures,
     Identity,
     NativeBranchAuthority,
     NativeGrowth,
@@ -102,6 +104,40 @@ defmodule SmolBox.NativeBranchAuthorityTest do
       BranchSpec.fingerprint(spec, ManagedMachine.key(parent), String.duplicate("k", 32))
 
     BranchOps.accept(parent, spec, fingerprint, "owned-leaf", @capacity, parent.reservation, 1100)
+  end
+
+  test "static egress requires a held branch and preserves the source allowlist in the assignment" do
+    original = source()
+    {:ok, network} = NetworkPolicy.new(hosts: ["example.com"], cidrs: ["192.0.2.1/32"])
+    profile = %{original.spec.profile | network: network}
+    spec = %{original.spec | profile: profile, checkpointable: false, branch_static_egress: true}
+    {:ok, fingerprint} = ManagedMachineSpec.fingerprint(spec, String.duplicate("k", 32))
+
+    creation =
+      CreationFeatures.attach(
+        original.backend_assignment.creation,
+        CreationFeatures.from_spec(spec)
+      )
+
+    parent = %{
+      original
+      | spec: spec,
+        fingerprint: fingerprint,
+        created_machine: %{original.created_machine | network: network},
+        observed_machine: %{original.observed_machine | network: network},
+        backend_assignment: %{original.backend_assignment | creation: creation}
+    }
+
+    assert :ok = ManagedMachine.validate(parent)
+    assert {:error, _} = accept(parent, false)
+    assert {:ok, _, child} = accept(parent, true)
+    assert child.spec.branch_static_egress
+    assert child.spec.profile.network == network
+    assert {:ok, <<"smolbox-record-v52\0", _::binary>> = bytes} = Codec.encode(child)
+    assert {:ok, ^child} = Codec.decode(bytes)
+    assert BranchCreation.matches?(child.backend_assignment.creation, child.spec)
+    assert {:ok, different} = NetworkPolicy.new(hosts: ["example.org"])
+    assert {:error, _} = Codec.encode(put_in(child.spec.profile.network, different))
   end
 
   test "checkpointable native branch sources retain the shared disk-growth exclusion" do

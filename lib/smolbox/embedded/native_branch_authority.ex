@@ -395,13 +395,13 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
   defp source?(source, receipt, profile),
     do:
       source.name == receipt["name"] and source.created_at == nil and
-        source.state == :running and offline?(source) and
+        source.state == :running and source_configuration?(source, profile) and
         Identity.valid?(source.backend_identity) and source.backend_identity.receipt == receipt and
         source.backend_identity.pid_identity != nil and
         allocations?(source, profile)
 
-  defp offline?(source),
-    do: source.network == :offline and source.ports == [] and source.mounts == []
+  defp source_configuration?(source, profile),
+    do: source.network == profile.network and source.ports == [] and source.mounts == []
 
   defp allocations?(source, profile),
     do:

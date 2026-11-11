@@ -801,7 +801,7 @@
       ],
       "review": {
         "evidence": ["test/contract/managed_branch_test.exs", "scripts/lab/branch-static-egress.exs"],
-        "remaining": ["Embedded Port static egress for held branch sources and live qualification."]
+        "remaining": ["Embedded Port starts forkable sources through its ordinary start operation. A dedicated equivalent of this HTTP operation remains pending."]
       }
     },
     {

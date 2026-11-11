@@ -63,7 +63,7 @@ defmodule SmolBox.Embedded.NativeCollectedBranchPublicationResult do
       observed?(source.state, identity.pid_identity, pid) and
       {source.cpus, source.memory_mb, source.storage_gb, source.overlay_gb} ==
         {profile.cpus, profile.memory_mb, profile.storage_gb, profile.overlay_gb} and
-      source.network == :offline and source.ports == [] and source.mounts == []
+      source.network == profile.network and source.ports == [] and source.mounts == []
   end
 
   defp observed?(:running, pid, pid), do: pid != nil

@@ -13,9 +13,9 @@ defmodule SmolBox.ManagedMachineSpec do
   `managed_checkpoints: 1`. See `SmolBox.Checkpoints`.
 
   `branch_static_egress: true` prepares an approved local bare guest for held
-  branches with its explicit network allowlist on a Linux x86_64 HTTP worker
-  running smolvm 1.34.0. It is independent of `:checkpointable` and retains the
-  same allowlist on the source and its children.
+  branches with its explicit network allowlist on Linux x86_64. Use an HTTP
+  worker running SmolVM 1.34.0 or an Embedded Port package advertising
+  `branch_static_egress: 1`. The source and its children retain the same allowlist.
 
   Optional `ports: [SmolBox.PortMapping.t()]` adds fixed TCP forwarding on image
   sources and smolvm 1.17.0, 1.19.0, 1.20.2 or 1.22.0. The constructor canonicalizes mappings; they are part

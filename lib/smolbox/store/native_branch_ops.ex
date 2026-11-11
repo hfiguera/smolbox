@@ -28,10 +28,10 @@ defmodule SmolBox.Store.NativeBranchOps do
          :ok <- BranchSpec.validate(spec),
          true <- Validation.digest?(fingerprint) and SmolBox.MachineSpec.valid_name?(name),
          true <- parent.state == :running and ManagedMachine.idle?(parent),
-         true <- parent.branch == nil and parent.spec.checkpointable and parent.id != spec.id,
+         true <- parent.branch == nil and parent.id != spec.id,
+         true <- source_mode?(parent.spec, spec.hold),
          true <-
-           parent.spec.profile.network == :offline and parent.spec.ports == [] and
-             parent.spec.volumes == [] and parent.spec.workload == nil,
+           parent.spec.ports == [] and parent.spec.volumes == [] and parent.spec.workload == nil,
          true <-
            map_size(parent.branch_children) < 256 and
              not Map.has_key?(parent.branch_children, spec.id),
@@ -99,6 +99,11 @@ defmodule SmolBox.Store.NativeBranchOps do
          do: {:ok, parent, child},
          else: (_ -> error())
   end
+
+  defp source_mode?(spec, hold),
+    do:
+      (spec.checkpointable and spec.profile.network == :offline) or
+        (spec.branch_static_egress and hold)
 
   defp unused?(parent, id) do
     not Map.has_key?(parent.native_branch_history, id) and

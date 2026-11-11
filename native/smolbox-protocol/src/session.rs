@@ -112,6 +112,10 @@ impl Session {
                             .sdk
                             .as_ref()
                             .is_none_or(|sdk| sdk.feature_versions.get("checkpoints") != Some(&1))))
+                || (operation.branch_static_egress()
+                    && self.hello.sdk.as_ref().is_none_or(|sdk| {
+                        sdk.feature_versions.get("branch_static_egress") != Some(&1)
+                    }))
                 || (matches!(&operation, Operation::ResolvePartialBranchCleanup { .. })
                     && self.hello.sdk.as_ref().is_none_or(|sdk| {
                         sdk.feature_versions.get("partial_cleanup_resolution") != Some(&1)
@@ -1040,7 +1044,10 @@ impl Session {
                             .configuration
                             .as_ref()
                             .is_some_and(|configuration| {
-                                !configuration.network.enabled
+                                (!configuration.network.enabled
+                                    || self.hello.sdk.as_ref().is_some_and(|sdk| {
+                                        sdk.feature_versions.get("branch_static_egress") == Some(&1)
+                                    }))
                                     && configuration.ports.is_empty()
                                     && configuration.mounts.is_none()
                             }),

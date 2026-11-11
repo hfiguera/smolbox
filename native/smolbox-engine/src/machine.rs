@@ -74,9 +74,9 @@ impl PackRecordPolicy<'_> {
         if self.checkpointable {
             crate::checkpoint_capture::validate_pack(manifest)?;
             if self.features.is_some_and(|features| {
-                features.network.enabled
-                    || !features.ports.is_empty()
+                !features.ports.is_empty()
                     || features.workload.is_some()
+                    || (!cfg!(target_os = "linux") && features.network.enabled)
             }) {
                 return Err(Error::before(ErrorCode::Unsupported));
             }
@@ -824,12 +824,22 @@ impl Engine {
         resources: Resources,
         user: Option<&str>,
     ) -> Result<()> {
+        self.qualify_branchable_creation(artifact, resources, user, None)
+    }
+
+    pub fn qualify_branchable_creation(
+        &self,
+        artifact: &ApprovedArtifact,
+        resources: Resources,
+        user: Option<&str>,
+        features: Option<&crate::CreationFeatures>,
+    ) -> Result<()> {
         self.qualify_creation_policy(
             artifact,
             resources,
             user,
             PackRecordPolicy {
-                features: None,
+                features,
                 checkpointable: true,
             },
         )
@@ -869,11 +879,21 @@ impl Engine {
         deadline: std::time::Instant,
         cancel: &Cancellation,
     ) -> Result<CreationReceipt> {
+        self.create_branchable(request, None, deadline, cancel)
+    }
+
+    pub fn create_branchable(
+        &self,
+        request: CreateRequest,
+        features: Option<&crate::CreationFeatures>,
+        deadline: std::time::Instant,
+        cancel: &Cancellation,
+    ) -> Result<CreationReceipt> {
         self.create_mode(
             request,
             true,
             PackRecordPolicy {
-                features: None,
+                features,
                 checkpointable: true,
             },
             None,
@@ -1077,6 +1097,9 @@ impl Engine {
         )?;
         artifact.source.validate()?;
         features.validate()?;
+        if checkpointable && features.network.enabled {
+            return Err(Error::before(ErrorCode::Unsupported));
+        }
         let policy = PackRecordPolicy {
             features: Some(&features),
             checkpointable,
@@ -3659,7 +3682,7 @@ fn prepared_pack_record(
     }
     if policy.checkpointable {
         policy.qualify(&prepared.manifest)?;
-        crate::checkpoint_capture::validate_record(&record)?;
+        crate::checkpoint_capture::validate_branch_record(&record)?;
         record.forkable = true;
     }
     Ok(record)
@@ -5190,8 +5213,7 @@ pub(crate) mod tests {
     }
 
     #[test]
-    fn checkpointable_pack_opt_in_is_original_material_and_rejects_container_or_networked_sources()
-    {
+    fn forkable_pack_opt_in_binds_network_policy_and_keeps_capture_offline() {
         use std::time::{Duration, Instant};
         let temp = tempfile::tempdir().unwrap();
         let engine = test_engine(temp.path());
@@ -5267,16 +5289,27 @@ pub(crate) mod tests {
                     ports: vec![],
                     workload: None,
                 };
-                assert_eq!(
+                let networked = prepared_pack_record(
+                    &request,
+                    &artifact.prepared,
                     PackRecordPolicy {
                         features: Some(&networked),
-                        checkpointable: true
-                    }
-                    .qualify(&artifact.prepared.manifest)
-                    .unwrap_err()
-                    .code,
-                    ErrorCode::Unsupported
+                        checkpointable: true,
+                    },
+                    None,
                 );
+                if cfg!(target_os = "linux") {
+                    let networked = networked.unwrap();
+                    assert!(networked.forkable);
+                    assert_eq!(networked.dns_filter_hosts, Some(vec!["example.com".into()]));
+                    assert!(crate::checkpoint_capture::validate_record(&networked).is_err());
+                    assert_ne!(
+                        material_hash(&networked).unwrap(),
+                        material_hash(&ordinary).unwrap()
+                    );
+                } else {
+                    assert_eq!(networked.unwrap_err().code, ErrorCode::Unsupported);
+                }
             } else {
                 assert_eq!(opted.unwrap_err().code, ErrorCode::Unsupported);
             }

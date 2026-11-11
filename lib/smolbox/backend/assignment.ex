@@ -146,9 +146,11 @@ defmodule SmolBox.Backend.Assignment do
         CheckpointContract.matches?(create, spec, retained) and
         MountContract.matches_spec?(create, spec, retained)
 
-  defp features_approved?(%{creation: %{"branch" => request}}, config, spec),
+  defp features_approved?(%{creation: %{"branch" => request} = creation}, config, spec),
     do:
       Features.supports?(config, :branches) and
+        (not Map.has_key?(creation, "features") or
+           CheckpointContract.static_egress_approved?(config)) and
         request["approval"] in BranchRequest.approvals(config) and command_approved?(config, spec)
 
   defp features_approved?(assignment, config, spec),
@@ -263,6 +265,8 @@ defmodule SmolBox.Backend.Assignment do
   defp profile_approved?(config, spec),
     do:
       spec.profile in config.profiles and checkpoint_profile_approved?(config, spec) and
+        (not Map.get(spec, :branch_static_egress, false) or
+           CheckpointContract.static_egress_approved?(config)) and
         (not Map.get(spec, :checkpointable, false) or Features.supports?(config, :checkpoints))
 
   defp checkpoint_profile_approved?(config, %{artifact: %{"kind" => "checkpoint"}} = spec),
@@ -351,8 +355,6 @@ defmodule SmolBox.Backend.Assignment do
     do:
       is_map(expected) and map_size(expected) == 3 and
         artifact_matches?(creation["artifact"], expected)
-
-  defp supported_spec?(%{branch_static_egress: true}, _version), do: false
 
   defp supported_spec?(spec, version) do
     is_map(spec) and native_profile?(spec.profile, version) and

@@ -5,8 +5,9 @@ memory and disks. Prepare once, then give separate tasks their own copies. Chang
 to one child's guest memory or disks do not change its siblings or source.
 
 This contract supports **idle, offline bare guests on smolvm 1.19.0, 1.20.2, 1.22.0 or 1.34.0**, on the
-source's worker. On the 1.34.0 HTTP worker, held children can also use
-[static egress](#static-egress) or a [per-child HTTPS credential](#per-child-https-credentials).
+source's worker. Held children can also use [static egress](#static-egress) on
+supported HTTP and Embedded Port workers. The 1.34.0 HTTP worker also supports a
+[per-child HTTPS credential](#per-child-https-credentials).
 Each request creates one leaf child. Use [exports](machine-exports.md) for supported disk artifacts and
 [checkpoints](managed-checkpoints.md) for explicit saved memory and independent restore.
 
@@ -125,7 +126,8 @@ their original environment. Use `SmolBox.Command` for command-specific parameter
 
 ### Static egress
 
-On a Linux x86_64 HTTP worker running SmolVM 1.34.0, approve a profile with a
+On Linux x86_64, use an HTTP worker running SmolVM 1.34.0 or an Embedded Port
+package advertising `branch_static_egress: 1`. Approve a profile with a
 nonempty `SmolBox.NetworkPolicy` and a local bare artifact. Create the source
 with that profile and `branch_static_egress: true` in
 `SmolBox.ManagedMachineSpec`. Start it in the usual way and request children
@@ -140,12 +142,17 @@ for DNS, shared-IP, and host network boundaries.
 
 Static egress uses no credential resolver. Omit `checkpointable` for this
 source. The static mode excludes portable checkpoint capture, remote artifacts,
-ports, startup workloads, local volumes, and Embedded Port workers. Upgrade
+ports, startup workloads, and local volumes. Upgrade
 shared store readers and writers to v52 before opting in.
 
 To reproduce the Linux x86_64 check, start a dedicated SmolVM 1.34.0 HTTP
 worker on a Unix socket with its own `--state-dir`. With an approved local
 bare `.smolmachine`, run `MIX_ENV=test mix run scripts/lab/branch-static-egress.exs SOCKET ARTIFACT STATE_DIR`.
+For Embedded Port, use a fresh test account or an isolated `HOME` so the helper
+can install its approved templates. Prepare an empty `STATE_DIR` and set
+`XDG_CACHE_HOME`, `XDG_DATA_HOME`, and `XDG_CONFIG_HOME` to
+`STATE_DIR/.cache`, `STATE_DIR/.local/share`, and `STATE_DIR/.config` respectively.
+Run `MIX_ENV=test mix run scripts/lab/branch-static-egress.exs --embedded PACKAGE ARTIFACT STATE_DIR`.
 Append `hostnames` to test a DNS hostname policy with no CIDRs. The probe
 checks both held siblings after release and after stop/start. A control VM
 with both destinations allowlisted verifies that both endpoints are reachable

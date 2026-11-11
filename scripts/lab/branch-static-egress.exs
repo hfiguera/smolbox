@@ -17,6 +17,7 @@ defmodule SmolBox.Lab.BranchStaticEgress do
   }
 
   alias SmolBox.ArtifactStore.Directory
+  alias SmolBox.Embedded.Config
   alias SmolBox.Runtime.WorkerConfig
   alias SmolBox.Store.Memory
 
@@ -40,12 +41,8 @@ defmodule SmolBox.Lab.BranchStaticEgress do
   done
   """
 
-  def run(socket, artifact_path, state_dir, mode) do
+  def run(backend, artifact_path, state_dir, mode) do
     {"Linux x86_64\n", 0} = System.cmd("uname", ["-sm"])
-    {:ok, endpoint} = Worker.new("proof", "http://localhost", unix_socket: socket)
-    {:ok, client} = Client.new(endpoint)
-    {:ok, %{version: "1.34.0"}} = Client.health(client)
-    {:ok, []} = Client.list(client)
     [approved, _denied] = destinations = destinations(mode)
     {:ok, restricted} = policy(mode, [approved])
     {:ok, control} = policy(mode, destinations)
@@ -64,17 +61,19 @@ defmodule SmolBox.Lab.BranchStaticEgress do
       "architecture" => "x86_64"
     }
 
-    {:ok, worker} =
-      WorkerConfig.new(
-        client: client,
-        platform: :linux,
-        architecture: "x86_64",
-        profiles: [profile, control_profile],
-        artifacts: [Map.put(artifact, "path", artifact_path)],
-        branch_policies: [policy],
-        capacity: %{slots: 8, cpus: 8, memory_mb: 8192, disk_gb: 64},
-        allocation_floor: %{storage_gb: 1, overlay_gb: 1, host_overhead_mb: 128}
-      )
+    options = [
+      platform: :linux,
+      architecture: "x86_64",
+      profiles: [profile, control_profile],
+      branch_policies: [policy],
+      capacity: %{slots: 8, cpus: 8, memory_mb: 8192, disk_gb: 64},
+      allocation_floor: %{storage_gb: 1, overlay_gb: 1, host_overhead_mb: 128}
+    ]
+
+    {worker, verify_empty} =
+      worker(backend, Map.put(artifact, "path", artifact_path), state_dir, options)
+
+    verify_empty.()
 
     {:ok, store} = Memory.start_link([])
     objects_path = Path.join(state_dir, "proof-objects")
@@ -96,12 +95,54 @@ defmodule SmolBox.Lab.BranchStaticEgress do
 
     try do
       exercise(runtime, artifact, {profile, control_profile}, policy, state_dir, destinations)
-      {:ok, []} = Client.list(client)
+      verify_empty.()
       {:ok, %{slots: 0, disk_gb: 0}} = Memory.usage(store, "proof")
       IO.puts("PASS: worker inventory empty and reservations released")
     after
       Supervisor.stop(runtime)
     end
+  end
+
+  defp worker({:http, socket}, artifact, _state_dir, options) do
+    {:ok, endpoint} = Worker.new("proof", "http://localhost", unix_socket: socket)
+    {:ok, client} = Client.new(endpoint)
+    {:ok, %{version: "1.34.0"}} = Client.health(client)
+    {:ok, worker} = WorkerConfig.new([client: client, artifacts: [artifact]] ++ options)
+    {worker, fn -> {:ok, []} = Client.list(client) end}
+  end
+
+  defp worker({:embedded, package}, artifact, state_dir, options) do
+    cache = Path.join(state_dir, ".cache")
+    data = Path.join(state_dir, ".local/share")
+    ^cache = System.fetch_env!("XDG_CACHE_HOME")
+    ^data = System.fetch_env!("XDG_DATA_HOME")
+    config = Path.join(state_dir, ".config")
+    ^config = System.fetch_env!("XDG_CONFIG_HOME")
+    false = File.exists?(Path.join(data, "smolvm"))
+    verify_empty = fn -> [] = Path.wildcard(Path.join(cache, "smolvm/vms/*/name")) end
+
+    manifest_bytes = File.read!(Path.join(package, "package.json"))
+    manifest = Jason.decode!(manifest_bytes)
+    sdk = manifest["policy"]["sdk"]
+    %{"sdk_version" => "1.34.0", "feature_versions" => %{"branch_static_egress" => 1}} = sdk
+    artifact = Map.put(artifact, "max_bytes", File.stat!(artifact["path"]).size)
+
+    {:ok, worker} =
+      Config.new(
+        [
+          id: "proof",
+          bridge: :port,
+          package_path: package,
+          package_manifest_sha256: Files.sha256(manifest_bytes),
+          package_identity: manifest["identity"],
+          sdk_identity: sdk,
+          domain_generation: :crypto.strong_rand_bytes(16) |> Base.encode16(case: :lower),
+          allow_initialize: true,
+          artifacts: [artifact]
+        ] ++ options
+      )
+
+    {worker, verify_empty}
   end
 
   defp destinations(:cidrs), do: ["1.1.1.1", "1.0.0.1"]
@@ -185,7 +226,7 @@ defmodule SmolBox.Lab.BranchStaticEgress do
       )
 
     {:ok, handle} = Machines.create(runtime, spec)
-    %{state: :created} = machine(runtime, handle)
+    true = machine(runtime, handle).state in [:created, :stopped]
     transition(runtime, handle, :start, :running)
     handle
   end
@@ -235,7 +276,15 @@ defmodule SmolBox.Lab.BranchStaticEgress do
   defp transition(runtime, handle, action, expected, retries \\ 10) do
     case apply(Machines, action, [runtime, handle, machine(runtime, handle).version]) do
       {:ok, _} ->
-        %{state: ^expected} = machine(runtime, handle)
+        record = machine(runtime, handle)
+
+        if record.state != expected,
+          do:
+            raise(
+              "#{action} #{inspect(handle)} reached #{inspect({record.state, record.last_error})}"
+            )
+
+        record
 
       {:error, %{category: :stale_version}} when retries > 0 ->
         transition(runtime, handle, action, expected, retries - 1)
@@ -250,11 +299,18 @@ end
 
 case System.argv() do
   [socket, artifact, state_dir] ->
-    SmolBox.Lab.BranchStaticEgress.run(socket, artifact, state_dir, :cidrs)
+    SmolBox.Lab.BranchStaticEgress.run({:http, socket}, artifact, state_dir, :cidrs)
 
   [socket, artifact, state_dir, "hostnames"] ->
-    SmolBox.Lab.BranchStaticEgress.run(socket, artifact, state_dir, :hostnames)
+    SmolBox.Lab.BranchStaticEgress.run({:http, socket}, artifact, state_dir, :hostnames)
+
+  ["--embedded", package, artifact, state_dir] ->
+    SmolBox.Lab.BranchStaticEgress.run({:embedded, package}, artifact, state_dir, :cidrs)
+
+  ["--embedded", package, artifact, state_dir, "hostnames"] ->
+    SmolBox.Lab.BranchStaticEgress.run({:embedded, package}, artifact, state_dir, :hostnames)
 
   _ ->
-    raise ArgumentError, "expected SOCKET ARTIFACT STATE_DIR [hostnames]"
+    raise ArgumentError,
+          "expected SOCKET or --embedded PACKAGE, followed by ARTIFACT STATE_DIR [hostnames]"
 end
