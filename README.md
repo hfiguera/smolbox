@@ -17,8 +17,13 @@ Linux x86_64 or Linux ARM64. You need Elixir 1.18 or later and the
 [host prerequisites](docs/supported-platforms.md#embedded-port-hosts). SmolBox
 starts the helper from your Mix application without a separate HTTP server.
 
-SmolBox 0.5.1 defaults to **SmolVM 1.34.0** for both backends.
+SmolBox 0.6.0 defaults to **SmolVM 1.34.0** for both backends.
 For a separate SmolVM server, follow the [HTTP worker quickstart](docs/getting-started.md).
+
+Held branches can receive their own non-secret environment values at release.
+On Linux x86_64, both backends support opt-in allowlisted branch egress and
+per-child HTTPS Bearer credentials. See [Managed branches](docs/managed-branches.md)
+and [Upgrading to 0.6.0](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/upgrading.md#upgrade-to-0-6-0).
 
 ## Why use SmolBox?
 

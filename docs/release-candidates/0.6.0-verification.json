@@ -1,0 +1,68 @@
+{
+  "version": "0.6.0",
+  "base_commit": "54f2d3d012f90ddeda9afc106e9359955ab3ded7",
+  "branch": "release/0.6.0",
+  "status": "release-preparation",
+  "package_sha256": "fc9a3a1c6f5635f143c4d58ef0e513075bb74f7403a46f7db7edd7ea32e10213",
+  "local_validation": {
+    "toolchain": {
+      "elixir": "1.20.5",
+      "otp": "29.1.2"
+    },
+    "mix_ci": {
+      "passed": 2177,
+      "excluded": 42,
+      "quality_checks": "passed"
+    },
+    "ci_tools": {
+      "passed": 47
+    },
+    "docs": {
+      "warnings": 0,
+      "pages_checked": 151
+    },
+    "production_consumers": [
+      {
+        "platform": "macos-aarch64",
+        "elixir": "1.20.5",
+        "otp": "29.1.2",
+        "minimum_dependencies": false,
+        "package_sha256": "fc9a3a1c6f5635f143c4d58ef0e513075bb74f7403a46f7db7edd7ea32e10213",
+        "result": "passed"
+      },
+      {
+        "platform": "macos-aarch64",
+        "elixir": "1.18.4",
+        "otp": "27.3.4.15",
+        "minimum_dependencies": true,
+        "without_rust": true,
+        "package_sha256": "fc9a3a1c6f5635f143c4d58ef0e513075bb74f7403a46f7db7edd7ea32e10213",
+        "result": "passed"
+      }
+    ]
+  },
+  "feature_live_evidence": [
+    {
+      "feature": "held release environment",
+      "pr": 87
+    },
+    {
+      "feature": "HTTP child HTTPS credentials",
+      "pr": 88
+    },
+    {
+      "feature": "HTTP branch static egress",
+      "pr": 89
+    },
+    {
+      "feature": "Embedded Port branch static egress",
+      "pr": 90
+    },
+    {
+      "feature": "Embedded Port child HTTPS credentials",
+      "pr": 91
+    }
+  ],
+  "release_artifacts": "record separately after the tagged build succeeds",
+  "publication": "pending"
+}

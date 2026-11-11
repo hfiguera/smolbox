@@ -11,7 +11,7 @@ for running untrusted code. Each part of a deployment has a separate responsibil
 | Application and deployment | Authorize access, approve images, protect worker interfaces, enforce host resource limits, configure networking and credentials, and operate durable storage and recovery |
 
 Use [Supported platforms](supported-platforms.md) for worker versions and host
-prerequisites, and [Upgrading SmolBox](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/upgrading.md) before changing an existing
+prerequisites, and [Upgrading SmolBox](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/upgrading.md) before changing an existing
 deployment. The library dependency does not install a worker.
 
 Provision the worker, proxy, database, image registry and hypervisor for your
@@ -29,7 +29,7 @@ The host must choose who may reuse a machine and authorize its operations.
 
 After the 0.1.0 release, a Linux campaign verified external resource enforcement
 and failure recovery on one pinned nested deployment. See the
-[validation summary](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/resource-qualification.md#subsequent-linux-deployment-validation)
+[validation summary](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/resource-qualification.md#subsequent-linux-deployment-validation)
 and the full
 [Linux qualification guide](https://github.com/hfiguera/smolbox/blob/v0.1.1/docs/linux-production-qualification.md).
 Those results apply to that configuration: one execution at a time, approved
@@ -108,7 +108,7 @@ to another worker.
 Controlled networking permits explicit operator-approved outbound policies on
 smolvm 1.16.0, 1.16.1, 1.17.0, 1.19.0, 1.20.2 and 1.22.0. Offline remains the
 default. See [Network access](network-access.md) for DNS/IP semantics and profile
-approval, and [Testing reports](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/testing.md) for the recorded checks and their limits.
+approval, and [Testing reports](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/testing.md) for the recorded checks and their limits.
 The server's strict egress floor must remain enabled when relying on the recorded
 private-address and DNS rebinding checks. SmolBox does not attest worker environment
 settings. Network-enabled guests can reach upstream's dedicated rollout gateway;
@@ -279,7 +279,7 @@ storage, and an owned-worker recovery procedure for exhausted storage. The
 experiment recovered by destroying only its separately bounded, verified owned
 unit and private in-memory mount. This cannot be generalized to deleting a
 shared worker's data or all machines with a matching name prefix. See
-[resource qualification](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/resource-qualification.md) for exact limits, counters
+[resource qualification](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/resource-qualification.md) for exact limits, counters
 and the recorded shared-storage failure.
 
 The subsequent nested Linux deployment separated its 768 MiB VM/cache mount
@@ -288,7 +288,7 @@ VM/cache mount while metadata retained free space; owned stop, API deletion and
 absence inspection all succeeded. This resolves the observed cleanup problem
 for that storage layout. It does not change smolvm's behavior when data and
 metadata share an exhausted filesystem. See
-[Linux deployment validation](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/resource-qualification.md#subsequent-linux-deployment-validation)
+[Linux deployment validation](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/resource-qualification.md#subsequent-linux-deployment-validation)
 for the tested configuration and recovery evidence.
 
 ## Approved checkpoint state

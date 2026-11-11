@@ -275,7 +275,7 @@ stops/starts, reads again, explicitly deletes, verifies absence, and checks zero
 reserved resources. Output reports the machine name so both processes can be
 compared. A failure retains evidence and may require the resolution procedure.
 
-See [validation evidence](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/persistent-machines-validation.md) for the tested scope
+See [validation evidence](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/persistent-machines-validation.md) for the tested scope
 and remaining qualification limits.
 
 ## Interactive use

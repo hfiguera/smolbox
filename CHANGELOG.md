@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+## 0.6.0
+
+Held branches can receive per-child environment values, opt-in static egress,
+and host-side HTTPS credentials. SmolVM **1.34.0** remains the default.
+[Upgrade guidance](docs/upgrading.md#upgrade-to-0-6-0)
+
+- Supply bounded non-secret environment values with `Branches.release/4` on
+  HTTP workers and Embedded Port. Bind retry identity to the accepted values
+  and preserve the environment in codec v51 records.
+- Add opt-in, allowlisted static egress for held branches on both backends on
+  Linux x86_64. Both siblings retain the approved policy after release and
+  stop/start. Portable checkpoints remain offline. Static egress uses codec v52.
+- Resolve HTTPS Bearer credentials independently for each held child on HTTP
+  workers and Embedded Port on Linux x86_64. Keep keys on the host, restrict
+  substitution to the approved hostname, and deny missing child bindings.
+  Embedded Port resolves keys again before restart and uses codec v53.
+- Fix macOS held-child restore when the normal source cache already exists.
+  Share canonical release-environment JSON bytes between Rust and Elixir,
+  including the vertical-tab regression.
+- Upgrade shared store readers, writers and adapters before enabling the new
+  capabilities. No new SQL migration is required for these features.
+- Restrict CI pushes to main, cancel superseded PR runs, consolidate test and
+  Dialyzer work, and add native compiler caching plus focused local Git hooks.
+- Remove repetitive validation-deferral wording from current guidance while
+  preserving historical test evidence and test-selection controls.
+
 - Document production support by backend, host, feature and store.
   [Validated configurations](docs/supported-platforms.md#validated-configurations)
 - Deprecate worker `qualification` as a deployment label. Existing

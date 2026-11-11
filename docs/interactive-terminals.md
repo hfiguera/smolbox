@@ -300,7 +300,7 @@ failed/incomplete capture even when earlier phases passed. Capture exit zero alo
 does not replace checking the phase results and final cleanup assertions. Guest
 keys and object archives are not exported by this mechanism.
 
-See [Validation evidence](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/interactive-terminals-validation.md) for real-worker
+See [Validation evidence](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/interactive-terminals-validation.md) for real-worker
 scenarios, simulated coverage, failed attempts and qualification limits.
 
 When a record uses an explicit guest path policy or expanded file budget,
@@ -309,4 +309,4 @@ and additionally requires `guest_files: 1`. Other feature capabilities and
 retention rules still apply.
 
 See [Supported platforms](supported-platforms.md) for current worker selection
-and [Testing reports](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/testing.md) for recorded checks and their limits.
+and [Testing reports](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/testing.md) for recorded checks and their limits.

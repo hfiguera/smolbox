@@ -11,9 +11,9 @@ Preserve the source identity and original operation handle; follow
 before resolving them. A cache hit, expired lease or observed absence cannot
 cancel a request already sent to the worker.
 
-For an existing deployment, follow [Upgrading SmolBox](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/upgrading.md). See
+For an existing deployment, follow [Upgrading SmolBox](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/upgrading.md). See
 [Troubleshooting](troubleshooting.md) for common symptoms and
-[Testing reports](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/testing.md) for the recorded recovery checks.
+[Testing reports](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/testing.md) for the recorded recovery checks.
 
 <a id="retained-machines-0-2-0"></a>
 
@@ -278,27 +278,27 @@ See [local volume recovery](local-volumes.md#uncertain-outcomes-and-recovery).
 
 ## Earlier upgrades
 
-For release transitions, use [Upgrading SmolBox](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/upgrading.md). These links retain
+For release transitions, use [Upgrading SmolBox](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/upgrading.md). These links retain
 older bookmarks; the instructions are kept in the upgrade documentation.
 
 ## Upgrading to 0.2.0
 
-Follow the [consolidated upgrade guide](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/upgrading-to-0.2.0.md) for worker selection,
+Follow the [consolidated upgrade guide](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/upgrading-to-0.2.0.md) for worker selection,
 controller quiescence, PostgreSQL migrations, capability/schema requirements and
 rollback restrictions.
 
 ### Upgrading to 0.1.3
 
-See [Upgrade to 0.1.3](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/upgrading-within-0.1.x.md#upgrading-to-0-1-3).
+See [Upgrade to 0.1.3](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/upgrading-within-0.1.x.md#upgrading-to-0-1-3).
 
 ### Upgrading to 0.1.4
 
-See [Upgrade to 0.1.4](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/upgrading-within-0.1.x.md#upgrading-to-0-1-4).
+See [Upgrade to 0.1.4](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/upgrading-within-0.1.x.md#upgrading-to-0-1-4).
 
 ### Upgrading to 0.1.5
 
-See [Upgrade to 0.1.5](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/upgrading-within-0.1.x.md#upgrading-to-0-1-5).
+See [Upgrade to 0.1.5](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/upgrading-within-0.1.x.md#upgrading-to-0-1-5).
 
 ### Checkpoint records (0.1.5)
 
-See [the checkpoint record transition](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/upgrading-within-0.1.x.md#upgrading-to-0-1-5).
+See [the checkpoint record transition](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/upgrading-within-0.1.x.md#upgrading-to-0-1-5).

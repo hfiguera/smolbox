@@ -148,5 +148,5 @@ yet must coordinate their own static admission restrictions and maintenance poli
 ## Validation
 
 Store and controller checks do not establish worker request fencing or automatic
-shutdown safety. See [Durable worker draining tests](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/worker-draining-validation.md)
+shutdown safety. See [Durable worker draining tests](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/worker-draining-validation.md)
 for concurrency checks, the Linux/PostgreSQL recovery run and rollback results.

@@ -1,7 +1,7 @@
 # Getting started with an HTTP worker
 
 Run a Python program in a disposable VM, read `42` from its output file, and
-wait for the VM to be deleted. The Mix example uses SmolBox **0.5.1** and
+wait for the VM to be deleted. The Mix example uses SmolBox **0.6.0** and
 SmolVM **1.34.0**. The downloadable Livebook has its own pins to SmolBox 0.4.3
 and SmolVM 1.22.0.
 
@@ -23,7 +23,7 @@ read it. A different port or `SMOLVM_DATA_DIR` does not isolate macOS worker sta
 
 This is a local demo with an in-memory store. See
 [Supported platforms](supported-platforms.md#host-prerequisites) for host
-requirements. Existing deployments should use [Upgrading SmolBox](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/upgrading.md).
+requirements. Existing deployments should use [Upgrading SmolBox](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/upgrading.md).
 
 For local execution through a supervised helper, see the
 [Embedded Port quickstart](embedded-quickstart.md).
@@ -83,7 +83,7 @@ Run `mix new smolbox_demo`, enter that directory, and add the following to `deps
 in `mix.exs`. Then run `mix deps.get`.
 
 ```elixir
-{:smolbox, "~> 0.5.1"}
+{:smolbox, "~> 0.6.0"}
 ```
 
 ## 2. Prepare one local worker
@@ -195,7 +195,7 @@ if this check fails.
 
 This section continues the Mix application path. For Livebook, use the complete
 [notebook](notebooks/getting-started.livemd) instead. Recorded checks are available
-separately in [Testing reports](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/testing.md#feature-checks).
+separately in [Testing reports](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/testing.md#feature-checks).
 
 In your application's terminal, set the directory printed in step 2 and its
 approved digest:
