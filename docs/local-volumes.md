@@ -245,5 +245,5 @@ failures before/after persistence, lost responses, interrupted callers, changed
 mount observations, record limits and malformed codec/wire inputs. These are
 failure-injection coverage, not evidence of host quotas or multi-tenant isolation.
 
-The [1.22.0 qualification](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/runtime-1.22.0-qualification.md) records the newer
+The [1.22.0 qualification](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/runtime-1.22.0-qualification.md) records the newer
 platform checks. The historical validation above still describes its original run.

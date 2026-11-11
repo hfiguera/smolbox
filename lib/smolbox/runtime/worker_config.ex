@@ -157,7 +157,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   not install or upgrade it. Explicit `"1.34.0"` selection is available for HTTP
   worker qualification. See [Supported platforms](supported-platforms.html)
   for host prerequisites and feature limits, and
-  [Upgrading SmolBox](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/upgrading.md)
+  [Upgrading SmolBox](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/upgrading.md)
   before changing an existing deployment.
   See [Getting started](getting-started.html) for a complete configuration.
 

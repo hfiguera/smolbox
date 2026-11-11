@@ -1,20 +1,20 @@
 # Supported platforms
 
-SmolBox 0.5.1 defaults to **SmolVM 1.34.0** for both backends. Use the
+SmolBox 0.6.0 defaults to **SmolVM 1.34.0** for both backends. Use the
 [Embedded Port quickstart](embedded-quickstart.md) for a local helper or the
 [HTTP worker quickstart](getting-started.md) for a separate SmolVM server.
 
 ## Elixir and Erlang
 
 The library requires Elixir **1.18 or later**. The repository and primary CI use
-**Elixir 1.20.4 / OTP 29.0.6**. Additional CI pairs are Elixir 1.18.4 / OTP 27.3.4.15,
+**Elixir 1.20.5 / OTP 29.1.2**. Additional CI pairs are Elixir 1.18.4 / OTP 27.3.4.15,
 Elixir 1.19.5 / OTP 28.5 and Elixir 1.20.4 / OTP 28.5.
 These tested pairs do not establish support for every possible Elixir/OTP pairing.
 
 ## Embedded Port hosts
 
 The bundle installer checks the exact `resize2fs` executable from the
-[release input catalog](https://github.com/hfiguera/smolbox/blob/v0.5.1/native/release-inputs.json).
+[release input catalog](https://github.com/hfiguera/smolbox/blob/v0.6.0/native/release-inputs.json).
 Each entry lists the pinned package downloads and the executable path and
 SHA-256. Install the matching host tools before running the quickstart.
 
@@ -53,7 +53,7 @@ cleanup on all three published targets. Managed HTTP workers on SmolVM 1.34.0
 support Linux x86_64 and Apple Silicon. The live campaigns also covered the
 following workloads.
 [Release validation](https://github.com/hfiguera/smolbox/releases/tag/v0.5.1)
-· [Live test configurations and results](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/evidence/smolvm-1.34.0-qualification.md)
+· [Live test configurations and results](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/evidence/smolvm-1.34.0-qualification.md)
 
 | Host | HTTP worker | Embedded Port |
 | --- | --- | --- |
@@ -61,10 +61,14 @@ following workloads.
 | Linux ARM64 | — | Ordinary VM lifecycle and retained files across graceful helper restart |
 | Apple Silicon | File transfer, terminals, startup workloads, port policy and checkpoints | Disposable and retained VM lifecycle, terminal I/O and resize, checkpoint capture and restore |
 
+SmolBox 0.6.0 adds per-child environment values at held release on both backends.
+Static branch egress and per-child HTTPS Bearer credentials are validated on
+Linux x86_64 for both backends. Other hosts retain their documented feature
+limits. See [Managed branches](managed-branches.md).
+
 Use a durable store when records must survive controller restarts. The Memory
 store is ephemeral. Check the feature guide for its required store capabilities
-and host and source limits. Live Embedded Port crash and independent CLI race
-qualification remain deferred.
+and host and source limits.
 [Persistence and recovery](recovery.md)
 · [Embedded Port qualification scope](embedded-port.md#maintainer-qualification)
 
@@ -80,7 +84,7 @@ onward need working `resize2fs` in the worker environment. Install your Linux
 distribution's `e2fsprogs` package, or `brew install e2fsprogs` on macOS. Before
 admitting work, verify file persistence through a stop/start cycle on a fresh
 machine you own. A successful health response alone does not verify disk
-preparation. The [historical prerequisite report](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/compatibility.md#host-preparation-prerequisites)
+preparation. The [historical prerequisite report](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/compatibility.md#host-preparation-prerequisites)
 records the failures that led to this requirement.
 
 The Linux demo uses a fresh `SMOLVM_DATA_DIR` and separate HTTP and guest rollout

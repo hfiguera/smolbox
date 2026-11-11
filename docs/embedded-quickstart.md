@@ -24,7 +24,7 @@ Run `mix new smolbox_demo`, enter the new directory, and add SmolBox to
 `deps/0` in `mix.exs`.
 
 ```elixir
-{:smolbox, "~> 0.5.1"}
+{:smolbox, "~> 0.6.0"}
 ```
 
 Install the dependency and bundle into a new, private directory. The

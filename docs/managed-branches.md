@@ -537,7 +537,7 @@ results from simulated failure tests. No cross-worker, cross-platform or macOS l
 qualification is implied.
 
 See [Supported platforms](supported-platforms.md) for current worker selection
-and [Testing reports](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/testing.md) for recorded checks and their limits.
+and [Testing reports](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/testing.md) for recorded checks and their limits.
 
 
 Released-child deletion now has a distinct checked native absence proof and Port

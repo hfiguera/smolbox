@@ -218,5 +218,5 @@ compatibility. Simulated controller tests cover restarts, no replay, mismatched
 ownership, explicit resolution and commands after growth. No macOS VM qualification,
 checkpoint/branch expansion, live growth or out-of-space fault campaign is claimed.
 
-The [1.22.0 qualification](https://github.com/hfiguera/smolbox/blob/v0.5.1/docs/runtime-1.22.0-qualification.md) records the newer
+The [1.22.0 qualification](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/runtime-1.22.0-qualification.md) records the newer
 platform checks. The historical validation above still describes its original run.
