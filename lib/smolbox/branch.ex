@@ -184,7 +184,7 @@ defmodule SmolBox.Branch do
   defp branch_network?(%{branch: %{spec: %{hold: true}}, spec: %{branch_static_egress: true}}),
     do: true
 
-  defp branch_network?(%{branch: %{native_authority: nil, spec: %{hold: true}}} = m),
+  defp branch_network?(%{branch: %{spec: %{hold: true}}} = m),
     do: SmolBox.BranchHTTPSCredentials.network?(m.spec.profile.network)
 
   defp branch_network?(_), do: false

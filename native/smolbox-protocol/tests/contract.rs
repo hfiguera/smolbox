@@ -870,6 +870,7 @@ fn observation_hello() -> Hello {
 
 fn creation_features() -> CreationFeatures {
     CreationFeatures {
+        branch_https: false,
         compact: false,
         network: NetworkPolicy {
             enabled: false,

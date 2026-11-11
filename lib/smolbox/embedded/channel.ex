@@ -53,6 +53,7 @@ defmodule SmolBox.Embedded.Channel do
     major: 1,
     unavailable: false,
     branch_static_egress: false,
+    branch_https_credentials: false,
     partial_cleanup_resolution: false,
     partial_collection_preflight: false,
     last_id: 0,
@@ -68,6 +69,8 @@ defmodule SmolBox.Embedded.Channel do
       minor: hello["minor"],
       major: Map.get(hello, "major", 1),
       branch_static_egress: get_in(hello, ~w(sdk feature_versions branch_static_egress)) == 1,
+      branch_https_credentials:
+        get_in(hello, ~w(sdk feature_versions branch_https_credentials)) == 1,
       partial_cleanup_resolution:
         match?(
           %{"branches" => 1, "partial_cleanup_resolution" => 1},
@@ -93,6 +96,7 @@ defmodule SmolBox.Embedded.Channel do
          true <- map_size(channel.pending) < 32,
          true <- channel.last_id < 9_007_199_254_740_991,
          true <- Request.valid?(operation, 1, channel.major),
+         true <- not Map.has_key?(operation, "credential") or channel.branch_https_credentials,
          true <-
            operation["operation"] != "resolve_partial_branch_cleanup" or
              channel.partial_cleanup_resolution,

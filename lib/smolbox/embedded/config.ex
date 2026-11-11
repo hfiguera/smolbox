@@ -56,6 +56,13 @@ defmodule SmolBox.Embedded.Config do
   their original surface. Ordinary public qualification remains package-specific.
   `sdk_version/1` describes the pinned SDK independently of the SmolBox engine version.
 
+  Optional `:branch_https_credentials` is a `{module, context}` resolver implementing
+  `SmolBox.BranchHTTPSCredentials`. A Linux x86_64 package advertising
+  `branch_https_credentials: 1` supports held branches with a single approved
+  HTTPS hostname. Values are resolved for each child at release and restart.
+  The store needs `native_branch_https_credentials: 1` and the v53 reader.
+  See [Per-child HTTPS credentials](managed-branches.html#per-child-https-credentials).
+
   Engine `0.2.0` packages use protocol 2 and manifest schema 3. Package policy and
   Hello must agree on the exact implemented SDK feature descriptor. The store
   additionally needs `native_material_proofs: 2`, including the selective v17
@@ -112,6 +119,7 @@ defmodule SmolBox.Embedded.Config do
     :branch_policies,
     :volume_policy,
     :registry_credentials,
+    :branch_https_credentials,
     :registry_policy,
     :sdk_identity,
     :publish_address
@@ -131,6 +139,7 @@ defmodule SmolBox.Embedded.Config do
                 branch_policies: [],
                 volume_policy: nil,
                 registry_credentials: nil,
+                branch_https_credentials: nil,
                 registry_policy: nil,
                 sdk_identity: nil,
                 publish_address: "127.0.0.1",
@@ -161,6 +170,7 @@ defmodule SmolBox.Embedded.Config do
           branch_policies: [SmolBox.BranchPolicy.t()],
           volume_policy: SmolBox.VolumePolicy.t() | nil,
           registry_credentials: {module(), term()} | nil,
+          branch_https_credentials: {module(), term()} | nil,
           registry_policy: SmolBox.Embedded.RegistryPolicy.t() | nil,
           sdk_identity: map() | nil,
           publish_address: String.t(),
@@ -348,8 +358,12 @@ defmodule SmolBox.Embedded.Config do
       Approvals.branch_policies?(config.branch_policies, version) and
       Approvals.volume_policy?(config.volume_policy, version, config.platform) and
       SmolBox.RegistryCredentials.valid?(config.registry_credentials) and
+      branch_credentials?(config.branch_https_credentials) and
       registry_policy?(config)
   end
+
+  defp branch_credentials?(nil), do: true
+  defp branch_credentials?(resolver), do: SmolBox.BranchHTTPSCredentials.resolver?(resolver)
 
   defp registry_policy?(config) do
     valid = RegistryPolicy.catalog?(config.registry_policy, config.sources)

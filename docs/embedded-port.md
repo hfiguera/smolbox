@@ -41,8 +41,7 @@ consumer takes an explicitly approved basic `.smolcheckpoint` seed; the
 now pass capture, source continuation, normal stopped Runtime replacement, two
 independent RAM/disk restores, cold restart and final artifact/staging cleanup.
 The same Hex package also passes both ordinary branch consumers. These remain
-scoped Memory-store results; wider parity gates stay pending. Crash validation
-stays deferred.
+scoped Memory-store results; wider parity gates stay pending.
 
 The [83137f8c helper checkpoint](evidence/embedded-port-http-parity-partial-collection-83137f8c.json)
 passes its build and release models. Both fresh current/minimum ordinary partial
@@ -68,7 +67,7 @@ backing release after an ordinary one-second API deadline. Both end with zero
 resources, empty SDK/process inventories and normal shutdown. Both toolchains
 read each history's five checkpoints (15 records). Encrypted unbooted histories
 and remaining platform/source/resource/upgrade combinations still need acceptance.
-Crash validation remains deferred; full parity and distribution approval stay open.
+Full parity and distribution approval stay open.
 
 The shared engine also supports original-owner historical publication lookup
 after an inactive later branch phase. Its deterministic models preserve phase,
@@ -197,7 +196,7 @@ VM and native-process inventories. This exact package has no installed public
 branch-consumer qualification yet. Public/store workflows and
 original-owner recovery remain required. That checkpoint did not qualify public
 native branching.
-Crash validation remains deferred and distribution approval remains separate.
+Distribution approval remains separate.
 
 The Linux development helper advertises checkpoint/branch wire operations
 for explicit Port qualification. Its [ordinary Port runner](evidence/embedded-port-http-parity-branch-port-runner.json)
@@ -556,7 +555,7 @@ The migration to an unmodified SDK has removed the five active downstream patche
 while keeping this architecture. Repository design and implementation notes are
 `docs/design/embedded-port-unmodified-sdk.md` and
 `docs/design/embedded-port-unmodified-sdk-implementation-plan.md`.
-Crash validation stays deferred. Exact engine 0.1.0 clean development packages have ordinary
+Exact engine 0.1.0 clean development packages have ordinary
 platform and current/minimum consumer qualification on Linux x86_64 and macOS arm64.
 The rebuilt engine 0.2.0 packages require their own ordinary qualification; schema
 and deterministic peer checks cannot transfer that historical evidence.
@@ -888,7 +887,7 @@ HTTP checkpoint records and existing native envelopes retain their encodings.
 Earlier native envelopes reject checkpoint restore-source assignments. This
 reader and managed-routing foundation does not enable public embedded checkpoints:
 capture/history integration, uncertainty resolution and ordinary restored-VM/
-package qualification remain pending. Crash validation remains deferred.
+package qualification remain pending.
 Checkpointable startup/preflight now have shared-engine and Port foundations that
 require original forkable material and an enrolled live source. They cannot
 convert an ordinary record from inventory, and preflight does not attest guest
@@ -1095,15 +1094,12 @@ Keep receipt-bearing evidence private. A failed attempt is not qualified: preser
 its evidence and reconcile authentic owned state before retrying. Ordinary mode
 avoids deliberate helper/BEAM interruption. Historical patched-package Linux
 boot/helper-loss and macOS durable boundaries passed; they do not qualify clean
-packages. Live crash and independent CLI-race campaigns remain deferred at the
-user's request. See the latest
+packages. See the latest
 repository progress record (`docs/design/embedded-port-progress.md`) for exact scope and failures.
 
 Default `mix test` and `mix ci` exclude both `runtime` and `deferred_crash`. The
 second tag separately fences native owner/helper-loss and persistence-interruption
-fixture tests. Selecting ordinary runtime qualification does not select deferred
-crash cases. These cases remain deferred; use deterministic models and normal
-shutdown/replacement for current validation.
+fixture tests. Select the test tags explicitly for the intended validation scope.
 
 ## Upgrade and drain procedure
 
@@ -1161,7 +1157,6 @@ patched-package receipts is outside scope. Unknown reservations block migration;
 never relabel assignments, rotate their generation or remove unresolved evidence.
 The unmodified SDK requires one cooperating owner for the dedicated domain;
 independent SDK/CLI writers and simultaneous Port/Rustler owners are unsupported.
-Crash and destructive CLI-race validation remain deferred.
 
 The 1.34.0 qualification covered ordinary lifecycle, public installation and
 source delivery. Follow the documented recovery procedure for uncertain
@@ -1322,7 +1317,7 @@ Linux bare and container exports passed ordinary public publication, resolution
 and digest-pinned re-import on the current and minimum toolchains with PostgreSQL.
 macOS bare and container exports passed the same workflow with Memory on the
 current toolchain and PostgreSQL on the minimum toolchain. Both default policies
-match their qualified descriptors. Crash validation remains deferred.
+match their qualified descriptors.
 
 Linux volume capability approval is explicit: an approved package must advertise
 volume descriptor one and the exact finite volume limits. Existing packages and
@@ -1397,7 +1392,7 @@ fence active work and can advance independently for historical records; immutabl
 native binding and material prefixes establish collected snapshot identity.
 See [scoped growth evidence](evidence/embedded-port-http-parity-public-growth-c27b705.json).
 This does not qualify bare guest overlay filesystems, other source/platform
-combinations or full HTTP parity. Crash validation stays deferred.
+combinations or full HTTP parity.
 
 
 The corrected Linux stopped-growth workflow now passes current/minimum public
@@ -1411,7 +1406,7 @@ and finish owned deletion with zero reservations. See the
 Bare/OCI and remaining source/resource combinations are still required. A new
 maintainer-only SDK packer tool prepares a bare input without opening an SDK
 domain or VM; preparing that file does not qualify its boot or filesystem growth.
-Full parity and the separate crash/distribution gates remain incomplete.
+Full parity and distribution approval remain incomplete.
 
 
 Standalone native terminal preflight is now implemented behind the separately
@@ -1471,7 +1466,7 @@ records exact inputs, package identities and normal shutdown with no native
 processes or zombies. Direct OCI, configured workloads, durable-store and other
 required combinations remain pending on this package. Keep the qualified package
 location available; its byte-identical initial build at another path does not
-replace protected template references. Crash validation remains deferred.
+replace protected template references.
 
 
 [Public branch admission evidence](evidence/embedded-port-http-parity-public-branches-admission.json) records 939 branch/backend/codec checks

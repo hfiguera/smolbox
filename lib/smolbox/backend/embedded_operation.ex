@@ -1,7 +1,15 @@
 defmodule SmolBox.Backend.EmbeddedOperation do
   @moduledoc false
   alias SmolBox.Backend.{Budget, EmbeddedContext, EmbeddedPreparation, Features}
-  alias SmolBox.Embedded.{Config, ImageContract, MountContract, NativeGrowth, Request}
+
+  alias SmolBox.Embedded.{
+    CheckpointContract,
+    Config,
+    ImageContract,
+    MountContract,
+    NativeGrowth,
+    Request
+  }
 
   alias SmolBox.{
     ArtifactPreparation,
@@ -144,6 +152,16 @@ defmodule SmolBox.Backend.EmbeddedOperation do
              },
              budget
            )
+  end
+
+  defp operation(context, :start, [{name, token}], budget) do
+    with true <- name == context.name and Map.has_key?(context.assignment.creation, "branch"),
+         true <- CheckpointContract.https_approved?(context.config),
+         true <- SmolBox.BranchHTTPSCredentials.token?(token),
+         {:ok, receipt} <- EmbeddedContext.receipt(context),
+         do:
+           ready(%{"operation" => "start", "receipt" => receipt, "credential" => token}, budget),
+         else: (_ -> error(:authentication, :start))
   end
 
   defp operation(context, operation, [name], budget)

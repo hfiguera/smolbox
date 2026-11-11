@@ -280,7 +280,7 @@ defmodule SmolBox.Runtime.Machines do
   end
 
   defp mutate(
-         worker,
+         %{kind: :http} = worker,
          %{operation: :start, spec: %{checkpointable: true, profile: profile}} = record
        )
        when profile.network != :offline,
@@ -292,7 +292,25 @@ defmodule SmolBox.Runtime.Machines do
          )
 
   defp mutate(worker, %{operation: :start, spec: %{checkpointable: true}} = record),
-    do: Backend.start_checkpointable(Target.connection(worker, record), record.machine_name)
+    do:
+      if(SmolBox.BranchHTTPSCredentials.source?(record.spec),
+        do: Backend.start(Target.connection(worker, record), record.machine_name),
+        else: Backend.start_checkpointable(Target.connection(worker, record), record.machine_name)
+      )
+
+  defp mutate(%{kind: :embedded} = worker, %{operation: :start} = record) do
+    if SmolBox.BranchHTTPSCredentials.child?(record) do
+      case SmolBox.BranchHTTPSCredentials.resolve(worker.branch_https_credentials, record) do
+        {:ok, token} ->
+          Backend.start(Target.connection(worker, record), {record.machine_name, token})
+
+        {:error, error} ->
+          {:credential_unavailable, error}
+      end
+    else
+      Backend.start(Target.connection(worker, record), record.machine_name)
+    end
+  end
 
   defp mutate(worker, record),
     do: apply(Backend, record.operation, [Target.connection(worker, record), record.machine_name])
@@ -309,11 +327,26 @@ defmodule SmolBox.Runtime.Machines do
            )
   end
 
-  defp create(worker, %{spec: %{checkpointable: true}} = record, %{network: network} = spec)
+  defp create(
+         %{kind: :http} = worker,
+         %{spec: %{checkpointable: true}} = record,
+         %{network: network} = spec
+       )
        when network != :offline,
        do: Backend.create(Target.connection(worker, record), spec, branch_https: true)
 
   defp create(worker, record, spec), do: Backend.create(Target.connection(worker, record), spec)
+
+  defp complete_response(config, %{operation: :start} = record, {:credential_unavailable, error}) do
+    fresh_write(config, record,
+      state: :stopped,
+      operation: nil,
+      phase: nil,
+      operation_deadline_ms: nil,
+      last_error: %{error | operation: :start, evidence: :not_dispatched},
+      next_due_at_ms: config.clock.now() + 60_000
+    )
+  end
 
   defp complete_response(config, record, {:ok, %Machine{} = observed}) do
     with {:ok, current} <- claim(config, ManagedMachine.key(record)),

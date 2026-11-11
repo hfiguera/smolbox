@@ -7,7 +7,7 @@ engine to be used by a future Rustler bridge. The development
 correlation state share its fixtures. Internal supervised Port ownership, durable
 assignments and observational recovery are implemented. Explicitly approved
 development packages can use public admission; new clean packages still require
-ordinary platform qualification, and crash/distribution gates remain separate.
+ordinary platform qualification. Distribution approval remains separate.
 
 Version 1.4 adds an epoch-bound `{"type":"unavailable","epoch":...}` notice.
 It contains no request ID, result, receipt or capacity-release authority. The
@@ -370,7 +370,7 @@ collection is separate from SDK dispatch: a collected pre-dispatch failure can
 have no guest Exit. Background/file/command results cannot satisfy terminal
 completion. Uncertainty may preserve observed Exit without qualifying success.
 Live bridge routing, native reader/store admission and platform qualification
-remain pending; crash validation stays deferred.
+remain pending.
 
 ### Optional growth and explicit qualification
 
@@ -386,7 +386,7 @@ qualification evidence. No stream/upload is valid for these messages, and legacy
 majors, wrong/crossed results, geometry/proof mismatches and duplicates reject.
 Qualification remains subject to work admission/fences even after an explicit
 owner quiesce; it is not a quarantined observation. Public setup/qualification
-acceptance and crash qualification remain separate gates.
+acceptance remains a separate gate.
 
 
 ### Original unbooted-disposal selection

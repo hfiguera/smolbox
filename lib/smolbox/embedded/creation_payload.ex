@@ -15,6 +15,8 @@ defmodule SmolBox.Embedded.CreationPayload do
     end
   end
 
+  def encode(%{"branch_https" => true}), do: :error
+
   def encode(features) do
     if CreationFeatures.valid?(features) do
       network = features["network"]

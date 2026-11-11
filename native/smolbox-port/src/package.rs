@@ -943,6 +943,7 @@ mod tests {
         assert_eq!(fixture_features.remove("branch_release_env"), Some(1));
         if cfg!(target_os = "linux") {
             assert_eq!(fixture_features.remove("branch_static_egress"), Some(1));
+            assert_eq!(fixture_features.remove("branch_https_credentials"), Some(1));
         }
         assert_eq!(
             hello.sdk.as_deref().unwrap().feature_versions,

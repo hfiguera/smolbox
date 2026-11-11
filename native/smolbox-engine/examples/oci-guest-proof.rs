@@ -125,6 +125,7 @@ impl Settings {
             return Err("only the fixed ordinary startup fixture can be qualified".into());
         }
         let features = CreationFeatures {
+            branch_https: false,
             network: self.network.clone(),
             ports: vec![],
             workload: self.startup_workload.clone(),
@@ -368,6 +369,7 @@ impl Session {
             },
             labels: BTreeMap::new(),
             features: CreationFeatures {
+                branch_https: false,
                 network: NetworkPolicy {
                     enabled: false,
                     hosts: vec![],

@@ -606,10 +606,11 @@ pub fn run_with_policy(
             .and_then(|deadline| engine.start_checkpointable(&receipt(&r), deadline, &cancel)).map(observation),
         wire::Operation::CheckpointPreflight { receipt: r } => observation_budget()
             .and_then(|budget| engine.checkpoint_preflight(&receipt(&r), &budget)).map(observation),
-        wire::Operation::Start { receipt: r } => match policy {
-            Some(policy) => operation_deadline.ok_or(engine::Error { code: engine::ErrorCode::Validation, dispatch: engine::Dispatch::NotDispatched })
+        wire::Operation::Start { receipt: r, credential } => match (credential, policy) {
+            (Some(token), _) => engine.start_with_branch_credential(&receipt(&r), &token.into_secret()),
+            (None, Some(policy)) => operation_deadline.ok_or(engine::Error { code: engine::ErrorCode::Validation, dispatch: engine::Dispatch::NotDispatched })
                 .and_then(|deadline| engine.start_with_volume_policy(&receipt(&r), &policy, deadline, &cancel)),
-            None => engine.start(&receipt(&r)),
+            (None, None) => engine.start(&receipt(&r)),
         }.map(observation),
         wire::Operation::Stop { receipt: r } => stop_operation(stop_deadline, cancel.clone(),
             |budget| engine.stop_with_budget(&receipt(&r), budget)),
@@ -1068,6 +1069,7 @@ fn effective_features(value: Option<Box<wire::CreationFeatures>>) -> engine::Cre
     value
         .map(|value| features(*value))
         .unwrap_or_else(|| engine::CreationFeatures {
+            branch_https: false,
             network: engine::NetworkPolicy {
                 enabled: false,
                 hosts: vec![],
@@ -1094,6 +1096,7 @@ fn oci_intent(create: wire::OciCreate) -> engine::OciCreationIntent {
 }
 fn features(value: wire::CreationFeatures) -> engine::CreationFeatures {
     engine::CreationFeatures {
+        branch_https: value.branch_https,
         network: engine::NetworkPolicy {
             enabled: value.network.enabled,
             hosts: value.network.hosts,
@@ -2056,9 +2059,12 @@ fn held_branch_release(
     remaining: Duration,
     cancel: engine::Cancellation,
 ) -> wire::Outcome {
-    let (request, qualify) = match operation {
-        wire::Operation::ReleaseHeldBranch { request } => (request, false),
-        wire::Operation::QualifyHeldBranchRelease { request } => (request, true),
+    let (request, qualify, credential) = match operation {
+        wire::Operation::ReleaseHeldBranch {
+            request,
+            credential,
+        } => (request, false, credential),
+        wire::Operation::QualifyHeldBranchRelease { request } => (request, true, None),
         _ => unreachable!(),
     };
     let convert_error = || engine::Error {
@@ -2090,6 +2096,14 @@ fn held_branch_release(
                 &native_request,
                 &budget,
             )?
+        } else if let Some(token) = &credential {
+            Some(engine.release_held_branch_with_credential(
+                &completion,
+                &receipt(&request.source),
+                &native_request,
+                &budget,
+                &token.clone().into_secret(),
+            )?)
         } else {
             Some(engine.release_held_branch_checked(
                 &completion,

@@ -116,6 +116,7 @@ impl Plan {
         let features = smolvm::agent::LaunchFeatures {
             snapshot_dir: Some(self.snapshot.path.clone()),
             dns_filter_hosts: record.dns_filter_hosts.clone(),
+            credentials: smolvm::credentials::CredentialLaunch::for_record(&record.name, record),
             uid_share_dir: Some(self.source.path.clone()),
             watch_parent: Some(true),
             ..Default::default()

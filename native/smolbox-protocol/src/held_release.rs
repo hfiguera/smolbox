@@ -70,6 +70,7 @@ fn release_environment_requires_negotiated_support() {
     request.request.env = vec![("MODE".into(), "one = 'literal'".into())];
     request.validate().unwrap();
     let operation = Operation::ReleaseHeldBranch {
+        credential: None,
         request: Box::new(request.clone()),
     };
     let mut h = hello(&request);
@@ -115,6 +116,7 @@ fn shared_explicit_request_and_transition_preserve_both_platforms_and_finite_bud
                 }
             } else {
                 Operation::ReleaseHeldBranch {
+                    credential: None,
                     request: Box::new(request.clone()),
                 }
             };
@@ -197,6 +199,7 @@ fn session_distinguishes_release_from_qualification_and_binds_platform_before_wo
                 }
             } else {
                 Operation::ReleaseHeldBranch {
+                    credential: None,
                     request: Box::new(request.clone()),
                 }
             };
@@ -248,5 +251,59 @@ fn session_distinguishes_release_from_qualification_and_binds_platform_before_wo
                 }
             ));
         }
+    }
+}
+
+#[test]
+fn credential_tokens_require_negotiated_support_and_are_removed_from_bookkeeping() {
+    let request: BranchHeldReleaseRequest =
+        serde_json::from_value(rows()[0]["request"].clone()).unwrap();
+    let token: RegistryToken = serde_json::from_value(serde_json::json!("child-test-key")).unwrap();
+    let operations = [
+        Operation::ReleaseHeldBranch {
+            request: Box::new(request.clone()),
+            credential: Some(token.clone()),
+        },
+        Operation::Start {
+            receipt: request.completion.child.clone(),
+            credential: Some(token),
+        },
+    ];
+    for operation in operations {
+        operation.validate(1000).unwrap();
+        assert!(!serde_json::to_string(&operation.sanitized())
+            .unwrap()
+            .contains("child-test-key"));
+        let mut h = hello(&request);
+        let mut session = Session::new(h.clone()).unwrap();
+        session.approve(&h).unwrap();
+        assert!(matches!(
+            admit(&mut session, &h, operation.clone()),
+            ServerMessage::Terminal {
+                outcome: Outcome::Error {
+                    code: SafeCode::Unsupported,
+                    dispatch: Dispatch::NotDispatched
+                },
+                ..
+            }
+        ));
+        for feature in [
+            "checkpoints",
+            "networking",
+            "branch_static_egress",
+            "branch_https_credentials",
+        ] {
+            h.sdk
+                .as_mut()
+                .unwrap()
+                .feature_versions
+                .insert(feature.into(), 1);
+        }
+        let mut session = Session::new(h.clone()).unwrap();
+        session.approve(&h).unwrap();
+        assert!(matches!(
+            admit(&mut session, &h, operation),
+            ServerMessage::Accepted { .. }
+        ));
     }
 }

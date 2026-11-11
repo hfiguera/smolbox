@@ -82,6 +82,8 @@ pub(crate) struct ImageContext {
 #[serde(deny_unknown_fields)]
 pub(crate) struct Metadata {
     pub command: BufferedCommand,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    credential_environment: Vec<(String, String)>,
     image: Option<ImageContext>,
     deadline_ns: u64,
     background: bool,
@@ -91,6 +93,12 @@ pub(crate) struct Metadata {
     instant_clock: bool,
 }
 impl Metadata {
+    fn environment(&self) -> Vec<(String, String)> {
+        let mut environment = self.credential_environment.clone();
+        smolvm::util::layer_env(&mut environment, self.command.env.clone());
+        environment
+    }
+
     fn now_ns(&self) -> Result<u64> {
         if self.instant_clock {
             instant_clock_ns()
@@ -161,7 +169,7 @@ impl Metadata {
         let request = match &self.image {
             None => AgentRequest::VmExec {
                 command: c.argv.clone(),
-                env: c.env.clone(),
+                env: self.environment(),
                 workdir: c.workdir.clone(),
                 timeout_ms: Some(remaining.as_millis() as u64),
                 interactive: true,
@@ -246,6 +254,11 @@ impl Metadata {
         if !record.remote_volumes.is_empty() {
             return Err(Error::before(ErrorCode::Unsupported));
         }
+        let (_, credential_environment) = smolvm::credentials::workload_env(
+            record.credential_policy.as_ref(),
+            &record.credential_placeholders,
+            &record.secret_refs,
+        );
         let image = record.image.as_ref().map(|image| {
             let config = smolvm::agent::RunConfig::new(image, command.argv.clone())
                 .in_machine(record, &record.name, &command.env)
@@ -261,6 +274,7 @@ impl Metadata {
         let remaining = expires.saturating_duration_since(Instant::now());
         Ok(Self {
             command,
+            credential_environment,
             image,
             deadline_ns: now.saturating_add(remaining.as_nanos() as u64),
             background: false,
@@ -278,6 +292,14 @@ impl Metadata {
         Ok(metadata)
     }
     pub(crate) fn validate(&self) -> Result<()> {
+        if self.credential_environment.len() > 16
+            || self.credential_environment.iter().any(|(key, value)| {
+                key.len() > 128 || value.len() > 8192 || key.contains('\0') || value.contains('\0')
+            })
+        {
+            return Err(Error::before(ErrorCode::Validation));
+        }
+
         self.command.validate(self.image.is_some())?;
         if self.background && (self.image.is_none() || self.command.stdin.is_some()) {
             return Err(Error::before(ErrorCode::Unsupported));
@@ -350,7 +372,7 @@ impl Metadata {
         let result = match &self.image {
             None => client.vm_exec(
                 c.argv.clone(),
-                c.env.clone(),
+                self.environment(),
                 c.workdir.clone(),
                 Some(remaining),
                 c.stdin.clone(),
@@ -794,6 +816,48 @@ impl Engine {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn bare_credential_commands_add_trust_without_consuming_the_public_environment_budget() {
+        let mut record = smolvm::config::VmRecord::new(
+            "credential-command".into(),
+            1,
+            512,
+            vec![],
+            vec![],
+            true,
+        );
+        let policy = crate::branch_credentials::policy("api.example.test").unwrap();
+        record.credential_placeholders =
+            smolvm::credentials::prepare_policy(&policy, Some(&["api.example.test".into()]))
+                .unwrap();
+        record.credential_policy = Some(policy);
+        let command = BufferedCommand {
+            argv: vec!["/bin/true".into()],
+            env: (0..64)
+                .map(|i| (format!("VALUE_{i}"), i.to_string()))
+                .collect(),
+            workdir: None,
+            user: None,
+            stdin: None,
+            timeout: Duration::from_secs(10),
+            max_output_bytes: 1024,
+        };
+        let metadata =
+            Metadata::new(&record, command, Instant::now() + Duration::from_secs(10)).unwrap();
+        metadata.validate().unwrap();
+        assert_eq!(metadata.command.env.len(), 64);
+        let environment: std::collections::BTreeMap<_, _> =
+            metadata.environment().into_iter().collect();
+        assert_eq!(environment["SSL_CERT_FILE"], "/run/smolvm/ca-bundle.pem");
+        assert!(environment["SMOLBOX_BRANCH_HTTPS_TOKEN"].starts_with("SMOL_PLACEHOLDER_"));
+        let mut override_environment = metadata;
+        override_environment.command.env =
+            vec![("SSL_CERT_FILE".into(), "/custom/trust.pem".into())];
+        let environment: std::collections::BTreeMap<_, _> =
+            override_environment.environment().into_iter().collect();
+        assert_eq!(environment["SSL_CERT_FILE"], "/custom/trust.pem");
+    }
 
     #[test]
     fn file_activation_is_fixed_and_preserves_original_overlay_without_a_runtime_manager() {

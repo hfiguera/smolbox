@@ -149,10 +149,11 @@ defmodule SmolBox.Runtime.Branches do
            MachineSession.io(config, child, fn ->
              release_evidence(config, worker, child)
            end),
+         {:ok, credential} <- release_credential(worker, child),
          {:ok, pending} <- release_advance(config, child, :dispatching) do
       result =
         MachineSession.io(config, pending, fn ->
-          release_call(config, worker, pending)
+          release_call(config, worker, pending, credential)
         end)
 
       case result do
@@ -169,10 +170,23 @@ defmodule SmolBox.Runtime.Branches do
           release_advance(config, pending, :unknown)
       end
     else
-      _ ->
-        release_advance(config, child, :unknown)
+      :credential_unavailable -> release_advance(config, child, :credential_unavailable)
+      _ -> release_advance(config, child, :unknown)
     end
   end
+
+  defp release_credential(%{kind: :embedded} = worker, child) do
+    if BranchHTTPSCredentials.child?(child) do
+      case BranchHTTPSCredentials.resolve(worker.branch_https_credentials, child) do
+        {:ok, token} -> {:ok, token}
+        {:error, _} -> :credential_unavailable
+      end
+    else
+      {:ok, nil}
+    end
+  end
+
+  defp release_credential(_worker, _child), do: {:ok, nil}
 
   defp install_https_credential(_worker, %{spec: %{profile: %{network: :offline}}}), do: :ok
   defp install_https_credential(_worker, %{spec: %{branch_static_egress: true}}), do: :ok
@@ -187,7 +201,14 @@ defmodule SmolBox.Runtime.Branches do
     end
   end
 
-  defp release_call(config, worker, pending) do
+  defp release_call(config, %{kind: :embedded} = worker, pending, token) when is_binary(token) do
+    with {:ok, source} <- release_source(config, pending) do
+      {:branch_result,
+       Backend.branch_release(connection(worker, source, pending, config.clock), {pending, token})}
+    end
+  end
+
+  defp release_call(config, worker, pending, _credentialed) do
     with {:ok, source} <- release_source(config, pending),
          :ok <- install_https_credential(worker, pending) do
       {:branch_result,

@@ -19,7 +19,16 @@ defmodule SmolBox.Lab.BranchStaticEgress do
   alias SmolBox.ArtifactStore.Directory
   alias SmolBox.Embedded.Config
   alias SmolBox.Runtime.WorkerConfig
-  alias SmolBox.Store.Memory
+  alias SmolBox.Store.{Codec, Memory}
+
+  defmodule HTTPSResolver do
+    @behaviour SmolBox.BranchHTTPSCredentials
+    @impl true
+    def resolve(%{id: id, host: "httpbingo.org"}, grants),
+      do: Agent.get(grants, &Map.fetch(&1, id))
+
+    def resolve(_, _), do: :error
+  end
 
   @timeout 120_000
   @scope "static-egress-proof"
@@ -70,6 +79,17 @@ defmodule SmolBox.Lab.BranchStaticEgress do
       allocation_floor: %{storage_gb: 1, overlay_gb: 1, host_overhead_mb: 128}
     ]
 
+    {options, scenario} =
+      if mode == :credentials do
+        {:ok, grants} =
+          Agent.start_link(fn -> %{"left" => "left-test-key", "right" => "right-test-key"} end)
+
+        {Keyword.put(options, :branch_https_credentials, {HTTPSResolver, grants}),
+         {:credentials, grants}}
+      else
+        {options, mode}
+      end
+
     {worker, verify_empty} =
       worker(backend, Map.put(artifact, "path", artifact_path), state_dir, options)
 
@@ -94,7 +114,16 @@ defmodule SmolBox.Lab.BranchStaticEgress do
       )
 
     try do
-      exercise(runtime, artifact, {profile, control_profile}, policy, state_dir, destinations)
+      exercise(
+        runtime,
+        artifact,
+        {profile, control_profile},
+        policy,
+        state_dir,
+        destinations,
+        scenario
+      )
+
       verify_empty.()
       {:ok, %{slots: 0, disk_gb: 0}} = Memory.usage(store, "proof")
       IO.puts("PASS: worker inventory empty and reservations released")
@@ -145,34 +174,33 @@ defmodule SmolBox.Lab.BranchStaticEgress do
     {worker, verify_empty}
   end
 
+  defp destinations(:credentials), do: ["httpbingo.org", "example.com"]
+
   defp destinations(:cidrs), do: ["1.1.1.1", "1.0.0.1"]
   defp destinations(:hostnames), do: ["one.one.one.one", "example.com"]
 
   defp policy(:cidrs, destinations),
     do: NetworkPolicy.new(cidrs: Enum.map(destinations, &(&1 <> "/32")))
 
-  defp policy(:hostnames, destinations), do: NetworkPolicy.new(hosts: destinations)
+  defp policy(mode, destinations) when mode in [:hostnames, :credentials],
+    do: NetworkPolicy.new(hosts: destinations)
 
-  defp exercise(runtime, artifact, {profile, control_profile}, policy, state_dir, destinations) do
+  defp exercise(
+         runtime,
+         artifact,
+         {profile, control_profile},
+         policy,
+         state_dir,
+         destinations,
+         mode
+       )
+       when mode in [:cidrs, :hostnames] do
     control = boot(runtime, "control", artifact, control_profile, false)
     expect_probe(runtime, control, destinations, "control before branching", :both_reachable)
 
     source = boot(runtime, "source", artifact, profile, true)
 
-    "" =
-      execute(runtime, source, "park", [
-        "/bin/sh",
-        "-c",
-        """
-        smolvm-branch-ready -- /bin/true </dev/null >/tmp/branch-ready.log 2>&1 &
-        for n in 1 2 3 4 5; do
-          test -s /run/smolvm/forkpoint/ready && exit 0
-          sleep 1
-        done
-        cat /tmp/branch-ready.log >&2
-        exit 1
-        """
-      ])
+    park(runtime, source)
 
     children =
       for id <- ~w(left right) do
@@ -195,9 +223,76 @@ defmodule SmolBox.Lab.BranchStaticEgress do
       {:ok, _} = Branches.retire(runtime, child, quiesced: true)
     end
 
+    cleanup(runtime, source, control, children, state_dir, destinations, mode)
+  end
+
+  defp exercise(
+         runtime,
+         artifact,
+         {profile, control_profile},
+         policy,
+         state_dir,
+         destinations,
+         {:credentials, grants}
+       ) do
+    control = boot(runtime, "control", artifact, control_profile, false)
+    control_probe(runtime, control, destinations, :credentials, "control before branching")
+    source = boot(runtime, "source", artifact, profile, :credentials)
+    park(runtime, source)
+
+    children =
+      for id <- ~w(left right unbound) do
+        {:ok, spec} = BranchSpec.new(id: id, policy: policy, idle: true, hold: true)
+        {:ok, child} = Branches.create(runtime, source, spec)
+        {:ok, %{branch: %{state: :held}}} = Branches.await(runtime, child, @timeout)
+        IO.puts("#{id}: held")
+        child
+      end
+
+    for {_, id} = child <- children do
+      {:ok, _} = Branches.release(runtime, child, machine(runtime, child).version)
+
+      if id == "unbound" do
+        {:ok, %{branch: %{state: :held}, last_error: %{category: :authentication}}} =
+          Branches.await(runtime, child, @timeout)
+
+        IO.puts("unbound: denied release and retained held state")
+      else
+        {:ok, %{branch: %{state: :released}}} = Branches.await(runtime, child, @timeout)
+        credential_probe(runtime, child, id <> "-test-key", id <> " after release")
+        transition(runtime, child, :stop, :stopped)
+
+        prove_revoked_restart(runtime, child, id, grants)
+
+        transition(runtime, child, :start, :running)
+        credential_probe(runtime, child, id <> "-test-key", id <> " after stop/start")
+        transition(runtime, child, :stop, :stopped)
+      end
+
+      transition(runtime, child, :delete, :deleted)
+      {:ok, _} = Branches.retire(runtime, child, quiesced: true)
+    end
+
+    cleanup(runtime, source, control, children, state_dir, destinations, :credentials)
+  end
+
+  defp prove_revoked_restart(runtime, child, "left" = id, grants) do
+    Agent.update(grants, &Map.delete(&1, id))
+    {:ok, _} = Machines.start(runtime, child, machine(runtime, child).version)
+
+    %{state: :stopped, last_error: %{category: :authentication, evidence: :not_dispatched}} =
+      machine(runtime, child)
+
+    IO.puts("left: revoked binding denied restart before native dispatch")
+    Agent.update(grants, &Map.put(&1, id, id <> "-test-key"))
+  end
+
+  defp prove_revoked_restart(_runtime, _child, _id, _grants), do: :ok
+
+  defp cleanup(runtime, source, control, children, state_dir, destinations, mode) do
     transition(runtime, source, :stop, :stopped)
     transition(runtime, source, :delete, :deleted)
-    expect_probe(runtime, control, destinations, "control after restart probes", :both_reachable)
+    control_probe(runtime, control, destinations, mode, "control after restart probes")
     transition(runtime, control, :stop, :stopped)
     transition(runtime, control, :delete, :deleted)
 
@@ -215,6 +310,70 @@ defmodule SmolBox.Lab.BranchStaticEgress do
     end
   end
 
+  defp park(runtime, source) do
+    "" =
+      execute(runtime, source, "park", [
+        "/bin/sh",
+        "-c",
+        """
+        smolvm-branch-ready -- /bin/true </dev/null >/tmp/branch-ready.log 2>&1 &
+        for n in 1 2 3 4 5; do
+          test -s /run/smolvm/forkpoint/ready && exit 0
+          sleep 1
+        done
+        cat /tmp/branch-ready.log >&2
+        exit 1
+        """
+      ])
+  end
+
+  defp control_probe(runtime, control, destinations, :credentials, label) do
+    for host <- destinations do
+      output =
+        execute(
+          runtime,
+          control,
+          "control-" <> host <> "-" <> Integer.to_string(System.unique_integer([:positive])),
+          [
+            "/bin/sh",
+            "-c",
+            ~S(timeout 15 wget -q -O - "https://$1/" >/dev/null && printf reachable),
+            "probe",
+            host
+          ]
+        )
+
+      "reachable" = output
+    end
+
+    IO.puts(label <> ": both HTTPS destinations reachable")
+  end
+
+  defp control_probe(runtime, control, destinations, _mode, label),
+    do: expect_probe(runtime, control, destinations, label, :both_reachable)
+
+  defp credential_probe(runtime, child, key, label) do
+    output =
+      execute(runtime, child, "https-" <> Integer.to_string(System.unique_integer([:positive])), [
+        "/bin/sh",
+        "-c",
+        ~S(timeout 15 wget -q -O - https://httpbingo.org/headers)
+      ])
+
+    %{"headers" => headers} = Jason.decode!(output)
+    ["Bearer " <> ^key] = headers["Authorization"]
+
+    blocked =
+      execute(runtime, child, "deny-" <> Integer.to_string(System.unique_integer([:positive])), [
+        "/bin/sh",
+        "-c",
+        ~S(if timeout 10 wget -q -O - https://example.com/ >/tmp/denied-response 2>/tmp/denied-error; then exit 1; fi; test ! -s /tmp/denied-response && printf blocked)
+      ])
+
+    "blocked" = blocked
+    IO.puts(label <> ": own credential verified at approved HTTPS host; denied host blocked")
+  end
+
   defp boot(runtime, id, artifact, profile, static_egress) do
     {:ok, spec} =
       ManagedMachineSpec.new(
@@ -222,7 +381,8 @@ defmodule SmolBox.Lab.BranchStaticEgress do
         id: id,
         artifact: artifact,
         profile: profile,
-        branch_static_egress: static_egress
+        branch_static_egress: static_egress == true,
+        checkpointable: static_egress == :credentials
       )
 
     {:ok, handle} = Machines.create(runtime, spec)
@@ -268,9 +428,19 @@ defmodule SmolBox.Lab.BranchStaticEgress do
 
     {:ok, request} = Machines.submit(runtime, handle, execution)
     {:ok, result} = SmolBox.await(runtime, request, @timeout)
-    %{state: :completed, result: %{exit_code: 0, stdout: stdout}} = result
-    machine(runtime, handle)
-    String.trim(stdout)
+    roundtrip(result)
+
+    case result do
+      %{state: :completed, result: %{exit_code: 0, stdout: stdout}} ->
+        machine(runtime, handle)
+        String.trim(stdout)
+
+      %{result: %SmolBox.Result{} = failed} ->
+        raise "guest probe failed: #{inspect(Map.take(Map.from_struct(failed), [:exit_code, :stdout, :stderr]))}"
+
+      _ ->
+        raise "guest execution failed: #{inspect(Map.take(result, [:state, :last_error, :failure]))}"
+    end
   end
 
   defp transition(runtime, handle, action, expected, retries \\ 10) do
@@ -293,8 +463,18 @@ defmodule SmolBox.Lab.BranchStaticEgress do
 
   defp machine(runtime, handle) do
     {:ok, record} = Machines.await(runtime, handle, @timeout)
+    roundtrip(record)
+  end
+
+  defp roundtrip(
+         %{backend_assignment: %{creation: %{"features" => %{"branch_https" => true}}}} = record
+       ) do
+    {:ok, <<"smolbox-record-v53\0", _::binary>> = encoded} = Codec.encode(record)
+    {:ok, ^record} = Codec.decode(encoded)
     record
   end
+
+  defp roundtrip(record), do: record
 end
 
 case System.argv() do
@@ -307,10 +487,13 @@ case System.argv() do
   ["--embedded", package, artifact, state_dir] ->
     SmolBox.Lab.BranchStaticEgress.run({:embedded, package}, artifact, state_dir, :cidrs)
 
+  ["--embedded", package, artifact, state_dir, "credentials"] ->
+    SmolBox.Lab.BranchStaticEgress.run({:embedded, package}, artifact, state_dir, :credentials)
+
   ["--embedded", package, artifact, state_dir, "hostnames"] ->
     SmolBox.Lab.BranchStaticEgress.run({:embedded, package}, artifact, state_dir, :hostnames)
 
   _ ->
     raise ArgumentError,
-          "expected SOCKET or --embedded PACKAGE, followed by ARTIFACT STATE_DIR [hostnames]"
+          "expected SOCKET or --embedded PACKAGE, followed by ARTIFACT STATE_DIR [hostnames|credentials]"
 end

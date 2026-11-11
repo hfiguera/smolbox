@@ -784,7 +784,7 @@
       ],
       "review": {
         "evidence": ["test/contract/managed_branch_test.exs"],
-        "remaining": ["Embedded Port credential-enabled source startup and live qualification."]
+        "remaining": ["Embedded Port uses credential-aware creation and its ordinary start operation. A dedicated adapter for this HTTP helper operation remains pending."]
       }
     },
     {
@@ -1062,7 +1062,7 @@
       ],
       "review": {
         "evidence": ["test/contract/managed_branch_test.exs"],
-        "remaining": ["Embedded Port held-child credential binding and live qualification."]
+        "remaining": ["Embedded Port carries transient credentials on receipt-bound release and restart requests. A standalone equivalent of this HTTP installation operation remains pending."]
       }
     },
     {

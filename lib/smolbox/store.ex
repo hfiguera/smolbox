@@ -317,6 +317,11 @@ defmodule SmolBox.Store do
   codec to read v51 and supporting the four-argument release transaction.
   Advertise `branch_static_egress: 1` after upgrading to read and write v52
   source and child records and preserving the static egress intent in branch transactions.
+  Advertise `native_branch_https_credentials: 1` after upgrading every reader
+  and writer to v53 and supporting pre-dispatch credential denial through
+  `NativeBranchReleaseOps`. Denial restores the held child and unlocks the source
+  while retaining their backing reservations. Transient credential values are
+  passed through the backend operation and stay outside these records.
   These transactions must serialize with commands, files, PTYs, capture, export
   and lifecycle admission across controllers sharing the store.
 

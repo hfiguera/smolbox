@@ -851,6 +851,11 @@ defmodule SmolBox.Embedded.Port do
          Features.supports?(config, :branches) and
            BranchChildAbsence.approval(request) in BranchRequest.approvals(config)
 
+  defp operation_approved?(config, %{"credential" => _} = request),
+    do:
+      Features.supports?(config, :branch_https_credentials) and
+        operation_approved?(config, Map.delete(request, "credential"))
+
   defp operation_approved?(config, %{"operation" => "branch_preflight"}),
     do: Features.supports?(config, :branches)
 

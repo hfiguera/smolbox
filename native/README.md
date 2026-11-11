@@ -87,8 +87,8 @@ exec normalization, and capped guest file transfers. Earlier 0.1.0 packages
 have macOS proof evidence. The [framed helper](smolbox-port/README.md), internal Elixir Port owner and
 record-scoped adapter have also run macOS proofs, including encrypted PostgreSQL
 recovery across fresh BEAM processes. Pack structure and geometry are validated
-before reservation. Public development admission is available; distribution and full crash
-qualification remain separate gates.
+before reservation. Public development admission is available; distribution approval
+remains separate.
 HTTP-only Elixir consumers do not build this workspace or require Rust.
 
 The maintainer package-consumer check can also exercise an already built, signed
@@ -112,7 +112,7 @@ Add `--native-terminal` with `--native-public` for the ordinary retained-image
 PTY qualification on packages declaring `terminals: 1`. It verifies binary
 input/output, resize, observed Exit 7 and durable slot release. The native package
 must use an optimized release build so complete template verification fits the
-finite startup budget. This option never selects deferred crash campaigns.
+finite startup budget.
 
 Run under the minimum supported Elixir/OTP toolchain with `--minimum` to pin
 minimum production dependencies, optionally consuming the same `--archive`.
@@ -239,8 +239,8 @@ boot-time parent loss or the complete fault matrix.
 The removed patch-specific boot fault fixtures remain in Git at
 `4be5e7b:native/smolbox-engine/tests/parent_watch.rs` and
 `4be5e7b:native/smolbox-port/tests/boot_fault_proof.py` (with its shim). They rely
-on old SDK hooks and do not qualify the SmolBox-owned guard. Crash validation is
-deferred; future fault qualification requires fixtures for the clean architecture.
+on old SDK hooks and do not qualify the SmolBox-owned guard. Fault tests for the
+clean architecture require fixtures for its owner guard.
 
 For normal VM validation without deliberate interruption, use
 `smolbox-port/tests/ordinary_proof.py` with `--package`, `--fixture`, `--sha256`,
@@ -371,7 +371,7 @@ container source. The `publish` phase additionally requires one approved
 loopback registry destination and its transient bearer on stdin. The test peer
 in `smolbox-port/tests/export_registry.py` keeps bounded upload files, enforces
 immutable tags and supports independent digest readback. Neither mode changes
-public capability admission or runs deferred crash tests.
+public capability admission.
 
 For the managed export proof, use `scripts/embedded-exports-runtime-proof.exs`
 inside an installed production consumer with no Rust on PATH. Run it with
@@ -388,8 +388,7 @@ the durable example consumer with a migrated Repo and a JSON settings file
 containing the partition and the path to a private 32-byte encryption key in
 `partition` and `key_file`. After normal exit, run
 `--without-rust --ordinary --readback EVIDENCE SETTINGS` in a fresh BEAM to verify
-the exact completed records without attaching a worker. These campaigns keep
-crash validation deferred.
+the exact completed records without attaching a worker.
 
 For offline Linux builds, use the locked Cargo vendor tree with a private
 `CARGO_HOME`, a vendored-source configuration and `CARGO_NET_OFFLINE=true`.
@@ -437,7 +436,7 @@ Existing databases are validated before SDK initialization can create tables.
 Domain/lock identity and all local material/handles must also establish absence;
 unknown durable reservations are retained on every failed proof. WAL readers do
 not exclude independent writers. Epoch fencing and ordinary clean-package recovery
-qualification remain part of the unfinished migration; crash validation is deferred.
+qualification remain part of the unfinished migration.
 
 
 Image-backed file access activates the existing persistent image root through a
@@ -695,7 +694,7 @@ unchanged. Rebuilding changes the helper/manifest identity and requires fresh
 operator approval and its own ordinary public qualification; 36ed1c49 above does
 not acquire the new features. The explicit public image consumer is selected
 through `--native-public --native-images` with private bounded source settings.
-It retains the original owner on failure and never selects deferred crash tests.
+It retains the original owner on failure.
 
 Source 30239b6 rebuilds exact Linux manifest e7387c9c with 1,121 native checks,
 strict all-target Clippy and unmodified SDK inventories. Its first current/minimum
@@ -870,7 +869,7 @@ for the scoped checks; it supplies no live SDK outcome.
 This witness does not exercise durable paired dependency retirement, framed Port
 branch routing or public current/minimum no-Rust consumers. Those campaigns and
 other required platforms/sources remain P8/P9 acceptance gates. Public native
-branch admission stays disabled; crash and distribution approvals stay separate.
+branch admission stays disabled; distribution approval stays separate.
 
 The [preparation evidence](../docs/evidence/embedded-port-http-parity-branch-witness-preparation.json)
 records only pure models, source/tooling checks and documentation validation.

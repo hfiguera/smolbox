@@ -5,7 +5,7 @@ defmodule SmolBox.Embedded.SDKIdentity do
 
   @features ~w(lifecycle foreground_exec extended_exec files extended_files material_proofs
                observability networking ports workloads compact_creation job_resources buffered_exec remote_sources images background_exec
-               logs streaming_exec terminals terminal_preflight volumes disk_growth checkpoints exports branches branch_release_env branch_static_egress partial_cleanup_resolution partial_collection_preflight)
+               logs streaming_exec terminals terminal_preflight volumes disk_growth checkpoints exports branches branch_release_env branch_static_egress branch_https_credentials partial_cleanup_resolution partial_collection_preflight)
 
   # This is the implemented package contract, not all APIs present in the SDK.
   # Launch and Hello must both bind it to the exact locally approved package.
@@ -64,7 +64,8 @@ defmodule SmolBox.Embedded.SDKIdentity do
           Map.merge(implemented, %{
             "volumes" => 1,
             "disk_growth" => 1,
-            "branch_static_egress" => 1
+            "branch_static_egress" => 1,
+            "branch_https_credentials" => 1
           }),
         else: implemented
 
@@ -117,6 +118,9 @@ defmodule SmolBox.Embedded.SDKIdentity do
           {"remote_sources", "compact_creation"},
           {"partial_cleanup_resolution", "branches"},
           {"branch_release_env", "branches"},
+          {"branch_https_credentials", "branches"},
+          {"branch_https_credentials", "checkpoints"},
+          {"branch_https_credentials", "branch_static_egress"},
           {"branch_static_egress", "branches"},
           {"branch_static_egress", "checkpoints"},
           {"branch_static_egress", "networking"},

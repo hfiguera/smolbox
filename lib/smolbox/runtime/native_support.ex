@@ -44,6 +44,7 @@ defmodule SmolBox.Runtime.NativeSupport do
          true <- checkpoint_source_support?(config, supported),
          true <- export_support?(config, supported),
          true <- branch_support?(config, supported),
+         true <- branch_credentials_support?(config, supported),
          true <- volume_support?(config, supported, adapter),
          true <-
            Enum.all?(required, fn {name, arity} -> function_exported?(adapter, name, arity) end),
@@ -59,6 +60,12 @@ defmodule SmolBox.Runtime.NativeSupport do
           2 -> supported[:native_material_proofs] == 2
           _unsupported -> false
         end
+      end)
+
+  defp branch_credentials_support?(config, supported),
+    do:
+      Enum.all?(targets(config), fn target ->
+        target.branch_https_credentials == nil or supported[:native_branch_https_credentials] == 1
       end)
 
   defp background_support?(config, supported),

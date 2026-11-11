@@ -412,6 +412,12 @@ defmodule SmolBox.Embedded.Request do
          Shape.keys?(operation, ~w(operation request)) and BranchChildAbsence.request?(request) and
            budget <= 30_000
 
+  defp operation?(%{"operation" => name, "credential" => token} = operation, budget, 2)
+       when name in ~w(start release_held_branch),
+       do:
+         SmolBox.BranchHTTPSCredentials.token?(token) and
+           operation?(Map.delete(operation, "credential"), budget, 2)
+
   defp operation?(%{"operation" => name} = operation, budget, 2)
        when name in ~w(release_held_branch qualify_held_branch_release),
        do:

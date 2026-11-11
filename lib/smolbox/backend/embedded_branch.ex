@@ -14,6 +14,7 @@ defmodule SmolBox.Backend.EmbeddedBranch do
     BranchPublication,
     BranchReleaseTransition,
     Call,
+    CheckpointContract,
     HeldBranchReleaseRequest,
     Identity,
     NativeBranchAuthority,
@@ -50,7 +51,22 @@ defmodule SmolBox.Backend.EmbeddedBranch do
          {:ok, remaining} <- remaining(budget, deadline),
          context = Call.pin(context, remaining),
          true <- is_pid(context.server) and context.epoch != nil do
-      coordinate(context, mode(operation, child), parent, child, budget, &Call.run/3, deadline)
+      credential =
+        case arguments do
+          [{_child, token}] -> token
+          _ -> nil
+        end
+
+      coordinate(
+        context,
+        mode(operation, child),
+        parent,
+        child,
+        budget,
+        &Call.run/3,
+        deadline,
+        credential
+      )
     else
       {:error, _} = error -> error
       _ -> failure(:unsupported_capability, :not_dispatched)
@@ -68,7 +84,10 @@ defmodule SmolBox.Backend.EmbeddedBranch do
     if source_context?(context, parent), do: records, else: :error
   end
 
-  defp records(context, :branch_release, [child]), do: [context, child]
+  defp records(context, :branch_release, [%ManagedMachine{} = child]), do: [context, child]
+
+  defp records(context, :branch_release, [{child, token}])
+       when is_binary(token), do: [context, child]
 
   defp records(context, :branch_inspect_child, [child, held]) do
     if held == child.branch.spec.hold, do: [context.spec, child], else: :error
@@ -86,12 +105,22 @@ defmodule SmolBox.Backend.EmbeddedBranch do
 
   # Transport-independent sequence used by run/4 after policy/pin approval.
   # A semantic peer can exercise it without enabling an unqualified SDK feature.
-  def coordinate(context, operation, parent, child, budget, call, deadline \\ nil) do
+  def coordinate(
+        context,
+        operation,
+        parent,
+        child,
+        budget,
+        call,
+        deadline \\ nil,
+        credential \\ nil
+      ) do
     budget = recovery_budget(operation, budget)
     deadline = deadline || now() + budget.timeout_ms
 
     with true <- pinned?(context) and scope?(context, operation, parent, child),
          {:ok, request} <- request(operation, child),
+         {:ok, request} <- credential_request(context, child, request, credential),
          {:ok, response, budget} <- exchange(context, request, budget, call, deadline),
          {:ok, evidence} <- proof(operation, child, response),
          {:ok, source_context, child_context} <- promote(context, operation, child, evidence) do
@@ -105,6 +134,24 @@ defmodule SmolBox.Backend.EmbeddedBranch do
       _ -> failure(:identity_conflict, :dispatch_uncertain)
     end
   end
+
+  defp credential_request(_context, _child, request, nil), do: {:ok, request}
+
+  defp credential_request(
+         context,
+         child,
+         %{"operation" => "release_held_branch"} = request,
+         token
+       ) do
+    if CheckpointContract.https_approved?(context.config) and
+         SmolBox.BranchHTTPSCredentials.child?(child) and
+         SmolBox.BranchHTTPSCredentials.token?(token),
+       do: {:ok, Map.put(request, "credential", token)},
+       else: failure(:authentication, :not_dispatched)
+  end
+
+  defp credential_request(_context, _child, _request, _token),
+    do: failure(:authentication, :not_dispatched)
 
   # A valid completion precedes these fresh observations. A later undispatched
   # inspection cannot prove that the whole branch operation was undispatched,

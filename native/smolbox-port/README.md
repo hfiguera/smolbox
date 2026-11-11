@@ -6,7 +6,7 @@ ordinary smolvm CLI operations. The internal Elixir bridge, store integration an
 observational recovery use this helper. Public development admission accepts
 explicitly approved packages. Exact engine 0.1.0 clean packages have ordinary
 platform/consumer qualification on Linux x86_64 and macOS arm64; the new 0.2.0
-packages need their own qualification. Distribution and crash gates remain separate.
+packages need their own qualification. Distribution approval remains separate.
 
 Build only against the verified source snapshot and private copied libraries:
 
@@ -173,8 +173,7 @@ python3 native/smolbox-port/tests/ordinary_proof.py \
 Those recorded proofs used historical patched packages. New clean packages need
 their own ordinary platform and consumer evidence. Lifecycle checks now use
 SmolBox's cooperating gate and pre/post observations around ordinary SDK APIs;
-independent SDK/CLI writers remain unsupported. Live owner loss, boot faults,
-persistence interruptions and destructive CLI races remain deferred. No native
+independent SDK/CLI writers remain unsupported. No native
 package publication is authorized by these checks.
 
 The internal Elixir Port owner now verifies the manifest and executable before
@@ -185,9 +184,8 @@ cancellation; the caller must also monitor owner death. Every fresh channel
 requires observational reconciliation and explicit activation before mutations.
 These components participate in public development runtime assignment, store
 enrollment and receipt-bound recovery. See the [public setup guide](../../docs/embedded-port.md)
-for startup and the runnable example. Remaining live fault and distribution
-qualification limits are recorded separately; public development availability
-does not claim crash certification or publisher approval.
+for startup and the runnable example. Distribution requirements are recorded
+separately; public development availability does not claim publisher approval.
 
 The separate ordinary Elixir proof exercises the actual OS Port owner, preserving
 a real nonzero Exit and binary file data, recovering retained storage after

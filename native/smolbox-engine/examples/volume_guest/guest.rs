@@ -100,6 +100,7 @@ pub fn first(session: &mut Session, settings: &Settings) -> ProofResult<serde_js
     let receipt = session.engine.create_with_volume_mounts(
         request,
         CreationFeatures {
+            branch_https: false,
             network: NetworkPolicy {
                 enabled: false,
                 hosts: vec![],

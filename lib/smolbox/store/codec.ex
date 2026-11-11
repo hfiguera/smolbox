@@ -341,6 +341,11 @@ defmodule SmolBox.Store.Codec do
   Static branch egress sources and children use v52 to retain the approved
   mode across controller replacement. Earlier envelopes omit this field and
   restore it as false. Upgrade readers and writers before enabling the mode.
+
+  Native HTTPS credential branch sources, children and attached commands use v53. Their records
+  retain the approved mode, lineage and release history. Credential values travel
+  only through transient backend requests. Upgrade paired release writers and
+  every reader before advertising `native_branch_https_credentials: 1`.
   """
 
   alias SmolBox.{Error, Execution, ExecutionFeatures}
@@ -395,6 +400,7 @@ defmodule SmolBox.Store.Codec do
   }
 
   @max_bytes 16_777_216
+  @branch_https_prefix "smolbox-record-v53\0"
   @branch_static_egress_prefix "smolbox-record-v52\0"
   @branch_release_env_prefix "smolbox-record-v51\0"
   @native_collected_branch_publications_prefix "smolbox-record-v50\0"
@@ -537,8 +543,51 @@ defmodule SmolBox.Store.Codec do
     Error
   ]
 
+  defp encode_branch_credentials(record) do
+    with true <- native_branch_credentials?(record),
+         :ok <- validate_extended(record) do
+      bytes = @branch_https_prefix <> :erlang.term_to_binary(record)
+      if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
+    else
+      _ -> invalid()
+    end
+  end
+
+  defp native_branch_credentials?(%Execution{
+         backend_assignment: %{version: 2, creation: %{"features" => %{"branch_https" => true}}}
+       }),
+       do: true
+
+  defp native_branch_credentials?(record),
+    do:
+      SmolBox.BranchHTTPSCredentials.source?(record.spec) or
+        SmolBox.BranchHTTPSCredentials.child?(record)
+
   @spec encode(Execution.t() | SmolBox.ManagedMachine.t() | SmolBox.Volume.t()) ::
           {:ok, binary()} | {:error, Error.t()}
+  def encode(
+        %Execution{
+          backend_assignment: %{version: 2, creation: %{"features" => %{"branch_https" => true}}}
+        } = record
+      ),
+      do: encode_branch_credentials(record)
+
+  def encode(
+        %SmolBox.ManagedMachine{
+          backend_assignment: %{version: 2, creation: %{"features" => %{"branch_https" => true}}}
+        } = record
+      ),
+      do: encode_branch_credentials(record)
+
+  def encode(
+        %SmolBox.ManagedMachine{
+          backend_assignment: %{version: 2},
+          branch: %{},
+          spec: %{profile: %{network: %SmolBox.NetworkPolicy{}}, branch_static_egress: false}
+        } = record
+      ),
+      do: encode_branch_credentials(record)
+
   def encode(%SmolBox.ManagedMachine{spec: %{branch_static_egress: true}} = record) do
     with :ok <- validate_extended(record) do
       bytes = @branch_static_egress_prefix <> :erlang.term_to_binary(record)
@@ -751,6 +800,22 @@ defmodule SmolBox.Store.Codec do
   @spec decode(binary()) ::
           {:ok, Execution.t() | SmolBox.ManagedMachine.t() | SmolBox.Volume.t()}
           | {:error, Error.t()}
+  def decode(<<@branch_https_prefix, 131, tag, _rest::binary>> = bytes)
+      when tag != 80 and byte_size(bytes) <= @max_bytes do
+    Enum.each(@record_modules, &Code.ensure_loaded!/1)
+    <<@branch_https_prefix, payload::binary>> = bytes
+
+    with {%{__struct__: module, backend_assignment: %{version: 2}} = record, used} <-
+           :erlang.binary_to_term(payload, [:safe, :used]),
+         true <- module in [SmolBox.ManagedMachine, Execution],
+         true <- used == byte_size(payload) and native_branch_credentials?(record),
+         :ok <- validate_extended(record),
+         do: {:ok, record},
+         else: (_ -> invalid())
+  rescue
+    ArgumentError -> invalid()
+  end
+
   def decode(<<@branch_static_egress_prefix, 131, tag, _rest::binary>> = bytes)
       when tag != 80 and byte_size(bytes) <= @max_bytes do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)

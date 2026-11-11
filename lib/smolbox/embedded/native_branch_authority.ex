@@ -127,7 +127,7 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
         fn {proof, module} -> proof == nil or module.valid?(proof, authority) end
       )
 
-  def assignment_fields(%__MODULE__{} = authority, artifact, profile),
+  def assignment_fields(%__MODULE__{} = authority, artifact, profile, credentialed \\ false),
     do: %{
       version: 2,
       binding: %Binding{
@@ -135,7 +135,7 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
         target_id: authority.request["source"]["target_id"],
         generation: authority.request["source"]["domain_generation"]
       },
-      creation: BranchCreation.from_request(authority.request, artifact, profile)
+      creation: BranchCreation.from_request(authority.request, artifact, profile, credentialed)
     }
 
   def history_valid?(%{backend_assignment: nil} = record),
@@ -178,7 +178,13 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
     valid?(authority) and branch_spec?(branch.spec, request, profile) and
       authority.source == branch.source and authority.fingerprint == child.fingerprint and
       child.id == request["child"]["operation_id"] and
-      Map.from_struct(assignment) == assignment_fields(authority, child.spec.artifact, profile) and
+      Map.from_struct(assignment) ==
+        assignment_fields(
+          authority,
+          child.spec.artifact,
+          profile,
+          SmolBox.BranchHTTPSCredentials.child?(child)
+        ) and
       source?(branch.source_machine, request["source"], profile) and
       proof_records?(child, authority.completion)
   end
@@ -223,12 +229,26 @@ defmodule SmolBox.Embedded.NativeBranchAuthority do
   defp proofs_preserved?(original, saved, record, next),
     do:
       creation_proofs_preserved?(original, saved, record.version) and
-        NativeBranchRelease.preserved?(original.release, saved.release) and
+        release_preserved?(original.release, saved.release, record, next) and
         NativeBranchRetirement.preserved?(original.retirement, saved.retirement, record.version) and
         NativeBranchBacking.preserved?(original.backing, saved.backing, record.version) and
         NativeBranchDeletion.preserved?(original.deletion, saved.deletion, record.version) and
         NativeBranchDeletionAction.preserved?(original, saved, record.version) and
         deletion_authorized?(record, next) and closure_authorized?(record.branch, next.branch)
+
+  defp release_preserved?(
+         %NativeBranchRelease{transition: nil},
+         nil,
+         %{branch: %{state: :release_pending}, phase: :pending},
+         %{
+           branch: %{state: :held, release_version: nil, release_env: []},
+           last_error: %{category: :authentication, operation: :branch, evidence: :not_dispatched}
+         }
+       ),
+       do: true
+
+  defp release_preserved?(before, after_release, _record, _next),
+    do: NativeBranchRelease.preserved?(before, after_release)
 
   defp creation_proofs_preserved?(original, saved, version),
     do:

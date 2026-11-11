@@ -70,6 +70,9 @@ impl PackRecordPolicy<'_> {
     fn qualify(&self, manifest: &smolvm_pack::format::PackManifest) -> Result<()> {
         if let Some(features) = self.features {
             features.qualify(manifest)?;
+            if features.branch_https && !self.checkpointable {
+                return Err(Error::before(ErrorCode::Unsupported));
+            }
         }
         if self.checkpointable {
             crate::checkpoint_capture::validate_pack(manifest)?;
@@ -1935,6 +1938,7 @@ impl Engine {
             .validate()
             .map_err(|_| Error::before(ErrorCode::Unsupported))?;
         let features = crate::CreationFeatures {
+            branch_https: false,
             network: crate::NetworkPolicy {
                 enabled: true,
                 hosts: record
@@ -2468,7 +2472,15 @@ impl Engine {
     }
 
     pub fn start(&self, receipt: &CreationReceipt) -> Result<Observation> {
-        self.start_mode(receipt, None, None)
+        self.start_mode(receipt, None, None, None)
+    }
+
+    pub fn start_with_branch_credential(
+        &self,
+        receipt: &CreationReceipt,
+        token: &str,
+    ) -> Result<Observation> {
+        self.start_mode(receipt, None, None, Some(token))
     }
 
     /// Only originally authenticated forkable material is eligible. The SDK's
@@ -2489,7 +2501,7 @@ impl Engine {
         if !record.forkable {
             return Err(Error::before(ErrorCode::Unsupported));
         }
-        self.start_mode(receipt, None, Some((deadline, cancel)))
+        self.start_mode(receipt, None, Some((deadline, cancel)), None)
     }
 
     /// Read-only source qualification, not an assertion that guest work is idle.
@@ -2548,7 +2560,7 @@ impl Engine {
                 let mounts = self.qualify_volume_mounts(policy, &material.mounts, &budget)?;
                 self.start_with_volume_mounts(receipt, mounts, deadline, cancel)
             }
-            None => self.start_mode(receipt, None, Some((deadline, cancel))),
+            None => self.start_mode(receipt, None, Some((deadline, cancel)), None),
         }
     }
 
@@ -2561,7 +2573,7 @@ impl Engine {
         deadline: std::time::Instant,
         cancel: &Cancellation,
     ) -> Result<Observation> {
-        self.start_mode(receipt, Some(mounts), Some((deadline, cancel)))
+        self.start_mode(receipt, Some(mounts), Some((deadline, cancel)), None)
     }
 
     fn start_mode(
@@ -2569,6 +2581,7 @@ impl Engine {
         receipt: &CreationReceipt,
         mut mounts: Option<crate::QualifiedVolumeMounts>,
         budget: Option<(std::time::Instant, &Cancellation)>,
+        credential: Option<&str>,
     ) -> Result<Observation> {
         // Capture the fallback before any preflight/SDK work. Readiness never
         // grants another budget after the original one-shot boot returns.
@@ -2611,6 +2624,13 @@ impl Engine {
             _ => return Err(Error::before(ErrorCode::State)),
         }
         let record = self.record(receipt)?;
+        let _credential_values = if record.credential_policy.is_some() || credential.is_some() {
+            Some(crate::branch_credentials::prepare_boot(
+                &record, credential,
+            )?)
+        } else {
+            None
+        };
         reject_unqualified_oci_boot(&record)?;
         match &mounts {
             Some(mounts) => {
@@ -5163,6 +5183,7 @@ pub(crate) mod tests {
                 artifact,
                 labels: BTreeMap::new(),
                 features: crate::CreationFeatures {
+                    branch_https: false,
                     network: crate::NetworkPolicy {
                         enabled: false,
                         hosts: vec![],
@@ -5281,6 +5302,7 @@ pub(crate) mod tests {
                     material_hash(&ordinary).unwrap()
                 );
                 let networked = crate::CreationFeatures {
+                    branch_https: false,
                     network: crate::NetworkPolicy {
                         enabled: true,
                         hosts: vec!["example.com".into()],
@@ -5628,6 +5650,7 @@ pub(crate) mod tests {
             },
             labels: BTreeMap::new(),
             features: crate::CreationFeatures {
+                branch_https: false,
                 network: crate::NetworkPolicy {
                     enabled: false,
                     hosts: vec![],

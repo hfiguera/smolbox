@@ -1,7 +1,16 @@
 defmodule SmolBox.Embedded.CreationFeatures do
   @moduledoc false
   alias SmolBox.Embedded.{Config, Shape}
-  alias SmolBox.{ExecutionSpec, Mount, NetworkPolicy, PortMapping, Validation, Workload}
+
+  alias SmolBox.{
+    BranchHTTPSCredentials,
+    ExecutionSpec,
+    Mount,
+    NetworkPolicy,
+    PortMapping,
+    Validation,
+    Workload
+  }
 
   def from_spec(spec) do
     ports = Map.get(spec, :ports, [])
@@ -10,15 +19,31 @@ defmodule SmolBox.Embedded.CreationFeatures do
     if spec.profile.network == :offline and ports == [] and workload == nil do
       nil
     else
-      %{
+      features = %{
         "network" => network(spec.profile.network),
         "ports" => PortMapping.to_wire(ports),
         "workload" => workload(workload)
       }
+
+      if BranchHTTPSCredentials.source?(spec),
+        do: Map.put(features, "branch_https", true),
+        else: features
     end
   end
 
-  def valid?(value),
+  def valid?(
+        %{
+          "branch_https" => true,
+          "network" => %{"hosts" => [_], "cidrs" => []},
+          "ports" => [],
+          "workload" => nil
+        } = value
+      ),
+      do: ordinary?(Map.delete(value, "branch_https"))
+
+  def valid?(value), do: ordinary?(value)
+
+  defp ordinary?(value),
     do:
       Shape.keys?(value, ~w(network ports workload)) and network?(value["network"]) and
         ports?(value["ports"]) and workload?(value["workload"])
@@ -30,10 +55,15 @@ defmodule SmolBox.Embedded.CreationFeatures do
 
     valid?(value) and is_map(sdk) and
       Enum.any?(~w(networking ports workloads), &(sdk["feature_versions"][&1] == 1)) and
-      (not value["network"]["enabled"] or sdk["feature_versions"]["networking"] == 1) and
+      network_approved?(value, sdk) and
       (value["ports"] == [] or sdk["feature_versions"]["ports"] == 1) and
       (value["workload"] == nil or sdk["feature_versions"]["workloads"] == 1)
   end
+
+  defp network_approved?(value, sdk),
+    do:
+      (not value["network"]["enabled"] or sdk["feature_versions"]["networking"] == 1) and
+        (value["branch_https"] != true or sdk["feature_versions"]["branch_https_credentials"] == 1)
 
   def attach(create, nil), do: create
   def attach(create, features), do: Map.put(create, "features", features)

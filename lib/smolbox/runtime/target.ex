@@ -1,7 +1,7 @@
 defmodule SmolBox.Runtime.Target do
   @moduledoc false
   alias SmolBox.Backend.{Assignment, Embedded, Features, HTTP}
-  alias SmolBox.Embedded.{Config, Port}
+  alias SmolBox.Embedded.{CheckpointContract, Config, Port}
   alias SmolBox.{Error, MachineSpec, Source}
   alias SmolBox.Runtime.WorkerConfig
 
@@ -59,7 +59,8 @@ defmodule SmolBox.Runtime.Target do
             :checkpoint_policies,
             :branch_policies,
             :volume_policy,
-            :registry_credentials
+            :registry_credentials,
+            :branch_https_credentials
           ])
           |> Map.merge(%{
             kind: :embedded,
@@ -168,6 +169,11 @@ defmodule SmolBox.Runtime.Target do
 
   def https_branches?(%__MODULE__{kind: :http} = target, profile),
     do: WorkerConfig.https_branches?(worker_definition(target), profile)
+
+  def https_branches?(%__MODULE__{kind: :embedded, native_config: config}, profile),
+    do:
+      CheckpointContract.https_approved?(config) and
+        SmolBox.BranchHTTPSCredentials.network?(profile.network)
 
   def https_branches?(_target, _profile), do: false
 

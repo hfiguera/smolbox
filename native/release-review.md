@@ -123,10 +123,8 @@ Both platforms passed current/minimum public consumers, PostgreSQL-backed normal
 Runtime replacement, compatible clean helper replacement and bare-VM snapshot
 import/retention. The PostgreSQL lifecycle uses
 ordinary Runtime shutdown with its store alive, without injected persistence loss.
-The remaining crash/CLI-race campaign is deferred at the user's request;
-complete crash qualification is not claimed. The latest
-[progress record](../docs/design/embedded-port-progress.md) preserves tested scope,
-an unresolved Linux verification failure and the stop request.
+The [progress record](../docs/design/embedded-port-progress.md) preserves the
+historical test scope, including the recorded Linux verification failure.
 
 Distribution approval remains separate: complete independent SDK interference
 races when separately authorized, exact native source/license delivery, publisher

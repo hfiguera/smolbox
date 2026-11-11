@@ -149,8 +149,7 @@ defmodule SmolBox.Backend.Assignment do
   defp features_approved?(%{creation: %{"branch" => request} = creation}, config, spec),
     do:
       Features.supports?(config, :branches) and
-        (not Map.has_key?(creation, "features") or
-           CheckpointContract.static_egress_approved?(config)) and
+        (not Map.has_key?(creation, "features") or branch_network_approved?(config, creation)) and
         request["approval"] in BranchRequest.approvals(config) and command_approved?(config, spec)
 
   defp features_approved?(assignment, config, spec),
@@ -158,6 +157,12 @@ defmodule SmolBox.Backend.Assignment do
       CheckpointContract.opt_in_approved?(config, assignment.creation) and
         CreationFeatures.approved?(Map.get(assignment.creation, "features"), config) and
         command_approved?(config, spec) and MountContract.approved?(assignment.creation, config)
+
+  defp branch_network_approved?(config, %{"features" => %{"branch_https" => true}}),
+    do: CheckpointContract.https_approved?(config)
+
+  defp branch_network_approved?(config, _creation),
+    do: CheckpointContract.static_egress_approved?(config)
 
   defp approved_creation?(_creation, nil), do: false
 
@@ -267,6 +272,8 @@ defmodule SmolBox.Backend.Assignment do
       spec.profile in config.profiles and checkpoint_profile_approved?(config, spec) and
         (not Map.get(spec, :branch_static_egress, false) or
            CheckpointContract.static_egress_approved?(config)) and
+        (not SmolBox.BranchHTTPSCredentials.source?(spec) or
+           CheckpointContract.https_approved?(config)) and
         (not Map.get(spec, :checkpointable, false) or Features.supports?(config, :checkpoints))
 
   defp checkpoint_profile_approved?(config, %{artifact: %{"kind" => "checkpoint"}} = spec),
@@ -389,7 +396,8 @@ defmodule SmolBox.Backend.Assignment do
 
   defp bare_guest?(%{checkpointable: true} = spec, version),
     do:
-      version == 2 and spec.artifact["kind"] != "oci" and spec.profile.network == :offline and
+      version == 2 and spec.artifact["kind"] != "oci" and
+        (spec.profile.network == :offline or SmolBox.BranchHTTPSCredentials.source?(spec)) and
         not SmolBox.FileAccess.extended?(spec.profile) and Map.get(spec, :volumes, []) == [] and
         Map.get(spec, :ports, []) == [] and Map.get(spec, :workload) == nil
 

@@ -112,6 +112,10 @@ impl Session {
                             .sdk
                             .as_ref()
                             .is_none_or(|sdk| sdk.feature_versions.get("checkpoints") != Some(&1))))
+                || (operation.requires_branch_credentials()
+                    && self.hello.sdk.as_ref().is_none_or(|sdk| {
+                        sdk.feature_versions.get("branch_https_credentials") != Some(&1)
+                    }))
                 || (operation.branch_static_egress()
                     && self.hello.sdk.as_ref().is_none_or(|sdk| {
                         sdk.feature_versions.get("branch_static_egress") != Some(&1)
@@ -125,7 +129,7 @@ impl Session {
                         sdk.feature_versions.get("partial_collection_preflight") != Some(&1)
                     }))
                 || (matches!(&operation,
-                    Operation::ReleaseHeldBranch { request }
+                    Operation::ReleaseHeldBranch { request, .. }
                     | Operation::QualifyHeldBranchRelease { request }
                     if !request.request.env.is_empty()
                 ) && self
@@ -970,7 +974,7 @@ impl Session {
                 )?;
             }
             (
-                Operation::ReleaseHeldBranch { request },
+                Operation::ReleaseHeldBranch { request, .. },
                 Outcome::HeldBranchReleased { transition },
             ) => {
                 check(pending.output_bytes == 0)?;
