@@ -9,5 +9,5 @@ SmolBox now owns bounded transfer supervision, approved asset preparation,
 cooperating lifecycle policy, read-only absence observation and the boot guard.
 See the [migration design](../../docs/design/embedded-port-unmodified-sdk.md) and
 [progress record](../../docs/design/embedded-port-progress.md). Independent SDK
-writers remain unsupported. Crash and destructive CLI-race validation remain
-deferred; historical patched-package evidence does not qualify clean packages.
+writers remain unsupported. Historical patched-package evidence does not qualify
+clean packages.

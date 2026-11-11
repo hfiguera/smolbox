@@ -517,7 +517,7 @@ defmodule SmolBox.Machines do
   Use `continue_deletion/4` separately to finish an unentered final SDK deletion.
   An entered SDK deletion never replays. HTTP targets and restarted children do
   not support this operation. Native branch admission remains disabled pending
-  ordinary qualification; crash validation remains deferred.
+  ordinary qualification.
   """
   @spec collect_deletion(SmolBox.runtime(), handle(), pos_integer(), keyword()) ::
           {:ok, ManagedMachine.t()} | {:error, Error.t()}

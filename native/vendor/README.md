@@ -34,4 +34,4 @@ SmolBox's native crates use the repository MIT license. This archive includes no
 libkrun/libkrunfw binaries, firmware, rootfs or disk templates. Their exact
 provenance/license audit and corresponding-source delivery remain separate
 [distribution requirements](../release-review.md). Existing patched-package
-approvals/evidence remain historical. Crash qualification stays deferred.
+approvals/evidence remain historical.

@@ -170,7 +170,7 @@ library source. Original keys, authority, binary data and historical output surv
 final deletion releases all reservations and both test databases shut down normally.
 Other sources, mounted/other durable histories and platform/resource combinations
 remain pending on this package. Earlier package evidence keeps its own scope; full HTTP parity remains
-incomplete, with crash qualification deferred.
+incomplete.
 
 Adapters advertise `managed_disk_expansion: 1` and implement `:expansion_accept`
 and `:expansion_advance` under the existing `Store.machine/3` boundary. Acceptance

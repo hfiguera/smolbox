@@ -274,7 +274,7 @@ completed-result recovery and owned cleanup. Separate BEAMs on both toolchains
 read all 13 final encrypted records and both backing acknowledgements without
 native workers. Both readers validate five checkpoints (45 records) per dataset.
 These cases do not identify every internal native cancellation phase. Other
-partial phases, platforms and upgrades remain pending. Crash validation is deferred.
+partial phases, platforms and upgrades remain pending.
 
 **For the HTTP backend, an uncertain release cannot be resolved as kept.** Upstream can clear its held
 flag before guest activation completes, so that flag does not prove successful
@@ -409,7 +409,7 @@ Runtime/store for explicit inspection and cleanup; never start another exercise
 or readback to bypass that state. The linked c5f9fde campaign now qualifies this
 exact Linux local-bare workflow, including both encrypted cross-toolchain readers
 with the same library version. It does not qualify library rollback or other
-source/platform/partial-recovery combinations. It selects no crash validation.
+source/platform/partial-recovery combinations.
 
 Its frozen child assignments and source dependency/history
 records use **codec v30**, including original completion, immutable child root and
@@ -568,8 +568,7 @@ retires; dependency and backing closure remain separate. Upgrade every shared re
 and resource projector before using v42. Older envelopes reject it, and records
 without this grant keep their earlier encodings. Restarted/pre-handoff deletion
 and ordinary SDK/platform qualification remain pending.
-Native branch admission and ordinary SDK/platform qualification remain pending;
-crash validation stays deferred.
+Native branch admission and ordinary SDK/platform qualification remain pending.
 
 
 Normal stop of an original released child now uses the same original-manager
@@ -633,8 +632,7 @@ exact envelopes/bytes, with a nil collection default on read. Upgrade all reader
 and resource projection writers before activation. An additional 128-KiB native
 metadata reservation is retained before original deletion entry so collection
 control remains available during quarantine. Ordinary SDK/platform qualification
-remains pending; native branch admission stays disabled and crash validation is
-deferred.
+remains pending; native branch admission stays disabled.
 
 The separate pre-handoff collection control is exposed as
 `SmolBox.Branches.collect_partial(runtime, child_handle, version, quiesced: true)`.
