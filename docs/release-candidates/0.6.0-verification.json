@@ -3,7 +3,7 @@
   "base_commit": "54f2d3d012f90ddeda9afc106e9359955ab3ded7",
   "branch": "release/0.6.0",
   "status": "release-preparation",
-  "package_sha256": "fc9a3a1c6f5635f143c4d58ef0e513075bb74f7403a46f7db7edd7ea32e10213",
+  "package_sha256": "54071cb1b0e7a87fd5d15bd87267340cc420597d034dc2cbcc9efac3d66cad15",
   "local_validation": {
     "toolchain": {
       "elixir": "1.20.5",
@@ -27,7 +27,7 @@
         "elixir": "1.20.5",
         "otp": "29.1.2",
         "minimum_dependencies": false,
-        "package_sha256": "fc9a3a1c6f5635f143c4d58ef0e513075bb74f7403a46f7db7edd7ea32e10213",
+        "package_sha256": "54071cb1b0e7a87fd5d15bd87267340cc420597d034dc2cbcc9efac3d66cad15",
         "result": "passed"
       },
       {
@@ -36,10 +36,11 @@
         "otp": "27.3.4.15",
         "minimum_dependencies": true,
         "without_rust": true,
-        "package_sha256": "fc9a3a1c6f5635f143c4d58ef0e513075bb74f7403a46f7db7edd7ea32e10213",
+        "package_sha256": "54071cb1b0e7a87fd5d15bd87267340cc420597d034dc2cbcc9efac3d66cad15",
         "result": "passed"
       }
-    ]
+    ],
+    "github_upgrade_anchors": "verified against GitHub rendered Markdown; numeric version punctuation is removed"
   },
   "feature_live_evidence": [
     {
@@ -64,5 +65,12 @@
     }
   ],
   "release_artifacts": "record separately after the tagged build succeeds",
-  "publication": "pending"
+  "publication": "pending",
+  "initial_package_sha256": "fc9a3a1c6f5635f143c4d58ef0e513075bb74f7403a46f7db7edd7ea32e10213",
+  "initial_tagged_build": {
+    "commit": "ae57e44a560c2ea3f13aaca23d66e083028f761c",
+    "run": "https://github.com/hfiguera/smolbox/actions/runs/42965585033",
+    "ci": "passed after one timing-sensitive compatibility job rerun",
+    "superseded_by": "corrected documentation anchors; final native artifacts rebuilt from the corrected tag before publication"
+  }
 }

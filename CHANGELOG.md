@@ -6,7 +6,7 @@
 
 Held branches can receive per-child environment values, opt-in static egress,
 and host-side HTTPS credentials. SmolVM **1.34.0** remains the default.
-[Upgrade guidance](docs/upgrading.md#upgrade-to-0-6-0)
+[Upgrade guidance](docs/upgrading.md#upgrade-to-060)
 
 - Supply bounded non-secret environment values with `Branches.release/4` on
   HTTP workers and Embedded Port. Bind retry identity to the accepted values
@@ -38,7 +38,7 @@ and host-side HTTPS credentials. SmolVM **1.34.0** remains the default.
 
 SmolVM **1.34.0** is the default for the HTTP worker, checkpoint approvals and
 Embedded Port. Existing workers and checkpoints can keep an explicit 1.22.0 pin.
-[Upgrade guidance](docs/upgrading.md#upgrade-to-0-5-1)
+[Upgrade guidance](docs/upgrading.md#upgrade-to-051)
 
 - Allow quiet HTTP create and stop responses to use the remaining operation
   budget, including cold disk preparation and the longer VMM exit flush.
@@ -66,7 +66,7 @@ SmolVM servers. The default worker version is **1.22.0**.
   volumes, disk growth, exports, checkpoints and branches.
 - Upgrade shared store readers and writers before admitting Embedded Port work.
   Apply the backend-bindings migration if you use the supplied PostgreSQL
-  adapter. See [Upgrading to 0.5.0](docs/upgrading.md#upgrade-to-0-5-0).
+  adapter. See [Upgrading to 0.5.0](docs/upgrading.md#upgrade-to-050).
 - Keep public TLS validation for the explicit `credential_ref` exchange, crash
   validation, and CLI-race validation deferred.
 

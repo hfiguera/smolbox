@@ -23,7 +23,7 @@ For a separate SmolVM server, follow the [HTTP worker quickstart](docs/getting-s
 Held branches can receive their own non-secret environment values at release.
 On Linux x86_64, both backends support opt-in allowlisted branch egress and
 per-child HTTPS Bearer credentials. See [Managed branches](docs/managed-branches.md)
-and [Upgrading to 0.6.0](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/upgrading.md#upgrade-to-0-6-0).
+and [Upgrading to 0.6.0](https://github.com/hfiguera/smolbox/blob/v0.6.0/docs/upgrading.md#upgrade-to-060).
 
 ## Why use SmolBox?
 

@@ -24,9 +24,9 @@ deploy the target library once, after accounting for the intervening requirement
 | 0.4.1 | Pin workers and checkpoint approvals, or separately adopt smolvm 1.22.0; coordinate readers of runtime receipts | [Upgrade to 0.4.1](upgrading-to-0.4.1.md) |
 | 0.4.2 | Upgrade every shared reader and custom error decoder before recording `:unsupported_network_policy` | [Upgrade to 0.4.2](upgrading-to-0.4.2.md) |
 | 0.4.3 | Update and restart controllers; account for the independent maintenance task if monitoring task counts | [Upgrade to 0.4.3](upgrading-to-0.4.3.md) |
-| 0.5.0 | Apply the PostgreSQL example's backend-bindings migration and coordinate store readers before enabling Embedded Port | [Upgrade to 0.5.0](#upgrade-to-0-5-0) |
-| 0.5.1 | Pin existing workers and checkpoint captures, or adopt SmolVM 1.34.0 in a separately prepared deployment | [Upgrade to 0.5.1](#upgrade-to-0-5-1) |
-| 0.6.0 | Upgrade shared readers and branch transactions before enabling release environments, static egress or native HTTPS credentials; approve the matching native bundle | [Upgrade to 0.6.0](#upgrade-to-0-6-0) |
+| 0.5.0 | Apply the PostgreSQL example's backend-bindings migration and coordinate store readers before enabling Embedded Port | [Upgrade to 0.5.0](#upgrade-to-050) |
+| 0.5.1 | Pin existing workers and checkpoint captures, or adopt SmolVM 1.34.0 in a separately prepared deployment | [Upgrade to 0.5.1](#upgrade-to-051) |
+| 0.6.0 | Upgrade shared readers and branch transactions before enabling release environments, static egress or native HTTPS credentials; approve the matching native bundle | [Upgrade to 0.6.0](#upgrade-to-060) |
 
 SQL migrations belong to the supplied PostgreSQL example. Custom stores need
 equivalent atomic behavior rather than those particular tables. Applications
