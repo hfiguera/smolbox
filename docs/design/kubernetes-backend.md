@@ -1,8 +1,29 @@
 # Kubernetes backend
 
-Status: proposed, November 13, 2026. This document defines a development preview,
-not an implemented backend or a production qualification. The delivery sequence
-is in [the implementation plan](kubernetes-backend-implementation-plan.md).
+Status: proposed, November 13, 2026. This document defines the Kubernetes backend
+direction and its first development preview. Implementation and qualification
+remain future work. The delivery sequence is in
+[the implementation plan](kubernetes-backend-implementation-plan.md).
+
+## Long-term goal: HTTP and Embedded parity
+
+**The long-term goal is feature parity with the HTTP and Embedded backends
+through the same SmolBox public APIs and behavioral contracts.** Kubernetes is
+intended to become a full backend for managed execution and machines. The narrow
+preview below is the first milestone toward that goal, not a permanent feature
+ceiling.
+
+Parity covers lifecycle and retained data, execution modes, files, sources and
+credentials, networking/ports, volumes, images, measurements, exports,
+checkpoints, branches, and their admission/recovery/cleanup semantics. Kubernetes
+uses its own transport and ownership model while preserving those domain
+contracts, including byte fidelity, uncertainty, identity and capacity accounting.
+
+Deliver parity one capability family at a time, with an explicit coverage matrix
+against HTTP and Embedded and shared public contract tests. Some capabilities
+will require additional infrastructure or upstream SmolVM changes. They remain
+tracked parity gaps until implemented and qualified; Kubernetes API availability
+alone cannot enable them. Unsupported operations continue to fail explicitly.
 
 ## Decision and first release
 
@@ -575,8 +596,28 @@ hashes and positive cleanup evidence:
 6. Current HTTP/Embedded contract and compatibility suites remain passing.
    Lab/offline Kubernetes checks remain manual; no CI workflow change is needed.
 
-After this preview, consider a production node-evidence mechanism and multi-node
-enrollment first, then private image pulls, broader qualified images, network
-allowlists/services, and retained storage/lifecycle as separate designs. Terminals,
-background execution, checkpoints and branches require independent contracts;
-Kubernetes API availability alone does not enable them.
+## Roadmap to parity
+
+After the preview, pursue the following capability milestones. Each needs a
+separate detailed design and qualification gate; the preview's exclusions do not
+remove these capabilities from the long-term goal.
+
+| Milestone | Parity work |
+| --- | --- |
+| Production foundation | Authenticated node evidence, multi-node ownership/fencing, failure recovery, qualified resource sizing and operational measurements |
+| Sources and connectivity | Private image credentials, broader image/artifact sources, qualified network allowlists, ports and associated admission policy |
+| Retained machines and storage | Managed machine lifecycle and attached commands, persistent files, volumes and disk growth with equivalent ownership and reservation rules |
+| Extended execution | Command stdin, guest users, broader file policies, startup workloads, background execution, logs and terminals |
+| Saved state and publication | Exports, checkpoint capture/restore, branches and dependency/backing cleanup |
+
+Retained lifecycle must preserve data and identity across stop/start; creating
+another Pod alone does not satisfy that contract. Checkpoints and branches need
+qualified runtime/storage support rather than assuming Kubernetes snapshots are
+equivalent. The same rule applies to every parity feature: preserve its public
+meaning before declaring support.
+
+Maintain a versioned parity matrix with each capability marked implemented and
+qualified, blocked by a named dependency, or planned. Cross-reference evidence
+and remaining work. The completion gate for long-term parity is coverage of the
+HTTP and Embedded domain capability surface with equivalent public behavior and
+recovery guarantees, plus continued compatibility of those existing backends.

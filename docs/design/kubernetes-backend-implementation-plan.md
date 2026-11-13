@@ -1,10 +1,12 @@
 # Kubernetes backend implementation plan
 
 Status: proposed, November 13, 2026. Follow the decisions in
-[the design](kubernetes-backend.md). This plan delivers a development preview of
-disposable execution on one enrolled Linux/K3s node, not HTTP/Embedded feature
-parity or general production Kubernetes support. Existing backend behavior must
-remain compatible throughout.
+[the design](kubernetes-backend.md). **The long-term goal is feature parity with
+HTTP and Embedded through the same SmolBox public APIs and behavioral contracts.**
+Phases 0–7 deliver the first milestone: a development preview of disposable
+execution on one enrolled Linux/K3s node. Later milestones extend that foundation
+to production operation and full domain capability coverage. Existing backend
+behavior must remain compatible throughout.
 
 ## Starting point
 
@@ -365,8 +367,42 @@ works. Stop release enablement for ineffective offline enforcement, undercounted
 VM resources, missing complete store authority, ambiguous command replay,
 unbounded transport buffers, or API absence treated as physical cleanup.
 
-Later plans should address production node receipts/observers and multi-node
-fencing before scaling. Private pulls, richer network policy, retained storage,
-terminals, background execution, checkpoints and branches remain independent
-capability work, with no automatic inheritance from HTTP/Embedded or upstream
-Kubernetes support.
+## After the preview — Deliver HTTP and Embedded parity
+
+These milestones are part of the long-term implementation direction, outside
+the first release. Expand each into a detailed plan before implementation;
+dependencies and live evidence determine the delivery order within each family.
+
+1. **Production foundation:** replace the lab-only node evidence provider with
+   a reviewed production mechanism; add multi-node enrollment, fencing, recovery,
+   qualified resource sizing, measurements and worker operations. Preserve
+   uncertainty and capacity accounting during node/controller failures.
+2. **Sources and connectivity:** add private registry credentials and rotation,
+   broader qualified image/artifact sources, network allowlists and ports.
+   Preserve exact source approval, credential redaction and effective guest
+   network policy across all provisioning paths.
+3. **Retained machines and storage:** add the managed machine API, attached
+   commands, stop/start with persistent data, volumes and disk growth. Define
+   durable storage/incarnation authority and recovery before exposing lifecycle
+   operations; replacing a Pod does not by itself preserve the existing contract.
+4. **Extended execution:** add qualified command stdin and EOF behavior, guest
+   user selection, broader file policies, startup workloads, background launches,
+   logs and terminals. Preserve launch versus exit evidence, command-slot
+   ownership and cancellation semantics for every execution mode.
+5. **Saved state and publication:** add exports, checkpoint capture/restore and
+   branches, including storage dependencies, backing reservations, publication
+   and cleanup. Identify and implement required upstream runtime or storage
+   changes; Kubernetes snapshot support alone does not establish equivalence.
+
+Create and maintain a versioned HTTP/Embedded/Kubernetes parity matrix as these
+milestones begin. For every domain capability, record the public contract,
+implementation status, qualification evidence, dependencies and remaining work.
+Use shared public API and store/recovery contract tests, supplemented by backend
+specific live evidence. A feature remains an explicit unsupported capability
+until its implementation and qualification gates pass.
+
+Long-term completion requires equivalent coverage of the HTTP and Embedded
+domain capability surface and its observable behavior, with existing backends
+remaining compatible. The one-node preview is an intermediate milestone; its
+scope limits are not permanent exclusions from that goal. These later milestones
+do not broaden the first release or change its manual validation policy.
