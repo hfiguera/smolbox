@@ -80,6 +80,10 @@ jobs:
           otp-version: '29.1.2'
           elixir-version: '1.20.5'
       - run: elixir scripts/ci_test.exs
+      - name: Check Kubernetes smoke evidence gate without a cluster
+        run: |
+          python3 -m unittest discover -s scripts/kubernetes -p 'test_*.py'
+          for script in scripts/kubernetes/*.sh; do bash -n "$script"; done
       - name: Check provisioning benchmark harness and evidence
         run: |
           elixir scripts/benchmarks/provisioning/metrics_test.exs

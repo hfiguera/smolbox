@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "scope": "single-node-k3s-upstream-runtime-smoke",
+  "source": {
+    "branch": "feature/kubernetes-smoke-lab",
+    "base_commit": "7d7c0a80c2a93817bbb0272535043166befae603",
+    "uncommitted_changes": true,
+    "files_sha256": {
+      "scripts/kubernetes/install-node.sh": "0662ecb46c9b4795cb6c7951e017abbba7fd1654e328e37d3be589bcb7497a23",
+      "scripts/kubernetes/lab.sh": "857d3dc8fed9ec39077ad1155eb37712c6cc304a697c7ca5e843e988b3e70a84",
+      "scripts/kubernetes/pins.json": "f4c74a07948817ab4045e091c4123c6cb49de95122c86bb246e64a7a074b670d",
+      "scripts/kubernetes/smoke.py": "64575e727f2bad38ce35894bdd3afb7f0d6e33d58f564f056b1e20183d6426ba",
+      "scripts/kubernetes/test_smoke.py": "40ca3d03b3f2b8ab714104300a6df32215b7d9f986b1a37828834d6db2550d24",
+      "scripts/kubernetes/vm.sh": "3a17509d565565621313a423b81f27d9bbbeea2e44e3cb215c6f732c90cc7058"
+    }
+  },
+  "environment": {
+    "ssh_host": "linux",
+    "host_name": "pop-os",
+    "service": "smolbox-kubernetes-lab.service",
+    "service_scope": "user",
+    "boot_enabled": false,
+    "outer_virtualization": "QEMU/KVM",
+    "guest_name": "smolbox-k3s",
+    "vcpus": 4,
+    "guest_ram_gib": 8,
+    "disk_virtual_gib": 40,
+    "host_memory_max_gib": 12,
+    "host_cpu_quota_percent": 400,
+    "host_swap_max_bytes": 0,
+    "host_tasks_max": 256,
+    "runtime_max_hours": 4,
+    "exclusive_lock": "/var/lib/smolbox-lab/vm.lock",
+    "loopback_forwards": {
+      "22470": "guest SSH 22",
+      "16443": "guest Kubernetes API 6443"
+    }
+  },
+  "observations": [
+    "Live smoke passed after an outer VM shutdown/start and idempotent reprovisioning.",
+    "Node was Ready and no smoke namespaces remained after the recorded run.",
+    "The outer VM held the shared lab lock; other lab VM profiles cannot run concurrently."
+  ],
+  "limitations": [
+    "No SmolBox Kubernetes backend is implemented or qualified.",
+    "An earlier EOF-driven stdin attempt produced an empty file. This run uses length-delimited stdin with its producer held open until command exit.",
+    "Only exact empty regular upstream operation-lock files are excluded from VM-directory cleanup inventories; no lock files are unlinked.",
+    "No persistent volume, network policy, multi-node, hostile isolation, or node-failure recovery qualification."
+  ],
+  "smoke": {
+    "schema": 1,
+    "scope": "single-node-k3s-upstream-runtime-smoke",
+    "smolbox_kubernetes_backend": false,
+    "namespace": "smolbox-smoke-8c9a5536e3d144d5",
+    "pins": {
+      "cloud_image": {
+        "url": "https://cloud-images.ubuntu.com/releases/noble/release-20260826/ubuntu-24.04-server-cloudimg-amd64.img",
+        "sha256": "d0fe84bb5f80853425fa6be28e2c106f30104c3cfe8611933f2e65c9b63f0e30"
+      },
+      "k3s": {
+        "version": "v1.35.10+k3s1",
+        "url": "https://github.com/k3s-io/k3s/releases/download/v1.35.10%2Bk3s1/k3s",
+        "sha256": "5cd49f0faca5b2ea4355d4761e7b1445b8aa05cd50e612fd9c370551db49e5e2"
+      },
+      "smolvm": {
+        "version": "1.34.0",
+        "url": "https://github.com/smol-machines/smolvm/releases/download/v1.34.0/smolvm-1.34.0-linux-x86_64.tar.gz",
+        "sha256": "89e098b1f7749c515ed95263f081c469befb0aa10b49ee589ccb3e901090608a"
+      },
+      "image": "docker.io/library/busybox@sha256:b7f3d86d6e84fc17718c48bcde1450807faa2d56704205c697b4bd5df7b9e29f"
+    },
+    "passed": true,
+    "cleanup_verified": true,
+    "node": {
+      "osImage": "Ubuntu 24.04.4 LTS",
+      "kernelVersion": "6.8.0-138-generic",
+      "kubeletVersion": "v1.35.10+k3s1",
+      "containerRuntimeVersion": "containerd://2.2.10-k3s1"
+    },
+    "pod_uid": "c8b1b051-5404-4218-9ee8-0c16d753542e",
+    "container_id": "containerd://1d6fb02d4e62c04a74aee3e35a2f65106269a8d16ccc3012280d69ba5a4c7d0c",
+    "image_id": "docker.io/library/busybox@sha256:b7f3d86d6e84fc17718c48bcde1450807faa2d56704205c697b4bd5df7b9e29f",
+    "sandbox_id": "27afd22f6b25982b24f97944cc4cb0c9583733ce16788f8cc61756385172cf1d",
+    "kvm_processes": [
+      {
+        "pid": 3741,
+        "birth": "7259",
+        "descriptors": [
+          "anon_inode:kvm-vcpu:0",
+          "anon_inode:kvm-vcpu:1",
+          "anon_inode:kvm-vm"
+        ]
+      }
+    ],
+    "guest_kernel": "Linux 6.18.60",
+    "node_kernel": "6.8.0-138-generic",
+    "execution": {
+      "exit_code": 7,
+      "stdin_mode": "length-delimited-producer-held-open",
+      "stdout": "smolbox-kubernetes-stdout\n",
+      "stderr": "smolbox-kubernetes-stderr\n",
+      "collected_bytes": 4352,
+      "collected_sha256": "4043ab3659cd61351795c186762a045221774893a97dcc74f6ba3deade65ac03"
+    },
+    "baseline": {
+      "machines": [],
+      "vm_dirs": [],
+      "shares": []
+    },
+    "after_cleanup": {
+      "machines": [],
+      "vm_dirs": [],
+      "shares": []
+    },
+    "k3s_version": "k3s version v1.35.10+k3s1 (6d11235c)",
+    "shim_sha256": "adc1bde9ba1109d963e28d3fa778688bd9ea2fb4a61dae2ea09fd0b43e222aa0",
+    "guest_packages": [
+      "ca-certificates=20260816ubuntu0.24.04.2",
+      "curl=8.5.0-2ubuntu10.16",
+      "iproute2=6.1.0-1ubuntu6.4",
+      "jq=1.7.1-3ubuntu0.24.04.2",
+      "python3=3.12.3-0ubuntu2.1",
+      "util-linux=2.39.3-9ubuntu6.6",
+      "zstd=1.5.5+dfsg2-2build1.1"
+    ],
+    "recorded_at": "2026-11-13T22:11:18.159042+00:00",
+    "harness_sha256": "64575e727f2bad38ce35894bdd3afb7f0d6e33d58f564f056b1e20183d6426ba"
+  }
+}

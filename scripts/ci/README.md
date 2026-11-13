@@ -503,6 +503,12 @@ The separately authorized [nested Linux lab](../../docs/nested-kvm-lab.md) uses
 deadline and recovery timer were tested against a frozen QEMU process. It is
 maintainer infrastructure, not a GitHub runner or a production qualification.
 
+The [single-node Kubernetes lab](../../docs/kubernetes-lab.md) adds a separate
+K3s VM profile on the same authorized host. Its opt-in smoke exercises the real
+SmolVM RuntimeClass, binary execution/collection, UID-bound deletion and positive
+VM cleanup. Ordinary CI runs only its offline evidence-gate tests. This is
+upstream runtime preparation, not a SmolBox Kubernetes backend implementation.
+
 The [Linux candidate campaign](../../docs/linux-production-qualification.md)
 adds explicit resource exhaustion and outage tests inside that disposable guest.
 Its opt-in test helper selects a Unix socket and resets only the stopped owned
