@@ -8,6 +8,10 @@ execution on one enrolled Linux/K3s node. Later milestones extend that foundatio
 to production operation and full domain capability coverage. Existing backend
 behavior must remain compatible throughout.
 
+Track delivery in [implementation progress](kubernetes-backend-progress.md) and
+the [versioned parity matrix](kubernetes-backend-parity.md). Phase 0 runtime
+qualification has passed in the dedicated lab; library phases remain pending.
+
 ## Starting point
 
 Already available:

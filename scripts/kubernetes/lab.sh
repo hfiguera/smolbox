@@ -10,7 +10,7 @@ scripts=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 lab=/var/lib/smolbox-lab
 root=$lab/kubernetes
 unit=smolbox-kubernetes-lab.service
-action=${1:?Usage: lab.sh prepare|start|install|sync|smoke|ssh|status|stop}
+action=${1:?Usage: lab.sh prepare|start|install|install-preview|sync|smoke|qualify|ssh|status|stop}
 shift
 
 guest_ssh() {
@@ -28,7 +28,7 @@ guest_copy() {
 
 sync_scripts() {
   guest_ssh 'mkdir -p /home/lab/smolbox-kubernetes/reports'
-  guest_copy "$scripts/"{install-node.sh,smoke.py,pins.json} \
+  guest_copy "$scripts/"{install-node.sh,install-preview.sh,offline_guard.py,smoke.py,pins.json,preview-policy.json,qualify.py,websocket_probe.py,source-basis.json} \
     lab@127.0.0.1:/home/lab/smolbox-kubernetes/
 }
 
@@ -137,13 +137,17 @@ UNIT
     guest_ssh 'sudo bash /home/lab/smolbox-kubernetes/install-node.sh'
     ;;
   sync) sync_scripts ;;
-  smoke)
-    run_id=$(date -u +%Y%m%dT%H%M%SZ)-$RANDOM
+  install-preview)
+    sync_scripts
+    guest_ssh 'sudo bash /home/lab/smolbox-kubernetes/install-preview.sh'
+    ;;
+  smoke|qualify)
+    run_id=$action-$(date -u +%Y%m%dT%H%M%SZ)-$RANDOM
     status=0
-    guest_ssh "sudo python3 /home/lab/smolbox-kubernetes/smoke.py --report /home/lab/smolbox-kubernetes/reports/$run_id.json" || status=$?
+    guest_ssh "sudo python3 /home/lab/smolbox-kubernetes/$action.py --report /home/lab/smolbox-kubernetes/reports/$run_id.json" || status=$?
     guest_copy "lab@127.0.0.1:/home/lab/smolbox-kubernetes/reports/$run_id.json" "$root/$run_id.json" || status=1
     if [[ -f $root/$run_id.json ]]; then
-      cp "$root/$run_id.json" "$root/smoke.json"
+      cp "$root/$run_id.json" "$root/$action.json"
     fi
     exit "$status"
     ;;

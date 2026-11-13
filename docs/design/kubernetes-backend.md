@@ -25,6 +25,9 @@ will require additional infrastructure or upstream SmolVM changes. They remain
 tracked parity gaps until implemented and qualified; Kubernetes API availability
 alone cannot enable them. Unsupported operations continue to fail explicitly.
 
+See [implementation progress](kubernetes-backend-progress.md) and the
+[parity matrix](kubernetes-backend-parity.md) for current evidence and gaps.
+
 ## Decision and first release
 
 Add `SmolBox.Backend.Kubernetes` behind the existing domain-operation boundary.
@@ -474,6 +477,15 @@ add and qualify a node-level restriction or obtain an upstream runtime change.
 Until then there is no Kubernetes backend release. Do not reinterpret offline
 as “no Service,” allow unrestricted guest networking, or add a permissive network
 mode just to pass the first smoke.
+
+Phase 0 has now demonstrated that NetworkPolicy alone leaves node-port and
+node-originated ingress exceptions in this K3s lab. The qualified preview recipe
+adds an administrator-owned bridge guard that drops all frames on verified
+preview Pod bridge ports. The future NodeEvidence provider must verify fresh
+guard membership and exact live rules before staging or dispatch. See the
+[findings and constraints](kubernetes-backend-progress.md) and
+[live evidence](../evidence/kubernetes-backend-phase0-2026-11-13.json). This does
+not qualify other CNIs or replace the separate read-only cleanup provider.
 
 ## Cleanup, cancellation and recovery
 

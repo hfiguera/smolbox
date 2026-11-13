@@ -1,0 +1,32 @@
+{
+  "release_tag": "v1.34.0",
+  "release_commit": "d77eaf1c6eeff16bc8c258613746033e9bf567ca",
+  "reference_commit": "f9e93d8ffe2215130cc81de1cec365c92c46a869",
+  "files": {
+    "crates/smolvm-shim/src/engine.rs": {
+      "release_sha256": "82757415903b1b451185eff93d6880f415d9cdf862a82461fd7a60ae1c4bce55",
+      "reference_sha256": "82757415903b1b451185eff93d6880f415d9cdf862a82461fd7a60ae1c4bce55",
+      "identical": true
+    },
+    "crates/smolvm-shim/src/task.rs": {
+      "release_sha256": "35a11fca857deb0e06c1786bce749d7b208efd0195ab1b1d76b62ce988cd573a",
+      "reference_sha256": "35a11fca857deb0e06c1786bce749d7b208efd0195ab1b1d76b62ce988cd573a",
+      "identical": true
+    },
+    "crates/smolvm-shim/src/service.rs": {
+      "release_sha256": "565b368ac6cefd63e4c4340de380ef8e82cb2a82bbed2639a785925a8b491fe3",
+      "reference_sha256": "565b368ac6cefd63e4c4340de380ef8e82cb2a82bbed2639a785925a8b491fe3",
+      "identical": true
+    },
+    "crates/smolvm-agent/src/pod.rs": {
+      "release_sha256": "01daa2abfc2b2492a234e3b3b7c83b91ad72ac282c3e3810b2e50e25f9483412",
+      "reference_sha256": "01daa2abfc2b2492a234e3b3b7c83b91ad72ac282c3e3810b2e50e25f9483412",
+      "identical": true
+    },
+    "src/data/resources.rs": {
+      "release_sha256": "96b874e1e1cc3bb7daaa44caf30c427ecca8c38d96e6a2a8f6820ce04b1c4bcf",
+      "reference_sha256": "7d372d3d26e955e0568847849095f29b84382f6067d847b53242f01878ed5a04",
+      "identical": false
+    }
+  }
+}

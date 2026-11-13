@@ -153,3 +153,36 @@ The proposed [Kubernetes backend design](design/kubernetes-backend.md) and
 [implementation plan](design/kubernetes-backend-implementation-plan.md) build on
 this lab. They describe future work; the current smoke exercises upstream runtime
 operations directly rather than a SmolBox Kubernetes backend.
+
+## Preview runtime qualification
+
+The manual Phase 0 probes add a dedicated `smolbox-preview` namespace,
+default-deny policy, and RuntimeClass with 512Mi memory overhead. Unlike the
+original upstream smoke, this accounts for the full 1-GiB VM plus 512Mi declared
+host overhead. The preview remains limited to one slot and the enclosing VM.
+
+NetworkPolicy alone failed controlled node-port and node-to-Pod tests. Preview
+setup therefore also installs an administrator-only **inside-guest** bridge guard:
+it maps preview Pods through CRI to CNI bridge ports and drops all frames on
+those ports. No physical-host firewall or other namespaces' ports are changed.
+The guard is a separate guest service; ordinary application credentials cannot
+change it. See [progress and constraints](design/kubernetes-backend-progress.md).
+
+```sh
+rsync -a --exclude __pycache__ scripts/kubernetes/ linux:smolbox-kubernetes-lab/
+ssh linux 'bash ~/smolbox-kubernetes-lab/lab.sh install-preview'
+ssh linux 'bash ~/smolbox-kubernetes-lab/lab.sh qualify'
+```
+
+`qualify` checks pinned archive/installed runtime/rootfs identity, fixed guest and
+scheduler resources, Python prerequisites, real WebSocket v5 binary channels and
+exits, controlled IPv4/IPv6 and inbound network isolation, and positive VM cleanup.
+It briefly permits only its marked canary Pod to establish working network
+controls, restores full isolation, and fails if any probe remains reachable.
+Only root inside the disposable node can grant the expiring qualification permit.
+
+Unique reports and the latest `qualify.json` are collected under the existing
+host lab directory. The [Phase 0 report](evidence/kubernetes-backend-phase0-2026-11-13.json)
+records the failed NetworkPolicy-only control and the passing guarded run.
+These probes and the expanded 21-test Python suite remain manual. They qualify
+the lab's runtime recipe; a SmolBox Kubernetes backend is not implemented yet.
