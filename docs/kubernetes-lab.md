@@ -131,9 +131,10 @@ python3 -m unittest discover -s scripts/kubernetes -p 'test_*.py'
 for script in scripts/kubernetes/*.sh; do bash -n "$script"; done
 ```
 
-The ordinary CI tooling lane runs these without SSH, KVM, or Kubernetes. The
-tests require corrupted binary output, synthetic exit 255, missing KVM evidence,
-and failed cleanup to fail the evidence gate. Live VM checks remain explicit
+Run these checks manually when changing the lab scripts; they need no SSH, KVM,
+or Kubernetes. The tests require corrupted binary output, synthetic exit 255,
+missing KVM evidence, and failed cleanup to fail the evidence gate. Neither these
+offline checks nor the live smoke runs in CI. Live VM checks are explicit
 maintainer actions on `ssh linux`.
 
 The SmolVM archive pin identifies this upstream Kubernetes distribution. It

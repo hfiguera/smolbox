@@ -506,8 +506,9 @@ maintainer infrastructure, not a GitHub runner or a production qualification.
 The [single-node Kubernetes lab](../../docs/kubernetes-lab.md) adds a separate
 K3s VM profile on the same authorized host. Its opt-in smoke exercises the real
 SmolVM RuntimeClass, binary execution/collection, UID-bound deletion and positive
-VM cleanup. Ordinary CI runs only its offline evidence-gate tests. This is
-upstream runtime preparation, not a SmolBox Kubernetes backend implementation.
+VM cleanup. Its offline checks and live smoke are manual maintainer commands,
+documented in the lab guide; neither runs in CI. This is upstream runtime
+preparation, not a SmolBox Kubernetes backend implementation.
 
 The [Linux candidate campaign](../../docs/linux-production-qualification.md)
 adds explicit resource exhaustion and outage tests inside that disposable guest.
