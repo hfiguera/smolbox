@@ -148,3 +148,8 @@ features or failure-recovery guarantees.
 The [2026-11-13 live report](evidence/kubernetes-lab-2026-11-13.json) records a
 passing run after VM restart and reprovisioning, including source file hashes,
 4,352 collected bytes, exit 7, and empty post-cleanup runtime inventories.
+
+The proposed [Kubernetes backend design](design/kubernetes-backend.md) and
+[implementation plan](design/kubernetes-backend-implementation-plan.md) build on
+this lab. They describe future work; the current smoke exercises upstream runtime
+operations directly rather than a SmolBox Kubernetes backend.
