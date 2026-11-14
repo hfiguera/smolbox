@@ -1,6 +1,6 @@
 # Kubernetes node authority progress
 
-Status: Phases 0–3 implementation gates passed, November 14, 2026. Delivery branch:
+Status: Phases 0–4 implementation gates passed, November 14, 2026. Delivery branch:
 `feature/kubernetes-node-authority`. Follow the [specification](kubernetes-node-authority.md),
 [frozen contracts](kubernetes-node-authority-contract.md) and
 [implementation plan](kubernetes-node-authority-implementation-plan.md).
@@ -11,7 +11,7 @@ Status: Phases 0–3 implementation gates passed, November 14, 2026. Delivery br
 | 1 — Standalone verifier | Passed | Self-contained configured core, source comparison, 53 extraction checks and interruption evidence below |
 | 2 — Administrator installation | Passed (fixtures) | Deterministic bundle, explicit root installer and immutable enrollment; live installation remains Phase 5 |
 | 3 — Endpoint and SDK provider | Passed (protocol/access scope) | Strict SDK provider, bounded transport, package constructors and real pre-enrollment SSH controls; execution qualification remains Phase 5 |
-| 4 — Runtime/store integration | Pending | Preliminary epoch/codec compatibility only; provider/store campaigns remain required |
+| 4 — Runtime/store integration | Passed (simulated node observations) | Shared public runtime campaign passes Memory/PostgreSQL, existing compatibility and full suites, package consumers and static/docs gates; physical proof remains Phase 5 |
 | 5 — Live qualification | Pending | Existing lab evidence does not qualify this provider |
 
 ## Phase 0 — Frozen v1 data and authority contracts
@@ -177,3 +177,60 @@ reproduction. A separate fresh domain and repeated effective-access checks are
 required for final runtime qualification. Default/example selection remains the
 lab provider; the new provider is not execution-qualified or operationally
 enabled. Phases 4–5 and public Memory/PostgreSQL campaigns remain outstanding.
+
+## Phase 4 — Public runtime and store compatibility
+
+The host settings example keeps Lab as the default and supports explicit
+`node_provider: "node_authority"` with separate SSH/approval fields. Unknown names
+fail without fallback. Construction and redacted inspection are tested without
+existing credentials or a connection. The older-SDK selection guard reports an
+unavailable provider instead of silently selecting Lab. The operational guide
+shows the redacted shape and keeps execution enablement gated on Phase 5.
+
+A shared 25-scenario public runtime contract now runs against both Memory and
+the reference PostgreSQL adapter. It exercises the real standalone SDK, strict
+protocol, framed Port and typed evidence validation against explicitly simulated
+node observations and TLS Kubernetes/exec peers. These are integration fixtures,
+not physical node/SmolVM qualification evidence. Existing lab/controller tests and
+production runtime/store code remain unchanged.
+
+Both stores pass binary input staging/read-back, output collection and exit 7;
+silent zero exits at caps 1/4096; exact combined binary output and over-limit
+uncertainty; cancellation before/after dispatch; lost create/status responses;
+occupied-slot queueing; cancelled/expired missing originals; changed generation,
+changed manifest, missing/malformed authority; foreign/replacement UID inventory;
+old lab receipt refusal; complete paginated startup; and preserved real exit
+while cleanup proof is unavailable. Adapter-boundary observations verify that
+the original receipt's version-3 proof is already durable while capacity remains
+charged, before release produces zero usage. DELETE preconditions retain original
+UIDs. v54 round-trips retain the generation and exclude transport/credential paths.
+
+Recovery publication survives a 5.25-second hold across a five-second worker
+lease while renewal and accepted admission continue. Task death and lease loss
+stop publication, keep the target fenced and retain charges until a supervised
+retry completes. Download retries never replay an application command. A valid
+command larger than the configured request allowance is rejected before any
+application exec request; its durable dispatch intent remains conservatively
+unknown until positive cleanup, preserving existing uncertainty semantics.
+
+Validation: the full SDK suite passes **2,363 checks, 42 excluded**; the full
+reference PostgreSQL suite passes **335 tests, 29 excluded**, including all 25
+new shared scenarios. Format, warning-free compile, strict Credo, zero-clone
+ExDNA, xref and Dialyzer pass. Documentation builds with warnings as errors.
+Current/minimum production consumers pass without Rust, SSH or a checkout. An
+independently unpacked production package builds identical complete authority
+archives twice using isolated Python. The package test fixture was updated for
+the existing required authority inventory; required-file enforcement is retained.
+Minimal-host and community-workspace examples compile against their existing SDK
+dependencies, including community-workspace's pinned SmolBox 0.3.0. Its dependency
+build emits existing Mix xref deprecation notices; no dependency was upgraded.
+An initial concurrent full run hit an existing one-second socket timing assertion;
+the unchanged socket test and final full suite pass with bounded test concurrency.
+
+The [Phase 4 evidence](../evidence/kubernetes-node-authority-phase4-2026-11-14.json)
+records exact source/log/package hashes, scopes, commands and failed observations.
+No durable schema, backend behavior, verifier/core asset, CI workflow or live node
+authority changed. The earlier access VM is still stopped with its disk retained;
+the shared lock is available. A separate fresh guest, actual enrollment and all
+manual live runtime/access/failure gates remain required in Phase 5. The new
+provider is **not execution-qualified or enabled**.

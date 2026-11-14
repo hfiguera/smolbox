@@ -3,10 +3,9 @@ defmodule SmolBox.Test.NodeAuthority do
   alias SmolBox.Kubernetes.{Config, NodeAuthority, Receipt}
   alias SmolBox.Kubernetes.NodeEvidence.Projection
   alias SmolBox.Test.Kubernetes, as: Fixture
+  @vectors Path.expand("../fixtures/kubernetes/node-authority-v1/vectors.json", __DIR__)
 
-  def vectors,
-    do:
-      "test/fixtures/kubernetes/node-authority-v1/vectors.json" |> File.read!() |> Jason.decode!()
+  def vectors, do: @vectors |> File.read!() |> Jason.decode!()
 
   def context(overrides \\ []) do
     values = vectors()

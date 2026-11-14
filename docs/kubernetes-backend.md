@@ -86,6 +86,37 @@ archive, shim, libkrun, kernel, rootfs and guard hashes plus qualified versions,
 as shown in the checked-in evidence. Obtain live UIDs/boot and policy digest for
 the enrolled lab; old evidence is not a portable cluster configuration.
 
+The example defaults to `"node_provider": "lab"`; omitting the field preserves
+existing lab settings. Standalone node-authority integration is under manual
+qualification and is **not enabled or execution-qualified**. After every gate in
+the [node-authority plan](https://github.com/hfiguera/smolbox/blob/main/docs/design/kubernetes-node-authority-implementation-plan.md)
+passes, explicit `"node_provider": "node_authority"` selects it using a separate
+`node_authority` object:
+
+```json
+{
+  "node_provider": "node_authority",
+  "node_authority": {
+    "ssh_host": "127.0.0.1",
+    "ssh_port": 22471,
+    "ssh_user": "smolbox-evidence",
+    "identity_file": "/absolute/private/node-key",
+    "known_hosts_file": "/absolute/private/node-known-hosts",
+    "authority_generation": "<administrator-approved 64-character SHA-256>",
+    "verifier_manifest_sha256": "<administrator-approved 64-character SHA-256>"
+  }
+}
+```
+
+This is a redacted configuration shape, not an enrollment descriptor. Obtain
+both hashes from the administrator's verified installation; do not copy them
+from another node or substitute the lab history UUID. All other target,
+credential, artifact and same-host controller fields above remain required.
+Construction reads no SSH credentials and makes no node connection. Unknown
+provider names fail rather than falling back. Runtime use requires the restricted
+endpoint, pinned host key and the same positively enrolled authority throughout
+an execution. Old lab receipts cannot be continued by switching this field.
+
 From the project root, with the lab and HTTPS tunnel running:
 
 ```sh

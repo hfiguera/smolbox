@@ -6,6 +6,8 @@ from pathlib import Path
 import struct
 import sys
 import time
+import urllib.parse
+import urllib.request
 
 
 root = Path(__file__).parent
@@ -27,6 +29,14 @@ request = json.loads(exact(struct.unpack(">I", exact(4))[0]))
 (root / "request.json").write_text(json.dumps({"argv": sys.argv[1:], "request": request}))
 options = json.loads((root / "response.json").read_text())
 mode = options["mode"]
+if mode == "authority":
+    endpoint = urllib.parse.urlsplit(options["endpoint"])
+    assert endpoint.scheme == "http" and endpoint.hostname == "127.0.0.1"
+    query = urllib.request.Request(options["endpoint"], json.dumps(request).encode(), {"Content-Type": "application/json"})
+    with urllib.request.urlopen(query, timeout=max(0.001, request["timeout_ms"] / 1000)) as response:
+        options["response"] = json.loads(response.read(65537))
+    options["recorded"] = True
+    mode = "normal"
 if magic == b"SBA1" and not options.get("recorded", False):
     for field in ["version", "action", "nonce", "binding_generation", "authority_generation", "verifier_manifest_sha256"]:
         options["response"][field] = request[field]

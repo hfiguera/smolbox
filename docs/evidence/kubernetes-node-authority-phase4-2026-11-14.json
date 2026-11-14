@@ -1,0 +1,491 @@
+{
+  "branch": "feature/kubernetes-node-authority",
+  "date": "2026-11-14",
+  "execution_qualified": false,
+  "failed_observations": [
+    {
+      "case": "Initial binary I/O fixture",
+      "observation": "Input declaration used an output-style max_bytes field and was rejected by ExecutionSpec validation.",
+      "resolution": "Use exact size, SHA-256 and runtime_default mode; binary staging/read-back passes both adapters."
+    },
+    {
+      "case": "Initial request-limit expectation",
+      "observation": "Existing durable dispatch intent yields unknown, not failed/not_dispatched, even though the oversized payload is rejected before an exec request.",
+      "resolution": "Retain conservative production uncertainty; assert zero exec requests/replays, no result, and proof-bound cleanup."
+    },
+    {
+      "case": "Initial full SDK suite",
+      "log_sha256": "3efc3748ddc19e7373ceaaba4c2bb33c3245533d991ee82b9deef0f5601e3c37",
+      "observation": "A concurrent run hit the unchanged one-second caller-death socket assertion; package fixture omitted the Phase 3 required authority inventory.",
+      "resolution": "Unchanged socket test passes separately and in final full suite at max_cases 8. Update package fixture to approved 14 programs, two schemas and five shipped tools, retaining required-file enforcement."
+    },
+    {
+      "case": "Intermediate package fixture",
+      "observation": "Repository-only source-basis.json was listed instead of shipped README.md; package allowlist rejected it.",
+      "resolution": "Match the reviewed shipped inventory; package fixture suite and both actual production consumers pass."
+    },
+    {
+      "case": "Initial static/docs checks",
+      "observation": "Fixture machine constructors duplicated existing shape; public ExDoc link targeted an unpublished design extra.",
+      "resolution": "Share fixture machine construction from profile resources and use repository design link. Final zero-clone and warning-free docs checks pass."
+    }
+  ],
+  "implementation_base": "d284a6d3058df6fbbc60d31980c897da782cb817",
+  "invariants": {
+    "ci_workflows_unchanged": true,
+    "durable_schema_unchanged": true,
+    "legacy_lab_sources_unchanged": true,
+    "no_fallback_or_receipt_migration": true,
+    "no_live_authority_mutation": true,
+    "production_runtime_store_and_verifier_unchanged": true
+  },
+  "logs": {
+    "phase4-community-compile": {
+      "sha256": "7cb9352be508395e438558dc5bf60d2588079280f1c2aced538cf4708049f3fe"
+    },
+    "phase4-compile-test": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "phase4-credo-final": {
+      "sha256": "d632ea1dfa054d080d267c7e2bfca402bd8105dbcc635485202135729c55a1d4"
+    },
+    "phase4-deps": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "phase4-dialyzer": {
+      "sha256": "733184d4a1d1808fc4590fc82a3a0d2af5122f33c52e39f28025872190f6a16b"
+    },
+    "phase4-docs-2": {
+      "sha256": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d"
+    },
+    "phase4-docs-final": {
+      "sha256": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d"
+    },
+    "phase4-ex-dna-3": {
+      "sha256": "786f1c5b3fa9e394b94165a5966cd772bc6478d3334439d4b2ad8f36df4d3ad8"
+    },
+    "phase4-format": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "phase4-full-tests-2": {
+      "sha256": "39d79c102001061477464c486909a3529edbb019126f5d8651e50f3a856ca555"
+    },
+    "phase4-memory-4": {
+      "sha256": "d5d90a97736005f731d295f79690e9c21a005700aec7e5ca739909e43db61bca"
+    },
+    "phase4-minimal-compile": {
+      "sha256": "008d4d9e39482cae6fd0d1353064308d1e333b72460a2c0f59658453a74ef59f"
+    },
+    "phase4-package-fixture": {
+      "sha256": "91b7b041260a911d781ea7356338adf203c565ffab1882a2dba6554a3b8a1f18"
+    },
+    "phase4-postgres-2": {
+      "sha256": "c3163fc24c9d2e1e088ad6469ad2692e8c233b04dc30173643a66a1b31b43426"
+    },
+    "phase4-postgres-compile": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "phase4-postgres-credo": {
+      "sha256": "36b676b0fb668147d449e8184a0dc48bbe3d0af83cb7adcc2a384ac56797b0a4"
+    },
+    "phase4-postgres-deps": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "phase4-postgres-full": {
+      "sha256": "455e289fcddc5a639564ddcaba4d573956bb9ec80f07a2cf6bdf84bc9c287b28"
+    },
+    "phase4-settings": {
+      "sha256": "f0bf5f1efed7d081ab62b2c4bd0858ad4493d2c71558450d903776ca42a548a7"
+    },
+    "phase4-xref": {
+      "sha256": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548"
+    }
+  },
+  "next_gate": "Phase 5: fresh positively empty guest, actual administrator installation/enrollment, restricted access verification, live public Memory/PostgreSQL execution/restart/failure/custody campaigns. Earlier access guest stays stopped; existing authority/history/ledgers preserved.",
+  "offline_bundle": {
+    "archive_sha256": "ba76fc50ede8337fec28483660b3785d326926337f18bd2b288acdfe14549512",
+    "deterministic": true,
+    "isolated_python": true,
+    "member_count": 22,
+    "production_package_sha256": "3e8241695e05e01960999d267708713996ec797c003d38113f11a1c115ead688",
+    "program_count": 14,
+    "verifier_manifest_sha256": "cec1597ec86107f838c45f60be9ac56f4c5b9bb7bc2dbe88ffa94cc4f5469e27",
+    "version": 1,
+    "without_checkout": true
+  },
+  "operationally_enabled": false,
+  "packages": {
+    "current": {
+      "architecture": "arm64",
+      "minimum": false,
+      "package_sha256": "3e8241695e05e01960999d267708713996ec797c003d38113f11a1c115ead688",
+      "platform": "macos",
+      "report_sha256": "24238fac3e44ce745ee85caf126bf8cd95cc8232c01553a04b8d63aaa7da6d4a",
+      "runtime_dependencies": [
+        "finch",
+        "hpax",
+        "jason",
+        "mime",
+        "mint",
+        "mint_web_socket",
+        "nimble_options",
+        "nimble_pool",
+        "req",
+        "telemetry"
+      ],
+      "smoke": {
+        "checkpoint": true,
+        "client": true,
+        "guest_files": true,
+        "interactive": true,
+        "legacy_1_14_6_explicit": "1.14.6",
+        "legacy_runtime_explicit": "1.14.1",
+        "managed_branches": true,
+        "managed_checkpoints": true,
+        "managed_exports": true,
+        "network_policy": true,
+        "node_authority_offline": true,
+        "offline_default": true,
+        "runtime_1_16_0_explicit": "1.16.0",
+        "runtime_default": "1.34.0",
+        "supervisor": true,
+        "unqualified_runtime_rejected": "1.16.2",
+        "versions": {
+          "jason": "1.4.5",
+          "mint": "1.11.0",
+          "mint_web_socket": "1.0.6",
+          "nimble_options": "1.2.0",
+          "req": "0.7.5",
+          "telemetry": "1.4.2"
+        },
+        "without_rust": true,
+        "workload": true
+      },
+      "toolchain": "Erlang/OTP 29 [erts-17.1.1] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit]\n\nElixir 1.20.5 (compiled with Erlang/OTP 29)",
+      "without_rust": true
+    },
+    "minimum": {
+      "architecture": "arm64",
+      "minimum": true,
+      "package_sha256": "3e8241695e05e01960999d267708713996ec797c003d38113f11a1c115ead688",
+      "platform": "macos",
+      "report_sha256": "9e8ffa671077cc3276bad6eda961c0f5db459bae37211a21c2932e4857a79b60",
+      "runtime_dependencies": [
+        "finch",
+        "hpax",
+        "jason",
+        "mime",
+        "mint",
+        "mint_web_socket",
+        "nimble_options",
+        "nimble_pool",
+        "req",
+        "telemetry"
+      ],
+      "smoke": {
+        "checkpoint": true,
+        "client": true,
+        "guest_files": true,
+        "interactive": true,
+        "legacy_1_14_6_explicit": "1.14.6",
+        "legacy_runtime_explicit": "1.14.1",
+        "managed_branches": true,
+        "managed_checkpoints": true,
+        "managed_exports": true,
+        "network_policy": true,
+        "node_authority_offline": true,
+        "offline_default": true,
+        "runtime_1_16_0_explicit": "1.16.0",
+        "runtime_default": "1.34.0",
+        "supervisor": true,
+        "unqualified_runtime_rejected": "1.16.2",
+        "versions": {
+          "jason": "1.4.0",
+          "mint": "1.11.0",
+          "mint_web_socket": "1.0.6",
+          "nimble_options": "1.1.0",
+          "req": "0.7.4",
+          "telemetry": "1.3.0"
+        },
+        "without_rust": true,
+        "workload": true
+      },
+      "toolchain": "Erlang/OTP 29 [erts-17.1.1] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit]\n\nElixir 1.20.5 (compiled with Erlang/OTP 29)",
+      "without_rust": true
+    },
+    "snapshot_note": "Production archives were built before this evidence/progress update; their source hashes identify the exact tested package snapshot. SDK/core and example settings match this phase."
+  },
+  "phase": 4,
+  "requirements": [
+    {
+      "evidence": "Two host-settings tests preserve default/explicit Lab, explicit redacted standalone selection, unchanged valid binding and unknown-provider refusal without SSH or credential reads.",
+      "plan_item": "4.1"
+    },
+    {
+      "evidence": "Full SDK suite includes canonical authority vectors, cold standalone and lab v54 decoding with different atom load order, old HTTP/Embedded exact-byte/fingerprint fixtures; shared final records round-trip v54 and exclude SSH/credential paths.",
+      "plan_item": "4.2"
+    },
+    {
+      "evidence": "All 25 shared runtime scenarios pass both stores. Spy fetches authenticated persisted proof before real adapter release; reservation is still held, original receipt and v3 proof agree, then zero usage follows.",
+      "plan_item": "4.3"
+    },
+    {
+      "evidence": "Changed epoch/manifest, unavailable/malformed authority, foreign/replacement UID, cancellation between startup pages and old UUID lab receipts retain charges/frozen admission; restore only the original authority for positive proof.",
+      "plan_item": "4.4"
+    },
+    {
+      "evidence": "5.25-second publication crosses five-second worker lease with renewal; task death and lease loss stop publication without application replay. Exact/small/overflow output and valid request-payload exhaustion pass. Durable dispatch intent remains conservatively unknown for pre-exec request-limit rejection.",
+      "plan_item": "4.5"
+    },
+    {
+      "evidence": "Current/minimum isolated production consumers pass without Rust/SSH, complete verifier inventory is present, independently unpacked offline builder is deterministic. Reference example compiles warning-free and all 335 tests pass. Minimal-host and community-workspace also compile with their existing path/locked 0.3.0 SDK dependencies; upstream xref deprecation notices are retained in the log.",
+      "plan_item": "4.6"
+    }
+  ],
+  "scope": {
+    "not_claimed": [
+      "live enrollment",
+      "physical SmolVM execution or cleanup",
+      "production Kubernetes support",
+      "distributed controller fencing",
+      "cross-provider receipt migration"
+    ],
+    "real": [
+      "Elixir SDK/protocol/raw framed Port",
+      "local TLS Kubernetes/exec transports",
+      "public runtime/coordinator/recovery",
+      "Memory adapter",
+      "reference PostgreSQL adapter and encrypted durable records",
+      "independent production package consumers",
+      "offline isolated Python bundle builds"
+    ],
+    "simulated": [
+      "node physical observation/history/lifecycle/proof responses",
+      "Kubernetes API objects and workload exec frames",
+      "same-host controller command fixture"
+    ]
+  },
+  "shared_scenarios": [
+    {
+      "id": "binary_io",
+      "memory": "passed",
+      "postgresql": "passed",
+      "title": "binary staging, read-back, exit and collection persist proof before release"
+    },
+    {
+      "id": "tiny_output",
+      "memory": "passed",
+      "postgresql": "passed",
+      "title": "silent zero exit works with a one-byte output cap"
+    },
+    {
+      "id": "small_output",
+      "memory": "passed",
+      "postgresql": "passed",
+      "title": "silent zero exit works with a 4 KiB output cap"
+    },
+    {
+      "id": "exact_output",
+      "memory": "passed",
+      "postgresql": "passed",
+      "title": "exact combined output cap preserves real exit seven"
+    },
+    {
+      "id": "excess_output",
+      "memory": "passed",
+      "postgresql": "passed",
+      "title": "excess combined output remains unknown"
+    },
+    {
+      "id": "lost_create",
+      "memory": "passed",
+      "postgresql": "passed",
+      "title": "lost create response never creates or executes twice"
+    },
+    {
+      "id": "lost_status",
+      "memory": "passed",
+      "postgresql": "passed",
+      "title": "lost status never replays application work"
+    },
+    {
+      "id": "cancel_queued",
+      "memory": "passed",
+      "postgresql": "passed",
+      "title": "cancellation before admission sends no create"
+    },
+    {
+      "id": "cancel_dispatched",
+      "memory": "passed",
+      "postgresql": "passed",
+      "title": "cancellation after dispatch keeps uncertainty"
+    },
+    {
+      "id": "occupied",
+      "memory": "passed",
+      "postgresql": "passed",
+      "title": "occupied single slot keeps accepted work queued"
+    },
+    {
+      "id": "changed_epoch",
+      "memory": "passed",
+      "postgresql": "passed",
+      "title": "changed authority generation freezes charged recovery"
+    },
+    {
+      "id": "changed_manifest",
+      "memory": "passed",
+      "postgresql": "passed",
+      "title": "changed manifest freezes charged recovery"
+    },
+    {
+      "id": "missing",
+      "memory": "passed",
+      "postgresql": "passed",
+      "title": "missing authority freezes charged recovery"
+    },
+    {
+      "id": "corrupt",
+      "memory": "passed",
+      "postgresql": "passed",
+      "title": "corrupt authority freezes charged recovery"
+    },
+    {
+      "id": "old_lab",
+      "memory": "passed",
+      "postgresql": "passed",
+      "title": "old lab receipts are never adopted by standalone authority"
+    },
+    {
+      "id": "cancel_ready",
+      "memory": "passed",
+      "postgresql": "passed",
+      "title": "cancelled absent original cleans up without application dispatch"
+    },
+    {
+      "id": "expired_ready",
+      "memory": "passed",
+      "postgresql": "passed",
+      "title": "expired absent original cleans up without application dispatch"
+    },
+    {
+      "id": "pages",
+      "memory": "passed",
+      "postgresql": "passed",
+      "title": "complete paginated startup observes cancellation between pages"
+    },
+    {
+      "id": "foreign",
+      "memory": "passed",
+      "postgresql": "passed",
+      "title": "foreign inventory prevents admission"
+    },
+    {
+      "id": "replacement",
+      "memory": "passed",
+      "postgresql": "passed",
+      "title": "replacement UID is preserved while original reservation stays charged"
+    },
+    {
+      "id": "request_limit",
+      "memory": "passed",
+      "postgresql": "passed",
+      "title": "request byte exhaustion rejects application dispatch"
+    },
+    {
+      "id": "exit_custody",
+      "memory": "passed",
+      "postgresql": "passed",
+      "title": "unavailable cleanup authority preserves a real collected exit"
+    },
+    {
+      "id": "renewal",
+      "memory": "passed",
+      "postgresql": "passed",
+      "title": "recovery publication outlives a renewed worker lease"
+    },
+    {
+      "id": "task_death",
+      "memory": "passed",
+      "postgresql": "passed",
+      "title": "recovery task death cancels publication and retries without execution"
+    },
+    {
+      "id": "lease_loss",
+      "memory": "passed",
+      "postgresql": "passed",
+      "title": "lease loss stops publication and preserves capacity"
+    }
+  ],
+  "source_sha256": {
+    "examples/durable_host/mix.exs": "f7430e8c3400048bdb2af3bcc49f9a6cfb4390aa848b93ebe075cf40e3224b7c",
+    "examples/durable_host/mix.lock": "b9d05bec076d80efe32b09b8b8b59ed79297c3dfb83e70b3c35f95eef9e00a2a",
+    "examples/durable_host/test/node_authority_runtime_test.exs": "9a77bed03ae30b005ac6cf560283faf8979b46426bf8f56a06bc68460eb9888a",
+    "examples/kubernetes_host/settings.exs": "e91306015aea82b25091fb5f1af37b31693605f2371af1784f103b596baea3c2",
+    "test/ci/package_test.exs": "ce7016efe0deab905702235aacbb4b4c8f46cea56787e85ca8da52842a5c3c8b",
+    "test/support/kubernetes_node_peer.py": "df39dc50864205eec71c4ffddd6b45632567bf73049aa13447a3afa064dfd277",
+    "test/support/kubernetes_peer.ex": "d2e8a9738741b0ec85f0aae14a98896ed55d41638a15d96728d8d9cbffe88ec3",
+    "test/support/node_authority_fixture.ex": "ff6141bb15f51ae769eecf4190eab58af723e968d1766e43c212512ef1f631e1",
+    "test/support/node_authority_peer.ex": "9ba6b7da84f64947d7e650abe7400cf8d62833c37b70f361022747667fb546e5",
+    "test/support/store/kubernetes_fixture.ex": "37093e8392cf83b26fb6f1b524ff50c6da8ca1b61aaafee22630b24ce043ea50",
+    "test/support/store/node_authority_runtime_contract.ex": "ff0c0f5ca7c67f4d26c8c9b602b275b18061ecf28cb979e19dd66327f4897e91",
+    "test/support/store/node_authority_store.ex": "7641599a34c7536e7c4fe53916aa313ae05dc70d9ba706deb0ef8ce029c75233",
+    "test/unit/kubernetes_host_settings_test.exs": "80665d9ec81b05ee2a83bdbd24a5bec8eb2e1a7b96179ab04f0c6306ef6efa17",
+    "test/unit/kubernetes_node_authority_runtime_test.exs": "1da3be2cd09e266dee97a01403f35321b901a615e04ca5d453e3d8ef666d92bd"
+  },
+  "status": "runtime_store_integration_gates_passed",
+  "tests": {
+    "focused_runtime_per_store": 25,
+    "host_settings": 2,
+    "package_fixture_suite": 16,
+    "postgresql_full": {
+      "command": "SMOLBOX_DATABASE_SOCKET_DIR=<dedicated private socket> SMOLBOX_DATABASE_PORT=27613 ERL_FLAGS='+S 4:4' MIX_ENV=test mix test --warnings-as-errors --max-cases 4",
+      "excluded": 29,
+      "isolation": "unique test partition, removed after runtime shutdown; no node authority/history mutation",
+      "port": 27613,
+      "postgresql_version": "17.11",
+      "seed": 325965,
+      "tests": 335,
+      "transport": "dedicated Unix socket only"
+    },
+    "sdk_full": {
+      "checks": 2363,
+      "command": "mix test --warnings-as-errors --max-cases 8",
+      "doctests": 4,
+      "excluded": 42,
+      "properties": 6,
+      "seed": 351156,
+      "tests": 2353
+    },
+    "shared_examples": {
+      "community_workspace": {
+        "command": "mix compile --warnings-as-errors",
+        "dependency_notices": "Two Mix 1.20 deprecations of upstream xref exclude options; application compilation succeeded. No dependency upgrade.",
+        "exit_code": 0,
+        "sdk": "existing locked Hex 0.3.0"
+      },
+      "durable_host": {
+        "command": "MIX_ENV=test mix compile --warnings-as-errors",
+        "exit_code": 0,
+        "full_tests": 335,
+        "sdk": "existing path dependency"
+      },
+      "minimal_host": {
+        "command": "mix compile --warnings-as-errors",
+        "exit_code": 0,
+        "sdk": "existing path dependency"
+      }
+    },
+    "static": {
+      "dialyzer_errors": 0,
+      "docs_warnings": 0,
+      "ex_dna_clones": 0,
+      "format": "passed",
+      "strict_credo_root_and_example": "passed",
+      "unused_dependencies": "none",
+      "warning_free_compile": "passed",
+      "xref_cycles": 0
+    }
+  },
+  "version": 1
+}

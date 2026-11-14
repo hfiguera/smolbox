@@ -9,7 +9,7 @@ defmodule SmolBox.KubernetesPeer do
     def resolve(token, _budget), do: {:ok, token}
   end
 
-  def start(tls) do
+  def start(tls, options \\ []) do
     {:ok, base} = Fixture.config(credential_provider: {Credentials, "token-a"})
     objects = objects(base)
 
@@ -21,6 +21,7 @@ defmodule SmolBox.KubernetesPeer do
              objects: objects,
              requests: [],
              pod: nil,
+             pod_uid: Keyword.get(options, :pod_uid, "pod-original"),
              ready: false,
              mode: :normal,
              overrides: %{},
@@ -199,7 +200,8 @@ defmodule SmolBox.KubernetesPeer do
     if snapshot.pod do
       TestPeer.json(conn, %{}, 409)
     else
-      pod = effective(manifest, snapshot.ready)
+      uid = if is_function(snapshot.pod_uid, 0), do: snapshot.pod_uid.(), else: snapshot.pod_uid
+      pod = effective(manifest, snapshot.ready) |> put_in(["metadata", "uid"], uid)
       Agent.update(state, &%{&1 | pod: pod})
       if snapshot.mode == :lost_create, do: exit(:normal), else: TestPeer.json(conn, pod, 201)
     end

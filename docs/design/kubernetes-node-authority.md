@@ -1,14 +1,16 @@
 # Kubernetes single-node authority
 
 Status: implementation specification, November 14, 2026. The standalone provider is
-implemented through Phase 3 but not qualified or enabled for execution. Delivery branch:
+implemented through Phase 4 but not qualified or enabled for execution. Delivery branch:
 `feature/kubernetes-node-authority`.
 
 Phase 0 contracts are frozen in the [contract checkpoint](kubernetes-node-authority-contract.md),
 with schemas/vectors and Python/Elixir compatibility checks. Standalone extraction
 and administrator installation have passed their fixture gates; protocol/SDK
-and real pre-enrollment access checks have passed Phase 3. Phases 4–5 remain
-pending; see the [implementation progress](kubernetes-node-authority-progress.md).
+and real pre-enrollment access checks have passed Phase 3. Phase 4 public runtime,
+Memory/PostgreSQL and compatibility gates pass against simulated node evidence.
+Manual live qualification remains Phase 5; see the
+[implementation progress](kubernetes-node-authority-progress.md).
 
 Follow the [implementation plan](kubernetes-node-authority-implementation-plan.md),
 [backend parity matrix](kubernetes-backend-parity.md), and existing
@@ -287,7 +289,7 @@ invalidates proof and retains capacity. The endpoint never repairs such failures
 
 ## Runtime integration and controller ownership
 
-Proposed SDK API: `SmolBox.Kubernetes.NodeAuthority.new/1`, returning an explicitly
+SDK API: `SmolBox.Kubernetes.NodeAuthority.new/1`, returning an explicitly
 validated callback context for `node_evidence: {NodeAuthority, context}`. The
 context holds connection fields and expected generation/manifest approvals, with
 redacted Inspect. Construction performs no SSH, credential lookup or node writes.

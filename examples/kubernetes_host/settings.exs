@@ -20,12 +20,36 @@ settings = path |> File.read!() |> Jason.decode!()
     preparation_ms: 300_000
   )
 
-{:ok, node} =
-  LabNodeEvidence.new(
-    ssh_host: settings["ssh_host"],
-    inspector_sha256: settings["inspector_sha256"],
-    history_sha256: settings["history_sha256"]
-  )
+node_evidence =
+  case Map.get(settings, "node_provider", "lab") do
+    "lab" ->
+      {:ok, node} =
+        LabNodeEvidence.new(
+          ssh_host: settings["ssh_host"],
+          inspector_sha256: settings["inspector_sha256"],
+          history_sha256: settings["history_sha256"]
+        )
+
+      {LabNodeEvidence, node}
+
+    "node_authority" ->
+      provider = SmolBox.Kubernetes.NodeAuthority
+
+      unless Code.ensure_loaded?(provider) and function_exported?(provider, :new, 1),
+        do: raise("this SDK does not support the configured node authority provider")
+
+      approval = Map.fetch!(settings, "node_authority")
+
+      fields =
+        ~w(ssh_host ssh_port ssh_user identity_file known_hosts_file authority_generation verifier_manifest_sha256)a
+
+      options = Enum.map(fields, &{&1, Map.fetch!(approval, Atom.to_string(&1))})
+      {:ok, node} = apply(provider, :new, [options])
+      {provider, node}
+
+    _ ->
+      raise "unknown node evidence provider"
+  end
 
 {:ok, controller} =
   LabController.new(
@@ -46,7 +70,7 @@ options = Enum.map(fields, &{&1, Map.fetch!(settings, Atom.to_string(&1))})
         credential_provider: {:token_file, settings["token_file"]},
         sources: [source],
         profiles: [profile],
-        node_evidence: {LabNodeEvidence, node},
+        node_evidence: node_evidence,
         controller_guard: controller
       ]
   )
