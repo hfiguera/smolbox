@@ -227,11 +227,19 @@ defmodule SmolBox.KubernetesExecTest do
     assert Enum.count(Peer.requests(c.peer), &String.ends_with?(&1.path, "/exec")) == 1
   end
 
-  test "incomplete node history or a stale isolation guard blocks upgrade", c do
+  test "incomplete history, failed isolation or changed node incarnation blocks upgrade", c do
     install(c, [])
     {module, observation} = c.config.node_evidence
 
-    for bad <- [%{observation | complete_history: false}, %{observation | isolated: false}] do
+    for bad <- [
+          %{observation | complete_history: false},
+          %{observation | isolated: false},
+          %{observation | observer_epoch: "another-epoch"},
+          %{
+            observation
+            | processes: Enum.map(observation.processes, &%{&1 | start_ticks: &1.start_ticks + 1})
+          }
+        ] do
       config = %{c.config | node_evidence: {module, bad}}
 
       assert {:error, %{category: :identity_conflict, evidence: :not_dispatched}} =

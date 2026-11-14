@@ -226,6 +226,8 @@ provider from Phase 6. Bring that prerequisite forward before closing this phase
 a low-level helper/WebSocket probe or a unit fixture cannot qualify the assigned
 adapter. Snapshot-only CRI/SQLite/process inspection is insufficient. Record
 component qualification separately until the continuous history gate passes.
+The Phase 4 capture prerequisite and guarded exec gate are now recorded in
+[progress](kubernetes-backend-progress.md); managed cleanup/recovery remains Phase 6.
 
 Exit gate: direct adapter exec preserves actual bytes and exits on the live
 qualified image, and induced loss yields uncertainty with no second exec.

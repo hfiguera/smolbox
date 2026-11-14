@@ -14,9 +14,9 @@ parity tracked in [the parity matrix](kubernetes-backend-parity.md).
 | 1 — Target and authority types | Type/validation gate passed | Offline constructors, immutable Pod intent, receipts, node observations, cleanup proofs and target normalization |
 | 2 — Store/codec/OCI admission | Store gate passed | Selective v54, atomic allocation, UID receipt transitions, proof-bound release, authenticated PostgreSQL enrollment, gated OCI submission; operational dispatch disabled |
 | 3 — Object lifecycle | Object API gate passed | Bounded TLS/token client, pinned object enrollment, assigned backend create/observe/readiness/UID-delete and restricted live RBAC; application IO and capacity release disabled |
-| 4 — Exec | In progress; transport component qualified | Fixed helper and Elixir v5 transport pass unit/live component checks; guarded adapter exit gate awaits continuous node-history provider |
+| 4 — Exec | Guarded adapter exec gate passed | Real transaction-backed node capture; saved ready receipts; assigned adapter bytes/exits 0 and 7; lost observation without replay |
 | 5 — Files | Pending | Qualified helper staging/collection |
-| 6 — Cleanup/recovery | Pending | NodeEvidence provider, positive cleanup proofs and restart reconciliation |
+| 6 — Cleanup/recovery | Capture prerequisite implemented; managed gate pending | Journal/inspector and typed physical-proof component qualified; startup/recovery, quiescence, cancellation and proof-bound managed release remain |
 | 7 — Public qualification | Pending | Public SmolBox smoke, compatibility evidence and user documentation |
 
 Kubernetes authority types and target normalization are implemented; the backend
@@ -87,7 +87,7 @@ returned machine/directory/share inventories to their baseline.
 This is a **lab-only** infrastructure recipe. Its bridge mapping and observer
 assumptions must not be exported as general distribution/CNI support.
 
-### Node evidence contract to implement in Phase 6
+### Node evidence contract and remaining Phase 6 gate
 
 Capture the enrolled node UID/boot identity, namespace UID, original Pod UID,
 all discoverable CRI sandbox attempts, verified VM-name/directory mapping,
@@ -101,11 +101,14 @@ mutations. Mapping gaps, lost attempt history, observer gaps, stale guard state,
 node reboot or unknown namespace identity fail closed and retain the reservation.
 An empty list, disappearance of a Pod, or a successful SSH command alone is
 insufficient. The Phase 0 smoke captures and checks this evidence for its own
-single observed attempt; the reusable provider and durable proof are still pending.
+single observed attempt. Phase 4 adds the reusable capture provider and a typed
+physical-proof component below; managed proof persistence/release and recovery
+remain Phase 6 gates.
 
 ## Validation so far
 
-The manual Python suite passes 26 tests, including fixed-helper framing, argv/env,
+The manual Python suite passes 48 tests, including transaction history, node
+inspection, fixed-helper framing, argv/env,
 stdin EOF and validation rejection, plus existing smoke evidence
 gates, WebSocket fragmentation/binary/terminal-status failures, edited/foreign
 bridge-rule rejection, policy drift, and archive/rootfs integrity. All four shell
@@ -290,7 +293,7 @@ zero-clone ExDNA, strict-assumption Credence and Dialyzer passed. All live check
 remain manual; no CI workflow changed. [Exact report](../evidence/kubernetes-backend-phase3-2026-11-13.json).
 
 
-## Phase 4 — Command transport component (phase gate still open)
+## Phase 4 — Initial command transport checkpoint
 
 The Elixir v5 transport and fixed Python helper are implemented. An assigned
 backend accepts only the saved foreground command and ready receipt. Application
@@ -326,15 +329,14 @@ node, Secret or policy mutation permission was added. See the
 [upstream change](https://github.com/kubernetes/kubernetes/blob/v1.35.0/CHANGELOG/CHANGELOG-1.35.md).
 The first rejected probe was definitive; it was not an uncertain command replay.
 
-**Phase 4 is not complete.** Its live component probe exercised the fixed-helper/
+**At that checkpoint, Phase 4 was not complete.** Its live component probe exercised the fixed-helper/
 WebSocket layer directly, not the guarded assigned exec path. The reusable real
-NodeEvidence provider is still absent; unit fixtures do not qualify it. Assigned
-exec checks fresh isolation, complete history and the exact saved incarnation
-before and after application I/O. That gate stays closed. A one-time CRI/SQLite/
-process snapshot cannot establish complete sandbox-attempt history. Bring the
-continuous history prerequisite forward from Phase 6, qualify observer gaps and
-restarts, then repeat the live test through the guarded adapter before closing
-Phase 4. Cleanup/recovery and public qualification remain separate gates.
+NodeEvidence provider was still absent; unit fixtures did not qualify it. Assigned
+exec required fresh isolation, complete history and the exact saved incarnation
+before and after application I/O. That gate remained closed until the prerequisite
+and guarded live test described below passed. A one-time CRI/SQLite/process
+snapshot could not establish complete sandbox-attempt history. Cleanup/recovery
+and public qualification remain separate gates.
 
 [Transport component evidence](../evidence/kubernetes-backend-phase4-transport-2026-11-13.json).
 No CI workflow changed; all lab qualification remains manual.
@@ -349,3 +351,56 @@ hardening, all 27 focused exec/remote-command/terminal-transport cases passed.
 The 26 Python cases, fresh production package consumer, formatting, warnings-as-
 errors compilation, zero dependency cycles, strict Credo, zero-clone ExDNA,
 strict-assumption Credence and Dialyzer also passed.
+
+
+## Phase 4 — Guarded adapter exec gate
+
+The gate passed on November 13 (Denver; November 14 UTC), 2026. The prerequisite
+[lab node-evidence provider](kubernetes-node-evidence.md) now uses administrator-
+installed SQLite transaction triggers to retain every runtime VM-record change,
+a separately fsynced ownership/prefix ledger, read-only node inspection and a
+fixed bounded SSH protocol. Polling or the best-effort upstream usage journal
+cannot silently stand in for this continuity. Exact runtime/source identities,
+PID births, KVM descriptors, guard state and original UID/container authority are
+checked before and after application I/O. Codecs/receipts remain unchanged.
+
+The first neutral keeper revealed the runtime's empty per-VM readiness marker
+in shared rootfs. No shipped file had changed. The verifier now recognizes only
+an exact journal-bound, regular, single-link, zero-byte marker; all shipped
+assets still match the archive manifest. Before any ready receipt or app dispatch,
+the correction preserved all journal events and rotated the inspector epoch.
+The first preparation was failed and collected under its original UID; its
+absolute deadline was not reset and its application was never dispatched.
+
+Fresh execution intents then passed through the **assigned Backend exec_stream
+port**, with real saved ready receipts and the real host provider rather than
+unit evidence or a transport-only bypass. Silent exit 0, exit 7, arbitrary binary
+stdout/stderr, exact argv/env and application stdin EOF passed. An induced callback
+stall closed observation with `:dispatch_uncertain` and no fabricated exit.
+A separate administrator file read confirmed the counter incremented once; the
+original command was not resubmitted. Final cases repeated these checks with
+combined API/node/application byte-budget accounting. Each case used fresh BEAM
+processes between create, execute and delete, retaining the saved authority.
+This is not managed-controller recovery qualification.
+
+UID-bound deletion was followed by real typed physical-proof validation. A
+controlled empty share left at the original sandbox path caused proof refusal
+and remained untouched by the provider. Only the administrator's identified
+fixture inode was removed; a subsequent fresh proof passed. No component driver
+released store capacity. All probe Pods and original VM processes, records,
+directories and shares were collected; the enrolled lab remains running, idle,
+for the next implementation phase.
+
+Validation: 2,246 main-project checks passed with 42 opt-in excluded, followed by
+15 focused node-provider/exec cases after the budget-helper dependency refactor.
+The 48 manual Python cases, fresh production package consumer with an independent
+build path, formatting, warnings-as-errors compilation, zero dependency cycles,
+strict Credo, zero-clone ExDNA, strict-assumption Credence and Dialyzer passed.
+The package report's source hashes match the current packaged files. New unit
+cases reject changed observer epochs/PID births before exec, invalid/truncated
+node frames, SSH argument injection, lost owners, history corruption and leaks.
+No CI workflow or physical-host worker baseline changed.
+
+[Guarded exec and node-capture evidence](../evidence/kubernetes-backend-phase4-2026-11-13.json).
+Phase 5 files, Phase 6 managed cleanup/recovery and Phase 7 public qualification
+remain required. Runtime health/admission remains disabled until those gates pass.

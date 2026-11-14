@@ -92,8 +92,9 @@ defmodule SmolBox.Kubernetes.Exec do
     {module, context} = operation.config.node_evidence
     receipt = record.backend_receipt
 
-    with {:ok, %Observation{} = observation} <-
-           module.capture(receipt.binding, receipt.pod_uid, Operation.budget(operation), context),
+    with {:ok, budget} <- Operation.node_budget(operation),
+         {:ok, %Observation{} = observation} <-
+           module.capture(receipt.binding, receipt.pod_uid, budget, context),
          true <-
            Observation.dispatchable?(
              observation,
@@ -105,7 +106,10 @@ defmodule SmolBox.Kubernetes.Exec do
            Receipt.ready(receipt, receipt.container_id, receipt.image_id, observation),
          true <- Receipt.same_incarnation?(receipt, current),
          do: :ok,
-         else: (_ -> Operation.error(:identity_conflict, operation.name, :not_dispatched))
+         else: (
+           {:error, %Error{category: :output_limit}} = error -> error
+           _ -> Operation.error(:identity_conflict, operation.name, :not_dispatched)
+         )
   end
 
   defp finish(capture, :ok, name), do: outcome(RemoteCommand.result(capture), name)

@@ -10,7 +10,7 @@ scripts=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 lab=/var/lib/smolbox-lab
 root=$lab/kubernetes
 unit=smolbox-kubernetes-lab.service
-action=${1:?Usage: lab.sh prepare|start|install|install-preview|sync|smoke|qualify|ssh|status|stop}
+action=${1:?Usage: lab.sh prepare|start|install|install-preview|install-node-history|sync|smoke|qualify|ssh|status|stop}
 shift
 
 guest_ssh() {
@@ -28,7 +28,7 @@ guest_copy() {
 
 sync_scripts() {
   guest_ssh 'mkdir -p /home/lab/smolbox-kubernetes/reports'
-  guest_copy "$scripts/"{install-node.sh,install-preview.sh,offline_guard.py,smoke.py,pins.json,preview-policy.json,qualify.py,websocket_probe.py,source-basis.json,runtime-rbac.yaml} \
+  guest_copy "$scripts/"{install-node.sh,install-preview.sh,install-node-history.sh,node_history.py,node_inspector.py,offline_guard.py,smoke.py,pins.json,preview-policy.json,qualify.py,websocket_probe.py,source-basis.json,runtime-rbac.yaml} \
     lab@127.0.0.1:/home/lab/smolbox-kubernetes/
 }
 
@@ -137,6 +137,10 @@ UNIT
     guest_ssh 'sudo bash /home/lab/smolbox-kubernetes/install-node.sh'
     ;;
   sync) sync_scripts ;;
+  install-node-history)
+    sync_scripts
+    guest_ssh 'sudo bash /home/lab/smolbox-kubernetes/install-node-history.sh'
+    ;;
   install-preview)
     sync_scripts
     guest_ssh 'sudo bash /home/lab/smolbox-kubernetes/install-preview.sh'

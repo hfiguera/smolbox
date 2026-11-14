@@ -227,3 +227,22 @@ inside the guest observed actual KVM births, SQLite records and scoped disk/shar
 paths. API absence alone did not establish cleanup. A production node observer,
 continuous history and the public managed smoke remain Phase 6–7 work. Do not
 promote the manual inspection report into a fabricated store cleanup proof.
+
+
+## Transaction-backed node evidence
+
+The guarded adapter's Phase 4 qualification adds an administrator-installed
+runtime transaction journal and a fixed lab node inspector. With the preview
+namespace, runtime VM records, boot processes and VM/share paths empty, run:
+
+```sh
+ssh linux '~/smolbox-kubernetes-lab/lab.sh install-node-history'
+```
+
+This changes audit schema and evidence files only inside the disposable guest.
+It never resets an existing journal or silently replaces an enrolled inspector.
+Record its explicit program hashes/epoch for the host provider. A node reboot,
+missing ledger, changed program or unmapped attempt fails closed; an old receipt
+cannot adopt new authority. See [the evidence boundary and manual checks](design/kubernetes-node-evidence.md)
+and [the guarded exec report](evidence/kubernetes-backend-phase4-2026-11-13.json).
+Managed recovery and reservation release remain unqualified until Phase 6.

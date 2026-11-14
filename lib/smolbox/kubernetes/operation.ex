@@ -32,6 +32,27 @@ defmodule SmolBox.Kubernetes.Operation do
   def error(category, name, evidence),
     do: {:error, %Error{category: category, operation: name, evidence: evidence}}
 
+  # Opaque host callbacks cannot report every transport byte to the API client.
+  # Reserve their entire granted allowance first; unused bytes are not refunded.
+  # This keeps combined API, node-proof and application IO within one operation
+  # limit without changing the public Backend.Budget or extension callbacks.
+  @doc false
+  def node_budget(operation) do
+    request_left = operation.budget.max_request_bytes - :atomics.get(operation.bytes, 1)
+    response_left = response_left(operation)
+    request = min(65_544, div(request_left, 4))
+    response = min(65_544, div(response_left, 4))
+
+    if request > 0 and response > 0 do
+      account(operation, 1, request)
+      account(operation, 2, response)
+
+      {:ok, %{budget(operation) | max_request_bytes: request, max_response_bytes: response}}
+    else
+      error(:output_limit, operation.name, :not_dispatched)
+    end
+  end
+
   # A request owns its socket and credential resolver. Killing the outer caller
   # also kills this isolated worker; callback exceptions never escape or log data.
   def run(operation, function) do

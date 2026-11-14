@@ -1,6 +1,6 @@
 # Kubernetes backend parity matrix
 
-Status: implementation version 4, November 13, 2026. The long-term goal is equivalent
+Status: implementation version 5, November 13, 2026. The long-term goal is equivalent
 SmolBox public domain behavior across HTTP, Embedded and Kubernetes. Follow
 [the design](kubernetes-backend.md), [delivery plan](kubernetes-backend-implementation-plan.md),
 and [implementation status](kubernetes-backend-progress.md).
@@ -14,9 +14,9 @@ runtime-only evidence is not marked as an implemented library capability.
 | --- | --- | --- | --- |
 | Target admission, fixed resources, effective offline policy | Existing target/package/profile approvals | Runtime recipe, target/store enrollment and restricted live object lifecycle complete; managed runtime admission disabled | Phases 0–3, then public Phase 7 |
 | Disposable submit/fetch/await/cancel | Existing managed execution API | Gated OCI submit/fetch persistence implemented; operational lifecycle pending | Phases 1–7 |
-| Foreground binary output and real exit | Existing exec contracts | Elixir v5 transport/helper implemented and live component probe passed; guarded adapter awaits continuous node history | Phase 4 + public qualification |
+| Foreground binary output and real exit | Existing exec contracts | Guarded assigned adapter passed real node capture, binary bytes/exits and loss without replay; public runtime integration pending | Phase 4 + public qualification |
 | Bounded input files and artifact collection | Existing file/ArtifactStore contracts | Planned | Phase 5 + public qualification |
-| Durable intent, ownership, no replay, positive cleanup | Existing store/backend evidence contracts | Persistence, atomic store gates and fresh-process recovery validation complete; node provider and orchestration pending | Phases 2 and 6–7 |
+| Durable intent, ownership, no replay, positive cleanup | Existing store/backend evidence contracts | Persistence/store gates, fresh-process authority validation and transaction-backed capture complete; managed recovery/cleanup orchestration pending | Phases 2 and 6–7 |
 | OCI image/source approval | Existing qualified source catalogs | Pinned catalog, zero-retention submission and restricted live creation/readiness passed; application execution pending | Phases 1–3 and 7 |
 | Production node evidence, multi-node failure recovery, measurements | Existing backend-specific operational contracts | Planned after preview | Production foundation milestone |
 | Private credentials, broader artifacts, image operations | Existing qualified source/image APIs | Planned after preview | Sources/connectivity milestone |

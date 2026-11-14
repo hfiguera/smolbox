@@ -5,7 +5,9 @@ defmodule SmolBox.Kubernetes.NodeEvidence do
   This provider observes node/runtime identity, effective offline isolation,
   original sandbox processes and positive cleanup. It cannot create, stop or
   delete machines. API absence or a successful remote command alone is not a
-  cleanup proof. Connection configuration and live handles are never persisted.
+  cleanup proof. The provider may persist its own evidence ledger; installing or
+  resetting runtime audit infrastructure is a separate administrator operation.
+  Connection configuration and live handles are never persisted.
   """
   alias SmolBox.Backend.Budget
   alias SmolBox.Error
