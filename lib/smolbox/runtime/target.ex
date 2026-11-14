@@ -1,8 +1,9 @@
 defmodule SmolBox.Runtime.Target do
   @moduledoc false
-  alias SmolBox.Backend.{Assignment, Embedded, Features, HTTP}
+  alias SmolBox.Backend.{Assignment, Embedded, Features, HTTP, Kubernetes}
   alias SmolBox.Embedded.{CheckpointContract, Config, Port}
   alias SmolBox.{Error, MachineSpec, Source}
+  alias SmolBox.Kubernetes.Config, as: KubernetesConfig
   alias SmolBox.Runtime.WorkerConfig
 
   @worker_fields [
@@ -26,7 +27,8 @@ defmodule SmolBox.Runtime.Target do
     :branch_https_credentials
   ]
   @derive {Inspect, only: [:kind, :id, :architecture, :platform, :runtime_version]}
-  defstruct [:kind, :id, :connection, :domain_binding, :native_config] ++ @worker_fields
+  defstruct [:kind, :id, :connection, :domain_binding, :native_config, :kubernetes_config] ++
+              @worker_fields
 
   @type t :: %__MODULE__{}
 
@@ -38,6 +40,41 @@ defmodule SmolBox.Runtime.Target do
   end
 
   def normalize(%__MODULE__{} = target), do: target
+
+  def normalize(%KubernetesConfig{} = config) do
+    {:ok, reference} = Kubernetes.reference(config)
+
+    fields =
+      config
+      |> Map.from_struct()
+      |> Map.take([
+        :architecture,
+        :platform,
+        :sources,
+        :profiles,
+        :capacity,
+        :allocation_floor,
+        :runtime_version,
+        :qualification,
+        :draining
+      ])
+
+    struct!(
+      __MODULE__,
+      Map.merge(fields, %{
+        kind: :kubernetes,
+        id: config.id,
+        connection: reference,
+        domain_binding: KubernetesConfig.binding(config),
+        kubernetes_config: config,
+        artifacts: [],
+        checkpoints: [],
+        export_destinations: [],
+        checkpoint_policies: [],
+        branch_policies: []
+      })
+    )
+  end
 
   def normalize(%Config{} = config) do
     case Embedded.reference(config, {:global, {Port, node()}}) do
@@ -81,6 +118,7 @@ defmodule SmolBox.Runtime.Target do
   # Managed code obtains its adapter reference here, never through worker fields.
   def connection(%{kind: :http, client: client}), do: HTTP.reference(client)
   def connection(%{__struct__: WorkerConfig, client: client}), do: HTTP.reference(client)
+  def connection(%KubernetesConfig{} = config), do: normalize(config).connection
   def connection(%__MODULE__{connection: connection}), do: connection
 
   def connection(target, record), do: target |> connection() |> SmolBox.Backend.assigned(record)
@@ -111,6 +149,7 @@ defmodule SmolBox.Runtime.Target do
 
   def id(%__MODULE__{id: id}), do: id
   def id(%Config{id: id}), do: id
+  def id(%KubernetesConfig{id: id}), do: id
   def id(%{client: %{worker: %{id: id}}}), do: id
 
   # runtime_version retains the operational health identity (the native engine
@@ -119,6 +158,8 @@ defmodule SmolBox.Runtime.Target do
     do: Config.sdk_version(config)
 
   def sdk_version(%Config{} = config), do: Config.sdk_version(config)
+  def sdk_version(%KubernetesConfig{}), do: nil
+  def sdk_version(%{kind: :kubernetes}), do: nil
   def sdk_version(%{runtime_version: version}), do: version
   def sdk_version(_unrecognized), do: nil
 
@@ -132,9 +173,11 @@ defmodule SmolBox.Runtime.Target do
 
   def endpoint(%__MODULE__{kind: kind, domain_binding: domain}), do: {kind, domain}
   def endpoint(%Config{} = config), do: {:embedded, Config.domain_binding(config)}
+  def endpoint(%KubernetesConfig{} = config), do: {:kubernetes, KubernetesConfig.binding(config)}
 
   def validate(%{__struct__: WorkerConfig} = worker), do: WorkerConfig.validate(worker)
   def validate(%Config{} = config), do: Config.validate(config)
+  def validate(%KubernetesConfig{} = config), do: KubernetesConfig.validate(config)
 
   def validate(%__MODULE__{kind: :http} = target) do
     worker = target |> Map.take(@worker_fields) |> then(&struct!(WorkerConfig, &1))
@@ -144,7 +187,7 @@ defmodule SmolBox.Runtime.Target do
          true <- target.id == worker.client.worker.id,
          true <-
            target.connection == nil and target.domain_binding == nil and
-             target.native_config == nil do
+             target.native_config == nil and target.kubernetes_config == nil do
       :ok
     else
       _ -> {:error, %SmolBox.Error{category: :validation, operation: :worker}}
@@ -159,12 +202,22 @@ defmodule SmolBox.Runtime.Target do
          else: (_invalid -> {:error, %Error{category: :validation, operation: :worker}})
   end
 
+  def validate(%__MODULE__{kind: :kubernetes, kubernetes_config: config} = target) do
+    with :ok <- KubernetesConfig.validate(config),
+         true <- SmolBox.Validation.struct_shape?(target, __MODULE__),
+         true <- target == normalize(config),
+         do: :ok,
+         else: (_invalid -> {:error, %Error{category: :validation, operation: :worker}})
+  end
+
   def validate(_), do: {:error, %SmolBox.Error{category: :validation, operation: :worker}}
 
   def supports?(%__MODULE__{kind: :embedded, native_config: config}, spec),
     do: Assignment.supports?(config, spec)
 
   def supports?(%Config{} = config, spec), do: Assignment.supports?(config, spec)
+  def supports?(%KubernetesConfig{}, _spec), do: false
+  def supports?(%{kind: :kubernetes}, _spec), do: false
   def supports?(target, spec), do: WorkerConfig.supports?(worker_definition(target), spec)
 
   def https_branches?(%__MODULE__{kind: :http} = target, profile),
@@ -193,10 +246,16 @@ defmodule SmolBox.Runtime.Target do
          do: {:ok, {target.id, name, target.capacity, assignment}}
   end
 
+  def allocation(%{kind: :kubernetes}, _spec, _name),
+    do: {:error, %Error{category: :unsupported_capability, operation: :create}}
+
   def allocation(target, _spec, name), do: {:ok, {id(target), name, target.capacity}}
 
   def qualify(%__MODULE__{kind: :embedded} = target, spec),
     do: target |> connection() |> SmolBox.Backend.qualify_creation(spec)
+
+  def qualify(%{kind: :kubernetes}, _spec),
+    do: {:error, %Error{category: :unsupported_capability, operation: :create}}
 
   def qualify(_target, _spec), do: :ok
 
@@ -240,6 +299,9 @@ defmodule SmolBox.Runtime.Target do
       {:error, %Error{category: :unsupported_capability, operation: :create}}
     end
   end
+
+  def machine_spec(%{kind: :kubernetes}, _spec, _name),
+    do: {:error, %Error{category: :unsupported_capability, operation: :create}}
 
   def machine_spec(target, spec, name),
     do: WorkerConfig.machine_spec(worker_definition(target), spec, name)

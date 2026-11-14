@@ -197,6 +197,14 @@ defmodule SmolBox.Backend.Assignment do
         &legacy_identity?/1
       )
 
+  # The new authority types have no persisted envelope until Phase 2. In
+  # particular, they must never pass through an Embedded/HTTP codec version.
+  def record_valid?(%{
+        __struct__: SmolBox.Execution,
+        backend_assignment: %SmolBox.Kubernetes.Assignment{}
+      }),
+      do: false
+
   def record_valid?(%{backend_assignment: %__MODULE__{} = assignment} = record) do
     valid?(assignment) and supported_record?(record, assignment.version) and
       specification_matches?(assignment.creation, record.spec, Map.get(record, :managed_machine)) and

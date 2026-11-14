@@ -11,7 +11,7 @@ parity tracked in [the parity matrix](kubernetes-backend-parity.md).
 | Phase | Status | Evidence / remaining work |
 | --- | --- | --- |
 | 0 — Runtime qualification | Runtime gate passed in the dedicated lab | [Exact live report](../evidence/kubernetes-backend-phase0-2026-11-13.json); recipe and constraints below |
-| 1 — Target and authority types | Pending | Config, binding, assignment, receipt and identity validation |
+| 1 — Target and authority types | Type/validation gate passed | Offline constructors, immutable Pod intent, receipts, node observations, cleanup proofs and target normalization; admission and persistence remain disabled |
 | 2 — Store/codec/OCI admission | Pending | Atomic authority and compatible persisted formats |
 | 3 — Object lifecycle | Pending | Restricted credentials and bounded API client |
 | 4 — Exec | Pending | Elixir WebSocket client and application helper |
@@ -19,9 +19,10 @@ parity tracked in [the parity matrix](kubernetes-backend-parity.md).
 | 6 — Cleanup/recovery | Pending | NodeEvidence provider, positive cleanup proofs and restart reconciliation |
 | 7 — Public qualification | Pending | Public SmolBox smoke, compatibility evidence and user documentation |
 
-No Kubernetes backend is implemented or enabled yet. Phase 0 demonstrates the
-upstream runtime and resolves its network recipe; it does not substitute for
-the later library, store, recovery or public-path gates.
+Kubernetes authority types and target normalization are implemented; the backend
+is not operational or enabled yet. Phase 0 demonstrates the upstream runtime and
+resolves its network recipe. The library still needs store, transport, recovery
+and public-path qualification before any execution can be admitted.
 
 ## Phase 0 findings and approved development recipe
 
@@ -112,3 +113,56 @@ scripts pass syntax checks and ShellCheck. No CI workflow was changed.
 The [lab guide](../kubernetes-lab.md) documents manual setup and commands.
 New Elixir backend contracts and public-path tests remain required before any
 backend completion claim.
+
+## Phase 1 — Typed target and ownership boundary
+
+`SmolBox.Kubernetes.Config` validates the enrolled cluster anchor, namespace,
+node/boot and RuntimeClass identities, the pinned runtime/guard descriptor,
+explicit HTTPS/CA/auth settings, OCI catalogs and the exact Phase 0 profile.
+Configuration and normalization call no credential or node provider. Credential
+and observer contexts are excluded from Inspect and durable binding generation;
+token rotation or an API tunnel port change cannot silently change data domains.
+Every enrolled incarnation/policy change does change the binding generation.
+
+Creation assignments freeze the exact normalized version-1 Pod manifest, its
+digest, a random nonce, approved source/profile, execution key and fingerprint.
+The manifest carries opaque identifiers and a neutral keeper, not application
+argv/env. Version-1 template validation must remain immutable when later schemas
+are added. Receipts bind an original Pod UID and refine readiness once to its
+container/image identity and typed KVM/bridge observation. Refreshing observation
+time cannot replace a container, process birth, observer epoch or Pod UID.
+Ownership observations can record unavailable isolation or incomplete history;
+`Observation.dispatchable?/4` separately requires matching, complete, fresh,
+isolated evidence before application I/O. An isolation failure must not prevent
+deleting a known owned VM, while incomplete history still prevents capacity release.
+
+`Machine` comparisons and execution observation validation now have an explicit
+Kubernetes identity branch. A cleanup-proof DTO requires the same capture and
+observer authority, original process termination, API absence and scoped record,
+directory and share absence. A cleanup proof cannot predate the latest saved
+live observation. These are validators for evidence supplied by the
+future provider; they do not create or attest live evidence themselves.
+
+The shared record validator deliberately rejects Kubernetes persisted records
+until Phase 2 adds their selective envelope and store contract. Tests verify
+that encoding them, or injecting them into legacy HTTP/Embedded envelopes,
+fails. `Runtime.KubernetesSupport` rejects enrollment, target eligibility is
+false, and the adapter advertises no operations. A runtime version string cannot
+enable HTTP capabilities on a Kubernetes target. Existing stored records and
+HTTP/Embedded behavior retain their contracts.
+
+Twelve focused cases cover invalid enrollment/TLS/catalog/profile data, binding
+incarnation changes, secret redaction, canonical intent and mutation, Pod/
+container/PID reuse, stale or incomplete node evidence, missing cleanup facts,
+legacy-envelope rejection and the public runtime startup gate. The default
+HTTP/Embedded/unit/contract suite passed 2,190 tests, with 42 opt-in tests excluded.
+Formatting, compilation with warnings as errors, zero dependency cycles, strict
+Credo, zero-clone ExDNA, Dialyzer and strict-assumption Credence all passed.
+No CI workflow or live Kubernetes infrastructure changed in this phase.
+
+Phase 2 must persist the initial Pod UID receipt before readiness and application
+I/O. Keep `created_machine` immutable: assign its final running observation only
+after the initial receipt has been refined and saved, instead of replacing a
+previously saved pending machine observation. This preserves the existing
+execution evidence transition invariant while adding the early Kubernetes UID
+receipt in its own field.

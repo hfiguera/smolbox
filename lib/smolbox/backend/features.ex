@@ -61,6 +61,9 @@ defmodule SmolBox.Backend.Features do
   def supports?(%Config{} = config, feature),
     do: Map.get(native_versions(config), feature) == 1
 
+  def supports?(%SmolBox.Kubernetes.Config{}, _feature), do: false
+  def supports?(%{kind: :kubernetes}, _feature), do: false
+
   def supports?(%{kind: :embedded}, _feature), do: false
 
   def supports?(%{runtime_version: version} = worker, feature),

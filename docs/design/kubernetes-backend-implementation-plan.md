@@ -10,7 +10,8 @@ behavior must remain compatible throughout.
 
 Track delivery in [implementation progress](kubernetes-backend-progress.md) and
 the [versioned parity matrix](kubernetes-backend-parity.md). Phase 0 runtime
-qualification has passed in the dedicated lab; library phases remain pending.
+qualification and Phase 1 offline type validation have passed. Store, operational
+transport and public-path qualification remain pending; admission stays disabled.
 
 ## Starting point
 

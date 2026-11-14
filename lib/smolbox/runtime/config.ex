@@ -1,5 +1,5 @@
 defmodule SmolBox.Runtime.Config do
-  alias SmolBox.Runtime.{NativeSupport, Target}
+  alias SmolBox.Runtime.{KubernetesSupport, NativeSupport, Target}
   @moduledoc false
   alias SmolBox.{Error, Identity, Validation}
 
@@ -65,6 +65,7 @@ defmodule SmolBox.Runtime.Config do
          :ok <- persistence(config),
          config = %{config | workers: Enum.map(config.workers, &Target.normalize/1)},
          :ok <- NativeSupport.verify(config),
+         :ok <- KubernetesSupport.verify(config),
          {:ok, worker_control} <- worker_control_support(config) do
       {:ok,
        %{

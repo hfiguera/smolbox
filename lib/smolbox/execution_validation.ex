@@ -71,6 +71,19 @@ defmodule SmolBox.ExecutionValidation do
   defp machine_identity?(%{backend_identity: nil} = machine, %{backend_assignment: nil}),
     do: Validation.integer?(machine.created_at, 0, 253_402_300_799)
 
+  defp machine_identity?(
+         %{backend_identity: %SmolBox.Kubernetes.Identity{receipt: receipt}} = machine,
+         %{backend_assignment: %SmolBox.Kubernetes.Assignment{} = assignment}
+       ),
+       do:
+         machine.created_at == nil and
+           SmolBox.Kubernetes.Identity.matches?(machine.backend_identity, assignment) and
+           ((machine.state == :created and receipt.phase == :created) or
+              (machine.state == :running and receipt.phase == :ready))
+
+  defp machine_identity?(_machine, %{backend_assignment: %SmolBox.Kubernetes.Assignment{}}),
+    do: false
+
   defp machine_identity?(machine, %{backend_assignment: assignment}) when not is_nil(assignment),
     do:
       machine.created_at == nil and
