@@ -13,6 +13,9 @@ defmodule SmolBox.KubernetesCodecTest do
 
     for fixture <- fixtures["records"] do
       stored_bytes = Base.decode64!(fixture["encoded"])
+      # The production decoder loads record modules before safe ETF inspection.
+      # Do not depend on other test modules having already interned these atoms.
+      assert {:ok, _record} = Codec.decode(stored_bytes)
       [prefix, payload] = :binary.split(stored_bytes, <<0>>)
       # ETF map order depends on this VM's atom table. Apply the original ETF
       # writer to the untouched golden payload in this VM before comparing bytes.
