@@ -2,7 +2,7 @@ defmodule SmolBox.Kubernetes.ExecutionPolicy do
   @moduledoc false
   alias SmolBox.Command
 
-  alias SmolBox.Kubernetes.Config
+  alias SmolBox.Kubernetes.{Config, GuestHelper}
 
   # Zero retention is an explicit disposable Kubernetes policy, never a change
   # to the positive retention contract of HTTP or Embedded executions.
@@ -22,7 +22,7 @@ defmodule SmolBox.Kubernetes.ExecutionPolicy do
         Map.get(spec, :volumes, []) == [] and Map.get(spec, :ports, []) == [] and
           Map.get(spec, :workload) == nil and not Map.get(spec, :checkpointable, false) and
           not Map.get(spec, :branch_static_egress, false) and
-          Config.profile?(profile)
+          Config.profile?(profile) and GuestHelper.command?(spec.command)
 
   def supported?(_), do: false
 end

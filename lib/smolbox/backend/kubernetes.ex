@@ -3,7 +3,7 @@ defmodule SmolBox.Backend.Kubernetes do
   @behaviour SmolBox.Backend
   alias SmolBox.Backend.{KubernetesContext, Reference}
   alias SmolBox.{Error, Execution}
-  alias SmolBox.Kubernetes.{Assignment, Config, Operation, Pod}
+  alias SmolBox.Kubernetes.{Assignment, Config, Exec, Operation, Pod}
 
   def reference(config) do
     with :ok <- Config.validate(config),
@@ -28,11 +28,11 @@ defmodule SmolBox.Backend.Kubernetes do
          else: (_ -> unsupported(:create))
   end
 
-  # Object operations require a validated assigned context. Unassigned health,
-  # application IO and cleanup completion remain disabled at this phase gate.
+  # Operations require a validated assignment. Exec additionally demands a saved
+  # ready receipt and fresh complete node evidence. Unassigned health stays closed.
   @impl true
   def supports_operation?(%KubernetesContext{}, operation),
-    do: operation in [:create, :inspect_machine, :start, :delete]
+    do: operation in [:create, :inspect_machine, :start, :delete, :exec, :exec_stream]
 
   @impl true
   def supports_operation?(_context, _operation), do: false
@@ -45,6 +45,14 @@ defmodule SmolBox.Backend.Kubernetes do
 
   def invoke(_context, operation, _arguments, _budget),
     do: unsupported(operation)
+
+  defp object_operation(record, op, operation, [name, command])
+       when operation in [:exec, :exec_stream],
+       do: object_operation(record, op, operation, [name, command, []])
+
+  defp object_operation(record, op, operation, [name, command, options])
+       when operation in [:exec, :exec_stream] and name == record.machine_name,
+       do: Exec.run(op, record, command, options)
 
   defp object_operation(record, op, :create, [assignment])
        when assignment == record.backend_assignment,

@@ -151,8 +151,9 @@ passing run after VM restart and reprovisioning, including source file hashes,
 
 The proposed [Kubernetes backend design](design/kubernetes-backend.md) and
 [implementation plan](design/kubernetes-backend-implementation-plan.md) build on
-this lab. They describe future work; the current smoke exercises upstream runtime
-operations directly rather than a SmolBox Kubernetes backend.
+this lab. The original smoke exercises upstream runtime operations directly.
+[Implementation progress](design/kubernetes-backend-progress.md) separately records
+passed library component gates and the remaining guarded/public-path gates.
 
 ## Preview runtime qualification
 
@@ -204,8 +205,9 @@ The file is an explicit lab example tied to namespace `smolbox-preview`, node
 using another deployment. Script sync copies the file but never applies it.
 
 The `smolbox-controller` service account can create/get/list/delete Pods only in
-that namespace and GET `pods/exec` for WebSocket v5. It can read only the named
-namespace/anchor/node/class/offline policy and API version. It cannot write
+that namespace and GET/CREATE `pods/exec` for WebSocket v5. Kubernetes 1.35
+requires CREATE permission for the upgrade even when the request uses GET. It can
+read only the named namespace/anchor/node/class/offline policy and API version. It cannot write
 policies, nodes, classes, namespaces, Secrets or controllers. Kubernetes RBAC
 cannot constrain Pod template contents; this credential belongs only to the
 trusted controller, whose assigned backend validates the immutable intent.

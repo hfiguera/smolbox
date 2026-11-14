@@ -221,6 +221,12 @@ duplicate status; oversize frames/output; stalled producer/consumer; owner death
 weird argv/env characters; application stdin EOF independent of helper stdin;
 no replay after upgrade; redaction of application values and credentials.
 
+Dependency note: the guarded exec path requires the real complete-history node
+provider from Phase 6. Bring that prerequisite forward before closing this phase;
+a low-level helper/WebSocket probe or a unit fixture cannot qualify the assigned
+adapter. Snapshot-only CRI/SQLite/process inspection is insufficient. Record
+component qualification separately until the continuous history gate passes.
+
 Exit gate: direct adapter exec preserves actual bytes and exits on the live
 qualified image, and induced loss yields uncertainty with no second exec.
 

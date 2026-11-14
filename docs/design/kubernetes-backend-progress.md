@@ -14,15 +14,15 @@ parity tracked in [the parity matrix](kubernetes-backend-parity.md).
 | 1 — Target and authority types | Type/validation gate passed | Offline constructors, immutable Pod intent, receipts, node observations, cleanup proofs and target normalization |
 | 2 — Store/codec/OCI admission | Store gate passed | Selective v54, atomic allocation, UID receipt transitions, proof-bound release, authenticated PostgreSQL enrollment, gated OCI submission; operational dispatch disabled |
 | 3 — Object lifecycle | Object API gate passed | Bounded TLS/token client, pinned object enrollment, assigned backend create/observe/readiness/UID-delete and restricted live RBAC; application IO and capacity release disabled |
-| 4 — Exec | Pending | Elixir WebSocket client and application helper |
+| 4 — Exec | In progress; transport component qualified | Fixed helper and Elixir v5 transport pass unit/live component checks; guarded adapter exit gate awaits continuous node-history provider |
 | 5 — Files | Pending | Qualified helper staging/collection |
 | 6 — Cleanup/recovery | Pending | NodeEvidence provider, positive cleanup proofs and restart reconciliation |
 | 7 — Public qualification | Pending | Public SmolBox smoke, compatibility evidence and user documentation |
 
 Kubernetes authority types and target normalization are implemented; the backend
 is not operational or enabled yet. Phase 0 demonstrates the upstream runtime and
-resolves its network recipe. The library still needs store, transport, recovery
-and public-path qualification before any execution can be admitted.
+resolves its network recipe. The store and object API gates have passed. Guarded application I/O, recovery
+and public-path qualification remain required before operational admission.
 
 ## Phase 0 findings and approved development recipe
 
@@ -105,7 +105,8 @@ single observed attempt; the reusable provider and durable proof are still pendi
 
 ## Validation so far
 
-The manual Python suite passes 21 tests, including existing smoke evidence
+The manual Python suite passes 26 tests, including fixed-helper framing, argv/env,
+stdin EOF and validation rejection, plus existing smoke evidence
 gates, WebSocket fragmentation/binary/terminal-status failures, edited/foreign
 bridge-rule rejection, policy drift, and archive/rootfs integrity. All four shell
 scripts pass syntax checks and ShellCheck. No CI workflow was changed.
@@ -287,3 +288,64 @@ The PostgreSQL backend/Kubernetes authority suite passed 25 cases after the hash
 fix. Format, warnings-as-errors compilation, zero dependency cycles, strict Credo,
 zero-clone ExDNA, strict-assumption Credence and Dialyzer passed. All live checks
 remain manual; no CI workflow changed. [Exact report](../evidence/kubernetes-backend-phase3-2026-11-13.json).
+
+
+## Phase 4 — Command transport component (phase gate still open)
+
+The Elixir v5 transport and fixed Python helper are implemented. An assigned
+backend accepts only the saved foreground command and ready receipt. Application
+argv/env travel in bounded length-framed stdin; only a constant helper program
+appears in the exec URL. Application stdin is `/dev/null`. A helper acknowledgement
+separates validation diagnostics from application output. The producer stays open
+through completion, avoiding the pinned runtime's stdin CloseIO/FIFO race.
+[Protocol and error semantics](kubernetes-backend-exec-protocol.md).
+
+The transport reuses verified Mint TLS, offers only v5, disables extensions and
+has no fallback/replay. A shared bounded frame parser preserves existing terminal
+behavior. Stream/status decoding preserves arbitrary binary, real exits and
+bounded partial results; missing or conflicting status cannot manufacture success.
+Owner loss, deadline, output limits and synchronous callback stalls close the
+socket. An explicit 401/403 remains a definitive authorization rejection.
+The helper is packaged and embedded at compile time; a fresh production consumer
+with an independent build path qualifies the package boundary.
+
+The live **component** probe used the restricted service account, real SmolVM
+and the exact Phase 0 Python image. It passed silent exit 0, exit 7, exact argv/env,
+application stdin EOF, 768 arbitrary stdout bytes and binary stderr. An induced
+callback stall lost observation before exit; a later independent read found the
+counter incremented once. The uncertain application command was never replayed.
+UID/container checks surrounded each operation. UID-bound deletion then positively
+collected the original PID birth, VM directory, share and SQLite record; no pinned
+runtime KVM holder or preview Pod remained. These facts did not release capacity.
+The idle disposable lab VM was stopped after collection.
+
+Kubernetes 1.35's default authorization gate also requires `create` on `pods/exec`
+for a GET WebSocket upgrade. The initial GET-only role returned 403 before helper
+dispatch. The namespace role now grants get/create on that subresource; no broader
+node, Secret or policy mutation permission was added. See the
+[upstream change](https://github.com/kubernetes/kubernetes/blob/v1.35.0/CHANGELOG/CHANGELOG-1.35.md).
+The first rejected probe was definitive; it was not an uncertain command replay.
+
+**Phase 4 is not complete.** Its live component probe exercised the fixed-helper/
+WebSocket layer directly, not the guarded assigned exec path. The reusable real
+NodeEvidence provider is still absent; unit fixtures do not qualify it. Assigned
+exec checks fresh isolation, complete history and the exact saved incarnation
+before and after application I/O. That gate stays closed. A one-time CRI/SQLite/
+process snapshot cannot establish complete sandbox-attempt history. Bring the
+continuous history prerequisite forward from Phase 6, qualify observer gaps and
+restarts, then repeat the live test through the guarded adapter before closing
+Phase 4. Cleanup/recovery and public qualification remain separate gates.
+
+[Transport component evidence](../evidence/kubernetes-backend-phase4-transport-2026-11-13.json).
+No CI workflow changed; all lab qualification remains manual.
+
+
+Transport checkpoint validation: 2,240 main-project checks passed (42 opt-in
+excluded) with eight concurrent cases. The first 32-case run expired a 300-ms
+client-test budget before TLS dispatch while other tools were active; its
+expected after-dispatch evidence therefore did not apply. The isolated focused
+check passed, followed by the complete eight-case run. After final close/status
+hardening, all 27 focused exec/remote-command/terminal-transport cases passed.
+The 26 Python cases, fresh production package consumer, formatting, warnings-as-
+errors compilation, zero dependency cycles, strict Credo, zero-clone ExDNA,
+strict-assumption Credence and Dialyzer also passed.

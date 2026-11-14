@@ -21,12 +21,10 @@ defmodule SmolBox.Kubernetes.Client do
   defp encode(body), do: Jason.encode(body)
 
   defp perform(operation, method, path, body, sent) do
-    uri = URI.parse(operation.config.api_server)
-
     with {:ok, token} <-
            Credentials.resolve(operation.config.credential_provider, Operation.budget(operation)),
          true <- Operation.remaining(operation) > 0,
-         {:ok, conn} <- connect(operation, uri) do
+         {:ok, conn} <- connect(operation) do
       try do
         send_request(conn, operation, method, path, body, token, sent)
       after
@@ -38,23 +36,26 @@ defmodule SmolBox.Kubernetes.Client do
     end
   end
 
-  defp connect(operation, uri),
-    do:
-      Mint.HTTP.connect(:https, uri.host, uri.port,
-        protocols: [:http1],
-        mode: :passive,
-        hostname: uri.host,
-        max_header_list_size: 16_384,
-        transport_opts: [
-          cacertfile: operation.config.ca_file,
-          verify: :verify_peer,
-          timeout: max(1, Operation.remaining(operation)),
-          send_timeout: min(1000, max(1, Operation.remaining(operation))),
-          send_timeout_close: true,
-          buffer: 16_384,
-          recbuf: 16_384
-        ]
-      )
+  @doc false
+  def connect(operation) do
+    uri = URI.parse(operation.config.api_server)
+
+    Mint.HTTP.connect(:https, uri.host, uri.port,
+      protocols: [:http1],
+      mode: :passive,
+      hostname: uri.host,
+      max_header_list_size: 16_384,
+      transport_opts: [
+        cacertfile: operation.config.ca_file,
+        verify: :verify_peer,
+        timeout: max(1, Operation.remaining(operation)),
+        send_timeout: min(1000, max(1, Operation.remaining(operation))),
+        send_timeout_close: true,
+        buffer: 16_384,
+        recbuf: 16_384
+      ]
+    )
+  end
 
   defp send_request(conn, operation, method, path, body, token, sent) do
     headers = [

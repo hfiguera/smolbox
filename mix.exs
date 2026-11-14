@@ -25,6 +25,7 @@ defmodule SmolBox.MixProject do
         },
         files: [
           "lib",
+          "priv/kubernetes",
           "mix.exs",
           "README.md",
           "CHANGELOG.md",
