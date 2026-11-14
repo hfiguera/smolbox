@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "status": "phase0_contract_checkpoint_not_provider_qualification",
+  "base_commit": "d0bf044ecf32100d717e82b1b938011311d4306c",
+  "legacy_files": {
+    "scripts/kubernetes/node_history.py": "8cf6195deaba11145afea2bd9c5fa5c94b30be04e0fc364764d57d1cefb42c5f",
+    "scripts/kubernetes/node_lifecycle.py": "cc138716a7a22e1d22c33f26cb8188cc5b11937d19fa27acfe643400126d288e",
+    "scripts/kubernetes/node_inspector.py": "ce2a3d2071e1fb051b53c385730483462e16e909684358c6c0c93175beea36b6",
+    "scripts/kubernetes/offline_guard.py": "cac7a26eb375089efd8d45579c9b6fc977f3217415023ec66696c2b32cec1c4e",
+    "scripts/kubernetes/qualify.py": "f340d85be5abbdb115dc561b00aef1da98d8caaf82025eb90959d7eccd3244ba",
+    "scripts/kubernetes/smoke.py": "64575e727f2bad38ce35894bdd3afb7f0d6e33d58f564f056b1e20183d6426ba",
+    "scripts/kubernetes/websocket_probe.py": "eafb1fe6fe4937a3e9d40cdd49e17a7db9d5765b12f2f6cce8768dab62a512c9"
+  },
+  "history_source_basis_sha256": "84342b63582d337ef86e366ce78e67fcc469825c34005de52bcc8d1975d55e65",
+  "lifecycle_source_basis_sha256": "c0f19189e0cedd301064a7dff17b01de2a86856c7750ae061785e81ea8d2c129",
+  "runtime_archive_sha256": "89e098b1f7749c515ed95263f081c469befb0aa10b49ee589ccb3e901090608a",
+  "k3s_binary_sha256": "5cd49f0faca5b2ea4355d4761e7b1445b8aa05cd50e612fd9c370551db49e5e2",
+  "cached_inputs_read_only_verification": {
+    "host": "ssh linux",
+    "verified_at_utc": "2026-11-14",
+    "runtime_archive_sha256": "89e098b1f7749c515ed95263f081c469befb0aa10b49ee589ccb3e901090608a",
+    "k3s_binary_sha256": "5cd49f0faca5b2ea4355d4761e7b1445b8aa05cd50e612fd9c370551db49e5e2",
+    "vm_state": "stopped_by_four_hour_cap",
+    "lab_lock": "available_during_read_only_check"
+  },
+  "new_provider_live_qualified": false,
+  "cached_archive_assets": {
+    "sha256": {
+      "containerd-shim-smolvm-v2": "adc1bde9ba1109d963e28d3fa778688bd9ea2fb4a61dae2ea09fd0b43e222aa0",
+      "smolvm-bin": "feeb3b3627c416dd4196e054e64854e5d648ba3c100767351f212757acddd2e0",
+      "lib/libkrun.so": "b5c9a29eaaec884fade7d422b51a3c777a817f4a6e8f950a0c45adfae84e09db",
+      "lib/libkrunfw.so.5.5.0": "73ab8204df4299bdbd3d7a8ba15a990b497faed2a67a2ae8235801137fb3aaad",
+      "storage-template.ext4.zst": "edd30687d6aa8f1cc6c6a186a6021687ed6d3c89c73ce82351c7a326d190eda5",
+      "overlay-template.ext4.zst": "f927b35aa189210912317e2ac4780305b503dd07b11ea7dcba338bbdc8e8a7d0"
+    },
+    "agent_rootfs": {
+      "sha256": "ddefffec4642f96aca931559e01ca54fcb5381f1f63549b3d1f7be08b94ce8f8",
+      "entries": 791,
+      "scheme": "sorted-posix-path-type-content-v1"
+    }
+  },
+  "cached_archive_matches_qualified_phase0": true
+}

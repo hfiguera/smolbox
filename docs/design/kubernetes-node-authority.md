@@ -4,6 +4,10 @@ Status: implementation specification, November 14, 2026. No new provider is
 implemented or qualified by this document. Delivery branch:
 `feature/kubernetes-node-authority`.
 
+Phase 0 contracts are frozen in the [contract checkpoint](kubernetes-node-authority-contract.md),
+with schemas/vectors and Python/Elixir compatibility checks. Phases 1–5 remain
+pending; see the [implementation progress](kubernetes-node-authority-progress.md).
+
 Follow the [implementation plan](kubernetes-node-authority-implementation-plan.md),
 [backend parity matrix](kubernetes-backend-parity.md), and existing
 [node evidence](kubernetes-node-evidence.md) and
