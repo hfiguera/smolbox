@@ -1,6 +1,6 @@
 # Kubernetes node authority implementation plan
 
-Status: Phases 0–4 implementation gates passed (installation fixtures, pre-enrollment access and simulated-node public runtime/store scope); Phase 5 pending, November 14, 2026.
+Status: Phases 0–5 passed for the explicitly approved fork-shim candidate on the tested single-node setup, November 14, 2026. The two failed official-runtime domains remain stopped and charged; this does not qualify that artifact or general Kubernetes production support. See progress and evidence.
 Branch: `feature/kubernetes-node-authority`.
 Implement the [single-node authority specification](kubernetes-node-authority.md).
 This document creates no qualification claim or operational permission to change
@@ -245,6 +245,72 @@ isolation, authenticated endpoint identity, bounded cancellation or proof-bound
 release cannot be established. The existing lab preview remains available under
 its own approvals. Neither implementation difficulty nor a successful smoke
 authorizes weaker proof, broader capabilities or automatic migration.
+
+## Runtime prerequisite before resuming Phase 5
+
+The user subsequently authorized implementing this prerequisite in the SmolVM
+fork and using it with SmolBox. The selected design has its own lifecycle review:
+ordinary helper `Child` handles retain their waits, the engine's existing per-PID
+VM registry is swept in the background, and the shim leaves unregistered orphan
+adoption to its supervising ancestor. A real framework/kernel regression covers
+each ownership class, including detached VM exits without liveness queries. This
+is an explicit ownership replacement, rather than disabling reaping without
+accounting for VM children and orphans. The exact v1.34.0 backport and new archive
+identity passed all live gates only in a fresh v3 domain. See the
+[prerequisite evidence](../evidence/kubernetes-node-authority-shim-fix-2026-11-14.json).
+
+The two preserved fresh-domain failures are recorded in the
+[partial live report](../evidence/kubernetes-node-authority-phase5-2026-11-14.json).
+The pinned v1.34.0 source invokes synchronous `Command::status()` for rootfs copy,
+mount copy and chmod while its default containerd-shim SIGCHLD handler reaps
+arbitrary children. Competing waits are consistent with the observed ECHILD
+failures; source review does not establish the exact runtime interleaving.
+
+Prepare a separately reviewed runtime prerequisite, suggested branch
+`feature/smolvm-shim-child-waits`, before changing this branch's approved runtime
+pins. Keep the existing version/hash restrictions and disabled provider in place
+until that review and the required artifact qualification are complete. This is
+an unmet dependency, not permission to replace either preserved installation.
+
+1. Reproduce the child-wait conflict in an isolated Linux test environment with
+   the actual default shim reaper enabled. Identify every shim-owned helper wait
+   sharing that reaper, including both copy sites and chmod; do not fix only the
+   error string observed in one campaign.
+2. Give each helper one coordinated exit-status owner. A monitor-based candidate
+   must subscribe to PID exit events **before spawning**, then match the exact
+   child PID; subscribing after spawn loses an immediately exiting child's
+   event. Preserve the real success, nonzero and signal outcomes. An ECHILD
+   error cannot be treated as a successful copy.
+3. Bound waiting and cancellation, release monitor subscriptions on every path,
+   and terminate/reap only the helper's owned child when required. Review
+   interactions with VMM boot and other concurrent child waits. Disabling the
+   global reaper, changing SIGCHLD handling around a single command or accepting
+   missing status is not an approved workaround; those approaches need their
+   own lifecycle review and cannot weaken VM/process cleanup authority.
+4. Add a deterministic Linux regression forcing a fast child's exit to reach
+   the reaper before the waiting task resumes. Cover zero/nonzero exit, signal,
+   spawn failure, cancellation, unrelated child events and subscription cleanup.
+   Exercise concurrent helpers and preserve copied bytes, modes, owners and
+   symlink behavior. A mock shim, sleep or longer timeout does not prove the
+   reaping race is fixed.
+5. Produce a reproducible reviewed artifact and record its source revision,
+   dependency identities and exact runtime/archive/shim hashes. Review the
+   version/hash and source-basis update separately; a patched binary reporting
+   the same version string does not inherit the old artifact's qualification.
+   Never install it on the shared physical host or either enrolled old guest.
+6. After approving that prerequisite, provision a new isolated domain with fresh
+   binding, enrollment, controller directory, keys and store partition. Preserve
+   both old created-only receipts and their charges without migration or release.
+   Repeat the complete Phase 5 installation/access, both-store public and
+   recovery/transport/authority campaigns against the newly approved artifact,
+   including all previously successful cases. Old artifact successes do not
+   qualify a different runtime identity. Maintain the shared lock and outer cap.
+
+The prerequisite may prevent new startup failures; it cannot manufacture either
+missing original ready-incarnation witness. Releasing those existing charges
+would require a separate reviewed recovery/proof design. The prerequisite
+and full live gate passed for the exact candidate setup; explicit selection is
+qualified only for that identity. The original official pins remain unchanged.
 
 ## Follow-up branches
 

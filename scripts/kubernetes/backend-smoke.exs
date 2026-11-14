@@ -175,7 +175,28 @@ defmodule SmolBox.KubernetesBackendSmoke do
 
   defp cancel_running(runtime, {scope, id} = handle) do
     wait_state(runtime, handle, :running, System.monotonic_time(:millisecond) + 120_000)
+
+    if path = System.get_env("SMOLBOX_KUBERNETES_DISPATCH_TRACE"),
+      do: wait_marker(path, System.monotonic_time(:millisecond) + 15_000)
+
     {:ok, _} = SmolBox.cancel(runtime, scope, id)
+  end
+
+  defp wait_marker(path, deadline) do
+    true = System.monotonic_time(:millisecond) < deadline
+
+    observed =
+      path
+      |> File.read!()
+      |> String.split("\n", trim: true)
+      |> Enum.any?(fn line ->
+        match?({:ok, %{"application_marker_observed" => true}}, Jason.decode(line))
+      end)
+
+    unless observed do
+      Process.sleep(50)
+      wait_marker(path, deadline)
+    end
   end
 
   defp wait_state(runtime, {scope, id} = handle, state, deadline) do

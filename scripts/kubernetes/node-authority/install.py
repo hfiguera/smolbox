@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import re
 import secrets
 import signal
 import stat
@@ -36,7 +37,14 @@ def trusted_source(path):
 
 
 class Installation:
-    def __init__(self, source, config, runner=None):
+    def __init__(
+        self, source, config, runner=None, runtime_archive_sha256=ARCHIVE_SHA256
+    ):
+        if not isinstance(runtime_archive_sha256, str) or not re.fullmatch(
+            r"[0-9a-f]{64}", runtime_archive_sha256
+        ):
+            raise InstallationError("explicit approved runtime archive digest required")
+        self.runtime_archive_sha256 = runtime_archive_sha256
         import authority_assets as assets
         import authority_contract as contract
         import authority_history as history
@@ -172,7 +180,8 @@ class Installation:
                 "unapproved source basis",
             )
         self.require(
-            self.config.binding["runtime_identity"]["archive_sha256"] == ARCHIVE_SHA256,
+            self.config.binding["runtime_identity"]["archive_sha256"]
+            == self.runtime_archive_sha256,
             "unqualified runtime archive",
         )
         self.require(
@@ -278,6 +287,11 @@ class Installation:
 
     def repeat(self, programs):
         self.require(
+            self.config.binding["runtime_identity"]["archive_sha256"]
+            == self.runtime_archive_sha256,
+            "unqualified runtime archive",
+        )
+        self.require(
             not os.path.lexists(self.marker)
             and not list(self.engine.STATE.glob("*.part")),
             "partial installation/publication",
@@ -379,7 +393,7 @@ class Installation:
             runtime = self.assets.runtime_identity(
                 self.engine.RUNTIME,
                 self.config.paths["runtime_archive"],
-                ARCHIVE_SHA256,
+                self.runtime_archive_sha256,
                 self.runner.tick,
             )
             self.require(
@@ -421,7 +435,7 @@ class Installation:
                     "active": True,
                     "programs": programs,
                     "runtime": runtime,
-                    "archive_sha256": ARCHIVE_SHA256,
+                    "archive_sha256": self.runtime_archive_sha256,
                     "lifecycle": lifecycle,
                     "enrollment_nonce": fields["enrollment_nonce"],
                     "verifier_manifest_sha256": manifest,
@@ -470,6 +484,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--configuration", required=True, type=Path)
     parser.add_argument(
+        "--runtime-archive-sha256",
+        default=ARCHIVE_SHA256,
+        help="explicit administrator-approved archive; defaults to the pinned release",
+    )
+    parser.add_argument(
         "--verify",
         action="store_true",
         help="validate existing enrollment without installation or repair",
@@ -497,7 +516,9 @@ def main():
     signal.signal(signal.SIGALRM, expired)
     signal.setitimer(signal.ITIMER_REAL, 30)
     os.umask(0o077)
-    installation = Installation(source, config)
+    installation = Installation(
+        source, config, runtime_archive_sha256=args.runtime_archive_sha256
+    )
     print(
         json.dumps(
             installation.verify() if args.verify else installation.install(),

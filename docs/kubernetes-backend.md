@@ -87,10 +87,12 @@ as shown in the checked-in evidence. Obtain live UIDs/boot and policy digest for
 the enrolled lab; old evidence is not a portable cluster configuration.
 
 The example defaults to `"node_provider": "lab"`; omitting the field preserves
-existing lab settings. Standalone node-authority integration is under manual
-qualification and is **not enabled or execution-qualified**. After every gate in
-the [node-authority plan](https://github.com/hfiguera/smolbox/blob/main/docs/design/kubernetes-node-authority-implementation-plan.md)
-passes, explicit `"node_provider": "node_authority"` selects it using a separate
+existing lab settings. Standalone node authority passed all manual gates only
+for the explicitly approved fork-shim candidate documented in the
+[qualification evidence](https://github.com/hfiguera/smolbox/blob/main/docs/evidence/kubernetes-node-authority-shim-fix-2026-11-14.json).
+It retains the fixed single-node preview policy and same-host controller guard;
+it does not qualify the original official archive or other runtime identities.
+Explicit `"node_provider": "node_authority"` selects it using a separate
 `node_authority` object:
 
 ```json
@@ -188,6 +190,14 @@ administrator node evidence. Preserve original UIDs, receipts, ledgers and error
 Do not sweep by labels, force release, reset enrollment, delete audit history or
 silently adopt a replacement Pod. A node reboot, daemon restart or lost mapping
 requires investigation; this preview does not promise automatic repair.
+
+Preparation can fail before an original ready-incarnation witness is saved. A
+created-only receipt remains charged even if its original Pod is deleted and a
+node-wide check reports idle: neither proves the missing original VM/KVM/cgroup
+witness. Preserve the original domain and escalate instead of reconstructing a
+receipt or forcing release. The standalone provider's manual campaign and
+[escalation guide](https://github.com/hfiguera/smolbox/blob/main/scripts/kubernetes/node-authority/README.md#unresolved-authority-and-escalation)
+record this limitation and the observed pinned-runtime startup failure.
 
 ## Manual validation
 

@@ -72,6 +72,32 @@ def prepare(bundle, expected, public_key):
         pass
     else:
         raise RuntimeError("evidence principal already exists")
+    files, programs, manifest = read_bundle(bundle, expected)
+    for path in [PROGRAMS.parent, PROGRAMS, ENTRY.parent]:
+        path.mkdir(mode=0o755, parents=True, exist_ok=True)
+        path.chmod(0o755)
+    for name, data in programs.items():
+        require(Path(name).name == name, "invalid program name")
+        write(PROGRAMS / name, data, 0o755 if name.endswith(".sh") else 0o644)
+    ENTRY.symlink_to(PROGRAMS / "entrypoint.sh")
+    FORCED.symlink_to(PROGRAMS / "ssh-command.sh")
+    prepare_policy(public_key)
+    value = {
+        "version": 1,
+        "scope": "pre_enrollment_access_fixture_only",
+        "archive_sha256": expected,
+        "verifier_manifest_sha256": digest(
+            json.dumps(manifest, sort_keys=True, separators=(",", ":")).encode()
+        ),
+        "node_boot_id": Path("/proc/sys/kernel/random/boot_id").read_text().strip(),
+        "uid": pwd.getpwnam(PRINCIPAL).pw_uid,
+        "programs": manifest["files"],
+    }
+    write(MARKER, json.dumps(value, sort_keys=True).encode(), 0o600)
+    print(json.dumps(value, sort_keys=True))
+
+
+def read_bundle(bundle, expected):
     require(digest(bundle.read_bytes()) == expected, "offline bundle checksum differs")
     files, expanded = {}, 0
     with tarfile.open(bundle) as archive:
@@ -123,14 +149,33 @@ def prepare(bundle, expected, public_key):
         },
         "offline verifier manifest differs",
     )
-    for path in [PROGRAMS.parent, PROGRAMS, ENTRY.parent]:
-        path.mkdir(mode=0o755, parents=True, exist_ok=True)
-        path.chmod(0o755)
-    for name, data in programs.items():
-        require(Path(name).name == name, "invalid program name")
-        write(PROGRAMS / name, data, 0o755 if name.endswith(".sh") else 0o644)
-    ENTRY.symlink_to(PROGRAMS / "entrypoint.sh")
-    FORCED.symlink_to(PROGRAMS / "ssh-command.sh")
+    return files, programs, manifest
+
+
+def prepare_policy(public_key):
+    """Administrator-only access setup; never install or change node authority."""
+    require(
+        ENTRY.is_file() and FORCED.is_file() and PROGRAMS.is_dir(),
+        "fixed installed endpoint required before access policy",
+    )
+    require(
+        not any(
+            os.path.lexists(path)
+            for path in [
+                HOME,
+                ROOT_KEY,
+                HOSTS,
+                Path("/etc/sudoers.d/smolbox-node-authority"),
+            ]
+        ),
+        "access policy exists; no replacement",
+    )
+    try:
+        pwd.getpwnam(PRINCIPAL)
+    except KeyError:
+        pass
+    else:
+        raise RuntimeError("evidence principal already exists")
     run(
         [
             "useradd",
@@ -224,19 +269,6 @@ def prepare(bundle, expected, public_key):
     )
     run(["/usr/sbin/sshd", "-t"])
     run(["systemctl", "reload", "ssh.service"])
-    value = {
-        "version": 1,
-        "scope": "pre_enrollment_access_fixture_only",
-        "archive_sha256": expected,
-        "verifier_manifest_sha256": digest(
-            json.dumps(manifest, sort_keys=True, separators=(",", ":")).encode()
-        ),
-        "node_boot_id": Path("/proc/sys/kernel/random/boot_id").read_text().strip(),
-        "uid": pwd.getpwnam(PRINCIPAL).pw_uid,
-        "programs": manifest["files"],
-    }
-    write(MARKER, json.dumps(value, sort_keys=True).encode(), 0o600)
-    print(json.dumps(value, sort_keys=True))
 
 
 def arguments(key=ROOT_KEY, hosts=HOSTS, defaults_disabled=True, agent="none"):
@@ -471,13 +503,34 @@ def disconnected_endpoint():
         return not original & endpoint_processes()
 
 
-def check(report):
-    marker = json.loads(MARKER.read_text())
+def check(report, enrolled=False):
+    if enrolled:
+        configuration = json.loads(
+            Path("/etc/smolbox-node-authority/enrollment.json").read_text()
+        )
+        state = Path(configuration["paths"]["state_directory"])
+        authority = json.loads((state / "authority-enrollment.json").read_text())
+        require(
+            authority.get("active") is True
+            and not (state / "authority-installing.json").exists(),
+            "complete enrolled authority required",
+        )
+        marker = {
+            "node_boot_id": configuration["binding"]["node_boot_id"],
+            "programs": authority["programs"],
+            "archive_sha256": authority["archive_sha256"],
+            "verifier_manifest_sha256": authority["verifier_manifest_sha256"],
+        }
+    else:
+        marker = json.loads(MARKER.read_text())
+        require(
+            not Path("/var/lib/smolbox-node-authority").exists(),
+            "fixture authority exists",
+        )
     require(
-        not Path("/var/lib/smolbox-node-authority").exists()
-        and marker["node_boot_id"]
+        marker["node_boot_id"]
         == Path("/proc/sys/kernel/random/boot_id").read_text().strip(),
-        "fixture authority/boot changed",
+        "access campaign node boot changed",
     )
     require(
         all(
@@ -490,10 +543,14 @@ def check(report):
         "version": 1,
         "action": "check",
         "nonce": secrets.token_hex(32),
-        "binding_generation": "1" * 64,
-        "authority_generation": "2" * 64,
+        "binding_generation": (
+            configuration["binding"]["generation"] if enrolled else "1" * 64
+        ),
+        "authority_generation": (
+            authority["authority_generation"] if enrolled else "2" * 64
+        ),
         "verifier_manifest_sha256": marker["verifier_manifest_sha256"],
-        "timeout_ms": 3000,
+        "timeout_ms": 5000 if enrolled else 3000,
         "max_response_bytes": 65544,
         "arguments": {},
     }
@@ -526,22 +583,45 @@ def check(report):
         options[key].strip() == value for key, value in required.items()
     )
 
-    def unavailable(value):
+    def accepted_response(value):
         status, output, _ = value
-        if status != 1 or output[:4] != b"SBA1" or len(output) < 8:
+        if status != (0 if enrolled else 1) or output[:4] != b"SBA1" or len(output) < 8:
             return False
         length = struct.unpack(">I", output[4:8])[0]
         if length != len(output) - 8:
             return False
         response = json.loads(output[8:])
+        identity = all(
+            response.get(key) == request[key]
+            for key in (
+                "version",
+                "action",
+                "nonce",
+                "binding_generation",
+                "authority_generation",
+                "verifier_manifest_sha256",
+            )
+        )
+        if enrolled:
+            return (
+                identity
+                and response.get("ok") is True
+                and response.get("error") is None
+                and response.get("value")
+                == {
+                    "complete_history": True,
+                    "idle": True,
+                    "observer_epoch": authority["authority_generation"],
+                }
+            )
         return (
-            response["nonce"] == request["nonce"]
-            and response["ok"] is False
-            and response["value"] is None
-            and response["error"] == "unavailable"
+            identity
+            and response.get("ok") is False
+            and response.get("value") is None
+            and response.get("error") == "unavailable"
         )
 
-    results["literal_fixed_root_entrypoint"] = unavailable(
+    results["literal_fixed_root_entrypoint"] = accepted_response(
         invoke([*arguments(), "127.0.0.1", "smolbox-node-authority-v1"], body)
     )
     for name, command in [
@@ -572,7 +652,7 @@ def check(report):
     results["original_command_environment_injection_denied"] = (
         status != 0 and not output
     )
-    results["interpreter_environment_injection_denied"] = unavailable(
+    results["interpreter_environment_injection_denied"] = accepted_response(
         invoke(
             [
                 *arguments(),
@@ -590,7 +670,7 @@ def check(report):
         [*arguments(key=missing), "127.0.0.1", "smolbox-node-authority-v1"], body
     )
     results["missing_explicit_key_no_default_fallback"] = status == 255 and not output
-    results["missing_key_control_would_fallback_without_none"] = unavailable(
+    results["missing_key_control_would_fallback_without_none"] = accepted_response(
         invoke(
             [
                 *arguments(key=missing, defaults_disabled=False),
@@ -654,7 +734,7 @@ def check(report):
     )
     results["local_forwarding_denied"] = forwarding("local")
     results["dynamic_forwarding_denied"] = forwarding("dynamic")
-    results["agent_forwarding_denied"] = agent_forwarding(body, unavailable)
+    results["agent_forwarding_denied"] = agent_forwarding(body, accepted_response)
     cursor = journal_cursor()
     x11 = invoke(
         [
@@ -671,7 +751,7 @@ def check(report):
         dict(os.environ, DISPLAY=":99"),
     )
     server = journal_after(cursor)
-    results["x11_forwarding_denied"] = unavailable(x11) and (
+    results["x11_forwarding_denied"] = accepted_response(x11) and (
         b"x11 forwarding disabled" in server
         or b"x11 forwarding request failed" in x11[2].lower()
     )
@@ -685,9 +765,15 @@ def check(report):
     )
     value = {
         "version": 1,
-        "scope": "pre_enrollment_access_fixture_only",
+        "scope": (
+            "enrolled_node_access_campaign"
+            if enrolled
+            else "pre_enrollment_access_fixture_only"
+        ),
         "node_boot_id": marker["node_boot_id"],
         "archive_sha256": marker["archive_sha256"],
+        "archive_kind": "runtime" if enrolled else "offline_authority_bundle",
+        "authority_generation": authority["authority_generation"] if enrolled else None,
         "verifier_manifest_sha256": marker["verifier_manifest_sha256"],
         "ssh_version": subprocess.run(
             ["/usr/bin/ssh", "-V"], capture_output=True, text=True
@@ -695,7 +781,8 @@ def check(report):
         "controls": results,
         "all_controls_passed": all(results.values()),
         "not_yet_tested": [],
-        "no_node_enrollment_or_workload_evidence": True,
+        "no_node_enrollment_or_workload_evidence": not enrolled,
+        "no_workload_execution_performed": True,
     }
     report.write_text(json.dumps(value, sort_keys=True, indent=2) + "\n")
     print(json.dumps(value, sort_keys=True))
@@ -712,7 +799,9 @@ def main():
     )
     os.umask(0o077)
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=["prepare", "check"])
+    parser.add_argument(
+        "action", choices=["prepare", "check", "policy", "check-enrolled"]
+    )
     parser.add_argument("--bundle", type=Path)
     parser.add_argument("--archive-sha256")
     parser.add_argument("--public-key", type=Path)
@@ -720,8 +809,10 @@ def main():
     options = parser.parse_args()
     if options.action == "prepare":
         prepare(options.bundle, options.archive_sha256, options.public_key)
+    elif options.action == "policy":
+        prepare_policy(options.public_key)
     else:
-        check(options.report)
+        check(options.report, enrolled=options.action == "check-enrolled")
 
 
 if __name__ == "__main__":

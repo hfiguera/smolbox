@@ -1,7 +1,7 @@
 # Kubernetes single-node authority
 
 Status: implementation specification, November 14, 2026. The standalone provider is
-implemented through Phase 4 but not qualified or enabled for execution. Delivery branch:
+implemented through Phase 5 and qualified only for the explicitly approved fork-shim candidate setup. Delivery branch:
 `feature/kubernetes-node-authority`.
 
 Phase 0 contracts are frozen in the [contract checkpoint](kubernetes-node-authority-contract.md),
@@ -9,7 +9,11 @@ with schemas/vectors and Python/Elixir compatibility checks. Standalone extracti
 and administrator installation have passed their fixture gates; protocol/SDK
 and real pre-enrollment access checks have passed Phase 3. Phase 4 public runtime,
 Memory/PostgreSQL and compatibility gates pass against simulated node evidence.
-Manual live qualification remains Phase 5; see the
+A fresh v3 domain passed all manual live gates with the separately approved
+SmolVM shim fix. The exact candidate identity and qualification bounds are in the
+[fork-fix evidence](../evidence/kubernetes-node-authority-shim-fix-2026-11-14.json).
+The two original official-runtime failures, charges and stopped guests remain
+preserved. Default Lab selection and official runtime pins are unchanged. See the
 [implementation progress](kubernetes-node-authority-progress.md).
 
 Follow the [implementation plan](kubernetes-node-authority-implementation-plan.md),

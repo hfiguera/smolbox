@@ -1,6 +1,6 @@
 # Kubernetes node authority progress
 
-Status: Phases 0–4 implementation gates passed, November 14, 2026. Delivery branch:
+Status: Phases 0–5 passed for the explicitly approved shim candidate on the tested single-node setup, November 14, 2026. The two failed official-runtime domains remain preserved and charged. Delivery branch:
 `feature/kubernetes-node-authority`. Follow the [specification](kubernetes-node-authority.md),
 [frozen contracts](kubernetes-node-authority-contract.md) and
 [implementation plan](kubernetes-node-authority-implementation-plan.md).
@@ -12,7 +12,7 @@ Status: Phases 0–4 implementation gates passed, November 14, 2026. Delivery br
 | 2 — Administrator installation | Passed (fixtures) | Deterministic bundle, explicit root installer and immutable enrollment; live installation remains Phase 5 |
 | 3 — Endpoint and SDK provider | Passed (protocol/access scope) | Strict SDK provider, bounded transport, package constructors and real pre-enrollment SSH controls; execution qualification remains Phase 5 |
 | 4 — Runtime/store integration | Passed (simulated node observations) | Shared public runtime campaign passes Memory/PostgreSQL, existing compatibility and full suites, package consumers and static/docs gates; physical proof remains Phase 5 |
-| 5 — Live qualification | Pending | Existing lab evidence does not qualify this provider |
+| 5 — Live qualification | Passed for the explicit candidate setup | Fresh v3 enrollment/access, 12 public cases, two durable recovery controls, original-authority proofs and final custody passed; the two failed old domains remain charged |
 
 ## Phase 0 — Frozen v1 data and authority contracts
 
@@ -234,3 +234,96 @@ authority changed. The earlier access VM is still stopped with its disk retained
 the shared lock is available. A separate fresh guest, actual enrollment and all
 manual live runtime/access/failure gates remain required in Phase 5. The new
 provider is **not execution-qualified or enabled**.
+
+## Phase 5 — Qualified explicit candidate; original failures preserved
+
+The original v1 and v2 guests reproduced the pinned SmolVM v1.34.0 startup error
+`spawn cp for mount .../etc-hosts: No child processes (os error 10)`. v1 passed
+four public cases and v2 passed nine before their failures. Both failed records
+retain only created receipts: original Pod deletion and node-wide idle checks
+cannot replace their missing ready VM/KVM/cgroup witnesses. Each PostgreSQL
+partition still holds one slot, 2 CPUs, 1536 MiB and 30 GiB. Their stopped guests,
+records, keys, history and controller metadata remain preserved. The
+[Phase 5 report](../evidence/kubernetes-node-authority-phase5-2026-11-14.json)
+retains both failures; nothing on the new authority releases their charges.
+
+The separately authorized SmolVM fork fix `ae6c1046` replaces competing child
+ownership in the shim. Ordinary helper `Child` handles own their waits; a
+background task sweeps the engine's existing per-PID VM registry; unregistered
+orphans remain with the supervising ancestor. The real framework/Linux fixture
+reproduces a successful copy whose exit is stolen by the default reaper. The
+unpatched configuration fails deterministically; the fixed configuration passes
+helper success/nonzero/signal/spawn/cancellation/concurrency and copy-metadata
+checks, detached VM reaping without liveness queries, and orphan ownership.
+Ten shim unit tests and two existing engine reaper/signal tests also pass.
+
+The exact v1.34.0 backport is `b64d2ac8`. Its reviewed shim replaces exactly one
+member of the official archive; the other 935 members retain their content and
+metadata. Two archive assemblies are byte-identical; the compiled shim was not
+independently built twice. The candidate has its own archive/shim hashes and
+**does not inherit official artifact qualification**. The default official pins,
+shared physical-host runtime and both old enrolled installations are unchanged.
+The [fork-fix evidence](../evidence/kubernetes-node-authority-shim-fix-2026-11-14.json)
+records exact source/toolchain/asset identities and the actual installed bundles.
+
+A fresh v3 domain ran under the original shared lock and four-hour/resource caps,
+with new binding, keys, controller directory and PostgreSQL partition. Positive
+empty installation and read-only repeated verification passed, followed by 30
+restricted server controls, eight Mac SDK controls and verified TLS/API preflight.
+No local Docker, local SmolVM SDK or lab wrapper participated in SDK execution.
+
+All 12 public cases passed on the candidate: both-store binary input/read-back/
+output with real exit 7; Memory silent caps 1/4096 and PostgreSQL silent cap 4096;
+both-store cancellation after an actual application marker; Memory overflow;
+and both-store lost-create and lost-status responses. Each trace records one
+create and one application request, except lost-create with zero application
+requests. Original-UID version-3 proof was persisted while the reservation was
+held, before zero usage. Cleanup often needed the existing delayed read-only
+proof retry after its mutation budget; no budget/deadline was expanded.
+
+The durable collection control preserved exit 7, the exact artifact, original Pod
+UID and deadlines across positive original-owner death. A paused owner beyond its
+five-second lease was refused takeover. Initial and recovered publication each
+outlasted the lease with actual renewal events. Killing an observation caller
+while the endpoint waited on the original lock ended that endpoint in 596 ms,
+without changing the original VMM births or KVM descriptors. A second execution
+remained accepted without reservation and was cancelled while queued.
+
+The authority-retention control preserved the real exit/artifact and charge
+under synthetic unavailable evidence and separate wrong-manifest/generation
+controllers. Restored original approvals completed cleanup and release. Its
+private harness initially expected exactly one DELETE; independent trace and
+persisted-record audit confirmed two safe deletes guarded by the same original
+UID, unchanged original cleanup deadline, one create and one application request.
+The failed assertion is retained and explicitly reported; no application was
+rerun to correct the harness. Both recovery cases persisted v3 proof before
+release and ended with zero usage.
+
+Four labeled counterfactual controls rejected changed boot observation, saved
+daemon birth, sandbox mapping and an owned-directory fixture. They changed only
+process-local inputs/a separate fixture and produced no release proof; installed
+configuration/enrollment/ledger stayed unchanged. These are not claims of actual
+node or daemon failure. Final custody found 14 runtime attempts, complete history
+at watermark 70, idle node and unchanged exact installation approvals.
+
+The v3 guest is synced/stopped, all owned proxies/controllers/tunnel are stopped
+and the shared lock is available. All four pre-existing disks are byte-identical.
+Read-only adapter fetches match both complete frozen failed records and their
+retained charges. No history reset, receipt migration, forced release, enrolled
+runtime/verifier replacement or CI workflow change occurred.
+
+Qualification is limited to the exact candidate hashes, Linux x86_64, K3s
+v1.35.10+k3s1/containerd 2.2.10-k3s1, approved Python image, fixed resources and
+same-host controller guard. Explicit standalone selection is now supported for
+that setup; the default remains Lab. General Kubernetes production support,
+distributed fencing, multi-node operation and HTTP/Embedded parity remain future
+work. Releasing either old created-only charge needs a separate reviewed proof
+and recovery design.
+
+Local validation retains the 2,364-check SDK suite (42 excluded) and 335 reference
+PostgreSQL tests (29 excluded) from this Phase 5 snapshot; no SDK/core source was
+changed by the shim prerequisite. The updated manual tools pass 181 Python tests,
+23 focused Elixir tests, strict Credo/Credence, zero-clone ExDNA and formatting.
+Both package dependency lanes and documentation checks are audited separately
+against the final source snapshot. The PostgreSQL full suite used a separate
+database so its DDL controls could not alter retained live partitions.

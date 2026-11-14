@@ -1,6 +1,6 @@
 # Standalone node authority administrator tooling
 
-This tooling is manual. It does not provision a node, install an SSH key, change
+The offline builder and installer are manual. They do not provision a node, install an SSH key, change
 sshd/sudo configuration, mutate an offline guard, replace the node runtime, reset
 history or upgrade an existing domain. Follow the
 [design](../../../docs/design/kubernetes-node-authority.md),
@@ -162,9 +162,10 @@ without opening a connection, reading a credential or installing anything:
 ```
 
 These example paths and connection fields must be replaced with administrator
-approvals. The provider is not yet live-qualified for execution. The existing
-example/default selection remains `LabNodeEvidence`; public runtime enablement
-waits for the remaining integration and live qualification gates.
+approvals. The provider is live-qualified only for the exact fork-shim candidate
+setup recorded in the versioned evidence. The example/default selection remains
+`LabNodeEvidence`; standalone use requires explicit candidate and installation
+approvals. The original official archive does not inherit that qualification.
 
 Host accepts an ASCII DNS name or IP literal (IPv6 without brackets); port and
 user are separate required fields. Paths are absolute ASCII paths using letters,
@@ -250,3 +251,213 @@ the server report before syncing and stopping this guest; verify the shared lock
 is released. No valid execution/capture/cleanup proof can be claimed from this
 campaign. Repeat effective access checks on the final enrolled installation in
 Phase 5.
+
+## Manual enrolled-node campaign preparation
+
+`qualification.py` and `enrollment.exs` are repository-only administrator tools
+for the separate fresh `node-authority-qualification-v1` guest. They do not
+qualify or enable the provider. Prepare all tools and inputs before starting the
+guest's four-hour lifetime. Preserve old disks and record their checksums; never
+restart an enrolled domain to renew that lifetime.
+
+Install the reviewed pinned K3s/SmolVM and preview guard inside the fresh guest
+using the existing administrator scripts. Do **not** run
+`install-node-history.sh`: that would enroll the separate legacy authority.
+Copy the reviewed `access.py` and `qualification.py` into a root-controlled tools
+directory. `qualification.py stage` requires no existing runtime database,
+standalone authority or legacy enrollment. With an explicitly approved bundle it
+initializes the runtime's empty base schema, provisions separate observation and
+controller credentials, and writes redacted object/asset metadata under
+`/root/node-authority-qualification`. It installs no evidence history.
+
+Transfer only that metadata to the private Mac campaign directory. Run
+`enrollment.exs` with `SMOLBOX_NODE_AUTHORITY_QUALIFICATION` naming that directory
+to construct `binding.json` through the SDK's canonical binding and policy code.
+Transfer the binding back to the fixed guest inputs directory and run
+`qualification.py configuration`. Review the resulting immutable configuration
+and exact hashes before invoking the offline installer separately. Positive
+empty enrollment checks remain mandatory; preparation is not their substitute.
+
+On the controller host, create its new private controller directory with mode
+0700 before starting a runtime. The controller guard never creates or resets
+that directory. Preserve it, all store records, and the encryption/fingerprint
+keys throughout the campaign. For a distinct fresh domain, explicitly choose
+new target/cluster IDs and a new PostgreSQL partition with the campaign's trusted
+`SMOLBOX_AUTHORITY_TARGET_ID`, `SMOLBOX_AUTHORITY_CLUSTER_ID` and
+`SMOLBOX_AUTHORITY_PARTITION` inputs. This never migrates or releases records from
+another domain. Keep every unresolved original domain and its charges preserved.
+
+After actual installation, `access.py policy --public-key <approved-public-key>`
+creates the restricted principal and policy without changing the installed
+authority. `access.py check-enrolled --report <new-private-report>` repeats the
+real SSH controls, now requiring authenticated positive idle evidence from the
+installed authority. The root-local counterfactual key is an access-test asset,
+never an SDK credential. The original pre-enrollment fixture actions remain
+separate and cannot be used to install over this domain.
+
+The manual TLS fault proxy supports `--mode observe` and an explicit reviewed
+`--helper-sha256`. Its bounded passive parser records only `exec`, `upload` or
+`download`, discards command/environment/file bytes, and reports unclassifiable
+requests rather than inventing a count. Fault modes retain their explicit lost
+response/replacement controls. They simulate transport/API observations and
+must be labeled separately from real node events.
+
+Following the complete public Memory/PostgreSQL campaign, run
+`qualification.py custody --report <new-private-report>` for an original-authority
+positive empty/history check. It advances only the verifier's evidence ledger
+and emits hashes/counts rather than raw runtime records. Preserve installation,
+access, workload, failure and final custody reports before syncing/stopping the
+guest. Every live gate in the implementation plan is still required.
+
+## Public execution and recovery controls
+
+`campaign.py` runs serial binary, silent-output, cancellation, overflow and lost
+create/status cases through the public runtime. It uses `campaign_settings.exs`
+and the actual Memory or reference PostgreSQL adapter, wrapped by
+`campaign_store.exs` for observation. The wrapper delegates all operations and
+asserts that the matching version-3 proof is already persisted while the original
+reservation is held before calling the adapter's guarded release. Reports and
+traces refuse replacement; a failed case stops the campaign without retrying its
+application or preparing another domain.
+
+```sh
+SMOLBOX_AUTHORITY_PARTITION=<NEW_APPROVED_PARTITION> \
+  python3 -B scripts/kubernetes/node-authority/campaign.py \
+  --directory <PRIVATE_ENROLLED_CONTROLLER_DIRECTORY>
+```
+
+The private directory contains the reviewed settings, approvals, explicit node
+key/pin, separate controller and artifact directories, and proxy TLS assets. Use
+a distinct CA subject and a signed localhost server leaf with serverAuth and
+localhost/loopback subject alternatives. The API proxy verifies the node CA;
+the SDK verifies the proxy CA. Verify TLS and a read-only API request before
+accepting any execution. A CA certificate used as its own server leaf is not a
+portable replacement for that chain.
+
+`recovery-campaign.exs` supplies manual `hold`, `resume`, `resume-held`, `standby`,
+`inspect` and `probe` actions, each followed by an execution ID. Run it from the reference
+durable host with the same approved partition, keys, controller directory and
+settings used by the original controller. Set `SMOLBOX_AUTHORITY_STORE=postgresql`
+and `SMOLBOX_AUTHORITY_PROFILE=kubernetes-preview-collection`; the latter selects
+an explicit 120-second collection budget while retaining the fixed preview
+resources. Keep the verified trace proxy alive throughout the case.
+
+The `hold` action submits one binary execution with real exit 7 and parks artifact
+publication for at most 90 seconds. Its private `publisher.json` and
+`boundary.json` identify the actual owner PID, original Pod/process births,
+deadlines, retained reservation and a second execution cancelled while queued.
+Observe lease renewals beyond the five-second worker lease before advancing.
+Never infer renewal from a healthy process alone.
+
+For the collection-restart control, pause that original PID beyond its lease,
+then run `standby` and require refusal with the original charge retained. Kill
+only the identified original controller, wait for its exit, and run `resume` with
+the same execution ID. Resume performs no submit. Require the original exit,
+deadlines and output hash, one traced application request, original-UID deletion,
+persisted v3 proof and zero final usage. Download retries may occur; application
+replay may not. Cleanup may repeat a DELETE guarded by the same original UID
+within its persisted mutation deadline. Count creates and application requests
+separately from these safe disposal retries; require every DELETE to name the
+original UID and preserve the original cleanup deadline.
+
+Use `resume-held` for the collection-restart check. It submits no work and parks
+the recovered publication in a new `recovery-publication` gate under the original
+execution's directory. Observe renewed worker leases after that publication has
+exceeded the five-second lease, then create its `publish.allow`. Require the
+original collection deadline, exit and VM/Pod identity to survive this interval.
+This distinguishes recovery publication from the first controller's collection.
+
+`observation_lock.py` is a separate root administrator tool for the dedicated
+guest. It holds only the **existing** authority lock until stdin EOF, with a
+30-second hard cap. It never creates, removes or repairs authority files. While
+it holds that lock, start `probe`, observe the original endpoint birth with
+`--inspect`, and kill the probe's identified controller PID. Require bounded
+original endpoint exit and unchanged original VMM births/KVM descriptors, then
+close the operator's lock channel. The inspection output excludes command and
+file payloads. This control interrupts a real read-only observation without
+killing a workload or changing its deadline.
+
+For the authority-retention control, the optional trusted `ssh_executable` can
+point to a private copy of `negative_ssh.py` with sibling `evidence-fault.json`.
+Mode `real` execs the normal SSH binary unchanged; mode `unavailable` produces
+only a matched synthetic rejection. Select it with
+`SMOLBOX_AUTHORITY_FAULT_SSH`. After publication is parked, switch to unavailable
+and create `publish.allow` in that execution's gate directory. Require the real
+exit and published artifact to survive while cleanup remains unproven and
+capacity held. After positive original-owner death, return to real SSH and test
+separate controllers with `SMOLBOX_AUTHORITY_BAD_APPROVAL=manifest` and
+`generation`; each must retain the charge. Stop each identified controller before
+the next. Finally restore the original approvals and resume the original record.
+These are explicitly synthetic availability/approval controls, not evidence of a
+real node failure, and cannot produce positive physical proof.
+
+Preserve every failed observation, original record and active process identity
+before deciding the next action. Never change an enrolled verifier, substitute a
+global idle check for an original receipt, or force release to finish a campaign.
+
+## Explicit fork-runtime candidate validation
+
+The user-authorized shim fix is developed separately in `hfiguera/smolvm` on
+`feature/smolvm-shim-child-waits`. Its Linux regression boots the real
+containerd-shim framework and deterministically reproduces an exit stolen from
+a successful `cp`. The selected integration uses the engine's existing per-PID
+VM reaper, keeps ordinary helpers owned by their `Child` handles and leaves
+unregistered orphan adoption to the supervising ancestor. The real framework
+checks cover helper exits/signals/concurrency/cancellation, registered VM exits
+without a liveness query and orphan cleanup. Their task-service stub supplies
+no KVM or public-execution qualification evidence.
+
+For the SmolBox candidate, backport the same change to the exact v1.34.0 source.
+`candidate_runtime.py` accepts the checksum-pinned original archive, the reviewed
+Linux x86_64 shim digest and exact backport/upstream-fix revisions. It produces a
+new deterministic archive replacing only `containerd-shim-smolvm-v2`; all other
+original member content and metadata remain preserved. It refuses unapproved
+inputs, another architecture and existing output. The archive is labeled
+**candidate only**, with a new approved archive and shim identity. It is not the
+official v1.34.0 artifact and does not inherit its qualification.
+
+Run `qualification.py stage` on a **fresh guest only**, passing the explicit
+`--runtime-archive-sha256` from that candidate's reviewed report. Without this
+option the original runtime pin remains the default. Pass that same approval to
+the separately reviewed offline `install.py` invocation, including `--verify`.
+An override cannot change the archive recorded in the immutable binding; a
+mismatch refuses installation or verification. It does not qualify the candidate.
+The positive-empty checks,
+restricted access, exact installed asset verification and immutable enrollment
+are unchanged. Never replace an enrolled verifier/runtime, migrate an old receipt
+or release an old charge using the candidate. Repeat the complete public
+Memory/PostgreSQL and recovery/access/transport/authority campaign under the
+shared lock and four-hour cap before claiming the candidate setup is qualified.
+
+## Unresolved authority and escalation
+
+Cleanup can remain charged after the mutation deadline and later complete from
+a fresh bounded read-only proof. Preserve that distinction in reports: a delayed
+positive proof is not immediate cleanup, and increasing an observation grant
+outside the runtime does not change the runtime's original budgets or deadlines.
+
+A preparation failure may leave only a created receipt, without the original
+ready VM/KVM/cgroup witness. Deleting its original Pod or obtaining a complete
+node-wide idle/history check cannot replace that missing witness. Both fresh live
+campaigns observed this after the pinned SmolVM runtime reported `No child
+processes` while copying an etc-hosts mount. Their unresolved PostgreSQL charges
+and stopped guests are preserved in the versioned Phase 5 evidence. No runtime fix or
+new release authority is inferred from successful work on another fresh domain.
+
+Escalation preserves original store records and encryption/fingerprint keys,
+controller metadata, Pod UID/receipt, installed programs/configuration,
+history/ledger, node events and guest disk. Stop admission and investigate the
+recorded runtime failure or missing witness. Any repair requiring different
+physical proof, durable fields or ownership semantics needs its own reviewed
+versioned design. Do not delete evidence, reconstruct a ready receipt from a
+global inventory or force release. A separate new installation needs a fresh
+guest/domain, positive-empty baseline, binding, controller directory, keys and
+store partition; it cannot adopt or clear the old domain.
+
+History is bounded and cannot be compacted or rotated in this release. Node
+reboot, daemon restart, lost continuity or ambiguous interrupted publication
+stops authority. There is no supported active-domain verifier upgrade or storage
+rollback. Keep the exact enrolled bundle and approval descriptor available for
+inspection; replacing them with older or newer files cannot restore an old
+epoch. Archive the unresolved domain and design recovery separately rather than
+reinstalling over it.

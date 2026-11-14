@@ -261,6 +261,50 @@ class InstallationTest(unittest.TestCase):
                 [(enrollment["epoch"],)],
             )
 
+    def test_explicit_candidate_pin_must_match_binding_and_is_preserved(self):
+        candidate = "a" * 64
+        self.installation.runtime_archive_sha256 = candidate
+        prior = self.files()
+        with self.assertRaisesRegex(RuntimeError, "unqualified runtime archive"):
+            self.installation.install()
+        self.assertEqual(
+            {
+                key: value
+                for key, value in self.files().items()
+                if key != "install.lock"
+            },
+            prior,
+        )
+        self.assertFalse(self.engine.STATE.exists())
+        data = self.installation.config.as_dict()
+        data["binding"]["runtime_identity"]["archive_sha256"] = candidate
+        self.installation.config = Configuration.from_dict(data)
+        self.engine.config = self.installation.config
+        self.engine.binding = self.installation.config.binding
+        approval = self.installation.install()
+        self.assertEqual(
+            self.engine.read_state(self.engine.ENROLLMENT)["archive_sha256"], candidate
+        )
+        self.assertEqual(assets.runtime_identity.call_args.args[2], candidate)
+        prior = self.files()
+        self.assertEqual(self.installation.verify(), approval)
+        self.assertEqual(self.files(), prior)
+        self.installation.runtime_archive_sha256 = installer.ARCHIVE_SHA256
+        with self.assertRaisesRegex(RuntimeError, "unqualified runtime archive"):
+            self.installation.verify()
+        self.assertEqual(self.files(), prior)
+
+    def test_invalid_explicit_archive_approval_is_rejected(self):
+        for value in (None, "", "A" * 64, "a" * 63, "a" * 65, "a" * 64 + "\n"):
+            with self.subTest(value=value), self.assertRaisesRegex(
+                RuntimeError, "digest required"
+            ):
+                installer.Installation(
+                    self.installation.source,
+                    self.installation.config,
+                    runtime_archive_sha256=value,
+                )
+
     def test_preexisting_history_rows_or_creation_reservations_never_get_reenrolled(
         self,
     ):
