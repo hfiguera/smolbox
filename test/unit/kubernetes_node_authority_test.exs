@@ -126,7 +126,7 @@ defmodule SmolBox.KubernetesNodeAuthorityTest do
     assert Enum.take(wire["argv"], 3) == ["-F", "/dev/null", "-T"]
     assert ("UserKnownHostsFile=" <> c.context.known_hosts_file) in wire["argv"]
 
-    assert Enum.take(wire["argv"], -9) ==
+    assert wire["argv"] |> Enum.reverse() |> Enum.take(9) ==
              [
                "-l",
                c.context.ssh_user,
@@ -138,6 +138,7 @@ defmodule SmolBox.KubernetesNodeAuthorityTest do
                c.context.ssh_host,
                "smolbox-node-authority-v1"
              ]
+             |> Enum.reverse()
   end
 
   test "every invocation has a new nonce and a recorded prior response is rejected", c do
