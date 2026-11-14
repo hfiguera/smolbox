@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+- Resume Kubernetes recovery collection in a supervised task while health probes
+  continue renewing the worker lease. Keep admission fenced until reconciliation
+  finishes, and retain the original collection deadline and cleanup authority.
+- Preserve Kubernetes control-traffic headroom for executions with small output
+  limits. Keep the configured aggregate transport budget separate from the
+  combined stdout/stderr cap.
+- Keep valid Kubernetes executions queued while the single node slot is busy.
+  Preserve operational health errors instead of treating them as unsupported policy.
+- Reconcile cancelled or expired ready Kubernetes executions before requiring
+  live readiness, including cancellation between startup-scan pages. Keep capacity
+  charged until the original incarnation's cleanup proof is persisted.
+- Add an opt-in single-node Kubernetes development preview for disposable OCI
+  executions, binary commands/files and artifact collection. Preserve uncertain
+  outcomes without replay; require original-UID deletion and version-3 node proof
+  before releasing capacity. Support same-host controller restart through complete
+  authenticated startup scans and persistent process-birth ownership metadata.
+- Add manual Memory/PostgreSQL public smoke tools and scoped SmolVM/K3s evidence.
+  Keep Kubernetes lab/Python checks manual and leave CI workflows unchanged.
+- Add selective codec v54 and reference PostgreSQL Kubernetes enrollment. Upgrade
+  shared readers/writers and apply the example migration before enabling this
+  backend. Existing HTTP/Embedded encodings and fingerprints remain compatible.
+  [Preview setup and limits](docs/kubernetes-backend.md)
+
 ## 0.6.0
 
 Held branches can receive per-child environment values, opt-in static egress,

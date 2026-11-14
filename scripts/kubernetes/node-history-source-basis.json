@@ -1,0 +1,67 @@
+{
+  "release_tag": "v1.34.0",
+  "release_commit": "d77eaf1c6eeff16bc8c258613746033e9bf567ca",
+  "reference_commit": "f9e93d8ffe2215130cc81de1cec365c92c46a869",
+  "files": {
+    "src/db.rs": {
+      "release_sha256": "6ad58e8121f90e9ade5b081f81ef414a1600420b97bc36e5ffa8fb268c7114f8",
+      "reference_sha256": "6ad58e8121f90e9ade5b081f81ef414a1600420b97bc36e5ffa8fb268c7114f8",
+      "identical": true
+    },
+    "src/embedded/control.rs": {
+      "release_sha256": "91f1a20ada6bc59cee28dd54005a2a523adb0c6bd5d8243b06c873a6de332cad",
+      "reference_sha256": "91f1a20ada6bc59cee28dd54005a2a523adb0c6bd5d8243b06c873a6de332cad",
+      "identical": true
+    },
+    "crates/smolvm-shim/src/engine.rs": {
+      "release_sha256": "82757415903b1b451185eff93d6880f415d9cdf862a82461fd7a60ae1c4bce55",
+      "reference_sha256": "82757415903b1b451185eff93d6880f415d9cdf862a82461fd7a60ae1c4bce55",
+      "identical": true
+    },
+    "src/agent/manager.rs": {
+      "release_sha256": "13484e3afea1bbb2dcf8c15a5a5d88da37b9a738d284b6caf474733d58a7237b",
+      "reference_sha256": "6b1881099e3fe5c2b93fc1ebf42b1623f27f84187ec4f314e7abebb8c1a05f86",
+      "identical": false
+    },
+    "src/process.rs": {
+      "release_sha256": "ff1495ea8a06012c031f7e4933cd2991ddf7004800f558ef6ce81cf07ea8ae05",
+      "reference_sha256": "788ab70312eddc6bd50076932e41a89d12318ec89b85fb927fd5762100c9c219",
+      "identical": false
+    },
+    "crates/smolvm-agent/src/main.rs": {
+      "release_sha256": "6423122422cc7306b83d3a41160d01a2fe3e5d3f70501c26443c9d594e6fe5d9",
+      "reference_sha256": "b075766e02916330a2cc0867277f5424e728d2e5d37624421a1969a90b284e5f",
+      "identical": false
+    }
+  },
+  "reviewed_identical_regions": {
+    "src/process.rs:#[cfg(target_os = \"linux\")]\npub fn process_start_time(pid: Pid)": {
+      "sha256": "56082139b0b1c2dd9a190a36c28ef43febba258d5ed2710127e54828feb406ab",
+      "identical": true
+    },
+    "src/agent/manager.rs:fn ready_marker_name(&self)": {
+      "sha256": "ce4d4183a113f85230c36bb7bd1124f302e9f76cd0e28941399decfb74e3b11e",
+      "identical": true
+    },
+    "src/agent/manager.rs:fn ready_marker_path(&self)": {
+      "sha256": "b2e27eda42b2eee8a549a2e67f82d76e85760d8e30f6188e249333b801993ed8",
+      "identical": true
+    },
+    "src/agent/manager.rs:fn clear_previous_run_files(&self)": {
+      "sha256": "ecf35b8a11f6e040b29b3f7d83f8352ff05fc649a23587b200f741cffad7ef64",
+      "identical": true
+    },
+    "crates/smolvm-agent/src/main.rs:fn signal_ready_to_host()": {
+      "sha256": "eb7283ad95602482383bc8536302124e4b008abaa289702034e508f9e7b44893",
+      "identical": true
+    }
+  },
+  "contract": [
+    "Shim creates a persistent runtime-managed VM record named by sandbox ID before starting the VM.",
+    "VM inserts, upsert updates and deletes use the same SQLite vms table; journal triggers share those transactions.",
+    "Persisted Linux PID start time is /proc stat field 22 in clock ticks, not wall-clock seconds.",
+    "Boot argv is the installed shim executable, _boot-vm and the VM directory boot-config.json path.",
+    "The engine pre-creates a per-VM readiness marker in shared rootfs. Doorbell success can leave it empty. Only exact, regular, single-link, zero-byte markers bound to journaled sandbox IDs are runtime bookkeeping.",
+    "Node inspection does not call machine status/start/stop/delete. Release manager observation can create a VM directory; the later reference changes that behavior."
+  ]
+}

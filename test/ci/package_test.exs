@@ -276,7 +276,7 @@ defmodule SmolBox.CI.PackageTest do
     on_exit(fn -> File.rm_rf!(root) end)
 
     names =
-      ~w(mix.exs README.md CHANGELOG.md LICENSE lib/smolbox.ex lib/smolbox/runtime.ex docs/notebooks/getting-started.livemd docs/images-and-registry-artifacts.md docs/images-and-registry-artifacts-validation.md docs/provisioning-performance.md docs/upgrading-to-0.3.0.md docs/upgrading-to-0.4.3.md docs/upgrading.md docs/upgrading-within-0.1.x.md docs/supported-platforms.md docs/testing.md docs/embedded-port.md docs/embedded-quickstart.md examples/embedded_port/scripts/quickstart.exs docs/network-access-validation.md docs/worker-measurements-validation.md docs/worker-draining-validation.md)
+      ~w(mix.exs README.md CHANGELOG.md LICENSE lib/smolbox.ex lib/smolbox/runtime.ex priv/kubernetes/guest_helper_v1.py priv/kubernetes/guest_loader_v1.py priv/kubernetes/controller_guard_v1.py docs/notebooks/getting-started.livemd docs/images-and-registry-artifacts.md docs/images-and-registry-artifacts-validation.md docs/provisioning-performance.md docs/upgrading-to-0.3.0.md docs/upgrading-to-0.4.3.md docs/upgrading.md docs/upgrading-within-0.1.x.md docs/supported-platforms.md docs/testing.md docs/embedded-port.md docs/kubernetes-backend.md docs/embedded-quickstart.md examples/embedded_port/scripts/quickstart.exs examples/kubernetes_host/settings.exs scripts/kubernetes/backend-smoke.exs docs/network-access-validation.md docs/worker-measurements-validation.md docs/worker-draining-validation.md)
 
     inner = Path.join(root, "contents.tar")
     members = Enum.map(names, &{String.to_charlist(&1), "fixture"})
@@ -301,6 +301,9 @@ defmodule SmolBox.CI.PackageTest do
     assert File.read!(Path.join(output, "docs/provisioning-performance.md")) == "fixture"
     assert File.read!(Path.join(output, "docs/upgrading-to-0.3.0.md")) == "fixture"
     assert File.read!(Path.join(output, "docs/notebooks/getting-started.livemd")) == "fixture"
+    assert File.read!(Path.join(output, "priv/kubernetes/guest_helper_v1.py")) == "fixture"
+    assert File.read!(Path.join(output, "priv/kubernetes/guest_loader_v1.py")) == "fixture"
+    assert File.read!(Path.join(output, "priv/kubernetes/controller_guard_v1.py")) == "fixture"
 
     assert File.read!(Path.join(output, "examples/embedded_port/scripts/quickstart.exs")) ==
              "fixture"

@@ -25,17 +25,26 @@ defmodule SmolBox.Store.BackendBindings do
   def merge(_first, _second), do: :conflict
 
   def record_binding(%{backend_assignment: %Assignment{binding: binding}}), do: binding
+
+  def record_binding(%{backend_assignment: %SmolBox.Kubernetes.Assignment{binding: binding}}),
+    do: binding
+
   def record_binding(%SmolBox.Volume{native_authority: %{binding: binding}}), do: binding
 
   def record_binding(%SmolBox.ManagedMachine{native_mounts: [%{binding: binding} | _]}),
     do: binding
 
-  def record_binding(_record), do: :http
+  def record_binding(%{backend_assignment: nil}), do: :http
+  def record_binding(%SmolBox.Volume{native_authority: nil}), do: :http
+  def record_binding(_record), do: :conflict
 
   def valid?(worker, :http), do: Validation.identifier?(worker)
 
   def valid?(worker, %Binding{} = binding),
     do: Binding.valid?(binding) and binding.target_id == worker
+
+  def valid?(worker, %SmolBox.Kubernetes.Binding{} = binding),
+    do: SmolBox.Kubernetes.Binding.valid?(binding) and binding.target_id == worker
 
   def valid?(_worker, _binding), do: false
 
@@ -45,6 +54,13 @@ defmodule SmolBox.Store.BackendBindings do
   def allocation({worker, name, capacity, %Assignment{} = assignment}, binding) do
     if Assignment.valid?(assignment) and assignment.binding == binding and
          assignment.binding.target_id == worker and assignment.creation["name"] == name,
+       do: {:ok, worker, name, capacity, assignment},
+       else: error(:identity_conflict)
+  end
+
+  def allocation({worker, name, capacity, %SmolBox.Kubernetes.Assignment{} = assignment}, binding) do
+    if SmolBox.Kubernetes.Assignment.valid?(assignment) and assignment.binding == binding and
+         assignment.binding.target_id == worker and assignment.pod_name == name,
        do: {:ok, worker, name, capacity, assignment},
        else: error(:identity_conflict)
   end
@@ -92,6 +108,21 @@ defmodule SmolBox.Store.BackendBindings do
       end)
 
   def available?(_bindings, _worker, :http), do: true
+
+  def available?(bindings, worker, %SmolBox.Kubernetes.Binding{} = binding),
+    do:
+      Enum.all?(bindings, fn {other, existing} ->
+        other == worker or not aliases?(existing, binding)
+      end)
+
   def available?(_bindings, _worker, _invalid), do: false
+
+  def aliases?(%SmolBox.Kubernetes.Binding{} = left, %SmolBox.Kubernetes.Binding{} = right),
+    do:
+      left.cluster_anchor_uid == right.cluster_anchor_uid and
+        (left.namespace_uid == right.namespace_uid or left.node_uid == right.node_uid)
+
+  def aliases?(%Binding{generation: generation}, %Binding{generation: generation}), do: true
+  def aliases?(_, _), do: false
   defp error(category), do: {:error, %Error{category: category, operation: :reservation}}
 end

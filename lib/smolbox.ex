@@ -101,7 +101,7 @@ defmodule SmolBox do
   def submit(runtime, spec) do
     with {:ok, config} <- config(runtime),
          :ok <- ExecutionSpec.validate(spec),
-         :ok <- disposable_command(spec),
+         :ok <- disposable_command(config, spec),
          :ok <- ExecutionSupport.check(config, spec),
          {:ok, fingerprint} <- ExecutionSpec.fingerprint(spec, config.fingerprint_key) do
       case Session.store(config, :fetch, [{spec.scope, spec.id}]) do
@@ -113,19 +113,26 @@ defmodule SmolBox do
     end
   end
 
-  defp disposable_command(%{command: %SmolBox.Terminal.Spec{}}),
+  defp disposable_command(_config, %{command: %SmolBox.Terminal.Spec{}}),
     do: Session.error(:unsupported_capability, :submit)
 
-  defp disposable_command(%{command: %SmolBox.ImagePull{}}),
+  defp disposable_command(_config, %{command: %SmolBox.ImagePull{}}),
     do: Session.error(:unsupported_capability, :submit)
 
-  defp disposable_command(%{command: %{background: true}}),
+  defp disposable_command(_config, %{command: %{background: true}}),
     do: Session.error(:unsupported_capability, :submit)
 
-  defp disposable_command(%{artifact: %{"kind" => kind}}) when kind in ["registry", "oci"],
-    do: Session.error(:unsupported_capability, :submit)
+  defp disposable_command(config, %{artifact: %{"kind" => "oci"}, retention_ms: 0} = spec) do
+    if Enum.any?(config.workers, &Target.supports?(&1, spec)),
+      do: :ok,
+      else: Session.error(:unsupported_capability, :submit)
+  end
 
-  defp disposable_command(_spec), do: :ok
+  defp disposable_command(_config, %{artifact: %{"kind" => kind}})
+       when kind in ["registry", "oci"],
+       do: Session.error(:unsupported_capability, :submit)
+
+  defp disposable_command(_config, _spec), do: :ok
 
   defp accept(config, spec, fingerprint) do
     if Enum.any?(config.workers, &Target.supports?(&1, spec)) do
@@ -353,6 +360,14 @@ defmodule SmolBox do
   limit); an empty filtered page can advance its opaque tuple cursor. `:absent`
   means that receipt-bound inspection observed missing storage; `:unverified`
   means no full receipt is saved. Native observations send no lifecycle mutation.
+
+  Kubernetes pages authenticate one stored assignment, including missing charged
+  resources, and observe the dedicated namespace through a bounded five-second
+  API inventory. `namespace_observations` contains at most 20 redacted API findings;
+  `namespace_count`/`namespace_truncated` describe that bounded inventory. A missing
+  charged assignment is `:unresolved`; an API object without a record is `:foreign`.
+  Its cursor is the opaque assignment cursor, and `foreign_count` is nil. These
+  observations never establish physical cleanup, adopt an object or release capacity.
   """
   @spec audit_worker(runtime(), String.t(), keyword()) :: {:ok, map()} | {:error, Error.t()}
   def audit_worker(runtime, worker_id, options \\ []) do

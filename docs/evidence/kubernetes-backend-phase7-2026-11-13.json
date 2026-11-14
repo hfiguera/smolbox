@@ -1,0 +1,619 @@
+{
+  "schema": 1,
+  "phase": 7,
+  "status": "qualified_single_enrolled_development_preview",
+  "recorded_at_utc": "2026-11-14",
+  "source_base": "93beda4e",
+  "branch": "feature/kubernetes-smoke-lab",
+  "source_sha256": {
+    "examples/kubernetes_host/settings.exs": "f57835cc8f2348d742c37ef4d4e1bc8433c67886db470b2e4bfac5ccf45c8cce",
+    "lib/smolbox.ex": "fad213443552a26a97e707485ee134d7f81b90ec0f33c8c9a049ce4b80ee7adc",
+    "lib/smolbox/kubernetes/assignment.ex": "a8222948c4a32ac763b7a72b25a7791d56c3eceb7d7bcc2c342403cd1dda683b",
+    "lib/smolbox/kubernetes/binding.ex": "240bfe9bbab66b7807c78e19774c38d576bd0a0e428f7ab827325b9b42c6f144",
+    "lib/smolbox/kubernetes/cleanup_proof.ex": "91583a7d6975673741cbd9bdd9b496c0eb9e64ed652bdb3ca926656fe2afad46",
+    "lib/smolbox/kubernetes/identity.ex": "1cd961c5b074094567ade405cf3c2958d66398fbd2f4aecee0f9f3dde5261263",
+    "lib/smolbox/kubernetes/pod.ex": "2d32c7013f70af49bfef8849b3258f257fa02faebc3c0d41401986813c0b0f4d",
+    "lib/smolbox/kubernetes/receipt.ex": "d1076d3d310b5bda0ba2f36297ad430c7c808b6aa4f308b56fdb9724973504da",
+    "scripts/kubernetes/backend-smoke.exs": "d059af59ca34dbfb15f5cbd9393c792287c15a26c4658d056cc559b0f0dfdff4",
+    "scripts/kubernetes/fault_proxy.py": "9c63c545ab0d83c09e7be0fab4bbfe36f0775fdeec194d5b60862b083ff22045",
+    "test/support/kubernetes_peer.ex": "d9fa94a9cf4d7360f848d21c5380a5c495f30a67c54ae887e4a5b46c0fd71aad",
+    "test/unit/kubernetes_api_test.exs": "48d4c8ecd64b7e1ecb9cfd8106ce816861d680d09dd786b5cd96a2b5e9cae10b"
+  },
+  "library_asset_manifest_sha256": "cc69d81d40903565716b15facb29e38138fe7c9a36e36fcdc46e0a991c227eac",
+  "scope": "Public submit/await/fetch/cancel and shared file/cleanup paths on the real single-VM K3s/SmolVM lab. Memory ordinary runs; encrypted reference PostgreSQL for durable recovery. No production or broad parity claim.",
+  "identities": {
+    "binding": {
+      "cluster_anchor_uid": "fd9e93df-bd93-47b6-8c53-8b128457cc39",
+      "cluster_id": "smolbox-k3s",
+      "generation": "f99ced0c0504d16e2813276563adba469ae0ed4f6093245b324ff1fbf2525aa5",
+      "kind": "kubernetes",
+      "namespace": "smolbox-preview",
+      "namespace_uid": "394f98e0-fbbb-4b06-a780-80859d531182",
+      "node_boot_id": "222014dc-c7c1-4856-9eed-a259db59143e",
+      "node_name": "smolbox-k3s",
+      "node_uid": "94b6ea75-e0e1-475b-9f15-6ce12e37cd77",
+      "runtime_class": "smolbox-preview",
+      "runtime_class_uid": "0a888a90-ff87-4ca5-9396-bbdd63d8930a",
+      "runtime_identity": {
+        "archive_sha256": "89e098b1f7749c515ed95263f081c469befb0aa10b49ee589ccb3e901090608a",
+        "containerd_version": "2.2.10-k3s1",
+        "guard_sha256": "cac7a26eb375089efd8d45579c9b6fc977f3217415023ec66696c2b32cec1c4e",
+        "guard_template_sha256": "d0ea5d6a0df4d3cb84055c4e88d831db54d9c162e637aaed7cf9402ae72e938e",
+        "k3s_version": "v1.35.10+k3s1",
+        "kernel_sha256": "73ab8204df4299bdbd3d7a8ba15a990b497faed2a67a2ae8235801137fb3aaad",
+        "libkrun_sha256": "b5c9a29eaaec884fade7d422b51a3c777a817f4a6e8f950a0c45adfae84e09db",
+        "rootfs_sha256": "ddefffec4642f96aca931559e01ca54fcb5381f1f63549b3d1f7be08b94ce8f8",
+        "shim_sha256": "adc1bde9ba1109d963e28d3fa778688bd9ea2fb4a61dae2ea09fd0b43e222aa0",
+        "smolvm_version": "1.34.0"
+      },
+      "runtime_policy_digest": "8fdf1f85f9b90db665b45c757b2a80eee86b05a8a4269462a366dfb1d6be3186",
+      "target_id": "kubernetes-phase3",
+      "version": 1
+    },
+    "node_info_same_verified_boot": {
+      "architecture": "amd64",
+      "bootID": "222014dc-c7c1-4856-9eed-a259db59143e",
+      "containerRuntimeVersion": "containerd://2.2.10-k3s1",
+      "kernelVersion": "6.8.0-138-generic",
+      "kubeProxyVersion": "",
+      "kubeletVersion": "v1.35.10+k3s1",
+      "machineID": "1d6c494136304756a566a8a270781c3f",
+      "operatingSystem": "linux",
+      "osImage": "Ubuntu 24.04.4 LTS",
+      "systemUUID": "1d6c494136304756a566a8a270781c3f"
+    },
+    "helper_sha256": "99cf845ce688b82f5ea12f2daefd8b924024e71f1834e35d71341d976290312b",
+    "loader_sha256": "59868b504e77d7d0860997949dad0e26e83c1e4c53faa5532567080d7d3e655a"
+  },
+  "public_cases": [
+    {
+      "mode": "binary",
+      "state": "completed",
+      "usage": {
+        "slots": 0,
+        "cpus": 0,
+        "memory_mb": 0,
+        "disk_gb": 0
+      },
+      "cleanup": "complete",
+      "execution": [
+        "kubernetes-smoke",
+        "public-memory-binary2"
+      ],
+      "pod_uid": "ea1eddad-63e1-43e8-b134-754f77cb303d",
+      "evidence": "exited",
+      "collection": "complete",
+      "artifacts": [
+        {
+          "destination": "binary-output",
+          "path": "/workspace/output",
+          "sha256": "8f1a936251db3b3d4d5741bae241e19ca879baaebf21e2838eb5512aca79bc94",
+          "size": 4352
+        }
+      ],
+      "result_exit": 7,
+      "cleanup_proof_version": 3,
+      "observer_epoch": "5289f8c3-94e9-4f77-b578-348f4772adbe",
+      "result_stdout_sha256": "f742b965f156c10374bc23aea96e3a8aff8facd6fc079defeaa30219ad86f211",
+      "result_stderr_sha256": "8509b81230019d2ad970d970f791dfbdc8caf54f5c594fcd327cef9feed206c1"
+    },
+    {
+      "mode": "binary",
+      "state": "completed",
+      "usage": {
+        "slots": 0,
+        "cpus": 0,
+        "memory_mb": 0,
+        "disk_gb": 0
+      },
+      "cleanup": "complete",
+      "execution": [
+        "kubernetes-smoke",
+        "public-postgres-binary"
+      ],
+      "artifacts": [
+        {
+          "destination": "binary-output",
+          "path": "/workspace/output",
+          "sha256": "8f1a936251db3b3d4d5741bae241e19ca879baaebf21e2838eb5512aca79bc94",
+          "size": 4352
+        }
+      ],
+      "pod_uid": "d86f1aef-06e0-4935-8115-cbd69ddaceae",
+      "evidence": "exited",
+      "collection": "complete",
+      "observer_epoch": "5289f8c3-94e9-4f77-b578-348f4772adbe",
+      "result_exit": 7,
+      "cleanup_proof_version": 3,
+      "result_stdout_sha256": "f742b965f156c10374bc23aea96e3a8aff8facd6fc079defeaa30219ad86f211",
+      "result_stderr_sha256": "8509b81230019d2ad970d970f791dfbdc8caf54f5c594fcd327cef9feed206c1"
+    },
+    {
+      "mode": "resume",
+      "state": "unknown",
+      "usage": {
+        "slots": 0,
+        "cpus": 0,
+        "memory_mb": 0,
+        "disk_gb": 0
+      },
+      "cleanup": "complete",
+      "artifacts": [],
+      "pod_uid": "6faf3c1a-9a42-4114-a662-daedd8901acc",
+      "execution": [
+        "kubernetes-smoke",
+        "public-postgres-crash"
+      ],
+      "evidence": "termination_confirmed",
+      "result_exit": null,
+      "collection": "pending",
+      "cleanup_proof_version": 3,
+      "observer_epoch": "5289f8c3-94e9-4f77-b578-348f4772adbe",
+      "result_stdout_sha256": null,
+      "result_stderr_sha256": null
+    },
+    {
+      "mode": "cancel",
+      "state": "unknown",
+      "usage": {
+        "slots": 0,
+        "cpus": 0,
+        "memory_mb": 0,
+        "disk_gb": 0
+      },
+      "cleanup": "complete",
+      "artifacts": [],
+      "pod_uid": "b7d38c68-52c8-403d-a14f-59813a894b6c",
+      "execution": [
+        "kubernetes-smoke",
+        "public-postgres-cancel"
+      ],
+      "evidence": "termination_confirmed",
+      "result_exit": null,
+      "collection": "pending",
+      "cleanup_proof_version": 3,
+      "observer_epoch": "5289f8c3-94e9-4f77-b578-348f4772adbe",
+      "result_stdout_sha256": null,
+      "result_stderr_sha256": null
+    },
+    {
+      "mode": "reject",
+      "state": "failed",
+      "usage": {
+        "slots": 0,
+        "cpus": 0,
+        "memory_mb": 0,
+        "disk_gb": 0
+      },
+      "cleanup": "complete",
+      "artifacts": [],
+      "pod_uid": "920bb8c7-5e3a-4baf-b6cb-be7b02df6a88",
+      "execution": [
+        "kubernetes-smoke",
+        "public-lost-create"
+      ],
+      "evidence": "not_dispatched",
+      "result_exit": null,
+      "collection": "pending",
+      "cleanup_proof_version": 3,
+      "observer_epoch": "5289f8c3-94e9-4f77-b578-348f4772adbe",
+      "result_stdout_sha256": null,
+      "result_stderr_sha256": null
+    },
+    {
+      "mode": "lost",
+      "state": "unknown",
+      "usage": {
+        "slots": 0,
+        "cpus": 0,
+        "memory_mb": 0,
+        "disk_gb": 0
+      },
+      "cleanup": "complete",
+      "artifacts": [],
+      "pod_uid": "9a5c32da-be19-4ecf-9760-e064e536441a",
+      "execution": [
+        "kubernetes-smoke",
+        "public-lost-status"
+      ],
+      "evidence": "termination_confirmed",
+      "result_exit": null,
+      "collection": "pending",
+      "cleanup_proof_version": 3,
+      "observer_epoch": "5289f8c3-94e9-4f77-b578-348f4772adbe",
+      "result_stdout_sha256": null,
+      "result_stderr_sha256": null
+    },
+    {
+      "mode": "reject",
+      "state": "failed",
+      "usage": {
+        "slots": 0,
+        "cpus": 0,
+        "memory_mb": 0,
+        "disk_gb": 0
+      },
+      "cleanup": "complete",
+      "artifacts": [],
+      "pod_uid": "5726a053-7b2e-4975-b70e-5c101d8d2a61",
+      "execution": [
+        "kubernetes-smoke",
+        "public-replacement"
+      ],
+      "evidence": "not_dispatched",
+      "result_exit": null,
+      "collection": "pending",
+      "cleanup_proof_version": 3,
+      "observer_epoch": "5289f8c3-94e9-4f77-b578-348f4772adbe",
+      "result_stdout_sha256": null,
+      "result_stderr_sha256": null
+    },
+    {
+      "mode": "overflow",
+      "state": "unknown",
+      "usage": {
+        "slots": 0,
+        "cpus": 0,
+        "memory_mb": 0,
+        "disk_gb": 0
+      },
+      "cleanup": "complete",
+      "artifacts": [],
+      "pod_uid": "e96a5fe0-6989-4bc0-9e01-1c3981cdcfb7",
+      "execution": [
+        "kubernetes-smoke",
+        "public-overflow"
+      ],
+      "evidence": "termination_confirmed",
+      "result_exit": null,
+      "collection": "pending",
+      "cleanup_proof_version": 3,
+      "observer_epoch": "5289f8c3-94e9-4f77-b578-348f4772adbe",
+      "result_stdout_sha256": null,
+      "result_stderr_sha256": null
+    },
+    {
+      "mode": "silent",
+      "state": "completed",
+      "usage": {
+        "slots": 0,
+        "cpus": 0,
+        "memory_mb": 0,
+        "disk_gb": 0
+      },
+      "cleanup": "complete",
+      "pod_uid": "c4a1b971-39d9-4f2b-bfc1-50c57a84e371",
+      "evidence": "exited",
+      "execution": [
+        "kubernetes-smoke",
+        "public-example-silent"
+      ],
+      "artifacts": [],
+      "collection": "complete",
+      "observer_epoch": "5289f8c3-94e9-4f77-b578-348f4772adbe",
+      "result_exit": 0,
+      "cleanup_proof_version": 3,
+      "result_stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "result_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "fault_proxy_controls": {
+    "lost-create": {
+      "post_count": 1,
+      "exec_upgrade_count": 0,
+      "delete_count": 1,
+      "faults": [
+        "lost-create-response"
+      ],
+      "trace_sha256": "0cc8d88410cdb7711eea4fe2a0f35ea611f98b4e75a44327471afbe4ed07b162"
+    },
+    "lost-status": {
+      "post_count": 1,
+      "exec_upgrade_count": 1,
+      "delete_count": 1,
+      "faults": [
+        "lost-exec-status-after-application-marker"
+      ],
+      "trace_sha256": "7f724447c868b91a31e90930cfdbddca70206df9ef65adf5e4d9a675f2f3de59"
+    },
+    "replacement": {
+      "post_count": 1,
+      "exec_upgrade_count": 0,
+      "delete_count": 1,
+      "faults": [
+        "replacement-container-observation"
+      ],
+      "trace_sha256": "7707d9f346da15911d2dc8686f45bf51e7c8fa668fceac748dc6e32a5b1a73bf"
+    }
+  },
+  "controller_fault": {
+    "original_pid": 94761,
+    "original_pod_uid": "6faf3c1a-9a42-4114-a662-daedd8901acc",
+    "original_machine_name": "kubepublic-kumjjwpyfjx3idbc7zfe",
+    "boundary_state": "running",
+    "ledger_before_paused_takeover_sha256": "14c2937c2b460627513b92ebe4f931816092944fa6284e85bd403fe550603f99",
+    "paused": true,
+    "paused_takeover_refused": true,
+    "paused_attempt_preserved_ledger": true,
+    "original_pid_stopped": true,
+    "original_pid_killed": true,
+    "replacement_observed_original_process_death": true,
+    "original_owner_history_preserved": true,
+    "original_uid_preserved": true,
+    "recovered_state": "unknown",
+    "recovered_result_unknown": true,
+    "cleanup_proof_version": 3,
+    "slots_after_release": 0,
+    "scope": "Real durable public running-command restart. No new submit during resume; no direct adapter create/execute/delete. Exact one-exec assertions are separately covered by deterministic recovery tests."
+  },
+  "foreign_and_drain_controls": {
+    "complete_scan_rejected_foreign_inventory": true,
+    "foreign_name": "kubepublic-foreign-control",
+    "foreign_uid": "242b3be4-2b6b-430f-b7b8-43c20b394bea",
+    "foreign_unscheduled": true,
+    "foreign_preserved_by_runtime": true,
+    "inspection_classified_foreign": true,
+    "startup_admission_blocked": true,
+    "admin_deleted_only_original_uid": true,
+    "draining_public_intent_not_reserved_or_created": true,
+    "cancellation_before_dispatch_complete": true,
+    "drain_restored_by_expected_version": true,
+    "node_idle_before_and_after": true,
+    "application_executed": false
+  },
+  "stale_enrollment_controls": {
+    "scope": "Stale approved identities checked against the real API; no live namespace/node/RuntimeClass mutation. Unapproved image is a catalog validation control.",
+    "live_enrollment_checks": [
+      {
+        "result": "identity_conflict",
+        "field": "namespace_uid",
+        "lifecycle_mutation": false
+      },
+      {
+        "result": "identity_conflict",
+        "field": "node_uid",
+        "lifecycle_mutation": false
+      },
+      {
+        "result": "identity_conflict",
+        "field": "node_boot_id",
+        "lifecycle_mutation": false
+      },
+      {
+        "result": "identity_conflict",
+        "field": "runtime_class_uid",
+        "lifecycle_mutation": false
+      },
+      {
+        "result": "identity_conflict",
+        "field": "runtime_policy_digest",
+        "lifecycle_mutation": false
+      }
+    ],
+    "unapproved_source_rejected": true,
+    "actual_namespace_or_daemon_recreated": false
+  },
+  "final_authenticated_corpus_and_node": {
+    "node": {
+      "idle": true,
+      "complete_history": true,
+      "observer_epoch": "5289f8c3-94e9-4f77-b578-348f4772adbe"
+    },
+    "usage": {
+      "slots": 0,
+      "cpus": 0,
+      "disk_gb": 0,
+      "memory_mb": 0
+    },
+    "authenticated_assigned_records": 7,
+    "all_cleanup_complete_with_version3": true,
+    "all_reservations_released": true,
+    "worker_mode": "active",
+    "cases": [
+      {
+        "id": "public-lost-create",
+        "state": "failed",
+        "cleanup": "complete",
+        "evidence": "not_dispatched",
+        "original_pod_uid": "920bb8c7-5e3a-4baf-b6cb-be7b02df6a88",
+        "proof_version": 3
+      },
+      {
+        "id": "public-lost-status",
+        "state": "unknown",
+        "cleanup": "complete",
+        "evidence": "termination_confirmed",
+        "original_pod_uid": "9a5c32da-be19-4ecf-9760-e064e536441a",
+        "proof_version": 3
+      },
+      {
+        "id": "public-overflow",
+        "state": "unknown",
+        "cleanup": "complete",
+        "evidence": "termination_confirmed",
+        "original_pod_uid": "e96a5fe0-6989-4bc0-9e01-1c3981cdcfb7",
+        "proof_version": 3
+      },
+      {
+        "id": "public-postgres-binary",
+        "state": "completed",
+        "cleanup": "complete",
+        "evidence": "exited",
+        "original_pod_uid": "d86f1aef-06e0-4935-8115-cbd69ddaceae",
+        "proof_version": 3
+      },
+      {
+        "id": "public-postgres-cancel",
+        "state": "unknown",
+        "cleanup": "complete",
+        "evidence": "termination_confirmed",
+        "original_pod_uid": "b7d38c68-52c8-403d-a14f-59813a894b6c",
+        "proof_version": 3
+      },
+      {
+        "id": "public-postgres-crash",
+        "state": "unknown",
+        "cleanup": "complete",
+        "evidence": "termination_confirmed",
+        "original_pod_uid": "6faf3c1a-9a42-4114-a662-daedd8901acc",
+        "proof_version": 3
+      },
+      {
+        "id": "public-replacement",
+        "state": "failed",
+        "cleanup": "complete",
+        "evidence": "not_dispatched",
+        "original_pod_uid": "5726a053-7b2e-4975-b70e-5c101d8d2a61",
+        "proof_version": 3
+      }
+    ]
+  },
+  "node_history": {
+    "epoch": "5289f8c3-94e9-4f77-b578-348f4772adbe",
+    "watermark": 120,
+    "watermark_hash": "8a6f143e77488de5d9f994f90a30af389ea3de140c268a78774bab313799dd09",
+    "sandbox_owners": 24,
+    "lifecycle_witnesses": 11,
+    "database_device": 64769,
+    "database_inode": 527331,
+    "programs": {
+      "node_history.py": "8cf6195deaba11145afea2bd9c5fa5c94b30be04e0fc364764d57d1cefb42c5f",
+      "node_inspector.py": "ce2a3d2071e1fb051b53c385730483462e16e909684358c6c0c93175beea36b6",
+      "node_lifecycle.py": "cc138716a7a22e1d22c33f26cb8188cc5b11937d19fa27acfe643400126d288e",
+      "offline_guard.py": "cac7a26eb375089efd8d45579c9b6fc977f3217415023ec66696c2b32cec1c4e",
+      "qualify.py": "f340d85be5abbdb115dc561b00aef1da98d8caaf82025eb90959d7eccd3244ba",
+      "smoke.py": "64575e727f2bad38ce35894bdd3afb7f0d6e33d58f564f056b1e20183d6426ba",
+      "websocket_probe.py": "eafb1fe6fe4937a3e9d40cdd49e17a7db9d5765b12f2f6cce8768dab62a512c9"
+    },
+    "lifecycle_daemons_and_mount": {
+      "daemons": [
+        {
+          "exe_sha256": "92ee3932d286d439e944ac59a3e3deba34c7993913843d419344addae0f83d56",
+          "pid": 696,
+          "service": "k3s",
+          "start_ticks": 573
+        },
+        {
+          "exe_sha256": "92ee3932d286d439e944ac59a3e3deba34c7993913843d419344addae0f83d56",
+          "pid": 865,
+          "service": "containerd",
+          "start_ticks": 791
+        }
+      ],
+      "mount": {
+        "device": 28,
+        "id": 33,
+        "inode": 1
+      }
+    },
+    "ledger_sha256": "754a7d87005219a001aaaecc01995012546b6b6bcb4a187676cbada0d8dafc0e"
+  },
+  "phase_continuity": {
+    "runtime_network_resources": "kubernetes-backend-phase0-2026-11-13.json",
+    "store_codec": "kubernetes-backend-phase2-2026-11-13.json",
+    "restricted_api": "kubernetes-backend-phase3-2026-11-13.json",
+    "guarded_exec": "kubernetes-backend-phase4-2026-11-13.json",
+    "binary_boundaries_corruption_unsafe_paths": "kubernetes-backend-phase5-2026-11-13.json",
+    "version3_cleanup_controller_authority": "kubernetes-backend-phase6-2026-11-13.json"
+  },
+  "validation": {
+    "main_checks_passed": 2298,
+    "main_opt_in_excluded": 42,
+    "postgres_full_checks_passed": 310,
+    "postgres_opt_in_excluded": 29,
+    "current_postgres_kubernetes_contracts": 12,
+    "manual_python_checks": 77,
+    "current_api_recovery_regressions": 26,
+    "docs_warnings_as_errors": true,
+    "formatting": true,
+    "dialyzer": true,
+    "strict_credo": true,
+    "zero_clone_exdna": true,
+    "strict_assumption_credence": true,
+    "dependency_cycles": 0,
+    "manual_shell_scripts": 5
+  },
+  "validation_log_sha256": {
+    "kubernetes-phase7-release-tests.log": "e6d051bec782bf61d0b179a8f6b67d80e885f086eb7cea63f3683719f59991cb",
+    "kubernetes-phase7-postgres-tests.log": "cf3cb205a375055f13d5b28aabc3b503736280d9357d70e1a1aa24b2608a659b",
+    "kubernetes-phase7-release-postgres-kube.log": "e4406ced8db77c8947f4f02390c2110d6350a2d6f7d41561432173ad8388950a",
+    "kubernetes-phase7-python.log": "f079fc219059f9281a411d9d44b58b29150d2c7c0300098463f6ddc734310a19",
+    "kubernetes-phase7-docs-final.log": "2f60e04c64ddd2cdfdefa319c2d6cfe0551ca8724adaba3033760ff71d2bf51c",
+    "kubernetes-phase7-release-format.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "kubernetes-phase7-release-dialyzer.log": "d0eadb38dfe6b3d68ee67c8727460e1fb62a0d50cde84f6d3df654feaf3c1978",
+    "kubernetes-phase7-release-package.log": "12d9360e55fe77294dd95aebde9c4ed41c24f15702378c5f8d4f8ffc8f4e7756",
+    "kubernetes-phase7-final-static-credo.log": "01b8b69be42411ecc1a14c5fddc3ba91565c16786bb7e4e3f9787d7c1943a2ce",
+    "kubernetes-phase7-final-static-dna.log": "591b895f983d3974476d078b9871c07185eb66cb0c72180b9721f5b07c6cf49d",
+    "kubernetes-phase7-final-static-credence.log": "9251a53f1c1282e946cfe4c1285e6fc82767809c5f22561d6fee38ff37998a91",
+    "kubernetes-phase7-final-static-cycles.log": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+    "kubernetes-phase7-final-format.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "kubernetes-phase7-release-docs-final.log": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d"
+  },
+  "package_consumer": {
+    "package_sha256": "230005397c08b3b8f1c1c6f45d76f1026a19af061dc2046a62e535f8882073d1",
+    "platform": "macos",
+    "architecture": "arm64",
+    "toolchain": "Erlang/OTP 29 [erts-17.1.1] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.20.5 (compiled with Erlang/OTP 29)",
+    "runtime_dependencies": [
+      "finch",
+      "hpax",
+      "jason",
+      "mime",
+      "mint",
+      "mint_web_socket",
+      "nimble_options",
+      "nimble_pool",
+      "req",
+      "telemetry"
+    ],
+    "smoke": {
+      "checkpoint": true,
+      "client": true,
+      "guest_files": true,
+      "interactive": true,
+      "legacy_1_14_6_explicit": "1.14.6",
+      "legacy_runtime_explicit": "1.14.1",
+      "managed_branches": true,
+      "managed_checkpoints": true,
+      "managed_exports": true,
+      "network_policy": true,
+      "offline_default": true,
+      "runtime_1_16_0_explicit": "1.16.0",
+      "runtime_default": "1.34.0",
+      "supervisor": true,
+      "unqualified_runtime_rejected": "1.16.2",
+      "versions": {
+        "jason": "1.4.5",
+        "mint": "1.11.0",
+        "mint_web_socket": "1.0.6",
+        "nimble_options": "1.2.0",
+        "req": "0.7.5",
+        "telemetry": "1.4.2"
+      },
+      "without_rust": false,
+      "workload": true
+    },
+    "all_current_library_asset_hashes_match": true,
+    "archive_precedes_final_report_text": true
+  },
+  "important_corrections": [
+    "Real PodList items omit TypeMeta. Normalize absent kind/apiVersion from the typed list; reject explicit wrong/null types. Default peers now match real K3s.",
+    "Manual first-run report tuple encoding failed after runtime assertions; corrected and repeated successfully.",
+    "Fault proxy initially used a self-signed leaf rejected by peer verification. Installed a signed local CA chain; TLS verification was never disabled.",
+    "One temporary-directory teardown race and 400ms TLS test assumptions were corrected. Product deadlines and uncertainty semantics were not weakened.",
+    "Foreign controls initially used a wrong inspection argument, then exposed the real PodList bug. Failed Pending test Pods were deleted only under their saved UIDs and never scheduled.",
+    "Repeating the same draining execution ID returned its original cancelled record; the manual campaign now uses a distinct identity for each distinct test.",
+    "Public type references and repository-only guide links were corrected; final ExDoc HTML/EPUB builds pass warnings-as-errors."
+  ],
+  "qualification_limits": [
+    "Fixed enrolled node/boot/daemon identities, one slot and one same-host controller/store authority",
+    "Replacement control injects a changed container observation through verified loopback TLS; it does not physically replace the MicroVM",
+    "Namespace/node/class controls use stale approvals against the real API; no namespace/node/RuntimeClass was recreated",
+    "No production evidence/fencing, multi-node support, generalized image policy or VM cgroup quota claim",
+    "Historical phase reports and failed logs remain historical; no proof versions or prior hashes rewritten"
+  ],
+  "ci_workflows_changed": false,
+  "physical_host_scope": "Only the owned disposable lab VM and loopback tunnel/proxy were used. No physical-host runtime or existing worker configuration was mutated. Four-hour VM cap remains configured.",
+  "source_manifest_scope": "Implementation, manual runner and regressions. Documentation/report text is finalized after package creation.",
+  "release_audit": "../design/kubernetes-backend-release-audit.md"
+}

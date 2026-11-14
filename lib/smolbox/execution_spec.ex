@@ -11,8 +11,12 @@ defmodule SmolBox.ExecutionSpec do
   A retained machine may instead use the immutable map returned by
   `SmolBox.Source.artifact/1` for a registry artifact or OCI source. Commands
   must use that same map. Remote provisioning is exposed through
-  `SmolBox.Machines.create/2`; disposable `SmolBox.submit/2` continues to require
-  an approved local artifact or checkpoint.
+  `SmolBox.Machines.create/2`. Disposable `SmolBox.submit/2` also supports an
+  explicitly approved digest-pinned OCI source on an enrolled Kubernetes target,
+  with `retention_ms: 0` and a store advertising `kubernetes_backend: 1`. This
+  narrow form requires a foreground command with no stdin or user override and
+  the fixed offline Kubernetes profile. HTTP and Embedded disposable source
+  rules and their positive retention defaults/ranges remain unchanged.
 
   `command` accepts `SmolBox.Command`, `SmolBox.Terminal.Spec`, or
   `SmolBox.ImagePull`. Image pulls require a retained running OCI machine, explicit
@@ -33,6 +37,8 @@ defmodule SmolBox.ExecutionSpec do
   """
 
   alias SmolBox.{Command, Error, Manifest, Profile, Validation}
+
+  alias SmolBox.Kubernetes.ExecutionPolicy
 
   alias SmolBox.Terminal.Spec, as: TerminalSpec
 
@@ -60,7 +66,7 @@ defmodule SmolBox.ExecutionSpec do
           inputs: [Manifest.input()],
           outputs: [Manifest.output()],
           queue_ms: pos_integer(),
-          retention_ms: pos_integer(),
+          retention_ms: non_neg_integer(),
           metadata: %{String.t() => String.t() | integer() | boolean() | nil}
         }
 
@@ -78,7 +84,7 @@ defmodule SmolBox.ExecutionSpec do
   | `:inputs` | `[]` | Up to 32 exact input declarations; see `SmolBox.Manifest` |
   | `:outputs` | `[]` | Up to 32 exact output declarations; see `SmolBox.Manifest` |
   | `:queue_ms` | `60_000` | 1–86,400,000 ms from first acceptance until queue expiry |
-  | `:retention_ms` | `86_400_000` | 60,000–2,592,000,000 ms after the execution deadline for unknown-outcome retention |
+  | `:retention_ms` | `86_400_000` | 60,000–2,592,000,000 ms after the execution deadline for unknown-outcome retention; exactly `0` for the gated Kubernetes disposable form |
   | `:metadata` | `%{}` | Up to 16 string identifier keys with string (up to 256 bytes), bounded integer, boolean or nil values |
 
   The command timeout in seconds must fit the profile's execution budget in
@@ -163,7 +169,8 @@ defmodule SmolBox.ExecutionSpec do
   defp fields?(spec) do
     Validation.identifier?(spec.scope) and Validation.identifier?(spec.id) and
       artifact?(spec.artifact) and Validation.integer?(spec.queue_ms, 1, 86_400_000) and
-      Validation.integer?(spec.retention_ms, 60_000, 2_592_000_000) and metadata?(spec.metadata) and
+      (Validation.integer?(spec.retention_ms, 60_000, 2_592_000_000) or
+         ExecutionPolicy.supported?(spec)) and metadata?(spec.metadata) and
       command_budget?(spec)
   end
 

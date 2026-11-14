@@ -40,6 +40,8 @@ defmodule SmolBox.Backend.Assignment do
     Request
   }
 
+  alias SmolBox.Kubernetes.RecordValidation
+
   alias SmolBox.Terminal.Spec, as: TerminalSpec
 
   @enforce_keys [:binding, :creation]
@@ -197,6 +199,14 @@ defmodule SmolBox.Backend.Assignment do
         &legacy_identity?/1
       )
 
+  def record_valid?(
+        %{
+          __struct__: SmolBox.Execution,
+          backend_assignment: %SmolBox.Kubernetes.Assignment{} = assignment
+        } = record
+      ),
+      do: RecordValidation.valid?(assignment, record)
+
   def record_valid?(%{backend_assignment: %__MODULE__{} = assignment} = record) do
     valid?(assignment) and supported_record?(record, assignment.version) and
       specification_matches?(assignment.creation, record.spec, Map.get(record, :managed_machine)) and
@@ -259,7 +269,8 @@ defmodule SmolBox.Backend.Assignment do
   # qualification rule must not make existing v16 native records unreadable.
   defp admission_spec?(spec, version),
     do:
-      supported_spec?(spec, version) and qualified_user?(Map.get(spec, :command)) and
+      Map.get(spec, :retention_ms) != 0 and
+        supported_spec?(spec, version) and qualified_user?(Map.get(spec, :command)) and
         (spec.artifact["kind"] != "oci" or spec.profile.network != :offline)
 
   defp volume_spec_approved?(config, spec),

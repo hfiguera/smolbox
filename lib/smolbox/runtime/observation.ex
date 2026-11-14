@@ -45,10 +45,12 @@ defmodule SmolBox.Runtime.Observation do
   end
 
   defp execute(session, record, callback) do
+    connection = Target.connection(session.worker, record)
+
     client =
-      Backend.bounded(Target.connection(session.worker, record),
+      Backend.bounded(connection,
         timeout_ms: record.spec.profile.execution_ms,
-        max_response_bytes: record.spec.profile.max_output_bytes * 2 + 4096
+        max_response_bytes: response_limit(connection, record)
       )
 
     options = [max_output_bytes: record.spec.profile.max_output_bytes]
@@ -63,6 +65,15 @@ defmodule SmolBox.Runtime.Observation do
         ),
       else: Backend.exec(client, record.machine_name, record.spec.command, options)
   end
+
+  # Kubernetes uses the aggregate allowance for API reads and controller/node
+  # proofs as well as WebSocket traffic. Its command parser caps output separately.
+  # Retain the reference's existing bound instead of deriving it from guest output.
+  defp response_limit(%{kind: :kubernetes, budget: budget}, _record),
+    do: budget.max_response_bytes
+
+  defp response_limit(_connection, record),
+    do: record.spec.profile.max_output_bytes * 2 + 4096
 
   defp observe(session, record, task, token) do
     budget = Session.remaining(session, record, :execution)

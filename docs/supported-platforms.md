@@ -72,6 +72,17 @@ and host and source limits.
 [Persistence and recovery](recovery.md)
 · [Embedded Port qualification scope](embedded-port.md#maintainer-qualification)
 
+## Kubernetes development preview
+
+The opt-in preview is qualified only for one enrolled Linux x86_64/K3s node,
+SmolVM 1.34.0, the pinned Python OCI image and fixed resource/offline policy.
+The controller was qualified on Apple Silicon/macOS with Python 3 and verified
+SSH/HTTPS access to that node. This is a development preview with manual lab
+qualification; the production HTTP/Embedded matrix above remains separate.
+See [Kubernetes setup, cleanup authority and limits](kubernetes-backend.md).
+Production Kubernetes, other node architectures, multi-node recovery and general
+HTTP/Embedded feature parity remain later milestones.
+
 ## Host prerequisites
 
 Install the complete matching smolvm distribution; do not combine an agent or VMM

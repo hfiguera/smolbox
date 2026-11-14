@@ -1,0 +1,663 @@
+{
+  "schema": 1,
+  "scope": "kubernetes-backend-phase0-runtime-qualification",
+  "phase0_complete": true,
+  "backend_implemented": false,
+  "source": {
+    "base_commit": "eb4c1e946408f6eb078a22eeb777c3f28f26cf53",
+    "uncommitted_changes": true,
+    "files_sha256": {
+      "scripts/kubernetes/install-node.sh": "0662ecb46c9b4795cb6c7951e017abbba7fd1654e328e37d3be589bcb7497a23",
+      "scripts/kubernetes/install-preview.sh": "e6f680c2966a995520408d92b142483a108e3ce9bda082c60010ee4f4ffdbd2e",
+      "scripts/kubernetes/lab.sh": "14b0e56909e889ca31d7699ec77b89a47f7251a5787bd745893e85d2f26e77b4",
+      "scripts/kubernetes/offline_guard.py": "cac7a26eb375089efd8d45579c9b6fc977f3217415023ec66696c2b32cec1c4e",
+      "scripts/kubernetes/pins.json": "f4c74a07948817ab4045e091c4123c6cb49de95122c86bb246e64a7a074b670d",
+      "scripts/kubernetes/preview-policy.json": "619d5d269db7f6a30821fddfeb6f1da2d8ed4b7a3de00d2e5678729db684df9d",
+      "scripts/kubernetes/qualify.py": "f340d85be5abbdb115dc561b00aef1da98d8caaf82025eb90959d7eccd3244ba",
+      "scripts/kubernetes/smoke.py": "64575e727f2bad38ce35894bdd3afb7f0d6e33d58f564f056b1e20183d6426ba",
+      "scripts/kubernetes/source-basis.json": "015cab0fb0a5e97d25c956a331d1a444b2370a0acfb7be8c6036c20e7a7b2082",
+      "scripts/kubernetes/test_qualification.py": "9fc4baf7fe4e8af42a5396c4281b42aa85b2a6b04ad6091f5e6f6bea47df8991",
+      "scripts/kubernetes/test_smoke.py": "40ca3d03b3f2b8ab714104300a6df32215b7d9f986b1a37828834d6db2550d24",
+      "scripts/kubernetes/vm.sh": "3a17509d565565621313a423b81f27d9bbbeea2e44e3cb215c6f732c90cc7058",
+      "scripts/kubernetes/websocket_probe.py": "eafb1fe6fe4937a3e9d40cdd49e17a7db9d5765b12f2f6cce8768dab62a512c9"
+    }
+  },
+  "node": {
+    "name": "smolbox-k3s",
+    "uid": "94b6ea75-e0e1-475b-9f15-6ce12e37cd77",
+    "node_info": {
+      "architecture": "amd64",
+      "bootID": "83630722-1642-4400-9fc4-1be8d76ca7de",
+      "containerRuntimeVersion": "containerd://2.2.10-k3s1",
+      "kernelVersion": "6.8.0-138-generic",
+      "kubeProxyVersion": "",
+      "kubeletVersion": "v1.35.10+k3s1",
+      "machineID": "1d6c494136304756a566a8a270781c3f",
+      "operatingSystem": "linux",
+      "osImage": "Ubuntu 24.04.4 LTS",
+      "systemUUID": "1d6c494136304756a566a8a270781c3f"
+    }
+  },
+  "cluster_anchor_namespace_uid": "fd9e93df-bd93-47b6-8c53-8b128457cc39",
+  "runtime_class": {
+    "handler": "smolvm",
+    "overhead": {
+      "podFixed": {
+        "cpu": "250m",
+        "memory": "512Mi"
+      }
+    },
+    "scheduling": {
+      "nodeSelector": {
+        "kubernetes.io/arch": "amd64",
+        "kubernetes.io/hostname": "smolbox-k3s",
+        "smolvm-runtime": "true"
+      }
+    }
+  },
+  "runtime_class_uid": "0a888a90-ff87-4ca5-9396-bbdd63d8930a",
+  "pre_guard_counterexample": {
+    "recorded_at": "2026-11-13T23:13:07.431223+00:00",
+    "historical_harness_sha256": {
+      "qualify.py": "c813436370c114405262a231a6e40e7e21349af569d16c3c6042933e9ec48a47",
+      "smoke.py": "64575e727f2bad38ce35894bdd3afb7f0d6e33d58f564f056b1e20183d6426ba",
+      "websocket_probe.py": "f384a7fc7aa8119986aa0ae071e601c5c45efed03e987c73cb16b5fc25aabb78",
+      "preview-policy.json": "3b47158ebdea487447a0c9e951708c0528724c96d86cd95f1a9ea48885926535"
+    },
+    "source_report": "/var/lib/smolbox-lab/kubernetes/qualify-20261113T231245Z-27263.json",
+    "nodeport_canary": {
+      "connected": true,
+      "elapsed_ms": 0
+    },
+    "ingress_positive_control": true,
+    "ingress_denied": false,
+    "cleanup_verified": true
+  },
+  "live": {
+    "schema": 1,
+    "phase": 0,
+    "passed": true,
+    "cleanup_verified": true,
+    "scope": "phase0-runtime-probes",
+    "preview_policy": {
+      "schema": 1,
+      "namespace": "smolbox-preview",
+      "node": "smolbox-k3s",
+      "runtime_class": "smolbox-preview",
+      "image": "docker.io/library/python@sha256:f3dac913ab53b78c64f26d5518fcd7043d5a1a46522d6a493b598c3ed12f62a6",
+      "image_config_digest": "sha256:c7ea9065843cd8081ac483d8ce0cd7f2dfed7dd77180c8c535cbfc9ee9a85a9c",
+      "image_tag_observed": "3.13-slim-bookworm",
+      "architecture": "x86_64",
+      "guest_cpus": 2,
+      "guest_memory_mb": 1024,
+      "storage_gb": 20,
+      "overlay_gb": 10,
+      "host_overhead_mb": 512,
+      "capacity": {
+        "slots": 1,
+        "cpus": 2,
+        "memory_mb": 1536,
+        "disk_gb": 30
+      },
+      "container_requests": {
+        "cpu": "2",
+        "memory": "1024Mi"
+      },
+      "container_limits": {
+        "cpu": "2",
+        "memory": "1024Mi"
+      },
+      "qualification": "pending"
+    },
+    "pins": {
+      "cloud_image": {
+        "url": "https://cloud-images.ubuntu.com/releases/noble/release-20260826/ubuntu-24.04-server-cloudimg-amd64.img",
+        "sha256": "d0fe84bb5f80853425fa6be28e2c106f30104c3cfe8611933f2e65c9b63f0e30"
+      },
+      "k3s": {
+        "version": "v1.35.10+k3s1",
+        "url": "https://github.com/k3s-io/k3s/releases/download/v1.35.10%2Bk3s1/k3s",
+        "sha256": "5cd49f0faca5b2ea4355d4761e7b1445b8aa05cd50e612fd9c370551db49e5e2"
+      },
+      "smolvm": {
+        "version": "1.34.0",
+        "url": "https://github.com/smol-machines/smolvm/releases/download/v1.34.0/smolvm-1.34.0-linux-x86_64.tar.gz",
+        "sha256": "89e098b1f7749c515ed95263f081c469befb0aa10b49ee589ccb3e901090608a"
+      },
+      "image": "docker.io/library/busybox@sha256:b7f3d86d6e84fc17718c48bcde1450807faa2d56704205c697b4bd5df7b9e29f"
+    },
+    "checks": {
+      "scheduler_memory_accounting": true,
+      "fixed_resources": true,
+      "python_workspace": true,
+      "network_positive_control": true,
+      "ingress_positive_control": true,
+      "ipv6_positive_control": true,
+      "offline_network": true,
+      "ingress_denied": true,
+      "websocket_v5": true
+    },
+    "runtime": {
+      "sha256": {
+        "containerd-shim-smolvm-v2": "adc1bde9ba1109d963e28d3fa778688bd9ea2fb4a61dae2ea09fd0b43e222aa0",
+        "smolvm-bin": "feeb3b3627c416dd4196e054e64854e5d648ba3c100767351f212757acddd2e0",
+        "lib/libkrun.so": "b5c9a29eaaec884fade7d422b51a3c777a817f4a6e8f950a0c45adfae84e09db",
+        "lib/libkrunfw.so.5.5.0": "73ab8204df4299bdbd3d7a8ba15a990b497faed2a67a2ae8235801137fb3aaad",
+        "storage-template.ext4.zst": "edd30687d6aa8f1cc6c6a186a6021687ed6d3c89c73ce82351c7a326d190eda5",
+        "overlay-template.ext4.zst": "f927b35aa189210912317e2ac4780305b503dd07b11ea7dcba338bbdc8e8a7d0"
+      },
+      "archive_verified": true,
+      "template_sizes": {
+        "storage-template.ext4": 21474836480,
+        "overlay-template.ext4": 10737418240
+      },
+      "agent_rootfs": {
+        "sha256": "ddefffec4642f96aca931559e01ca54fcb5381f1f63549b3d1f7be08b94ce8f8",
+        "entries": 791,
+        "scheme": "sorted-posix-path-type-content-v1"
+      }
+    },
+    "namespace_uid": "394f98e0-fbbb-4b06-a780-80859d531182",
+    "network_policy_uid": "19700f6c-604d-4e0f-a7e8-8f16dc70ede6",
+    "pod_uid": "a896b90a-b2db-48d8-a2d6-03c9ab6f844e",
+    "admitted_overhead": {
+      "cpu": "250m",
+      "memory": "512Mi"
+    },
+    "container": {
+      "allocatedResources": {
+        "cpu": "2",
+        "memory": "1Gi"
+      },
+      "containerID": "containerd://37f683a616c73bf0d1bd9ecff7fce6fe38f602a1eb40c4330381a18b1a6e9c02",
+      "image": "sha256:c7ea9065843cd8081ac483d8ce0cd7f2dfed7dd77180c8c535cbfc9ee9a85a9c",
+      "imageID": "docker.io/library/python@sha256:f3dac913ab53b78c64f26d5518fcd7043d5a1a46522d6a493b598c3ed12f62a6",
+      "lastState": {},
+      "name": "workload",
+      "ready": true,
+      "resources": {
+        "limits": {
+          "cpu": "2",
+          "memory": "1Gi"
+        },
+        "requests": {
+          "cpu": "2",
+          "memory": "1Gi"
+        }
+      },
+      "restartCount": 0,
+      "started": true,
+      "state": {
+        "running": {
+          "startedAt": "2026-11-13T23:28:09Z"
+        }
+      },
+      "user": {
+        "linux": {
+          "gid": 0,
+          "supplementalGroups": [
+            0
+          ],
+          "uid": 0
+        }
+      }
+    },
+    "pod_ip": "10.42.0.18",
+    "sandbox_id": "ce9a6e12c5578a7c07e110e78100ddfbef1eef23848d0c96aa52575e41a474c5",
+    "kvm_processes": [
+      {
+        "pid": 26131,
+        "birth": "469232",
+        "descriptors": [
+          "anon_inode:kvm-vcpu:0",
+          "anon_inode:kvm-vcpu:1",
+          "anon_inode:kvm-vm"
+        ]
+      }
+    ],
+    "process_status": [
+      {
+        "pid": 26131,
+        "status": "Name:\tlibkrun VM\nUmask:\t0000\nState:\tS (sleeping)\nTgid:\t26131\nNgid:\t0\nPid:\t26131\nPPid:\t26123\nTracerPid:\t0\nUid:\t2000000\t2000000\t2000000\t2000000\nGid:\t2000000\t2000000\t2000000\t2000000\nFDSize:\t1024\nGroups:\t993 \nNStgid:\t26131\nNSpid:\t26131\nNSpgid:\t26131\nNSsid:\t696\nKthread:\t0\nVmPeak:\t 3803980 kB\nVmSize:\t 3803980 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t  133892 kB\nVmRSS:\t  133892 kB\nRssAnon:\t  105056 kB\nRssFile:\t   28832 kB\nRssShmem:\t       4 kB\nVmData:\t 1754388 kB\nVmStk:\t     288 kB\nVmExe:\t   11228 kB\nVmLib:\t    7108 kB\nVmPTE:\t     736 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t61\nSigQ:\t0/31612\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000000001000\nSigCgt:\t0000000308004442\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t000001ffffffffff\nCapAmb:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t0\nSeccomp_filters:\t0\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\tf\nCpus_allowed_list:\t0-3\nMems_allowed:\t00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000001\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t5565\nnonvoluntary_ctxt_switches:\t884\nx86_Thread_features:\t\nx86_Thread_features_locked:\t\n",
+        "cgroup": "0::/system.slice/k3s.service\n"
+      }
+    ],
+    "vm_files": {
+      "agent-startup-error.log": 0,
+      "name": 64,
+      "workload.log": 0,
+      "agent.config.json": 539,
+      "agent-console.log": 6609,
+      "overlay.qcow2": 2359296,
+      "agent.pid": 12,
+      "overlay.formatted": 1,
+      "vm.lock": 0,
+      "storage.qcow2": 3014656,
+      ".vm-uid": 7,
+      "storage.formatted": 1
+    },
+    "resources": {
+      "kernel": "6.18.60",
+      "python": "3.13.18",
+      "cpus": 2,
+      "meminfo": "MemTotal:        1041912 kB\nMemFree:          965464 kB\nMemAvailable:     941848 kB\nBuffers:            1040 kB\nCached:            22264 kB\nSwapCached:            0 kB\nActive:             2976 kB\nInactive:          37468 kB\nActive(anon):        808 kB\nInactive(anon):    21172 kB\nActive(file):       2168 kB\nInactive(file):    16296 kB\nUnevictable:           0 kB\nMlocked:               0 kB\nSwapTotal:             0 kB\nSwapFree:              0 kB\nDirty:               956 kB\nWriteback:             0 kB\nAnonPages:         17340 kB\nMapped:            10312 kB\nShmem:              4708 kB\nKReclaimable:       1888 kB\nSlab:              11896 kB\nSReclaimable:       1888 kB\nSUnreclaim:        10008 kB\nKernelStack:        1392 kB\nPageTables:          696 kB\nSecPageTables:         0 kB\nNFS_Unstable:          0 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:      520956 kB\nCommitted_AS:      38476 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:        2028 kB\nVmallocChunk:          0 kB\nPercpu:             2880 kB\nAnonHugePages:         0 kB\nShmemHugePages:        0 kB\nShmemPmdMapped:        0 kB\nFileHugePages:         0 kB\nFilePmdMapped:         0 kB\nBalloon:               0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nHugetlb:               0 kB\nDirectMap4k:       22848 kB\nDirectMap2M:     1583104 kB\n",
+      "cgroup": "0::/\n",
+      "memory_max": "1073741824\n",
+      "cpu_max": "200000 100000\n",
+      "pids_max": "max\n",
+      "ipv6_addresses": "fe80000000000000a87d33fffe73b1d6 03 40 20 80     eth0\n00000000000000000000000000000001 01 80 10 80       lo\n",
+      "ipv6_routes": "fe800000000000000000000000000000 40 00000000000000000000000000000000 00 00000000000000000000000000000000 00000100 00000001 00000000 00000001     eth0\n00000000000000000000000000000000 00 00000000000000000000000000000000 00 00000000000000000000000000000000 ffffffff 00000001 00000000 00200200       lo\n00000000000000000000000000000001 80 00000000000000000000000000000000 00 00000000000000000000000000000000 00000000 00000002 00000000 80200001       lo\nfe80000000000000a87d33fffe73b1d6 80 00000000000000000000000000000000 00 00000000000000000000000000000000 00000000 00000002 00000000 80200001     eth0\nff000000000000000000000000000000 08 00000000000000000000000000000000 00 00000000000000000000000000000000 00000100 00000003 00000000 00000001     eth0\n00000000000000000000000000000000 00 00000000000000000000000000000000 00 00000000000000000000000000000000 ffffffff 00000001 00000000 00200200       lo\n",
+      "process_status": "Name:\tpython3\nUmask:\t0022\nState:\tR (running)\nTgid:\t2\nNgid:\t0\nPid:\t2\nPPid:\t0\nTracerPid:\t0\nUid:\t0\t0\t0\t0\nGid:\t0\t0\t0\t0\nFDSize:\t64\nGroups:\t0 \nNStgid:\t2\nNSpid:\t2\nNSpgid:\t2\nNSsid:\t2\nKthread:\t0\nVmPeak:\t   17392 kB\nVmSize:\t   17392 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t   13320 kB\nVmRSS:\t   13320 kB\nRssAnon:\t    7940 kB\nRssFile:\t    5380 kB\nRssShmem:\t       0 kB\nVmData:\t    9184 kB\nVmStk:\t     132 kB\nVmExe:\t       4 kB\nVmLib:\t    4416 kB\nVmPTE:\t      72 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t0/4060\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000001001000\nSigCgt:\t0000000000000002\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t0000000000000000\nCapAmb:\t0000000000000000\nNoNewPrivs:\t1\nSeccomp:\t2\nSeccomp_filters:\t1\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\t0003\nCpus_allowed_list:\t0-1\nMems_allowed:\t1\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t307\nnonvoluntary_ctxt_switches:\t11\n",
+      "workspace_writable": true
+    },
+    "network_positive_control": {
+      "node_canary": {
+        "connected": true,
+        "elapsed_ms": 27
+      },
+      "cluster_dns_udp": {
+        "connected": false,
+        "errno": null,
+        "error_type": "TimeoutError"
+      }
+    },
+    "ingress_positive_control": true,
+    "ipv6_positive_control": {
+      "node_ipv6_linklocal": {
+        "connected": true,
+        "elapsed_ms": 5
+      },
+      "cluster_dns_udp": {
+        "connected": false,
+        "errno": null,
+        "error_type": "TimeoutError"
+      }
+    },
+    "offline_guard": {
+      "at_unix_ms": 1794612494987,
+      "isolated_ports": [
+        "veth6fb076df"
+      ],
+      "mappings": [
+        {
+          "ifindex": 15,
+          "interface": "veth6fb076df",
+          "pod_uid": "a896b90a-b2db-48d8-a2d6-03c9ab6f844e",
+          "sandbox_id": "ce9a6e12c5578a7c07e110e78100ddfbef1eef23848d0c96aa52575e41a474c5"
+        }
+      ],
+      "namespace_uid": "394f98e0-fbbb-4b06-a780-80859d531182",
+      "node_boot_id": "83630722-1642-4400-9fc4-1be8d76ca7de",
+      "node_uid": "94b6ea75-e0e1-475b-9f15-6ce12e37cd77",
+      "program_sha256": "cac7a26eb375089efd8d45579c9b6fc977f3217415023ec66696c2b32cec1c4e",
+      "qualification_permits": [],
+      "schema": 1,
+      "table": {
+        "nftables": [
+          {
+            "metainfo": {
+              "json_schema_version": 1,
+              "release_name": "Old Doc Yak #3",
+              "version": "1.0.9"
+            }
+          },
+          {
+            "table": {
+              "comment": "SmolBox preview offline guard v1",
+              "family": "bridge",
+              "handle": 64,
+              "name": "smolbox_preview_guard"
+            }
+          },
+          {
+            "set": {
+              "elem": [
+                "veth6fb076df"
+              ],
+              "family": "bridge",
+              "handle": 3,
+              "name": "isolated_ports",
+              "table": "smolbox_preview_guard",
+              "type": "ifname"
+            }
+          },
+          {
+            "chain": {
+              "family": "bridge",
+              "handle": 1,
+              "hook": "prerouting",
+              "name": "from_pod",
+              "policy": "accept",
+              "prio": -300,
+              "table": "smolbox_preview_guard",
+              "type": "filter"
+            }
+          },
+          {
+            "chain": {
+              "family": "bridge",
+              "handle": 2,
+              "hook": "postrouting",
+              "name": "to_pod",
+              "policy": "accept",
+              "prio": -300,
+              "table": "smolbox_preview_guard",
+              "type": "filter"
+            }
+          },
+          {
+            "rule": {
+              "chain": "from_pod",
+              "expr": [
+                {
+                  "match": {
+                    "left": {
+                      "meta": {
+                        "key": "iifname"
+                      }
+                    },
+                    "op": "==",
+                    "right": "@isolated_ports"
+                  }
+                },
+                {
+                  "counter": {
+                    "bytes": 2482,
+                    "packets": 40
+                  }
+                },
+                {
+                  "drop": null
+                }
+              ],
+              "family": "bridge",
+              "handle": 4,
+              "table": "smolbox_preview_guard"
+            }
+          },
+          {
+            "rule": {
+              "chain": "to_pod",
+              "expr": [
+                {
+                  "match": {
+                    "left": {
+                      "meta": {
+                        "key": "oifname"
+                      }
+                    },
+                    "op": "==",
+                    "right": "@isolated_ports"
+                  }
+                },
+                {
+                  "counter": {
+                    "bytes": 828,
+                    "packets": 12
+                  }
+                },
+                {
+                  "drop": null
+                }
+              ],
+              "family": "bridge",
+              "handle": 5,
+              "table": "smolbox_preview_guard"
+            }
+          }
+        ]
+      },
+      "template_sha256": "d0ea5d6a0df4d3cb84055c4e88d831db54d9c162e637aaed7cf9402ae72e938e"
+    },
+    "network": {
+      "node_canary": {
+        "connected": false,
+        "errno": null,
+        "error_type": "TimeoutError",
+        "elapsed_ms": 1005
+      },
+      "pod_gateway_canary": {
+        "connected": false,
+        "errno": null,
+        "error_type": "TimeoutError",
+        "elapsed_ms": 1002
+      },
+      "nodeport_canary": {
+        "connected": false,
+        "errno": null,
+        "error_type": "TimeoutError",
+        "elapsed_ms": 1002
+      },
+      "cluster_api": {
+        "connected": false,
+        "errno": null,
+        "error_type": "TimeoutError",
+        "elapsed_ms": 1002
+      },
+      "cluster_dns_tcp": {
+        "connected": false,
+        "errno": null,
+        "error_type": "TimeoutError",
+        "elapsed_ms": 1002
+      },
+      "public_tls": {
+        "connected": false,
+        "errno": null,
+        "error_type": "TimeoutError",
+        "elapsed_ms": 1002
+      },
+      "metadata_http": {
+        "connected": false,
+        "errno": null,
+        "error_type": "TimeoutError",
+        "elapsed_ms": 1002
+      },
+      "node_ipv6_linklocal": {
+        "connected": false,
+        "errno": null,
+        "error_type": "TimeoutError",
+        "elapsed_ms": 1005
+      },
+      "cluster_dns_udp": {
+        "connected": false,
+        "errno": null,
+        "error_type": "TimeoutError"
+      }
+    },
+    "ingress_denied": true,
+    "offline_guard_counters": {
+      "nftables": [
+        {
+          "metainfo": {
+            "version": "1.0.9",
+            "release_name": "Old Doc Yak #3",
+            "json_schema_version": 1
+          }
+        },
+        {
+          "table": {
+            "family": "bridge",
+            "name": "smolbox_preview_guard",
+            "handle": 64,
+            "comment": "SmolBox preview offline guard v1"
+          }
+        },
+        {
+          "set": {
+            "family": "bridge",
+            "name": "isolated_ports",
+            "table": "smolbox_preview_guard",
+            "type": "ifname",
+            "handle": 3,
+            "elem": [
+              "veth6fb076df"
+            ]
+          }
+        },
+        {
+          "chain": {
+            "family": "bridge",
+            "table": "smolbox_preview_guard",
+            "name": "from_pod",
+            "handle": 1,
+            "type": "filter",
+            "hook": "prerouting",
+            "prio": -300,
+            "policy": "accept"
+          }
+        },
+        {
+          "chain": {
+            "family": "bridge",
+            "table": "smolbox_preview_guard",
+            "name": "to_pod",
+            "handle": 2,
+            "type": "filter",
+            "hook": "postrouting",
+            "prio": -300,
+            "policy": "accept"
+          }
+        },
+        {
+          "rule": {
+            "family": "bridge",
+            "table": "smolbox_preview_guard",
+            "chain": "from_pod",
+            "handle": 4,
+            "expr": [
+              {
+                "match": {
+                  "op": "==",
+                  "left": {
+                    "meta": {
+                      "key": "iifname"
+                    }
+                  },
+                  "right": "@isolated_ports"
+                }
+              },
+              {
+                "counter": {
+                  "packets": 51,
+                  "bytes": 3176
+                }
+              },
+              {
+                "drop": null
+              }
+            ]
+          }
+        },
+        {
+          "rule": {
+            "family": "bridge",
+            "table": "smolbox_preview_guard",
+            "chain": "to_pod",
+            "handle": 5,
+            "expr": [
+              {
+                "match": {
+                  "op": "==",
+                  "left": {
+                    "meta": {
+                      "key": "oifname"
+                    }
+                  },
+                  "right": "@isolated_ports"
+                }
+              },
+              {
+                "counter": {
+                  "packets": 16,
+                  "bytes": 1104
+                }
+              },
+              {
+                "drop": null
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "websocket": [
+      {
+        "protocol": "v5.channel.k8s.io",
+        "exit_code": 0,
+        "stdout_bytes": 4352,
+        "stderr_bytes": 8,
+        "status": {
+          "metadata": {},
+          "status": "Success"
+        }
+      },
+      {
+        "protocol": "v5.channel.k8s.io",
+        "exit_code": 7,
+        "stdout_bytes": 4352,
+        "stderr_bytes": 8,
+        "status": {
+          "metadata": {},
+          "status": "Failure",
+          "message": "command terminated with non-zero exit code: command terminated with exit code 7",
+          "reason": "NonZeroExitCode",
+          "details": {
+            "causes": [
+              {
+                "reason": "ExitCode",
+                "message": "7"
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "recorded_at": "2026-11-13T23:28:40.794634+00:00",
+    "source_basis": {
+      "release_tag": "v1.34.0",
+      "release_commit": "d77eaf1c6eeff16bc8c258613746033e9bf567ca",
+      "reference_commit": "f9e93d8ffe2215130cc81de1cec365c92c46a869",
+      "files": {
+        "crates/smolvm-shim/src/engine.rs": {
+          "release_sha256": "82757415903b1b451185eff93d6880f415d9cdf862a82461fd7a60ae1c4bce55",
+          "reference_sha256": "82757415903b1b451185eff93d6880f415d9cdf862a82461fd7a60ae1c4bce55",
+          "identical": true
+        },
+        "crates/smolvm-shim/src/task.rs": {
+          "release_sha256": "35a11fca857deb0e06c1786bce749d7b208efd0195ab1b1d76b62ce988cd573a",
+          "reference_sha256": "35a11fca857deb0e06c1786bce749d7b208efd0195ab1b1d76b62ce988cd573a",
+          "identical": true
+        },
+        "crates/smolvm-shim/src/service.rs": {
+          "release_sha256": "565b368ac6cefd63e4c4340de380ef8e82cb2a82bbed2639a785925a8b491fe3",
+          "reference_sha256": "565b368ac6cefd63e4c4340de380ef8e82cb2a82bbed2639a785925a8b491fe3",
+          "identical": true
+        },
+        "crates/smolvm-agent/src/pod.rs": {
+          "release_sha256": "01daa2abfc2b2492a234e3b3b7c83b91ad72ac282c3e3810b2e50e25f9483412",
+          "reference_sha256": "01daa2abfc2b2492a234e3b3b7c83b91ad72ac282c3e3810b2e50e25f9483412",
+          "identical": true
+        },
+        "src/data/resources.rs": {
+          "release_sha256": "96b874e1e1cc3bb7daaa44caf30c427ecca8c38d96e6a2a8f6820ce04b1c4bcf",
+          "reference_sha256": "7d372d3d26e955e0568847849095f29b84382f6067d847b53242f01878ed5a04",
+          "identical": false
+        }
+      }
+    },
+    "harness_sha256": {
+      "qualify.py": "f340d85be5abbdb115dc561b00aef1da98d8caaf82025eb90959d7eccd3244ba",
+      "smoke.py": "64575e727f2bad38ce35894bdd3afb7f0d6e33d58f564f056b1e20183d6426ba",
+      "websocket_probe.py": "eafb1fe6fe4937a3e9d40cdd49e17a7db9d5765b12f2f6cce8768dab62a512c9",
+      "preview-policy.json": "619d5d269db7f6a30821fddfeb6f1da2d8ed4b7a3de00d2e5678729db684df9d",
+      "offline_guard.py": "cac7a26eb375089efd8d45579c9b6fc977f3217415023ec66696c2b32cec1c4e",
+      "source-basis.json": "015cab0fb0a5e97d25c956a331d1a444b2370a0acfb7be8c6036c20e7a7b2082"
+    }
+  },
+  "limits": [
+    "Qualification applies only to the dedicated single-node lab with the administrator bridge guard.",
+    "NodeEvidence must check fresh bridge membership before staging/dispatch; ordinary NetworkPolicy is insufficient.",
+    "VM host RSS is an idle sample, not a stress-test or host cgroup guarantee. One slot and the outer VM provide the development bound.",
+    "No general EOF-driven stdin qualification, production node observer, node-failure recovery or Kubernetes backend completion is claimed."
+  ]
+}

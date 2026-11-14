@@ -1,0 +1,345 @@
+{
+  "phase": 4,
+  "status": "in_progress_transport_component_passed_guarded_adapter_gate_open",
+  "recorded_at_utc": "2026-11-14T01:49:42.305300+00:00",
+  "source_base": "c226f97e220c560917513a5a8be42544860aa1ca",
+  "branch": "feature/kubernetes-smoke-lab",
+  "checkpoint_source_sha256": {
+    "dev/smolbox/ci/package.ex": "6bfcf998c533cef2b9ea8c4c16375638a6ac09d275a87798573f107c24067bcd",
+    "docs/design/kubernetes-backend-exec-protocol.md": "bce1f88b0cdf997cef9b2ddbc92ae603aba540ce874ee8976e4a2b1dd1cde4ea",
+    "docs/design/kubernetes-backend-implementation-plan.md": "e682185de85a76aca46e0dac45bb22e290999451b997b8c655ddd406a94cb7e0",
+    "docs/design/kubernetes-backend-parity.md": "f47deb2e7acb26c56fe6dda16c19352da720e8b81ffa4f191aa45f7a20c98db2",
+    "docs/design/kubernetes-backend-progress.md": "b7d0f627d3e9ee64674fccdf1afedb6b04a7acb00024115eb4151d70b7f75887",
+    "docs/kubernetes-lab.md": "1e9c097e5a6799765f3e64ac714e6eb81cc7f910fef6080764e885cbbc7631a2",
+    "lib/smolbox/backend/kubernetes.ex": "6107225f25a7be887fd91a81833b9d2a47f0bb2d7116e51f4b75a3dd622db1b4",
+    "lib/smolbox/kubernetes/client.ex": "2554d1bc75fc577e1b7282cc259c030c48d9b9312d34e649f5e944ae2bb23b6c",
+    "lib/smolbox/kubernetes/exec.ex": "d7be50edd4342dfc8327956fb985ee28bc511865e2cdc361dcb50a2ed0f010fc",
+    "lib/smolbox/kubernetes/execution_policy.ex": "17bdf5b7fb61d22a201d58f8fc38119b2fe58d8c47bdaf797a593e07e54c6f67",
+    "lib/smolbox/kubernetes/exit_status.ex": "b359f44fc7379a27748dca0b5078d4e18a38642fb75c51f323027e2ab02e9310",
+    "lib/smolbox/kubernetes/guest_helper.ex": "27df457ac7badee0cf2b1b5e0abd4b53069e613ee90de31e9e3e3ff04c712375",
+    "lib/smolbox/kubernetes/remote_command.ex": "f4c3a94cfe565fadbd9a8f2b37f3a2cd276758baf13b7cf8cf4b97bb78d46a16",
+    "lib/smolbox/kubernetes/web_socket.ex": "f769923c8573430468aadfac587ec7bf0181f7b3f48c5ca062919927855f0a2b",
+    "lib/smolbox/terminal/wire.ex": "17bd82aa6c0f20fb631ab093bfb4d8aaa751ad30d143c49d02667594313dd34a",
+    "lib/smolbox/web_socket/wire.ex": "eb0a81a448326c67afd50c1e1f18e11b85f4ec37a2550aeb2ac296c9ff1fe5ec",
+    "mix.exs": "58963f6be4d0be838778f09c120ce4abd3f90a012821999ab1aaaae28ed820ca",
+    "priv/kubernetes/guest_helper_v1.py": "6180c6632ecc8968f906101e9cef9e10301a5dadcfb24c6764db148acc2d6e5f",
+    "scripts/kubernetes/runtime-rbac.yaml": "03f80ad9adfbd5eb86ed275b28e756f3b07b6d78205e342784c96e2befa27545",
+    "scripts/kubernetes/test_guest_helper.py": "f13e12f0c1b871943777c99472a9e7c44754d04d5549e4fa60976f90b1f0e45d",
+    "test/ci/package_test.exs": "94be29ae3ff0cc0f6db7da8670c43fbe1d1fc5846e42e94149f4190de49b5781",
+    "test/support/kubernetes_exec_peer.ex": "1c8baf4f299fe93bccbdcbae8f0fff473022ee520be4eebf58fcf61b963b233f",
+    "test/unit/kubernetes_exec_test.exs": "0f22b01a5a4c470ebf6c22f459ab3c5bfa7e5b3f915b11470e25b2ed2471b18e",
+    "test/unit/kubernetes_remote_command_test.exs": "564e55b126142bff65ee490338261c9f49ce260ca22c705e79248e83c70a94b3"
+  },
+  "scope": {
+    "low_level_helper_websocket_live_component_passed": true,
+    "guarded_assigned_adapter_live_qualified": false,
+    "node_evidence_provider_qualified": false,
+    "public_managed_execution_qualified": false,
+    "store_capacity_released": false,
+    "ci_workflows_changed": false,
+    "physical_host_baselines_changed": false,
+    "lab_stopped_after_collection": true
+  },
+  "identities": {
+    "node_name": "smolbox-k3s",
+    "node_uid": "94b6ea75-e0e1-475b-9f15-6ce12e37cd77",
+    "node_boot_id": "83630722-1642-4400-9fc4-1be8d76ca7de",
+    "node_info": {
+      "architecture": "amd64",
+      "bootID": "83630722-1642-4400-9fc4-1be8d76ca7de",
+      "containerRuntimeVersion": "containerd://2.2.10-k3s1",
+      "kernelVersion": "6.8.0-138-generic",
+      "kubeProxyVersion": "",
+      "kubeletVersion": "v1.35.10+k3s1",
+      "machineID": "1d6c494136304756a566a8a270781c3f",
+      "operatingSystem": "linux",
+      "osImage": "Ubuntu 24.04.4 LTS",
+      "systemUUID": "1d6c494136304756a566a8a270781c3f"
+    },
+    "namespace_uid": "394f98e0-fbbb-4b06-a780-80859d531182",
+    "cluster_anchor_uid": "fd9e93df-bd93-47b6-8c53-8b128457cc39",
+    "runtime_class_uid": "0a888a90-ff87-4ca5-9396-bbdd63d8930a",
+    "runtime_class": {
+      "handler": "smolvm",
+      "overhead": {
+        "podFixed": {
+          "cpu": "250m",
+          "memory": "512Mi"
+        }
+      },
+      "scheduling": {
+        "nodeSelector": {
+          "kubernetes.io/arch": "amd64",
+          "kubernetes.io/hostname": "smolbox-k3s",
+          "smolvm-runtime": "true"
+        }
+      }
+    },
+    "offline_policy_uid": "19700f6c-604d-4e0f-a7e8-8f16dc70ede6",
+    "image_manifest": "docker.io/library/python@sha256:f3dac913ab53b78c64f26d5518fcd7043d5a1a46522d6a493b598c3ed12f62a6",
+    "image_config_digest": "sha256:c7ea9065843cd8081ac483d8ce0cd7f2dfed7dd77180c8c535cbfc9ee9a85a9c",
+    "runtime_archive_sha256": "89e098b1f7749c515ed95263f081c469befb0aa10b49ee589ccb3e901090608a",
+    "runtime_executable_sha256": "adc1bde9ba1109d963e28d3fa778688bd9ea2fb4a61dae2ea09fd0b43e222aa0",
+    "prior_runtime_qualification": "kubernetes-backend-phase0-2026-11-13.json"
+  },
+  "protocol": {
+    "subprotocol": "v5.channel.k8s.io",
+    "helper_sha256": "6180c6632ecc8968f906101e9cef9e10301a5dadcfb24c6764db148acc2d6e5f",
+    "helper_framing": "SBK1 + u32be JSON length + exact JSON; acknowledgement SBK1 + four zero bytes",
+    "stdin_eof": "producer remains open; application fd0 is /dev/null",
+    "fallback_or_replay": false
+  },
+  "live_component": {
+    "scope": "low-level fixed-helper/WebSocket qualification; assigned node-proof gate remains closed",
+    "protocol": "v5.channel.k8s.io",
+    "helper_sha256": "6180c6632ecc8968f906101e9cef9e10301a5dadcfb24c6764db148acc2d6e5f",
+    "original_pod_uid": "aaae6a5c-65c5-443f-923d-20e422298051",
+    "original_pod_name": "kubeapi-23bl2lodgrm2wlivm4q2",
+    "silent_exit": 0,
+    "binary_exit": 7,
+    "stdout_bytes": 768,
+    "stdout_sha256": "f3a25aa93aa2fbba28d79260535bbd6a5eb0fc1c24a8b0f04e12b484c1dfe363",
+    "stderr_bytes": 3,
+    "application_stdin": "dev_null",
+    "argv_env_exact": true,
+    "loss": "expired without exit; no replay",
+    "counter_bytes_after_loss": 1,
+    "container_identity_before_after": "same",
+    "node_evidence_provider_qualified": false,
+    "capacity_released": false
+  },
+  "physical_before_delete": {
+    "pod_uid": "aaae6a5c-65c5-443f-923d-20e422298051",
+    "sandbox_id": "7fba8c463e2f00ea10b429d7f24dbec2b4f2078f8cc6748754b81dc165cb0104",
+    "vm_directory": "/var/lib/smolbox-kubernetes/cache/smolvm/vms/d87b7f994e5f45bc",
+    "processes": [
+      {
+        "pid": 125352,
+        "birth": "1227374",
+        "descriptors": [
+          "anon_inode:kvm-vcpu:0",
+          "anon_inode:kvm-vcpu:1",
+          "anon_inode:kvm-vm"
+        ]
+      }
+    ],
+    "sqlite_vm_records": [
+      "7fba8c463e2f00ea10b429d7f24dbec2b4f2078f8cc6748754b81dc165cb0104"
+    ],
+    "vm_directory_present": true,
+    "share_present": true,
+    "exe_sha256": "adc1bde9ba1109d963e28d3fa778688bd9ea2fb4a61dae2ea09fd0b43e222aa0",
+    "boot_id": "83630722-1642-4400-9fc4-1be8d76ca7de",
+    "guard": {
+      "at_unix_ms": 1794620266729,
+      "isolated_ports": [
+        "veth066fc925"
+      ],
+      "mappings": [
+        {
+          "ifindex": 19,
+          "interface": "veth066fc925",
+          "pod_uid": "aaae6a5c-65c5-443f-923d-20e422298051",
+          "sandbox_id": "7fba8c463e2f00ea10b429d7f24dbec2b4f2078f8cc6748754b81dc165cb0104"
+        }
+      ],
+      "namespace_uid": "394f98e0-fbbb-4b06-a780-80859d531182",
+      "node_boot_id": "83630722-1642-4400-9fc4-1be8d76ca7de",
+      "node_uid": "94b6ea75-e0e1-475b-9f15-6ce12e37cd77",
+      "program_sha256": "cac7a26eb375089efd8d45579c9b6fc977f3217415023ec66696c2b32cec1c4e",
+      "qualification_permits": [],
+      "schema": 1,
+      "table": {
+        "nftables": [
+          {
+            "metainfo": {
+              "json_schema_version": 1,
+              "release_name": "Old Doc Yak #3",
+              "version": "1.0.9"
+            }
+          },
+          {
+            "table": {
+              "comment": "SmolBox preview offline guard v1",
+              "family": "bridge",
+              "handle": 64,
+              "name": "smolbox_preview_guard"
+            }
+          },
+          {
+            "set": {
+              "elem": [
+                "veth066fc925"
+              ],
+              "family": "bridge",
+              "handle": 3,
+              "name": "isolated_ports",
+              "table": "smolbox_preview_guard",
+              "type": "ifname"
+            }
+          },
+          {
+            "chain": {
+              "family": "bridge",
+              "handle": 1,
+              "hook": "prerouting",
+              "name": "from_pod",
+              "policy": "accept",
+              "prio": -300,
+              "table": "smolbox_preview_guard",
+              "type": "filter"
+            }
+          },
+          {
+            "chain": {
+              "family": "bridge",
+              "handle": 2,
+              "hook": "postrouting",
+              "name": "to_pod",
+              "policy": "accept",
+              "prio": -300,
+              "table": "smolbox_preview_guard",
+              "type": "filter"
+            }
+          },
+          {
+            "rule": {
+              "chain": "from_pod",
+              "expr": [
+                {
+                  "match": {
+                    "left": {
+                      "meta": {
+                        "key": "iifname"
+                      }
+                    },
+                    "op": "==",
+                    "right": "@isolated_ports"
+                  }
+                },
+                {
+                  "counter": {
+                    "bytes": 4968,
+                    "packets": 83
+                  }
+                },
+                {
+                  "drop": null
+                }
+              ],
+              "family": "bridge",
+              "handle": 4,
+              "table": "smolbox_preview_guard"
+            }
+          },
+          {
+            "rule": {
+              "chain": "to_pod",
+              "expr": [
+                {
+                  "match": {
+                    "left": {
+                      "meta": {
+                        "key": "oifname"
+                      }
+                    },
+                    "op": "==",
+                    "right": "@isolated_ports"
+                  }
+                },
+                {
+                  "counter": {
+                    "bytes": 1104,
+                    "packets": 16
+                  }
+                },
+                {
+                  "drop": null
+                }
+              ],
+              "family": "bridge",
+              "handle": 5,
+              "table": "smolbox_preview_guard"
+            }
+          }
+        ]
+      },
+      "template_sha256": "d0ea5d6a0df4d3cb84055c4e88d831db54d9c162e637aaed7cf9402ae72e938e"
+    }
+  },
+  "physical_after_uid_delete": {
+    "pod_uid": "aaae6a5c-65c5-443f-923d-20e422298051",
+    "sandbox_id": "7fba8c463e2f00ea10b429d7f24dbec2b4f2078f8cc6748754b81dc165cb0104",
+    "original_births_terminated": true,
+    "owned_vm_directory_absent": true,
+    "owned_share_absent": true,
+    "sqlite_vm_records": [],
+    "runtime_kvm_processes": [],
+    "capacity_released": false
+  },
+  "post_cleanup_preview_pods": [],
+  "authorization": {
+    "service_account": "system:serviceaccount:smolbox-preview:smolbox-controller",
+    "exec_verbs": [
+      "get",
+      "create"
+    ],
+    "initial_get_only_role_result": 403,
+    "initial_request_application_dispatched": false,
+    "reason": "Kubernetes 1.35 default AuthorizePodWebsocketUpgradeCreatePermission gate",
+    "primary_source": "https://github.com/kubernetes/kubernetes/blob/v1.35.0/CHANGELOG/CHANGELOG-1.35.md"
+  },
+  "validation": {
+    "full_main_project": {
+      "passed": 2240,
+      "excluded": 42,
+      "max_cases": 8,
+      "seed": 399552
+    },
+    "first_full_run": {
+      "passed": 2239,
+      "failed": 1,
+      "max_cases": 32,
+      "seed": 881144,
+      "failure": "300-ms stalled-response test expired before TLS dispatch under concurrent checks; isolated focused test and complete eight-case rerun passed"
+    },
+    "final_focused_exec_remotecommand_terminal_transport": {
+      "passed": 27,
+      "seed": 228980
+    },
+    "python_manual_suite_passed": 26,
+    "format": true,
+    "compile_warnings_as_errors": true,
+    "xref_cycles": 0,
+    "credo_strict": true,
+    "exdna_clones": 0,
+    "credence_strict_assumptions": true,
+    "dialyzer_errors": 0
+  },
+  "package_consumer": {
+    "fresh_production_build_passed": true,
+    "custom_build_path": true,
+    "package_sha256": "0bc98dd76edf066fb138d89c4ad14686cc3ee9071e13c7908a0c176304ea806e",
+    "helper_asset_sha256": "6180c6632ecc8968f906101e9cef9e10301a5dadcfb24c6764db148acc2d6e5f",
+    "runtime_dependencies": [
+      "finch",
+      "hpax",
+      "jason",
+      "mime",
+      "mint",
+      "mint_web_socket",
+      "nimble_options",
+      "nimble_pool",
+      "req",
+      "telemetry"
+    ],
+    "consumer_report_sha256": "435b75113dc812609dc978a1c195ad427df53e8bbc7aa59b57d366a4d5eec6e3",
+    "initial_failure": "Application.app_dir compile-time priv link absent with fresh custom build path; fixed by embedding packaged source from compile-time source path"
+  },
+  "qualification_limits": [
+    "Live component called the fixed-helper/WebSocket layer directly; it did not bypass or satisfy the guarded assigned adapter for application admission.",
+    "Checkpoint includes additional unit-qualified authorization, byte accounting, close/status parsing and packaging hardening after the live component probe. Repeat the full guarded live path after the real NodeEvidence provider is qualified.",
+    "A one-time CRI/SQLite/process snapshot cannot prove complete sandbox-attempt history. Continuous observer history remains a prerequisite brought forward from Phase 6.",
+    "API absence and manual physical collection facts are not a persisted store cleanup proof. No reservation was released."
+  ]
+}

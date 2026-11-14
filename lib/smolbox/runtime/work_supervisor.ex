@@ -1,7 +1,7 @@
 defmodule SmolBox.Runtime.WorkSupervisor do
   @moduledoc false
   use Supervisor
-  alias SmolBox.Runtime.Coordinator
+  alias SmolBox.Runtime.{Coordinator, KubernetesSupport}
 
   def start_link(config), do: Supervisor.start_link(__MODULE__, config)
 
@@ -12,9 +12,11 @@ defmodule SmolBox.Runtime.WorkSupervisor do
       | terminal_table: :ets.new(__MODULE__, [:set, :public, read_concurrency: true])
     }
 
+    recovery_tasks = length(KubernetesSupport.targets(config))
+
     children = [
-      # Execution observers plus one maintenance task and one scan.
-      {Task.Supervisor, max_children: config.max_active + 2},
+      # Execution observers, maintenance, a scan and each Kubernetes recovery.
+      {Task.Supervisor, max_children: config.max_active + 2 + recovery_tasks},
       {Coordinator, {config, self()}}
     ]
 

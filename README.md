@@ -9,6 +9,11 @@ local Embedded Port helper or connects to an external smolvm HTTP worker.
 It tracks command identity, results and cleanup under your application's
 supervision tree.
 
+An opt-in [Kubernetes development preview](docs/kubernetes-backend.md) supports
+disposable execution on one enrolled Linux/K3s node using SmolVM. Its fixed
+image/resource policy, positive cleanup proof and manual lab setup are separate
+from the HTTP and Embedded production configurations.
+
 ## Start here
 
 For a first local run, follow the [Embedded Port quickstart](docs/embedded-quickstart.md).

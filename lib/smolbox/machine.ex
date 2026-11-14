@@ -13,6 +13,10 @@ defmodule SmolBox.Machine do
   the full receipt and durable machine incarnation.
 
   Embedded worker inventory can report a frozen branch source without a receipt.
+
+  Kubernetes observations carry their own Pod UID receipt. A running receipt
+  also binds the original container and verified node observation; it never
+  fabricates an Embedded host PID or a creation timestamp.
   """
 
   alias SmolBox.{Error, MachineSpec, Validation}
@@ -44,7 +48,7 @@ defmodule SmolBox.Machine do
           ports: [SmolBox.PortMapping.t()],
           state: :created | :running | :stopped | :frozen,
           created_at: non_neg_integer() | nil,
-          backend_identity: SmolBox.Embedded.Identity.t() | nil,
+          backend_identity: SmolBox.Embedded.Identity.t() | SmolBox.Kubernetes.Identity.t() | nil,
           cpus: pos_integer(),
           memory_mb: pos_integer(),
           storage_gb: pos_integer(),
@@ -162,6 +166,16 @@ defmodule SmolBox.Machine do
 
   @doc "Compare creation evidence and allocations; requires exclusive namespace control."
   @spec same_incarnation?(t(), t()) :: boolean()
+  def same_incarnation?(
+        %__MODULE__{backend_identity: %SmolBox.Kubernetes.Identity{} = identity} = expected,
+        %__MODULE__{backend_identity: %SmolBox.Kubernetes.Identity{} = observed_identity} =
+          observed
+      ) do
+    SmolBox.Kubernetes.Identity.same_incarnation?(identity, observed_identity) and
+      Map.from_struct(%{expected | state: observed.state, backend_identity: observed_identity}) ==
+        Map.from_struct(observed)
+  end
+
   def same_incarnation?(
         %__MODULE__{backend_identity: %Identity{} = identity} = expected,
         %__MODULE__{backend_identity: %Identity{} = observed_identity} = observed

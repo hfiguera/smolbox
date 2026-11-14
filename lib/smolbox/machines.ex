@@ -300,6 +300,9 @@ defmodule SmolBox.Machines do
   end
 
   @doc "Accept one command on an idle running machine; identical duplicates return the original execution."
+  def submit(_runtime, _handle, %{retention_ms: 0}),
+    do: Session.error(:unsupported_capability, :submit)
+
   def submit(runtime, handle, spec) do
     with :ok <- key(handle),
          {:ok, config} <- config(runtime),

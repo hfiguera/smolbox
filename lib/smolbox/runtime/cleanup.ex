@@ -1,5 +1,5 @@
 defmodule SmolBox.Runtime.Cleanup do
-  alias SmolBox.Runtime.Target
+  alias SmolBox.Runtime.{KubernetesCleanup, Target}
   @moduledoc false
   alias SmolBox.{Backend, Error, Execution, Machine, Telemetry}
   alias SmolBox.Runtime.{Machines, Session}
@@ -34,6 +34,9 @@ defmodule SmolBox.Runtime.Cleanup do
 
   defp pending?(record),
     do: Execution.terminal?(record) or record.state == :unknown or record.cleanup == :complete
+
+  defp reconcile(%{worker: %{kind: :kubernetes}} = session, record),
+    do: KubernetesCleanup.run(session, record)
 
   defp reconcile(session, record) do
     cond do

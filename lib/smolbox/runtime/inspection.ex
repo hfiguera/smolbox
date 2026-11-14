@@ -2,7 +2,7 @@ defmodule SmolBox.Runtime.Inspection do
   alias SmolBox.Runtime.Target
   @moduledoc false
   alias SmolBox.{Backend, Error, Execution, Identity, Machine, MachineSpec, Validation}
-  alias SmolBox.Runtime.{NativeInspection, Session}
+  alias SmolBox.Runtime.{KubernetesInspection, NativeInspection, Session}
 
   def page(config, worker_id, options) do
     with true <- Validation.identifier?(worker_id) and common_options?(options),
@@ -14,6 +14,9 @@ defmodule SmolBox.Runtime.Inspection do
       nil -> Session.error(:not_found, :worker)
     end
   end
+
+  defp inspect_target(config, %{kind: :kubernetes} = worker, options),
+    do: KubernetesInspection.page(config, worker, options)
 
   defp inspect_target(config, %{kind: :embedded} = worker, options),
     do: NativeInspection.page(config, worker, options)

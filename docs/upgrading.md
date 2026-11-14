@@ -33,6 +33,26 @@ equivalent atomic behavior rather than those particular tables. Applications
 coming from 0.1.2 or earlier must also account for the
 [upgrades within 0.1.x](upgrading-within-0.1.x.md).
 
+## Enable the unreleased Kubernetes preview
+
+Upgrade every shared controller, reader and writer before enabling Kubernetes
+records. They selectively use codec v54; existing HTTP/Embedded records retain
+their previous envelopes and semantic fingerprints. Historical Kubernetes proof
+versions 1/2 remain readable but cannot release capacity through the current
+contract. Do not rewrite them as version 3.
+
+Apply the supplied PostgreSQL example's
+`20261113000000_kubernetes_bindings` migration before enrolling a target. Custom
+stores must implement the atomic `kubernetes_backend: 1`, `backend_bindings: 1`
+and `backend_recovery: 1` contracts, complete authenticated assignment/tombstone
+scans and proof-bound release. A capability marker alone does not qualify a store.
+Preserve the partition, encryption/fingerprint keys, controller guard directory,
+ArtifactStore root and original node enrollment across controller restarts.
+
+Follow [the preview guide](kubernetes-backend.md) for the approved runtime,
+restricted RBAC, node history/lifecycle evidence and manual public smoke. Do not
+reuse HTTP/Embedded deployment qualification as Kubernetes node authority.
+
 ## Upgrade to 0.5.0
 
 Keep existing HTTP worker versions and approvals pinned. Existing HTTP workers

@@ -1,5 +1,5 @@
 defmodule SmolBox.Runtime.Executor do
-  alias SmolBox.Runtime.Target
+  alias SmolBox.Runtime.{KubernetesPreparation, Target}
   @moduledoc false
   alias SmolBox.{Backend, Error, Execution, Identity, Machine, Telemetry}
   alias SmolBox.Runtime.ExecutionSupport
@@ -7,6 +7,7 @@ defmodule SmolBox.Runtime.Executor do
   alias SmolBox.Runtime.{
     Cleanup,
     Files,
+    KubernetesSupport,
     Machines,
     Observation,
     Session,
@@ -29,6 +30,7 @@ defmodule SmolBox.Runtime.Executor do
                config,
                if(record.created_machine, do: record.created_machine.ports, else: [])
              ),
+           :ok <- KubernetesSupport.recovery_owner(config, record),
            session = Session.new(config, record),
            {:ok, claimed} <- Session.claim(session),
            {:ok, handled} <- route(session, claimed, eligible) do
@@ -157,7 +159,7 @@ defmodule SmolBox.Runtime.Executor do
            current.cancel_requested_at_ms == nil and
              not Execution.expired?(current, Session.now(session)),
          {:ok, name} <- Identity.machine_name(session.config.namespace),
-         {:ok, allocation} <- Target.allocation(worker, current.spec, name) do
+         {:ok, allocation} <- Target.allocation_record(worker, current, name) do
       Session.store(session.config, :reserve, [
         session.key,
         Session.guard(current),
@@ -185,6 +187,9 @@ defmodule SmolBox.Runtime.Executor do
       false -> fail_preparation(session, %Error{category: :identity_conflict, operation: :start})
     end
   end
+
+  defp prepare_machine(%{worker: %{kind: :kubernetes}} = session, record),
+    do: KubernetesPreparation.prepare(session, record)
 
   defp prepare_machine(session, record) do
     {:ok, spec} =

@@ -1,0 +1,72 @@
+# Administrator-applied lab example. The application cannot apply this file.
+# Substitute an explicitly enrolled namespace/node/class before other deployments.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: smolbox-controller
+  namespace: smolbox-preview
+automountServiceAccountToken: false
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: smolbox-controller
+  namespace: smolbox-preview
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["create", "get", "list", "delete"]
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["get", "create"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["networkpolicies"]
+    resourceNames: ["offline"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: smolbox-controller
+  namespace: smolbox-preview
+subjects:
+  - kind: ServiceAccount
+    name: smolbox-controller
+    namespace: smolbox-preview
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: smolbox-controller
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: smolbox-preview-observer
+rules:
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    resourceNames: ["kube-system", "smolbox-preview"]
+    verbs: ["get"]
+  - apiGroups: [""]
+    resources: ["nodes"]
+    resourceNames: ["smolbox-k3s"]
+    verbs: ["get"]
+  - apiGroups: ["node.k8s.io"]
+    resources: ["runtimeclasses"]
+    resourceNames: ["smolbox-preview"]
+    verbs: ["get"]
+  - nonResourceURLs: ["/version"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: smolbox-preview-observer
+subjects:
+  - kind: ServiceAccount
+    name: smolbox-controller
+    namespace: smolbox-preview
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: smolbox-preview-observer

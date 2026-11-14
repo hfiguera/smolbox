@@ -1,0 +1,386 @@
+{
+  "phase": 3,
+  "status": "object_api_gate_passed_application_io_disabled",
+  "recorded_at_utc": "2026-11-14T01:10:30.798541+00:00",
+  "source_base": "dc3c2410841668bb0d18e2c3bae63c2e346a6e6d",
+  "branch": "feature/kubernetes-smoke-lab",
+  "source_snapshot_sha256": {
+    "docs/design/kubernetes-backend-implementation-plan.md": "090a39045602ca9848a3c19f85abbf378b77c96aefb431bb989b9315ed8d9817",
+    "docs/design/kubernetes-backend-parity.md": "2b40cd1fcadbe3d1fbef279910b1f77f12d039df118a894335015c26cc05f73f",
+    "docs/design/kubernetes-backend-progress.md": "d6719c2b84a473d1c73ef25228e2db7a2ddb6b4ed7083e95ea0105cc9be6ccaf",
+    "docs/design/kubernetes-backend.md": "e5803c648178f5e6fb41e069786d8f4d35dc0d0741dad3812a340dcb56ec2a67",
+    "docs/kubernetes-lab.md": "d5e5af34ef820d51fde175c5a2849784c2314d71085fd825fad735b8b0afc148",
+    "lib/smolbox/backend/kubernetes.ex": "b1383541438f197ac37470f8e5b5e4a6ddf100e2c16a28172935948a9fa9b38f",
+    "lib/smolbox/backend/kubernetes_context.ex": "8b4e48a74f341180d80b0331129ac62999943d035428a89734de97f518296092",
+    "lib/smolbox/kubernetes/client.ex": "88ac06a789927b6b492cc2f8f272723fc19deeef1f0d12050d590d116a8d0fd5",
+    "lib/smolbox/kubernetes/credentials.ex": "adf02ab0890df3e61b28336734176f9c7e843595f1bbeb2173861a0369ccc34a",
+    "lib/smolbox/kubernetes/enrollment.ex": "b3209254c5cb83277545f47b65f854773849d7741e4bc76a332c73ac21ba4ea7",
+    "lib/smolbox/kubernetes/operation.ex": "1b9530ee8c58996d5387ca8ec4c1a03d3467fd5f13c6d86e060139d19afd29a4",
+    "lib/smolbox/kubernetes/pod.ex": "42433740df91ca570f1eebe2025df64f323f7260776b20cc4dd2cef304cf4f25",
+    "lib/smolbox/kubernetes/pod_template.ex": "ef63d72ff627e2447527dcb140060e4bd58e3fb44d05cb26d0bf876e0ace872a",
+    "lib/smolbox/kubernetes/shape.ex": "22d656a29d93bff55397a5d5356b664be0808e8f59b57f8d77fdeb16357e985e",
+    "lib/smolbox/store/codec_kubernetes.ex": "b23c0d5710ac789a546363e66bd898cffaebea860f048b0c59adbb732a109206",
+    "scripts/kubernetes/lab.sh": "d36c5f24ff00d87a804d758db87dfcbcda51acfc2b540e6327c62aaa18f021a2",
+    "scripts/kubernetes/runtime-rbac.yaml": "bf1b839f3e655e602194fa8ac66584dc992a5e82ab1bb532600c194d57e51a31",
+    "test/support/kubernetes_peer.ex": "750bd2b3cb6fd5a7bcc4799a2707a91ff59be12c68500d047423ce411b8fdf84",
+    "test/unit/kubernetes_api_test.exs": "1a6a5bc3de81228bfff84934ad3a2476317be123ddcdb199632dad7453001235",
+    "test/unit/kubernetes_client_test.exs": "81cfd9ab476f8b85d5b5d7c4931cac477e9e0fe374a381c6e8ba5dbda9fcba62",
+    "test/unit/kubernetes_cold_codec_test.exs": "66a94322e6b37737d6c1350a37082657bf9921cea6a9e16d253026cb52ec34f1"
+  },
+  "scope": {
+    "backend": "real assigned SmolBox.Backend object port over verified Mint TLS and restricted service-account credentials",
+    "public_managed_execution_qualified": false,
+    "node_evidence_provider_qualified": false,
+    "store_capacity_released": false,
+    "ci_workflows_changed": false,
+    "physical_host_baselines_changed": false
+  },
+  "identities": {
+    "node_name": "smolbox-k3s",
+    "node_uid": "94b6ea75-e0e1-475b-9f15-6ce12e37cd77",
+    "node_boot_id": "83630722-1642-4400-9fc4-1be8d76ca7de",
+    "node_info": {
+      "architecture": "amd64",
+      "bootID": "83630722-1642-4400-9fc4-1be8d76ca7de",
+      "containerRuntimeVersion": "containerd://2.2.10-k3s1",
+      "kernelVersion": "6.8.0-138-generic",
+      "kubeProxyVersion": "",
+      "kubeletVersion": "v1.35.10+k3s1",
+      "machineID": "1d6c494136304756a566a8a270781c3f",
+      "operatingSystem": "linux",
+      "osImage": "Ubuntu 24.04.4 LTS",
+      "systemUUID": "1d6c494136304756a566a8a270781c3f"
+    },
+    "namespace_uid": "394f98e0-fbbb-4b06-a780-80859d531182",
+    "cluster_anchor_uid": "fd9e93df-bd93-47b6-8c53-8b128457cc39",
+    "runtime_class_uid": "0a888a90-ff87-4ca5-9396-bbdd63d8930a",
+    "runtime_class": {
+      "handler": "smolvm",
+      "overhead": {
+        "podFixed": {
+          "cpu": "250m",
+          "memory": "512Mi"
+        }
+      },
+      "scheduling": {
+        "nodeSelector": {
+          "kubernetes.io/arch": "amd64",
+          "kubernetes.io/hostname": "smolbox-k3s",
+          "smolvm-runtime": "true"
+        }
+      }
+    },
+    "offline_policy_uid": "19700f6c-604d-4e0f-a7e8-8f16dc70ede6",
+    "image_manifest": "docker.io/library/python@sha256:f3dac913ab53b78c64f26d5518fcd7043d5a1a46522d6a493b598c3ed12f62a6",
+    "image_config_digest": "sha256:c7ea9065843cd8081ac483d8ce0cd7f2dfed7dd77180c8c535cbfc9ee9a85a9c",
+    "runtime_archive_sha256": "89e098b1f7749c515ed95263f081c469befb0aa10b49ee589ccb3e901090608a",
+    "runtime_executable_sha256": "adc1bde9ba1109d963e28d3fa778688bd9ea2fb4a61dae2ea09fd0b43e222aa0",
+    "prior_runtime_qualification": "kubernetes-backend-phase0-2026-11-13.json"
+  },
+  "restricted_rbac": {
+    "manifest": "scripts/kubernetes/runtime-rbac.yaml",
+    "service_account": "system:serviceaccount:smolbox-preview:smolbox-controller",
+    "credential_kind": "short-lived TokenRequest token file; no admin kubeconfig used by library",
+    "forbidden_capabilities": [
+      {
+        "allowed": false,
+        "resource": "secrets",
+        "namespace": "smolbox-preview",
+        "verb": "create"
+      },
+      {
+        "allowed": false,
+        "resource": "nodes",
+        "namespace": null,
+        "verb": "update"
+      },
+      {
+        "allowed": false,
+        "resource": "networkpolicies",
+        "namespace": "smolbox-preview",
+        "verb": "patch"
+      },
+      {
+        "allowed": false,
+        "resource": "runtimeclasses",
+        "namespace": null,
+        "verb": "create"
+      },
+      {
+        "allowed": false,
+        "resource": "secrets",
+        "namespace": "smolbox-preview",
+        "verb": "get"
+      },
+      {
+        "allowed": false,
+        "resource": "nodes",
+        "namespace": null,
+        "verb": "list"
+      }
+    ]
+  },
+  "live_assigned_port": {
+    "create": {
+      "saved_before_post": "opaque immutable assignment and dispatched state in private codec snapshot; original UID saved before readiness",
+      "pod_name": "kubeapi-c22vg3ydrixrnxrpr2mq",
+      "pod_uid": "8589bb09-e437-4f7c-a696-7b4a039ea6a9"
+    },
+    "start": {
+      "phase": "ready",
+      "pod_uid": "8589bb09-e437-4f7c-a696-7b4a039ea6a9",
+      "pod_name": "kubeapi-c22vg3ydrixrnxrpr2mq",
+      "container_id": "containerd://8169f6d6ca0ebd4b10cba67eefc6a00731cea10881d2467620ede087ea5a67c9",
+      "image_id": "docker.io/library/python@sha256:f3dac913ab53b78c64f26d5518fcd7043d5a1a46522d6a493b598c3ed12f62a6",
+      "node_evidence_qualified": false
+    },
+    "delete": {
+      "result": "api_absent",
+      "uid_precondition": "8589bb09-e437-4f7c-a696-7b4a039ea6a9",
+      "grace_seconds": 10,
+      "api_inventory_after": []
+    },
+    "physical_observation_before": {
+      "pod_uid": "8589bb09-e437-4f7c-a696-7b4a039ea6a9",
+      "sandbox_id": "1c7387b88470d0f713dc4da241518ef7520b89249a0958e9c84e07fcc17b6030",
+      "vm_directory": "/var/lib/smolbox-kubernetes/cache/smolvm/vms/6ce58227bf04b3ed",
+      "processes": [
+        {
+          "pid": 98959,
+          "birth": "1022967",
+          "descriptors": [
+            "anon_inode:kvm-vcpu:0",
+            "anon_inode:kvm-vcpu:1",
+            "anon_inode:kvm-vm"
+          ]
+        }
+      ],
+      "sqlite_vm_records": [
+        "1c7387b88470d0f713dc4da241518ef7520b89249a0958e9c84e07fcc17b6030"
+      ],
+      "vm_directory_present": true,
+      "share_present": true,
+      "exe_sha256": "adc1bde9ba1109d963e28d3fa778688bd9ea2fb4a61dae2ea09fd0b43e222aa0",
+      "boot_id": "83630722-1642-4400-9fc4-1be8d76ca7de",
+      "guard": {
+        "at_unix_ms": 1794618060012,
+        "isolated_ports": [
+          "veth6a73e07f"
+        ],
+        "mappings": [
+          {
+            "ifindex": 18,
+            "interface": "veth6a73e07f",
+            "pod_uid": "8589bb09-e437-4f7c-a696-7b4a039ea6a9",
+            "sandbox_id": "1c7387b88470d0f713dc4da241518ef7520b89249a0958e9c84e07fcc17b6030"
+          }
+        ],
+        "namespace_uid": "394f98e0-fbbb-4b06-a780-80859d531182",
+        "node_boot_id": "83630722-1642-4400-9fc4-1be8d76ca7de",
+        "node_uid": "94b6ea75-e0e1-475b-9f15-6ce12e37cd77",
+        "program_sha256": "cac7a26eb375089efd8d45579c9b6fc977f3217415023ec66696c2b32cec1c4e",
+        "qualification_permits": [],
+        "schema": 1,
+        "table": {
+          "nftables": [
+            {
+              "metainfo": {
+                "json_schema_version": 1,
+                "release_name": "Old Doc Yak #3",
+                "version": "1.0.9"
+              }
+            },
+            {
+              "table": {
+                "comment": "SmolBox preview offline guard v1",
+                "family": "bridge",
+                "handle": 64,
+                "name": "smolbox_preview_guard"
+              }
+            },
+            {
+              "set": {
+                "elem": [
+                  "veth6a73e07f"
+                ],
+                "family": "bridge",
+                "handle": 3,
+                "name": "isolated_ports",
+                "table": "smolbox_preview_guard",
+                "type": "ifname"
+              }
+            },
+            {
+              "chain": {
+                "family": "bridge",
+                "handle": 1,
+                "hook": "prerouting",
+                "name": "from_pod",
+                "policy": "accept",
+                "prio": -300,
+                "table": "smolbox_preview_guard",
+                "type": "filter"
+              }
+            },
+            {
+              "chain": {
+                "family": "bridge",
+                "handle": 2,
+                "hook": "postrouting",
+                "name": "to_pod",
+                "policy": "accept",
+                "prio": -300,
+                "table": "smolbox_preview_guard",
+                "type": "filter"
+              }
+            },
+            {
+              "rule": {
+                "chain": "from_pod",
+                "expr": [
+                  {
+                    "match": {
+                      "left": {
+                        "meta": {
+                          "key": "iifname"
+                        }
+                      },
+                      "op": "==",
+                      "right": "@isolated_ports"
+                    }
+                  },
+                  {
+                    "counter": {
+                      "bytes": 4520,
+                      "packets": 75
+                    }
+                  },
+                  {
+                    "drop": null
+                  }
+                ],
+                "family": "bridge",
+                "handle": 4,
+                "table": "smolbox_preview_guard"
+              }
+            },
+            {
+              "rule": {
+                "chain": "to_pod",
+                "expr": [
+                  {
+                    "match": {
+                      "left": {
+                        "meta": {
+                          "key": "oifname"
+                        }
+                      },
+                      "op": "==",
+                      "right": "@isolated_ports"
+                    }
+                  },
+                  {
+                    "counter": {
+                      "bytes": 1104,
+                      "packets": 16
+                    }
+                  },
+                  {
+                    "drop": null
+                  }
+                ],
+                "family": "bridge",
+                "handle": 5,
+                "table": "smolbox_preview_guard"
+              }
+            }
+          ]
+        },
+        "template_sha256": "d0ea5d6a0df4d3cb84055c4e88d831db54d9c162e637aaed7cf9402ae72e938e"
+      }
+    },
+    "physical_observation_after": {
+      "pod_uid": "8589bb09-e437-4f7c-a696-7b4a039ea6a9",
+      "sandbox_id": "1c7387b88470d0f713dc4da241518ef7520b89249a0958e9c84e07fcc17b6030",
+      "original_births_terminated": true,
+      "owned_vm_directory_absent": true,
+      "owned_share_absent": true,
+      "sqlite_vm_records": [],
+      "runtime_kvm_processes": [],
+      "capacity_released": false
+    },
+    "qualification_only": "Root inspection observed original process births, disk/share and SQLite record collection. These facts are not a typed production cleanup proof and did not release a store reservation."
+  },
+  "live_discoveries": {
+    "tuple_hashing": {
+      "problem": "Tuple-wrapped maps bypassed recursive canonicalization, producing hashes that could fail in a fresh BEAM. Earlier same-process tests missed it.",
+      "fix": "Canonicalize/tag tuples recursively; load create-dispatch enum-defining validation module before safe ETF decoding.",
+      "regression": "test/unit/kubernetes_cold_codec_test.exs; queued/dispatched/created/ready authority read by a fresh VM with different atom initialization order",
+      "old_experimental_authority": "Fails closed; no migration/adoption. Affected first Pod removed with its saved original UID before fresh intent qualification.",
+      "affected_original": {
+        "pod_uid": "e7a5d9a3-8d4f-41e7-b21a-92fa91b7c9d4",
+        "sandbox_id": "be5bb563888c49dec00cdbf5a8934d514737a2c562b58648aa7b4b5c75e16ee4",
+        "processes": [
+          {
+            "pid": 85495,
+            "birth": "932034",
+            "descriptors": [
+              "anon_inode:kvm-vcpu:0",
+              "anon_inode:kvm-vcpu:1",
+              "anon_inode:kvm-vm"
+            ]
+          }
+        ],
+        "cleanup": {
+          "pod_uid": "e7a5d9a3-8d4f-41e7-b21a-92fa91b7c9d4",
+          "original_births_terminated": true,
+          "owned_vm_directory_absent": true,
+          "owned_share_absent": true,
+          "sqlite_vm_records": [],
+          "capacity_released": false
+        }
+      }
+    },
+    "image_status": {
+      "observed": "status.image is a config digest; status.imageID retains the approved platform-manifest reference",
+      "authority": "Validate exact immutable Pod spec image plus imageID, original UID, zero restarts and saved container incarnation; display label never grants source approval."
+    }
+  },
+  "checks": {
+    "full_root_suite": {
+      "passed": 2222,
+      "excluded_opt_in": 42
+    },
+    "final_focused_kubernetes": {
+      "passed": 46
+    },
+    "postgresql_backend_and_kubernetes_authority": {
+      "passed": 25
+    },
+    "format": "passed",
+    "compile_warnings_as_errors": "passed",
+    "xref_cycles": 0,
+    "strict_credo": "passed",
+    "exdna_clone_budget": 0,
+    "strict_assumption_credence": "passed",
+    "dialyzer_errors": 0,
+    "lab_script_bash_syntax": "passed",
+    "lab_script_shellcheck_on_linux": "passed",
+    "note": "Full compatibility suite followed by final focused inventory, UID-race, condition and temp-directory hardening."
+  },
+  "log_sha256": {
+    "kubernetes-phase3-full-tests.log": "9612d41194c402e291cab9407d135664f1972994769cdbb0d253d85577f286a5",
+    "kubernetes-phase3-focused-final.log": "ac23ee061fe76a5b8791f7387edb5a7053878aaae1091ea7c2106ccb1451812e",
+    "kubernetes-phase3-postgres-tests.log": "1ac08a9cd7f9b01c193347a9bc778851b758eba2b5a727cfa71f38f360cc5965",
+    "kubernetes-phase3-credo.log": "aa20268c938172603a8bfc86582ac97f3e2dd151eb4584b3ec9e31dc5a621a60",
+    "kubernetes-phase3-exdna.log": "447184d928b96e56afa1c8abda98f547a049e004f2296232b166a2945fc75acd",
+    "kubernetes-phase3-dialyzer.log": "150ce8d915f3d9a571f67faaf873dfd89b06e0f94fde3e95f2a4214668b295ee",
+    "kubernetes-phase3-credence.log": "215d8598b761d5d07aec682dd1eee17fb35cf76acd66cd58bdfd5f6caeebde9b"
+  },
+  "remaining_phases": [
+    4,
+    5,
+    6,
+    7
+  ]
+}

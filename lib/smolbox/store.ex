@@ -75,6 +75,24 @@ defmodule SmolBox.Store do
   every adapter before advertising this marker. Reader support does not enable
   a helper's volume descriptor or approve a native package.
 
+  `kubernetes_backend: 1` requires selective codec v54, typed Kubernetes
+  binding/assignment/receipt/cleanup readers, complete authenticated recovery
+  scans (including released tombstones), and the KubernetesContract against each
+  adapter's actual transaction boundary. Persist intent, name, reservation and
+  `backend_create_state: :pending` atomically. Before POST, durably advance it to
+  `:dispatched`; it cannot reset after ambiguity. Save the original UID receipt
+  before readiness or application IO. Receipt refinement cannot replace a Pod,
+  container, sandbox, process birth or observer incarnation. Reject aliased
+  namespace/node capacity under another target ID within the same cluster anchor.
+
+  Assigned Kubernetes cleanup/release requires the exact latest receipt's typed
+  physical CleanupProof, not just API absence or an adapter success tuple. The
+  separate `:not_dispatched` cleanup marker requires a still-pending create with
+  no receipt; it never resolves a possibly dispatched POST. Old backends keep nil
+  defaults and their existing envelopes. Upgrade all shared readers and resource
+  writers before enrollment; the durable example additionally requires migration
+  `20261113000000_kubernetes_bindings`. This marker grants no runtime operation.
+
   Every mutation is one transaction. Failures must roll back record and worker
   changes together. Reads are authoritative and must never translate unavailable,
   corrupt, or unknown-schema storage into `not_found`. There is no fallback store.
@@ -886,7 +904,7 @@ defmodule SmolBox.Store do
               {:ok, %{schema: 1, durable: boolean(), atomic: true}} | {:error, Error.t()}
 
   @doc """
-  Atomically enroll a stable worker ID as HTTP or an embedded data domain.
+  Atomically enroll a stable worker ID as HTTP, Embedded or Kubernetes authority.
 
   Advertise `backend_bindings: 1` only after implementing this callback and native
   allocation transactions. Serialize enrollment with every assignment admission.
@@ -931,8 +949,8 @@ defmodule SmolBox.Store do
   every reader accepts selective v23 creation opt-in and every reservation writer
   retains that marker for the original machine and its attached commands.
   """
-  @callback bind_backend(context(), String.t(), :http | SmolBox.Backend.Binding.t()) ::
-              {:ok, :http | SmolBox.Backend.Binding.t()} | {:error, Error.t()}
+  @callback bind_backend(context(), String.t(), backend_binding()) ::
+              {:ok, backend_binding()} | {:error, Error.t()}
   @optional_callbacks bind_backend: 3
 
   @typedoc "Opaque keyset position in the authority's complete assignment scan."
@@ -962,9 +980,12 @@ defmodule SmolBox.Store do
               | {:error, Error.t()}
   @optional_callbacks backend_assignments: 4
 
+  @type backend_binding :: :http | SmolBox.Backend.Binding.t() | SmolBox.Kubernetes.Binding.t()
+
   @type allocation ::
           {String.t(), String.t(), capacity()}
-          | {String.t(), String.t(), capacity(), SmolBox.Backend.Assignment.t()}
+          | {String.t(), String.t(), capacity(),
+             SmolBox.Backend.Assignment.t() | SmolBox.Kubernetes.Assignment.t()}
   @callback accept(context(), Execution.t(), pos_integer()) ::
               {:ok, Execution.t(), :inserted | :existing} | {:error, Error.t()}
   @callback fetch(context(), Execution.key()) :: result()
