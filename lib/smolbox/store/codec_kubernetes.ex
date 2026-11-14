@@ -22,7 +22,8 @@ defmodule SmolBox.Store.CodecKubernetes do
     SmolBox.Kubernetes.Receipt,
     SmolBox.Kubernetes.Identity,
     SmolBox.Kubernetes.Observation,
-    SmolBox.Kubernetes.CleanupProof
+    SmolBox.Kubernetes.CleanupProof,
+    SmolBox.Kubernetes.RecordValidation
   ]
 
   def required?(record), do: ExecutionPolicy.required?(record)

@@ -186,3 +186,42 @@ host lab directory. The [Phase 0 report](evidence/kubernetes-backend-phase0-2026
 records the failed NetworkPolicy-only control and the passing guarded run.
 These probes and the expanded 21-test Python suite remain manual. They qualify
 the lab's runtime recipe; a SmolBox Kubernetes backend is not implemented yet.
+
+
+## Restricted object API credentials (manual)
+
+Phase 3 qualifies the assigned backend object port; it does not enable public
+execution or store cleanup release. Follow the
+[phase status](design/kubernetes-backend-progress.md) and
+[exact evidence](evidence/kubernetes-backend-phase3-2026-11-13.json).
+
+Copy the current scripts to the physical host as above, then run
+`~/smolbox-kubernetes-lab/lab.sh sync`. An administrator inside the **disposable
+guest** can apply `/home/lab/smolbox-kubernetes/runtime-rbac.yaml` with
+`sudo k3s kubectl apply -f /home/lab/smolbox-kubernetes/runtime-rbac.yaml`.
+The file is an explicit lab example tied to namespace `smolbox-preview`, node
+`smolbox-k3s` and RuntimeClass `smolbox-preview`; review these identities before
+using another deployment. Script sync copies the file but never applies it.
+
+The `smolbox-controller` service account can create/get/list/delete Pods only in
+that namespace and GET `pods/exec` for WebSocket v5. It can read only the named
+namespace/anchor/node/class/offline policy and API version. It cannot write
+policies, nodes, classes, namespaces, Secrets or controllers. Kubernetes RBAC
+cannot constrain Pod template contents; this credential belongs only to the
+trusted controller, whose assigned backend validates the immutable intent.
+
+Issue a short-lived token manually with
+`sudo k3s kubectl -n smolbox-preview create token smolbox-controller --duration=2h`.
+Write its output directly to a private host token file; do not paste it into
+source, command arguments or evidence. Export only the public server CA for
+verified TLS. `SmolBox.Kubernetes.Config` accepts this token file or a bounded
+host callback. Keep API port forwarding on loopback with an explicit trusted CA
+and verified hostname; the library reads no admin kubeconfig and runs no auth
+plugin. Token rotation does not change the enrolled domain.
+
+The component qualification persisted original intent/UID before readiness and
+used the restricted token for create/readiness/UID-delete. Root SSH inspection
+inside the guest observed actual KVM births, SQLite records and scoped disk/share
+paths. API absence alone did not establish cleanup. A production node observer,
+continuous history and the public managed smoke remain Phase 6–7 work. Do not
+promote the manual inspection report into a fabricated store cleanup proof.

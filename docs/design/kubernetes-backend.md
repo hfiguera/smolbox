@@ -158,7 +158,8 @@ Introduce a separate `SmolBox.Kubernetes.Config`. Do not overload HTTP
 | `node_evidence` | Required bounded provider for sandbox identity and positive cleanup |
 | `qualification`, `draining`, `budgets` | Development-only qualification, admission switch, object/exec limits |
 
-These are proposed API names, not constructors available today. Client auth
+The target/authority constructors and object API are now implemented; follow the
+progress document for remaining preview gates. Client auth
 supports an explicitly configured bearer-token file (including an in-cluster
 projected service-account token) or a host callback. Read rotating token files
 within the operation budget. The first release does not interpret arbitrary

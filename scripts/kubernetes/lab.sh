@@ -28,7 +28,7 @@ guest_copy() {
 
 sync_scripts() {
   guest_ssh 'mkdir -p /home/lab/smolbox-kubernetes/reports'
-  guest_copy "$scripts/"{install-node.sh,install-preview.sh,offline_guard.py,smoke.py,pins.json,preview-policy.json,qualify.py,websocket_probe.py,source-basis.json} \
+  guest_copy "$scripts/"{install-node.sh,install-preview.sh,offline_guard.py,smoke.py,pins.json,preview-policy.json,qualify.py,websocket_probe.py,source-basis.json,runtime-rbac.yaml} \
     lab@127.0.0.1:/home/lab/smolbox-kubernetes/
 }
 

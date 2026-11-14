@@ -26,9 +26,9 @@ Already available:
   and ten manual offline harness checks. The lab is committed separately from
   the future backend and is not run by CI.
 
-Phases 1–2 now supply typed targets/authority, selective persisted receipts,
-proof-bound store release and gated OCI submission. Still absent: the bounded
-API client, exec/file transport, live node-evidence provider, orchestration and
+Phases 1–3 now supply typed targets/authority, selective persisted receipts,
+proof-bound store release, gated OCI submission and the bounded object API.
+Still absent: exec/file transport, live node-evidence provider, orchestration and
 public Kubernetes execution qualification. The runtime smoke does not substitute
 for those gates.
 

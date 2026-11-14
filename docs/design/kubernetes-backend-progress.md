@@ -13,7 +13,7 @@ parity tracked in [the parity matrix](kubernetes-backend-parity.md).
 | 0 — Runtime qualification | Runtime gate passed in the dedicated lab | [Exact live report](../evidence/kubernetes-backend-phase0-2026-11-13.json); recipe and constraints below |
 | 1 — Target and authority types | Type/validation gate passed | Offline constructors, immutable Pod intent, receipts, node observations, cleanup proofs and target normalization |
 | 2 — Store/codec/OCI admission | Store gate passed | Selective v54, atomic allocation, UID receipt transitions, proof-bound release, authenticated PostgreSQL enrollment, gated OCI submission; operational dispatch disabled |
-| 3 — Object lifecycle | Pending | Restricted credentials and bounded API client |
+| 3 — Object lifecycle | Object API gate passed | Bounded TLS/token client, pinned object enrollment, assigned backend create/observe/readiness/UID-delete and restricted live RBAC; application IO and capacity release disabled |
 | 4 — Exec | Pending | Elixir WebSocket client and application helper |
 | 5 — Files | Pending | Qualified helper staging/collection |
 | 6 — Cleanup/recovery | Pending | NodeEvidence provider, positive cleanup proofs and restart reconciliation |
@@ -219,3 +219,71 @@ Format, warnings-as-errors compilation, zero dependency cycles, strict Credo,
 zero-clone ExDNA, strict-assumption Credence and Dialyzer passed. The PostgreSQL
 run used an isolated local Unix-socket database; no live VM or CI change was
 needed in this phase. [Machine-readable report](../evidence/kubernetes-backend-phase2-2026-11-13.json).
+
+
+## Phase 3 bounded object API gate
+
+The gate passed on November 13 (Denver; November 14 UTC), 2026. Object operations
+use the existing Mint dependency directly, with verified CA/hostname, HTTP/1.1,
+a 16-KiB response-header cap, bounded JSON and a single monotonic deadline.
+Request/response byte allowances accumulate across enrollment reads, polling and
+inventory pages. Token-file reads and host credential callbacks run inside the
+same deadline in an isolated request process. Caller death terminates that
+process and its socket. There are no redirects, automatic retries, decompression,
+kubeconfig plugins or arbitrary credential commands.
+
+Enrollment checks the pinned server version, kube-system anchor UID, workload
+namespace UID, node UID/boot/runtime/readiness, RuntimeClass UID/handler/overhead/
+selectors and administrator-owned offline policy identity/spec. The policy digest
+includes the policy UID. Source approval still comes from the exact host catalog;
+Kubernetes declarations do not attest effective networking or installed binaries.
+The qualified node-evidence provider remains a separate Phase 6 gate.
+
+The assigned Backend port accepts only the saved creation intent or exact Pod
+name. Create returns the original UID receipt before readiness; known admission
+mutation retains a receipt for cleanup but fails before application IO. Recovery
+uses a one-name GET with complete immutable intent comparison and never sends a
+second POST. Readiness requires the original UID, pinned manifest imageID,
+qualified effective defaults, one workload container, zero restarts and, once captured, the saved container
+incarnation. The pinned CRI's `status.image` is a config/display digest;
+it is not used as source authority. The Pod spec image and `status.imageID` must
+retain the approved platform-manifest reference.
+
+API deletion checks the original namespace/cluster authority and uses an atomic
+UID precondition and bounded grace. It reports only `:api_absent`, never physical
+cleanup. A changed node readiness/policy cannot prevent UID-bound cleanup of an
+owned Pod in the original namespace. Finalizers, UID replacements, denied access,
+lost responses and incomplete inventory remain errors, with no release of
+capacity. Inventory has resourceVersion/continuation validation, per-page and
+total bounds, and rejects repeated tokens or duplicate identities. Unassigned
+health and all application operations remain unsupported, so the managed runtime
+still cannot start Kubernetes work automatically.
+
+The live check used the real preview RuntimeClass and pinned Python image through
+restricted service-account credentials, including the Backend assigned port.
+Six forbidden capabilities were denied: create/read Secrets, update/list Nodes,
+patch NetworkPolicies and create RuntimeClasses. The example RBAC is in
+`scripts/kubernetes/runtime-rbac.yaml`. Original KVM PID births, runtime executable
+hash, sandbox/SQLite record, disk directory and host share were observed before
+delete. After UID deletion, those original processes/paths/records and all pinned
+runtime KVM holders were absent. These manual facts are **not** a production
+NodeEvidence proof and did not complete a store reservation or qualify app IO.
+The physical host and existing workers were unchanged.
+
+The live check also exposed two gaps in the earlier same-process store gate.
+`Shape.digest/1` had not descended into tuple-wrapped maps, making binding and
+intent hashes depend on the BEAM atom-table order. Recursive tagged tuple
+canonicalization fixes this. The safe decoder now explicitly loads the authority
+validation module defining the create-dispatch atoms. A regression writes queued/
+dispatched/created/ready authority and reads it in a fresh BEAM with a different
+atom initialization order. Old experimental hashes fail closed; no automatic
+migration/adoption was introduced. The first affected lab Pod was deleted under
+its saved original UID and physically collected before fresh intent was tested.
+Existing HTTP/Embedded encodings and fingerprints retain their contracts.
+
+Validation: 2,222 main-project tests passed (42 opt-in excluded), followed by
+46 focused Kubernetes cases including final inventory/UID-race hardening.
+The PostgreSQL backend/Kubernetes authority suite passed 25 cases after the hash
+fix. Format, warnings-as-errors compilation, zero dependency cycles, strict Credo,
+zero-clone ExDNA, strict-assumption Credence and Dialyzer passed. All live checks
+remain manual; no CI workflow changed. [Exact report](../evidence/kubernetes-backend-phase3-2026-11-13.json).

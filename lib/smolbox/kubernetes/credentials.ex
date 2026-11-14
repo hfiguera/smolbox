@@ -16,4 +16,42 @@ defmodule SmolBox.Kubernetes.Credentials do
   @doc false
   def valid?({:token_file, path}), do: Shape.absolute_path?(path)
   def valid?(provider), do: Shape.callback?(provider, resolve: 2)
+
+  # Called only in Operation.run's isolated, deadline-bound request worker.
+  def resolve(provider, budget) do
+    case fetch(provider, budget) do
+      {:ok, token} -> if token?(token), do: {:ok, token}, else: invalid()
+      _ -> invalid()
+    end
+  rescue
+    _ -> invalid()
+  catch
+    _, _ -> invalid()
+  end
+
+  defp fetch({:token_file, path}, _budget) do
+    with {:ok, file} <- File.open(path, [:read, :binary]) do
+      try do
+        case IO.binread(file, 16_385) do
+          token when is_binary(token) and byte_size(token) < 16_385 ->
+            {:ok, String.trim_trailing(token, "\n")}
+
+          _ ->
+            invalid()
+        end
+      after
+        File.close(file)
+      end
+    end
+  end
+
+  defp fetch({module, context}, budget), do: module.resolve(context, budget)
+  defp fetch(_, _), do: invalid()
+
+  defp token?(token),
+    do:
+      is_binary(token) and byte_size(token) in 1..16_384 and
+        Regex.match?(~r/\A[A-Za-z0-9._~+\/-]+=*\z/, token)
+
+  defp invalid, do: {:error, %Error{category: :authentication, operation: :client}}
 end

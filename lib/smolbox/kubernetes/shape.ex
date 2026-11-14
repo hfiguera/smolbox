@@ -55,5 +55,9 @@ defmodule SmolBox.Kubernetes.Shape do
     do: {:map, value |> Enum.sort() |> Enum.map(fn {key, item} -> {key, canonical(item)} end)}
 
   defp canonical(value) when is_list(value), do: {:list, Enum.map(value, &canonical/1)}
+
+  defp canonical(value) when is_tuple(value),
+    do: {:tuple, value |> Tuple.to_list() |> Enum.map(&canonical/1)}
+
   defp canonical(value), do: value
 end
