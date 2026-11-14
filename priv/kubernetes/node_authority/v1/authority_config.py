@@ -213,7 +213,7 @@ def owned_path(
     return path
 
 
-def verify_filesystem(config, action="check"):
+def verify_filesystem(config, action="check", state_required=True):
     paths = config.paths
     require(
         paths["proc_root"] == Path("/proc")
@@ -246,6 +246,10 @@ def verify_filesystem(config, action="check"):
             private=key in {"state_directory", "kubeconfig"},
             executable=key in EXECUTABLES,
             installation_symlinks=key in EXECUTABLES,
-            allow_missing=action == "cleanup" and key in optional_cleanup,
+            allow_missing=key in {"vm_root", "share_root", "netns_root"}
+            or key == "state_directory"
+            and not state_required
+            or action == "cleanup"
+            and key in optional_cleanup,
         )
     return config

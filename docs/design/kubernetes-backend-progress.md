@@ -9,8 +9,8 @@ parity tracked in [the parity matrix](kubernetes-backend-parity.md).
 Next planned work: [standalone single-node authority](kubernetes-node-authority.md)
 on `feature/kubernetes-node-authority`, with a
 [detailed implementation plan](kubernetes-node-authority-implementation-plan.md).
-The [Phases 0–1 contract and core checkpoints](kubernetes-node-authority-progress.md) have
-passed; installation, endpoint/provider implementation and fresh live qualification remain
+The [Phases 0–2 contract/core/installer checkpoints](kubernetes-node-authority-progress.md) have
+passed (installer fixtures only); endpoint/SDK completion and fresh live qualification remain
 pending. The qualified preview and controller guard are unchanged.
 
 ## Phase status

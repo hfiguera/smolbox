@@ -37,6 +37,16 @@ def config():
     return Configuration.from_dict(json.loads(VECTORS.read_text())["configuration"])
 
 
+def write_manifest(directory):
+    values = {
+        name: hashlib.sha256((directory / name).read_bytes()).hexdigest()
+        for name in assets.PROGRAMS
+    }
+    (directory / "manifest.json").write_bytes(
+        contract.canonical({"version": 1, "files": values})
+    )
+
+
 class ConfigurationTest(unittest.TestCase):
     def test_configuration_is_exact_canonical_immutable_and_has_no_input_alias(self):
         value = json.loads(VECTORS.read_text())["configuration"]
@@ -148,9 +158,9 @@ class ConfigurationTest(unittest.TestCase):
                 self.assertFalse(calls[config().paths[key]]["allow_missing"])
             verify.reset_mock()
             verify_filesystem(config(), "capture")
-            self.assertFalse(
-                any(call.kwargs["allow_missing"] for call in verify.call_args_list)
-            )
+            calls = {call.args[0]: call.kwargs for call in verify.call_args_list}
+            self.assertFalse(calls[config().paths["runtime_root"]]["allow_missing"])
+            self.assertFalse(calls[config().paths["guard_state"]]["allow_missing"])
 
 
 class RunnerTest(unittest.TestCase):
@@ -215,6 +225,15 @@ class RunnerTest(unittest.TestCase):
         self.assertNotIn("PYTHONPATH", actual)
         with self.assertRaisesRegex(ValueError, "argument vector"):
             Runner()(["relative", "command"])
+        with self.assertRaisesRegex(ValueError, "command unavailable"):
+            Runner()([sys.executable, "-c", "print('no');raise SystemExit(1)"])
+        self.assertEqual(
+            Runner()(
+                [sys.executable, "-c", "print('no');raise SystemExit(1)"],
+                allowed_exit_codes=(0, 1),
+            ),
+            b"no\n",
+        )
 
 
 class EngineTest(unittest.TestCase):
@@ -285,6 +304,7 @@ class EngineTest(unittest.TestCase):
     def test_program_inventory_includes_source_basis_and_rejects_unapproved_files(self):
         for name in assets.PROGRAMS:
             (self.root / name).write_bytes((BUNDLE / name).read_bytes())
+        write_manifest(self.root)
         values = assets.programs(self.root, lambda: None)
         manifest = contract.sha256({"version": 1, "files": values})
         enrollment = {
@@ -496,6 +516,7 @@ class TransactionalInspectionTest(unittest.TestCase):
         self.engine.bundle.mkdir()
         for name in assets.PROGRAMS:
             shutil.copyfile(BUNDLE / name, self.engine.bundle / name)
+        write_manifest(self.engine.bundle)
         self.receipt = copy.deepcopy(json.loads(VECTORS.read_text())["receipt"])
         self.uid = self.receipt["pod_uid"]
         self.sid = self.receipt["observation"]["sandbox_ids"][0]

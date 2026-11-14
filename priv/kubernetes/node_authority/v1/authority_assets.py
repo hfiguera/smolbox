@@ -8,12 +8,14 @@ import re
 import stat
 import tarfile
 
-from authority_history import require
+from authority_history import require, pairs
 
 PROGRAMS = (
     "authority_assets.py",
+    "authority_bootstrap.py",
     "authority_config.py",
     "authority_contract.py",
+    "authority_endpoint.py",
     "authority_guard.py",
     "authority_history.py",
     "authority_lifecycle.py",
@@ -21,6 +23,8 @@ PROGRAMS = (
     "authority_verifier.py",
     "source-basis-history.json",
     "source-basis-lifecycle.json",
+    "entrypoint.sh",
+    "ssh-command.sh",
 )
 
 
@@ -148,7 +152,7 @@ def runtime_identity(runtime, archive, expected_sha, tick):
     }
 
 
-def programs(directory, tick):
+def programs(directory, tick, installed=True):
     parent = directory.lstat()
     require(
         stat.S_ISDIR(parent.st_mode)
@@ -161,7 +165,10 @@ def programs(directory, tick):
         tick()
         require(count <= 256, "program inventory bound")
         names.add(item.name)
-    require(names == set(PROGRAMS), "unexpected verifier program")
+    require(
+        names == set(PROGRAMS) | ({"manifest.json"} if installed else set()),
+        "unexpected verifier program",
+    )
     for name in PROGRAMS:
         info = (directory / name).lstat()
         require(
@@ -171,4 +178,23 @@ def programs(directory, tick):
             and not info.st_mode & 0o022,
             "verifier program ownership",
         )
-    return {name: sha(directory / name, tick) for name in PROGRAMS}
+    values = {name: sha(directory / name, tick) for name in PROGRAMS}
+    if installed:
+        manifest = directory / "manifest.json"
+        info = manifest.lstat()
+        require(
+            stat.S_ISREG(info.st_mode)
+            and info.st_nlink == 1
+            and info.st_uid == os.geteuid()
+            and not info.st_mode & 0o022
+            and info.st_size <= 65536,
+            "verifier manifest ownership/size",
+        )
+        with manifest.open("rb") as source:
+            document = json.loads(source.read(65537), object_pairs_hook=pairs)
+        require(
+            document == {"version": 1, "files": values}
+            and type(document["version"]) is int,
+            "verifier manifest changed",
+        )
+    return values

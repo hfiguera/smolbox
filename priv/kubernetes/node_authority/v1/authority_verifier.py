@@ -138,6 +138,10 @@ class Verifier:
             "unsupported inspection target",
         )
         verify_filesystem(self.config, request["action"])
+        require(
+            not os.path.lexists(self.STATE / "authority-installing.json"),
+            "authority installation incomplete",
+        )
         enrollment = self.read_state(self.ENROLLMENT)
         generation = self.verify_enrollment(enrollment)
         expected_keys = {"version", "action", "binding"} | (

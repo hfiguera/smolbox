@@ -1,0 +1,42 @@
+Administrator-reviewed examples for the enrolled node only. Do not apply these
+to the shared physical development host. Substitute the controller's PUBLIC key;
+never put a private key in this bundle, the node configuration or an approval.
+
+Principal: smolbox-evidence; shell /bin/sh; no password authentication; no groups
+granting runtime, Kubernetes, sudo, Docker or other node mutation authority.
+Use an administrator-controlled home, for example
+/var/lib/smolbox-node-evidence-home (root:root 0755). Its .ssh directory and
+authorized_keys must be root-owned and unavailable for principal writes.
+No user rc, environment file, startup script or alternate writable key path.
+
+authorized_keys (root:root 0600):
+restrict,command="/usr/local/libexec/smolbox-node-authority-ssh" ssh-ed25519 <CONTROLLER_PUBLIC_KEY>
+
+sshd_config Match example (validate effective configuration with sshd -T -C):
+Match User smolbox-evidence
+    AuthenticationMethods publickey
+    PasswordAuthentication no
+    KbdInteractiveAuthentication no
+    PermitTTY no
+    DisableForwarding yes
+    PermitUserRC no
+    PermitUserEnvironment no
+    ForceCommand /usr/local/libexec/smolbox-node-authority-ssh
+
+The global AuthorizedKeysFile configuration must resolve only the root-owned
+key policy above. Audit global AcceptEnv and remove any route for this principal
+to supply SSH_ORIGINAL_COMMAND, interpreter variables or dynamic-loader settings.
+Inspect Include/Match precedence, other authorization methods and sudo rules.
+
+/etc/sudoers.d/smolbox-node-authority (root:root 0440; validate with visudo -cf):
+Defaults:smolbox-evidence env_reset,!setenv
+smolbox-evidence ALL=(root) NOPASSWD: /usr/local/libexec/smolbox-node-authority ""
+
+The empty argument specification is intentional: only the exact no-argument
+entrypoint is permitted. No interpreter, wildcard, alternate config path,
+installer, reset, upgrade, repair or runtime command belongs in this rule.
+
+Before enablement test: correct literal token; shell/default command; SFTP and
+subsystems; PTY; local/remote/dynamic/agent/X11 forwarding; extra command arguments;
+environment injection; alternate sudo commands. These examples alone do not
+prove the effective SSH/sudo policy. The installer never edits/restarts sshd.

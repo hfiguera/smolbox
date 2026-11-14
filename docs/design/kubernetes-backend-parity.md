@@ -1,6 +1,6 @@
 # Kubernetes backend parity matrix
 
-Status: matrix revision 9, November 14, 2026. Preview implementation remains at
+Status: matrix revision 10, November 14, 2026. Preview implementation remains at
 the qualified Phase 7 scope. The long-term goal is equivalent
 SmolBox public domain behavior across HTTP, Embedded and Kubernetes. Follow
 [the design](kubernetes-backend.md), [delivery plan](kubernetes-backend-implementation-plan.md),
@@ -25,7 +25,7 @@ remain separate work. Specification does not mark the new provider implemented.
 | Bounded input files and artifact collection | Existing file/ArtifactStore contracts | Qualified shared binary staging/read-back/artifact publication; component corruption and unsafe-path controls retained | Phase 5 + public qualification |
 | Durable intent, ownership, no replay, positive cleanup | Existing store/backend evidence contracts | Qualified selective v54, complete startup scans, same-host process-death takeover, unknown recovery and version-3 proof-bound release | Phases 2 and 6–7 |
 | OCI image/source approval | Existing qualified source catalogs | Qualified pinned Python OCI catalog through the public disposable path; unapproved sources rejected | Phases 1–4 and 7 |
-| Standalone single-node evidence authority | Existing backend-specific evidence contracts | Phases 0–1 contract/compatibility and standalone core gates passed; installation, endpoint/provider and live qualification pending. Existing lab provider remains the preview authority | [Node-authority slice](kubernetes-node-authority-progress.md) of production foundation |
+| Standalone single-node evidence authority | Existing backend-specific evidence contracts | Phases 0–2 contract/core/installation fixture gates passed; endpoint/SDK completion, runtime integration and live qualification pending. Existing lab provider remains the preview authority | [Node-authority slice](kubernetes-node-authority-progress.md) of production foundation |
 | Controller fencing, multi-node failure recovery, measurements | Existing backend-specific operational contracts | Planned after the node-authority boundary; current same-host guard remains required | Remaining production foundation milestone |
 | Private credentials, broader artifacts, image operations | Existing qualified source/image APIs | Planned after preview | Sources/connectivity milestone |
 | Network allowlists and ports | Existing qualified network policies/mappings | Planned after preview | Sources/connectivity milestone |

@@ -35,8 +35,14 @@ class Runner:
         self.tick()
         return self.deadline - time.monotonic()
 
-    def __call__(self, arguments):
+    def __call__(self, arguments, allowed_exit_codes=(0,)):
         self.tick()
+        require(
+            isinstance(allowed_exit_codes, tuple)
+            and allowed_exit_codes
+            and set(allowed_exit_codes) <= {0, 1},
+            "observation exit policy",
+        )
         require(
             isinstance(arguments, list)
             and arguments
@@ -85,7 +91,10 @@ class Runner:
                     while process.poll() is None:
                         self.tick()
                         time.sleep(min(0.01, max(0, self.deadline - time.monotonic())))
-                    require(process.returncode == 0, "observation command unavailable")
+                    require(
+                        process.returncode in allowed_exit_codes,
+                        "observation command unavailable",
+                    )
                 self.tick()
                 return b"".join(chunks)
             finally:
@@ -94,8 +103,9 @@ class Runner:
                     process.wait(timeout=2)
 
     @contextmanager
-    def locked(self, path):
-        fd = os.open(path, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600)
+    def locked(self, path, create=True):
+        flags = os.O_RDWR | os.O_NOFOLLOW | os.O_CLOEXEC | (os.O_CREAT if create else 0)
+        fd = os.open(path, flags, 0o600)
         with os.fdopen(fd, "r+") as lock:
             info = os.fstat(lock.fileno())
             require(

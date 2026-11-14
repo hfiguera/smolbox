@@ -1,6 +1,6 @@
 # Kubernetes node authority progress
 
-Status: Phases 0–1 gates passed, November 14, 2026. Delivery branch:
+Status: Phases 0–2 implementation gates passed, November 14, 2026. Delivery branch:
 `feature/kubernetes-node-authority`. Follow the [specification](kubernetes-node-authority.md),
 [frozen contracts](kubernetes-node-authority-contract.md) and
 [implementation plan](kubernetes-node-authority-implementation-plan.md).
@@ -9,8 +9,8 @@ Status: Phases 0–1 gates passed, November 14, 2026. Delivery branch:
 | --- | --- | --- |
 | 0 — Contract and authority review | Passed | Exact schemas, canonical vectors, proof/privilege obligations, source basis and compatibility checks below |
 | 1 — Standalone verifier | Passed | Self-contained configured core, source comparison, 53 extraction checks and interruption evidence below |
-| 2 — Administrator installation | Pending | No new node installation or enrollment |
-| 3 — Endpoint and SDK provider | Pending | Pure data contract exists; no runnable endpoint/provider |
+| 2 — Administrator installation | Passed (fixtures) | Deterministic bundle, explicit root installer and immutable enrollment; live installation remains Phase 5 |
+| 3 — Endpoint and SDK provider | In progress | Fixed framed entrypoint has initial socket tests; SDK provider and complete protocol/access qualification pending |
 | 4 — Runtime/store integration | Pending | Preliminary epoch/codec compatibility only; provider/store campaigns remain required |
 | 5 — Live qualification | Pending | Existing lab evidence does not qualify this provider |
 
@@ -83,3 +83,41 @@ Exact file hashes and intentional differences are in the
 No node installation, new enrollment, endpoint, SDK provider or operational
 selection exists at this checkpoint. Phases 2–5 and both-store live qualification
 remain required. No CI workflow was changed.
+
+## Phase 2 — Offline installation and immutable enrollment
+
+The [administrator guide](../../scripts/kubernetes/node-authority/README.md)
+describes deterministic offline bundle construction, fixed installation paths,
+root custody, canonical configuration, read-only Kubernetes RBAC and restricted
+SSH/sudo policy examples. The installer never provisions a user/key, applies
+Kubernetes RBAC, edits/restarts SSH or mutates the offline guard/runtime. These
+remain explicit administrator operations on the fresh guest.
+
+Setup validates the approved archive/K3s pins, runtime assets/templates, node
+versions and object identity, root-controlled files, source reports and a positive
+empty API/CRI/runtime/process/path/guard baseline. Fifteen access reviews require
+needed reads and deny Pod mutation/exec, Secrets and broad node/namespace listing;
+they never attempt the denied workload operation. Complete role review and real
+credential/SSH negative controls remain required during live qualification.
+
+A bounded installer lock serializes setup. Audit enrollment checks emptiness
+inside its transaction; runtime/node/lifecycle baselines are checked again before
+publishing private ledger, redacted approval and active enrollment in that order.
+The fixed framed endpoint refuses the installation marker. An identical repeated
+install only validates; explicit verification cannot create missing lock/state.
+Different files, an old journal, unexplained controller metadata, missing ledger
+or interrupted installation refuse continuation without reset or repair.
+
+Validation: all 159 manual Python tests passed, including 13 installation/bundle
+checks and six initial socket endpoint checks. Two independent builds produced
+identical archive bytes. An independently unpacked installer runs `--help` with
+an isolated interpreter. Fixed shell syntax and Python formatting checks pass.
+The [Phase 2 evidence](../evidence/kubernetes-node-authority-phase2-2026-11-14.json)
+records exact bundle/tool hashes, real local components and simulated node/root
+observations separately. Legacy lab sources and CI workflows are unchanged.
+
+No Linux guest has been installed or enrolled by this phase. The basic endpoint
+assets are included so the fixed installed entrypoint is concrete; the complete
+protocol/SDK provider gate is still Phase 3. Package/public Memory/PostgreSQL
+contracts and all real SSH/RBAC/installation/runtime campaigns remain Phases 4–5.
+The provider is unavailable for operational selection and is not live-qualified.

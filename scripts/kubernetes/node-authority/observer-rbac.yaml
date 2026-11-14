@@ -1,0 +1,68 @@
+# Administrator-reviewed example for the default enrolled namespace/node/class.
+# Adapt names to the approved binding. Never apply to the shared physical host.
+# Generate/store a separate kubeconfig outside this manifest; no token belongs here.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: smolbox-node-evidence
+  namespace: smolbox-preview
+automountServiceAccountToken: false
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: smolbox-node-evidence
+  namespace: smolbox-preview
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["networkpolicies"]
+    resourceNames: ["offline"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: smolbox-node-evidence
+  namespace: smolbox-preview
+subjects:
+  - kind: ServiceAccount
+    name: smolbox-node-evidence
+    namespace: smolbox-preview
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: smolbox-node-evidence
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: smolbox-node-evidence
+rules:
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    resourceNames: ["kube-system", "smolbox-preview"]
+    verbs: ["get"]
+  - apiGroups: [""]
+    resources: ["nodes"]
+    resourceNames: ["smolbox-k3s"]
+    verbs: ["get"]
+  - apiGroups: ["node.k8s.io"]
+    resources: ["runtimeclasses"]
+    resourceNames: ["smolbox-preview"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: smolbox-node-evidence
+subjects:
+  - kind: ServiceAccount
+    name: smolbox-node-evidence
+    namespace: smolbox-preview
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: smolbox-node-evidence

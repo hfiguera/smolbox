@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "phase": 2,
+  "scope": "administrator_installation_and_bundle_fixture_gate_only",
+  "new_provider_enabled": false,
+  "new_provider_live_qualified": false,
+  "checks": {
+    "manual_python": {
+      "passed": 159,
+      "authority_contract": 10,
+      "standalone_core": 53,
+      "endpoint_fixture": 6,
+      "installation_and_bundle": 13
+    },
+    "python_format": "11 changed/new files checked with Black 24.10.0",
+    "fixed_shell_entrypoints_syntax": true,
+    "unpacked_isolated_installer_help": true,
+    "deterministic_archive_bytes": true,
+    "legacy_sources_unchanged": true,
+    "ci_workflows_unchanged": true
+  },
+  "offline_bundle": {
+    "archive_sha256": "d7e8f7531f5777066294bee21ef8d2d27693d982097021e6772622ec5a787be3",
+    "verifier_manifest_sha256": "cec1597ec86107f838c45f60be9ac56f4c5b9bb7bc2dbe88ffa94cc4f5469e27",
+    "programs": {
+      "authority_assets.py": "e38fcf537554507537fb6f97e72ee0d127fa7554f0792a074bb9bd20a7143932",
+      "authority_bootstrap.py": "6af8cd0deff501b16fb156d7fab515788e551e69711722a203a67e978487bdf3",
+      "authority_config.py": "c1f718820408609f86d26db54d2dcb261e27403a1c81d406d888c4235b6523e9",
+      "authority_contract.py": "6bcd7babadb481c6a46181d90bcf2f78de74080559a9a37e04ddc195e310a8ef",
+      "authority_endpoint.py": "82068790a072f5a3b3866284379106e594f7bc73e65a5ecdfb18d7a1bbfc553d",
+      "authority_guard.py": "d4eb6619c8498060902befd1b60a1c18b74aad53ee96a6d95867907e425a655b",
+      "authority_history.py": "c0c922be9e8782e48679f5d8d6f69334cf42b7fb4e0685d0f826fc5c84a685d0",
+      "authority_lifecycle.py": "8e3a7cd4ec60c3e5493f959cd29c14b2d2927e153f723b88177d6ed0678784e7",
+      "authority_runner.py": "15da4a6e68faae1fba158c0a769831a3f7be32a0991e89d764ac3bdf613b1471",
+      "authority_verifier.py": "b8a2bd67cf88eed919425021ae966d2f10bfe90177850b87ec4e6998d78049ce",
+      "source-basis-history.json": "84342b63582d337ef86e366ce78e67fcc469825c34005de52bcc8d1975d55e65",
+      "source-basis-lifecycle.json": "c0f19189e0cedd301064a7dff17b01de2a86856c7750ae061785e81ea8d2c129",
+      "entrypoint.sh": "3ec8c3cfda900a0cb9426391c577be6f736e4a5882b947c5c053aff63a3d78be",
+      "ssh-command.sh": "b1e0855d31b3c257663749a5094fca06141d533b8f35d7b1b421206820b07670"
+    },
+    "tooling_sha256": {
+      "scripts/kubernetes/node-authority/README.md": "b2007011ae934812da66b98bf0aaece95ae826013d2dde5c12fa22f91e328ae6",
+      "scripts/kubernetes/node-authority/access-policy.txt": "a7cb9be93a094e8f21fbf647eb1a9d97e7d8d8e2e50c85360ebf2c9188cc3255",
+      "scripts/kubernetes/node-authority/bundle.py": "08458b29db7f7f84c203a82bdb790728d84e694a7db741328a344ec4b16b5035",
+      "scripts/kubernetes/node-authority/install.py": "56fa171883a30215267d887931705ed10eac1d3d0b456d7b322ee589324a10e5",
+      "scripts/kubernetes/node-authority/observer-rbac.yaml": "bdc6634914ffb128ed34d98039b7970d207bc98999224b971b6c37845ce5454a"
+    }
+  },
+  "fixtures": {
+    "real_components": [
+      "SQLite empty enrollment, triggers, stored epoch and readonly snapshots",
+      "file modes, durable publication, fixed entrypoint links and deterministic tar/gzip archive",
+      "concurrent installation locks and validation-only repeated installation",
+      "framed socket I/O, malformed inputs and original timeouts"
+    ],
+    "simulated_observations": [
+      "positive root custody for installer campaign",
+      "Kubernetes/CRI inventory and effective authorization answers",
+      "runtime assets and lifecycle baselines",
+      "offline guard health"
+    ],
+    "negative_controls": [
+      "preexisting audit history",
+      "nonempty rows/reservations",
+      "preexisting controller metadata",
+      "changed configuration/programs and missing ledger",
+      "interruption after audit enrollment without active publication",
+      "API/CRI/guard unavailable",
+      "underprivileged, overprivileged and unavailable credential authorization answers",
+      "verification cannot create missing lock/state",
+      "approval mismatch, framing and tiny response grants"
+    ]
+  },
+  "live_side_effects": [],
+  "manual_live_ssh_rbac_and_installation_pending": true,
+  "pending_phases": [
+    3,
+    4,
+    5
+  ]
+}
