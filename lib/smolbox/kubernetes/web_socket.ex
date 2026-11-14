@@ -40,7 +40,7 @@ defmodule SmolBox.Kubernetes.WebSocket do
           state = %{
             conn: conn,
             ref: ref,
-            wire: Wire.new(ws, 1_048_577),
+            wire: Wire.new(ws, message_limit(operation, snapshot)),
             input: payload,
             operation: operation,
             snapshot: snapshot,
@@ -63,6 +63,13 @@ defmodule SmolBox.Kubernetes.WebSocket do
         Operation.error(:transport, operation.name, :not_dispatched)
     end
   end
+
+  defp message_limit(operation, table),
+    do:
+      min(
+        operation.budget.max_response_bytes,
+        max(8193, snapshot(table).max + byte_size(GuestHelper.ack()) + 1)
+      )
 
   defp upgrade(operation, conn, ref, state, bytes) do
     if Operation.remaining(operation) == 0 or bytes >= 16_384 do
@@ -160,7 +167,7 @@ defmodule SmolBox.Kubernetes.WebSocket do
       {:ok, bytes} ->
         if Operation.account(state.operation, 2, byte_size(bytes)) <=
              state.operation.budget.max_response_bytes,
-           do: wire_frames(state, Wire.feed(state.wire, bytes)),
+           do: receive_bytes(state, bytes),
            else: {:error, :output_limit}
 
       {:error, :timeout} ->
@@ -171,15 +178,24 @@ defmodule SmolBox.Kubernetes.WebSocket do
     end
   end
 
-  defp wire_frames(state, {:ok, wire, frames}) do
-    with {:ok, state} <- apply_frames(%{state | wire: wire}, frames) do
-      command = snapshot(state.snapshot)
-
-      wire_next(state, command.closed)
-    end
+  # TLS may coalesce several individually bounded WebSocket frames into one
+  # read. Account the complete read above, then feed bounded pieces to Wire;
+  # transport read boundaries must not become a spurious message-size limit.
+  defp receive_bytes(state, bytes) do
+    with {:ok, state} <- consume_bytes(state, bytes),
+         do: wire_next(state, snapshot(state.snapshot).closed)
   end
 
-  defp wire_frames(_, {:error, category}), do: {:error, category}
+  defp consume_bytes(state, <<>>), do: {:ok, state}
+
+  defp consume_bytes(state, bytes) do
+    count = min(byte_size(bytes), 16_384)
+    <<chunk::binary-size(^count), rest::binary>> = bytes
+
+    with {:ok, wire, frames} <- Wire.feed(state.wire, chunk),
+         {:ok, state} <- apply_frames(%{state | wire: wire}, frames),
+         do: consume_bytes(state, rest)
+  end
 
   defp wire_next(state, false), do: pump(state)
   defp wire_next(%{wire: %{buffer: "", message_bytes: 0}, input: ""}, true), do: :ok

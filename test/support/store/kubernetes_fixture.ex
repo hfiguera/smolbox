@@ -1,7 +1,7 @@
 defmodule SmolBox.Test.Kubernetes do
   @moduledoc false
-  alias SmolBox.{Command, Execution, ExecutionSpec, Profile, Source}
-  alias SmolBox.Kubernetes.{Assignment, CleanupProof, Config, Observation, Receipt}
+  alias SmolBox.{Command, Execution, ExecutionSpec, Machine, Profile, Source}
+  alias SmolBox.Kubernetes.{Assignment, CleanupProof, Config, Identity, Observation, Receipt}
 
   defmodule Credentials do
     @moduledoc false
@@ -76,7 +76,7 @@ defmodule SmolBox.Test.Kubernetes do
     })
   end
 
-  def execution(config) do
+  def execution(config, overrides \\ [], now \\ 1000) do
     {:ok, command} =
       Command.new(["python3", "-c", "print('private-command-value')"],
         env: [{"PRIVATE", "private-env-value"}]
@@ -84,21 +84,26 @@ defmodule SmolBox.Test.Kubernetes do
 
     {:ok, spec} =
       ExecutionSpec.new(
-        scope: "unit",
-        id: "execution-1",
-        command: command,
-        artifact: config.sources |> hd() |> Source.artifact(),
-        profile: hd(config.profiles),
-        retention_ms: 0
+        Keyword.merge(
+          [
+            scope: "unit",
+            id: "execution-1",
+            command: command,
+            artifact: config.sources |> hd() |> Source.artifact(),
+            profile: hd(config.profiles),
+            retention_ms: 0
+          ],
+          overrides
+        )
       )
 
     {:ok, fingerprint} = ExecutionSpec.fingerprint(spec, String.duplicate("k", 32))
-    {:ok, record} = Execution.new(spec, fingerprint, 1000)
+    {:ok, record} = Execution.new(spec, fingerprint, now)
     record
   end
 
-  def assigned(config) do
-    record = execution(config)
+  def assigned(config, overrides \\ [], now \\ 1000) do
+    record = execution(config, overrides, now)
     {:ok, assignment} = Assignment.new(config, record, "kube-unit-creation")
 
     reserved = %{
@@ -115,8 +120,41 @@ defmodule SmolBox.Test.Kubernetes do
       reserved
       | state: :preparing,
         deadlines:
-          Map.put(reserved.deadlines, :preparation, 1000 + reserved.spec.profile.preparation_ms)
+          Map.put(reserved.deadlines, :preparation, now + reserved.spec.profile.preparation_ms)
     }
+
+    {record, assignment}
+  end
+
+  def ready_record(config, overrides \\ [], now \\ 1000) do
+    {record, assignment} = assigned(config, overrides, now)
+    ready = ready_receipt(assignment)
+    {:ok, created} = Receipt.created(assignment, ready.pod_uid)
+
+    {:ok, record} =
+      Execution.transition(
+        record,
+        [backend_create_state: :dispatched, backend_receipt: created],
+        now
+      )
+
+    machine = %Machine{
+      name: assignment.pod_name,
+      state: :running,
+      created_at: nil,
+      cpus: 2,
+      memory_mb: 1024,
+      storage_gb: 20,
+      overlay_gb: 10,
+      backend_identity: %Identity{receipt: ready}
+    }
+
+    {:ok, record} =
+      Execution.transition(
+        record,
+        [backend_receipt: ready, created_machine: machine, state: :ready],
+        now
+      )
 
     {record, assignment}
   end

@@ -372,32 +372,37 @@ first-release assumptions. Other principals able to recreate Pods in that
 namespace violate the deployment contract; a post-exec mismatch cannot undo
 effects. Labels, owner references, or a preflight GET do not solve that problem.
 
-Do not put application argv/env in exec query parameters or interpolate them
-into a shell. Invoke a constant Python helper (`python3 -I -S -c <fixed program>`)
-and send a bounded, versioned, length-delimited control message on stdin containing
-the approved argv/env/workdir. The helper validates it, changes directory,
-redirects the application's stdin to `/dev/null`, and `exec`s the exact argv
-with the image environment plus explicit overrides. It must not evaluate shell
-text or print the control message. Audit configuration must also avoid recording
-exec payloads; static helper text is not an application secret.
+Do not put application argv/env or file paths in exec query parameters or
+interpolate them into a shell. Invoke a fixed Python loader
+(`python3 -I -S -u -c <fixed loader>`). Its query contains only infrastructure
+code and the approved helper size/SHA-256. Send `SBP1`, a big-endian unsigned
+32-bit source length and the exact approved helper source over channel 0. The
+loader verifies the fixed size and digest before executing it from a Linux memfd
+sealed against writes, growth and shrinkage. It does not evaluate user strings or
+stage a writable script. The helper closes the source descriptor before application
+exec. This keeps the upgraded request below the server request-line limit as
+file support grows. Both fixed sources are compile-time package assets.
 
-The controller keeps the protocol producer open until the helper has read its
-declared length and the command finishes. It does not send stream-close to
-delimit data. This avoids the observed shim CloseIO/FIFO-drain race, but does not
-qualify command stdin, EOF delivery, or arbitrary interactive protocols. Internal
-helper input is distinct from user `Command.stdin`, which is rejected.
-
-Freeze helper framing independently of WebSocket channel framing: four magic
-bytes `SBK1`, a big-endian unsigned 32-bit JSON-header length, the exact UTF-8
-header, then only the declared raw upload bytes. The header includes operation,
-protocol version, relative path or command fields, declared byte count and
+Next send `SBK1`, a big-endian unsigned 32-bit JSON-header length, the exact UTF-8
+header, and only the declared raw upload bytes. The header includes version,
+operation, absolute workspace path or command fields, declared byte count and
 digest where applicable. Cap the header at the lower of 1 MiB and remaining
 request budget before allocation; also bound depth, keys and decoded fields.
-Check encoded request size before upgrade. A download response uses the same
-magic/length convention with a header capped at 4 KiB and exact data length;
-application command output remains unframed workload stdout/stderr. Invalid
-framing never falls back to shell/EOF behavior. Protocol fixtures must cover
-partial reads, excess bytes, empty data and version mismatch.
+Check the complete source/control/data request size before upgrade. The helper
+validates the command, changes directory, redirects application stdin to
+`/dev/null`, acknowledges with `SBK1` followed by four zero bytes, and directly
+execs the exact argv with the image environment plus explicit overrides.
+Audit configuration must avoid recording exec payloads.
+
+The controller keeps the producer open until completion. Neither EOF nor
+stream-close delimits a request; this avoids the observed shim CloseIO/FIFO-drain
+race. Internal helper input does not qualify user `Command.stdin`, which remains
+rejected. The acknowledgement is stripped from command stdout. File responses
+instead carry acknowledgement plus `SBF1`, a 32-bit header length (1–8192), exact
+JSON metadata, then exactly the declared raw download bytes. Empty files have
+size zero and the SHA-256 of empty bytes. Workload stdout/stderr remain unframed.
+Invalid framing never falls back to shell/EOF behavior. See the
+[implemented file protocol](kubernetes-file-protocol.md) for validation and limits.
 
 `Runtime.Observation` already dispatches `exec_stream` for ordinary foreground
 commands. Implement that operation even though this release has no public

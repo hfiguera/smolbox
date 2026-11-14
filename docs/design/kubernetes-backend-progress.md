@@ -15,14 +15,14 @@ parity tracked in [the parity matrix](kubernetes-backend-parity.md).
 | 2 — Store/codec/OCI admission | Store gate passed | Selective v54, atomic allocation, UID receipt transitions, proof-bound release, authenticated PostgreSQL enrollment, gated OCI submission; operational dispatch disabled |
 | 3 — Object lifecycle | Object API gate passed | Bounded TLS/token client, pinned object enrollment, assigned backend create/observe/readiness/UID-delete and restricted live RBAC; application IO and capacity release disabled |
 | 4 — Exec | Guarded adapter exec gate passed | Real transaction-backed node capture; saved ready receipts; assigned adapter bytes/exits 0 and 7; lost observation without replay |
-| 5 — Files | Pending | Qualified helper staging/collection |
+| 5 — Files | Assigned file gate passed | Shared Runtime.Files staging/read-back and artifact publication on real SmolVM; bounded sealed helper, corruption and unsafe-path rejection |
 | 6 — Cleanup/recovery | Capture prerequisite implemented; managed gate pending | Journal/inspector and typed physical-proof component qualified; startup/recovery, quiescence, cancellation and proof-bound managed release remain |
 | 7 — Public qualification | Pending | Public SmolBox smoke, compatibility evidence and user documentation |
 
 Kubernetes authority types and target normalization are implemented; the backend
 is not operational or enabled yet. Phase 0 demonstrates the upstream runtime and
-resolves its network recipe. The store and object API gates have passed. Guarded application I/O, recovery
-and public-path qualification remain required before operational admission.
+resolves its network recipe. The store, object API, guarded exec and file gates have passed. Managed cleanup,
+recovery and public-path qualification remain required before operational admission.
 
 ## Phase 0 findings and approved development recipe
 
@@ -402,5 +402,56 @@ node frames, SSH argument injection, lost owners, history corruption and leaks.
 No CI workflow or physical-host worker baseline changed.
 
 [Guarded exec and node-capture evidence](../evidence/kubernetes-backend-phase4-2026-11-13.json).
-Phase 5 files, Phase 6 managed cleanup/recovery and Phase 7 public qualification
-remain required. Runtime health/admission remains disabled until those gates pass.
+At this checkpoint Phase 5 files, Phase 6 managed cleanup/recovery and Phase 7
+public qualification remained required. Runtime health/admission stayed disabled.
+
+
+## Phase 5 — Bounded files through the shared runtime
+
+The assigned file gate passed on November 13 (Denver; November 14 UTC), 2026.
+[File protocol](kubernetes-file-protocol.md) describes the fixed sealed loader,
+length framing, workspace directory descriptors, atomic upload, changing-file
+checks and strict reply validation. Application paths and payloads remain outside
+the exec URL. Both helper sources ship in the package and compile on the Mac;
+the loader's Linux memfd execution was qualified in the real MicroVM.
+
+The real assigned backend, fresh node guards and shared `Runtime.Files` staged
+and read back empty, 4,352-byte and 1-MiB binary inputs, including a quoted Unicode
+path. A single foreground command checked digests, reversed the bytes, emitted
+binary stdout/stderr and exited 7. Shared collection published the exact three
+artifacts and preserved that exit. The application also verified that it did not
+inherit the sealed helper descriptor. A deliberately wrong upload checksum was
+rejected by the real utility (exit 126) and left the prior input unchanged.
+
+A second execution produced a symlink instead of its declared output. Collection
+failed with utility exit 126, published no artifact and preserved the application's
+exit 7. Its CRI sandbox outlived the manual driver's 30-second observation deadline;
+that failed check remains recorded. A subsequent read-only observation of the
+original UID confirmed CRI absence and obtained fresh typed physical cleanup
+proof. The command was never replayed. The driver's ephemeral store had exited,
+so this case does not claim reservation release or controller-recovery success.
+The successful file case did persist proof and perform guarded manual Memory
+store release, observing zero slots. Neither case qualifies managed cleanup.
+
+Unit coverage includes binary boundaries/backpressure, duplicate/malformed reply
+headers, missing acknowledgements/status, helper exit evidence, identity/history
+changes before transfer, manifest/path limits, corrupt read-back/publication and
+slow ArtifactStore callbacks. Python cases also cover interrupted uploads, digest
+mismatch, atomic replacement, temporary cleanup, symlinks, hard links, FIFO/directory
+rejection and files changing during download.
+
+[Exact Phase 5 evidence](../evidence/kubernetes-backend-phase5-2026-11-13.json).
+Phase 6 managed cleanup/recovery and Phase 7 public qualification remain pending;
+public Kubernetes health/admission stays disabled. All cluster checks remain
+manual and no CI workflow changed.
+
+Final validation: 2,259 main-project checks passed (42 opt-in excluded), 22 focused
+exec/file/runtime-file cases passed, and 56 manual Python cases passed. A repeated
+boundary check caught TLS coalescing valid frames into a read larger than the
+wire parser's feed cap. The adapter now feeds bounded chunks after accounting
+the full read; the final suite and a fresh live file campaign passed after this
+fix. Formatting, warnings-as-errors builds, strict Credo, zero-clone ExDNA,
+strict-assumption Credence, Dialyzer and zero dependency cycles passed. A fresh
+production package consumer on an independent build path included both helper
+assets; all packaged library/asset hashes matched the checkpoint. The archive
+precedes this final evidence/report text, so it is not a hash of the later docs.

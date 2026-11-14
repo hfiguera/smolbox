@@ -58,7 +58,7 @@ defmodule SmolBox.Runtime.Files do
          :ok <-
            Session.io(session, record, :preparation, fn ->
              Backend.upload(
-               Target.connection(session.worker, record),
+               connection(session, record, :preparation),
                record.machine_name,
                input["path"],
                bytes,
@@ -68,7 +68,7 @@ defmodule SmolBox.Runtime.Files do
          {:ok, staged} <-
            Session.io(session, record, :preparation, fn ->
              Backend.download(
-               Target.connection(session.worker, record),
+               connection(session, record, :preparation),
                record.machine_name,
                input["path"],
                record.spec.profile.max_file_bytes
@@ -90,7 +90,7 @@ defmodule SmolBox.Runtime.Files do
          {:ok, bytes} <-
            Session.io(session, record, :collection, fn ->
              Backend.download(
-               Target.connection(session.worker, record),
+               connection(session, record, :collection),
                record.machine_name,
                output["path"],
                output["max_bytes"]
@@ -111,6 +111,15 @@ defmodule SmolBox.Runtime.Files do
     end
   end
 
+  defp connection(session, record, stage) do
+    reference = Target.connection(session.worker, record)
+
+    if reference.kind == :kubernetes,
+      do:
+        Backend.bounded(reference, timeout_ms: max(1, Session.remaining(session, record, stage))),
+      else: reference
+  end
+
   defp approved(%{worker: nil}, _record), do: Session.error(:unsupported_capability, :worker)
 
   defp approved(session, record) do
@@ -121,7 +130,7 @@ defmodule SmolBox.Runtime.Files do
 
   defp running(session, record) do
     case Session.io(session, record, :collection, fn ->
-           Backend.inspect_machine(Target.connection(session.worker, record), record.machine_name)
+           Backend.inspect_machine(connection(session, record, :collection), record.machine_name)
          end) do
       {:ok, %{state: :running} = observed} ->
         if Machine.same_incarnation?(record.created_machine, observed),

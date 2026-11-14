@@ -1,7 +1,7 @@
 defmodule SmolBox.KubernetesExecTest do
   use ExUnit.Case, async: true
-  alias SmolBox.{Backend, Execution, Machine}
-  alias SmolBox.Kubernetes.{Assignment, GuestHelper, Identity, Receipt, WebSocket}
+  alias SmolBox.{Backend, Execution}
+  alias SmolBox.Kubernetes.{Assignment, GuestHelper}
   alias SmolBox.KubernetesExecPeer, as: ExecPeer
   alias SmolBox.KubernetesPeer, as: Peer
   alias SmolBox.Runtime.Target
@@ -22,35 +22,8 @@ defmodule SmolBox.KubernetesExecTest do
 
   setup context do
     {config, peer} = Peer.start(context.tls)
-    {record, assignment} = Fixture.assigned(config)
-    ready = Fixture.ready_receipt(assignment)
-    config = %{config | node_evidence: {ExecPeer.Proof, ready.observation}}
-    {:ok, created} = Receipt.created(assignment, ready.pod_uid)
-
-    {:ok, record} =
-      Execution.transition(
-        record,
-        [backend_create_state: :dispatched, backend_receipt: created],
-        1000
-      )
-
-    machine = %Machine{
-      name: assignment.pod_name,
-      state: :running,
-      created_at: nil,
-      cpus: 2,
-      memory_mb: 1024,
-      storage_gb: 20,
-      overlay_gb: 10,
-      backend_identity: %Identity{receipt: ready}
-    }
-
-    {:ok, record} =
-      Execution.transition(
-        record,
-        [backend_receipt: ready, created_machine: machine, state: :ready],
-        1000
-      )
+    {record, assignment} = Fixture.ready_record(config)
+    config = %{config | node_evidence: {ExecPeer.Proof, record.backend_receipt.observation}}
 
     {:ok, record} =
       Execution.transition(record, [state: :dispatching, evidence: :dispatch_uncertain], 1000)
@@ -67,43 +40,8 @@ defmodule SmolBox.KubernetesExecTest do
     |> Backend.bounded(budget)
   end
 
-  defp status(code) do
-    object =
-      if code == 0,
-        do: %{"metadata" => %{}, "status" => "Success"},
-        else: %{
-          "status" => "Failure",
-          "reason" => "NonZeroExitCode",
-          "details" => %{
-            "causes" => [%{"reason" => "ExitCode", "message" => Integer.to_string(code)}]
-          }
-        }
-
-    {:binary, <<3, Jason.encode!(object)::binary>>}
-  end
-
-  defp install(c, frames, options \\ []) do
-    owner = self()
-    route = "/api/v1/namespaces/smolbox-preview/pods/" <> c.record.machine_name <> "/exec"
-
-    callback = fn conn ->
-      offered = Plug.Conn.get_req_header(conn, "sec-websocket-protocol")
-      send(owner, {:offered, offered})
-
-      conn
-      |> Plug.Conn.put_resp_header(
-        "sec-websocket-protocol",
-        Keyword.get(options, :protocol, WebSocket.protocol())
-      )
-      |> Plug.Conn.upgrade_adapter(
-        :websocket,
-        {ExecPeer, %{owner: owner, frames: frames, mode: Keyword.get(options, :mode, :normal)},
-         []}
-      )
-    end
-
-    Peer.change(c.peer, &put_in(&1, [:overrides, {"GET", route}], callback))
-  end
+  defp status(code), do: ExecPeer.status(code)
+  defp install(c, frames, options \\ []), do: ExecPeer.install(c.peer, c.record, frames, options)
 
   test "assigned exec_stream returns byte-exact stdout/stderr and actual nonzero status", c do
     frames = [

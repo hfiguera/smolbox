@@ -22,7 +22,9 @@ defmodule SmolBox.Kubernetes.ExecutionPolicy do
         Map.get(spec, :volumes, []) == [] and Map.get(spec, :ports, []) == [] and
           Map.get(spec, :workload) == nil and not Map.get(spec, :checkpointable, false) and
           not Map.get(spec, :branch_static_egress, false) and
-          Config.profile?(profile) and GuestHelper.command?(spec.command)
+          Config.profile?(profile) and GuestHelper.command?(spec.command) and
+          GuestHelper.paths?(Map.get(spec, :inputs, [])) and
+          GuestHelper.paths?(Map.get(spec, :outputs, []))
 
   def supported?(_), do: false
 end

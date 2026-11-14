@@ -234,6 +234,11 @@ qualified image, and induced loss yields uncertainty with no second exec.
 
 ## Phase 5 — Implement basic files
 
+Assigned file gate passed; see [progress](kubernetes-backend-progress.md),
+[file protocol](kubernetes-file-protocol.md) and
+[manual live evidence](../evidence/kubernetes-backend-phase5-2026-11-13.json).
+Managed cleanup/recovery and public runtime admission remain separate gates.
+
 Primary areas: guest helper, backend upload/download, `Runtime.Files` integration.
 
 1. Implement bounded path-component walking beneath `/workspace` using directory

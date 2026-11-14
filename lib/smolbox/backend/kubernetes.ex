@@ -3,7 +3,7 @@ defmodule SmolBox.Backend.Kubernetes do
   @behaviour SmolBox.Backend
   alias SmolBox.Backend.{KubernetesContext, Reference}
   alias SmolBox.{Error, Execution}
-  alias SmolBox.Kubernetes.{Assignment, Config, Exec, Operation, Pod}
+  alias SmolBox.Kubernetes.{Assignment, Config, Exec, Files, Inspection, Operation, Pod}
 
   def reference(config) do
     with :ok <- Config.validate(config),
@@ -32,7 +32,17 @@ defmodule SmolBox.Backend.Kubernetes do
   # ready receipt and fresh complete node evidence. Unassigned health stays closed.
   @impl true
   def supports_operation?(%KubernetesContext{}, operation),
-    do: operation in [:create, :inspect_machine, :start, :delete, :exec, :exec_stream]
+    do:
+      operation in [
+        :create,
+        :inspect_machine,
+        :start,
+        :delete,
+        :exec,
+        :exec_stream,
+        :upload,
+        :download
+      ]
 
   @impl true
   def supports_operation?(_context, _operation), do: false
@@ -58,9 +68,17 @@ defmodule SmolBox.Backend.Kubernetes do
        when assignment == record.backend_assignment,
        do: Pod.create_once(op, record)
 
+  defp object_operation(record, op, :upload, [name, path, bytes, digest])
+       when name == record.machine_name,
+       do: Files.upload(op, record, path, bytes, digest)
+
+  defp object_operation(record, op, :download, [name, path, max])
+       when name == record.machine_name,
+       do: Files.download(op, record, path, max)
+
   defp object_operation(record, op, operation, [name]) when name == record.machine_name do
     case operation do
-      :inspect_machine -> Pod.observe(op, record)
+      :inspect_machine -> Inspection.observe(op, record)
       :start -> Pod.await_ready(op, record)
       :delete -> Pod.delete(op, record)
       _ -> unsupported(operation)
