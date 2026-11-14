@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Preserve Kubernetes control-traffic headroom for executions with small output
+  limits. Keep the configured aggregate transport budget separate from the
+  combined stdout/stderr cap.
 - Keep valid Kubernetes executions queued while the single node slot is busy.
   Preserve operational health errors instead of treating them as unsupported policy.
 - Reconcile cancelled or expired ready Kubernetes executions before requiring

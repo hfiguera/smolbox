@@ -81,6 +81,20 @@ defmodule SmolBox.KubernetesExecTest do
              Backend.exec(reference(c), c.record.machine_name, c.record.spec.command)
   end
 
+  test "an explicit aggregate response budget still bounds control traffic", c do
+    install(c, [{:binary, <<1, GuestHelper.ack()::binary>>}, status(0)])
+
+    assert {:error, %{category: :output_limit}} =
+             Backend.exec(
+               reference(c, max_response_bytes: 128),
+               c.record.machine_name,
+               c.record.spec.command
+             )
+
+    refute Enum.any?(Peer.requests(c.peer), &String.ends_with?(&1.path, "/exec"))
+    refute_receive {:exec_request, _, _}, 20
+  end
+
   test "explicit exec authorization rejection is definitive and does not retry", c do
     route = "/api/v1/namespaces/smolbox-preview/pods/" <> c.record.machine_name <> "/exec"
     denied = &SmolBox.TestPeer.json(&1, %{}, 403)

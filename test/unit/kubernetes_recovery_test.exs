@@ -20,10 +20,15 @@ defmodule SmolBox.KubernetesRecoveryTest do
            observer_epoch: "observer-epoch"
          }}
 
-    def capture(binding, uid, _, _),
-      do:
-        {:ok,
-         %{Fixture.observation(binding, uid) | observed_at_ms: System.system_time(:millisecond)}}
+    def capture(binding, uid, budget, _) do
+      observation =
+        %{Fixture.observation(binding, uid) | observed_at_ms: System.system_time(:millisecond)}
+
+      # The real framed node transport must fit at least this observation payload.
+      if byte_size(Jason.encode!(Map.from_struct(observation))) + 8 <= budget.max_response_bytes,
+        do: {:ok, observation},
+        else: {:error, %Error{category: :identity_conflict, operation: :worker}}
+    end
 
     def cleanup(_, receipt, _, peer) do
       if Agent.get(peer, &(is_nil(&1.pod) and &1.mode != :proof_unavailable)),
@@ -157,6 +162,37 @@ defmodule SmolBox.KubernetesRecoveryTest do
     hd(reports).status
   end
 
+  defp output_cap(c, cap) do
+    profile = %{hd(c.kube.profiles) | max_output_bytes: cap}
+
+    # Real Node responses include metadata that is unrelated to command output.
+    Peer.change(c.peer, fn state ->
+      put_in(state.objects.node["metadata"]["annotations"], %{
+        "fixture.example/node-metadata" => String.duplicate("n", 4096)
+      })
+    end)
+
+    %{c | kube: %{c.kube | profiles: [profile]}}
+  end
+
+  defp public_execution(c, frames) do
+    Peer.change(c.peer, &%{&1 | ready: true})
+    ExecPeer.install(c.peer, %{machine_name: :any}, frames)
+    runtime = start(c, false, [])
+    eventually(fn -> worker_status(runtime) == :ready end)
+    assert {:ok, handle} = SmolBox.submit(runtime, Fixture.execution(c.kube).spec)
+
+    eventually(fn ->
+      match?({:ok, %{cleanup: :complete, reservation: nil}}, Memory.fetch(c.store, handle))
+    end)
+
+    assert {:ok, finished} = Memory.fetch(c.store, handle)
+    assert {:ok, %{slots: 0}} = Memory.usage(c.store, c.kube.id)
+    assert Enum.count(Peer.requests(c.peer), &(&1.method == "POST")) == 1
+    assert Enum.count(Peer.requests(c.peer), &String.ends_with?(&1.path, "/exec")) == 1
+    finished
+  end
+
   defp seed(c, owner, state, now \\ System.system_time(:millisecond) - 2000) do
     {prepared, assignment} = Fixture.ready_record(c.kube, [], now)
     record = Fixture.execution(c.kube, [], now)
@@ -274,6 +310,55 @@ defmodule SmolBox.KubernetesRecoveryTest do
              Memory.fetch(c.store, handle)
 
     assert Enum.count(Peer.requests(c.peer), &String.ends_with?(&1.path, "/exec")) == 1
+  end
+
+  for cap <- [1, 4096] do
+    test "public silent execution keeps infrastructure headroom with output cap #{cap}", c do
+      c = output_cap(c, unquote(cap))
+      assert :ok = Config.validate(c.kube)
+
+      finished = public_execution(c, [{:binary, <<1, "SBK1", 0::32>>}, ExecPeer.status(0)])
+
+      assert finished.state == :completed
+      assert finished.last_error == nil
+      assert %{exit_code: 0, stdout: "", stderr: "", truncated: false} = finished.result
+    end
+  end
+
+  test "public execution retains the full combined output cap after control traffic", c do
+    c = output_cap(c, 4096)
+    stdout = :binary.copy(<<255>>, 2048)
+    stderr = :binary.copy(<<254>>, 2048)
+
+    finished =
+      public_execution(c, [
+        {:binary, <<1, "SBK1", 0::32, stdout::binary>>},
+        {:binary, <<2, stderr::binary>>},
+        ExecPeer.status(7)
+      ])
+
+    assert finished.state == :completed
+    assert finished.last_error == nil
+    assert finished.result.exit_code == 7
+    assert finished.result.stdout == stdout
+    assert finished.result.stderr == stderr
+    refute finished.result.truncated
+  end
+
+  test "public execution still rejects combined output above the cap", c do
+    c = output_cap(c, 4096)
+    stdout = :binary.copy(<<255>>, 4096)
+
+    finished =
+      public_execution(c, [
+        {:binary, <<1, "SBK1", 0::32, stdout::binary>>},
+        {:binary, <<2, 254>>},
+        ExecPeer.status(0)
+      ])
+
+    assert finished.state == :unknown
+    assert finished.last_error.category == :output_limit
+    assert finished.result == nil
   end
 
   test "a busy single-slot target queues valid work and executes it after release", c do

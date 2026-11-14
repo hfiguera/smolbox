@@ -92,6 +92,13 @@ one command with exit 7, collects/verifies its binary output, waits for positive
 cleanup and checks zero reserved slots. `silent`, `cancel` and `overflow` modes
 exercise other outcomes. IDs must be unique for distinct executions. Run cases
 serially. An `await` result is separate from cleanup and reservation release.
+
+The profile's `max_output_bytes` limits combined decoded stdout/stderr. Kubernetes
+uses the target's separate `budget.max_response_bytes` (2 MiB by default) for
+aggregate API responses, controller/node proofs and WebSocket traffic. A small
+output cap does not shrink this transport allowance; tighter aggregate bounds
+still apply to infrastructure traffic as well as command traffic.
+
 The `lost` and `reject` modes are intended for explicit loopback fault-proxy
 campaigns; `reject` requires a failed preparation with positive original cleanup.
 The TLS proxy keeps both legs verified and records only request counts/faults,

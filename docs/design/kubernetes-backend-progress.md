@@ -616,3 +616,29 @@ before deletion to prevent late OS-helper writes racing teardown; the lost-uploa
 test allows TLS setup time while retaining its uncertainty/no-replay assertions.
 The original live reports remain historical; this follow-up uses local API/store
 fixtures and changes no node verifier or CI workflow.
+
+## Review follow-up — command output and infrastructure budgets
+
+Kubernetes command observation now retains the assigned reference's configured
+aggregate response budget instead of shrinking it to the profile's output cap.
+API reads, controller authorization and node proofs share that bounded allowance;
+the command parser still independently enforces the combined decoded stdout/stderr
+cap. Existing tighter reference bounds remain effective, and HTTP/Embedded retain
+their previous output-derived transport bounds.
+
+Four public-runtime regressions failed before the fix and pass afterward. They
+cover silent commands with 1-byte and 4-KiB output caps, exact combined binary
+output at 4 KiB and overflow by one stderr byte. The API fixture includes 4 KiB
+of Node metadata, and node capture rejects an observation that cannot fit its
+granted response budget. Every case verifies one create, one application exec,
+positive cleanup and zero reserved slots. A direct backend check also verifies
+that an explicit small aggregate response budget still rejects control traffic
+before application exec. These are local fixtures; no new live qualification or
+CI workflow change is claimed.
+
+Validation passed all 2,309 main checks (42 opt-in excluded), 64 focused checks
+and both original review reproductions using the captured K3s Node response.
+Formatting, strict Credo, zero-clone ExDNA, strict-assumption Credence and
+Dialyzer passed. The initial full run hit an existing 300-ms TLS-deadline test
+while static checks were also running; the focused test and full rerun with
+lower concurrency passed without changing that test.
