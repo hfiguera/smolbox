@@ -1,6 +1,6 @@
 # Kubernetes node authority progress
 
-Status: Phases 0–2 implementation gates passed, November 14, 2026. Delivery branch:
+Status: Phases 0–3 implementation gates passed, November 14, 2026. Delivery branch:
 `feature/kubernetes-node-authority`. Follow the [specification](kubernetes-node-authority.md),
 [frozen contracts](kubernetes-node-authority-contract.md) and
 [implementation plan](kubernetes-node-authority-implementation-plan.md).
@@ -10,7 +10,7 @@ Status: Phases 0–2 implementation gates passed, November 14, 2026. Delivery br
 | 0 — Contract and authority review | Passed | Exact schemas, canonical vectors, proof/privilege obligations, source basis and compatibility checks below |
 | 1 — Standalone verifier | Passed | Self-contained configured core, source comparison, 53 extraction checks and interruption evidence below |
 | 2 — Administrator installation | Passed (fixtures) | Deterministic bundle, explicit root installer and immutable enrollment; live installation remains Phase 5 |
-| 3 — Endpoint and SDK provider | In progress | Fixed framed entrypoint has initial socket tests; SDK provider and complete protocol/access qualification pending |
+| 3 — Endpoint and SDK provider | Passed (protocol/access scope) | Strict SDK provider, bounded transport, package constructors and real pre-enrollment SSH controls; execution qualification remains Phase 5 |
 | 4 — Runtime/store integration | Pending | Preliminary epoch/codec compatibility only; provider/store campaigns remain required |
 | 5 — Live qualification | Pending | Existing lab evidence does not qualify this provider |
 
@@ -121,3 +121,59 @@ assets are included so the fixed installed entrypoint is concrete; the complete
 protocol/SDK provider gate is still Phase 3. Package/public Memory/PostgreSQL
 contracts and all real SSH/RBAC/installation/runtime campaigns remain Phases 4–5.
 The provider is unavailable for operational selection and is not live-qualified.
+
+## Phase 3 — Restricted protocol and SDK provider
+
+`SmolBox.Kubernetes.NodeAuthority.new/1` now constructs an explicit redacted
+connection/approval context without SSH, credential reads or node installation.
+The provider uses direct SSH with a fixed token, pinned host/key files, no
+inherited configuration, agent/default-key fallback, proxy/local command,
+forwarding or multiplexing. No lab wrapper or API-only fallback exists. The
+existing lab projection API delegates to shared typed projection without changing
+its wire protocol, approval shape or explicit availability.
+
+The new raw-frame path preserves duplicate JSON keys until strict normalization.
+Canonical configuration/receipt/identity vectors agree with Python; schemas,
+ASCII/signed-integer/depth/cardinality/body bounds, nonce/action/generation/manifest
+matching and exact typed results are enforced. Each invocation gets a fresh
+nonce. The original callback deadline includes validation, serialization,
+transport and projection; frame overhead is charged. Capture retains future/
+five-second freshness checks. Cleanup attaches only the saved receipt, requires
+its canonical digest and version-3 proof, and rejects old provider epochs.
+Positive evidence requires normal helper completion; even a valid positive frame
+with a nonzero helper status cannot become authority. A complete matched negative
+frame can report only its bounded rejection, never a workload exit or diagnostic.
+
+Validation: 41 focused Elixir provider/protocol/lab/controller/codec checks and all
+159 manual Python checks passed. Strict static/duplication/format checks pass.
+Current and minimum production dependency consumers construct the provider with
+missing credential/SSH paths and no Rust. The package contains every approved
+core/schema/tool asset, excludes bytecode caches, and its independently unpacked
+builder works with no test checkout. The existing package validator/smoke now
+checks these assets and offline construction. Its macOS temp-root handling was
+corrected after a real `/var`/`/private/var` alias produced broken Mix `priv` links.
+No CI workflow or node-provisioning/qualification job was changed.
+
+A fresh `node-authority-access-v1` guest ran under the existing shared lock and
+four-hour/CPU/memory/task/file limits. Thirty real server controls passed on
+OpenSSH 9.6, including shell/subsystem/PTY/environment/sudo/forwarding rejection,
+key/host mismatch, missing-key fallback, original endpoint death after client
+loss and the real thirty-second partial-header deadline. Four Mac SDK controls
+passed through an external tunnel on OpenSSH 10.5. The controls intentionally
+returned **unavailable**, with no enrolled authority or K3s/workload/proof claim.
+
+The campaign exposed two policy-example defects: a root-owned authorized_keys
+file needs principal-readable public-key permissions, and OpenSSH 9.6 requires
+`PermitUserEnvironment` outside Match. Both examples were corrected and effective
+policy was verified on the guest. An initial agent-control assertion incorrectly
+filtered post-authentication session logs by service unit; comm/syslog filtering
+then observed the actual denial. Failed controls and their resolutions are kept
+with the [Phase 3 report](../evidence/kubernetes-node-authority-phase3-2026-11-14.json).
+
+The guest and tunnel are stopped, its disk retained and shared lock released.
+The original lab disk, failed-by-cap service and authority were not modified.
+The [manual tools/guide](../../scripts/kubernetes/node-authority/README.md) describe
+reproduction. A separate fresh domain and repeated effective-access checks are
+required for final runtime qualification. Default/example selection remains the
+lab provider; the new provider is not execution-qualified or operationally
+enabled. Phases 4–5 and public Memory/PostgreSQL campaigns remain outstanding.

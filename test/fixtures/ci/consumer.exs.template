@@ -24,6 +24,16 @@ end
 
 {:ok, _apps} = Application.ensure_all_started(:smolbox)
 [] = Application.spec(:smolbox, :mod)
+{:ok, node_authority} = SmolBox.Kubernetes.NodeAuthority.new(
+  ssh_host: "127.0.0.1", ssh_port: 1, ssh_user: "smolbox-evidence",
+  identity_file: "/missing/authority-key", known_hosts_file: "/missing/authority-hosts",
+  ssh_executable: "/missing/authority-ssh", authority_generation: String.duplicate("a", 64),
+  verifier_manifest_sha256: String.duplicate("b", 64))
+false = String.contains?(inspect(node_authority), "/missing/")
+authority_assets = Application.app_dir(:smolbox, "priv/kubernetes/node_authority")
+true = File.regular?(Path.join(authority_assets, "configuration-v1.schema.json"))
+true = File.regular?(Path.join(authority_assets, "protocol-v1.schema.json"))
+14 = authority_assets |> Path.join("v1") |> File.ls!() |> length()
 {:ok, endpoint} = SmolBox.Worker.new("consumer", "http://127.0.0.1:1", allow_insecure_loopback: true)
 {:ok, client} = SmolBox.Client.new(endpoint, transport: Consumer.Transport)
 {:ok, %{version: "1.22.0", total: 0, running: 0}} = SmolBox.Client.health(client)
@@ -156,6 +166,7 @@ versions = Map.new([:req, :mint, :mint_web_socket, :jason, :telemetry, :nimble_o
 end)
 File.write!("smoke.json", Jason.encode!(%{client: true, supervisor: true,
   without_rust: without_rust,
+  node_authority_offline: true,
   managed_branches: true, managed_checkpoints: true, managed_exports: true, guest_files: true, workload: true, checkpoint: true, interactive: true, network_policy: true, offline_default: true, runtime_1_16_0_explicit: "1.16.0",
   unqualified_runtime_rejected: "1.16.2", runtime_default: "1.35.1", legacy_runtime_explicit: "1.14.1",
   legacy_1_14_6_explicit: "1.14.6", versions: versions}))

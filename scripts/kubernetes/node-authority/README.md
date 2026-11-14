@@ -143,3 +143,110 @@ qualifies the node. Run the fixture campaign explicitly:
 ```sh
 python3 -B -m unittest discover -s scripts/kubernetes -p 'test_node_authority_*.py'
 ```
+
+## SDK construction and transport
+
+`SmolBox.Kubernetes.NodeAuthority.new/1` constructs a redacted callback context
+without opening a connection, reading a credential or installing anything:
+
+```elixir
+{:ok, node} = SmolBox.Kubernetes.NodeAuthority.new(
+  ssh_host: "127.0.0.1",
+  ssh_port: 22471,
+  ssh_user: "smolbox-evidence",
+  identity_file: "/private/approved/node-key",
+  known_hosts_file: "/private/approved/node-known-hosts",
+  authority_generation: approvals["authority_generation"],
+  verifier_manifest_sha256: approvals["verifier_manifest_sha256"]
+)
+```
+
+These example paths and connection fields must be replaced with administrator
+approvals. The provider is not yet live-qualified for execution. The existing
+example/default selection remains `LabNodeEvidence`; public runtime enablement
+waits for the remaining integration and live qualification gates.
+
+Host accepts an ASCII DNS name or IP literal (IPv6 without brackets); port and
+user are separate required fields. Paths are absolute ASCII paths using letters,
+digits, dot, underscore, hyphen and slash. Whitespace, shell syntax, percent/tilde
+expansion, traversal and inherited-home interpretation are rejected. An optional
+absolute `ssh_executable` is a trusted host choice; the default is `/usr/bin/ssh`.
+
+The transport disables inherited SSH configuration with `-F /dev/null`, agent and
+default-key fallback, alternate authentication, host-key discovery/update,
+proxy/local commands, forwarding and multiplexed session reuse. Only the fixed
+literal token is sent. An external administrator-operated tunnel is acceptable;
+pin the node key for the exact forwarded host/port in the supplied known-hosts
+file. `IdentityFile=none` remains alongside the explicit key so a missing `-i`
+file cannot activate default identities. See the
+[OpenSSH identity-file contract](https://man.openbsd.org/ssh_config#IdentityFile).
+
+One operation deadline includes validation, serialization, transport and typed
+projection. Both frame headers count against the granted byte allowances.
+Canonical receipt JSON matches the node's v1 encoding; every request gets a fresh
+nonce. Responses must match that request's identity/action/nonce, exact schemas
+and current typed evidence. Capture keeps the five-second/future-clock checks;
+cleanup attaches only the original saved receipt and requires version 3. A
+complete rejection can report its bounded error despite a nonzero helper exit;
+positive evidence requires normal helper completion. No helper exit is exposed
+as an application exit. There is no lab/API-only fallback.
+
+The production source package carries the full verifier, schemas and offline
+builder/installer. Building an authority archive does not require test fixtures,
+a checkout or Rust. This does not constitute node/runtime qualification.
+
+## Manual access-policy campaign
+
+`lab.py`, `access.py` and `access-client.exs` are repository-only qualification
+tools. They are not called by the SDK, shipped as node observation actions or
+run by CI. The access fixture intentionally has **no node enrollment or K3s**:
+only the fixed root reader's redacted unavailable response may succeed. Keep its
+disk as access evidence; use another fresh guest/domain for the real runtime.
+
+Stage `lab.py` under `~/smolbox-node-authority-lab/` on `ssh linux`, with an
+`inputs/` directory containing its exact `FILES` inventory from the reviewed
+existing lab scripts. Its prepare action verifies the cached cloud/K3s/SmolVM
+pins and refuses an existing domain or unit. It creates a new 40-GiB disk with
+4 CPUs/8 GiB and the original 4-CPU/12-GiB/no-swap/256-task/42-GiB-file/four-hour
+outer limits. A QEMU-inherited descriptor retains the shared `vm.lock`.
+
+```sh
+python3 -I -S -B ~/smolbox-node-authority-lab/lab.py --domain node-authority-access-v1 prepare
+python3 -I -S -B ~/smolbox-node-authority-lab/lab.py --domain node-authority-access-v1 start
+python3 -I -S -B ~/smolbox-node-authority-lab/lab.py --domain node-authority-access-v1 bootstrap
+```
+
+The administrator bootstrap pins the new operator-controlled loopback endpoint;
+subsequent administrative connections use strict checking. SDK evidence always
+uses a separately provisioned explicit pin. Never reuse the legacy disk, keys,
+controller metadata or history, or restart a stopped enrolled domain to renew
+its lifetime/authority.
+
+Copy a reviewed offline bundle, its independent archive checksum, the controller's
+**public** access-test key and `access.py` into this fresh guest. Run as its
+administrator with the isolated interpreter:
+
+```sh
+sudo /usr/bin/python3 -I -S -B /home/lab/access.py prepare \
+  --bundle /home/lab/access-v1.tar.gz --archive-sha256 <APPROVED_ARCHIVE_SHA256> \
+  --public-key /home/lab/evidence-key.pub
+sudo /usr/bin/python3 -I -S -B /home/lab/access.py check \
+  --report /home/lab/access-report.json
+```
+
+Preparation is exclusive and refuses any existing authority/principal/fixture.
+The checks cover effective sshd policy, file custody, exact sudo, shell/subsystem/
+PTY/environment rejection, all forwarding families, wrong host/key, missing-key
+fallback controls, original endpoint death on disconnect and the real 30-second
+partial-header deadline. A temporary root-local client key/agent exists only in
+this disposable guest to test actual forbidden forwarding requests and the
+default-key counterfactual. The SDK never creates or loads that test key.
+
+`access-client.exs` consumes an administrator JSON file named by
+`SMOLBOX_NODE_AUTHORITY_ACCESS` and performs the four redacted client-side controls
+against that fixture, including an authenticated rejection. Its binding is a
+clearly synthetic contract vector, not a node approval. Collect its report and
+the server report before syncing and stopping this guest; verify the shared lock
+is released. No valid execution/capture/cleanup proof can be claimed from this
+campaign. Repeat effective access checks on the final enrolled installation in
+Phase 5.

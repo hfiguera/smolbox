@@ -40,6 +40,9 @@ class AuthorityContractTest(unittest.TestCase):
                 self.assertEqual(contract.response(contract.decode(contract.canonical(response)), request), response)
 
     def test_schema_fields_match_executable_contract(self):
+        for name in ("configuration", "protocol"):
+            self.assertEqual((FIXTURES / (name + ".schema.json")).read_bytes(),
+                             (ROOT / "priv/kubernetes/node_authority" / (name + "-v1.schema.json")).read_bytes())
         schema = json.loads((FIXTURES / "protocol.schema.json").read_text())["$defs"]
         for name, keys in (("request", contract.REQUEST_KEYS), ("response", contract.RESPONSE_KEYS)):
             self.assertEqual(set(schema[name]["required"]), keys)

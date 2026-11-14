@@ -9,10 +9,18 @@ Use an administrator-controlled home, for example
 authorized_keys must be root-owned and unavailable for principal writes.
 No user rc, environment file, startup script or alternate writable key path.
 
-authorized_keys (root:root 0600):
+Use root:root 0755 on .ssh and root:root 0644 on authorized_keys: sshd reads
+the PUBLIC key policy with the principal's credentials. Both remain unwritable
+by that principal. Mode 0600 on a root-owned file would prevent authentication.
+
+authorized_keys (root:root 0644):
 restrict,command="/usr/local/libexec/smolbox-node-authority-ssh" ssh-ed25519 <CONTROLLER_PUBLIC_KEY>
 
-sshd_config Match example (validate effective configuration with sshd -T -C):
+sshd_config GLOBAL prerequisite (not permitted inside Match on OpenSSH 9.6):
+PermitUserEnvironment no
+
+sshd_config Match example (validate syntax with sshd -t and effective policy
+with sshd -T -C; append Match after global settings):
 Match User smolbox-evidence
     AuthenticationMethods publickey
     PasswordAuthentication no
@@ -20,7 +28,6 @@ Match User smolbox-evidence
     PermitTTY no
     DisableForwarding yes
     PermitUserRC no
-    PermitUserEnvironment no
     ForceCommand /usr/local/libexec/smolbox-node-authority-ssh
 
 The global AuthorizedKeysFile configuration must resolve only the root-owned

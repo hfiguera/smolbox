@@ -56,9 +56,10 @@ def build(output):
     files = {"programs/" + name: value for name, value in programs.items()}
     for name in ("install.py", "access-policy.txt", "observer-rbac.yaml", "README.md"):
         files[name] = (Path(__file__).parent / name).read_bytes()
-    files["configuration.schema.json"] = (
-        ROOT / "test/fixtures/kubernetes/node-authority-v1/configuration.schema.json"
-    ).read_bytes()
+    for name in ("configuration", "protocol"):
+        files[name + ".schema.json"] = (
+            PROGRAMS.parent / (name + "-v1.schema.json")
+        ).read_bytes()
     package = {
         "version": 1,
         "files": {

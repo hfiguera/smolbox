@@ -72,6 +72,7 @@ class BundleTest(unittest.TestCase):
                     "observer-rbac.yaml",
                     "README.md",
                     "configuration.schema.json",
+                    "protocol.schema.json",
                     "package-manifest.json",
                 },
             )

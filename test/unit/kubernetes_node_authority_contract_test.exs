@@ -8,6 +8,11 @@ defmodule SmolBox.KubernetesNodeAuthorityContractTest do
   test "canonical authority vectors agree with the node's JSON contract" do
     vectors = @vectors |> File.read!() |> Jason.decode!()
 
+    for name <- ~w(configuration protocol) do
+      assert File.read!("priv/kubernetes/node_authority/#{name}-v1.schema.json") ==
+               File.read!("test/fixtures/kubernetes/node-authority-v1/#{name}.schema.json")
+    end
+
     for {field, encoded, digest} <- [
           {"identity_fields", "identity_canonical", vectors["authority_generation"]},
           {"configuration", "configuration_canonical",

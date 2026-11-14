@@ -1,6 +1,7 @@
 """Manual pipe/socket framing checks; no installed SSH policy is claimed here."""
 
 import copy
+import errno
 import json
 from pathlib import Path
 import socket
@@ -78,7 +79,17 @@ class EndpointTest(unittest.TestCase):
                 if raw:
                     client.sendall(raw)
                 if disconnected:
-                    client.shutdown(socket.SHUT_WR)
+                    try:
+                        client.shutdown(socket.SHUT_WR)
+                    except OSError as error:
+                        # A rejected short/oversize frame may already have
+                        # closed its socket before the fixture half-closes.
+                        if error.errno not in (
+                            errno.ENOTCONN,
+                            errno.ECONNRESET,
+                            errno.EPIPE,
+                        ):
+                            raise
                 chunks = []
                 while True:
                     try:

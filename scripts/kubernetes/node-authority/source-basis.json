@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "phase2_installation_fixture_gate_not_provider_qualification",
+  "status": "phase3_protocol_and_pre_enrollment_access_gate_not_execution_qualification",
   "base_commit": "d0bf044ecf32100d717e82b1b938011311d4306c",
   "legacy_files": {
     "scripts/kubernetes/node_history.py": "8cf6195deaba11145afea2bd9c5fa5c94b30be04e0fc364764d57d1cefb42c5f",
@@ -125,5 +125,44 @@
       ]
     },
     "new_provider_live_qualified": false
+  },
+  "restricted_provider": {
+    "phase": 3,
+    "source_sha256": {
+      "lib/smolbox/kubernetes/node_authority.ex": "7bac2dab5dbd66d070d0fd04eab3d9d52ef17c564f96702cf243ab03efc68ad6",
+      "lib/smolbox/kubernetes/node_authority/context.ex": "d0632e43478753e32c8b8c7b5abdbdb8522da9364d20287d122dce5f7f91d6dc",
+      "lib/smolbox/kubernetes/node_authority/json.ex": "09e98b7dfd0dc964186d3468fc0802a20dc0e58f0724129938bee97732b4b969",
+      "lib/smolbox/kubernetes/node_authority/protocol.ex": "023b5fcd6296ec073d2cd530206f2e8b1f14d1e2821877e2934f80cde472047f",
+      "lib/smolbox/kubernetes/node_authority/transport.ex": "29b538fcd7a4f9877002e8e9161b1b28efe76b0fb129e12d2e87bc82e3ab3ad1",
+      "lib/smolbox/kubernetes/framed_port.ex": "4694aded8ec3264f19ce81452cba5367206a7828ca3faaf5ebfa2b1ba8767c73",
+      "lib/smolbox/kubernetes/node_evidence/projection.ex": "b5ed2925b195e7f979474b3a40d41ab0928091cea0070be90b543a4ce2be0e6b",
+      "lib/smolbox/kubernetes/lab_node_evidence/projection.ex": "a70b908a989c2d6ec466977a33b962b1a2ceb91499f11f52a3cb525c11af54f1",
+      "scripts/kubernetes/node-authority/access.py": "a294b5b8311ec4d5488104cdf7bfe44cc2fd4d6980fa68a128b93c6801f91518",
+      "scripts/kubernetes/node-authority/lab.py": "e90b49d158ec6050b1aafacb9520c67a5acac0811777f0d13ad1e7490e6e72e5",
+      "scripts/kubernetes/node-authority/access-client.exs": "12c91e307a7e8fb80d142cce7b38d5c5313c084f3ef55b7b7257de2033af2284",
+      "scripts/kubernetes/node-authority/access-policy.txt": "bd9809b5583c4272539c2b4cbca12572006060b5175d907c66f04243435f1b68",
+      "scripts/kubernetes/node-authority/README.md": "e49b6b9d6adf118b5b0ecb1019b98575859db1200df0473eb8a08741f4c45f18",
+      "scripts/kubernetes/node-authority/bundle.py": "f9f66f7073a983a420581dc429998fa44c4570e86433adeb8f979820356606b1",
+      "priv/kubernetes/node_authority/configuration-v1.schema.json": "de35c61080e443bfaa4ba4ce3500cd78972d03c2d545e55021d434747644ce5b",
+      "priv/kubernetes/node_authority/protocol-v1.schema.json": "d0e38553c134bc0e5a9595067b30f8ff737e7125ac5744cdd27ded7c5be4f51e",
+      "mix.exs": "865cce6d1dc6c41e75e8ad18a236d94f194b6fb42ae4e6c8b83aec1bb53d4005",
+      "dev/smolbox/ci/package.ex": "1d411ad5bd2745b9c7423a81e4ea2104d4380d5c2a7a6ecf2833d2c3bdfc4fc6",
+      "test/fixtures/ci/consumer.exs.template": "b901b95353e9446b5465761501647b9c62de6b3e6e6d3828b03b8c8074639d5b",
+      "test/support/node_authority_fixture.ex": "8b920b999fe5f6862110f61f17029515d3a427d764c987cd1925b9edbde480d1",
+      "test/support/kubernetes_node_peer.py": "052869aa9e450ec1dd12b48fd962ad792951bf52b8aab82c645f2fa83ccfd912",
+      "test/unit/kubernetes_node_authority_test.exs": "4d4bbae17faa7f016052595479aadd19f47383c20a341c64439a45f6b60b6bfc",
+      "test/unit/kubernetes_node_authority_protocol_test.exs": "fad748d7457befcbe20108d2a99264d48ca6e3eccf078ce5051938509e661446",
+      "test/unit/kubernetes_node_authority_contract_test.exs": "ec2aa7315f5e03a76fecc62ee526ba037f6d2effa1d71609a040a6e9b69eb7f5",
+      "scripts/kubernetes/test_node_authority_endpoint.py": "16890ca84a2e69a41e2e9500a28460201556aba0374e689b71babba29d57bd05",
+      "scripts/kubernetes/test_node_authority_install.py": "e9b2007be44309c9b6b7756533ff6765f64b311634db86edb25a3ac528a385a0",
+      "scripts/kubernetes/test_node_authority_contract.py": "2376fcade888ccecb64b839d422a59e0ca14b01b5762afbf7a29688fdc87c855"
+    },
+    "access_fixture_manifest_sha256": "cec1597ec86107f838c45f60be9ac56f4c5b9bb7bc2dbe88ffa94cc4f5469e27",
+    "access_scope": "pre_enrollment_access_fixture_only",
+    "server_controls_passed": 30,
+    "mac_controls_passed": 4,
+    "new_provider_execution_qualified": false,
+    "legacy_lab_protocol_and_sources_unchanged": true,
+    "default_selection_remains_lab": true
   }
 }

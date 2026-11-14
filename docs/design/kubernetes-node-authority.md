@@ -1,13 +1,13 @@
 # Kubernetes single-node authority
 
-Status: implementation specification, November 14, 2026. No new provider is
-implemented or qualified by this document. Delivery branch:
+Status: implementation specification, November 14, 2026. The standalone provider is
+implemented through Phase 3 but not qualified or enabled for execution. Delivery branch:
 `feature/kubernetes-node-authority`.
 
 Phase 0 contracts are frozen in the [contract checkpoint](kubernetes-node-authority-contract.md),
 with schemas/vectors and Python/Elixir compatibility checks. Standalone extraction
-and administrator installation have passed their fixture gates (Phases 1–2);
-Phases 3–5 remain
+and administrator installation have passed their fixture gates; protocol/SDK
+and real pre-enrollment access checks have passed Phase 3. Phases 4–5 remain
 pending; see the [implementation progress](kubernetes-node-authority-progress.md).
 
 Follow the [implementation plan](kubernetes-node-authority-implementation-plan.md),
