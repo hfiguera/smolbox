@@ -32,6 +32,8 @@ defmodule SmolBox.Execution do
     Validation
   }
 
+  alias SmolBox.Kubernetes.RecordValidation
+
   @states [
     :accepted,
     :preparing,
@@ -75,7 +77,10 @@ defmodule SmolBox.Execution do
     :artifacts,
     :last_error,
     :cleanup_attempts,
-    :absence_at_ms
+    :absence_at_ms,
+    :backend_receipt,
+    :backend_cleanup,
+    :backend_create_state
   ]
   @evidence [
     :image_pulled,
@@ -99,6 +104,8 @@ defmodule SmolBox.Execution do
     :deadlines
   ]
   @derive {Inspect, only: [:scope, :id, :version, :state, :evidence, :collection, :cleanup]}
+  # Persisted compatibility fields cannot be regrouped without changing old records.
+  # credo:disable-for-next-line Credo.Check.Warning.StructFieldAmount
   defstruct [
     :scope,
     :id,
@@ -119,6 +126,9 @@ defmodule SmolBox.Execution do
     :claim_until_ms,
     :absence_at_ms,
     backend_assignment: nil,
+    backend_receipt: nil,
+    backend_cleanup: nil,
+    backend_create_state: nil,
     schema: 1,
     version: 1,
     generation: 0,
@@ -151,7 +161,11 @@ defmodule SmolBox.Execution do
           | :cancelling
   @type t :: %__MODULE__{
           managed_machine: SmolBox.ManagedMachine.key() | nil,
-          backend_assignment: SmolBox.Backend.Assignment.t() | nil,
+          backend_assignment:
+            SmolBox.Backend.Assignment.t() | SmolBox.Kubernetes.Assignment.t() | nil,
+          backend_receipt: SmolBox.Kubernetes.Receipt.t() | nil,
+          backend_cleanup: SmolBox.Kubernetes.CleanupProof.t() | :not_dispatched | nil,
+          backend_create_state: :pending | :dispatched | nil,
           schema: 1,
           scope: String.t(),
           id: String.t(),
@@ -266,7 +280,8 @@ defmodule SmolBox.Execution do
     with true <- Validation.struct_shape?(record, __MODULE__),
          :ok <- ExecutionSpec.validate(record.spec),
          true <- fields?(record),
-         true <- ExecutionValidation.metadata?(record) do
+         true <- ExecutionValidation.metadata?(record),
+         true <- RecordValidation.fields?(record) do
       outcome(record)
     else
       _invalid -> invalid()
@@ -327,15 +342,19 @@ defmodule SmolBox.Execution do
   defp evidence_transition(previous, next) do
     valid =
       preserves?(previous, next, [:result, :created_machine, :absence_at_ms]) and
-        (previous.evidence not in [:exited, :launched, :image_pulled] or
-           next.evidence == previous.evidence) and
+        preserves_outcome?(previous, next) and
         (previous.evidence != :termination_confirmed or
            next.evidence in [:termination_confirmed, :exited] or
            reobserved_running?(previous, next)) and
         (previous.cleanup != :complete or next.cleanup == :complete)
 
-    if valid, do: :ok, else: invalid()
+    if valid and RecordValidation.transition?(previous, next), do: :ok, else: invalid()
   end
+
+  defp preserves_outcome?(previous, next),
+    do:
+      previous.evidence not in [:exited, :launched, :image_pulled] or
+        next.evidence == previous.evidence
 
   defp reobserved_running?(%{state: :unknown}, %{
          state: :unknown,

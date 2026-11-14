@@ -11,8 +11,8 @@ parity tracked in [the parity matrix](kubernetes-backend-parity.md).
 | Phase | Status | Evidence / remaining work |
 | --- | --- | --- |
 | 0 — Runtime qualification | Runtime gate passed in the dedicated lab | [Exact live report](../evidence/kubernetes-backend-phase0-2026-11-13.json); recipe and constraints below |
-| 1 — Target and authority types | Type/validation gate passed | Offline constructors, immutable Pod intent, receipts, node observations, cleanup proofs and target normalization; admission and persistence remain disabled |
-| 2 — Store/codec/OCI admission | Pending | Atomic authority and compatible persisted formats |
+| 1 — Target and authority types | Type/validation gate passed | Offline constructors, immutable Pod intent, receipts, node observations, cleanup proofs and target normalization |
+| 2 — Store/codec/OCI admission | Store gate passed | Selective v54, atomic allocation, UID receipt transitions, proof-bound release, authenticated PostgreSQL enrollment, gated OCI submission; operational dispatch disabled |
 | 3 — Object lifecycle | Pending | Restricted credentials and bounded API client |
 | 4 — Exec | Pending | Elixir WebSocket client and application helper |
 | 5 — Files | Pending | Qualified helper staging/collection |
@@ -143,11 +143,11 @@ directory and share absence. A cleanup proof cannot predate the latest saved
 live observation. These are validators for evidence supplied by the
 future provider; they do not create or attest live evidence themselves.
 
-The shared record validator deliberately rejects Kubernetes persisted records
-until Phase 2 adds their selective envelope and store contract. Tests verify
-that encoding them, or injecting them into legacy HTTP/Embedded envelopes,
-fails. `Runtime.KubernetesSupport` rejects enrollment, target eligibility is
-false, and the adapter advertises no operations. A runtime version string cannot
+At the Phase 1 close, the shared record validator deliberately rejected Kubernetes
+persisted records until Phase 2 added their selective envelope and store contract.
+Tests verified that encoding them, or injecting them into legacy HTTP/Embedded
+envelopes, failed. Enrollment and target eligibility were disabled; the adapter still
+advertises no operations. A runtime version string cannot
 enable HTTP capabilities on a Kubernetes target. Existing stored records and
 HTTP/Embedded behavior retain their contracts.
 
@@ -166,3 +166,56 @@ after the initial receipt has been refined and saved, instead of replacing a
 previously saved pending machine observation. This preserves the existing
 execution evidence transition invariant while adding the early Kubernetes UID
 receipt in its own field.
+
+## Phase 2 store and admission gate
+
+The gate passed on November 13, 2026. Kubernetes disposable intent uses selective
+codec **v54**. Existing envelopes omit the three new nil defaults exactly and
+reject Kubernetes authority, including queued zero-retention intent. Golden
+HTTP and Embedded payloads captured from commit `8eb2dcb6` retain their fields,
+envelopes and fingerprints. The byte test applies the original ETF writer to
+those untouched legacy payloads in the same VM: ETF map ordering depends on the
+BEAM atom table and was never canonical across separate VM runs.
+
+Atomic reservation saves the typed assignment, Pod name, resource charge and
+`backend_create_state: :pending`. Before a future POST, orchestration must save
+`:dispatched`; this state cannot reset. The initial original-UID receipt can then
+be saved and refined to ready, without replacing a Pod/container, sandbox,
+process birth or observer epoch. `created_machine` remains immutable and is
+saved only with the final ready observation. Cleanup proof binds to the exact
+latest saved receipt. API absence without physical evidence cannot complete
+cleanup or release capacity. The separate `:not_dispatched` cleanup marker is
+valid only while create is durably pending with no receipt; it cannot resolve
+an ambiguous POST. Post-POST preparation failures without sufficient node
+history remain charged until Phase 6 supplies a valid cleanup path.
+
+Both Memory and the reference PostgreSQL adapter advertise `kubernetes_backend: 1` after the shared transaction contract. Recovery retains released tombstones.
+Namespace or node aliases within an enrolled cluster anchor cannot create a
+second capacity pool under another target ID. PostgreSQL stores full Kubernetes
+enrollment in authenticated encryption tied to partition and target ID, validates
+kind/generation projections, and authenticates complete record scans before
+using their worker projections. A missing ledger does not erase assigned domain
+authority. Migration `20261113000000_kubernetes_bindings` adds nullable enrollment
+payload storage without rewriting existing execution payloads; apply it with
+controllers stopped and upgrade all readers before enrollment. Rollback refuses
+to discard Kubernetes bindings.
+
+Public submit accepts only an exactly approved digest-pinned OCI source, fixed
+offline profile, foreground command with no stdin/user override, and explicit
+`retention_ms: 0`, on a Kubernetes-capable store. Positive retention is not
+silently shortened. HTTP/Embedded disposable remote-source policy and positive
+retention behavior remain unchanged; retained command attachment rejects zero
+retention. Repeated submission retains the first absolute deadline and rejects
+changed intent. Runtime startup validates the marker and enrolls the typed
+domain separately from Embedded recovery. The Kubernetes adapter still
+advertises **no operations**: accepted intent cannot create a Pod at this gate.
+
+Validation: 2,202 main-project tests passed (42 opt-in excluded); 308 PostgreSQL
+example tests passed (29 opt-in excluded). Focused checks cover atomic capacity,
+stale claims/versions, immutable UID/container authority, cleanup proof mismatch,
+double release, old-envelope injection, source/retention gates, transaction
+rollback, tampered enrollment, a lost ledger and displaced worker projection.
+Format, warnings-as-errors compilation, zero dependency cycles, strict Credo,
+zero-clone ExDNA, strict-assumption Credence and Dialyzer passed. The PostgreSQL
+run used an isolated local Unix-socket database; no live VM or CI change was
+needed in this phase. [Machine-readable report](../evidence/kubernetes-backend-phase2-2026-11-13.json).

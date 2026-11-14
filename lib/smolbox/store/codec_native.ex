@@ -3,6 +3,7 @@ defmodule SmolBox.Store.CodecNative do
   alias SmolBox.Store.{
     CodecBranches,
     CodecFields,
+    CodecKubernetes,
     CodecMaterial,
     CodecNativeCaptures,
     CodecNativeMounts,
@@ -26,6 +27,7 @@ defmodule SmolBox.Store.CodecNative do
       |> CodecMaterial.strip()
       |> CodecStaticBranchEgress.strip()
       |> CodecFields.transform(@defaults, :strip)
+      |> CodecKubernetes.strip()
 
   def upgrade(record),
     do: record |> CodecFields.transform(@defaults, :upgrade) |> CodecStaticBranchEgress.upgrade()
@@ -39,7 +41,7 @@ defmodule SmolBox.Store.CodecNative do
       |> :erlang.term_to_binary()
 
   def legacy_term(payload) do
-    {record, used} = :erlang.binary_to_term(payload, [:safe, :used])
+    {record, used} = CodecKubernetes.legacy_term(payload)
 
     {record
      |> CodecNativeMounts.upgrade()

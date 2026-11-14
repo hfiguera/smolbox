@@ -6,6 +6,9 @@ defmodule SmolBox.Store.RecordOps do
 
   alias SmolBox.{Error, Execution, Store, Validation}
 
+  alias SmolBox.Kubernetes.Assignment, as: KubernetesAssignment
+  alias SmolBox.Kubernetes.ExecutionPolicy
+
   @type owned_record :: Execution.t() | SmolBox.ManagedMachine.t()
 
   @spec initial(Execution.t()) :: :ok | {:error, Error.t()}
@@ -18,6 +21,14 @@ defmodule SmolBox.Store.RecordOps do
       _invalid -> error(:validation)
     end
   end
+
+  defp reservable_source?(record, %{__struct__: SmolBox.Kubernetes.Assignment} = assignment),
+    do:
+      KubernetesAssignment.valid?(assignment) and
+        ExecutionPolicy.supported?(record.spec)
+
+  defp reservable_source?(record, _assignment),
+    do: not SmolBox.Source.remote?(record.spec.artifact) and record.spec.retention_ms != 0
 
   @spec lease(Store.lease() | nil, String.t(), non_neg_integer(), pos_integer()) ::
           {:ok, Store.lease()} | {:error, Error.t()}
@@ -102,7 +113,7 @@ defmodule SmolBox.Store.RecordOps do
   def reservation(record, worker, machine, worker_lease, capacity, used, now, assignment) do
     needed = resources(record)
 
-    with false <- SmolBox.Source.remote?(record.spec.artifact),
+    with true <- reservable_source?(record, assignment),
          false <- is_struct(record.spec.command, SmolBox.ImagePull),
          :ok <- pending(record, now),
          true <- Validation.identifier?(worker) and SmolBox.MachineSpec.valid_name?(machine),
@@ -111,6 +122,8 @@ defmodule SmolBox.Store.RecordOps do
       reserved = %{
         record
         | backend_assignment: assignment,
+          backend_create_state:
+            if(is_struct(assignment, SmolBox.Kubernetes.Assignment), do: :pending),
           worker_id: worker,
           machine_name: machine,
           worker_generation: worker_lease.generation,

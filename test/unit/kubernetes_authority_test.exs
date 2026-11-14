@@ -17,8 +17,10 @@ defmodule SmolBox.KubernetesAuthorityTest do
     assert Assignment.valid?(c.assignment)
     assert Assignment.approved?(c.assignment, c.config, c.record)
     assert RecordValidation.valid?(c.assignment, c.record)
-    refute SmolBox.Backend.Assignment.record_valid?(c.record)
-    assert {:error, %Error{}} = Codec.encode(c.record)
+    assert SmolBox.Backend.Assignment.record_valid?(c.record)
+    assert {:ok, bytes} = Codec.encode(c.record)
+    assert {:ok, restored} = Codec.decode(bytes)
+    assert restored == c.record
 
     for version <- ["v2", "v10", "v16"] do
       assert {:error, %Error{}} =
@@ -187,7 +189,13 @@ defmodule SmolBox.KubernetesAuthorityTest do
     original = machine(c.assignment, c.receipt)
     assert Machine.same_incarnation?(original, original)
     assert ExecutionValidation.machine?(original, c.record)
-    assert RecordValidation.valid?(c.assignment, %{c.record | created_machine: original})
+
+    assert RecordValidation.valid?(c.assignment, %{
+             c.record
+             | created_machine: original,
+               backend_receipt: c.receipt,
+               backend_create_state: :dispatched
+           })
 
     for changed <- [
           %{c.receipt | pod_uid: "replacement"},

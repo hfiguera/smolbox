@@ -42,6 +42,14 @@ defmodule SmolBox.Runtime.ExecutionSupport do
 
   defp image_capability(_config, _spec), do: :ok
 
+  defp source_capability(config, %{retention_ms: 0}) do
+    case Session.store(config, :capabilities, []) do
+      {:ok, %{kubernetes_backend: 1}} -> :ok
+      {:ok, _} -> Session.error(:unsupported_capability, :submit)
+      error -> error
+    end
+  end
+
   defp source_capability(config, spec) do
     if SmolBox.Source.remote?(spec.artifact) do
       case Session.store(config, :capabilities, []) do

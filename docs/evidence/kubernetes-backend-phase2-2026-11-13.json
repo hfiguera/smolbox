@@ -1,0 +1,112 @@
+{
+  "phase": 2,
+  "status": "store_gate_passed_operations_disabled",
+  "recorded_at": "2026-11-14T00:31:08.559540+00:00",
+  "source_base": "8eb2dcb63bb0fe63811e57d268e7c84415a0d7a1",
+  "branch": "feature/kubernetes-smoke-lab",
+  "source_snapshot_sha256": {
+    "docs/design/kubernetes-backend-implementation-plan.md": "61fab7cb5d05daa4361fe92d930ffacb66ce20f90a01e21fd62d6acdc4ed7337",
+    "docs/design/kubernetes-backend-parity.md": "f8655e03e81330eee4ed0ab3113e72e9e5711f39acafb4296483fe2a517292ca",
+    "docs/design/kubernetes-backend-progress.md": "d3fea32eb411207aa49eacb764d6f41802ecf73db8ee114460deda2f613d8f5f",
+    "docs/design/kubernetes-backend.md": "1e99079bb1c2c2e19a58ecd60caee7577700e41870d59de48d6a8fd21d932da8",
+    "examples/durable_host/README.md": "c1d990b8222ba229b6343b5ed2b00f360002323a667e9ccd7509f12eb386fdbb",
+    "examples/durable_host/priv/repo/migrations/20261113000000_kubernetes_bindings.exs": "57862eb90b8af94083579e10f483cfcb98e30595434a72ce65d240da1d400240",
+    "examples/durable_host/test/kubernetes_store_test.exs": "e3d81d763f14e79f74eda4c3beac27df79844da60fc48eaf89f7ba4725f4c97a",
+    "examples/support/store/backend_store.ex": "ef5aa3846fea8fdc88484481fc40d6397fd6ffe8d60ad7b6ed91153b95cd3c1e",
+    "examples/support/store/database.ex": "9da86afdbb4a8a3fe612f55cf8555c013941eba800c8f072a6f19199ab8011ac",
+    "examples/support/store/kubernetes_binding.ex": "39f7d681a67a861641df152ac83b0c6635a2d824b7f2d4cc42e16606f06798d7",
+    "lib/smolbox.ex": "b86423dc57bf20934bc5d6f897d09d45300c615bedaae3af6eb95bcefd07c605",
+    "lib/smolbox/backend/assignment.ex": "d7f50c03f7f8274214773786255d9327b6bdec202f1c94a4729f292f685d2dbb",
+    "lib/smolbox/execution.ex": "57866d6bc02eda262492ef69d856942f5192e5e4f393945675f0a5aa4ecb16ff",
+    "lib/smolbox/execution_spec.ex": "14a90e439d28009e2788ca8d932dca03227c9d8858d3293b9f75cbea64a037f8",
+    "lib/smolbox/kubernetes/assignment.ex": "b50471dbe35d9ac6b7cf17cabaa07f1d6b32362a01eded7950fefa1208e6a3ba",
+    "lib/smolbox/kubernetes/execution_policy.ex": "1f90ed8d5795f96a67dbb1d01242e691bca0e55b039a2e6f8abf6bcfe0759ae8",
+    "lib/smolbox/kubernetes/record_validation.ex": "34d33faf9be24be702deda16eb6455a4ee6e46dde8d6ad7bb03a993a219cae8c",
+    "lib/smolbox/machines.ex": "2a439db4e124eea77fa9a4363ec174b0d7f43ccdde281aae582747cb453016c8",
+    "lib/smolbox/runtime/coordinator.ex": "6fe20368013ec69aa970c815e81f45068e3e6d8f3768e3391a3869b14a0d95ae",
+    "lib/smolbox/runtime/execution_support.ex": "cbe64e72ff9503be0fe0c0faaf62ddcc2ece4b47be2cf587722eb190b651156e",
+    "lib/smolbox/runtime/executor.ex": "44bc847248172c9a272f18f0a9cfcfd3755a61bee4485de9d8aee5f42fa5aad3",
+    "lib/smolbox/runtime/kubernetes_support.ex": "d268fab01420a4dcaaa9170e73baf34040a2d0db773eb5cd5c20b2857fb256e3",
+    "lib/smolbox/runtime/target.ex": "746ea0fd56c20d939d6abb4147daef7b4b1f6a55e87bd267d5814cfe58fe4f5c",
+    "lib/smolbox/runtime/worker_config.ex": "f5f126bb7117c73022b656e66eb063e890c2bc19c0e4e3558ffe897906ed5dc3",
+    "lib/smolbox/store.ex": "26aa5b6a82159483bd7898e5c32701c151269c2d7cef681f352d3b7f57e31c49",
+    "lib/smolbox/store/backend_bindings.ex": "5c342bd7988b65397224e0b9dc86d37c6ce9cd78aa5f6de5cb2be21eb7714875",
+    "lib/smolbox/store/codec.ex": "3aedf6636f3ded08cb443eccd991c4b27de9a68deadd5b1b4c183d6696cb4317",
+    "lib/smolbox/store/codec_kubernetes.ex": "428c0a5e58f1a1fe336b5e7b5a4b07d6e44d2a59ead2867037ad3dc429a7035c",
+    "lib/smolbox/store/codec_native.ex": "1f4042acaa8fa11f54fe3d50012f6ded095a4146845f6ec6e8430a3015ff46cd",
+    "lib/smolbox/store/memory.ex": "c5e1c84c48729210e05223d4aab07d7bce7b8f48cf4209ddf8dad68307efd2aa",
+    "lib/smolbox/store/record_ops.ex": "c4dc439def81e72913e508789ae492e64666f5940871c267b6bee4eedee703a3",
+    "test/fixtures/kubernetes/pre-kubernetes-codecs.json": "6f5200085509e7d8960e6c220542cf02af2aa1ab66042ec68dda84d7da152c21",
+    "test/support/store/kubernetes_contract.ex": "6c753f1d4406dc54e6fb6e4f3af7ce10193d3aa0047aac543f0f863510926873",
+    "test/support/store/kubernetes_fixture.ex": "de9d77dc0f7675f1784d392af7402fed1559cefc873846b856f2156b74d06974",
+    "test/unit/kubernetes_authority_test.exs": "5c66be5924fea75e43f386758349c4dcf4b78d8bb51ca3a3b962cb67cd320836",
+    "test/unit/kubernetes_codec_test.exs": "5544e70a6fe5affe02f6d0aec41cfa38026b3def3aab81e82628f1989aafed94",
+    "test/unit/kubernetes_config_test.exs": "82a90efc9f90d770c3863d49a82f376fdae9a1459309a0f5d7231f84fff2e346",
+    "test/unit/kubernetes_store_test.exs": "4a14a49a680a7544bb1f9770dbd7540502893a18dcc513ff847a7445183a3b0a",
+    "test/unit/kubernetes_submission_test.exs": "b8b74c351eb79ab488c92cfadd8468c12a9fdbfc54312ae7bba77dc9e4dcf6e6"
+  },
+  "checks": {
+    "root_suite": {
+      "passed": 2202,
+      "excluded_opt_in": 42
+    },
+    "focused_kubernetes_suite": {
+      "passed": 24
+    },
+    "postgresql_suite": {
+      "passed": 308,
+      "excluded_opt_in": 29,
+      "server": "PostgreSQL 17.11",
+      "transport": "isolated local Unix socket; no TCP listener"
+    },
+    "format": "passed",
+    "compile_warnings_as_errors": "passed",
+    "xref_cycles": 0,
+    "strict_credo": "passed",
+    "exdna_clone_budget": 0,
+    "strict_assumption_credence": "passed",
+    "dialyzer_errors": 0,
+    "durable_example_quality": "passed",
+    "final_postgresql_kubernetes_suite": {
+      "passed": 10
+    },
+    "full_suite_followup": "Final Kubernetes-only stage and malformed-config hardening rechecked in focused suites; existing-backend compatibility suites passed above."
+  },
+  "log_sha256": {
+    "kubernetes-phase2-full-tests-final.log": "e30857adcf838d5279f195d9678102c6d684ecfdb19ab956d63e992166acc7fc",
+    "kubernetes-phase2-focused-final.log": "bbbf48b824b5c1f044fe739ee3d882bb7e85ce1b80952cd207273b69349768fb",
+    "kubernetes-phase2-credo.log": "aaa96ff5e3115d9bb1910bee5e9dad8edb97115d2226befc42d282174dbf8458",
+    "kubernetes-phase2-exdna.log": "c9c1e19ea026bbfd8d95d1a65945c3ef5050dbb618c692a3fc4ad218610f2bb2",
+    "kubernetes-phase2-dialyzer.log": "b5195a41442950fa48921b2427f75e4b142a367fc1080ab65451982d0eab6512",
+    "kubernetes-phase2-credence.log": "eb67e95f639268cdaccec81a15a433258d4428bab14c6f16956365f505cb8332",
+    "kubernetes-phase2-db/full-tests.log": "54f8d0e979fcf06d2cf0453deb7c717f65323ce2b36df97ab28c70617b2cd0c1",
+    "kubernetes-phase2-db/quality.log": "66ece30fcd2d2de68b8ae0fa1559846ecbd0f7377a9d76d4d83bdadda7227de3",
+    "kubernetes-phase2-db/focused-final.log": "d4e10476303df94855996419b5a2416fd0521d18885dbbbc7578cb07aa9c91d8"
+  },
+  "codec": {
+    "kubernetes": "v54",
+    "prior_envelopes": "v1-v53 retained; Kubernetes and smuggled defaults rejected",
+    "golden_baseline_commit": "8eb2dcb6",
+    "golden_byte_comparison": "original legacy payload serialized in the same VM to account for pre-existing non-canonical ETF map order; fields/envelopes/fingerprints retained"
+  },
+  "authority": {
+    "create": "pending -> dispatched before POST; cannot reset",
+    "receipt": "original UID saved before readiness; no incarnation replacement",
+    "release": "matching exact-receipt physical cleanup proof, or durable undispatched create with no receipt",
+    "recovery": "complete authenticated scans including released tombstones; namespace/node alias exclusion"
+  },
+  "live_runtime_tests": "not required for this offline store phase; Phase 0 live evidence retained",
+  "ci_workflows_changed": false,
+  "remaining_phases": [
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "limitations": [
+    "Adapter advertises no operations; accepted intent cannot create a Pod.",
+    "Preparation failures after a possibly dispatched POST retain capacity unless sufficient positive physical evidence exists.",
+    "Production node evidence and complete backend parity remain later milestones."
+  ]
+}

@@ -157,7 +157,7 @@ defmodule SmolBox.Runtime.Executor do
            current.cancel_requested_at_ms == nil and
              not Execution.expired?(current, Session.now(session)),
          {:ok, name} <- Identity.machine_name(session.config.namespace),
-         {:ok, allocation} <- Target.allocation(worker, current.spec, name) do
+         {:ok, allocation} <- Target.allocation_record(worker, current, name) do
       Session.store(session.config, :reserve, [
         session.key,
         Session.guard(current),

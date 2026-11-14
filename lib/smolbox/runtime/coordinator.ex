@@ -7,6 +7,7 @@ defmodule SmolBox.Runtime.Coordinator do
 
   alias SmolBox.Runtime.{
     Executor,
+    KubernetesSupport,
     Machines,
     NativeRecovery,
     NativeSupport,
@@ -21,6 +22,13 @@ defmodule SmolBox.Runtime.Coordinator do
 
   @impl GenServer
   def init({config, parent}) do
+    case KubernetesSupport.enroll(config) do
+      :ok -> init_enrolled(config, parent)
+      {:error, error} -> {:stop, error}
+    end
+  end
+
+  defp init_enrolled(config, parent) do
     state = %{
       config: config,
       parent: parent,

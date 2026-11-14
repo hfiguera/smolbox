@@ -4,6 +4,7 @@ defmodule SmolBox.Runtime.Target do
   alias SmolBox.Embedded.{CheckpointContract, Config, Port}
   alias SmolBox.{Error, MachineSpec, Source}
   alias SmolBox.Kubernetes.Config, as: KubernetesConfig
+  alias SmolBox.Kubernetes.ExecutionPolicy
   alias SmolBox.Runtime.WorkerConfig
 
   @worker_fields [
@@ -216,8 +217,13 @@ defmodule SmolBox.Runtime.Target do
     do: Assignment.supports?(config, spec)
 
   def supports?(%Config{} = config, spec), do: Assignment.supports?(config, spec)
-  def supports?(%KubernetesConfig{}, _spec), do: false
+  def supports?(%KubernetesConfig{} = config, spec), do: kubernetes_approved?(config, spec)
+
+  def supports?(%{kind: :kubernetes, kubernetes_config: config}, spec),
+    do: kubernetes_approved?(config, spec)
+
   def supports?(%{kind: :kubernetes}, _spec), do: false
+
   def supports?(target, spec), do: WorkerConfig.supports?(worker_definition(target), spec)
 
   def https_branches?(%__MODULE__{kind: :http} = target, profile),
@@ -230,12 +236,27 @@ defmodule SmolBox.Runtime.Target do
 
   def https_branches?(_target, _profile), do: false
 
+  defp kubernetes_approved?(%KubernetesConfig{} = config, spec),
+    do:
+      KubernetesConfig.validate(config) == :ok and ExecutionPolicy.supported?(spec) and
+        spec.profile in config.profiles and
+        Enum.any?(config.sources, &(SmolBox.Source.artifact(&1) == spec.artifact))
+
+  defp kubernetes_approved?(_config, _spec), do: false
+
   def allocation_record(
         %__MODULE__{kind: :embedded, native_config: config} = target,
         record,
         name
       ) do
-    with {:ok, assignment} <- Assignment.new(config, record.spec, name, record.native_mounts),
+    with {:ok, assignment} <-
+           Assignment.new(config, record.spec, name, Map.get(record, :native_mounts, [])),
+         do: {:ok, {target.id, name, target.capacity, assignment}}
+  end
+
+  def allocation_record(%__MODULE__{kind: :kubernetes} = target, record, name) do
+    with {:ok, assignment} <-
+           SmolBox.Kubernetes.Assignment.new(target.kubernetes_config, record, name),
          do: {:ok, {target.id, name, target.capacity, assignment}}
   end
 

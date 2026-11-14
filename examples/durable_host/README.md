@@ -905,3 +905,21 @@ input/output allowance through native publication and fresh source observation.
 Saved acknowledgements return without helper IO after later ready/disposal
 completion. The example's callback/SQL models do not qualify a native package;
 public native branch admission remains disabled.
+
+
+### Kubernetes preview store authority
+
+The preview's `kubernetes_backend: 1` store contract requires migration
+`20261113000000_kubernetes_bindings`. Stop controllers, apply the migration, and
+upgrade every shared codec reader and resource writer before enrolling a target.
+It adds authenticated Kubernetes enrollment payloads and selective execution v54
+readers; existing HTTP/Embedded execution payloads and fingerprints are retained.
+The rollback refuses to discard Kubernetes bindings. The marker covers atomic
+intent/capacity, UID-bound receipt transitions, complete authenticated recovery
+and proof-bound cleanup release; it enables no Pod operation by itself.
+
+Run the shared `KubernetesContract` and PostgreSQL tampering/rollback tests
+manually with `MIX_ENV=test mix test test/kubernetes_store_test.exs`. Follow the
+[backend progress](../../docs/design/kubernetes-backend-progress.md) for the
+remaining operational gates and the [K3s lab](../../docs/kubernetes-lab.md) for
+explicit live checks. Kubernetes lab checks remain manual.

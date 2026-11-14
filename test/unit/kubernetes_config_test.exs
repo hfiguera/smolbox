@@ -145,7 +145,7 @@ defmodule SmolBox.KubernetesConfigTest do
                Backend.invoke(reference, operation, List.duplicate(nil, arity - 1))
     end
 
-    refute Target.supports?(target, Fixture.execution(config).spec)
+    assert Target.supports?(target, Fixture.execution(config).spec)
     assert {:error, %Error{evidence: :not_dispatched}} = Target.qualify(target, %{})
 
     assert {:error, %Error{evidence: :not_dispatched}} =
@@ -171,11 +171,11 @@ defmodule SmolBox.KubernetesConfigTest do
     assert Shape.dns_label?(String.duplicate("a", 63))
   end
 
-  test "the public runtime constructor cannot enroll a preview before the store gate exists" do
+  test "the public runtime constructor accepts offline enrollment with the store marker" do
     {:ok, config} = Fixture.config()
     store = start_supervised!(SmolBox.Store.Memory)
 
-    assert {:error, %Error{category: :unsupported_capability, operation: :runtime}} =
+    assert {:ok, _runtime} =
              SmolBox.Runtime.Config.new(
                name: SmolBox.KubernetesDisabledRuntime,
                namespace: "kube",

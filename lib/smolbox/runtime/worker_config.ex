@@ -204,6 +204,8 @@ defmodule SmolBox.Runtime.WorkerConfig do
 
   @doc "Check exact profile/artifact approval and allocation floors; this is not a health probe."
   @spec supports?(t(), ExecutionSpec.t() | SmolBox.ManagedMachineSpec.t()) :: boolean()
+  def supports?(_worker, %{retention_ms: 0}), do: false
+
   def supports?(%{runtime_version: version}, %{checkpointable: true})
       when version not in ["1.19.0", "1.20.2", "1.22.0", "1.34.0"],
       do: false

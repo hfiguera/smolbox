@@ -9,9 +9,9 @@ to production operation and full domain capability coverage. Existing backend
 behavior must remain compatible throughout.
 
 Track delivery in [implementation progress](kubernetes-backend-progress.md) and
-the [versioned parity matrix](kubernetes-backend-parity.md). Phase 0 runtime
-qualification and Phase 1 offline type validation have passed. Store, operational
-transport and public-path qualification remain pending; admission stays disabled.
+the [versioned parity matrix](kubernetes-backend-parity.md). Runtime qualification and offline type validation have passed. Track subsequent
+store, transport and public qualification gates in the progress document; a store
+reader marker alone never enables operational dispatch.
 
 ## Starting point
 
@@ -26,9 +26,11 @@ Already available:
   and ten manual offline harness checks. The lab is committed separately from
   the future backend and is not run by CI.
 
-Still absent: Kubernetes target configuration, API client, exec transport,
-source admission, durable Pod receipts, backend cleanup proofs, and public
-Kubernetes execution tests. The current smoke is not a substitute for them.
+Phases 1–2 now supply typed targets/authority, selective persisted receipts,
+proof-bound store release and gated OCI submission. Still absent: the bounded
+API client, exec/file transport, live node-evidence provider, orchestration and
+public Kubernetes execution qualification. The runtime smoke does not substitute
+for those gates.
 
 Deliver phases in dependency order. Each phase should be a reviewable change
 with focused tests and an explicit exit gate. Do not combine speculative later
@@ -111,7 +113,7 @@ Primary areas: `lib/smolbox.ex`, `lib/smolbox/store.ex`,
 `lib/smolbox/runtime/{config,execution_support,native_support}.ex`;
 the reference durable-store integration under `examples/`.
 
-1. Add optional execution receipt/cleanup-proof fields, nil for existing records.
+1. Add optional execution receipt/cleanup-proof/create-dispatch fields, nil for existing records.
    Add a selective Kubernetes codec version, preserving existing HTTP/Embedded
    serialized bytes and old fingerprints. Include corruption and unsupported
    version rejection; never decode new authority as legacy nil assignment.

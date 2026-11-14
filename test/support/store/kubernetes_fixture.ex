@@ -88,7 +88,8 @@ defmodule SmolBox.Test.Kubernetes do
         id: "execution-1",
         command: command,
         artifact: config.sources |> hd() |> Source.artifact(),
-        profile: hd(config.profiles)
+        profile: hd(config.profiles),
+        retention_ms: 0
       )
 
     {:ok, fingerprint} = ExecutionSpec.fingerprint(spec, String.duplicate("k", 32))
@@ -103,14 +104,13 @@ defmodule SmolBox.Test.Kubernetes do
     reserved = %{
       record
       | backend_assignment: assignment,
+        backend_create_state: :pending,
         worker_id: config.id,
         machine_name: assignment.pod_name,
         worker_generation: 1,
         reservation: Profile.resources(record.spec.profile)
     }
 
-    # A prototype for authority validation. Full Execution persistence remains
-    # disabled until the selective Kubernetes codec is implemented.
     record = %{
       reserved
       | state: :preparing,

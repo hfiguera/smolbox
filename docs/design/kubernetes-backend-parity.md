@@ -1,6 +1,6 @@
 # Kubernetes backend parity matrix
 
-Status: baseline version 1, November 13, 2026. The long-term goal is equivalent
+Status: implementation version 2, November 13, 2026. The long-term goal is equivalent
 SmolBox public domain behavior across HTTP, Embedded and Kubernetes. Follow
 [the design](kubernetes-backend.md), [delivery plan](kubernetes-backend-implementation-plan.md),
 and [implementation status](kubernetes-backend-progress.md).
@@ -12,12 +12,12 @@ runtime-only evidence is not marked as an implemented library capability.
 
 | Domain contract / reference | HTTP and Embedded baseline | Kubernetes status | Delivery gate |
 | --- | --- | --- | --- |
-| Target admission, fixed resources, effective offline policy | Existing target/package/profile approvals | Runtime recipe and typed target validation complete; runtime admission disabled | Phases 0–3, then public Phase 7 |
-| Disposable submit/fetch/await/cancel | Existing managed execution API | Planned; no backend implementation | Phases 1–7 |
+| Target admission, fixed resources, effective offline policy | Existing target/package/profile approvals | Runtime recipe, typed target and store enrollment complete; operations disabled | Phases 0–3, then public Phase 7 |
+| Disposable submit/fetch/await/cancel | Existing managed execution API | Gated OCI submit/fetch persistence implemented; operational lifecycle pending | Phases 1–7 |
 | Foreground binary output and real exit | Existing exec contracts | Runtime WebSocket v5 probe passed; Elixir transport pending | Phase 4 + public qualification |
 | Bounded input files and artifact collection | Existing file/ArtifactStore contracts | Planned | Phase 5 + public qualification |
-| Durable intent, ownership, no replay, positive cleanup | Existing store/backend evidence contracts | Immutable intent/receipt/proof types complete; persistence and provider pending | Phases 2 and 6–7 |
-| OCI image/source approval | Existing qualified source catalogs | Public Python manifest pinned and exact catalogs validated; disposable OCI admission pending | Phases 1–3 and 7 |
+| Durable intent, ownership, no replay, positive cleanup | Existing store/backend evidence contracts | Intent/receipt/proof persistence and atomic store gates complete; node provider and orchestration pending | Phases 2 and 6–7 |
+| OCI image/source approval | Existing qualified source catalogs | Pinned Python manifest, exact catalogs and zero-retention OCI submission gate complete; live creation pending | Phases 1–3 and 7 |
 | Production node evidence, multi-node failure recovery, measurements | Existing backend-specific operational contracts | Planned after preview | Production foundation milestone |
 | Private credentials, broader artifacts, image operations | Existing qualified source/image APIs | Planned after preview | Sources/connectivity milestone |
 | Network allowlists and ports | Existing qualified network policies/mappings | Planned after preview | Sources/connectivity milestone |

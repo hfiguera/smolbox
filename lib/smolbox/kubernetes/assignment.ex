@@ -1,7 +1,7 @@
 defmodule SmolBox.Kubernetes.Assignment do
   @moduledoc false
   alias SmolBox.{Error, Execution, Source, Validation}
-  alias SmolBox.Kubernetes.{Binding, Config, PodIntent, Shape}
+  alias SmolBox.Kubernetes.{Binding, Config, ExecutionPolicy, PodIntent, Shape}
 
   @enforce_keys [
     :binding,
@@ -32,7 +32,8 @@ defmodule SmolBox.Kubernetes.Assignment do
            Map.get(record, :worker_id) == nil and Map.get(record, :backend_assignment) == nil,
          true <- Map.get(record, :managed_machine) == nil,
          true <- artifact in Enum.map(config.sources, &Source.artifact/1),
-         true <- profile in config.profiles do
+         true <- profile in config.profiles,
+         true <- ExecutionPolicy.supported?(spec) do
       fields = %{
         binding: Config.binding(config),
         pod_name: name,

@@ -359,6 +359,7 @@ defmodule SmolBox.Store.Codec do
     CodecExports,
     CodecFiles,
     CodecGrowth,
+    CodecKubernetes,
     CodecMaterial,
     CodecNative,
     CodecNativeBranchAuthority,
@@ -546,7 +547,7 @@ defmodule SmolBox.Store.Codec do
   defp encode_branch_credentials(record) do
     with true <- native_branch_credentials?(record),
          :ok <- validate_extended(record) do
-      bytes = @branch_https_prefix <> :erlang.term_to_binary(record)
+      bytes = @branch_https_prefix <> CodecKubernetes.legacy_payload(record)
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     else
       _ -> invalid()
@@ -565,6 +566,8 @@ defmodule SmolBox.Store.Codec do
 
   @spec encode(Execution.t() | SmolBox.ManagedMachine.t() | SmolBox.Volume.t()) ::
           {:ok, binary()} | {:error, Error.t()}
+  def encode(%Execution{spec: %{retention_ms: 0}} = record), do: CodecKubernetes.encode(record)
+
   def encode(
         %Execution{
           backend_assignment: %{version: 2, creation: %{"features" => %{"branch_https" => true}}}
@@ -590,7 +593,7 @@ defmodule SmolBox.Store.Codec do
 
   def encode(%SmolBox.ManagedMachine{spec: %{branch_static_egress: true}} = record) do
     with :ok <- validate_extended(record) do
-      bytes = @branch_static_egress_prefix <> :erlang.term_to_binary(record)
+      bytes = @branch_static_egress_prefix <> CodecKubernetes.legacy_payload(record)
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
   end
@@ -599,7 +602,7 @@ defmodule SmolBox.Store.Codec do
     with :ok <- validate_extended(record) do
       bytes =
         @branch_release_env_prefix <>
-          :erlang.term_to_binary(CodecStaticBranchEgress.strip(record))
+          CodecKubernetes.legacy_payload(CodecStaticBranchEgress.strip(record))
 
       if byte_size(bytes) <= @max_bytes, do: {:ok, bytes}, else: invalid()
     end
@@ -800,13 +803,15 @@ defmodule SmolBox.Store.Codec do
   @spec decode(binary()) ::
           {:ok, Execution.t() | SmolBox.ManagedMachine.t() | SmolBox.Volume.t()}
           | {:error, Error.t()}
+  def decode(<<"smolbox-record-v54\0", _::binary>> = bytes), do: CodecKubernetes.decode(bytes)
+
   def decode(<<@branch_https_prefix, 131, tag, _rest::binary>> = bytes)
       when tag != 80 and byte_size(bytes) <= @max_bytes do
     Enum.each(@record_modules, &Code.ensure_loaded!/1)
     <<@branch_https_prefix, payload::binary>> = bytes
 
     with {%{__struct__: module, backend_assignment: %{version: 2}} = record, used} <-
-           :erlang.binary_to_term(payload, [:safe, :used]),
+           CodecKubernetes.legacy_term(payload),
          true <- module in [SmolBox.ManagedMachine, Execution],
          true <- used == byte_size(payload) and native_branch_credentials?(record),
          :ok <- validate_extended(record),
@@ -822,7 +827,7 @@ defmodule SmolBox.Store.Codec do
     <<@branch_static_egress_prefix, payload::binary>> = bytes
 
     with {%SmolBox.ManagedMachine{spec: %{branch_static_egress: true}} = record, used} <-
-           :erlang.binary_to_term(payload, [:safe, :used]),
+           CodecKubernetes.legacy_term(payload),
          true <- used == byte_size(payload),
          :ok <- validate_extended(record),
          do: {:ok, record},
@@ -837,7 +842,7 @@ defmodule SmolBox.Store.Codec do
     <<@branch_release_env_prefix, payload::binary>> = bytes
 
     with {%SmolBox.ManagedMachine{branch: %{release_env: [_ | _]}} = record, used} <-
-           :erlang.binary_to_term(payload, [:safe, :used]),
+           CodecKubernetes.legacy_term(payload),
          true <- used == byte_size(payload),
          record = CodecStaticBranchEgress.upgrade(record),
          :ok <- validate_extended(record),
@@ -1042,10 +1047,10 @@ defmodule SmolBox.Store.Codec do
       record
       |> CodecBranches.strip_release_env()
       |> CodecStaticBranchEgress.strip()
-      |> :erlang.term_to_binary()
+      |> CodecKubernetes.legacy_payload()
 
   defp legacy_branch_term(payload) do
-    {record, used} = :erlang.binary_to_term(payload, [:safe, :used])
+    {record, used} = CodecKubernetes.legacy_term(payload)
     {record |> CodecBranches.upgrade_release_env() |> CodecStaticBranchEgress.upgrade(), used}
   end
 

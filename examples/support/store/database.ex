@@ -279,7 +279,6 @@ defmodule SmolBox.DurableHost.Database do
   end
 
   if Code.ensure_loaded?(SmolBox.Store.BackendBindings) do
-    alias SmolBox.Backend.Binding
     alias SmolBox.Store.BackendBindings
 
     # Include released/deleted tombstones, unlike operational maintenance pages.
@@ -325,13 +324,29 @@ defmodule SmolBox.DurableHost.Database do
     defp domain_workers(context, rows, generation) do
       Enum.reduce_while(rows, :ok, fn [worker], :ok ->
         case assignment_backend(context, worker) do
-          {:ok, %Binding{generation: ^generation}} -> {:halt, error(:identity_conflict)}
-          {:ok, :conflict} -> {:halt, error(:store)}
-          {:ok, _binding} -> {:cont, :ok}
-          error -> {:halt, error}
+          {:ok, :conflict} ->
+            {:halt, error(:store)}
+
+          {:ok, binding} ->
+            domain_result(binding, generation)
+
+          error ->
+            {:halt, error}
         end
       end)
     end
+
+    defp domain_result(binding, generation),
+      do:
+        if(domain_conflict?(binding, generation),
+          do: {:halt, error(:identity_conflict)},
+          else: {:cont, :ok}
+        )
+
+    defp domain_conflict?(%{generation: generation}, generation) when is_binary(generation),
+      do: true
+
+    defp domain_conflict?(binding, requested), do: BackendBindings.aliases?(binding, requested)
 
     defp assignment_page(context, worker, kind, cursor, evidence) do
       {scope, id} = cursor || {nil, nil}
@@ -339,9 +354,9 @@ defmodule SmolBox.DurableHost.Database do
       rows =
         query(
           context,
-          "SELECT scope,execution_id,#{columns(kind)} FROM #{table(kind)} WHERE partition=$1 AND worker_id=$2 " <>
-            "AND ($3::varchar IS NULL OR (scope,execution_id)>($3,$4)) ORDER BY scope,execution_id LIMIT 100",
-          [context.partition, worker, scope, id]
+          "SELECT scope,execution_id,#{columns(kind)} FROM #{table(kind)} WHERE partition=$1 " <>
+            "AND ($2::varchar IS NULL OR (scope,execution_id)>($2,$3)) ORDER BY scope,execution_id LIMIT 100",
+          [context.partition, scope, id]
         ).rows
 
       with {:ok, records} <- decode_rows(context, rows, kind) do

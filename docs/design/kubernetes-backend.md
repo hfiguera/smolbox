@@ -221,7 +221,7 @@ reuse the general `Identity.machine_name` output without validating those rules.
 Never reuse a Pod name, including after deletion. Keep released assignment
 tombstones in authenticated recovery scans.
 
-Add optional `backend_receipt` and `backend_cleanup` execution fields, nil for
+Add optional `backend_receipt`, `backend_cleanup`, and `backend_create_state` execution fields, nil for
 existing records. Immutable creation intent stays in `backend_assignment`.
 Store a creation receipt under the current claim/version before staging or exec.
 Updates may fill in initial runtime observations but may never substitute a new

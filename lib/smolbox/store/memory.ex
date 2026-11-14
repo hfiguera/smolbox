@@ -167,6 +167,7 @@ defmodule SmolBox.Store.Memory do
         %{
           managed_disk_expansion: 1,
           backend_bindings: 1,
+          kubernetes_backend: 1,
           backend_recovery: 1,
           native_material_proofs: 2,
           native_background_launches: 1,
@@ -384,9 +385,15 @@ defmodule SmolBox.Store.Memory do
     end
   end
 
+  defp binding_available?(state, worker, next) do
+    records = Map.values(state.records) ++ Map.values(state.machines) ++ Map.values(state.volumes)
+    bindings = Enum.map(records, &{&1.worker_id, BackendBindings.record_binding(&1)})
+    BackendBindings.available?(Map.to_list(state.backend_bindings) ++ bindings, worker, next)
+  end
+
   defp binding_admission(state, worker, current, next) do
     cond do
-      not BackendBindings.available?(state.backend_bindings, worker, next) ->
+      not binding_available?(state, worker, next) ->
         error(:identity_conflict)
 
       current != nil or map_size(state.backend_bindings) < state.max_records ->

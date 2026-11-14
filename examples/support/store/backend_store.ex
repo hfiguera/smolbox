@@ -18,7 +18,7 @@ defmodule SmolBox.DurableHost.BackendStore do
 
   if Code.ensure_loaded?(SmolBox.Store.BackendBindings) do
     alias SmolBox.Backend.Binding
-    alias SmolBox.DurableHost.Database
+    alias SmolBox.DurableHost.{Database, KubernetesBinding}
     alias SmolBox.Error
 
     alias SmolBox.Store.{
@@ -36,11 +36,15 @@ defmodule SmolBox.DurableHost.BackendStore do
     }
 
     def capabilities(context) do
-      Database.query(context, "SELECT kind,generation FROM smolbox_backend_bindings LIMIT 0", [])
+      Database.query(
+        context,
+        "SELECT kind,generation,payload FROM smolbox_backend_bindings LIMIT 0",
+        []
+      )
 
       capabilities =
         if function_exported?(__MODULE__, :assignments, 4),
-          do: %{backend_bindings: 1, backend_recovery: 1},
+          do: %{backend_bindings: 1, backend_recovery: 1, kubernetes_backend: 1},
           else: %{backend_bindings: 1}
 
       capabilities =
@@ -215,16 +219,16 @@ defmodule SmolBox.DurableHost.BackendStore do
            {:ok, next} <-
              BackendBindings.bind(worker, current, binding, evidence),
            :ok <- available(context, worker, next) do
-        {kind, generation} = columns(next)
+        {kind, generation, payload} = columns(context, next)
 
         Database.query(
           context,
           """
-          INSERT INTO smolbox_backend_bindings (partition,worker_id,kind,generation)
-          VALUES ($1,$2,$3,$4) ON CONFLICT (partition,worker_id) DO UPDATE SET
-            kind=EXCLUDED.kind,generation=EXCLUDED.generation
+          INSERT INTO smolbox_backend_bindings (partition,worker_id,kind,generation,payload)
+          VALUES ($1,$2,$3,$4,$5) ON CONFLICT (partition,worker_id) DO UPDATE SET
+            kind=EXCLUDED.kind,generation=EXCLUDED.generation,payload=EXCLUDED.payload
           """,
-          [context.partition, worker, kind, generation]
+          [context.partition, worker, kind, generation, payload]
         )
 
         {:ok, next}
@@ -293,26 +297,37 @@ defmodule SmolBox.DurableHost.BackendStore do
       rows =
         Database.query(
           context,
-          "SELECT kind,generation FROM smolbox_backend_bindings WHERE partition=$1 AND worker_id=$2",
+          "SELECT kind,generation,payload FROM smolbox_backend_bindings WHERE partition=$1 AND worker_id=$2",
           [context.partition, worker]
         ).rows
 
-      decode(worker, rows)
+      decode(context, worker, rows)
     end
 
-    defp decode(_worker, []), do: {:ok, nil}
-    defp decode(_worker, [["http", nil]]), do: {:ok, :http}
+    defp decode(_context, _worker, []), do: {:ok, nil}
+    defp decode(_context, _worker, [["http", nil, nil]]), do: {:ok, :http}
 
-    defp decode(worker, [["embedded", generation]]) do
+    defp decode(_context, worker, [["embedded", generation, nil]]) do
       binding = %Binding{kind: :embedded, target_id: worker, generation: generation}
       if Binding.valid?(binding), do: {:ok, binding}, else: error(:store)
     end
 
-    defp decode(_worker, _rows), do: error(:store)
-    defp columns(:http), do: {"http", nil}
-    defp columns(%Binding{generation: generation}), do: {"embedded", generation}
+    defp decode(context, worker, [["kubernetes", generation, payload]]),
+      do: KubernetesBinding.decrypt(context, worker, generation, payload)
+
+    defp decode(_context, _worker, _rows), do: error(:store)
+    defp columns(_context, :http), do: {"http", nil, nil}
+    defp columns(_context, %Binding{generation: generation}), do: {"embedded", generation, nil}
+
+    defp columns(context, %SmolBox.Kubernetes.Binding{} = binding),
+      do: {"kubernetes", binding.generation, KubernetesBinding.encrypt(context, binding)}
 
     defp available(_context, _worker, :http), do: :ok
+
+    defp available(context, worker, %SmolBox.Kubernetes.Binding{} = binding) do
+      with :ok <- available_page(context, worker, binding, nil),
+           do: Database.assignment_domain_available(context, worker, binding)
+    end
 
     defp available(context, worker, %Binding{generation: generation}) do
       rows =
@@ -325,6 +340,34 @@ defmodule SmolBox.DurableHost.BackendStore do
       if rows == [],
         do: Database.assignment_domain_available(context, worker, generation),
         else: error(:identity_conflict)
+    end
+
+    defp available_page(context, worker, binding, cursor) do
+      rows =
+        Database.query(
+          context,
+          "SELECT worker_id,kind,generation,payload FROM smolbox_backend_bindings WHERE partition=$1 " <>
+            "AND ($2::varchar IS NULL OR worker_id>$2) ORDER BY worker_id LIMIT 100",
+          [context.partition, cursor]
+        ).rows
+
+      with :ok <- available_rows(context, worker, binding, rows) do
+        if Enum.count_until(rows, 100) == 100,
+          do: available_page(context, worker, binding, rows |> List.last() |> hd()),
+          else: :ok
+      end
+    end
+
+    defp available_rows(context, worker, binding, rows) do
+      Enum.reduce_while(rows, :ok, fn [other | values], :ok ->
+        with {:ok, existing} <- decode(context, other, [values]),
+             true <- BackendBindings.available?([{other, existing}], worker, binding) do
+          {:cont, :ok}
+        else
+          {:error, _} = error -> {:halt, error}
+          _ -> {:halt, error(:identity_conflict)}
+        end
+      end)
     end
 
     defp error(category), do: {:error, %Error{category: category, operation: :reservation}}
