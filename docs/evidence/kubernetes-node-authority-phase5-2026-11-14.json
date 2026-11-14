@@ -2936,7 +2936,7 @@
     ],
     "plan": "docs/design/kubernetes-node-authority-implementation-plan.md#runtime-prerequisite-before-resuming-phase-5",
     "state": "implemented_reviewed_and_live_tested_exact_candidate_only",
-    "suggested_branch": "feature/smolvm-shim-child-waits",
+    "suggested_branch": "fix/shim-child-wait-race",
     "fix_commit": "ae6c104623aff1703e3abd36ce902aa365e122c2",
     "validation_backport_commit": "b64d2ac83fbaf2d5d95a4acb781cac4ca2abf055",
     "report": "docs/evidence/kubernetes-node-authority-shim-fix-2026-11-14.json",

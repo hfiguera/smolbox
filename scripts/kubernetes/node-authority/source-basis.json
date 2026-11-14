@@ -230,7 +230,7 @@
       "scripts/kubernetes/node-authority/recovery-campaign.exs": "a06787e657a1dafc1002dc5cdafea79cbfa1e6c7ae7f5536f5348c3600991b59",
       "scripts/kubernetes/node-authority/enrolled-client.exs": "00a2605c4f35a3122cd76c8dc3ea90d972fbedddbdedd12195355ee1075d8b23",
       "scripts/kubernetes/node-authority/campaign_settings.exs": "d5e064c693a7d077f2a43167a009d6b515de553c7794654f185b4ea750e92516",
-      "scripts/kubernetes/node-authority/README.md": "1dd8e0d2d29d1b1f3f5add626bc84697e172184e44dcb08d21906fd16ddee805",
+      "scripts/kubernetes/node-authority/README.md": "53acbc2c9e9363beca42d85ec845920aa9b843744b7cbe1344c0d9c3d183cb36",
       "scripts/kubernetes/fault_proxy.py": "3ab664dd79ae0c99daa64e869af6a1941d4f4b19ced15399874d782b440f8dbb",
       "scripts/kubernetes/backend-smoke.exs": "7c18c09ae9ac1cf654ec93b298fd44035f13c6107fe2254ad2fa224c45c16f55",
       "scripts/kubernetes/node-authority/candidate_runtime.py": "7ba0495148fcea7a33a5656c39109d0e5f08892468256c84d823222620bdb098"
@@ -258,7 +258,7 @@
   "fork_runtime_candidate": {
     "report": "docs/evidence/kubernetes-node-authority-shim-fix-2026-11-14.json",
     "fork": "https://github.com/hfiguera/smolvm",
-    "branch": "feature/smolvm-shim-child-waits",
+    "branch": "fix/shim-child-wait-race",
     "fix_commit": "ae6c104623aff1703e3abd36ce902aa365e122c2",
     "validation_backport_commit": "b64d2ac83fbaf2d5d95a4acb781cac4ca2abf055",
     "base_version": "1.34.0",

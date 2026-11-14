@@ -3,7 +3,7 @@
   "date": "2026-11-14",
   "status": "passed_exact_candidate_setup_all_gates_and_final_audit",
   "fork": "https://github.com/hfiguera/smolvm",
-  "branch": "feature/smolvm-shim-child-waits",
+  "branch": "fix/shim-child-wait-race",
   "upstream_base_commit": "93d46b463dc8608e2b90a452471aad3ef4f7a94f",
   "fix_commit": "ae6c104623aff1703e3abd36ce902aa365e122c2",
   "validation_source_revision": "b64d2ac83fbaf2d5d95a4acb781cac4ca2abf055",

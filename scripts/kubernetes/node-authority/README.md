@@ -398,7 +398,7 @@ global idle check for an original receipt, or force release to finish a campaign
 ## Explicit fork-runtime candidate validation
 
 The user-authorized shim fix is developed separately in `hfiguera/smolvm` on
-`feature/smolvm-shim-child-waits`. Its Linux regression boots the real
+`fix/shim-child-wait-race`. Its Linux regression boots the real
 containerd-shim framework and deterministically reproduces an exit stolen from
 a successful `cp`. The selected integration uses the engine's existing per-PID
 VM reaper, keeps ordinary helpers owned by their `Child` handles and leaves

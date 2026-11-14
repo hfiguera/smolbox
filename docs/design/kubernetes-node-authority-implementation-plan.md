@@ -267,7 +267,7 @@ arbitrary children. Competing waits are consistent with the observed ECHILD
 failures; source review does not establish the exact runtime interleaving.
 
 Prepare a separately reviewed runtime prerequisite, suggested branch
-`feature/smolvm-shim-child-waits`, before changing this branch's approved runtime
+`fix/shim-child-wait-race`, before changing this branch's approved runtime
 pins. Keep the existing version/hash restrictions and disabled provider in place
 until that review and the required artifact qualification are complete. This is
 an unmet dependency, not permission to replace either preserved installation.
