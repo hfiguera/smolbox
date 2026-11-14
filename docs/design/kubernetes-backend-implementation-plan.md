@@ -1,7 +1,6 @@
 # Kubernetes backend implementation plan
 
-Status: Phases 0–6 qualified; Phase 7 public campaign in progress, November 13,
-2026. Follow the decisions in
+Status: Phases 0–7 qualified for the narrow first preview, November 13, 2026. Follow the decisions in
 [the design](kubernetes-backend.md). **The long-term goal is feature parity with
 HTTP and Embedded through the same SmolBox public APIs and behavioral contracts.**
 Phases 0–7 deliver the first milestone: a development preview of disposable
@@ -27,13 +26,11 @@ Already available:
   and ten manual offline harness checks. The lab is committed separately from
   the future backend and is not run by CI.
 
-Phases 1–6 now supply target/store authority, bounded object/exec/file transport,
-transaction-backed version-3 node proof, same-host controller quiescence,
-authenticated startup scans and managed cleanup. Public Memory/PostgreSQL binary,
-cancellation and durable restart runs have passed. Complete the remaining Phase 7
-fault campaign, compatibility audit and preview documentation before declaring
-the first release qualified. The runtime-only smoke never substitutes for these
-library gates.
+Phases 0–7 have passed their scoped first-preview gates. The public campaign and
+[release audit](kubernetes-backend-release-audit.md) record exact evidence and
+limits. This plan remains the implementation/verification contract for that
+milestone. The later parity milestones below remain future work; the runtime-only
+smoke does not substitute for public library qualification.
 
 Deliver phases in dependency order. Each phase should be a reviewable change
 with focused tests and an explicit exit gate. Do not combine speculative later

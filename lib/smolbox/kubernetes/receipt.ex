@@ -1,5 +1,11 @@
 defmodule SmolBox.Kubernetes.Receipt do
-  @moduledoc false
+  @moduledoc """
+  Persisted original-Pod creation and ready-incarnation evidence.
+
+  A ready receipt retains its original container, sandbox history, process births
+  and observer epoch. It is not a label-based discovery or adoption handle.
+  Runtime guards require fresh evidence before application I/O.
+  """
   alias SmolBox.{Error, Validation}
   alias SmolBox.Kubernetes.{Assignment, Binding, Observation, Shape}
 
@@ -10,6 +16,7 @@ defmodule SmolBox.Kubernetes.Receipt do
 
   @type t :: %__MODULE__{}
 
+  @doc false
   def created(assignment, pod_uid) do
     if Assignment.valid?(assignment) and Shape.uid?(pod_uid) do
       {:ok,
@@ -26,6 +33,7 @@ defmodule SmolBox.Kubernetes.Receipt do
     end
   end
 
+  @doc false
   def ready(%__MODULE__{} = receipt, container_id, image_id, observation) do
     candidate = %{
       receipt
@@ -45,6 +53,7 @@ defmodule SmolBox.Kubernetes.Receipt do
 
   def ready(_receipt, _container_id, _image_id, _observation), do: invalid()
 
+  @doc false
   def valid?(%__MODULE__{} = value),
     do:
       Validation.struct_shape?(value, __MODULE__) and value.version == 1 and
@@ -55,6 +64,7 @@ defmodule SmolBox.Kubernetes.Receipt do
 
   def valid?(_value), do: false
 
+  @doc false
   def matches_assignment?(value, assignment),
     do:
       valid?(value) and Assignment.valid?(assignment) and value.binding == assignment.binding and
@@ -62,6 +72,7 @@ defmodule SmolBox.Kubernetes.Receipt do
         value.intent_digest == assignment.intent_digest and
         value.image_reference == assignment.source["reference"]
 
+  @doc false
   def same_creation?(expected, observed),
     do:
       valid?(expected) and valid?(observed) and expected.binding == observed.binding and
@@ -69,6 +80,7 @@ defmodule SmolBox.Kubernetes.Receipt do
         expected.nonce == observed.nonce and expected.intent_digest == observed.intent_digest and
         expected.image_reference == observed.image_reference
 
+  @doc false
   def same_incarnation?(expected, observed),
     do:
       same_creation?(expected, observed) and expected.phase == observed.phase and

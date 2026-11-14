@@ -223,6 +223,36 @@ defmodule SmolBox.KubernetesAPITest do
     assert {:error, %{category: :protocol}} = Pod.inventory(operation(c.config, :list))
   end
 
+  test "typed PodList omits item TypeMeta but explicit foreign types are rejected", c do
+    object = c.record.backend_assignment |> Assignment.manifest() |> Peer.effective()
+    key = {"GET", "/api/v1/namespaces/smolbox-preview/pods"}
+
+    for {item, valid} <- [
+          {Map.drop(object, ["kind", "apiVersion"]), true},
+          {Map.put(object, "kind", "Secret"), false},
+          {Map.put(object, "apiVersion", "apps/v1"), false},
+          {Map.put(object, "kind", nil), false}
+        ] do
+      Peer.change(
+        c.peer,
+        &put_in(&1, [:overrides, key], fn conn ->
+          TestPeer.json(conn, %{
+            "apiVersion" => "v1",
+            "kind" => "PodList",
+            "metadata" => %{"resourceVersion" => "42"},
+            "items" => [item]
+          })
+        end)
+      )
+
+      result = Pod.inventory(operation(c.config, :list))
+
+      if valid,
+        do: assert(result == {:ok, [object]}),
+        else: assert(match?({:error, %{category: :protocol}}, result))
+    end
+  end
+
   test "inventory follows opaque tokens and rejects an inconsistent snapshot", c do
     object = c.record.backend_assignment |> Assignment.manifest() |> Peer.effective()
     token = "opaque+token/&?"

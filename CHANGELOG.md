@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- Add an opt-in single-node Kubernetes development preview for disposable OCI
+  executions, binary commands/files and artifact collection. Preserve uncertain
+  outcomes without replay; require original-UID deletion and version-3 node proof
+  before releasing capacity. Support same-host controller restart through complete
+  authenticated startup scans and persistent process-birth ownership metadata.
+- Add manual Memory/PostgreSQL public smoke tools and scoped SmolVM/K3s evidence.
+  Keep Kubernetes lab/Python checks manual and leave CI workflows unchanged.
+- Add selective codec v54 and reference PostgreSQL Kubernetes enrollment. Upgrade
+  shared readers/writers and apply the example migration before enabling this
+  backend. Existing HTTP/Embedded encodings and fingerprints remain compatible.
+  [Preview setup and limits](docs/kubernetes-backend.md)
+
 ## 0.6.0
 
 Held branches can receive per-child environment values, opt-in static egress,

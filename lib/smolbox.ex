@@ -360,6 +360,14 @@ defmodule SmolBox do
   limit); an empty filtered page can advance its opaque tuple cursor. `:absent`
   means that receipt-bound inspection observed missing storage; `:unverified`
   means no full receipt is saved. Native observations send no lifecycle mutation.
+
+  Kubernetes pages authenticate one stored assignment, including missing charged
+  resources, and observe the dedicated namespace through a bounded five-second
+  API inventory. `namespace_observations` contains at most 20 redacted API findings;
+  `namespace_count`/`namespace_truncated` describe that bounded inventory. A missing
+  charged assignment is `:unresolved`; an API object without a record is `:foreign`.
+  Its cursor is the opaque assignment cursor, and `foreign_count` is nil. These
+  observations never establish physical cleanup, adopt an object or release capacity.
   """
   @spec audit_worker(runtime(), String.t(), keyword()) :: {:ok, map()} | {:error, Error.t()}
   def audit_worker(runtime, worker_id, options \\ []) do

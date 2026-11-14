@@ -1,5 +1,11 @@
 defmodule SmolBox.Kubernetes.Identity do
-  @moduledoc false
+  @moduledoc """
+  Kubernetes incarnation carried by a managed machine observation.
+
+  The saved receipt binds the observation to its original Pod, container and node
+  history. Runtime comparisons never treat a same-name replacement as ownership.
+  This is persisted adapter data, not an application-supplied adoption token.
+  """
   alias SmolBox.Kubernetes.{Assignment, Receipt}
   alias SmolBox.Validation
 
@@ -8,11 +14,13 @@ defmodule SmolBox.Kubernetes.Identity do
   defstruct @enforce_keys
   @type t :: %__MODULE__{receipt: Receipt.t()}
 
+  @doc false
   def valid?(%__MODULE__{} = value),
     do: Validation.struct_shape?(value, __MODULE__) and Receipt.valid?(value.receipt)
 
   def valid?(_value), do: false
 
+  @doc false
   def matches?(%__MODULE__{} = value, assignment),
     do:
       valid?(value) and Assignment.valid?(assignment) and
@@ -20,6 +28,7 @@ defmodule SmolBox.Kubernetes.Identity do
 
   def matches?(_identity, _assignment), do: false
 
+  @doc false
   def same_incarnation?(left, right),
     do: valid?(left) and valid?(right) and Receipt.same_incarnation?(left.receipt, right.receipt)
 end

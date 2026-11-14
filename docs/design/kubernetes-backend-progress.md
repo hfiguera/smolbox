@@ -1,6 +1,6 @@
 # Kubernetes backend progress
 
-Status: implementation in progress, November 13, 2026. Follow
+Status: first development preview qualified, November 13, 2026 (November 14 UTC). Follow
 [the design](kubernetes-backend.md) and
 [implementation plan](kubernetes-backend-implementation-plan.md).
 The goal remains the complete first release, Phases 0–7, with HTTP/Embedded
@@ -12,17 +12,16 @@ parity tracked in [the parity matrix](kubernetes-backend-parity.md).
 | --- | --- | --- |
 | 0 — Runtime qualification | Runtime gate passed in the dedicated lab | [Exact live report](../evidence/kubernetes-backend-phase0-2026-11-13.json); recipe and constraints below |
 | 1 — Target and authority types | Type/validation gate passed | Offline constructors, immutable Pod intent, receipts, node observations, cleanup proofs and target normalization |
-| 2 — Store/codec/OCI admission | Store gate passed | Selective v54, atomic allocation, UID receipt transitions, proof-bound release, authenticated PostgreSQL enrollment, gated OCI submission; operational dispatch disabled |
-| 3 — Object lifecycle | Object API gate passed | Bounded TLS/token client, pinned object enrollment, assigned backend create/observe/readiness/UID-delete and restricted live RBAC; application IO and capacity release disabled |
+| 2 — Store/codec/OCI admission | Store gate passed | Selective v54, atomic allocation, UID receipt transitions, proof-bound release, authenticated PostgreSQL enrollment, gated OCI submission; later lifecycle gates supplied by Phases 4–7 |
+| 3 — Object lifecycle | Object API gate passed | Bounded TLS/token client, pinned object enrollment, assigned backend create/observe/readiness/UID-delete and restricted live RBAC; application I/O and cleanup qualified in later phases |
 | 4 — Exec | Guarded adapter exec gate passed | Real transaction-backed node capture; saved ready receipts; assigned adapter bytes/exits 0 and 7; lost observation without replay |
 | 5 — Files | Assigned file gate passed | Shared Runtime.Files staging/read-back and artifact publication on real SmolVM; bounded sealed helper, corruption and unsafe-path rejection |
 | 6 — Cleanup/recovery | Authority gate passed | Version-3 node/kubelet proof, same-host process guard, authenticated startup scans, live durable restart/cancellation and proof-bound release |
-| 7 — Public qualification | In progress | Public Memory/PostgreSQL binary, restart, cancellation and lost-create cases passed; remaining fault campaign and final documentation |
+| 7 — Public qualification | First-preview gate passed | Real public Memory/PostgreSQL smoke and fault controls; current compatibility suite, package/docs checks and [release audit](kubernetes-backend-release-audit.md) |
 
 The runtime public entrypoints are implemented behind explicit controller,
 complete startup-scan, enrolled-node and fresh-idle admission gates. Phases 0–6
-have passed their scoped gates; the final public qualification campaign remains
-in progress. This is an opt-in single-node development preview, with broader
+have passed their scoped gates; Phase 7 public qualification is complete. This is an opt-in single-node development preview, with broader
 HTTP/Embedded parity delivered by later milestones.
 
 ## Phase 0 findings and approved development recipe
@@ -460,6 +459,9 @@ precedes this final evidence/report text, so it is not a hash of the later docs.
 
 ## Phase 6 — Historical component checkpoints
 
+These paragraphs preserve earlier checkpoints in order. The managed-authority
+and public-qualification sections below describe the current version-3 preview.
+
 The managed preparation path now saves create dispatch intent before POST, saves
 its original UID before readiness, and captures/persists the ready incarnation
 before staging. The dedicated Kubernetes cleanup branch runs before generic
@@ -549,3 +551,43 @@ strict-assumption Credence, Dialyzer, zero dependency cycles and a fresh indepen
 production package consumer passed. All packaged library/asset hashes match this
 checkpoint. Teardown ordering and overly tight TLS test deadlines were corrected;
 failed validation runs are retained in the private campaign logs.
+
+
+## Phase 7 — Public preview qualification
+
+The manual public API campaign passed Memory and encrypted PostgreSQL binary
+input/read-back/output publication with exit 7, a silent exit 0 through the
+checked-in settings example, cancellation, output overflow, lost create response,
+lost exec status and durable controller restart. Unknown results stayed unknown;
+all completed physical cleanup before releasing their original reservations.
+Loopback fault traces recorded one POST per induced case, no exec after lost
+create or changed-container observation, and exactly one exec for lost status.
+The changed-container fault modifies an API observation after initial capture;
+it does not claim to physically replace the MicroVM.
+
+A real foreign Pending Pod remained unscheduled and untouched by the runtime.
+The complete startup scan rejected foreign inventory; public audit classified it
+as foreign. The administrator removed only its saved UID. Persistent draining
+blocked new reservation, cancellation before dispatch sent no application work,
+and resume used the expected control revision. Stale namespace/node/boot/class/
+policy approvals were rejected against the actual API without destroying enrolled
+objects. A valid unapproved source was rejected by catalog admission.
+
+The foreign control exposed K3s PodList items omitting TypeMeta. The adapter now
+fills only absent `kind`/`apiVersion` from the typed list and rejects explicit
+wrong/null types. The peer's ordinary list responses match K3s, and a focused
+regression protects nonempty recovery/inspection.
+
+Final authenticated PostgreSQL enumeration found all seven assigned executions
+with matching version-3 proof, cleanup complete and no reservation. Usage was
+zero slots/CPU/memory/disk; the node reported idle with complete unchanged history.
+No fault proxy or managed VM remained. The outer VM retains its four-hour cap.
+The physical host and existing worker configuration were not mutated.
+
+[Exact public qualification evidence](../evidence/kubernetes-backend-phase7-2026-11-13.json)
+records cases, identities, trace counts, source/asset hashes, previous failures
+and their corrections. The final main suite passed 2,298 checks (42 opt-in
+excluded); the reference PostgreSQL suite passed 310 (29 opt-in excluded),
+with all 12 current Kubernetes contracts passing. All 77 Python checks remain
+manual. Full first-preview requirements and test boundaries are mapped in the
+[release audit](kubernetes-backend-release-audit.md).

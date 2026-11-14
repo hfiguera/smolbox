@@ -1,5 +1,12 @@
 defmodule SmolBox.Kubernetes.CleanupProof do
-  @moduledoc false
+  @moduledoc """
+  Typed original-incarnation cleanup evidence persisted before store release.
+
+  Historical proof versions remain readable; only version 3 can currently release
+  capacity. The approved node provider must establish API/CRI/physical absence and
+  original kubelet lifecycle quiescence. Structural validation cannot manufacture
+  those observations or authorize a caller to release a reservation.
+  """
   alias SmolBox.Kubernetes.{Observation, Receipt, Shape}
   alias SmolBox.Validation
 
@@ -18,6 +25,7 @@ defmodule SmolBox.Kubernetes.CleanupProof do
   defstruct @enforce_keys ++ [version: 3]
   @type t :: %__MODULE__{}
 
+  @doc false
   def valid?(%__MODULE__{receipt: %{observation: %Observation{} = capture}} = value),
     do:
       Validation.struct_shape?(value, __MODULE__) and value.version in [1, 2, 3] and
@@ -28,8 +36,10 @@ defmodule SmolBox.Kubernetes.CleanupProof do
 
   # Earlier component proofs remain readable. Version 3 additionally requires
   # a persisted kubelet lifecycle witness and unchanged daemon incarnations.
+  @doc false
   def releasable?(proof, receipt), do: matches?(proof, receipt) and proof.version == 3
 
+  @doc false
   def matches?(proof, receipt),
     do: valid?(proof) and proof.receipt == receipt
 

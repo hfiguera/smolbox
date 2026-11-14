@@ -1,5 +1,11 @@
 defmodule SmolBox.Kubernetes.Assignment do
-  @moduledoc false
+  @moduledoc """
+  Immutable Kubernetes creation intent stored with an execution reservation.
+
+  It binds the exact execution, nonce, source, profile and Pod specification before
+  the single create attempt. This internal persisted type is exposed for store
+  adapters; applications should use the public SmolBox execution APIs.
+  """
   alias SmolBox.{Error, Execution, Source, Validation}
   alias SmolBox.Kubernetes.{Binding, Config, ExecutionPolicy, PodIntent, Shape}
 
@@ -20,6 +26,7 @@ defmodule SmolBox.Kubernetes.Assignment do
 
   # Mint immutable creation intent once before reservation. This constructor
   # does not grant execution admission or dispatch an API request.
+  @doc false
   def new(
         config,
         %{__struct__: Execution, scope: scope, id: id, fingerprint: fingerprint, spec: spec} =
@@ -55,6 +62,7 @@ defmodule SmolBox.Kubernetes.Assignment do
 
   def new(_config, _record, _name), do: invalid()
 
+  @doc false
   def valid?(%__MODULE__{} = value),
     do:
       Validation.struct_shape?(value, __MODULE__) and value.version == 1 and
@@ -65,11 +73,13 @@ defmodule SmolBox.Kubernetes.Assignment do
 
   def valid?(_value), do: false
 
+  @doc false
   def manifest(%__MODULE__{} = value) do
     value.pod_intent
     |> put_in(["metadata", "annotations", "smolbox.io/intent"], value.intent_digest)
   end
 
+  @doc false
   def record_matches?(
         %__MODULE__{} = value,
         %{__struct__: Execution, spec: %{artifact: artifact, profile: profile}} = record
@@ -83,6 +93,7 @@ defmodule SmolBox.Kubernetes.Assignment do
 
   def record_matches?(_assignment, _record), do: false
 
+  @doc false
   def approved?(value, config, record),
     do:
       Config.validate(config) == :ok and record_matches?(value, record) and

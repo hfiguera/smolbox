@@ -228,7 +228,8 @@ defmodule SmolBox.KubernetesPeer do
         TestPeer.json(conn, %{
           "kind" => "PodList",
           "metadata" => %{"resourceVersion" => "42"},
-          "items" => if(snapshot.pod, do: [snapshot.pod], else: [])
+          "items" =>
+            if(snapshot.pod, do: [Map.drop(snapshot.pod, ["kind", "apiVersion"])], else: [])
         })
 
       snapshot.pod == nil ->

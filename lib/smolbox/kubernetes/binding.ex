@@ -1,5 +1,11 @@
 defmodule SmolBox.Kubernetes.Binding do
-  @moduledoc false
+  @moduledoc """
+  Durable enrolled identity for the Kubernetes development preview.
+
+  Its canonical generation binds the cluster, namespace, node/boot, RuntimeClass
+  and approved runtime policy. Connection and credential contexts are excluded.
+  This is persisted store authority; its shape alone never authorizes adoption.
+  """
   alias SmolBox.{Error, Validation}
   alias SmolBox.Kubernetes.{RuntimeIdentity, Shape}
 
@@ -22,6 +28,7 @@ defmodule SmolBox.Kubernetes.Binding do
   defstruct @enforce_keys ++ [kind: :kubernetes, version: 1]
   @type t :: %__MODULE__{}
 
+  @doc false
   def new(options) do
     if Validation.keys?(options, @identity) and
          Enum.all?(@identity, &Keyword.has_key?(options, &1)) do
@@ -33,6 +40,7 @@ defmodule SmolBox.Kubernetes.Binding do
     end
   end
 
+  @doc false
   def valid?(%__MODULE__{} = value),
     do:
       Validation.struct_shape?(value, __MODULE__) and value.kind == :kubernetes and

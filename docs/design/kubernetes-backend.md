@@ -1,6 +1,6 @@
 # Kubernetes backend
 
-Status: first-preview implementation under qualification, November 13, 2026.
+Status: first development preview qualified, November 13, 2026.
 This document defines the Kubernetes backend direction and its first development
 preview. Follow [current progress](kubernetes-backend-progress.md) and exact
 phase evidence for implemented/qualified capabilities. The delivery sequence is in

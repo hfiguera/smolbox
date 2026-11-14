@@ -284,6 +284,11 @@ defmodule SmolBox.Kubernetes.Pod do
            byte_size(token) <= 4096 and token not in seen and Enum.count_until(seen, 32) < 32,
          true <- length(objects) + length(items) <= 1024,
          true <- inventory_items?(objects ++ items, operation.config.namespace) do
+      # Typed Kubernetes lists omit TypeMeta on their individual objects.
+      # Reject explicit mismatches above; fill only absent fields from PodList.
+      items =
+        Enum.map(items, &(&1 |> Map.put_new("kind", "Pod") |> Map.put_new("apiVersion", "v1")))
+
       if token == "",
         do: {:ok, objects ++ items},
         else: inventory_page(operation, token, rv, objects ++ items, [token | seen])
@@ -298,7 +303,8 @@ defmodule SmolBox.Kubernetes.Pod do
   defp inventory_items?(items, namespace) do
     valid =
       Enum.all?(items, fn item ->
-        item["kind"] == "Pod" and get_in(item, ["metadata", "namespace"]) == namespace and
+        Map.get(item, "kind", "Pod") == "Pod" and Map.get(item, "apiVersion", "v1") == "v1" and
+          get_in(item, ["metadata", "namespace"]) == namespace and
           Shape.uid?(get_in(item, ["metadata", "uid"])) and
           Shape.dns_label?(get_in(item, ["metadata", "name"]))
       end)

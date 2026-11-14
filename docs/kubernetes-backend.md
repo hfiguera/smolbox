@@ -3,9 +3,9 @@
 SmolBox can run disposable foreground commands through one enrolled Linux
 x86_64/K3s node using SmolVM. It uses the same `submit`, `fetch`, `await`, `cancel`
 and ArtifactStore contracts as the HTTP and Embedded backends. Full domain
-parity remains the [long-term goal](design/kubernetes-backend-parity.md); this
-preview supports the narrow policy below. Public qualification is tracked in
-[implementation progress](design/kubernetes-backend-progress.md).
+parity remains the [long-term goal](https://github.com/hfiguera/smolbox/blob/main/docs/design/kubernetes-backend-parity.md); this
+preview supports the narrow policy below. Public qualification passed for this fixed lab setup; exact cases and limits are in
+[implementation progress](https://github.com/hfiguera/smolbox/blob/main/docs/design/kubernetes-backend-progress.md).
 
 ## Supported policy
 
@@ -29,7 +29,7 @@ and k3d do not replace this runtime qualification.
 
 ## Administrator setup
 
-Follow the [single-VM lab guide](kubernetes-lab.md), including the four-hour outer
+Follow the [single-VM lab guide](https://github.com/hfiguera/smolbox/blob/main/docs/kubernetes-lab.md), including the four-hour outer
 limit and shared lab lock. Install the approved runtime, dedicated RuntimeClass,
 namespace and restricted service-account RBAC. NetworkPolicy alone failed the
 live isolation control: the preview also requires the administrator-owned bridge
@@ -41,8 +41,8 @@ RuntimeClass and policy identities in host configuration. Source/runtime pins
 come from administrator qualification, not discovery or current mutable tags.
 The fixed observer is read-only with respect to workload lifecycle. It preserves
 transaction-backed sandbox history, original process births and cgroup lifecycle
-witnesses. See [node evidence](design/kubernetes-node-evidence.md) and
-[cleanup authority](design/kubernetes-cleanup-authority.md).
+witnesses. See [node evidence](https://github.com/hfiguera/smolbox/blob/main/docs/design/kubernetes-node-evidence.md) and
+[cleanup authority](https://github.com/hfiguera/smolbox/blob/main/docs/design/kubernetes-cleanup-authority.md).
 
 The application credential needs only the supplied restricted RBAC. Keep CA,
 token and SSH material on the controller; execution records contain no tokens,
@@ -92,13 +92,19 @@ one command with exit 7, collects/verifies its binary output, waits for positive
 cleanup and checks zero reserved slots. `silent`, `cancel` and `overflow` modes
 exercise other outcomes. IDs must be unique for distinct executions. Run cases
 serially. An `await` result is separate from cleanup and reservation release.
+The `lost` and `reject` modes are intended for explicit loopback fault-proxy
+campaigns; `reject` requires a failed preparation with positive original cleanup.
+The TLS proxy keeps both legs verified and records only request counts/faults,
+never credentials or application payloads.
+
 Reports contain redacted outcomes; diagnostic record files may contain command
 and output data. Keep the report directory private. Diagnostics are not a store
 backup or permission to reconstruct missing authority.
 
 The example uses Memory for development; process death loses its records. For
 restart qualification, replace `store` with the reference PostgreSQL adapter and
-set `mode: :durable`, preserving partition, encryption key, fingerprint key,
+set `mode: :durable`, apply the Kubernetes example migration, and preserve the
+partition, encryption key, fingerprint key,
 controller directory and ArtifactStore root. Run through the durable host Mix
 project with its isolated database configured. There is no fallback to Memory.
 The smoke script's `crash` mode waits at a running public-command boundary and
@@ -125,7 +131,7 @@ A cleanup deadline limits mutation. After it expires, bounded read-only proof
 observations may establish that the original deletion finished; they do not reset
 the deadline or issue another application command. Capacity remains charged until
 positive proof. A transient `cleanup: :failed` can therefore later become complete.
-If proof remains unavailable, inspect the record, bounded worker inspection and
+If proof remains unavailable, inspect the record, `SmolBox.audit_worker/3` and
 administrator node evidence. Preserve original UIDs, receipts, ledgers and errors.
 Do not sweep by labels, force release, reset enrollment, delete audit history or
 silently adopt a replacement Pod. A node reboot, daemon restart or lost mapping
