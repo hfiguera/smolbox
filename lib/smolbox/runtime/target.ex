@@ -279,13 +279,26 @@ defmodule SmolBox.Runtime.Target do
     with true <- kubernetes_approved?(config, spec),
          {:ok, %{idle: true}} <- Health.check(config, config.budget),
          do: :ok,
-         else: (_ ->
-                  {:error,
-                   %Error{
-                     category: :unsupported_capability,
-                     operation: :qualify_creation,
-                     evidence: :not_dispatched
-                   }})
+         else: (
+           {:ok, %{idle: false}} ->
+             {:error,
+              %Error{
+                category: :admission_exhausted,
+                operation: :qualify_creation,
+                evidence: :not_dispatched
+              }}
+
+           {:error, %Error{}} = error ->
+             error
+
+           _ ->
+             {:error,
+              %Error{
+                category: :unsupported_capability,
+                operation: :qualify_creation,
+                evidence: :not_dispatched
+              }}
+         )
   end
 
   def qualify(%{kind: :kubernetes}, _spec),

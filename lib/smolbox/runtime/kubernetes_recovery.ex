@@ -105,7 +105,34 @@ defmodule SmolBox.Runtime.KubernetesRecovery do
 
   defp page(_, _, _, _), do: Session.error(:identity_conflict, :reconcile)
 
-  defp classify(_config, target, %{state: :ready} = record) do
+  defp classify(config, target, %{state: :ready} = record) do
+    session = Session.new(config, record)
+
+    if record.cancel_requested_at_ms != nil or
+         Session.remaining(session, record, :preparation) <= 0 do
+      with {:ok, retired} <- retire_ready(session), do: reconcile(config, retired)
+    else
+      inspect_ready(target, record)
+    end
+  end
+
+  defp classify(config, _target, record), do: reconcile(config, record)
+
+  # Persist a terminal state before reusing Executor: recovery must never enter
+  # its ready-command dispatch route, even if the clock changes after expiry.
+  defp retire_ready(session) do
+    with {:ok, current} <- Session.claim(session) do
+      if current.state == :ready,
+        do:
+          Session.write(session, current,
+            state: if(current.cancel_requested_at_ms != nil, do: :cancelled, else: :failed),
+            last_error: %Error{category: :expired, operation: :runtime}
+          ),
+        else: {:ok, current}
+    end
+  end
+
+  defp inspect_ready(target, record) do
     with {:ok, %Machine{} = machine} <-
            Backend.inspect_machine(
              Backend.bounded(Target.connection(target, record), timeout_ms: 5000),
@@ -116,7 +143,7 @@ defmodule SmolBox.Runtime.KubernetesRecovery do
          else: (_ -> Session.error(:identity_conflict, :reconcile))
   end
 
-  defp classify(config, _target, record) do
+  defp reconcile(config, record) do
     with {:ok, current} <- Executor.run(config, Execution.key(record), []),
          true <- current.cleanup == :complete and current.reservation == nil,
          do: {:ok, current},
@@ -129,12 +156,12 @@ defmodule SmolBox.Runtime.KubernetesRecovery do
   defp finalize(config, target, state, coordinator) do
     kube = target.kubernetes_config
 
-    with {:ok, operation} <- Operation.new(kube, %{kube.budget | timeout_ms: 5000}, :inspect),
+    with {:ok, records} <- fresh_ready(config, target, state.records),
+         {:ok, operation} <- Operation.new(kube, %{kube.budget | timeout_ms: 5000}, :inspect),
          {:ok, inventory} <- Pod.inventory(operation),
-         true <- inventory?(inventory, state.records),
-         :ok <- fresh_ready(target, state.records),
+         true <- inventory?(inventory, records),
          {:ok, node} <- Operation.run(operation, fn _sent -> Health.node_status(operation) end),
-         true <- node.idle or Enum.any?(state.records, fn {_, r} -> r.state == :ready end),
+         true <- node.idle or Enum.any?(records, fn {_, r} -> r.state == :ready end),
          {:ok, context} <-
            LabController.activate(Config.binding(kube), kube.budget, kube.controller_guard),
          {:ok, activated} <-
@@ -142,23 +169,30 @@ defmodule SmolBox.Runtime.KubernetesRecovery do
          :ok <- GenServer.call(coordinator, {:native_ready, target.id}) do
       {:ok,
        WorkerHealth.observe(activated, config.clock)
-       |> Map.put(:recovery, %{state | phase: :ready})}
+       |> Map.put(:recovery, %{state | phase: :ready, records: records})}
     else
       {:error, _} = error -> error
       _ -> Session.error(:identity_conflict, :reconcile)
     end
   end
 
-  defp fresh_ready(target, records) do
-    Enum.reduce_while(records, :ok, fn
-      {_, %{state: :ready} = record}, :ok ->
-        case classify(nil, target, record) do
-          {:ok, _} -> {:cont, :ok}
-          error -> {:halt, error}
+  defp fresh_ready(config, target, records) do
+    Enum.reduce_while(records, {:ok, records}, fn
+      {name, %{state: :ready} = record}, {:ok, corpus} ->
+        # Cancellation can arrive after an earlier page was observed. Re-read
+        # durable intent before the final inventory/activation checks.
+        with {:ok, %Execution{} = current} <-
+               Session.store(config, :fetch, [Execution.key(record)]),
+             true <- current.backend_assignment == record.backend_assignment,
+             {:ok, next} <- page(config, target, Map.delete(corpus, name), [current]) do
+          {:cont, {:ok, next}}
+        else
+          {:error, _} = error -> {:halt, error}
+          _ -> {:halt, Session.error(:identity_conflict, :reconcile)}
         end
 
-      _, :ok ->
-        {:cont, :ok}
+      _, result ->
+        {:cont, result}
     end)
   end
 

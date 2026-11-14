@@ -591,3 +591,28 @@ excluded); the reference PostgreSQL suite passed 310 (29 opt-in excluded),
 with all 12 current Kubernetes contracts passing. All 77 Python checks remain
 manual. Full first-preview requirements and test boundaries are mapped in the
 [release audit](kubernetes-backend-release-audit.md).
+
+## Review follow-up — queued admission and ready recovery
+
+An occupied single-node slot now reports temporary admission exhaustion, keeping
+valid accepted work queued until capacity is released. Operational health errors
+retain their original classification; unsupported policy remains a permanent
+admission rejection.
+
+Startup recovery now persists cancellation or preparation expiry as a terminal
+state before entering the existing cleanup path. It does not require a missing
+original Pod to become ready again. Final startup verification re-reads ready
+records so cancellation between scan pages is also honored. Original-incarnation
+version-3 proof is still required before reservation release; unavailable proof
+keeps the worker frozen and capacity charged. Recovery never dispatches this work.
+
+Six new regressions failed before the fixes and pass afterward, including queued
+execution after slot release, operational health failures, cancelled/expired ready
+records, unavailable proof and cancellation between pages. Validation passed
+2,304 main checks (42 opt-in excluded), 52 focused checks and all 12 reference
+PostgreSQL Kubernetes contracts, plus formatting, strict Credo, zero-clone ExDNA,
+strict-assumption Credence and Dialyzer. The test fixture now isolates its directory
+before deletion to prevent late OS-helper writes racing teardown; the lost-upload
+test allows TLS setup time while retaining its uncertainty/no-replay assertions.
+The original live reports remain historical; this follow-up uses local API/store
+fixtures and changes no node verifier or CI workflow.

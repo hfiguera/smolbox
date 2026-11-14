@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Keep valid Kubernetes executions queued while the single node slot is busy.
+  Preserve operational health errors instead of treating them as unsupported policy.
+- Reconcile cancelled or expired ready Kubernetes executions before requiring
+  live readiness, including cancellation between startup-scan pages. Keep capacity
+  charged until the original incarnation's cleanup proof is persisted.
 - Add an opt-in single-node Kubernetes development preview for disposable OCI
   executions, binary commands/files and artifact collection. Preserve uncertain
   outcomes without replay; require original-UID deletion and version-3 node proof

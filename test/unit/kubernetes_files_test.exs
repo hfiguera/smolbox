@@ -228,7 +228,7 @@ defmodule SmolBox.KubernetesFilesTest do
 
     assert {:error, %{category: :expired, evidence: :dispatch_uncertain}} =
              Backend.upload(
-               reference(c, timeout_ms: 500),
+               reference(c, timeout_ms: 2000),
                c.record.machine_name,
                c.input["path"],
                c.bytes,
