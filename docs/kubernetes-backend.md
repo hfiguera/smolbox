@@ -127,6 +127,13 @@ status, controller death after dispatch, cancellation and output overflow can
 leave the command outcome unknown. The SDK never replays that application work.
 A real durable exit remains separate from collection or cleanup failures.
 
+Startup reconciliation runs in one supervised task per Kubernetes target while
+health probes continue renewing the worker lease. Collection can outlast a lease
+interval while staying within its original stage deadline. New assigned work
+remains fenced until the complete authenticated scan and cleanup finish. A failed
+recovery task can retry safe reads/publication; it never replays application work.
+Lease loss stops observed collection IO and leaves its reservation charged.
+
 Cleanup deletes only the saved original Pod UID. API absence alone cannot release
 capacity. The version-3 node proof requires original-UID API/CRI absence, complete
 unchanged sandbox history, original VM process termination and scoped path/SDK

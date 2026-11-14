@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Resume Kubernetes recovery collection in a supervised task while health probes
+  continue renewing the worker lease. Keep admission fenced until reconciliation
+  finishes, and retain the original collection deadline and cleanup authority.
 - Preserve Kubernetes control-traffic headroom for executions with small output
   limits. Keep the configured aggregate transport budget separate from the
   combined stdout/stderr cap.

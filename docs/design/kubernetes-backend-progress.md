@@ -642,3 +642,33 @@ Formatting, strict Credo, zero-clone ExDNA, strict-assumption Credence and
 Dialyzer passed. The initial full run hit an existing 300-ms TLS-deadline test
 while static checks were also running; the focused test and full rerun with
 lower concurrency passed without changing that test.
+
+## Review follow-up — recovery collection and worker leases
+
+The coordinator now runs one supervised recovery task per Kubernetes target,
+outside the lease-bounded health probe. Probes continue renewing the worker lease
+and return the latest completed observation. Recovery observations have a separate
+cache so a scan captured before a task result cannot overwrite its cursor or
+completion. Startup admission remains fenced until the full existing reconciliation
+and activation path finishes. The task supervisor reserves an additional slot for
+each Kubernetes target, preserving normal execution, maintenance and scan capacity.
+
+The original stage deadlines, store claim checks, host controller authority and
+proof-bound cleanup rules remain in force. Failed recovery tasks clear their
+cached observation and retry under the closed fence. A failed worker-lease renewal
+causes observed collection IO to stop when ownership expires. Recording successful
+publication or releasing capacity still requires valid store claims.
+
+Three regressions cover publication held beyond the smoke tool's five-second
+lease, death of the recovery task, and failed lease renewal. They verify continued
+renewal, queued admission while fenced, safe recovery retries, preservation of the
+original exit/deadline, binary publication and version-3 cleanup before release.
+The slow-publication test failed before the fix because the health probe killed
+its publisher. These checks use local fixtures and leave CI workflows unchanged.
+
+Validation passed all 2,312 main checks (42 opt-in excluded), all 24 recovery
+checks and both original review cases. The original six-second publication now
+finishes in one attempt with either a five-second or a thirty-second lease.
+Formatting, strict Credo, zero-clone ExDNA, strict-assumption Credence, Dialyzer
+and the zero-cycle dependency check passed. No new live-node qualification is
+claimed.

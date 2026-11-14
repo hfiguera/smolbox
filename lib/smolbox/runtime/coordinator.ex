@@ -44,6 +44,8 @@ defmodule SmolBox.Runtime.Coordinator do
       native_holders: %{},
       coordinator: self(),
       maintenance: MapSet.new(),
+      kubernetes_recoveries: %{},
+      kubernetes_observations: %{},
       scan: nil,
       health: %{},
       cursor: nil,
@@ -66,6 +68,14 @@ defmodule SmolBox.Runtime.Coordinator do
 
   @impl GenServer
   def handle_call(:config, _from, state), do: {:reply, {:ok, state.config}, state}
+
+  # Probes renew the worker lease and read cached observations. Reconciliation
+  # may include collection/cleanup longer than that lease, so it owns a separate
+  # supervised task while the native authority fence stays closed.
+  def handle_call({:kubernetes_observe, id}, _from, state) do
+    next = start_kubernetes_recovery(state, id)
+    {:reply, Map.get(next.kubernetes_observations, id), next}
+  end
 
   def handle_call({:native_available, id}, _from, state),
     do: {:reply, not MapSet.member?(state.native_frozen, id), state}
@@ -256,9 +266,21 @@ defmodule SmolBox.Runtime.Coordinator do
      Enum.reduce(keys, %{next | machines_first: not state.machines_first}, &launch(&2, &1))}
   end
 
-  def handle_info({reference, _result}, state) when is_reference(reference) do
+  def handle_info({reference, result}, state) when is_reference(reference) do
     Process.demonitor(reference, [:flush])
-    {:noreply, forget(state, reference)}
+
+    case Map.pop(state.kubernetes_recoveries, reference) do
+      {nil, _} ->
+        {:noreply, forget(state, reference)}
+
+      {id, recoveries} ->
+        {:noreply,
+         %{
+           state
+           | kubernetes_recoveries: recoveries,
+             kubernetes_observations: Map.put(state.kubernetes_observations, id, result)
+         }}
+    end
   end
 
   def handle_info({:DOWN, reference, :process, _pid, _reason}, state) do
@@ -275,6 +297,8 @@ defmodule SmolBox.Runtime.Coordinator do
     do: Enum.any?(state.task_targets, fn {_ref, ids} -> id in ids end)
 
   defp forget(state, reference) do
+    state = forget_kubernetes_recovery(state, reference)
+
     if state.scan == reference,
       do: %{state | scan: nil},
       else: %{
@@ -283,6 +307,39 @@ defmodule SmolBox.Runtime.Coordinator do
           task_targets: Map.delete(state.task_targets, reference),
           maintenance: MapSet.delete(state.maintenance, reference)
       }
+  end
+
+  defp forget_kubernetes_recovery(state, reference) do
+    case Map.pop(state.kubernetes_recoveries, reference) do
+      {nil, _} ->
+        state
+
+      {id, recoveries} ->
+        %{
+          state
+          | kubernetes_recoveries: recoveries,
+            kubernetes_observations: Map.delete(state.kubernetes_observations, id)
+        }
+    end
+  end
+
+  defp start_kubernetes_recovery(state, id) do
+    target = Enum.find(KubernetesSupport.targets(state.config), &(&1.id == id))
+
+    if target != nil and id not in Map.values(state.kubernetes_recoveries) do
+      coordinator = self()
+      config = state.config
+      previous = get_in(state.kubernetes_observations, [id, :recovery])
+
+      task =
+        Task.Supervisor.async_nolink(state.tasks, fn ->
+          KubernetesRecovery.observe(config, target, previous, coordinator)
+        end)
+
+      %{state | kubernetes_recoveries: Map.put(state.kubernetes_recoveries, task.ref, id)}
+    else
+      state
+    end
   end
 
   defp launch(state, {key, lane, assigned}) do
@@ -425,14 +482,8 @@ defmodule SmolBox.Runtime.Coordinator do
         coordinator
       )
 
-  defp observe_worker(config, %{kind: :kubernetes} = worker, previous, _refresh, coordinator),
-    do:
-      KubernetesRecovery.observe(
-        config,
-        worker,
-        get_in(previous, [worker.id, :recovery]),
-        coordinator
-      )
+  defp observe_worker(_config, %{kind: :kubernetes} = worker, _previous, _refresh, coordinator),
+    do: GenServer.call(coordinator, {:kubernetes_observe, worker.id})
 
   defp observe_worker(config, worker, previous, refresh, _coordinator),
     do:

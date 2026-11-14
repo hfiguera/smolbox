@@ -9,6 +9,23 @@ defmodule SmolBox.KubernetesRecoveryTest do
   alias SmolBox.Test.Kubernetes, as: Fixture
   @moduletag capture_log: true
 
+  defmodule GatedArtifacts do
+    @moduledoc false
+    @behaviour SmolBox.ArtifactStore
+    @impl true
+    def read(context, scope, reference, max),
+      do: TestArtifacts.read(context.store, scope, reference, max)
+
+    @impl true
+    def put(context, key, destination, bytes, digest) do
+      send(context.owner, {:publishing, self()})
+
+      receive do
+        :publish -> TestArtifacts.put(context.store, key, destination, bytes, digest)
+      end
+    end
+  end
+
   defmodule Evidence do
     @moduledoc false
     def check(_, _, peer),
@@ -66,6 +83,12 @@ defmodule SmolBox.KubernetesRecoveryTest do
         else: apply(Memory, :backend_assignments, [c.store | args])
     end
 
+    defp invoke(c, :claim_worker, args) do
+      if Agent.get(c.lease_gate, & &1),
+        do: {:error, %Error{category: :store, operation: :claim_worker}},
+        else: apply(Memory, :claim_worker, [c.store | args])
+    end
+
     defp invoke(c, operation, args), do: apply(Memory, operation, [c.store | args])
   end
 
@@ -111,7 +134,17 @@ defmodule SmolBox.KubernetesRecoveryTest do
     store = start_supervised!({Memory, []})
     artifacts = start_supervised!({Agent, fn -> %{} end}, id: :artifacts)
     gate = start_supervised!({Agent, fn -> false end}, id: :scan)
-    %{kube: kube, peer: peer, root: root, store: store, artifacts: artifacts, gate: gate}
+    lease_gate = start_supervised!({Agent, fn -> false end}, id: :lease)
+
+    %{
+      kube: kube,
+      peer: peer,
+      root: root,
+      store: store,
+      artifacts: artifacts,
+      gate: gate,
+      lease_gate: lease_gate
+    }
   end
 
   defp start(c, enrolled, owners) do
@@ -127,12 +160,12 @@ defmodule SmolBox.KubernetesRecoveryTest do
       name: __MODULE__,
       namespace: "kubefiles",
       mode: :ephemeral,
-      store: {ScanStore, %{store: c.store, gate: c.gate}},
-      artifact_store: {TestArtifacts, c.artifacts},
+      store: {ScanStore, %{store: c.store, gate: c.gate, lease_gate: c.lease_gate}},
+      artifact_store: Map.get(c, :artifact_store, {TestArtifacts, c.artifacts}),
       workers: [c.kube],
       fingerprint_key: String.duplicate("k", 32),
       poll_ms: 20,
-      lease_ms: 5000
+      lease_ms: Map.get(c, :lease_ms, 5000)
     ]
 
     runtime = start_supervised!({SmolBox, options})
@@ -194,8 +227,9 @@ defmodule SmolBox.KubernetesRecoveryTest do
   end
 
   defp seed(c, owner, state, now \\ System.system_time(:millisecond) - 2000) do
-    {prepared, assignment} = Fixture.ready_record(c.kube, [], now)
-    record = Fixture.execution(c.kube, [], now)
+    overrides = Map.get(c, :spec_overrides, [])
+    {prepared, assignment} = Fixture.ready_record(c.kube, overrides, now)
+    record = Fixture.execution(c.kube, overrides, now)
     {:ok, _} = Memory.bind_backend(c.store, c.kube.id, Config.binding(c.kube))
     {:ok, _} = Memory.claim_worker(c.store, c.kube.id, owner, now, 1000)
     {:ok, _, :inserted} = Memory.accept(c.store, record, 10)
@@ -252,6 +286,134 @@ defmodule SmolBox.KubernetesRecoveryTest do
 
     Peer.change(c.peer, &%{&1 | pod: Peer.effective(Assignment.manifest(assignment), true)})
     record
+  end
+
+  defp collecting(c) do
+    output = %{"destination" => "output", "path" => "/workspace/output", "max_bytes" => 1024}
+
+    c =
+      Map.merge(c, %{
+        spec_overrides: [outputs: [output]],
+        artifact_store: {GatedArtifacts, %{store: c.artifacts, owner: self()}}
+      })
+
+    record = seed(c, "owner-previous", :dispatching)
+
+    {:ok, record} =
+      Memory.write(
+        c.store,
+        Execution.key(record),
+        Session.guard(record),
+        [
+          state: :collecting,
+          evidence: :exited,
+          result: %SmolBox.Result{exit_code: 7, stdout: "", stderr: "", encoding: :bytes}
+        ],
+        record.updated_at_ms + 1
+      )
+
+    bytes = <<0, 255, 128>>
+
+    ExecPeer.install(c.peer, record, fn header, _data ->
+      ExecPeer.file_frames(header["operation"], header["path"], bytes)
+    end)
+
+    {c, record, bytes}
+  end
+
+  defp collected(c, runtime, original, bytes) do
+    eventually(fn ->
+      match?(
+        {:ok, %{cleanup: :complete, reservation: nil}},
+        Memory.fetch(c.store, Execution.key(original))
+      )
+    end)
+
+    assert {:ok, finished} = Memory.fetch(c.store, Execution.key(original))
+    assert finished.state == :completed and finished.collection == :complete
+    assert finished.result == original.result
+    assert finished.deadlines.collection == original.deadlines.collection
+    assert [%{"size" => 3}] = finished.artifacts
+    assert finished.backend_cleanup.version == 3
+    assert {:ok, %{slots: 0}} = Memory.usage(c.store, c.kube.id)
+
+    assert Agent.get(c.artifacts, &Map.fetch!(&1, {Execution.key(original), "output"})) ==
+             {bytes, SmolBox.Files.sha256(bytes)}
+
+    refute Enum.any?(Peer.requests(c.peer), &(&1.method == "POST"))
+    assert Enum.count(Peer.requests(c.peer), &(&1.method == "DELETE")) == 1
+    eventually(fn -> worker_status(runtime) == :ready end)
+  end
+
+  @tag :recovery_lease
+  test "restart collection survives the worker lease while renewal and admission continue", c do
+    {c, record, bytes} = collecting(c)
+    runtime = start(c, true, ["owner-previous"])
+    assert_receive {:publishing, publisher}, 3000
+    initial_lease = :sys.get_state(c.store).leases[c.kube.id]
+
+    assert {:ok, queued} =
+             SmolBox.submit(runtime, %{record.spec | id: "queued-during-recovery", outputs: []})
+
+    Process.sleep(5250)
+    assert Process.alive?(publisher)
+    renewed = :sys.get_state(c.store).leases[c.kube.id]
+    assert renewed.until_ms > initial_lease.until_ms
+    assert renewed.until_ms > System.system_time(:millisecond)
+
+    assert {:ok, %{state: :collecting, artifacts: [], reservation: reservation}} =
+             Memory.fetch(c.store, Execution.key(record))
+
+    assert reservation != nil
+    assert {:ok, %{state: :accepted, reservation: nil}} = Memory.fetch(c.store, queued)
+    assert worker_status(runtime) == :unavailable
+    refute Enum.any?(Peer.requests(c.peer), &(&1.method in ["POST", "DELETE"]))
+    assert Enum.count(Peer.requests(c.peer), &String.ends_with?(&1.path, "/exec")) == 1
+    assert {:ok, _} = SmolBox.cancel(runtime, elem(queued, 0), elem(queued, 1))
+
+    send(publisher, :publish)
+    collected(c, runtime, record, bytes)
+    assert Enum.count(Peer.requests(c.peer), &String.ends_with?(&1.path, "/exec")) == 1
+    refute_receive {:publishing, _}, 20
+  end
+
+  test "a failed background recovery is retried with the target still fenced", c do
+    {c, record, bytes} = collecting(c)
+    runtime = start(c, true, ["owner-previous"])
+    assert_receive {:publishing, publisher}, 3000
+    monitor = Process.monitor(publisher)
+    coordinator = Runtime.coordinator(runtime)
+    {recovery, _} = :sys.get_state(coordinator).native_holders[c.kube.id]
+    Process.exit(recovery, :kill)
+    assert_receive {:DOWN, ^monitor, :process, ^publisher, _}, 1000
+    assert_receive {:publishing, replacement}, 3000
+    assert replacement != publisher
+    assert worker_status(runtime) == :unavailable
+    refute Enum.any?(Peer.requests(c.peer), &(&1.method in ["POST", "DELETE"]))
+    send(replacement, :publish)
+    collected(c, runtime, record, bytes)
+    assert Enum.count(Peer.requests(c.peer), &String.ends_with?(&1.path, "/exec")) == 2
+  end
+
+  test "failed lease renewal stops recovery IO before publishing or deleting", c do
+    {c, record, bytes} = collecting(Map.put(c, :lease_ms, 1000))
+    runtime = start(c, true, ["owner-previous"])
+    assert_receive {:publishing, publisher}, 3000
+    monitor = Process.monitor(publisher)
+    Agent.update(c.lease_gate, fn _ -> true end)
+    assert_receive {:DOWN, ^monitor, :process, ^publisher, _}, 3000
+    assert worker_status(runtime) == :unavailable
+
+    assert {:ok, %{state: :collecting, artifacts: [], reservation: reservation}} =
+             Memory.fetch(c.store, Execution.key(record))
+
+    assert reservation != nil
+    refute Enum.any?(Peer.requests(c.peer), &(&1.method in ["POST", "DELETE"]))
+    assert Agent.get(c.artifacts, &map_size/1) == 0
+    Agent.update(c.lease_gate, fn _ -> false end)
+    assert_receive {:publishing, replacement}, 3000
+    send(replacement, :publish)
+    collected(c, runtime, record, bytes)
   end
 
   test "inspection reports an absent charged assignment as unresolved without mutation", c do
