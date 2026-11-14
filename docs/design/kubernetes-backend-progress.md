@@ -691,3 +691,9 @@ The same isolated Linux subset now passes all 28 checks. The community example
 passes compilation, strict Credo, zero-clone ExDNA and Dialyzer, and generated
 documentation passes the local-link check across all 162 pages. CI workflows
 remain unchanged; live Kubernetes/Python campaigns remain manual.
+
+The GitHub rerun passed coverage, docs/package, the community example and the
+Elixir 1.18/1.19 compatibility jobs. Elixir 1.20 exposed an existing native export
+test's teardown race: that test now uses the package fixture's existing bounded
+cleanup retries instead of raw recursive deletion. All 18 native recovery checks
+pass locally (three opt-in checks excluded).

@@ -168,7 +168,7 @@ defmodule SmolBox.NativeRecoveryTest do
   test "startup preserves a native export intent as unknown without publication or cleanup replay",
        context do
     native = Package.create(backend: true, persistent_backend: true, protocol_major: 2)
-    on_exit(fn -> File.rm_rf!(native.package_path) end)
+    on_exit(fn -> Package.remove!(native) end)
     native = %{native | capacity: %{slots: 16, cpus: 64, memory_mb: 131_072, disk_gb: 1024}}
     config = %{context.config | workers: [Target.normalize(native)]}
     seed = seed_machine(%{context | native: native, config: config}, :receipt)
