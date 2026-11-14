@@ -5,7 +5,7 @@ implemented or qualified by this document. Delivery branch:
 `feature/kubernetes-node-authority`.
 
 Phase 0 contracts are frozen in the [contract checkpoint](kubernetes-node-authority-contract.md),
-with schemas/vectors and Python/Elixir compatibility checks. Phases 1–5 remain
+with schemas/vectors and Python/Elixir compatibility checks. The standalone verifier extraction has passed Phase 1; Phases 2–5 remain
 pending; see the [implementation progress](kubernetes-node-authority-progress.md).
 
 Follow the [implementation plan](kubernetes-node-authority-implementation-plan.md),

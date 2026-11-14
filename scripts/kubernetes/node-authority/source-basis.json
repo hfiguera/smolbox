@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "status": "phase0_contract_checkpoint_not_provider_qualification",
+  "status": "phase1_standalone_extraction_not_provider_qualification",
   "base_commit": "d0bf044ecf32100d717e82b1b938011311d4306c",
   "legacy_files": {
     "scripts/kubernetes/node_history.py": "8cf6195deaba11145afea2bd9c5fa5c94b30be04e0fc364764d57d1cefb42c5f",
@@ -39,5 +39,51 @@
       "scheme": "sorted-posix-path-type-content-v1"
     }
   },
-  "cached_archive_matches_qualified_phase0": true
+  "cached_archive_matches_qualified_phase0": true,
+  "standalone_extraction": {
+    "phase": 1,
+    "bundle": "priv/kubernetes/node_authority/v1",
+    "files": {
+      "authority_assets.py": "77dfb6b70c5e0bdf42d5029f7422cde676ae24bf521baf26ed40349c6c1fc683",
+      "authority_config.py": "a836ae3c86a5a1652227aa7384f5c02b1784440c3e1cf5e1a9177d1b9048aa6c",
+      "authority_contract.py": "6bcd7babadb481c6a46181d90bcf2f78de74080559a9a37e04ddc195e310a8ef",
+      "authority_guard.py": "d4eb6619c8498060902befd1b60a1c18b74aad53ee96a6d95867907e425a655b",
+      "authority_history.py": "c0c922be9e8782e48679f5d8d6f69334cf42b7fb4e0685d0f826fc5c84a685d0",
+      "authority_lifecycle.py": "8e3a7cd4ec60c3e5493f959cd29c14b2d2927e153f723b88177d6ed0678784e7",
+      "authority_runner.py": "65661e72451daa4a568f7ade5dd8852d2b6f22cadb5ff4a547bcec47533512c5",
+      "authority_verifier.py": "46e6a5e051c4c6bbda4ecb4c2b519a768c7d76b3e7bd8e07d9c4dafd222d6cd8",
+      "source-basis-history.json": "84342b63582d337ef86e366ce78e67fcc469825c34005de52bcc8d1975d55e65",
+      "source-basis-lifecycle.json": "c0f19189e0cedd301064a7dff17b01de2a86856c7750ae061785e81ea8d2c129"
+    },
+    "verifier_manifest_sha256": "8bbd7bcf9280e5637e4c095b739c5b2fb9b7ec2ae99742cb78f745490230c15c",
+    "comparison": {
+      "normalized_ast_equivalent": [
+        "history.schema",
+        "history.enroll",
+        "history.verify_schema",
+        "history.event_hash",
+        "history.record",
+        "history.initial_ledger",
+        "history.reconcile",
+        "all lifecycle predicates with configured paths",
+        "verifier.capture",
+        "verifier.cleanup",
+        "verifier.check_runtime"
+      ],
+      "intentional_changes": [
+        "immutable validated configuration and root filesystem custody",
+        "public authority generation distinct from internal history UUID",
+        "self-contained bounded runtime/archive helpers",
+        "sanitized read-only child environment and explicit kubeconfig/CRI endpoint",
+        "shared deadline/owner checks during child, SQLite, lock and ledger operations",
+        "exact program inventory and manifest/configuration approvals",
+        "original and redirected installation-link custody",
+        "strict internal JSON duplicate-key rejection",
+        "additional scoped CRI-empty enrollment check",
+        "private no-follow state reads and no-overwrite interrupted ledger publication"
+      ],
+      "legacy_source_files_unchanged": true,
+      "new_provider_live_qualified": false
+    }
+  }
 }

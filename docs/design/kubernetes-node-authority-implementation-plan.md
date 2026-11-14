@@ -1,6 +1,6 @@
 # Kubernetes node authority implementation plan
 
-Status: Phase 0 contract gate passed; Phases 1–5 pending, November 14, 2026.
+Status: Phases 0–1 gates passed; Phases 2–5 pending, November 14, 2026.
 Branch: `feature/kubernetes-node-authority`.
 Implement the [single-node authority specification](kubernetes-node-authority.md).
 This document creates no qualification claim or operational permission to change

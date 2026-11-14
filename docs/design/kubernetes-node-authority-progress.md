@@ -1,6 +1,6 @@
 # Kubernetes node authority progress
 
-Status: Phase 0 contract gate passed, November 14, 2026. Delivery branch:
+Status: Phases 0–1 gates passed, November 14, 2026. Delivery branch:
 `feature/kubernetes-node-authority`. Follow the [specification](kubernetes-node-authority.md),
 [frozen contracts](kubernetes-node-authority-contract.md) and
 [implementation plan](kubernetes-node-authority-implementation-plan.md).
@@ -8,7 +8,7 @@ Status: Phase 0 contract gate passed, November 14, 2026. Delivery branch:
 | Phase | State | Evidence |
 | --- | --- | --- |
 | 0 — Contract and authority review | Passed | Exact schemas, canonical vectors, proof/privilege obligations, source basis and compatibility checks below |
-| 1 — Standalone verifier | Pending | No extracted verifier yet |
+| 1 — Standalone verifier | Passed | Self-contained configured core, source comparison, 53 extraction checks and interruption evidence below |
 | 2 — Administrator installation | Pending | No new node installation or enrollment |
 | 3 — Endpoint and SDK provider | Pending | Pure data contract exists; no runnable endpoint/provider |
 | 4 — Runtime/store integration | Pending | Preliminary epoch/codec compatibility only; provider/store campaigns remain required |
@@ -41,7 +41,45 @@ seven focused Elixir authority/legacy/cold-codec checks passed. The new cold
 authority case explicitly changes atom-loading order. These are data-contract
 and source-comparison checks, not node installation or physical proof evidence.
 
-The endpoint remains unimplemented and unavailable. No new operational selection,
+At this checkpoint the endpoint remained unimplemented and unavailable. No new operational selection,
 capability, codec version, controller ownership or CI workflow is enabled here.
 The remaining phase gates and complete manual Memory/PostgreSQL live campaigns
 are still required before qualification or goal completion.
+
+## Phase 1 — Standalone verifier extraction
+
+The private `priv/kubernetes/node_authority/v1/` core observes through an immutable
+validated configuration. It imports only its approved bundle and Python stdlib;
+it has no lab-home, hostname, smoke/qualification utility, runtime mutation or
+guard mutation dependency. The administrator-only history enrollment function
+remains separate from the observation entrypoint. Existing lab sources and their
+pinned hashes are unchanged.
+
+The extracted history and lifecycle predicates are compared with the original
+source AST, allowing only configured paths and the public authority-generation
+projection. Capture, cleanup and runtime-health predicates retain their original
+structure. Guard rule and netns mapping comparisons use identical inventories.
+Bounded filesystem/process/archive helpers replace the former transitive utility
+imports. Root custody checks include both sides of installation symlinks; optional
+missing health assets do not prevent original-authority cleanup observation.
+
+One deadline covers child observations, lock waits, SQLite busy/progress waits and
+ledger publication. Input loss terminates only owned observation children. State
+reads reject symlinks, nonprivate files and oversize records. Ledger publication
+uses private exclusive partial files, file fsync, atomic replace and directory
+fsync; interrupted partial publication is refused rather than repaired. Tests
+inject failures at each publication boundary and prove no evidence is returned
+when publication fails.
+
+Validation: all 140 manual Python tests passed, including 53 core checks (30
+legacy negative/projection cases rerun against the extraction); 14 focused Elixir
+node-evidence/authority/legacy/cold-codec checks passed. A temporary real SQLite
+journal exercises capture, persisted original UID/lifecycle witnesses and cleanup
+through version 3. Kernel/API/CRI/VM/guard observations are fixtures, clearly
+separated in the [Phase 1 report](../evidence/kubernetes-node-authority-phase1-2026-11-14.json).
+Exact file hashes and intentional differences are in the
+[source basis](../../scripts/kubernetes/node-authority/source-basis.json).
+
+No node installation, new enrollment, endpoint, SDK provider or operational
+selection exists at this checkpoint. Phases 2–5 and both-store live qualification
+remain required. No CI workflow was changed.
