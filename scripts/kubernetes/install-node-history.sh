@@ -8,7 +8,7 @@ scripts=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 target=/usr/local/lib/smolbox-kubernetes/node-history
 # Never replace an enrolled inspector or reset a history epoch. Its existing
 # source must match before a repeated setup can even touch the program files.
-files=(node_history.py node_inspector.py offline_guard.py qualify.py smoke.py websocket_probe.py)
+files=(node_lifecycle.py node_history.py node_inspector.py offline_guard.py qualify.py smoke.py websocket_probe.py)
 if [[ -e /var/lib/smolbox-kubernetes/node-history-enrollment.json ]]; then
   for name in "${files[@]}"; do cmp "$scripts/$name" "$target/$name"; done
   echo 'Node history already enrolled; no reset or replacement performed.'

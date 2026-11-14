@@ -3,7 +3,7 @@ defmodule SmolBox.Store.KubernetesContract do
   import ExUnit.Assertions
   alias SmolBox.{Execution, Profile}
   alias SmolBox.Kubernetes.{Assignment, Config, Receipt}
-  alias SmolBox.Store.BackendContract
+  alias SmolBox.Store.{BackendContract, Codec}
   alias SmolBox.Store.Contract
   alias SmolBox.Test.Kubernetes, as: Fixture
 
@@ -15,6 +15,10 @@ defmodule SmolBox.Store.KubernetesContract do
             {"Kubernetes reservation atomically saves exact intent and capacity", :reservation},
             {"Kubernetes stale receipt writes cannot replace original authority", :receipts},
             {"Kubernetes cleanup requires matching physical proof and releases once", :cleanup},
+            {"Kubernetes historical component proof cannot release managed capacity",
+             :legacy_proof},
+            {"Kubernetes historical CRI-only proof cannot release managed capacity",
+             :legacy_cri_proof},
             {"Kubernetes undispatched create has a separate durable cleanup path", :undispatched},
             {"Kubernetes recovery scans retain released tombstones and empty pages", :recovery}
           ] do
@@ -138,7 +142,7 @@ defmodule SmolBox.Store.KubernetesContract do
              )
   end
 
-  def cleanup(adapter, store) do
+  defp cleanup_authority(adapter, store) do
     {config, record, assignment} = reserved(adapter, store)
     {:ok, created} = Receipt.created(assignment, "pod-original")
 
@@ -150,6 +154,11 @@ defmodule SmolBox.Store.KubernetesContract do
 
     ready = Fixture.ready_receipt(assignment)
     assert {:ok, record} = write(adapter, store, record, backend_receipt: ready, state: :failed)
+    {config, record, ready}
+  end
+
+  def cleanup(adapter, store) do
+    {config, record, ready} = cleanup_authority(adapter, store)
     assert {:error, _} = write(adapter, store, record, cleanup: :complete, absence_at_ms: 1300)
     proof = %{Fixture.cleanup_proof(ready) | observed_at_ms: 1300}
 
@@ -189,6 +198,27 @@ defmodule SmolBox.Store.KubernetesContract do
              adapter.release(store, Execution.key(record), Contract.guard(released), 1300)
 
     assert {:error, _} = adapter.bind_backend(store, config.id, :http)
+  end
+
+  def legacy_proof(adapter, store), do: historical_proof(adapter, store, 1)
+  def legacy_cri_proof(adapter, store), do: historical_proof(adapter, store, 2)
+
+  defp historical_proof(adapter, store, version) do
+    {config, record, ready} = cleanup_authority(adapter, store)
+    proof = %{Fixture.cleanup_proof(ready) | version: version, observed_at_ms: 1300}
+
+    assert {:ok, held} =
+             write(adapter, store, record,
+               backend_cleanup: proof,
+               cleanup: :complete,
+               absence_at_ms: 1300
+             )
+
+    assert {:ok, bytes} = Codec.encode(held)
+    assert {:ok, ^held} = Codec.decode(bytes)
+    assert {:error, _} = adapter.release(store, Execution.key(held), Contract.guard(held), 1300)
+    assert {:ok, ^held} = adapter.fetch(store, Execution.key(held))
+    assert {:ok, %{slots: 1}} = adapter.usage(store, config.id)
   end
 
   def undispatched(adapter, store) do

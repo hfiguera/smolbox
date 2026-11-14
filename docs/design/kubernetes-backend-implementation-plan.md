@@ -1,6 +1,7 @@
 # Kubernetes backend implementation plan
 
-Status: proposed, November 13, 2026. Follow the decisions in
+Status: Phases 0–6 qualified; Phase 7 public campaign in progress, November 13,
+2026. Follow the decisions in
 [the design](kubernetes-backend.md). **The long-term goal is feature parity with
 HTTP and Embedded through the same SmolBox public APIs and behavioral contracts.**
 Phases 0–7 deliver the first milestone: a development preview of disposable
@@ -9,9 +10,9 @@ to production operation and full domain capability coverage. Existing backend
 behavior must remain compatible throughout.
 
 Track delivery in [implementation progress](kubernetes-backend-progress.md) and
-the [versioned parity matrix](kubernetes-backend-parity.md). Runtime qualification and offline type validation have passed. Track subsequent
-store, transport and public qualification gates in the progress document; a store
-reader marker alone never enables operational dispatch.
+the [versioned parity matrix](kubernetes-backend-parity.md). A store reader marker
+alone never enables operational dispatch; the implemented runtime requires full
+controller/startup/node authority and the explicit preview policy.
 
 ## Starting point
 
@@ -26,11 +27,13 @@ Already available:
   and ten manual offline harness checks. The lab is committed separately from
   the future backend and is not run by CI.
 
-Phases 1–3 now supply typed targets/authority, selective persisted receipts,
-proof-bound store release, gated OCI submission and the bounded object API.
-Still absent: exec/file transport, live node-evidence provider, orchestration and
-public Kubernetes execution qualification. The runtime smoke does not substitute
-for those gates.
+Phases 1–6 now supply target/store authority, bounded object/exec/file transport,
+transaction-backed version-3 node proof, same-host controller quiescence,
+authenticated startup scans and managed cleanup. Public Memory/PostgreSQL binary,
+cancellation and durable restart runs have passed. Complete the remaining Phase 7
+fault campaign, compatibility audit and preview documentation before declaring
+the first release qualified. The runtime-only smoke never substitutes for these
+library gates.
 
 Deliver phases in dependency order. Each phase should be a reviewable change
 with focused tests and an explicit exit gate. Do not combine speculative later

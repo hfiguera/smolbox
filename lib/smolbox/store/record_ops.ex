@@ -7,7 +7,7 @@ defmodule SmolBox.Store.RecordOps do
   alias SmolBox.{Error, Execution, Store, Validation}
 
   alias SmolBox.Kubernetes.Assignment, as: KubernetesAssignment
-  alias SmolBox.Kubernetes.ExecutionPolicy
+  alias SmolBox.Kubernetes.{ExecutionPolicy, RecordValidation}
 
   @type owned_record :: Execution.t() | SmolBox.ManagedMachine.t()
 
@@ -139,7 +139,8 @@ defmodule SmolBox.Store.RecordOps do
 
   @spec release(Execution.t(), non_neg_integer()) :: {:ok, Execution.t()} | {:error, Error.t()}
   def release(record, now) do
-    if record.cleanup == :complete and (record.worker_id == nil or record.absence_at_ms != nil) do
+    if record.cleanup == :complete and (record.worker_id == nil or record.absence_at_ms != nil) and
+         RecordValidation.releasable?(record) do
       update(record, %{reservation: nil}, now)
     else
       error(:cleanup)

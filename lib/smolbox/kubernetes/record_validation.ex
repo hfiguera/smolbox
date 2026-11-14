@@ -11,6 +11,16 @@ defmodule SmolBox.Kubernetes.RecordValidation do
         stage?(record) and
         owned?(record.created_machine, assignment, record.backend_receipt)
 
+  def releasable?(
+        %{backend_assignment: %Assignment{}, backend_cleanup: :not_dispatched} = record
+      ),
+      do: record.backend_create_state == :pending and record.backend_receipt == nil
+
+  def releasable?(%{backend_assignment: %Assignment{}} = record),
+    do: CleanupProof.releasable?(record.backend_cleanup, record.backend_receipt)
+
+  def releasable?(_record), do: true
+
   def fields?(record) do
     if ExecutionPolicy.required?(record),
       do: disposable?(record) and cleanup?(record),

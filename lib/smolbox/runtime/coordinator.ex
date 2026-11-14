@@ -7,6 +7,7 @@ defmodule SmolBox.Runtime.Coordinator do
 
   alias SmolBox.Runtime.{
     Executor,
+    KubernetesRecovery,
     KubernetesSupport,
     Machines,
     NativeRecovery,
@@ -22,10 +23,10 @@ defmodule SmolBox.Runtime.Coordinator do
 
   @impl GenServer
   def init({config, parent}) do
-    case KubernetesSupport.enroll(config) do
-      :ok -> init_enrolled(config, parent)
-      {:error, error} -> {:stop, error}
-    end
+    with :ok <- KubernetesSupport.enroll(config),
+         {:ok, acquired} <- KubernetesSupport.acquire(config),
+         do: init_enrolled(acquired, parent),
+         else: ({:error, error} -> {:stop, error})
   end
 
   defp init_enrolled(config, parent) do
@@ -35,7 +36,11 @@ defmodule SmolBox.Runtime.Coordinator do
       tasks: nil,
       active: %{},
       task_targets: %{},
-      native_frozen: MapSet.new(NativeSupport.targets(config), &Target.id/1),
+      native_frozen:
+        MapSet.new(
+          NativeSupport.targets(config) ++ KubernetesSupport.targets(config),
+          &Target.id/1
+        ),
       native_holders: %{},
       coordinator: self(),
       maintenance: MapSet.new(),
@@ -129,6 +134,19 @@ defmodule SmolBox.Runtime.Coordinator do
     case state.native_holders[id] do
       {^caller, _monitor} ->
         {:reply, :ok, %{state | native_frozen: MapSet.delete(state.native_frozen, id)}}
+
+      _ ->
+        {:reply, Session.error(:stale_claim, :reconcile), state}
+    end
+  end
+
+  # Historical native_* commands serialize both backend authority domains.
+  def handle_call({:kubernetes_controller, id, context}, {caller, _tag}, state) do
+    case {state.native_holders[id],
+          Enum.find(KubernetesSupport.targets(state.config), &(&1.id == id))} do
+      {{^caller, _monitor}, target} when not is_nil(target) ->
+        config = KubernetesSupport.replace(state.config, target, context)
+        {:reply, {:ok, Enum.find(config.workers, &(&1.id == id))}, %{state | config: config}}
 
       _ ->
         {:reply, Session.error(:stale_claim, :reconcile), state}
@@ -251,7 +269,7 @@ defmodule SmolBox.Runtime.Coordinator do
   end
 
   defp native_target?(state, id),
-    do: Enum.any?(state.config.workers, &match?(%{kind: :embedded, id: ^id}, &1))
+    do: Enum.any?(state.config.workers, &(&1.id == id and &1.kind in [:embedded, :kubernetes]))
 
   defp native_busy?(state, id),
     do: Enum.any?(state.task_targets, fn {_ref, ids} -> id in ids end)
@@ -401,6 +419,15 @@ defmodule SmolBox.Runtime.Coordinator do
   defp observe_worker(config, %{kind: :embedded} = worker, previous, _refresh, coordinator),
     do:
       NativeRecovery.observe(
+        config,
+        worker,
+        get_in(previous, [worker.id, :recovery]),
+        coordinator
+      )
+
+  defp observe_worker(config, %{kind: :kubernetes} = worker, previous, _refresh, coordinator),
+    do:
+      KubernetesRecovery.observe(
         config,
         worker,
         get_in(previous, [worker.id, :recovery]),

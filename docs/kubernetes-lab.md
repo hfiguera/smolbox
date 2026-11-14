@@ -246,3 +246,39 @@ missing ledger, changed program or unmapped attempt fails closed; an old receipt
 cannot adopt new authority. See [the evidence boundary and manual checks](design/kubernetes-node-evidence.md)
 and [the guarded exec report](evidence/kubernetes-backend-phase4-2026-11-13.json).
 Managed recovery and reservation release remain unqualified until Phase 6.
+
+
+### Reviewing an enrolled inspector upgrade
+
+The ordinary history installer refuses changed enrolled programs. The Phase 6
+component harness adds a separate administrator-only
+`lab.sh upgrade-node-inspector APPROVED_SHA256` for the specifically reviewed
+prior inspector. Stop all application controllers first and prove their exit;
+this is manual empty-node maintenance, not application recovery. The command
+checks complete history and empty Pod/CRI/VM/reservation/process/path state,
+preserves all events/owners and database identity, and records the old/new epoch
+and source approval. Interrupted or different maintenance fails closed and needs
+administrator investigation; the tool never resets or automatically resumes it.
+Consult [cleanup authority](design/kubernetes-cleanup-authority.md) before use.
+This does not enable Kubernetes admission or add a CI check.
+
+
+## Public backend qualification
+
+After node-history/lifecycle and same-host controller enrollment, use the
+[public backend guide](kubernetes-backend.md) and
+`scripts/kubernetes/backend-smoke.exs`. Run cases serially through one target and
+store. The Memory example validates ordinary disposable execution; controller
+restart requires the durable PostgreSQL store and preserved host metadata/keys.
+The current version-3 observer requires original kubelet-cgroup absence and
+unchanged daemon incarnations in addition to CRI/VM collection. Old version-1/2
+proofs cannot release managed reservations.
+
+The optional loopback `fault_proxy.py` is a manual fault instrument. It terminates
+TLS with a locally approved CA and separately validates upstream TLS; it never
+disables peer verification or logs tokens/headers/bodies. Lost-create and lost-exit
+faults exercise the actual API/SmolVM path. Its replacement mode injects a changed
+container observation after initial readiness, without replacing the actual VM.
+Keep its private TLS key and trace files inside the disposable campaign directory,
+stop its owned process afterward, and restore the direct API endpoint. It is not
+an ingress, a node provider, or part of CI.

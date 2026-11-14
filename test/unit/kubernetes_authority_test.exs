@@ -229,6 +229,13 @@ defmodule SmolBox.KubernetesAuthorityTest do
     proof = Fixture.cleanup_proof(c.receipt)
     assert CleanupProof.valid?(proof)
     assert CleanupProof.matches?(proof, c.receipt)
+    assert CleanupProof.releasable?(proof, c.receipt)
+    legacy = %{proof | version: 1}
+    assert CleanupProof.valid?(legacy)
+    refute CleanupProof.releasable?(legacy, c.receipt)
+    assert CleanupProof.valid?(%{proof | version: 2})
+    refute CleanupProof.releasable?(%{proof | version: 2}, c.receipt)
+    refute CleanupProof.valid?(%{proof | version: 4})
     assert Identity.valid?(%Identity{receipt: c.receipt})
 
     unisolated = %{c.receipt | observation: %{c.receipt.observation | isolated: false}}

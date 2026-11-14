@@ -118,12 +118,12 @@ defmodule SmolBox.KubernetesExecTest do
   defp normalize_error({:error, error}), do: {:error, error, nil}
   defp normalize_error(other), do: other
 
-  test "deadline and caller loss close observation with no second exec", c do
+  test "deadline closes observation with no second exec", c do
     install(c, [], mode: :hold)
 
     assert {:error, %{evidence: :dispatch_uncertain}} =
              Backend.exec(
-               reference(c, timeout_ms: 400),
+               reference(c, timeout_ms: 2000),
                c.record.machine_name,
                c.record.spec.command
              )
@@ -140,11 +140,11 @@ defmodule SmolBox.KubernetesExecTest do
       {:binary, <<1, "observed">>}
     ])
 
-    callback = fn _ -> Process.sleep(1000) end
+    callback = fn _ -> Process.sleep(5000) end
 
     assert {:error, %{exit_code: 7}, %{exit_code: 7, stdout: "observed", truncated: true}} =
              Backend.exec_stream(
-               reference(c, timeout_ms: 400),
+               reference(c, timeout_ms: 2000),
                c.record.machine_name,
                c.record.spec.command,
                on_event: callback

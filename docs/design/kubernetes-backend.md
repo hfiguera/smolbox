@@ -1,8 +1,9 @@
 # Kubernetes backend
 
-Status: proposed, November 13, 2026. This document defines the Kubernetes backend
-direction and its first development preview. Implementation and qualification
-remain future work. The delivery sequence is in
+Status: first-preview implementation under qualification, November 13, 2026.
+This document defines the Kubernetes backend direction and its first development
+preview. Follow [current progress](kubernetes-backend-progress.md) and exact
+phase evidence for implemented/qualified capabilities. The delivery sequence is in
 [the implementation plan](kubernetes-backend-implementation-plan.md).
 
 ## Long-term goal: HTTP and Embedded parity

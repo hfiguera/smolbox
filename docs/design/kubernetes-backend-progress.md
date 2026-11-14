@@ -16,13 +16,14 @@ parity tracked in [the parity matrix](kubernetes-backend-parity.md).
 | 3 — Object lifecycle | Object API gate passed | Bounded TLS/token client, pinned object enrollment, assigned backend create/observe/readiness/UID-delete and restricted live RBAC; application IO and capacity release disabled |
 | 4 — Exec | Guarded adapter exec gate passed | Real transaction-backed node capture; saved ready receipts; assigned adapter bytes/exits 0 and 7; lost observation without replay |
 | 5 — Files | Assigned file gate passed | Shared Runtime.Files staging/read-back and artifact publication on real SmolVM; bounded sealed helper, corruption and unsafe-path rejection |
-| 6 — Cleanup/recovery | Capture prerequisite implemented; managed gate pending | Journal/inspector and typed physical-proof component qualified; startup/recovery, quiescence, cancellation and proof-bound managed release remain |
-| 7 — Public qualification | Pending | Public SmolBox smoke, compatibility evidence and user documentation |
+| 6 — Cleanup/recovery | Authority gate passed | Version-3 node/kubelet proof, same-host process guard, authenticated startup scans, live durable restart/cancellation and proof-bound release |
+| 7 — Public qualification | In progress | Public Memory/PostgreSQL binary, restart, cancellation and lost-create cases passed; remaining fault campaign and final documentation |
 
-Kubernetes authority types and target normalization are implemented; the backend
-is not operational or enabled yet. Phase 0 demonstrates the upstream runtime and
-resolves its network recipe. The store, object API, guarded exec and file gates have passed. Managed cleanup,
-recovery and public-path qualification remain required before operational admission.
+The runtime public entrypoints are implemented behind explicit controller,
+complete startup-scan, enrolled-node and fresh-idle admission gates. Phases 0–6
+have passed their scoped gates; the final public qualification campaign remains
+in progress. This is an opt-in single-node development preview, with broader
+HTTP/Embedded parity delivered by later milestones.
 
 ## Phase 0 findings and approved development recipe
 
@@ -455,3 +456,96 @@ strict-assumption Credence, Dialyzer and zero dependency cycles passed. A fresh
 production package consumer on an independent build path included both helper
 assets; all packaged library/asset hashes matched the checkpoint. The archive
 precedes this final evidence/report text, so it is not a hash of the later docs.
+
+
+## Phase 6 — Historical component checkpoints
+
+The managed preparation path now saves create dispatch intent before POST, saves
+its original UID before readiness, and captures/persists the ready incarnation
+before staging. The dedicated Kubernetes cleanup branch runs before generic
+machine-not-found/stop handling. Pending intents can complete with explicit
+not-dispatched evidence. Lost responses reconcile the exact saved Pod intent
+without a second POST; missing original mapping remains unresolved. A known UID
+can still be deleted after readiness rejection, without inventing a physical
+proof or releasing capacity.
+
+The cleanup path saves a fresh matching typed proof before guarded release;
+failed proofs retain the reservation and original result. Once mutation attempts
+or their absolute deadline are exhausted it permits only a separately bounded
+read-only proof observation, preserving the original deadline. Unit cases cover
+cancellation, missing original objects, foreign replacements, mutated Pod
+responses, old proofs, original nonzero exits, and failures before/after proof
+persistence and before release. The focused lifecycle/file-runtime set currently
+passes 23 checks. A different controller is explicitly refused ownership takeover
+until positive quiescence is implemented. This is implementation progress, **not the Phase 6 exit gate**.
+
+Operational health/admission remains disabled. Remaining prerequisites include
+complete authenticated startup scans and tombstones, positive old-controller
+quiescence before ownership takeover, CRI sandbox absence integrated into the
+pinned built-in node proof, safe reconciliation of in-flight preparation, and
+live cancellation/controller-restart qualification with durable storage. The first history-preserving verifier maintenance is now qualified: version 2
+adds original CRI sandbox absence, while retaining all journal events and owners.
+See [cleanup authority and remaining gates](kubernetes-cleanup-authority.md).
+This version-2 component checkpoint does not yet establish kubelet/controller
+quiescence or enable public admission.
+
+
+Phase 6 component evidence now includes real shared preparation, binary execution
+and ArtifactStore collection, then shared Runtime.Cleanup saving a CRI-bound
+version-2 proof before guarded release. Two capture retries and fourteen cleanup
+rejections stayed within their bounded observation paths; the command was not
+replayed and capacity stayed charged until proof. The first failed preparation
+and the lifecycle feasibility probe were collected under their original UIDs;
+neither lost ephemeral store is reported as recovered release authority. The
+reference PostgreSQL contract passed 11 checks, including historical-proof
+non-release. Full startup/controller/kubelet quiescence remains pending.
+
+
+[Exact Phase 6 component checkpoint](../evidence/kubernetes-backend-phase6-components-2026-11-13.json):
+2,280 main-project checks passed (42 opt-in excluded), 63 manual Python cases,
+11 reference PostgreSQL contract checks, fresh independent production package
+consumer, formatting, warnings-as-errors compilation, strict Credo, zero-clone
+ExDNA, strict-assumption Credence, Dialyzer and zero dependency cycles passed.
+Packaged product source/asset hashes match this checkpoint; the archive precedes
+the final report text. Phase 6 remains in progress, with public admission closed.
+
+
+## Phase 6 — Managed authority gate
+
+The version-3 inspector captures and persists the original guaranteed-QoS Pod
+cgroup while the original KVM process runs. Cleanup requires its absence with
+unchanged node boot/cgroup mount/K3s/containerd births, plus original API/CRI,
+process, SDK record, VM-directory and share absence over the complete transaction
+journal. Historical version-1/2 proof data remains readable but cannot release.
+The administrator upgrade preserved 65 events and 13 sandbox owner mappings,
+rotated the verifier epoch, and retained database inode/audit authority.
+
+The fixed same-host controller helper preserves complete bounded PID/birth/boot
+owner history in private local metadata. It refuses a paused original process,
+lease-only takeover and reset-ledger adoption of existing data. Startup freezes
+all work until an authenticated scan of every assignment and tombstone succeeds,
+original owners/bindings/incarnations match, and final API/node inventory agrees.
+Dispatched work becomes unknown without exec. Ready work waits for complete scan
+and fresh observation. Inspection is bounded, read-only and redacted.
+
+A real durable public command reached running, then the original BEAM was paused.
+A second controller was refused without changing its ledger. After positive
+original-process death, a new controller recovered the same PostgreSQL execution
+and Pod UID, kept the outcome unknown, collected version-3 cleanup proof and
+released to zero slots. Public cancellation also preserved unknown outcome until
+positive original-UID cleanup. Memory and PostgreSQL binary runs preserved exit 7
+and exact artifacts. These runs use real SmolVM, rather than unit proof fixtures.
+
+[Phase 6 authority evidence](../evidence/kubernetes-backend-phase6-2026-11-13.json)
+records exact sources, component proof, administrator maintenance, Mac OS guard
+control, durable restart/cancellation and validation. The older component report
+remains historical and is not rewritten to claim stronger proof authority.
+All cluster/Python checks remain manual and CI workflows are unchanged.
+
+Phase 6 final verification passed 2,297 main checks (42 opt-in excluded), 310
+reference PostgreSQL checks (29 opt-in excluded), 77 manual Python checks and
+20 focused fault regressions. Formatting, strict Credo, zero-clone ExDNA,
+strict-assumption Credence, Dialyzer, zero dependency cycles and a fresh independent
+production package consumer passed. All packaged library/asset hashes match this
+checkpoint. Teardown ordering and overly tight TLS test deadlines were corrected;
+failed validation runs are retained in the private campaign logs.

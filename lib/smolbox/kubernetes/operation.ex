@@ -2,7 +2,7 @@ defmodule SmolBox.Kubernetes.Operation do
   @moduledoc false
   alias SmolBox.Backend.Budget
   alias SmolBox.Error
-  alias SmolBox.Kubernetes.Config
+  alias SmolBox.Kubernetes.{Config, Controller}
 
   @enforce_keys [:config, :budget, :deadline, :name, :bytes]
   @derive {Inspect, only: [:name]}
@@ -18,7 +18,7 @@ defmodule SmolBox.Kubernetes.Operation do
          budget: budget,
          deadline: now() + budget.timeout_ms,
          name: name,
-         bytes: :atomics.new(2, [])
+         bytes: :atomics.new(3, [])
        }}
     else
       _ -> error(:validation, name, :not_dispatched)
@@ -87,7 +87,12 @@ defmodule SmolBox.Kubernetes.Operation do
     do: max(0, operation.budget.max_response_bytes - :atomics.get(operation.bytes, 2))
 
   defp protect(operation, sent, function) do
-    if remaining(operation) > 0, do: function.(sent), else: failure(operation, sent, :expired)
+    if remaining(operation) > 0 do
+      with :ok <- Controller.authorize(operation.config, budget(operation), operation.bytes),
+           do: function.(sent)
+    else
+      failure(operation, sent, :expired)
+    end
   rescue
     _ -> failure(operation, sent, :transport)
   catch

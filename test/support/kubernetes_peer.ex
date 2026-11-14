@@ -160,7 +160,12 @@ defmodule SmolBox.KubernetesPeer do
     }
 
     snapshot = Agent.get_and_update(state, &{&1, %{&1 | requests: [request | &1.requests]}})
-    override = snapshot.overrides[{conn.method, conn.request_path}]
+
+    override =
+      snapshot.overrides[{conn.method, conn.request_path}] ||
+        if(String.ends_with?(conn.request_path, "/exec"),
+          do: snapshot.overrides[{conn.method, :exec}]
+        )
 
     cond do
       token != ["Bearer " <> snapshot.expected_token] -> TestPeer.json(conn, %{}, 401)

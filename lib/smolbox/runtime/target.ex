@@ -4,7 +4,7 @@ defmodule SmolBox.Runtime.Target do
   alias SmolBox.Embedded.{CheckpointContract, Config, Port}
   alias SmolBox.{Error, MachineSpec, Source}
   alias SmolBox.Kubernetes.Config, as: KubernetesConfig
-  alias SmolBox.Kubernetes.ExecutionPolicy
+  alias SmolBox.Kubernetes.{ExecutionPolicy, Health}
   alias SmolBox.Runtime.WorkerConfig
 
   @worker_fields [
@@ -274,6 +274,19 @@ defmodule SmolBox.Runtime.Target do
 
   def qualify(%__MODULE__{kind: :embedded} = target, spec),
     do: target |> connection() |> SmolBox.Backend.qualify_creation(spec)
+
+  def qualify(%{kind: :kubernetes, kubernetes_config: config}, spec) do
+    with true <- kubernetes_approved?(config, spec),
+         {:ok, %{idle: true}} <- Health.check(config, config.budget),
+         do: :ok,
+         else: (_ ->
+                  {:error,
+                   %Error{
+                     category: :unsupported_capability,
+                     operation: :qualify_creation,
+                     evidence: :not_dispatched
+                   }})
+  end
 
   def qualify(%{kind: :kubernetes}, _spec),
     do: {:error, %Error{category: :unsupported_capability, operation: :create}}

@@ -3,7 +3,7 @@ defmodule SmolBox.Backend.Kubernetes do
   @behaviour SmolBox.Backend
   alias SmolBox.Backend.{KubernetesContext, Reference}
   alias SmolBox.{Error, Execution}
-  alias SmolBox.Kubernetes.{Assignment, Config, Exec, Files, Inspection, Operation, Pod}
+  alias SmolBox.Kubernetes.{Assignment, Config, Exec, Files, Health, Inspection, Operation, Pod}
 
   def reference(config) do
     with :ok <- Config.validate(config),
@@ -45,6 +45,13 @@ defmodule SmolBox.Backend.Kubernetes do
       ]
 
   @impl true
+  def supports_operation?(
+        %Config{controller_guard: %{owner: owner, enrolled: true}},
+        :observe_health
+      )
+      when is_binary(owner), do: true
+
+  @impl true
   def supports_operation?(_context, _operation), do: false
 
   @impl true
@@ -52,6 +59,9 @@ defmodule SmolBox.Backend.Kubernetes do
     with {:ok, op} <- Operation.new(context.config, budget, operation_name(operation)),
          do: object_operation(context.record, op, operation, arguments)
   end
+
+  def invoke(%Config{} = config, :observe_health, [expected], budget),
+    do: Health.observe(config, expected, budget)
 
   def invoke(_context, operation, _arguments, _budget),
     do: unsupported(operation)

@@ -2,8 +2,8 @@
 
 This is the capture prerequisite for the development preview, qualified with the
 guarded exec adapter in Phase 4. It applies only to the enrolled single-VM K3s
-lab. Managed cleanup, recovery, cancellation and reservation release remain
-Phase 6 gates. See [progress](kubernetes-backend-progress.md), the
+lab. Version-3 managed cleanup, recovery, cancellation and reservation release
+passed the Phase 6 authority gate. See [progress](kubernetes-backend-progress.md), the
 [exec protocol](kubernetes-backend-exec-protocol.md) and
 [delivery plan](kubernetes-backend-implementation-plan.md).
 
@@ -123,7 +123,7 @@ authenticated startup scans, worker quiescence, in-flight creation/CRI
 reconciliation, preparation failure and unknown-command paths, cancellation,
 proof persistence and atomic release. The node `check` result is observation
 health/runtime-idle information; it is not that managed reconciliation or a
-capacity-release proof. Public admission remains disabled.
+capacity-release proof. The completed runtime authority gate is described below.
 
 ## Manual setup and checks
 
@@ -140,3 +140,45 @@ focused Kubernetes node-evidence/exec tests with `mix test`. These unit fixtures
 do not qualify a real node. Live qualification uses the installed program, the
 restricted Kubernetes service account and the assigned Backend port. All lab
 checks remain manual; no CI workflow is changed.
+
+
+## Phase 6 component update — CRI-bound version 2
+
+The current inspector additionally requires original-UID CRI sandbox absence at
+two points in cleanup, reports remaining preview Pods/CRI/paths as non-idle, and
+waits for its observation lock within the original deadline with owner-loss
+checks. Transaction snapshots already rejected creation reservations; that check
+was not newly introduced. Historical version-1 proofs still decode but cannot
+release through the current Memory/reference PostgreSQL store contract.
+
+A separately approved empty-node administrator upgrade preserved the full audit
+prefix and ownership mappings while rotating the verifier epoch. See
+[cleanup authority](kubernetes-cleanup-authority.md) for exact hashes, evidence,
+maintenance conditions, and the remaining kubelet/controller quiescence work.
+Version 2 is a component checkpoint; it is not the complete preview release gate.
+Do not use manual maintenance to reset history or bypass unresolved authority.
+
+
+## Version 3 and managed runtime authority
+
+The current inspector pins `node_lifecycle.py` transitively and durably captures
+the original guaranteed-QoS Pod-cgroup inode/device/mount identity. Version-3
+cleanup additionally requires that witness to be absent, the same cgroup2 mount,
+node boot and K3s/containerd process births, plus all original API/CRI/VM/SDK/path
+evidence. Missing witnesses or daemon restarts fail closed. Source review covers
+all non-test kubelet Go files in the pinned K3s Kubernetes fork; exact URLs,
+hashes, callers and assumptions are in the
+[lifecycle source basis](../../scripts/kubernetes/kubelet-lifecycle-source-basis.json).
+This witnesses kubelet progress only; it adds no VMM cgroup confinement claim.
+
+The current observer epoch and approved program hashes, verified history-preserving
+maintenance, and real version-3 release cases are recorded in
+[cleanup authority](kubernetes-cleanup-authority.md). Historical v1/v2 proofs decode
+but cannot release through Memory or reference PostgreSQL. No silent upgrade or
+node-history reset is available to the application.
+
+The managed runtime also requires a persistent same-host controller guard and
+complete authenticated startup scans before work can execute. A different owner
+cannot rely on lease expiry or helper exit. The public durable restart test
+refused a paused controller, then recovered only after positive original-process
+death. Unsupported production/multi-node fencing remains outside this preview.

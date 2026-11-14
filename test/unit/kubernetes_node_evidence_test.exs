@@ -111,6 +111,14 @@ defmodule SmolBox.KubernetesNodeEvidenceTest do
     assert request["request"]["receipt"]["pod_uid"] == c.receipt.pod_uid
   end
 
+  test "historical component-only proof does not qualify current managed cleanup", c do
+    for version <- [1, 2] do
+      proof = %{proof(c.receipt) | version: version}
+      response(c, "cleanup", proof |> Map.from_struct() |> Map.delete(:receipt))
+      assert {:error, _} = LabNodeEvidence.cleanup(c.binding, c.receipt, @budget, c.context)
+    end
+  end
+
   test "incomplete history, stale capture, missing fields and changed cleanup epoch fail",
        c do
     status(c, false)

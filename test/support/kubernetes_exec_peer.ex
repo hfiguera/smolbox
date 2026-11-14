@@ -58,7 +58,11 @@ defmodule SmolBox.KubernetesExecPeer do
 
   def install(peer, record, frames, options \\ []) do
     owner = self()
-    route = "/api/v1/namespaces/smolbox-preview/pods/" <> record.machine_name <> "/exec"
+
+    route =
+      if record.machine_name == :any,
+        do: :exec,
+        else: "/api/v1/namespaces/smolbox-preview/pods/" <> record.machine_name <> "/exec"
 
     callback = fn conn ->
       offered = Plug.Conn.get_req_header(conn, "sec-websocket-protocol")

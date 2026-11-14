@@ -1,10 +1,9 @@
 defmodule SmolBox.KubernetesRuntimeFilesTest do
   use ExUnit.Case, async: true
   alias SmolBox.{Execution, Files, Result, TestArtifacts}
-  alias SmolBox.Kubernetes.{Assignment, Config, Receipt}
+  alias SmolBox.Kubernetes.{Assignment, Receipt}
   alias SmolBox.KubernetesExecPeer, as: ExecPeer
   alias SmolBox.KubernetesPeer, as: Peer
-  alias SmolBox.Runtime.Config, as: RuntimeConfig
   alias SmolBox.Runtime.Files, as: RuntimeFiles
   alias SmolBox.Runtime.Session
   alias SmolBox.Store.Memory
@@ -73,32 +72,8 @@ defmodule SmolBox.KubernetesRuntimeFilesTest do
         do: {Artifacts, %{store: artifacts, owner: self(), delay: 2500}},
         else: artifact_store
 
-    {:ok, config} =
-      RuntimeConfig.new(
-        name: __MODULE__,
-        namespace: "kubefiles",
-        mode: :ephemeral,
-        store: {Memory, store},
-        artifact_store: artifact_store,
-        workers: [kube],
-        fingerprint_key: String.duplicate("k", 32),
-        poll_ms: 10
-      )
-
-    {:ok, _} = Memory.bind_backend(store, kube.id, Config.binding(kube))
-    {:ok, _} = Memory.claim_worker(store, kube.id, config.owner, now, config.lease_ms)
-    {:ok, record} = Execution.new(prepared.spec, prepared.fingerprint, now)
-    {:ok, _, :inserted} = Memory.accept(store, record, 1)
-    {:ok, record} = Memory.claim(store, Execution.key(record), config.owner, now, config.lease_ms)
-
-    {:ok, record} =
-      Memory.reserve(
-        store,
-        Execution.key(record),
-        Session.guard(record),
-        {kube.id, assignment.pod_name, kube.capacity, assignment},
-        now
-      )
+    {config, record} =
+      Fixture.runtime(kube, store, artifact_store, {prepared, assignment}, name: __MODULE__)
 
     {:ok, created} = Receipt.created(assignment, prepared.backend_receipt.pod_uid)
 

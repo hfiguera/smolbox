@@ -23,6 +23,7 @@ import sys
 import time
 
 import node_history as history
+import node_lifecycle as lifecycle
 import offline_guard
 from qualify import manifest_digest, runtime_identity
 from smoke import entries
@@ -35,9 +36,10 @@ SHARE_ROOT = Path("/var/lib/containerd-shim-smolvm")
 RUNTIME = Path("/opt/smolvm-1.34.0-linux-x86_64")
 ENROLLMENT = STATE / "node-history-enrollment.json"
 LEDGER = STATE / "node-history-ledger.json"
-PROGRAMS = ["node_history.py", "node_inspector.py", "offline_guard.py", "qualify.py", "smoke.py", "websocket_probe.py"]
+PROGRAMS = ["node_lifecycle.py", "node_history.py", "node_inspector.py", "offline_guard.py", "qualify.py", "smoke.py", "websocket_probe.py"]
 IDENTITY_FIELDS = ["cluster_anchor_uid", "namespace_uid", "node_uid", "node_boot_id"]
 KVM = ["anon_inode:kvm-vcpu:0", "anon_inode:kvm-vcpu:1", "anon_inode:kvm-vm"]
+LIFECYCLE_SHA256 = "cc138716a7a22e1d22c33f26cb8188cc5b11937d19fa27acfe643400126d288e"
 WATCH_INPUT = False
 DEADLINE = 0
 require = history.require
@@ -110,7 +112,9 @@ def sha(path):
 
 def programs():
     directory = Path(__file__).parent
-    return {name: sha(directory / name) for name in PROGRAMS}
+    values = {name: sha(directory / name) for name in PROGRAMS}
+    require(values["node_lifecycle.py"] == LIFECYCLE_SHA256, "unapproved lifecycle program")
+    return values
 
 
 def birth(pid):
@@ -183,10 +187,10 @@ def install():
     pins = history.decode(Path("/etc/smolbox-kubernetes-lab/pins.json").read_bytes())
     runtime = runtime_identity(RUNTIME, Path("/home/lab/smolbox-kubernetes/smolvm.tar.gz"), pins["smolvm"]["sha256"])
     enrollment = history.enroll(DATABASE, identity(), baseline)
-    enrollment.update({"programs": programs(), "runtime": runtime,
+    enrollment.update({"lifecycle": lifecycle.current(run, sha, tick), "programs": programs(), "runtime": runtime,
                        "archive_sha256": pins["smolvm"]["sha256"]})
     history.atomic_json(ENROLLMENT, enrollment)
-    history.atomic_json(LEDGER, history.initial_ledger(enrollment))
+    history.atomic_json(LEDGER, {**history.initial_ledger(enrollment), "lifecycles": {}})
     return {"epoch": enrollment["epoch"], "identity": enrollment["identity"], "programs": enrollment["programs"]}
 
 
@@ -270,6 +274,7 @@ def capture(request, enrollment, audit, ledger, complete, sandboxes):
             processes[0]["exe_sha256"] == binding["runtime_identity"]["shim_sha256"], "process incarnation/history gap")
     interfaces = isolation(binding, uid, ids, sandboxes)
     require(processes == [p for p in physical(audit["attempts"]) if p["sandbox_id"] == sid], "process changed during capture")
+    lifecycle.capture(enrollment, ledger, uid, run, sha, tick)
     return {"version": 1, "binding_generation": binding["generation"], "pod_uid": uid,
             "sandbox_ids": ids, "processes": processes, "interfaces": interfaces,
             "observer_epoch": enrollment["epoch"], "observed_at_ms": round(time.time() * 1000),
@@ -278,7 +283,7 @@ def capture(request, enrollment, audit, ledger, complete, sandboxes):
             "complete_history": True, "isolated": True}
 
 
-def cleanup(request, enrollment, audit, ledger, complete):
+def cleanup(request, enrollment, audit, ledger, complete, sandboxes):
     receipt = request["receipt"]
     capture = receipt["observation"]
     require(complete and capture["observer_epoch"] == enrollment["epoch"] and
@@ -287,6 +292,9 @@ def cleanup(request, enrollment, audit, ledger, complete):
     require(ids == capture["sandbox_ids"], "cleanup sandbox history changed")
     require(kube("get", "pod", receipt["pod_name"], "-n", "smolbox-preview", "--ignore-not-found", absent=True) is None,
             "Pod name still exists")
+    require(not any(s.get("metadata", {}).get("uid") == receipt["pod_uid"] for s in sandboxes),
+            "original CRI sandbox remains")
+    lifecycle.cleanup(enrollment, ledger, receipt["pod_uid"], run, sha, tick)
     physical_processes = physical(audit["attempts"])
     require(not any(p["sandbox_id"] in ids for p in physical_processes), "owned boot process remains")
     for process in capture["processes"]:
@@ -298,9 +306,33 @@ def cleanup(request, enrollment, audit, ledger, complete):
     directories = sorted(hashlib.sha256(sid.encode()).hexdigest()[:16] for sid in ids)
     require(all(sid not in audit["material"] and not os.path.lexists(SHARE_ROOT / sid) for sid in ids) and
             all(not os.path.lexists(VM_ROOT / directory) for directory in directories), "owned record/directory/share remains")
-    return {"version": 1, "observed_at_ms": round(time.time() * 1000), "observer_epoch": enrollment["epoch"],
+    require(not any(s.get("metadata", {}).get("uid") == receipt["pod_uid"] for s in cri()),
+            "original CRI sandbox appeared during cleanup")
+    lifecycle.cleanup(enrollment, ledger, receipt["pod_uid"], run, sha, tick)
+    return {"version": 3, "observed_at_ms": round(time.time() * 1000), "observer_epoch": enrollment["epoch"],
             "api_absent": True, "terminated_processes": capture["processes"], "absent_records": ids,
             "absent_vm_directories": directories, "absent_shares": ids, "complete_history": True}
+
+
+def idle(audit, sandboxes, ledger):
+    return (lifecycle.idle(ledger) and not audit["material"] and not physical(audit["attempts"]) and
+            not entries(VM_ROOT) and not entries(SHARE_ROOT) and
+            not any(s.get("metadata", {}).get("namespace") == "smolbox-preview" for s in sandboxes) and
+            not kube("get", "pods", "-n", "smolbox-preview")["items"])
+
+
+def acquire(lock):
+    while True:
+        tick()
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            return
+        except BlockingIOError:
+            if WATCH_INPUT:
+                with selectors.DefaultSelector() as selector:
+                    selector.register(0, selectors.EVENT_READ)
+                    require(not selector.select(0), "inspection owner/input lost")
+            time.sleep(min(0.05, max(0, DEADLINE - time.monotonic())))
 
 
 def inspect(request):
@@ -313,24 +345,26 @@ def inspect(request):
     current = identity()
     require(current == enrollment["identity"] == {key: binding[key] for key in IDENTITY_FIELDS}, "enrolled node changed")
     with (STATE / "node-history.lock").open("a") as lock:
-        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        acquire(lock)
         ledger = history.decode(LEDGER.read_bytes())
         audit = history.snapshot(DATABASE, enrollment, ledger)
         if request["action"] != "cleanup":
             check_runtime(enrollment, binding, audit["attempts"])
+        lifecycle.same(enrollment, run, sha, tick)
         sandboxes = cri()
         ledger, complete = history.reconcile(audit, ledger, sandboxes, "smolbox-preview")
         if request["action"] == "capture":
             value = capture(request, enrollment, audit, ledger, complete, sandboxes)
         elif request["action"] == "cleanup":
-            value = cleanup(request, enrollment, audit, ledger, complete)
+            value = cleanup(request, enrollment, audit, ledger, complete, sandboxes)
         else:
             value = {"epoch": enrollment["epoch"], "complete_history": complete,
-                     "idle": not audit["material"] and not physical(audit["attempts"])}
+                     "idle": idle(audit, sandboxes, ledger)}
         after = history.snapshot(DATABASE, enrollment, ledger)
         require(after["hashes"] == audit["hashes"] and
                 Path("/proc/sys/kernel/random/boot_id").read_text().strip() == current["node_boot_id"],
                 "runtime changed during inspection")
+        require(len(json.dumps(ledger, separators=(",", ":")).encode()) <= history.MAX_RECORD, "ledger allocation bound")
         history.atomic_json(LEDGER, ledger)
     return {"version": 1, "action": request["action"], "value": value,
             "inspector_sha256": enrollment["programs"]["node_inspector.py"],

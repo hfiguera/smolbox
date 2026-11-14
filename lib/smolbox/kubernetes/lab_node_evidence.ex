@@ -61,7 +61,7 @@ defmodule SmolBox.Kubernetes.LabNodeEvidence do
          {:ok, value} <-
            request(:cleanup, binding, %{receipt: receipt_json(receipt)}, budget, context),
          {:ok, proof} <- Projection.cleanup(value, receipt),
-         true <- CleanupProof.matches?(proof, receipt),
+         true <- CleanupProof.releasable?(proof, receipt),
          true <- proof.observed_at_ms <= System.system_time(:millisecond),
          do: {:ok, proof},
          else: (_ -> unavailable())

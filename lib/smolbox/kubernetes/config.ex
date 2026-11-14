@@ -13,11 +13,13 @@ defmodule SmolBox.Kubernetes.Config do
   filesystem headroom remain administrator declarations, not hard quotas.
 
   Construction validates data without network access or credential resolution.
-  Backend admission stays disabled until the complete preview is qualified.
+  Public admission requires an acquired same-host controller guard, complete
+  authenticated startup reconciliation and fresh enrolled node/idle evidence.
   """
   alias SmolBox.Backend.Budget
   alias SmolBox.{Error, Profile, Source, Validation}
   alias SmolBox.Kubernetes.{Binding, Credentials, NodeEvidence, Shape}
+  alias SmolBox.Kubernetes.LabController.Context, as: ControllerContext
   alias SmolBox.Runtime.Approvals
 
   @required [
@@ -41,6 +43,7 @@ defmodule SmolBox.Kubernetes.Config do
     :node_evidence
   ]
   @defaults [
+    controller_guard: nil,
     architecture: "x86_64",
     platform: :linux,
     runtime_version: "1.34.0",
@@ -66,12 +69,16 @@ defmodule SmolBox.Kubernetes.Config do
   @doc false
   def validate(%__MODULE__{} = value) do
     if Validation.struct_shape?(value, __MODULE__) and identity?(value) and
-         connection?(value) and catalogs?(value) and resources?(value),
+         connection?(value) and controller?(value.controller_guard) and catalogs?(value) and
+         resources?(value),
        do: :ok,
        else: invalid()
   end
 
   def validate(_value), do: invalid()
+
+  defp controller?(nil), do: true
+  defp controller?(value), do: ControllerContext.validate(value) == :ok
 
   @doc false
   def binding(%__MODULE__{} = value) do

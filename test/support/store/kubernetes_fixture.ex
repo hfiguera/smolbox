@@ -159,6 +159,48 @@ defmodule SmolBox.Test.Kubernetes do
     {record, assignment}
   end
 
+  def runtime(config, store, artifact_store, {prepared, assignment}, options \\ []) do
+    alias SmolBox.Runtime.{Config, Session}
+    alias SmolBox.Store.Memory
+    now = prepared.accepted_at_ms
+
+    {:ok, runtime} =
+      Config.new(
+        Keyword.merge(
+          [
+            name: __MODULE__,
+            namespace: "kubefiles",
+            mode: :ephemeral,
+            store: {Memory, store},
+            artifact_store: artifact_store,
+            workers: [config],
+            fingerprint_key: String.duplicate("k", 32),
+            poll_ms: 10
+          ],
+          options
+        )
+      )
+
+    {:ok, _} = Memory.bind_backend(store, config.id, SmolBox.Kubernetes.Config.binding(config))
+    {:ok, _} = Memory.claim_worker(store, config.id, runtime.owner, now, runtime.lease_ms)
+    {:ok, record} = Execution.new(prepared.spec, prepared.fingerprint, now)
+    {:ok, _, :inserted} = Memory.accept(store, record, 1)
+
+    {:ok, record} =
+      Memory.claim(store, Execution.key(record), runtime.owner, now, runtime.lease_ms)
+
+    {:ok, record} =
+      Memory.reserve(
+        store,
+        Execution.key(record),
+        Session.guard(record),
+        {config.id, assignment.pod_name, config.capacity, assignment},
+        now
+      )
+
+    {runtime, record}
+  end
+
   def observation(binding, pod_uid \\ "pod-original") do
     sandbox = String.duplicate("d", 64)
 

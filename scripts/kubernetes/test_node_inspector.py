@@ -2,6 +2,7 @@
 
 import copy
 import tempfile
+import threading
 import time
 from pathlib import Path
 import unittest
@@ -20,6 +21,13 @@ EPOCH = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
 class InspectorTest(unittest.TestCase):
     def setUp(self):
         inspector.DEADLINE = time.monotonic() + 30
+        cri = patch.object(inspector, "cri", return_value=[])
+        cri.start()
+        self.addCleanup(cri.stop)
+        for name, value in [("capture", None), ("cleanup", None), ("idle", True)]:
+            lifecycle = patch.object(inspector.lifecycle, name, return_value=value)
+            lifecycle.start()
+            self.addCleanup(lifecycle.stop)
         self.directory = tempfile.TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)
         root = Path(self.directory.name)
@@ -45,8 +53,8 @@ class InspectorTest(unittest.TestCase):
     def capture(self):
         return inspector.capture(self.request, self.enrollment, self.audit, self.ledger, True, [])
 
-    def cleanup(self):
-        return inspector.cleanup(self.request, self.enrollment, self.audit, self.ledger, True)
+    def cleanup(self, sandboxes=None):
+        return inspector.cleanup(self.request, self.enrollment, self.audit, self.ledger, True, sandboxes or [])
 
     def test_capture_requires_one_original_observed_kvm_incarnation(self):
         with patch.object(inspector, "physical", return_value=[self.process]), \
@@ -119,6 +127,52 @@ class InspectorTest(unittest.TestCase):
             self.enrollment["epoch"] = "changed"
             with self.assertRaisesRegex(RuntimeError, "authority gap"):
                 self.cleanup()
+
+    def test_cleanup_requires_original_cri_absence_even_after_api_and_vm_disappear(self):
+        self.audit["material"] = {}
+        sandbox = {"id": SID, "metadata": {"uid": UID, "namespace": "smolbox-preview"}}
+        with patch.object(inspector, "kube", return_value=None), \
+             patch.object(inspector, "physical", return_value=[]), \
+             patch.object(inspector, "birth", return_value=None):
+            with self.assertRaisesRegex(RuntimeError, "original CRI sandbox remains"):
+                self.cleanup([sandbox])
+            with patch.object(inspector, "cri", return_value=[sandbox]):
+                with self.assertRaisesRegex(RuntimeError, "appeared during cleanup"):
+                    self.cleanup()
+            self.assertEqual(self.cleanup()["version"], 3)
+
+    def test_idle_does_not_hide_leftover_paths_cri_or_pending_pods(self):
+        self.audit["material"] = {}
+        with patch.object(inspector, "physical", return_value=[]), \
+             patch.object(inspector, "kube", return_value={"items": []}):
+            self.assertTrue(inspector.idle(self.audit, [], self.ledger))
+            for root in [inspector.VM_ROOT, inspector.SHARE_ROOT]:
+                path = root / "leftover"
+                path.mkdir()
+                self.assertFalse(inspector.idle(self.audit, [], self.ledger))
+                path.rmdir()
+            self.assertFalse(inspector.idle(self.audit, [{"metadata": {"namespace": "smolbox-preview"}}], self.ledger))
+            with patch.object(inspector, "kube", return_value={"items": [{"metadata": {"name": "pending"}}]}):
+                self.assertFalse(inspector.idle(self.audit, [], self.ledger))
+
+    def test_lock_contention_waits_within_original_deadline_and_owner_loss_fails(self):
+        path = Path(self.directory.name) / "lock"
+        with path.open("a") as first, path.open("a") as second:
+            inspector.fcntl.flock(first, inspector.fcntl.LOCK_EX)
+            release = threading.Timer(0.03, lambda: inspector.fcntl.flock(first, inspector.fcntl.LOCK_UN))
+            release.start()
+            inspector.acquire(second)
+            release.join()
+            inspector.fcntl.flock(second, inspector.fcntl.LOCK_UN)
+            inspector.fcntl.flock(first, inspector.fcntl.LOCK_EX)
+            with patch.object(inspector, "DEADLINE", time.monotonic() + 0.02):
+                with self.assertRaisesRegex(RuntimeError, "inspection deadline"):
+                    inspector.acquire(second)
+            with patch.object(inspector, "WATCH_INPUT", True), \
+                 patch.object(inspector.selectors, "DefaultSelector") as selector:
+                selector.return_value.__enter__.return_value.select.return_value = ["closed input"]
+                with self.assertRaisesRegex(RuntimeError, "owner/input lost"):
+                    inspector.acquire(second)
 
     def test_only_exact_empty_journal_bound_readiness_markers_are_runtime_bookkeeping(self):
         root = Path(self.directory.name) / "rootfs"

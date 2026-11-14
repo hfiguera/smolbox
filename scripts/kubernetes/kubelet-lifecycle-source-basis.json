@@ -1,0 +1,103 @@
+{
+  "k3s_release": "v1.35.10+k3s1",
+  "kubernetes_fork": "v1.35.10-k3s1",
+  "dependency_manifest": {
+    "url": "https://raw.githubusercontent.com/k3s-io/k3s/v1.35.10%2Bk3s1/go.mod",
+    "sha256": "b266b4ce916a8d4ea09a59166c1c7aa0d0538541bcd317c124f46da72eeaeda9"
+  },
+  "files": {
+    "pkg/kubelet/kubelet.go": {
+      "kubernetes/kubernetes": {
+        "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.35.10/pkg/kubelet/kubelet.go",
+        "sha256": "1d9b1c314f27c60e77710f17c6d446fac83cb44c68bd077312b07ca32aaf7301"
+      },
+      "k3s-io/kubernetes": {
+        "url": "https://raw.githubusercontent.com/k3s-io/kubernetes/v1.35.10-k3s1/pkg/kubelet/kubelet.go",
+        "sha256": "1d9b1c314f27c60e77710f17c6d446fac83cb44c68bd077312b07ca32aaf7301"
+      },
+      "identical": true
+    },
+    "pkg/kubelet/kubelet_pods.go": {
+      "kubernetes/kubernetes": {
+        "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.35.10/pkg/kubelet/kubelet_pods.go",
+        "sha256": "985aaae74224e49b5fa9eb507e829e0aefa99538d69e1d6b22124e5324247c0a"
+      },
+      "k3s-io/kubernetes": {
+        "url": "https://raw.githubusercontent.com/k3s-io/kubernetes/v1.35.10-k3s1/pkg/kubelet/kubelet_pods.go",
+        "sha256": "985aaae74224e49b5fa9eb507e829e0aefa99538d69e1d6b22124e5324247c0a"
+      },
+      "identical": true
+    },
+    "pkg/kubelet/kubelet_volumes.go": {
+      "kubernetes/kubernetes": {
+        "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.35.10/pkg/kubelet/kubelet_volumes.go",
+        "sha256": "15c22061f5a9b045280098b00661fcaea7fc22827a5feedb0b5f977de833ee4e"
+      },
+      "k3s-io/kubernetes": {
+        "url": "https://raw.githubusercontent.com/k3s-io/kubernetes/v1.35.10-k3s1/pkg/kubelet/kubelet_volumes.go",
+        "sha256": "15c22061f5a9b045280098b00661fcaea7fc22827a5feedb0b5f977de833ee4e"
+      },
+      "identical": true
+    },
+    "pkg/kubelet/pod_workers.go": {
+      "kubernetes/kubernetes": {
+        "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.35.10/pkg/kubelet/pod_workers.go",
+        "sha256": "34ef49fd7314db0ca7b0455cf7bdcff4826bbd9dbaaf097f81d98741bed5f46a"
+      },
+      "k3s-io/kubernetes": {
+        "url": "https://raw.githubusercontent.com/k3s-io/kubernetes/v1.35.10-k3s1/pkg/kubelet/pod_workers.go",
+        "sha256": "34ef49fd7314db0ca7b0455cf7bdcff4826bbd9dbaaf097f81d98741bed5f46a"
+      },
+      "identical": true
+    },
+    "pkg/kubelet/cm/pod_container_manager_linux.go": {
+      "kubernetes/kubernetes": {
+        "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.35.10/pkg/kubelet/cm/pod_container_manager_linux.go",
+        "sha256": "cd6f094dc7b05fd00c9c9729065664487ab4ead8345981a0e87756e4fd27603e"
+      },
+      "k3s-io/kubernetes": {
+        "url": "https://raw.githubusercontent.com/k3s-io/kubernetes/v1.35.10-k3s1/pkg/kubelet/cm/pod_container_manager_linux.go",
+        "sha256": "cd6f094dc7b05fd00c9c9729065664487ab4ead8345981a0e87756e4fd27603e"
+      },
+      "identical": true
+    }
+  },
+  "review_status": "caller_review_offline_implementation_and_live_version3_component_passed",
+  "reviewed_control_flow": [
+    "Pod cgroup creation precedes runtime synchronization in SyncPod.",
+    "SyncTerminatedPod destroys the Pod cgroup after termination and volume cleanup.",
+    "cleanupOrphanedPodCgroups excludes possibly-running and terminating Pod workers.",
+    "Pod workers serialize original-UID state transitions independently of desired API objects.",
+    "Ordinary Pod-directory cleanup has different conditions and cannot substitute for worker quiescence."
+  ],
+  "required_remaining_evidence": [
+    "Durable public controller restart and fault campaign"
+  ],
+  "live_feasibility_reference": "../../docs/evidence/kubernetes-backend-phase6-components-2026-11-13.json",
+  "resource_scope": "Kubelet lifecycle witness only. VM processes remain outside Pod cgroups; no new VM resource-enforcement claim.",
+  "caller_review": {
+    "archive_url": "https://codeload.github.com/k3s-io/kubernetes/tar.gz/refs/tags/v1.35.10-k3s1",
+    "archive_sha256": "6e30f7e5a3cac372f51ee697d27422241d6910efaecf76eb3fca72c1f6a80999",
+    "scope": "all non-test Go files under pkg/kubelet",
+    "pod_cgroup_destroy_callers": [
+      "Kubelet.SyncTerminatedPod",
+      "Kubelet.cleanupOrphanedPodCgroups"
+    ],
+    "pod_cgroup_ensure_caller": "Kubelet.SyncPod",
+    "other_factory_uses": "getters, stats, resource configuration/resize; no other Pod-cgroup Destroy or EnsureExists call found",
+    "assumptions": [
+      "Pinned cgroups-per-QoS/systemd/cgroup2 setup",
+      "Guaranteed-QoS fixed bare Pod with restartPolicy Never",
+      "Exclusive namespace principals and no original UID reuse",
+      "Same node boot, cgroup mount and K3s/containerd daemon incarnations",
+      "Original cgroup witnessed while the captured original VM runs"
+    ],
+    "implementation": "Root-owned immutable UID/inode witness in node evidence ledger; version3 proof requires original cgroup absence plus original API/CRI/VM evidence."
+  },
+  "version3_live_component": {
+    "pod_uid": "c932c807-e4d8-400d-836c-1c40a78912b8",
+    "observer_epoch": "5289f8c3-94e9-4f77-b578-348f4772adbe",
+    "cleanup_proof_version": 3,
+    "guarded_memory_release_slots": 0
+  }
+}
