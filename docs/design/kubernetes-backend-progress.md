@@ -6,6 +6,13 @@ Status: first development preview qualified, November 13, 2026 (November 14 UTC)
 The goal remains the complete first release, Phases 0–7, with HTTP/Embedded
 parity tracked in [the parity matrix](kubernetes-backend-parity.md).
 
+Next planned work: [standalone single-node authority](kubernetes-node-authority.md)
+on `feature/kubernetes-node-authority`, with a
+[detailed implementation plan](kubernetes-node-authority-implementation-plan.md).
+Only its specification exists at this checkpoint; implementation and fresh live
+qualification remain pending. The qualified preview and controller guard are
+unchanged.
+
 ## Phase status
 
 | Phase | Status | Evidence / remaining work |

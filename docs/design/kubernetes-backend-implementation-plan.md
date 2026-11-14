@@ -393,6 +393,13 @@ These milestones are part of the long-term implementation direction, outside
 the first release. Expand each into a detailed plan before implementation;
 dependencies and live evidence determine the delivery order within each family.
 
+The next delivery branch, `feature/kubernetes-node-authority`, implements the
+[standalone single-node authority specification](kubernetes-node-authority.md)
+through its [phase plan](kubernetes-node-authority-implementation-plan.md). This
+first foundation slice keeps the current same-host controller guard and fixed
+preview policy. Distributed controller fencing, multi-node operation and the
+remaining parity families use separate follow-up branches.
+
 1. **Production foundation:** replace the lab-only node evidence provider with
    a reviewed production mechanism; add multi-node enrollment, fencing, recovery,
    qualified resource sizing, measurements and worker operations. Preserve
