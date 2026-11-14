@@ -10,6 +10,13 @@ defmodule SmolBox.KubernetesRuntimeFilesTest do
   alias SmolBox.Test.Kubernetes, as: Fixture
   @moduletag capture_log: true
 
+  defmodule CollectionClock do
+    @moduledoc false
+    def now, do: Agent.get(__MODULE__, & &1)
+    def monotonic, do: System.monotonic_time(:millisecond)
+    def expire(ms), do: Agent.update(__MODULE__, &(&1 + ms))
+  end
+
   defmodule Artifacts do
     @moduledoc false
     @behaviour SmolBox.ArtifactStore
@@ -20,6 +27,7 @@ defmodule SmolBox.KubernetesRuntimeFilesTest do
     @impl true
     def put(context, key, destination, bytes, digest) do
       send(context.owner, :put_started)
+      CollectionClock.expire(context.collection_ms)
       Process.sleep(context.delay)
       SmolBox.TestArtifacts.put(context.store, key, destination, bytes, digest)
     end
@@ -67,13 +75,29 @@ defmodule SmolBox.KubernetesRuntimeFilesTest do
     files = start_supervised!({Agent, fn -> %{files: %{}, operations: []} end}, id: :files)
     artifact_store = Keyword.get(options, :artifact_store, {TestArtifacts, artifacts})
 
+    if artifact_store == :slow do
+      start_supervised!(%{
+        id: :collection_clock,
+        start:
+          {Agent, :start_link,
+           [fn -> System.system_time(:millisecond) end, [name: CollectionClock]]}
+      })
+    end
+
     artifact_store =
       if artifact_store == :slow,
-        do: {Artifacts, %{store: artifacts, owner: self(), delay: 2500}},
+        do:
+          {Artifacts,
+           %{store: artifacts, owner: self(), delay: 2500, collection_ms: profile.collection_ms}},
         else: artifact_store
 
+    runtime_options =
+      if Keyword.get(options, :artifact_store) == :slow,
+        do: [name: __MODULE__, clock: CollectionClock, lease_ms: 900_000],
+        else: [name: __MODULE__]
+
     {config, record} =
-      Fixture.runtime(kube, store, artifact_store, {prepared, assignment}, name: __MODULE__)
+      Fixture.runtime(kube, store, artifact_store, {prepared, assignment}, runtime_options)
 
     {:ok, created} = Receipt.created(assignment, prepared.backend_receipt.pod_uid)
 
@@ -200,7 +224,9 @@ defmodule SmolBox.KubernetesRuntimeFilesTest do
 
   test "artifact callback deadline cannot publish a fabricated receipt or replay the guest command",
        c do
-    c = prepare(c, artifact_store: :slow, collection_ms: 1000)
+    # Expire the stage only after publication starts; TLS setup time is unrelated
+    # to the callback-deadline contract this test exercises.
+    c = prepare(c, artifact_store: :slow)
     assert :ok = RuntimeFiles.stage(c.session, c.record)
     record = exited(c)
     assert {:ok, failed} = RuntimeFiles.collect(c.session, record)

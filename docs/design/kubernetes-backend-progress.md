@@ -672,3 +672,22 @@ finishes in one attempt with either a five-second or a thirty-second lease.
 Formatting, strict Credo, zero-clone ExDNA, strict-assumption Credence, Dialyzer
 and the zero-cycle dependency check passed. No new live-node qualification is
 claimed.
+
+## CI follow-up — portable fixtures and example compatibility
+
+Linux reproduced eight failures in the recovery/file fixture subset. Recovery
+polling now allows fifteen seconds for the full TLS/controller/exec/cleanup chain,
+without changing any production stage deadline or backend operation budget. The
+artifact callback test advances its own clock only after publication begins, so
+it tests callback expiry independently of TLS setup. Its longer fixture lease
+keeps worker ownership valid while that test clock advances.
+
+The shared Kubernetes binding helper compiles its functions only when the SDK
+provides Kubernetes binding types, preserving the community example's released
+SDK dependency. The packaged guide links to the repository's settings example
+instead of traversing outside the generated documentation directory.
+
+The same isolated Linux subset now passes all 28 checks. The community example
+passes compilation, strict Credo, zero-clone ExDNA and Dialyzer, and generated
+documentation passes the local-link check across all 162 pages. CI workflows
+remain unchanged; live Kubernetes/Python campaigns remain manual.

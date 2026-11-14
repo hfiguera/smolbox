@@ -177,7 +177,9 @@ defmodule SmolBox.KubernetesRecoveryTest do
     runtime
   end
 
-  defp eventually(function, attempts \\ 100)
+  # Include the complete TLS/controller/exec/cleanup chain on Linux CI runners.
+  # Production stage deadlines and backend operation budgets remain unchanged.
+  defp eventually(function, attempts \\ 500)
   defp eventually(_, 0), do: flunk("recovery condition not reached")
 
   defp eventually(function, attempts) do

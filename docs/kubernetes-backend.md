@@ -61,7 +61,7 @@ existing assignment corpus.
 
 ## Configure and run
 
-[The host settings example](../examples/kubernetes_host/settings.exs) constructs
+[The host settings example](https://github.com/hfiguera/smolbox/blob/main/examples/kubernetes_host/settings.exs) constructs
 `SmolBox.Kubernetes.Config` without network activity. Its JSON input supplies
 these exact approved target fields:
 
