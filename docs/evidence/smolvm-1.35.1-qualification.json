@@ -84,10 +84,8 @@
     }
   },
   "pending": [
-    "Publish and independently verify the reviewed corresponding-source and notice archives",
-    "Build and attest all three targets from an approved release tag",
-    "Qualify exact public downloads with current/minimum Elixir and OTP, no Rust, fresh standard accounts and Gatekeeper enabled on macOS",
-    "Promote defaults only after the public distribution gates pass"
+    "Public source delivery, hosted provenance and public-download qualification remain unrun because the user requested that artifacts stay unpublished",
+    "Keep defaults at 1.34.0 until the distribution gates are separately authorized and pass"
   ],
   "branch": "support/smolvm-1.35.1",
   "upstream_impact_review": {
@@ -2041,7 +2039,10 @@
           "public_download_qualified": false
         }
       }
-    }
+    },
+    "fresh_os_account_followup_platforms": [
+      "macos-aarch64"
+    ]
   },
   "staged_native_bundles": {
     "macos_aarch64": {
@@ -2114,13 +2115,90 @@
     "hosted_attestation_verified": false,
     "exact_public_installer_matrix_passed": false,
     "fresh_macos_standard_account_required": true,
-    "macos_account_creation_available_in_session": false
+    "macos_account_creation_available_in_session": true,
+    "publication_decision": "keep_artifacts_unpublished_at_user_request",
+    "publication_authorized": false,
+    "macos_account_setup": "agent-managed temporary standard accounts using native macOS administrator authorization",
+    "macos_staged_fresh_standard_account_matrix_passed": true
   },
   "local_environment_cleanup": {
     "private_postgresql_cluster": "normal smart shutdown confirmed",
     "arm64_lima_guest": "normal stop confirmed",
     "kubernetes_guest": "normal poweroff confirmed; task QEMU unit inactive/dead, MainPID 0, Result success",
     "task_only_ssh_forwards": "normal shutdown requested",
-    "failed_authority_roots": "preserved; no blanket reservation release claimed"
+    "failed_authority_roots": "preserved; no blanket reservation release claimed",
+    "fresh_macos_test_accounts": "Both temporary standard accounts, real HOME directories and account locks removed after zero VM rows, no remaining processes and post-use asset verification"
+  },
+  "fresh_macos_standard_accounts": {
+    "status": "passed",
+    "cases": 2,
+    "fresh_standard_accounts": true,
+    "public_download_qualified": false,
+    "publishing": false,
+    "defaults_changed": false,
+    "accounts_and_homes_removed": true,
+    "native_processes_remaining": 0,
+    "matrix": {
+      "current": {
+        "status": "passed",
+        "toolchain": "current",
+        "platform": "macos-aarch64",
+        "uid": 20071,
+        "real_home_verified": true,
+        "fresh_standard_os_account": true,
+        "admin_group_member": false,
+        "without_rust": true,
+        "empty_github_cli_configuration": true,
+        "inherited_environment_cleared": true,
+        "gatekeeper_enabled": true,
+        "signature_and_hypervisor_entitlement_verified": true,
+        "guest_stdout_42": true,
+        "quickstart_zero_reserved_slots_assertion_passed": true,
+        "sdk_inventory_empty": true,
+        "installed_assets_verified_after_use": 808,
+        "client_archive_sha256": "72c881067abf7856e96d1d4b866f01289509e744228f04f3bb38809a7734a27c",
+        "native_archive_sha256": "2f60177c53b6c44420d137eee0309a904412b06a15be56023cd287acc5987d10",
+        "manifest_sha256": "e5c2bbf87b7ef500c15f94c918cc73c66b1691414f94e1cae4e4665680dec0af",
+        "notices_sha256": "9b9593506bba5d74d3baca6ce9f82a065e6618ecc655057066f6b8ff4795467f",
+        "public_download_qualified": false,
+        "hosted_attestation_qualified": false,
+        "sdk_source_modified": false,
+        "account_removed": true,
+        "home_removed": true,
+        "native_processes_remaining": 0,
+        "account_lock_collected": true
+      },
+      "minimum": {
+        "status": "passed",
+        "toolchain": "minimum",
+        "platform": "macos-aarch64",
+        "uid": 20072,
+        "real_home_verified": true,
+        "fresh_standard_os_account": true,
+        "admin_group_member": false,
+        "without_rust": true,
+        "empty_github_cli_configuration": true,
+        "inherited_environment_cleared": true,
+        "gatekeeper_enabled": true,
+        "signature_and_hypervisor_entitlement_verified": true,
+        "guest_stdout_42": true,
+        "quickstart_zero_reserved_slots_assertion_passed": true,
+        "sdk_inventory_empty": true,
+        "installed_assets_verified_after_use": 808,
+        "client_archive_sha256": "72c881067abf7856e96d1d4b866f01289509e744228f04f3bb38809a7734a27c",
+        "native_archive_sha256": "2f60177c53b6c44420d137eee0309a904412b06a15be56023cd287acc5987d10",
+        "manifest_sha256": "e5c2bbf87b7ef500c15f94c918cc73c66b1691414f94e1cae4e4665680dec0af",
+        "notices_sha256": "9b9593506bba5d74d3baca6ce9f82a065e6618ecc655057066f6b8ff4795467f",
+        "public_download_qualified": false,
+        "hosted_attestation_qualified": false,
+        "sdk_source_modified": false,
+        "account_removed": true,
+        "home_removed": true,
+        "native_processes_remaining": 0,
+        "account_lock_collected": true
+      }
+    },
+    "authorization": "Native macOS administrator authorization for provisioning; native interactive account-management authorization for deletion",
+    "administrative_harness_notes": "The preflight Python-version mismatch was corrected before account creation. Idle per-user macOS services were stopped normally; native interactive account deletion resolved directory-service cleanup restrictions. All temporary accounts and HOME directories were removed."
   }
 }

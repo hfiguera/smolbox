@@ -4,7 +4,9 @@ Local qualification passes for the unmodified SDK at
 `bc58c3ef808e70db10c0ffb2b282c5f565ac6afc`. Defaults remain **1.34.0** for
 HTTP workers, checkpoints, Kubernetes and the public embedded installer. Public
 source delivery, hosted provenance and clean-account public installation remain
-open gates. This candidate has not been published or approved for distribution.
+open gates. This candidate has not been published or approved for distribution. The user
+requested that artifacts remain unpublished; the public distribution gates are
+therefore intentionally pending.
 
 The [machine-readable report](smolvm-1.35.1-qualification.json) binds each native
 campaign to its package, executable and asset digests. Historical evidence and
@@ -57,6 +59,15 @@ configuration directories under existing non-root UIDs. They do **not** qualify
 fresh OS accounts, public downloads or hosted provenance. The ARM64 minimum OTP
 is 27.3.4.17; the other minimum lanes use 27.3.4.15, all with Elixir 1.18.4.
 
+A follow-up passed both macOS lanes in fresh, password-disabled,
+non-admin standard accounts with their real registered HOME directories. Rust
+was absent, Gatekeeper stayed enabled, signatures and the hypervisor entitlement
+verified, the guest printed `42`, and cleanup left zero VM rows. All 808 installed
+assets verified after use. Both temporary accounts, HOME directories and account
+locks were removed after their processes exited. Provisioning and account
+removal used the native macOS authorization flows. These staged checks still do
+not establish public-download provenance.
+
 The final Elixir CI suites passed 2,323 checks on macOS and 2,322 on Linux, with
 42 runtime exclusions each. Final Rust workspace checks passed 1,349 on macOS
 and 1,350 on Linux, with 27 reviewed ignored cases each. Strict Clippy, Rustdoc,
@@ -87,9 +98,9 @@ Before promotion, complete the repository's
 2. Build and attest all three targets from the matching qualification tag,
    proposed as `v0.6.1-rc.1`.
 3. Verify the exact public downloads with current/minimum toolchains, Rust absent
-   and fresh standard accounts. Keep Gatekeeper enabled on macOS. A fresh macOS
-   test account still needs to be provided; this session cannot create one with
-   noninteractive administrator access.
+   and fresh standard accounts. Keep Gatekeeper enabled on macOS. Fresh macOS test
+   accounts can be provisioned through the native administrator authorization
+   flow, which the staged follow-up above exercised successfully.
 4. Record those identities and results before changing paired defaults.
 
 No SDK-revision domain migration, codec rollback or additional native crash
