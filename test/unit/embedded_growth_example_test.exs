@@ -107,7 +107,7 @@ defmodule SmolBox.EmbeddedGrowthExampleTest do
         sdk_identity: hello["hello"]["sdk"]
       )
 
-    on_exit(fn -> File.rm_rf!(target.package_path) end)
+    on_exit(fn -> EmbeddedPackage.remove!(target) end)
     assert hd(EmbeddedGrowth.configure(target).profiles).network == :offline
 
     {:ok, source} =
@@ -142,7 +142,7 @@ defmodule SmolBox.EmbeddedGrowthExampleTest do
         sdk_identity: hello["hello"]["sdk"]
       )
 
-    on_exit(fn -> File.rm_rf!(target.package_path) end)
+    on_exit(fn -> EmbeddedPackage.remove!(target) end)
     target
   end
 
@@ -673,7 +673,7 @@ defmodule SmolBox.EmbeddedGrowthExampleTest do
         sdk_identity: hello["hello"]["sdk"]
       )
 
-    on_exit(fn -> File.rm_rf!(target.package_path) end)
+    on_exit(fn -> EmbeddedPackage.remove!(target) end)
     target = EmbeddedGrowth.configure(target)
     output = Path.join(root, "not-created")
     assert_raise MatchError, fn -> EmbeddedGrowth.run(target, output, phase: :prepare) end

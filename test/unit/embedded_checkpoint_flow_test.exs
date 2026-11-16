@@ -52,7 +52,7 @@ defmodule SmolBox.Embedded.CheckpointFlowTest do
     on_exit(fn -> File.rm_rf!(root) end)
     File.chmod!(root, 0o700)
     config = Package.create(protocol_major: 2)
-    on_exit(fn -> File.rm_rf!(config.package_path) end)
+    on_exit(fn -> Package.remove!(config) end)
     %{config: config, root: root}
   end
 

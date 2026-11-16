@@ -44,7 +44,7 @@ defmodule SmolBox.EmbeddedImagesExampleTest do
 
     on_exit(fn ->
       File.rm_rf!(root)
-      File.rm_rf!(target.package_path)
+      EmbeddedPackage.remove!(target)
     end)
 
     %{target: target, root: root}
@@ -71,7 +71,7 @@ defmodule SmolBox.EmbeddedImagesExampleTest do
       |> get_in(~w(hello sdk))
 
     target = EmbeddedPackage.create(protocol_major: 2, platform: :macos, sdk_identity: sdk)
-    on_exit(fn -> File.rm_rf!(target.package_path) end)
+    on_exit(fn -> EmbeddedPackage.remove!(target) end)
 
     options =
       settings()

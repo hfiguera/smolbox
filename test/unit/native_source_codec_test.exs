@@ -386,7 +386,7 @@ defmodule SmolBox.Store.NativeSourceCodecTest do
       |> put_in(["feature_versions", "images"], 1)
 
     native = Package.create(protocol_major: 2, platform: :linux, sdk_identity: sdk)
-    on_exit(fn -> File.rm_rf!(native.package_path) end)
+    on_exit(fn -> Package.remove!(native) end)
 
     native = %{
       native
@@ -558,7 +558,7 @@ defmodule SmolBox.Store.NativeSourceCodecTest do
   test "current approved helpers reject source admission despite structural reader support" do
     config = Package.create(protocol_major: 2)
     {source, record, assignment} = fixture(config.architecture)
-    on_exit(fn -> File.rm_rf!(config.package_path) end)
+    on_exit(fn -> Package.remove!(config) end)
     config = %{config | sources: [source], profiles: [record.spec.profile]}
     assert :ok = Config.validate(config)
     refute Assignment.supports?(config, record.spec)
@@ -623,7 +623,7 @@ defmodule SmolBox.Store.NativeSourceCodecTest do
       |> get_in(~w(hello sdk))
 
     config = Package.create(protocol_major: 2, sdk_identity: sdk)
-    on_exit(fn -> File.rm_rf!(config.package_path) end)
+    on_exit(fn -> Package.remove!(config) end)
     assert :ok = Config.validate(config)
     target = %Target{kind: :embedded, native_config: config}
 

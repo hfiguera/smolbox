@@ -211,7 +211,7 @@ defmodule SmolBox.EmbeddedBranchExampleTest do
       target =
         EmbeddedPackage.create(protocol_major: 2, platform: unquote(platform), sdk_identity: sdk)
 
-      on_exit(fn -> File.rm_rf!(target.package_path) end)
+      on_exit(fn -> EmbeddedPackage.remove!(target) end)
       configured = EmbeddedBranches.configure(target)
       assert configured.artifacts == target.artifacts
       assert configured.package_identity == target.package_identity
@@ -248,7 +248,7 @@ defmodule SmolBox.EmbeddedBranchExampleTest do
       |> get_in(~w(hello sdk))
 
     target = EmbeddedPackage.create(protocol_major: 2, platform: :macos, sdk_identity: sdk)
-    on_exit(fn -> File.rm_rf!(target.package_path) end)
+    on_exit(fn -> EmbeddedPackage.remove!(target) end)
 
     configured =
       EmbeddedBranches.configure(target,

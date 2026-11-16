@@ -266,6 +266,8 @@ defmodule SmolBox.Example.EmbeddedPort do
           "$(touch /workspace/terminal-argv-unwanted)",
           "one two"
         ],
+        cols: 120,
+        rows: 43,
         session_ms: 30_000,
         idle_ms: 15_000,
         max_buffer_bytes: 65_536
@@ -276,8 +278,7 @@ defmodule SmolBox.Example.EmbeddedPort do
     {:ok, ^key} = Terminal.open(__MODULE__, machine, spec)
     {:ok, handle} = Terminal.attach(__MODULE__, key, 10_000)
     terminal_marker(handle, "SB_ARGV_READY")
-    :ok = Terminal.resize(handle, 120, 43)
-    :ok = Terminal.input(handle, "round trip\n")
+    :ok = terminal_input(handle, "round trip\n", 100)
     output = terminal_marker(handle, "SB_ARGV_DONE")
     true = :binary.match(output, "43 120") != :nomatch
     terminal_exit(handle, System.monotonic_time(:millisecond) + 10_000)
@@ -293,8 +294,20 @@ defmodule SmolBox.Example.EmbeddedPort do
       "literal_metacharacters" => true,
       "generated_script" => true,
       "stdin_roundtrip" => true,
-      "resize" => %{"cols" => 120, "rows" => 43}
+      "initial_size" => %{"cols" => 120, "rows" => 43}
     }
+  end
+
+  defp terminal_input(handle, bytes, retries) do
+    case Terminal.input(handle, bytes) do
+      {:error, %SmolBox.Error{category: :admission_exhausted, evidence: :not_dispatched}}
+      when retries > 0 ->
+        Process.sleep(10)
+        terminal_input(handle, bytes, retries - 1)
+
+      result ->
+        result
+    end
   end
 
   defp terminal_marker(handle, marker),

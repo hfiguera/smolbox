@@ -82,6 +82,7 @@ class PackageMetadataTests(unittest.TestCase):
         hello['sdk']['feature_versions']['branch_release_env'] = 1
         hello['sdk']['feature_versions']['branch_static_egress'] = 1
         hello['sdk']['feature_versions']['branch_https_credentials'] = 1
+        hello['sdk']['feature_versions']['terminal_arguments'] = 1
         self.assertEqual(linux['sdk']['feature_versions'], hello['sdk']['feature_versions'])
         with (package.ROOT / 'Cargo.toml').open('rb') as manifest:
             version = package.tomllib.load(manifest)['workspace']['dependencies']['smolvm']['version']

@@ -213,6 +213,9 @@ defmodule SmolBox.Example.EmbeddedVolumes do
         %MatchError{term: {:error, %SmolBox.Error{} = rejected}} ->
           Map.take(rejected, [:category, :operation, :evidence])
 
+        %MatchError{term: {:ok, %Volume{last_error: %SmolBox.Error{} = rejected}}} ->
+          Map.take(rejected, [:category, :operation, :evidence])
+
         _ ->
           nil
       end

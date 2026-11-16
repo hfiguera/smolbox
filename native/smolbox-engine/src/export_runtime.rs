@@ -8,7 +8,7 @@ use std::os::fd::AsRawFd;
 use std::os::unix::fs::{MetadataExt, OpenOptionsExt};
 use std::path::{Path, PathBuf};
 
-const FILES: usize = 16;
+const FILES: usize = 32;
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Anchor(u64, u64, u32, u32);
@@ -42,15 +42,12 @@ impl Entry {
         let m =
             std::fs::symlink_metadata(path.join(name)).map_err(|_| Error::before(ErrorCode::Io))?;
         let kind = m.mode() & (libc::S_IFMT as u32);
-        if kind
-            != if socket {
-                libc::S_IFSOCK as u32
-            } else {
-                libc::S_IFREG as u32
-            }
+        if kind != entry_kind(name, socket)
             || m.uid() != unsafe { libc::geteuid() }
-            || m.nlink() != 1
+            || m.nlink() != if attachment_directory(name) { 2 } else { 1 }
             || (!socket && m.mode() & 0o022 != 0)
+            || (attachment_directory(name)
+                && (m.mode() & 0o777 != 0o700 || !empty_directory(&path.join(name))?))
         {
             return Err(Error::before(ErrorCode::Ownership));
         }
@@ -71,6 +68,9 @@ impl Entry {
     fn socket(&self) -> bool {
         self.mode & (libc::S_IFMT as u32) == libc::S_IFSOCK as u32
     }
+    fn directory(&self) -> bool {
+        self.mode & (libc::S_IFMT as u32) == libc::S_IFDIR as u32
+    }
     fn verify(&self, path: &Path, removing: bool) -> Result<bool> {
         if removing && absent(&path.join(&self.name)) {
             return Ok(false);
@@ -82,13 +82,9 @@ impl Entry {
     }
     fn validate(&self, maximum: u64, socket: bool) -> Result<()> {
         let kind = self.mode & (libc::S_IFMT as u32);
-        if kind
-            != if socket {
-                libc::S_IFSOCK as u32
-            } else {
-                libc::S_IFREG as u32
-            }
+        if kind != entry_kind(&self.name, socket)
             || (!socket && self.mode & 0o022 != 0)
+            || (attachment_directory(&self.name) && self.mode & 0o777 != 0o700)
             || self.version.0 == 0
             || self.version.1 == 0
             || self.version.2 > maximum
@@ -99,6 +95,25 @@ impl Entry {
         }
         Ok(())
     }
+}
+fn attachment_directory(name: &str) -> bool {
+    matches!(name, "smolvm_attach_ro" | "smolvm_attach_rw")
+}
+#[allow(clippy::unnecessary_cast)]
+fn entry_kind(name: &str, socket: bool) -> u32 {
+    if socket {
+        libc::S_IFSOCK as u32
+    } else if attachment_directory(name) {
+        libc::S_IFDIR as u32
+    } else {
+        libc::S_IFREG as u32
+    }
+}
+fn empty_directory(path: &Path) -> Result<bool> {
+    Ok(std::fs::read_dir(path)
+        .map_err(|_| Error::before(ErrorCode::Io))?
+        .next()
+        .is_none())
 }
 #[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -118,11 +133,18 @@ fn limit(name: &str, plan: &crate::ExportConversionBudget) -> Result<(u64, bool)
         "overlay.raw" => (plan.overlay_gib * (1 << 30), false),
         "export-source.qcow2" => (plan.source_storage_bytes * 2, false),
         "agent.config.json" | "boot-config.json" => (8 << 20, false),
+        "vmm-exit.json" => (8192, false),
         "agent-console.log" | "agent-startup-error.log" | "boot-debug.log" => (64 << 20, false),
+        "workload.log" => (64 << 20, false),
+        // SDK-created attachment roots must remain empty. Retirement never
+        // traverses them or removes attached content.
+        "smolvm_attach_ro" | "smolvm_attach_rw" => (64 << 10, false),
         "vm.lock" => (0, false),
         // The SDK can leave the libkrun control endpoint in the original
         // helper directory after collection, alongside its agent sockets.
-        "agent.sock" | "agent.ready" | "control.sock" => (4096, true),
+        "agent.sock" | "agent.ready" | "control.sock" | "ports.sock" | "port-forward.sock" => {
+            (4096, true)
+        }
         _ => return Err(Error::before(ErrorCode::Ownership)),
     })
 }
@@ -339,7 +361,7 @@ impl Snapshot {
             budget.check()?;
             self.root.verify(root, path)?;
             if entry.verify(path, true)? {
-                unlink(root, &entry.name)?;
+                unlink_entry(root, &entry.name, entry.directory())?;
             }
         }
         root.sync_all()
@@ -362,9 +384,80 @@ impl Snapshot {
     }
 }
 fn unlink(root: &File, name: &str) -> Result<()> {
+    unlink_entry(root, name, false)
+}
+fn unlink_entry(root: &File, name: &str, directory: bool) -> Result<()> {
     let name = std::ffi::CString::new(name).map_err(|_| Error::before(ErrorCode::Ownership))?;
-    if unsafe { libc::unlinkat(root.as_raw_fd(), name.as_ptr(), 0) } != 0 {
+    let flags = if directory { libc::AT_REMOVEDIR } else { 0 };
+    if unsafe { libc::unlinkat(root.as_raw_fd(), name.as_ptr(), flags) } != 0 {
         return Err(Error::uncertain(ErrorCode::Io));
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::os::unix::fs::{symlink, PermissionsExt};
+
+    #[test]
+    fn attachment_custody_rejects_content_symlinks_and_wrong_modes() {
+        let temp = tempfile::tempdir().unwrap();
+        let path = temp.path();
+        let directory = path.join("smolvm_attach_ro");
+        std::fs::create_dir(&directory).unwrap();
+        let entry = Entry::capture(path, "smolvm_attach_ro", false).unwrap();
+        assert!(entry.directory());
+        entry.validate(64 << 10, false).unwrap();
+        std::fs::write(directory.join("keep"), b"attached content").unwrap();
+        assert!(entry.verify(path, false).is_err());
+        assert!(Entry::capture(path, "smolvm_attach_ro", false).is_err());
+        std::fs::remove_file(directory.join("keep")).unwrap();
+        std::fs::set_permissions(&directory, std::fs::Permissions::from_mode(0o755)).unwrap();
+        assert!(Entry::capture(path, "smolvm_attach_ro", false).is_err());
+        std::fs::remove_dir(&directory).unwrap();
+        symlink(path, &directory).unwrap();
+        assert!(Entry::capture(path, "smolvm_attach_ro", false).is_err());
+    }
+
+    #[test]
+    fn directory_retirement_never_recurses_or_unlinks_a_replacement_file() {
+        let temp = tempfile::tempdir().unwrap();
+        let root = File::open(temp.path()).unwrap();
+        let directory = temp.path().join("smolvm_attach_rw");
+        std::fs::create_dir(&directory).unwrap();
+        std::fs::write(directory.join("keep"), b"retained").unwrap();
+        assert!(unlink_entry(&root, "smolvm_attach_rw", true).is_err());
+        assert_eq!(std::fs::read(directory.join("keep")).unwrap(), b"retained");
+        std::fs::remove_file(directory.join("keep")).unwrap();
+        unlink_entry(&root, "smolvm_attach_rw", true).unwrap();
+        std::fs::write(&directory, b"replacement").unwrap();
+        assert!(unlink_entry(&root, "smolvm_attach_rw", true).is_err());
+        assert_eq!(std::fs::read(directory).unwrap(), b"replacement");
+    }
+
+    #[test]
+    fn runtime_allowlist_keeps_unknown_entries_and_wrong_kinds_rejected() {
+        let temp = tempfile::tempdir().unwrap();
+        let path = temp.path();
+        std::fs::write(path.join("ports.sock"), b"not a socket").unwrap();
+        assert!(Entry::capture(path, "ports.sock", true).is_err());
+        std::fs::create_dir(path.join("workload.log")).unwrap();
+        assert!(Entry::capture(path, "workload.log", false).is_err());
+        let plan = crate::ExportConversionResources {
+            slots: 1,
+            cpus: 4,
+            memory_mb: 4608,
+            disk_gb: 128,
+        }
+        .plan(1 << 30, 1 << 30, 128 << 30)
+        .unwrap();
+        assert!(limit("foreign", &plan).is_err());
+        assert!(limit("auto-ports.sock", &plan).is_err());
+        std::fs::write(path.join("vmm-exit.json"), vec![0; 8193]).unwrap();
+        assert!(Entry::capture(path, "vmm-exit.json", false)
+            .unwrap()
+            .validate(8192, false)
+            .is_err());
+    }
 }

@@ -695,7 +695,7 @@ defmodule SmolBox.NativeGrowthHistoryTest do
         minimum_material_revision: second.receipt["material"]["revision"]
       )
 
-    on_exit(fn -> File.rm_rf!(native.package_path) end)
+    on_exit(fn -> Package.remove!(native) end)
 
     native = %{
       native
