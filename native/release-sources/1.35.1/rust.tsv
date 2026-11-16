@@ -1,0 +1,715 @@
+crate	version	declared_license	source_repository	normal_dependency_graph	license_files
+adler2	2.0.1	0BSD OR MIT OR Apache-2.0	https://github.com/oyvindln/adler2	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-0BSD, LICENSE-APACHE, LICENSE-MIT
+aho-corasick	1.1.4	Unlicense OR MIT	https://github.com/BurntSushi/aho-corasick	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	COPYING, LICENSE-MIT, UNLICENSE
+aho-corasick	1.1.5	Unlicense OR MIT	https://github.com/BurntSushi/aho-corasick	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	COPYING, LICENSE-MIT, UNLICENSE
+allocator-api2	0.2.21	MIT OR Apache-2.0	https://github.com/zakarumych/allocator-api2	libkrun-aarch64-apple-darwin/libkrun	LICENSE-APACHE, LICENSE-MIT
+anstream	0.6.21	MIT OR Apache-2.0	https://github.com/rust-cli/anstyle.git	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+anstream	1.0.0	MIT OR Apache-2.0	https://github.com/rust-cli/anstyle.git	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+anstyle	1.0.14	MIT OR Apache-2.0	https://github.com/rust-cli/anstyle.git	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+anstyle-parse	0.2.7	MIT OR Apache-2.0	https://github.com/rust-cli/anstyle.git	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+anstyle-parse	1.0.0	MIT OR Apache-2.0	https://github.com/rust-cli/anstyle.git	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+anstyle-query	1.1.5	MIT OR Apache-2.0	https://github.com/rust-cli/anstyle.git	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+anstyle-wincon	3.0.11	MIT OR Apache-2.0	https://github.com/rust-cli/anstyle.git	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+anyhow	1.0.102	MIT OR Apache-2.0	https://github.com/dtolnay/anyhow	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+anyhow	1.0.104	MIT OR Apache-2.0	https://github.com/dtolnay/anyhow	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+arc-swap	1.9.1	MIT OR Apache-2.0	https://github.com/vorner/arc-swap	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+arc-swap	1.9.2	MIT OR Apache-2.0	https://github.com/vorner/arc-swap	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+asn1-rs	0.7.2	MIT OR Apache-2.0	https://github.com/rusticata/asn1-rs.git	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+asn1-rs-derive	0.6.0	MIT OR Apache-2.0	https://github.com/rusticata/asn1-rs.git	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+asn1-rs-impl	0.2.0	MIT/Apache-2.0	https://github.com/rusticata/asn1-rs.git	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	
+assert-json-diff	2.0.2	MIT	https://github.com/davidpdrsn/assert-json-diff.git	lockfile-only	LICENSE
+async-broadcast	0.7.2	MIT OR Apache-2.0	https://github.com/smol-rs/async-broadcast	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+async-channel	2.5.0	Apache-2.0 OR MIT	https://github.com/smol-rs/async-channel	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+async-executor	1.14.0	Apache-2.0 OR MIT	https://github.com/smol-rs/async-executor	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+async-io	2.6.0	Apache-2.0 OR MIT	https://github.com/smol-rs/async-io	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+async-lock	3.4.2	Apache-2.0 OR MIT	https://github.com/smol-rs/async-lock	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+async-process	2.5.0	Apache-2.0 OR MIT	https://github.com/smol-rs/async-process	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+async-recursion	1.1.1	MIT OR Apache-2.0	https://github.com/dcchut/async-recursion	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+async-signal	0.2.14	Apache-2.0 OR MIT	https://github.com/smol-rs/async-signal	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+async-stream	0.3.6	MIT	https://github.com/tokio-rs/async-stream	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+async-stream-impl	0.3.6	MIT	https://github.com/tokio-rs/async-stream	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+async-task	4.7.1	Apache-2.0 OR MIT	https://github.com/smol-rs/async-task	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+async-trait	0.1.89	MIT OR Apache-2.0	https://github.com/dtolnay/async-trait	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+async-trait	0.1.92	MIT OR Apache-2.0	https://github.com/dtolnay/async-trait	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+atomic-waker	1.1.2	Apache-2.0 OR MIT	https://github.com/smol-rs/atomic-waker	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT, LICENSE-THIRD-PARTY
+autocfg	1.5.0	Apache-2.0 OR MIT	https://github.com/cuviper/autocfg	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+autocfg	1.5.1	Apache-2.0 OR MIT	https://github.com/cuviper/autocfg	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+aws-lc-rs	1.18.1	ISC AND (Apache-2.0 OR ISC)	https://github.com/aws/aws-lc-rs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+aws-lc-sys	0.45.0	ISC AND (Apache-2.0 OR ISC) AND Apache-2.0 AND MIT AND BSD-3-Clause AND (Apache-2.0 OR ISC OR MIT) AND (Apache-2.0 OR ISC OR MIT-0)	https://github.com/aws/aws-lc-rs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE, aws-lc/LICENSE
+axum	0.8.9	MIT	https://github.com/tokio-rs/axum	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+axum-core	0.5.6	MIT	https://github.com/tokio-rs/axum	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+axum-macros	0.5.1	MIT	https://github.com/tokio-rs/axum	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+axum-server	0.7.3	MIT	https://github.com/programatik29/axum-server	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+base64	0.22.1	MIT OR Apache-2.0	https://github.com/marshallpierce/rust-base64	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+base64	0.23.1	MIT OR Apache-2.0	https://github.com/marshallpierce/rust-base64	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+bincode	2.0.1	MIT	https://github.com/bincode-org/bincode	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE.md
+bincode_derive	2.0.1	MIT	https://github.com/bincode-org/bincode	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE.md
+bindgen	0.72.1	BSD-3-Clause	https://github.com/rust-lang/rust-bindgen	lockfile-only	LICENSE
+bit-vec	0.6.3	MIT/Apache-2.0	https://github.com/contain-rs/bit-vec	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+bitfield	0.19.4	MIT OR Apache-2.0	https://github.com/dzamlo/rust-bitfield	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+bitfield-macros	0.19.4	MIT OR Apache-2.0	https://github.com/dzamlo/rust-bitfield	lockfile-only	
+bitflags	1.3.2	MIT/Apache-2.0	https://github.com/bitflags/bitflags	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+bitflags	2.11.0	MIT OR Apache-2.0	https://github.com/bitflags/bitflags	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+bitflags	2.13.0	MIT OR Apache-2.0	https://github.com/bitflags/bitflags	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+bitflags	2.13.2	MIT OR Apache-2.0	https://github.com/bitflags/bitflags	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+block-buffer	0.10.4	MIT OR Apache-2.0	https://github.com/RustCrypto/utils	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+blocking	1.6.2	Apache-2.0 OR MIT	https://github.com/smol-rs/blocking	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+bumpalo	3.20.2	MIT OR Apache-2.0	https://github.com/fitzgen/bumpalo	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+bumpalo	3.20.3	MIT OR Apache-2.0	https://github.com/fitzgen/bumpalo	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+byteorder	1.5.0	Unlicense OR MIT	https://github.com/BurntSushi/byteorder	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	COPYING, LICENSE-MIT, UNLICENSE
+bytes	1.11.1	MIT	https://github.com/tokio-rs/bytes	lockfile-only	LICENSE
+bytes	1.12.1	MIT	https://github.com/tokio-rs/bytes	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+bzip2	0.5.2	MIT OR Apache-2.0	https://github.com/trifectatechfoundation/bzip2-rs	libkrun-x86_64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+bzip2-sys	0.1.13+1.0.8	MIT/Apache-2.0	https://github.com/alexcrichton/bzip2-rs	libkrun-x86_64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT, bzip2-1.0.8/LICENSE
+caps	0.5.6	MIT/Apache-2.0	https://github.com/lucab/caps-rs	libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	COPYRIGHT, LICENSE-APACHE-2.0, LICENSE-MIT
+cc	1.2.57	MIT OR Apache-2.0	https://github.com/rust-lang/cc-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+cc	1.2.63	MIT OR Apache-2.0	https://github.com/rust-lang/cc-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+cc	1.7.0	MIT OR Apache-2.0	https://github.com/rust-lang/cc-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+cexpr	0.6.0	Apache-2.0/MIT	https://github.com/jethrogb/rust-cexpr	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+cfg-if	0.1.10	MIT/Apache-2.0	https://github.com/alexcrichton/cfg-if	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+cfg-if	1.0.4	MIT OR Apache-2.0	https://github.com/rust-lang/cfg-if	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+cfg-if	1.0.5	MIT OR Apache-2.0	https://github.com/rust-lang/cfg-if	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+cfg_aliases	0.2.1	MIT	https://github.com/katharostech/cfg_aliases	lockfile-only	LICENSE, NOTICES.md
+cfg_aliases	0.2.2	MIT	https://github.com/katharostech/cfg_aliases	lockfile-only	LICENSE, NOTICES.md
+cgroups-rs	0.5.0	MIT OR Apache-2.0	https://github.com/kata-containers/cgroups-rs	lockfile-only	LICENSE, LICENSE-Apache-2.0, LICENSE-MIT
+chacha20	0.10.0	MIT OR Apache-2.0	https://github.com/RustCrypto/stream-ciphers	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+chacha20	0.10.2	MIT OR Apache-2.0	https://github.com/RustCrypto/stream-ciphers	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+clang-sys	1.8.1	Apache-2.0	https://github.com/KyleMayes/clang-sys	lockfile-only	LICENSE.txt
+clap	4.6.7	MIT OR Apache-2.0	https://github.com/clap-rs/clap	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+clap_builder	4.6.7	MIT OR Apache-2.0	https://github.com/clap-rs/clap	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+clap_complete	4.6.11	MIT OR Apache-2.0	https://github.com/clap-rs/clap	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+clap_derive	4.6.7	MIT OR Apache-2.0	https://github.com/clap-rs/clap	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+clap_lex	1.1.0	MIT OR Apache-2.0	https://github.com/clap-rs/clap	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+clap_lex	1.1.1	MIT OR Apache-2.0	https://github.com/clap-rs/clap	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+cmake	0.1.58	MIT OR Apache-2.0	https://github.com/rust-lang/cmake-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+colorchoice	1.0.5	MIT OR Apache-2.0	https://github.com/rust-cli/anstyle.git	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+concurrent-queue	2.5.0	Apache-2.0 OR MIT	https://github.com/smol-rs/concurrent-queue	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+const_format	0.2.36	Zlib	https://github.com/rodrimati1992/const_format_crates/	lockfile-only	LICENSE-ZLIB.md
+const_format_proc_macros	0.2.34	Zlib	https://github.com/rodrimati1992/const_format_crates/	lockfile-only	LICENSE-ZLIB.md
+constant_time_eq	0.6.1	CC0-1.0 OR MIT-0 OR Apache-2.0	https://codeberg.org/cesarb/constant_time_eq	lockfile-only	LICENSE-APACHE, LICENSE-CC0, LICENSE-MIT0
+containerd-shim	0.11.0	Apache-2.0	https://github.com/containerd/rust-extensions	lockfile-only	
+containerd-shim-protos	0.11.0	Apache-2.0	https://github.com/containerd/rust-extensions	lockfile-only	
+core-foundation	0.10.1	MIT OR Apache-2.0	https://github.com/servo/core-foundation-rs	helper-aarch64-apple-darwin/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+core-foundation-sys	0.8.7	MIT OR Apache-2.0	https://github.com/servo/core-foundation-rs	helper-aarch64-apple-darwin/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+cpufeatures	0.2.17	MIT OR Apache-2.0	https://github.com/RustCrypto/utils	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+cpufeatures	0.3.0	MIT OR Apache-2.0	https://github.com/RustCrypto/utils	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+cpufeatures	0.3.1	MIT OR Apache-2.0	https://github.com/RustCrypto/utils	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+crc32fast	1.5.0	MIT OR Apache-2.0	https://github.com/srijs/rust-crc32fast	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+crc32fast	1.5.2	MIT OR Apache-2.0	https://github.com/srijs/rust-crc32fast	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+crossbeam	0.8.4	MIT OR Apache-2.0	https://github.com/crossbeam-rs/crossbeam	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+crossbeam-channel	0.5.15	MIT OR Apache-2.0	https://github.com/crossbeam-rs/crossbeam	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT, LICENSE-THIRD-PARTY
+crossbeam-channel	0.5.17	MIT OR Apache-2.0	https://github.com/crossbeam-rs/crossbeam	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT, LICENSE-THIRD-PARTY
+crossbeam-deque	0.8.7	MIT OR Apache-2.0	https://github.com/crossbeam-rs/crossbeam	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+crossbeam-epoch	0.9.20	MIT OR Apache-2.0	https://github.com/crossbeam-rs/crossbeam	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+crossbeam-epoch	0.9.21	MIT OR Apache-2.0	https://github.com/crossbeam-rs/crossbeam	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+crossbeam-queue	0.3.12	MIT OR Apache-2.0	https://github.com/crossbeam-rs/crossbeam	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+crossbeam-queue	0.3.14	MIT OR Apache-2.0	https://github.com/crossbeam-rs/crossbeam	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+crossbeam-utils	0.8.21	MIT OR Apache-2.0	https://github.com/crossbeam-rs/crossbeam	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+crossbeam-utils	0.8.23	MIT OR Apache-2.0	https://github.com/crossbeam-rs/crossbeam	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+crypto-common	0.1.7	MIT OR Apache-2.0	https://github.com/RustCrypto/traits	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+darling	0.20.11	MIT	https://github.com/TedDriggs/darling	lockfile-only	LICENSE
+darling_core	0.20.11	MIT	https://github.com/TedDriggs/darling	lockfile-only	LICENSE
+darling_macro	0.20.11	MIT	https://github.com/TedDriggs/darling	lockfile-only	LICENSE
+data-encoding	2.11.0	MIT	https://github.com/ia0/data-encoding	lockfile-only	LICENSE
+data-encoding	2.11.1	MIT	https://github.com/ia0/data-encoding	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+deadpool	0.12.3	MIT OR Apache-2.0	https://github.com/bikeshedder/deadpool	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+deadpool-runtime	0.1.4	MIT OR Apache-2.0	https://github.com/bikeshedder/deadpool	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+defmt	0.3.100	MIT OR Apache-2.0	https://github.com/knurling-rs/defmt	lockfile-only	
+defmt	1.1.0	MIT OR Apache-2.0	https://github.com/knurling-rs/defmt	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+defmt	1.1.1	MIT OR Apache-2.0	https://github.com/knurling-rs/defmt	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+defmt-macros	1.1.0	MIT OR Apache-2.0	https://github.com/knurling-rs/defmt	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+defmt-macros	1.1.1	MIT OR Apache-2.0	https://github.com/knurling-rs/defmt	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+defmt-parser	1.0.0	MIT OR Apache-2.0	https://github.com/knurling-rs/defmt	lockfile-only	
+der-parser	10.0.0	MIT OR Apache-2.0	https://github.com/rusticata/der-parser.git	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+deranged	0.5.8	MIT OR Apache-2.0	https://github.com/jhpratt/deranged	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-Apache, LICENSE-MIT
+derive-new	0.5.9	MIT	https://github.com/nrc/derive-new	lockfile-only	LICENSE
+derive_builder	0.20.2	MIT OR Apache-2.0	https://github.com/colin-kiegel/rust-derive-builder	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+derive_builder_core	0.20.2	MIT OR Apache-2.0	https://github.com/colin-kiegel/rust-derive-builder	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+derive_builder_macro	0.20.2	MIT OR Apache-2.0	https://github.com/colin-kiegel/rust-derive-builder	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+digest	0.10.7	MIT OR Apache-2.0	https://github.com/RustCrypto/traits	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+dirs	5.0.1	MIT OR Apache-2.0	https://github.com/soc/dirs-rs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+dirs-sys	0.4.1	MIT OR Apache-2.0	https://github.com/dirs-dev/dirs-sys-rs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+displaydoc	0.2.6	MIT OR Apache-2.0	https://github.com/yaahc/displaydoc	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+displaydoc	0.2.7	MIT OR Apache-2.0	https://github.com/yaahc/displaydoc	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+dunce	1.0.5	CC0-1.0 OR MIT-0 OR Apache-2.0	https://gitlab.com/kornelski/dunce	lockfile-only	LICENSE
+either	1.15.0	MIT OR Apache-2.0	https://github.com/rayon-rs/either	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+either	1.16.0	MIT OR Apache-2.0	https://github.com/rayon-rs/either	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+endi	1.1.1	MIT	https://github.com/zeenix/endi	lockfile-only	LICENSE-MIT
+enumflags2	0.7.12	MIT OR Apache-2.0	https://github.com/meithecatte/enumflags2	helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+enumflags2_derive	0.7.12	MIT OR Apache-2.0	https://github.com/meithecatte/enumflags2	helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+env_filter	1.0.0	MIT OR Apache-2.0	https://github.com/rust-cli/env_logger	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+env_logger	0.11.9	MIT OR Apache-2.0	https://github.com/rust-cli/env_logger	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+equivalent	1.0.2	Apache-2.0 OR MIT	https://github.com/indexmap-rs/equivalent	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, libkrun-aarch64-apple-darwin/libkrun	LICENSE-APACHE, LICENSE-MIT
+errno	0.3.14	MIT OR Apache-2.0	https://github.com/lambda-fairy/rust-errno	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+event-listener	5.4.2	Apache-2.0 OR MIT	https://github.com/smol-rs/event-listener	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+event-listener-strategy	0.5.4	Apache-2.0 OR MIT	https://github.com/smol-rs/event-listener-strategy	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+fallible-iterator	0.3.0	MIT/Apache-2.0	https://github.com/sfackler/rust-fallible-iterator	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+fallible-streaming-iterator	0.1.9	MIT/Apache-2.0	https://github.com/sfackler/fallible-streaming-iterator	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+fastrand	2.4.1	Apache-2.0 OR MIT	https://github.com/smol-rs/fastrand	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+fastrand	2.5.0	Apache-2.0 OR MIT	https://github.com/smol-rs/fastrand	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+filetime	0.2.27	MIT/Apache-2.0	https://github.com/alexcrichton/filetime	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+filetime	0.2.29	MIT/Apache-2.0	https://github.com/alexcrichton/filetime	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+find-msvc-tools	0.1.14	MIT OR Apache-2.0	https://github.com/rust-lang/cc-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+find-msvc-tools	0.1.9	MIT OR Apache-2.0	https://github.com/rust-lang/cc-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+fixedbitset	0.2.0	MIT/Apache-2.0	https://github.com/bluss/fixedbitset	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+flate2	1.1.10	MIT OR Apache-2.0	https://github.com/rust-lang/flate2-rs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+flate2	1.1.9	MIT OR Apache-2.0	https://github.com/rust-lang/flate2-rs	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+fnv	1.0.7	Apache-2.0 / MIT	https://github.com/servo/rust-fnv	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+foldhash	0.1.5	Zlib	https://github.com/orlp/foldhash	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+foldhash	0.2.0	Zlib	https://github.com/orlp/foldhash	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, libkrun-aarch64-apple-darwin/libkrun	LICENSE
+form_urlencoded	1.2.2	MIT OR Apache-2.0	https://github.com/servo/rust-url	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+fs-err	3.3.0	MIT OR Apache-2.0	https://github.com/andrewhickman/fs-err	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+fs-err	3.3.2	MIT OR Apache-2.0	https://github.com/andrewhickman/fs-err	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+fs_extra	1.3.0	MIT	https://github.com/webdesus/fs_extra	lockfile-only	LICENSE
+fsevent-sys	4.1.0	MIT	https://github.com/octplane/fsevent-rust/tree/master/fsevent-sys	helper-aarch64-apple-darwin/smolbox-port	LICENSE
+futures	0.3.32	MIT OR Apache-2.0	https://github.com/rust-lang/futures-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+futures	0.3.34	MIT OR Apache-2.0	https://github.com/rust-lang/futures-rs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+futures-channel	0.3.32	MIT OR Apache-2.0	https://github.com/rust-lang/futures-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+futures-channel	0.3.34	MIT OR Apache-2.0	https://github.com/rust-lang/futures-rs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+futures-core	0.3.32	MIT OR Apache-2.0	https://github.com/rust-lang/futures-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+futures-core	0.3.34	MIT OR Apache-2.0	https://github.com/rust-lang/futures-rs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+futures-executor	0.3.32	MIT OR Apache-2.0	https://github.com/rust-lang/futures-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+futures-io	0.3.32	MIT OR Apache-2.0	https://github.com/rust-lang/futures-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+futures-io	0.3.34	MIT OR Apache-2.0	https://github.com/rust-lang/futures-rs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+futures-lite	2.6.1	Apache-2.0 OR MIT	https://github.com/smol-rs/futures-lite	lockfile-only	LICENSE-APACHE, LICENSE-MIT, LICENSE-THIRD-PARTY
+futures-macro	0.3.32	MIT OR Apache-2.0	https://github.com/rust-lang/futures-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+futures-macro	0.3.34	MIT OR Apache-2.0	https://github.com/rust-lang/futures-rs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+futures-sink	0.3.32	MIT OR Apache-2.0	https://github.com/rust-lang/futures-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+futures-sink	0.3.34	MIT OR Apache-2.0	https://github.com/rust-lang/futures-rs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+futures-task	0.3.32	MIT OR Apache-2.0	https://github.com/rust-lang/futures-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+futures-task	0.3.34	MIT OR Apache-2.0	https://github.com/rust-lang/futures-rs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+futures-util	0.3.32	MIT OR Apache-2.0	https://github.com/rust-lang/futures-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+futures-util	0.3.34	MIT OR Apache-2.0	https://github.com/rust-lang/futures-rs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+generic-array	0.14.7	MIT	https://github.com/fizyk20/generic-array.git	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+getrandom	0.2.17	MIT OR Apache-2.0	https://github.com/rust-random/getrandom	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+getrandom	0.3.4	MIT OR Apache-2.0	https://github.com/rust-random/getrandom	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+getrandom	0.4.2	MIT OR Apache-2.0	https://github.com/rust-random/getrandom	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+getrandom	0.4.3	MIT OR Apache-2.0	https://github.com/rust-random/getrandom	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+getset	0.1.7	MIT	https://github.com/jbaublitz/getset	lockfile-only	LICENSE
+glob	0.3.3	MIT OR Apache-2.0	https://github.com/rust-lang/glob	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+go-flag	0.1.0	MIT OR Apache-2.0	https://github.com/qnighy/go-flag.rs	lockfile-only	
+h2	0.4.20	MIT	https://github.com/hyperium/h2	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+hash32	0.3.1	MIT OR Apache-2.0	https://github.com/japaric/hash32	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+hashbrown	0.12.3	MIT OR Apache-2.0	https://github.com/rust-lang/hashbrown	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+hashbrown	0.15.5	MIT OR Apache-2.0	https://github.com/rust-lang/hashbrown	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+hashbrown	0.16.1	MIT OR Apache-2.0	https://github.com/rust-lang/hashbrown	libkrun-aarch64-apple-darwin/libkrun	LICENSE-APACHE, LICENSE-MIT
+hashbrown	0.17.1	MIT OR Apache-2.0	https://github.com/rust-lang/hashbrown	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+hashlink	0.12.2	MIT OR Apache-2.0	https://github.com/djc/hashlink	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+heapless	0.9.3	MIT OR Apache-2.0	https://github.com/rust-embedded/heapless	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+heck	0.3.3	MIT OR Apache-2.0	https://github.com/withoutboats/heck	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+heck	0.5.0	MIT OR Apache-2.0	https://github.com/withoutboats/heck	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+hermit-abi	0.5.2	MIT OR Apache-2.0	https://github.com/hermit-os/hermit-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+hermit-abi	0.5.3	MIT OR Apache-2.0	https://github.com/hermit-os/hermit-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+hex	0.4.3	MIT OR Apache-2.0	https://github.com/KokaKiwi/rust-hex	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+hmac	0.12.1	MIT OR Apache-2.0	https://github.com/RustCrypto/MACs	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+home	0.5.12	MIT OR Apache-2.0	https://github.com/rust-lang/cargo	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+http	1.4.2	MIT OR Apache-2.0	https://github.com/hyperium/http	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+http	1.5.0	MIT OR Apache-2.0	https://github.com/hyperium/http	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+http-body	1.0.1	MIT	https://github.com/hyperium/http-body	lockfile-only	LICENSE
+http-body	1.1.0	MIT	https://github.com/hyperium/http-body	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+http-body-util	0.1.3	MIT	https://github.com/hyperium/http-body	lockfile-only	LICENSE
+http-body-util	0.1.5	MIT	https://github.com/hyperium/http-body	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+httparse	1.10.1	MIT OR Apache-2.0	https://github.com/seanmonstar/httparse	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+httpdate	1.0.3	MIT OR Apache-2.0	https://github.com/pyfisch/httpdate	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+humantime	2.3.0	MIT OR Apache-2.0	https://github.com/chronotope/humantime	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+humantime	2.4.0	MIT OR Apache-2.0	https://github.com/chronotope/humantime	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+hyper	1.10.1	MIT	https://github.com/hyperium/hyper	lockfile-only	LICENSE
+hyper	1.12.0	MIT	https://github.com/hyperium/hyper	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+hyper-rustls	0.27.10	Apache-2.0 OR ISC OR MIT	https://github.com/rustls/hyper-rustls	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-ISC, LICENSE-MIT
+hyper-rustls	0.27.9	Apache-2.0 OR ISC OR MIT	https://github.com/rustls/hyper-rustls	lockfile-only	LICENSE-APACHE, LICENSE-ISC, LICENSE-MIT
+hyper-util	0.1.20	MIT	https://github.com/hyperium/hyper-util	lockfile-only	LICENSE
+hyper-util	0.1.21	MIT	https://github.com/hyperium/hyper-util	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+icu_collections	2.2.0	Unicode-3.0	https://github.com/unicode-org/icu4x	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+icu_collections	2.3.0	Unicode-3.0	https://github.com/unicode-org/icu4x	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+icu_locale_core	2.2.0	Unicode-3.0	https://github.com/unicode-org/icu4x	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+icu_locale_core	2.3.0	Unicode-3.0	https://github.com/unicode-org/icu4x	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+icu_normalizer	2.2.0	Unicode-3.0	https://github.com/unicode-org/icu4x	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+icu_normalizer	2.3.0	Unicode-3.0	https://github.com/unicode-org/icu4x	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+icu_normalizer_data	2.2.0	Unicode-3.0	https://github.com/unicode-org/icu4x	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+icu_normalizer_data	2.3.0	Unicode-3.0	https://github.com/unicode-org/icu4x	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+icu_properties	2.2.0	Unicode-3.0	https://github.com/unicode-org/icu4x	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+icu_properties	2.3.0	Unicode-3.0	https://github.com/unicode-org/icu4x	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+icu_properties_data	2.2.0	Unicode-3.0	https://github.com/unicode-org/icu4x	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+icu_properties_data	2.3.0	Unicode-3.0	https://github.com/unicode-org/icu4x	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+icu_provider	2.2.0	Unicode-3.0	https://github.com/unicode-org/icu4x	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+icu_provider	2.3.1	Unicode-3.0	https://github.com/unicode-org/icu4x	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+id-arena	2.3.0	MIT/Apache-2.0	https://github.com/fitzgen/id-arena	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+ident_case	1.0.1	MIT/Apache-2.0	https://github.com/TedDriggs/ident_case	lockfile-only	LICENSE
+idna	1.1.0	MIT OR Apache-2.0	https://github.com/servo/rust-url/	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+idna_adapter	1.2.2	Apache-2.0 OR MIT	https://github.com/hsivonen/idna_adapter	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+imago	0.2.4	MIT	https://gitlab.com/hreitz/imago	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE
+imago	0.2.5	MIT	https://gitlab.com/hreitz/imago	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+indexmap	1.9.3	Apache-2.0 OR MIT	https://github.com/bluss/indexmap	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+indexmap	2.13.0	Apache-2.0 OR MIT	https://github.com/indexmap-rs/indexmap	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+indexmap	2.14.0	Apache-2.0 OR MIT	https://github.com/indexmap-rs/indexmap	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+indexmap	2.14.2	Apache-2.0 OR MIT	https://github.com/indexmap-rs/indexmap	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+inotify	0.9.6	ISC	https://github.com/hannobraun/inotify	helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+inotify-sys	0.1.7	ISC	https://github.com/hannobraun/inotify-sys	lockfile-only	LICENSE
+inotify-sys	0.1.8	ISC	https://github.com/hannobraun/inotify-sys	helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+io-uring	0.7.14	MIT OR Apache-2.0	https://github.com/tokio-rs/io-uring	libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+iocuddle	0.1.1	Apache-2.0	https://github.com/enarx/iocuddle	lockfile-only	LICENSE
+ipnet	2.12.0	MIT OR Apache-2.0	https://github.com/krisprice/ipnet	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+ipnet	2.12.2	MIT OR Apache-2.0	https://github.com/krisprice/ipnet	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+is_terminal_polyfill	1.70.2	MIT OR Apache-2.0	https://github.com/polyfill-rs/is_terminal_polyfill	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+itertools	0.10.5	MIT/Apache-2.0	https://github.com/rust-itertools/itertools	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+itertools	0.13.0	MIT OR Apache-2.0	https://github.com/rust-itertools/itertools	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+itoa	1.0.18	MIT OR Apache-2.0	https://github.com/dtolnay/itoa	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+jiff	0.2.23	Unlicense OR MIT	https://github.com/BurntSushi/jiff	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	COPYING, LICENSE-MIT, UNLICENSE
+jiff-static	0.2.23	Unlicense OR MIT	https://github.com/BurntSushi/jiff	lockfile-only	COPYING, LICENSE-MIT, UNLICENSE
+jobserver	0.1.34	MIT OR Apache-2.0	https://github.com/rust-lang/jobserver-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+jobserver	0.1.35	MIT OR Apache-2.0	https://github.com/rust-lang/jobserver-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+js-sys	0.3.100	MIT OR Apache-2.0	https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/js-sys	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+js-sys	0.3.106	MIT OR Apache-2.0	https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/js-sys	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+js-sys	0.3.91	MIT OR Apache-2.0	https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/js-sys	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+kbs-types	0.13.0	Apache-2.0	https://github.com/virtee/kbs-types	lockfile-only	LICENSE
+konst	0.2.20	Zlib	https://github.com/rodrimati1992/konst/	lockfile-only	LICENSE-ZLIB.md
+konst_macro_rules	0.2.19	Zlib	https://github.com/rodrimati1992/konst/	lockfile-only	LICENSE-ZLIB.md
+kqueue	1.2.0	MIT	https://gitlab.com/rust-kqueue/rust-kqueue	lockfile-only	LICENSE
+kqueue	1.2.1	MIT	https://gitlab.com/rust-kqueue/rust-kqueue	lockfile-only	LICENSE
+kqueue-sys	1.1.2	MIT	https://gitlab.com/rust-kqueue/rust-kqueue-sys	lockfile-only	LICENSE
+kvm-bindings	0.14.0	Apache-2.0	https://github.com/rust-vmm/kvm	libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE
+kvm-ioctls	0.24.0	Apache-2.0 OR MIT	https://github.com/rust-vmm/kvm	libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+landlock	0.4.5	MIT OR Apache-2.0	https://github.com/landlock-lsm/rust-landlock	lockfile-only	COPYRIGHT, LICENSE-APACHE, LICENSE-MIT
+landlock	0.4.7	MIT OR Apache-2.0	https://github.com/landlock-lsm/rust-landlock	helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	COPYRIGHT, LICENSE-APACHE, LICENSE-MIT
+lazy_static	1.5.0	MIT OR Apache-2.0	https://github.com/rust-lang-nursery/lazy-static.rs	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+lazy_static	1.5.1	MIT OR Apache-2.0	https://github.com/rust-lang-nursery/lazy-static.rs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+leb128fmt	0.1.0	MIT OR Apache-2.0	https://github.com/bluk/leb128fmt	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+libc	0.2.183	MIT OR Apache-2.0	https://github.com/rust-lang/libc	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+libc	0.2.186	MIT OR Apache-2.0	https://github.com/rust-lang/libc	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+libc	0.2.190	MIT OR Apache-2.0	https://github.com/rust-lang/libc	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+libloading	0.8.9	ISC	https://github.com/nagisa/rust_libloading/	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE
+libredox	0.1.14	MIT	https://gitlab.redox-os.org/redox-os/libredox.git	lockfile-only	LICENSE
+libredox	0.1.17	MIT	https://gitlab.redox-os.org/redox-os/libredox.git	lockfile-only	LICENSE
+libredox	0.1.25	MIT	https://gitlab.redox-os.org/redox-os/libredox.git	lockfile-only	LICENSE
+libsqlite3-sys	0.39.1	MIT	https://github.com/rusqlite/rusqlite	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+linux-raw-sys	0.12.1	Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT	https://github.com/sunfishcode/linux-raw-sys	helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	COPYRIGHT, LICENSE-APACHE, LICENSE-Apache-2.0_WITH_LLVM-exception, LICENSE-MIT
+linux-raw-sys	0.4.15	Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT	https://github.com/sunfishcode/linux-raw-sys	lockfile-only	COPYRIGHT, LICENSE-APACHE, LICENSE-Apache-2.0_WITH_LLVM-exception, LICENSE-MIT
+litemap	0.8.2	Unicode-3.0	https://github.com/unicode-org/icu4x	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+litemap	0.8.3	Unicode-3.0	https://github.com/unicode-org/icu4x	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+lock_api	0.4.14	MIT OR Apache-2.0	https://github.com/Amanieu/parking_lot	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+log	0.4.29	MIT OR Apache-2.0	https://github.com/rust-lang/log	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+log	0.4.32	MIT OR Apache-2.0	https://github.com/rust-lang/log	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+log	0.4.34	MIT OR Apache-2.0	https://github.com/rust-lang/log	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+lru	0.16.3	MIT	https://github.com/jeromefroe/lru-rs.git	libkrun-aarch64-apple-darwin/libkrun	LICENSE
+lru-slab	0.1.2	MIT OR Apache-2.0 OR Zlib	https://github.com/Ralith/lru-slab	lockfile-only	LICENSE-APACHE, LICENSE-MIT, LICENSE-ZLIB
+lru-slab	0.1.3	MIT OR Apache-2.0 OR Zlib	https://github.com/Ralith/lru-slab	lockfile-only	LICENSE-APACHE, LICENSE-MIT, LICENSE-ZLIB
+managed	0.8.0	0BSD	https://github.com/m-labs/rust-managed.git	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-0BSD.txt
+matchers	0.2.0	MIT	https://github.com/hawkw/matchers	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+matchit	0.8.4	MIT AND BSD-3-Clause	https://github.com/ibraheemdev/matchit	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE, LICENSE.httprouter
+maybe-async	0.2.11	MIT	https://github.com/fMeow/maybe-async-rs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE
+memchr	2.8.0	Unlicense OR MIT	https://github.com/BurntSushi/memchr	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	COPYING, LICENSE-MIT, UNLICENSE
+memchr	2.8.1	Unlicense OR MIT	https://github.com/BurntSushi/memchr	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	COPYING, LICENSE-MIT, UNLICENSE
+memchr	2.8.3	Unlicense OR MIT	https://github.com/BurntSushi/memchr	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	COPYING, LICENSE-MIT, UNLICENSE
+memoffset	0.7.1	MIT	https://github.com/Gilnaa/memoffset	lockfile-only	LICENSE
+memoffset	0.9.1	MIT	https://github.com/Gilnaa/memoffset	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE
+metrics	0.24.6	MIT	https://github.com/metrics-rs/metrics	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+metrics-exporter-prometheus	0.16.2	MIT	https://github.com/metrics-rs/metrics	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+metrics-util	0.19.1	MIT	https://github.com/metrics-rs/metrics	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+mime	0.3.17	MIT OR Apache-2.0	https://github.com/hyperium/mime	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+mime_guess	2.0.5	MIT	https://github.com/abonander/mime_guess	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+minimal-lexical	0.2.1	MIT/Apache-2.0	https://github.com/Alexhuszagh/minimal-lexical	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT, LICENSE.md
+miniz_oxide	0.8.9	MIT OR Zlib OR Apache-2.0	https://github.com/Frommi/miniz_oxide/tree/master/miniz_oxide	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE, LICENSE-APACHE.md, LICENSE-MIT.md, LICENSE-ZLIB.md
+miniz_oxide	0.9.1	MIT OR Zlib OR Apache-2.0	https://github.com/Frommi/miniz_oxide/tree/master/miniz_oxide	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE, LICENSE-APACHE.md, LICENSE-MIT.md, LICENSE-ZLIB.md
+mio	0.8.11	MIT	https://github.com/tokio-rs/mio	helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+mio	1.2.1	MIT	https://github.com/tokio-rs/mio	lockfile-only	LICENSE
+mio	1.2.4	MIT	https://github.com/tokio-rs/mio	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+multimap	0.8.3	MIT/Apache-2.0	https://github.com/havarnov/multimap	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+nitro-enclaves	0.5.0	Apache-2.0	https://github.com/virtee/nitro-enclaves	lockfile-only	LICENSE
+nitro-enclaves	0.6.1	Apache-2.0	https://github.com/virtee/nitro-enclaves	lockfile-only	LICENSE
+nix	0.25.1	MIT	https://github.com/nix-rust/nix	lockfile-only	LICENSE
+nix	0.26.4	MIT	https://github.com/nix-rust/nix	lockfile-only	LICENSE
+nix	0.27.1	MIT	https://github.com/nix-rust/nix	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+nix	0.30.1	MIT	https://github.com/nix-rust/nix	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE
+nix	0.31.2	MIT	https://github.com/nix-rust/nix	lockfile-only	LICENSE
+nix	0.31.3	MIT	https://github.com/nix-rust/nix	lockfile-only	LICENSE
+nom	7.1.3	MIT	https://github.com/Geal/nom	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+notify	6.1.1	CC0-1.0	https://github.com/notify-rs/notify.git	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-CC0
+nu-ansi-term	0.50.3	MIT	https://github.com/nushell/nu-ansi-term	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+num-bigint	0.4.8	MIT OR Apache-2.0	https://github.com/rust-num/num-bigint	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+num-conv	0.2.2	MIT OR Apache-2.0	https://github.com/jhpratt/num-conv	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-Apache, LICENSE-MIT
+num-integer	0.1.47	MIT OR Apache-2.0	https://github.com/rust-num/num-integer	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+num-traits	0.2.19	MIT OR Apache-2.0	https://github.com/rust-num/num-traits	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+num_cpus	1.17.0	MIT OR Apache-2.0	https://github.com/seanmonstar/num_cpus	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+oci-spec	0.9.0	Apache-2.0	https://github.com/youki-dev/oci-spec-rs	lockfile-only	LICENSE
+oid-registry	0.8.1	MIT OR Apache-2.0	https://github.com/rusticata/oid-registry.git	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+once_cell	1.21.4	MIT OR Apache-2.0	https://github.com/matklad/once_cell	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+once_cell_polyfill	1.70.2	MIT OR Apache-2.0	https://github.com/polyfill-rs/once_cell_polyfill	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+openssl-probe	0.2.1	MIT OR Apache-2.0	https://github.com/rustls/openssl-probe	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+openssl-probe	0.2.2	MIT OR Apache-2.0	https://github.com/rustls/openssl-probe	helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+option-ext	0.2.0	MPL-2.0	https://github.com/soc/option-ext.git	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE.txt
+ordered-stream	0.2.0	MIT OR Apache-2.0	https://github.com/danieldg/ordered-stream	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+page_size	0.6.0	MIT/Apache-2.0	https://github.com/Elzair/page_size_rs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+parking	2.2.1	Apache-2.0 OR MIT	https://github.com/smol-rs/parking	lockfile-only	LICENSE-APACHE, LICENSE-MIT, LICENSE-THIRD-PARTY
+parking_lot	0.12.5	MIT OR Apache-2.0	https://github.com/Amanieu/parking_lot	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+parking_lot_core	0.9.12	MIT OR Apache-2.0	https://github.com/Amanieu/parking_lot	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+pem	3.0.6	MIT	https://github.com/jcreekmore/pem-rs.git	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE.md
+percent-encoding	2.3.2	MIT OR Apache-2.0	https://github.com/servo/rust-url/	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+petgraph	0.5.1	MIT/Apache-2.0	https://github.com/petgraph/petgraph	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+pin-project-lite	0.2.17	Apache-2.0 OR MIT	https://github.com/taiki-e/pin-project-lite	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+pin-utils	0.1.0	MIT OR Apache-2.0	https://github.com/rust-lang-nursery/pin-utils	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+piper	0.2.5	MIT OR Apache-2.0	https://github.com/smol-rs/piper	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+pkg-config	0.3.32	MIT OR Apache-2.0	https://github.com/rust-lang/pkg-config-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+pkg-config	0.3.33	MIT OR Apache-2.0	https://github.com/rust-lang/pkg-config-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+pkg-config	0.3.34	MIT OR Apache-2.0	https://github.com/rust-lang/pkg-config-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+plain	0.2.3	MIT/Apache-2.0	https://github.com/randomites/plain	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+polling	3.11.0	Apache-2.0 OR MIT	https://github.com/smol-rs/polling	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+portable-atomic	1.13.1	Apache-2.0 OR MIT	https://github.com/taiki-e/portable-atomic	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+portable-atomic	1.15.0	Apache-2.0 OR MIT	https://github.com/taiki-e/portable-atomic	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+portable-atomic-util	0.2.6	Apache-2.0 OR MIT	https://github.com/taiki-e/portable-atomic-util	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+potential_utf	0.1.5	Unicode-3.0	https://github.com/unicode-org/icu4x	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+potential_utf	0.1.6	Unicode-3.0	https://github.com/unicode-org/icu4x	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+powerfmt	0.2.0	MIT OR Apache-2.0	https://github.com/jhpratt/powerfmt	lockfile-only	LICENSE-Apache, LICENSE-MIT
+powerfmt	0.2.1	MIT OR Apache-2.0	https://github.com/jhpratt/powerfmt	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-Apache, LICENSE-MIT
+ppv-lite86	0.2.21	MIT OR Apache-2.0	https://github.com/cryptocorrosion/cryptocorrosion	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+prettyplease	0.2.37	MIT OR Apache-2.0	https://github.com/dtolnay/prettyplease	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+proc-macro-crate	3.5.0	MIT OR Apache-2.0	https://github.com/bkchr/proc-macro-crate	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+proc-macro-error-attr2	2.0.0	MIT OR Apache-2.0	https://github.com/GnomedDev/proc-macro-error-2	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+proc-macro-error2	2.0.1	MIT OR Apache-2.0	https://github.com/GnomedDev/proc-macro-error-2	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+proc-macro2	1.0.106	MIT OR Apache-2.0	https://github.com/dtolnay/proc-macro2	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+proc-macro2	1.0.107	MIT OR Apache-2.0	https://github.com/dtolnay/proc-macro2	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+prost	0.8.0	Apache-2.0	https://github.com/tokio-rs/prost	lockfile-only	LICENSE
+prost-build	0.8.0	Apache-2.0	https://github.com/tokio-rs/prost	lockfile-only	
+prost-derive	0.8.0	Apache-2.0	https://github.com/tokio-rs/prost	lockfile-only	
+prost-types	0.8.0	Apache-2.0	https://github.com/tokio-rs/prost	lockfile-only	
+protobuf	3.7.2	MIT	https://github.com/stepancheg/rust-protobuf/	lockfile-only	LICENSE.txt
+protobuf-codegen	3.7.2	MIT	https://github.com/stepancheg/rust-protobuf/	lockfile-only	LICENSE.txt
+protobuf-parse	3.7.2	MIT	https://github.com/stepancheg/rust-protobuf/tree/master/protobuf-parse/	lockfile-only	LICENSE.txt
+protobuf-support	3.7.2	MIT	https://github.com/stepancheg/rust-protobuf/	lockfile-only	LICENSE.txt
+quanta	0.12.6	MIT	https://github.com/metrics-rs/quanta	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+quinn	0.11.12	MIT OR Apache-2.0	https://github.com/quinn-rs/quinn	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+quinn	0.11.9	MIT OR Apache-2.0	https://github.com/quinn-rs/quinn	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+quinn-proto	0.11.19	MIT OR Apache-2.0	https://github.com/quinn-rs/quinn	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+quinn-udp	0.5.16	MIT OR Apache-2.0	https://github.com/quinn-rs/quinn	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+quote	1.0.45	MIT OR Apache-2.0	https://github.com/dtolnay/quote	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+quote	1.0.47	MIT OR Apache-2.0	https://github.com/dtolnay/quote	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+r-efi	5.3.0	MIT OR Apache-2.0 OR LGPL-2.1-or-later	https://github.com/r-efi/r-efi	lockfile-only	
+r-efi	6.0.0	MIT OR Apache-2.0 OR LGPL-2.1-or-later	https://github.com/r-efi/r-efi	lockfile-only	
+rand	0.10.1	MIT OR Apache-2.0	https://github.com/rust-random/rand	lockfile-only	COPYRIGHT, LICENSE-APACHE, LICENSE-MIT
+rand	0.10.3	MIT OR Apache-2.0	https://github.com/rust-random/rand	lockfile-only	COPYRIGHT, LICENSE-APACHE, LICENSE-MIT
+rand	0.9.2	MIT OR Apache-2.0	https://github.com/rust-random/rand	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	COPYRIGHT, LICENSE-APACHE, LICENSE-MIT
+rand	0.9.4	MIT OR Apache-2.0	https://github.com/rust-random/rand	lockfile-only	COPYRIGHT, LICENSE-APACHE, LICENSE-MIT
+rand	0.9.5	MIT OR Apache-2.0	https://github.com/rust-random/rand	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	COPYRIGHT, LICENSE-APACHE, LICENSE-MIT
+rand_chacha	0.9.0	MIT OR Apache-2.0	https://github.com/rust-random/rand	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	COPYRIGHT, LICENSE-APACHE, LICENSE-MIT
+rand_core	0.10.1	MIT OR Apache-2.0	https://github.com/rust-random/rand_core	lockfile-only	COPYRIGHT, LICENSE-APACHE, LICENSE-MIT
+rand_core	0.9.5	MIT OR Apache-2.0	https://github.com/rust-random/rand	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	COPYRIGHT, LICENSE-APACHE, LICENSE-MIT
+rand_pcg	0.10.2	MIT OR Apache-2.0	https://github.com/rust-random/rngs	lockfile-only	COPYRIGHT, LICENSE-APACHE, LICENSE-MIT
+rand_xoshiro	0.7.0	MIT OR Apache-2.0	https://github.com/rust-random/rngs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	COPYRIGHT, LICENSE-APACHE, LICENSE-MIT
+rapidhash	4.4.1	MIT OR Apache-2.0	https://github.com/hoxxep/rapidhash	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+rapidhash	4.5.1	MIT OR Apache-2.0	https://github.com/hoxxep/rapidhash	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+raw-cpuid	11.6.0	MIT	https://github.com/gz/rust-cpuid	helper-x86_64-unknown-linux-gnu/smolbox-port	LICENSE.md
+rcgen	0.13.2	MIT OR Apache-2.0	https://github.com/rustls/rcgen	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+redox_syscall	0.5.18	MIT	https://gitlab.redox-os.org/redox-os/syscall	lockfile-only	LICENSE
+redox_syscall	0.7.3	MIT	https://gitlab.redox-os.org/redox-os/syscall	lockfile-only	LICENSE
+redox_users	0.4.6	MIT	https://gitlab.redox-os.org/redox-os/users	lockfile-only	LICENSE
+regex	1.12.3	MIT OR Apache-2.0	https://github.com/rust-lang/regex	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+regex	1.12.4	MIT OR Apache-2.0	https://github.com/rust-lang/regex	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+regex	1.13.1	MIT OR Apache-2.0	https://github.com/rust-lang/regex	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+regex-automata	0.4.14	MIT OR Apache-2.0	https://github.com/rust-lang/regex	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+regex-automata	0.4.18	MIT OR Apache-2.0	https://github.com/rust-lang/regex	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+regex-syntax	0.8.10	MIT OR Apache-2.0	https://github.com/rust-lang/regex	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+regex-syntax	0.8.11	MIT OR Apache-2.0	https://github.com/rust-lang/regex	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+remain	0.2.15	MIT OR Apache-2.0	https://github.com/dtolnay/remain	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+reqwest	0.12.28	MIT OR Apache-2.0	https://github.com/seanmonstar/reqwest	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+ring	0.17.14	Apache-2.0 AND ISC	https://github.com/briansmith/ring	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE, LICENSE-BoringSSL, LICENSE-other-bits
+rsqlite-vfs	0.2.0	MIT	https://github.com/Spxg/sqlite-wasm-rs	lockfile-only	
+rusqlite	0.41.1	MIT	https://github.com/rusqlite/rusqlite	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+rustc-hash	2.1.1	Apache-2.0 OR MIT	https://github.com/rust-lang/rustc-hash	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+rustc-hash	2.1.2	Apache-2.0 OR MIT	https://github.com/rust-lang/rustc-hash	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+rustc-hash	2.1.3	Apache-2.0 OR MIT	https://github.com/rust-lang/rustc-hash	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+rustc_version	0.4.1	MIT OR Apache-2.0	https://github.com/djc/rustc-version-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+rusticata-macros	4.1.0	MIT/Apache-2.0	https://github.com/rusticata/rusticata-macros.git	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+rustix	0.38.44	Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT	https://github.com/bytecodealliance/rustix	lockfile-only	COPYRIGHT, LICENSE-APACHE, LICENSE-Apache-2.0_WITH_LLVM-exception, LICENSE-MIT
+rustix	1.1.4	Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT	https://github.com/bytecodealliance/rustix	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	COPYRIGHT, LICENSE-APACHE, LICENSE-Apache-2.0_WITH_LLVM-exception, LICENSE-MIT
+rustix	1.1.5	Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT	https://github.com/bytecodealliance/rustix	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	COPYRIGHT, LICENSE-APACHE, LICENSE-Apache-2.0_WITH_LLVM-exception, LICENSE-MIT
+rustls	0.23.45	Apache-2.0 OR ISC OR MIT	https://github.com/rustls/rustls	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-ISC, LICENSE-MIT
+rustls	0.23.46	Apache-2.0 OR ISC OR MIT	https://github.com/rustls/rustls	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-ISC, LICENSE-MIT
+rustls-native-certs	0.8.4	Apache-2.0 OR ISC OR MIT	https://github.com/rustls/rustls-native-certs	lockfile-only	LICENSE, LICENSE-APACHE, LICENSE-ISC, LICENSE-MIT
+rustls-native-certs	0.8.5	Apache-2.0 OR ISC OR MIT	https://github.com/rustls/rustls-native-certs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE, LICENSE-APACHE, LICENSE-ISC, LICENSE-MIT
+rustls-pemfile	2.2.0	Apache-2.0 OR ISC OR MIT	https://github.com/rustls/pemfile	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE, LICENSE-APACHE, LICENSE-ISC, LICENSE-MIT
+rustls-pki-types	1.14.1	MIT OR Apache-2.0	https://github.com/rustls/pki-types	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+rustls-pki-types	1.15.1	MIT OR Apache-2.0	https://github.com/rustls/pki-types	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+rustls-webpki	0.103.15	ISC	https://github.com/rustls/webpki	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+rustls-webpki	0.103.16	ISC	https://github.com/rustls/webpki	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+rustversion	1.0.22	MIT OR Apache-2.0	https://github.com/dtolnay/rustversion	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+rustversion	1.0.23	MIT OR Apache-2.0	https://github.com/dtolnay/rustversion	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+ruzstd	0.9.1	MIT	https://github.com/KillingSpark/zstd-rs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+ryu	1.0.23	Apache-2.0 OR BSL-1.0	https://github.com/dtolnay/ryu	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-BOOST
+same-file	1.0.6	Unlicense/MIT	https://github.com/BurntSushi/same-file	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	COPYING, LICENSE-MIT, UNLICENSE
+schannel	0.1.29	MIT	https://github.com/steffengy/schannel-rs	lockfile-only	LICENSE.md
+schannel	0.1.30	MIT	https://github.com/steffengy/schannel-rs	lockfile-only	LICENSE.md
+scopeguard	1.2.0	MIT OR Apache-2.0	https://github.com/bluss/scopeguard	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+seccompiler	0.4.0	Apache-2.0 OR BSD-3-Clause	https://github.com/rust-vmm/seccompiler	helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-BSD-3-Clause
+security-framework	3.7.0	MIT OR Apache-2.0	https://github.com/kornelski/rust-security-framework	helper-aarch64-apple-darwin/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+security-framework-sys	2.17.0	MIT OR Apache-2.0	https://github.com/kornelski/rust-security-framework	helper-aarch64-apple-darwin/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+semver	1.0.27	MIT OR Apache-2.0	https://github.com/dtolnay/semver	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+semver	1.0.28	MIT OR Apache-2.0	https://github.com/dtolnay/semver	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+serde	1.0.228	MIT OR Apache-2.0	https://github.com/serde-rs/serde	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+serde	1.0.229	MIT OR Apache-2.0	https://github.com/serde-rs/serde	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+serde_core	1.0.228	MIT OR Apache-2.0	https://github.com/serde-rs/serde	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+serde_core	1.0.229	MIT OR Apache-2.0	https://github.com/serde-rs/serde	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+serde_derive	1.0.228	MIT OR Apache-2.0	https://github.com/serde-rs/serde	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+serde_derive	1.0.229	MIT OR Apache-2.0	https://github.com/serde-rs/serde	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+serde_json	1.0.149	MIT OR Apache-2.0	https://github.com/serde-rs/json	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+serde_json	1.0.150	MIT OR Apache-2.0	https://github.com/serde-rs/json	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+serde_json	1.0.152	MIT OR Apache-2.0	https://github.com/serde-rs/json	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+serde_path_to_error	0.1.20	MIT OR Apache-2.0	https://github.com/dtolnay/path-to-error	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+serde_repr	0.1.20	MIT OR Apache-2.0	https://github.com/dtolnay/serde-repr	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+serde_spanned	0.6.9	MIT OR Apache-2.0	https://github.com/toml-rs/toml	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+serde_urlencoded	0.7.1	MIT/Apache-2.0	https://github.com/nox/serde_urlencoded	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+serde_yaml	0.9.34+deprecated	MIT OR Apache-2.0	https://github.com/dtolnay/serde-yaml	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+sha1	0.10.6	MIT OR Apache-2.0	https://github.com/RustCrypto/hashes	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+sha1	0.10.7	MIT OR Apache-2.0	https://github.com/RustCrypto/hashes	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+sha2	0.10.9	MIT OR Apache-2.0	https://github.com/RustCrypto/hashes	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+sharded-slab	0.1.7	MIT	https://github.com/hawkw/sharded-slab	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+shlex	1.3.0	MIT OR Apache-2.0	https://github.com/comex/rust-shlex	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+shlex	2.0.1	MIT OR Apache-2.0	https://github.com/comex/rust-shlex	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+signal-hook	0.3.18	Apache-2.0/MIT	https://github.com/vorner/signal-hook	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+signal-hook-registry	1.4.8	MIT OR Apache-2.0	https://github.com/vorner/signal-hook	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+simd-adler32	0.3.10	MIT	https://github.com/mcountryman/simd-adler32	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE.md
+simd-adler32	0.3.8	MIT	https://github.com/mcountryman/simd-adler32	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE.md
+simd-adler32	0.3.9	MIT	https://github.com/mcountryman/simd-adler32	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE.md
+sketches-ddsketch	0.3.1	Apache-2.0	https://github.com/mheffner/rust-sketches-ddsketch	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+slab	0.4.12	MIT	https://github.com/tokio-rs/slab	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE
+sm3	0.4.2	MIT OR Apache-2.0	https://github.com/RustCrypto/hashes	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+smallvec	1.15.1	MIT OR Apache-2.0	https://github.com/servo/rust-smallvec	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+smallvec	1.16.3	MIT OR Apache-2.0	https://github.com/servo/rust-smallvec	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+smoltcp	0.13.1	0BSD	https://github.com/smoltcp-rs/smoltcp.git	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-0BSD.txt
+socket2	0.5.10	MIT OR Apache-2.0	https://github.com/rust-lang/socket2	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+socket2	0.6.4	MIT OR Apache-2.0	https://github.com/rust-lang/socket2	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+socket2	0.6.5	MIT OR Apache-2.0	https://github.com/rust-lang/socket2	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+sqlite-wasm-rs	0.6.2	MIT	https://github.com/Spxg/sqlite-wasm-rs	lockfile-only	LICENSE
+sqlite-wasm-rs	0.6.3	MIT	https://github.com/Spxg/sqlite-wasm-rs	lockfile-only	LICENSE
+stable_deref_trait	1.2.1	MIT OR Apache-2.0	https://github.com/storyyeller/stable_deref_trait	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+static_assertions	1.1.0	MIT OR Apache-2.0	https://github.com/nvzqz/static-assertions-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+strsim	0.11.1	MIT	https://github.com/rapidfuzz/strsim-rs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+strum	0.27.2	MIT	https://github.com/Peternator7/strum	lockfile-only	LICENSE
+strum_macros	0.27.2	MIT	https://github.com/Peternator7/strum	lockfile-only	LICENSE
+subtle	2.6.1	BSD-3-Clause	https://github.com/dalek-cryptography/subtle	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+syn	1.0.109	MIT OR Apache-2.0	https://github.com/dtolnay/syn	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+syn	2.0.117	MIT OR Apache-2.0	https://github.com/dtolnay/syn	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+syn	2.0.119	MIT OR Apache-2.0	https://github.com/dtolnay/syn	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+syn	3.0.6	MIT OR Apache-2.0	https://github.com/dtolnay/syn	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+syn	3.0.7	MIT OR Apache-2.0	https://github.com/dtolnay/syn	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+sync_wrapper	1.0.2	Apache-2.0	https://github.com/Actyx/sync_wrapper	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+synstructure	0.13.2	MIT	https://github.com/mystor/synstructure	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+synstructure	0.14.0	MIT	https://github.com/mystor/synstructure	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+tar	0.4.45	MIT OR Apache-2.0	https://github.com/alexcrichton/tar-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+tar	0.4.46	MIT OR Apache-2.0	https://github.com/composefs/tar-rs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+tdx	0.1.1	Apache-2.0	https://github.com/virtee/tdx	lockfile-only	LICENSE
+tempfile	3.27.0	MIT OR Apache-2.0	https://github.com/Stebalien/tempfile	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+thiserror	1.0.69	MIT OR Apache-2.0	https://github.com/dtolnay/thiserror	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+thiserror	2.0.18	MIT OR Apache-2.0	https://github.com/dtolnay/thiserror	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+thiserror	2.0.21	MIT OR Apache-2.0	https://github.com/dtolnay/thiserror	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+thiserror-impl	1.0.69	MIT OR Apache-2.0	https://github.com/dtolnay/thiserror	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+thiserror-impl	2.0.18	MIT OR Apache-2.0	https://github.com/dtolnay/thiserror	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+thiserror-impl	2.0.21	MIT OR Apache-2.0	https://github.com/dtolnay/thiserror	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+thread_local	1.1.10	MIT OR Apache-2.0	https://github.com/Amanieu/thread_local-rs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+thread_local	1.1.9	MIT OR Apache-2.0	https://github.com/Amanieu/thread_local-rs	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+time	0.3.47	MIT OR Apache-2.0	https://github.com/time-rs/time	lockfile-only	LICENSE-Apache, LICENSE-MIT
+time	0.3.55	MIT OR Apache-2.0	https://github.com/time-rs/time	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-Apache, LICENSE-MIT
+time-core	0.1.8	MIT OR Apache-2.0	https://github.com/time-rs/time	lockfile-only	LICENSE-Apache, LICENSE-MIT
+time-core	0.1.9	MIT OR Apache-2.0	https://github.com/time-rs/time	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-Apache, LICENSE-MIT
+time-macros	0.2.27	MIT OR Apache-2.0	https://github.com/time-rs/time	lockfile-only	LICENSE-Apache, LICENSE-MIT
+time-macros	0.2.32	MIT OR Apache-2.0	https://github.com/time-rs/time	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-Apache, LICENSE-MIT
+tinystr	0.8.3	Unicode-3.0	https://github.com/unicode-org/icu4x	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+tinystr	0.8.4	Unicode-3.0	https://github.com/unicode-org/icu4x	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+tinyvec	1.11.0	Zlib OR Apache-2.0 OR MIT	https://github.com/Lokathor/tinyvec	lockfile-only	LICENSE-APACHE.md, LICENSE-MIT.md, LICENSE-ZLIB.md
+tinyvec	1.13.3	Zlib OR Apache-2.0 OR MIT	https://github.com/Lokathor/tinyvec	lockfile-only	LICENSE-APACHE.md, LICENSE-MIT.md, LICENSE-ZLIB.md
+tinyvec_macros	0.1.1	MIT OR Apache-2.0 OR Zlib	https://github.com/Soveu/tinyvec_macros	lockfile-only	LICENSE-APACHE.md, LICENSE-MIT.md, LICENSE-ZLIB.md
+tokio	1.50.0	MIT	https://github.com/tokio-rs/tokio	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE
+tokio	1.53.2	MIT	https://github.com/tokio-rs/tokio	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+tokio	1.54.1	MIT	https://github.com/tokio-rs/tokio	lockfile-only	LICENSE
+tokio-macros	2.7.0	MIT	https://github.com/tokio-rs/tokio	lockfile-only	LICENSE
+tokio-macros	2.7.2	MIT	https://github.com/tokio-rs/tokio	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+tokio-rustls	0.26.4	MIT OR Apache-2.0	https://github.com/rustls/tokio-rustls	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+tokio-rustls	0.26.6	MIT OR Apache-2.0	https://github.com/rustls/tokio-rustls	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+tokio-stream	0.1.18	MIT	https://github.com/tokio-rs/tokio	lockfile-only	LICENSE
+tokio-stream	0.1.19	MIT	https://github.com/tokio-rs/tokio	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+tokio-tungstenite	0.29.0	MIT	https://github.com/snapview/tokio-tungstenite	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+tokio-util	0.7.18	MIT	https://github.com/tokio-rs/tokio	lockfile-only	LICENSE
+tokio-util	0.7.20	MIT	https://github.com/tokio-rs/tokio	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+tokio-vsock	0.7.2	Apache-2.0	https://github.com/rust-vsock/tokio-vsock	lockfile-only	LICENSE, THIRD-PARTY-LICENSES
+toml	0.8.23	MIT OR Apache-2.0	https://github.com/toml-rs/toml	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+toml_datetime	0.6.11	MIT OR Apache-2.0	https://github.com/toml-rs/toml	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+toml_datetime	1.1.1+spec-1.1.0	MIT OR Apache-2.0	https://github.com/toml-rs/toml	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+toml_edit	0.22.27	MIT OR Apache-2.0	https://github.com/toml-rs/toml	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+toml_edit	0.25.12+spec-1.1.0	MIT OR Apache-2.0	https://github.com/toml-rs/toml	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+toml_parser	1.1.2+spec-1.1.0	MIT OR Apache-2.0	https://github.com/toml-rs/toml	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+toml_write	0.1.2	MIT OR Apache-2.0	https://github.com/toml-rs/toml	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+tower	0.5.3	MIT	https://github.com/tower-rs/tower	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+tower-http	0.6.11	MIT	https://github.com/tower-rs/tower-http	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+tower-layer	0.3.3	MIT	https://github.com/tower-rs/tower	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+tower-service	0.3.3	MIT	https://github.com/tower-rs/tower	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+tracing	0.1.44	MIT	https://github.com/tokio-rs/tracing	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE
+tracing-attributes	0.1.31	MIT	https://github.com/tokio-rs/tracing	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE
+tracing-core	0.1.36	MIT	https://github.com/tokio-rs/tracing	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE
+tracing-log	0.2.0	MIT	https://github.com/tokio-rs/tracing	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+tracing-serde	0.2.0	MIT	https://github.com/tokio-rs/tracing	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+tracing-subscriber	0.3.23	MIT	https://github.com/tokio-rs/tracing	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+try-lock	0.2.5	MIT	https://github.com/seanmonstar/try-lock	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+ttrpc	0.9.0	Apache-2.0	https://github.com/containerd/ttrpc-rust	lockfile-only	LICENSE
+ttrpc-codegen	0.6.0	Apache-2.0	https://github.com/containerd/ttrpc-rust/tree/master/ttrpc-codegen	lockfile-only	LICENSE.txt
+ttrpc-compiler	0.8.0	Apache-2.0	https://github.com/containerd/ttrpc-rust/tree/master/compiler	lockfile-only	
+tungstenite	0.29.0	MIT OR Apache-2.0	https://github.com/snapview/tungstenite-rs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+twox-hash	2.1.5	MIT	https://github.com/shepmaster/twox-hash	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE.txt
+typed-path	0.13.0	MIT OR Apache-2.0	https://github.com/chipsenkbeil/typed-path	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+typenum	1.19.0	MIT OR Apache-2.0	https://github.com/paholg/typenum	lockfile-only	LICENSE, LICENSE-APACHE, LICENSE-MIT
+typenum	1.20.1	MIT OR Apache-2.0	https://github.com/paholg/typenum	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE, LICENSE-APACHE, LICENSE-MIT
+uds_windows	1.2.1	MIT	https://github.com/haraldh/rust_uds_windows	lockfile-only	LICENSE, THIRDPARTYNOTICES
+unicase	2.10.0	MIT OR Apache-2.0	https://github.com/seanmonstar/unicase	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+unicase	2.9.0	MIT OR Apache-2.0	https://github.com/seanmonstar/unicase	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+unicode-ident	1.0.24	(MIT OR Apache-2.0) AND Unicode-3.0	https://github.com/dtolnay/unicode-ident	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT, LICENSE-UNICODE
+unicode-ident	1.0.26	(MIT OR Apache-2.0) AND Unicode-3.0	https://github.com/dtolnay/unicode-ident	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT, LICENSE-UNICODE
+unicode-segmentation	1.13.3	MIT OR Apache-2.0	https://github.com/unicode-rs/unicode-segmentation	lockfile-only	COPYRIGHT, LICENSE-APACHE, LICENSE-MIT
+unicode-xid	0.2.6	MIT OR Apache-2.0	https://github.com/unicode-rs/unicode-xid	lockfile-only	COPYRIGHT, LICENSE-APACHE, LICENSE-MIT
+unsafe-libyaml	0.2.11	MIT	https://github.com/dtolnay/unsafe-libyaml	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-MIT
+untrusted	0.9.0	ISC	https://github.com/briansmith/untrusted	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE.txt
+unty	0.0.4	MIT OR Apache-2.0	https://github.com/bincode-org/unty	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+ureq	2.12.1	MIT OR Apache-2.0	https://github.com/algesten/ureq	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+url	2.5.8	MIT OR Apache-2.0	https://github.com/servo/rust-url	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+utf8_iter	1.0.4	Apache-2.0 OR MIT	https://github.com/hsivonen/utf8_iter	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	COPYRIGHT, LICENSE-APACHE, LICENSE-MIT
+utf8parse	0.2.2	Apache-2.0 OR MIT	https://github.com/alacritty/vte	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-MIT
+utoipa	6.0.0	MIT OR Apache-2.0	https://github.com/juhaku/utoipa	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+utoipa-gen	6.0.1	MIT OR Apache-2.0	https://github.com/juhaku/utoipa	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+utoipa-swagger-ui	10.0.2	MIT OR Apache-2.0	https://github.com/juhaku/utoipa	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+utoipa-swagger-ui-vendored	0.2.0	MIT OR Apache-2.0	https://github.com/juhaku/utoipa	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+uuid	1.22.0	Apache-2.0 OR MIT	https://github.com/uuid-rs/uuid	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+uuid	1.23.4	Apache-2.0 OR MIT	https://github.com/uuid-rs/uuid	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+valuable	0.1.1	MIT	https://github.com/tokio-rs/valuable	lockfile-only	
+value-bag	1.12.0	Apache-2.0 OR MIT	https://github.com/sval-rs/value-bag	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+vcpkg	0.2.15	MIT/Apache-2.0	https://github.com/mcgoo/vcpkg-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+version_check	0.9.5	MIT/Apache-2.0	https://github.com/SergioBenitez/version_check	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+vhost	0.15.0	Apache-2.0 OR BSD-3-Clause	https://github.com/rust-vmm/vhost	lockfile-only	
+virtio-bindings	0.2.7	BSD-3-Clause OR Apache-2.0	https://github.com/rust-vmm/vm-virtio	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-BSD-3-Clause
+virtue	0.0.18	MIT	https://github.com/bincode-org/virtue	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE.md
+vm-fdt	0.3.0	Apache-2.0 OR BSD-3-Clause	https://github.com/rust-vmm/vm-fdt	libkrun-aarch64-apple-darwin/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-BSD-3-Clause
+vmm-sys-util	0.14.0	BSD-3-Clause	https://github.com/rust-vmm/vmm-sys-util	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-BSD-3-Clause
+vmm-sys-util	0.15.0	BSD-3-Clause	https://github.com/rust-vmm/vmm-sys-util	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-BSD-3-Clause
+vsock	0.5.3	Apache-2.0	https://github.com/rust-vsock/vsock-rs	lockfile-only	LICENSE
+vsock	0.5.4	Apache-2.0	https://github.com/rust-vsock/vsock-rs	lockfile-only	LICENSE
+walkdir	2.5.0	Unlicense/MIT	https://github.com/BurntSushi/walkdir	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	COPYING, LICENSE-MIT, UNLICENSE
+want	0.3.1	MIT	https://github.com/seanmonstar/want	lockfile-only	LICENSE
+want	0.3.2	MIT	https://github.com/seanmonstar/want	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+wasi	0.11.1+wasi-snapshot-preview1	Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT	https://github.com/bytecodealliance/wasi	lockfile-only	LICENSE-APACHE, LICENSE-Apache-2.0_WITH_LLVM-exception, LICENSE-MIT
+wasip2	1.0.2+wasi-0.2.9	Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT	https://github.com/bytecodealliance/wasi-rs	lockfile-only	
+wasip2	1.0.3+wasi-0.2.9	Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT	https://github.com/bytecodealliance/wasi-rs	lockfile-only	LICENSE-APACHE, LICENSE-Apache-2.0_WITH_LLVM-exception, LICENSE-MIT
+wasip2	1.0.4+wasi-0.2.12	Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT	https://github.com/bytecodealliance/wasi-rs	lockfile-only	LICENSE-APACHE, LICENSE-Apache-2.0_WITH_LLVM-exception, LICENSE-MIT
+wasip3	0.4.0+wasi-0.3.0-rc-2026-01-06	Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT	https://github.com/bytecodealliance/wasi-rs	lockfile-only	
+wasm-bindgen	0.2.114	MIT OR Apache-2.0	https://github.com/wasm-bindgen/wasm-bindgen	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+wasm-bindgen	0.2.123	MIT OR Apache-2.0	https://github.com/wasm-bindgen/wasm-bindgen	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+wasm-bindgen	0.2.129	MIT OR Apache-2.0	https://github.com/wasm-bindgen/wasm-bindgen	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+wasm-bindgen-futures	0.4.73	MIT OR Apache-2.0	https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/futures	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+wasm-bindgen-futures	0.4.79	MIT OR Apache-2.0	https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/futures	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+wasm-bindgen-macro	0.2.114	MIT OR Apache-2.0	https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/macro	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+wasm-bindgen-macro	0.2.123	MIT OR Apache-2.0	https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/macro	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+wasm-bindgen-macro	0.2.129	MIT OR Apache-2.0	https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/macro	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+wasm-bindgen-macro-support	0.2.114	MIT OR Apache-2.0	https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/macro-support	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+wasm-bindgen-macro-support	0.2.123	MIT OR Apache-2.0	https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/macro-support	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+wasm-bindgen-macro-support	0.2.129	MIT OR Apache-2.0	https://github.com/wasm-bindgen/wasm-bindgen/tree/main/crates/macro-support	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+wasm-bindgen-shared	0.2.114	MIT OR Apache-2.0	https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/shared	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+wasm-bindgen-shared	0.2.123	MIT OR Apache-2.0	https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/shared	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+wasm-bindgen-shared	0.2.129	MIT OR Apache-2.0	https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/shared	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+wasm-encoder	0.244.0	Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT	https://github.com/bytecodealliance/wasm-tools/tree/main/crates/wasm-encoder	lockfile-only	
+wasm-metadata	0.244.0	Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT	https://github.com/bytecodealliance/wasm-tools/tree/main/crates/wasm-metadata	lockfile-only	
+wasm-streams	0.4.2	MIT OR Apache-2.0	https://github.com/MattiasBuelens/wasm-streams/	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+wasmparser	0.244.0	Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT	https://github.com/bytecodealliance/wasm-tools/tree/main/crates/wasmparser	lockfile-only	
+web-sys	0.3.100	MIT OR Apache-2.0	https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/web-sys	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+web-sys	0.3.106	MIT OR Apache-2.0	https://github.com/wasm-bindgen/wasm-bindgen/tree/master/crates/web-sys	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+web-time	1.1.0	MIT OR Apache-2.0	https://github.com/daxpedda/web-time	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+webpki-roots	0.26.11	CDLA-Permissive-2.0	https://github.com/rustls/webpki-roots	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+webpki-roots	1.0.10	CDLA-Permissive-2.0	https://github.com/rustls/webpki-roots	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+webpki-roots	1.0.9	CDLA-Permissive-2.0	https://github.com/rustls/webpki-roots	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+which	4.4.2	MIT	https://github.com/harryfei/which-rs.git	lockfile-only	LICENSE.txt
+which	8.0.4	MIT	https://github.com/harryfei/which-rs.git	lockfile-only	LICENSE.txt
+winapi	0.3.9	MIT/Apache-2.0	https://github.com/retep998/winapi-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+winapi-i686-pc-windows-gnu	0.4.0	MIT/Apache-2.0	https://github.com/retep998/winapi-rs	lockfile-only	lib/libwinapi_oemlicense.a
+winapi-util	0.1.11	Unlicense OR MIT	https://github.com/BurntSushi/winapi-util	lockfile-only	COPYING, LICENSE-MIT, UNLICENSE
+winapi-x86_64-pc-windows-gnu	0.4.0	MIT/Apache-2.0	https://github.com/retep998/winapi-rs	lockfile-only	lib/libwinapi_oemlicense.a
+windows-link	0.2.1	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows-sys	0.48.0	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows-sys	0.52.0	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows-sys	0.60.2	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows-sys	0.61.2	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows-targets	0.48.5	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows-targets	0.52.6	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows-targets	0.53.5	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows_aarch64_gnullvm	0.48.5	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows_aarch64_gnullvm	0.52.6	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows_aarch64_gnullvm	0.53.1	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows_aarch64_msvc	0.48.5	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows_aarch64_msvc	0.52.6	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows_aarch64_msvc	0.53.1	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows_i686_gnu	0.48.5	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows_i686_gnu	0.52.6	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows_i686_gnu	0.53.1	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows_i686_gnullvm	0.52.6	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows_i686_gnullvm	0.53.1	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows_i686_msvc	0.48.5	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows_i686_msvc	0.52.6	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows_i686_msvc	0.53.1	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows_x86_64_gnu	0.48.5	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows_x86_64_gnu	0.52.6	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows_x86_64_gnu	0.53.1	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows_x86_64_gnullvm	0.48.5	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows_x86_64_gnullvm	0.52.6	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows_x86_64_gnullvm	0.53.1	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows_x86_64_msvc	0.48.5	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows_x86_64_msvc	0.52.6	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+windows_x86_64_msvc	0.53.1	MIT OR Apache-2.0	https://github.com/microsoft/windows-rs	lockfile-only	license-apache-2.0, license-mit
+winnow	0.7.15	MIT	https://github.com/winnow-rs/winnow	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-MIT
+winnow	1.0.3	MIT	https://github.com/winnow-rs/winnow	lockfile-only	LICENSE-MIT
+wiremock	0.6.5	MIT/Apache-2.0	https://github.com/LukeMathWalker/wiremock-rs	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+wit-bindgen	0.51.0	Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT	https://github.com/bytecodealliance/wit-bindgen	lockfile-only	LICENSE-APACHE, LICENSE-Apache-2.0_WITH_LLVM-exception, LICENSE-MIT
+wit-bindgen	0.57.1	Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT	https://github.com/bytecodealliance/wit-bindgen	lockfile-only	LICENSE-APACHE, LICENSE-Apache-2.0_WITH_LLVM-exception, LICENSE-MIT
+wit-bindgen-core	0.51.0	Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT	https://github.com/bytecodealliance/wit-bindgen	lockfile-only	LICENSE-APACHE, LICENSE-Apache-2.0_WITH_LLVM-exception, LICENSE-MIT
+wit-bindgen-rust	0.51.0	Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT	https://github.com/bytecodealliance/wit-bindgen	lockfile-only	LICENSE-APACHE, LICENSE-Apache-2.0_WITH_LLVM-exception, LICENSE-MIT
+wit-bindgen-rust-macro	0.51.0	Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT	https://github.com/bytecodealliance/wit-bindgen	lockfile-only	LICENSE-APACHE, LICENSE-Apache-2.0_WITH_LLVM-exception, LICENSE-MIT
+wit-component	0.244.0	Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT	https://github.com/bytecodealliance/wasm-tools/tree/main/crates/wit-component	lockfile-only	
+wit-parser	0.244.0	Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT	https://github.com/bytecodealliance/wasm-tools/tree/main/crates/wit-parser	lockfile-only	
+writeable	0.6.3	Unicode-3.0	https://github.com/unicode-org/icu4x	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+writeable	0.6.4	Unicode-3.0	https://github.com/unicode-org/icu4x	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+x509-parser	0.18.1	MIT OR Apache-2.0	https://github.com/rusticata/x509-parser.git	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+xattr	1.6.1	MIT OR Apache-2.0	https://github.com/Stebalien/xattr	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+yasna	0.5.2	MIT OR Apache-2.0	https://github.com/qnighy/yasna.rs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	
+yoke	0.8.3	Unicode-3.0	https://github.com/unicode-org/icu4x	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+yoke-derive	0.8.2	Unicode-3.0	https://github.com/unicode-org/icu4x	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+yoke-derive	0.8.4	Unicode-3.0	https://github.com/unicode-org/icu4x	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+zbus	5.17.0	MIT	https://github.com/z-galaxy/zbus/	lockfile-only	LICENSE
+zbus_macros	5.17.0	MIT	https://github.com/z-galaxy/zbus/	lockfile-only	LICENSE
+zbus_names	4.3.3	MIT	https://github.com/z-galaxy/zbus/	lockfile-only	LICENSE
+zerocopy	0.8.47	BSD-2-Clause OR Apache-2.0 OR MIT	https://github.com/google/zerocopy	libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-APACHE, LICENSE-BSD, LICENSE-MIT
+zerocopy	0.8.52	BSD-2-Clause OR Apache-2.0 OR MIT	https://github.com/google/zerocopy	lockfile-only	LICENSE-APACHE, LICENSE-BSD, LICENSE-MIT
+zerocopy	0.8.62	BSD-2-Clause OR Apache-2.0 OR MIT	https://github.com/google/zerocopy	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-BSD, LICENSE-MIT
+zerocopy-derive	0.8.47	BSD-2-Clause OR Apache-2.0 OR MIT	https://github.com/google/zerocopy	lockfile-only	LICENSE-APACHE, LICENSE-BSD, LICENSE-MIT
+zerocopy-derive	0.8.52	BSD-2-Clause OR Apache-2.0 OR MIT	https://github.com/google/zerocopy	lockfile-only	LICENSE-APACHE, LICENSE-BSD, LICENSE-MIT
+zerocopy-derive	0.8.62	BSD-2-Clause OR Apache-2.0 OR MIT	https://github.com/google/zerocopy	lockfile-only	LICENSE-APACHE, LICENSE-BSD, LICENSE-MIT
+zerofrom	0.1.8	Unicode-3.0	https://github.com/unicode-org/icu4x	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+zerofrom-derive	0.1.7	Unicode-3.0	https://github.com/unicode-org/icu4x	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+zerofrom-derive	0.1.8	Unicode-3.0	https://github.com/unicode-org/icu4x	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+zeroize	1.8.2	Apache-2.0 OR MIT	https://github.com/RustCrypto/utils	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE-APACHE, LICENSE-MIT
+zeroize	1.9.1	Apache-2.0 OR MIT	https://github.com/RustCrypto/utils	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+zeroize_derive	1.4.3	Apache-2.0 OR MIT	https://github.com/RustCrypto/utils/tree/master/zeroize/derive	lockfile-only	LICENSE-APACHE, LICENSE-MIT
+zeroize_derive	1.5.0	Apache-2.0 OR MIT	https://github.com/RustCrypto/utils	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-APACHE, LICENSE-MIT
+zerotrie	0.2.4	Unicode-3.0	https://github.com/unicode-org/icu4x	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+zerotrie	0.2.5	Unicode-3.0	https://github.com/unicode-org/icu4x	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+zerovec	0.11.6	Unicode-3.0	https://github.com/unicode-org/icu4x	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+zerovec	0.11.8	Unicode-3.0	https://github.com/unicode-org/icu4x	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+zerovec-derive	0.11.3	Unicode-3.0	https://github.com/unicode-org/icu4x	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent	LICENSE
+zerovec-derive	0.11.6	Unicode-3.0	https://github.com/unicode-org/icu4x	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+zip	9.2.2	MIT	https://github.com/zip-rs/zip2	lockfile-only	LICENSE
+zip	9.5.0	MIT	https://github.com/zip-rs/zip2	lockfile-only	LICENSE
+zlib-rs	0.6.3	Zlib	https://github.com/trifectatechfoundation/zlib-rs	lockfile-only	LICENSE
+zlib-rs	0.6.8	Zlib	https://github.com/trifectatechfoundation/zlib-rs	lockfile-only	LICENSE
+zmij	1.0.21	MIT	https://github.com/dtolnay/zmij	agent-x86_64-unknown-linux-musl/smolvm-agent, agent-aarch64-unknown-linux-musl/smolvm-agent, libkrun-aarch64-apple-darwin/libkrun, libkrun-x86_64-unknown-linux-gnu/libkrun, libkrun-aarch64-unknown-linux-gnu/libkrun	LICENSE-MIT
+zmij	1.0.23	MIT	https://github.com/dtolnay/zmij	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE-MIT
+zopfli	0.8.3	Apache-2.0	https://github.com/zopfli-rs/zopfli	lockfile-only	COPYING
+zstd	0.13.3	MIT	https://github.com/gyscos/zstd-rs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port, libkrun-x86_64-unknown-linux-gnu/libkrun	LICENSE
+zstd	0.14.3	BSD-3-Clause	https://github.com/gyscos/zstd-rs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+zstd-safe	7.2.4	MIT OR Apache-2.0	https://github.com/gyscos/zstd-rs	libkrun-x86_64-unknown-linux-gnu/libkrun	LICENSE, LICENSE.Apache-2.0, LICENSE.Mit
+zstd-safe	7.3.0	BSD-3-Clause	https://github.com/gyscos/zstd-rs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+zstd-safe	8.2.0	BSD-3-Clause	https://github.com/gyscos/zstd-rs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE
+zstd-sys	2.0.16+zstd.1.5.7	MIT/Apache-2.0	https://github.com/gyscos/zstd-rs	libkrun-x86_64-unknown-linux-gnu/libkrun	LICENSE, LICENSE.Apache-2.0, LICENSE.BSD-3-Clause, LICENSE.Mit, zstd/COPYING, zstd/LICENSE
+zstd-sys	2.1.2+zstd.1.5.7	BSD-3-Clause	https://github.com/gyscos/zstd-rs	helper-aarch64-apple-darwin/smolbox-port, helper-x86_64-unknown-linux-gnu/smolbox-port, helper-aarch64-unknown-linux-gnu/smolbox-port	LICENSE, LICENSE.BSD-3-Clause, zstd/COPYING, zstd/LICENSE
+zvariant	5.13.0	MIT	https://github.com/z-galaxy/zbus/	lockfile-only	LICENSE
+zvariant_derive	5.13.0	MIT	https://github.com/z-galaxy/zbus/	lockfile-only	LICENSE
+zvariant_utils	3.5.0	MIT	https://github.com/z-galaxy/zbus/	lockfile-only	LICENSE

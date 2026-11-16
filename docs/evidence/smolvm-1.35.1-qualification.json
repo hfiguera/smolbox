@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "date": "2026-11-16",
-  "status": "scoped_candidate_qualification_passed_defaults_not_promoted",
+  "status": "local_qualification_passed_public_distribution_gates_pending",
   "runtime": "1.35.1",
   "upstream_commit": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
   "previous_sdk_commit": "d77eaf1c6eeff16bc8c258613746033e9bf567ca",
@@ -30,6 +30,10 @@
         "passed": 3,
         "egress_floor": "metadata",
         "scope": "Dedicated Unix-socket worker and two reachable host-owned private-address TCP responders; offline denial, allowed CIDR, denied CIDR, mapped loopback TCP, port conflict and long-lived exec streams."
+      },
+      "explicit_terminal_arguments_rerun": {
+        "passed": 3,
+        "scope": "Complete interactive input/resize/control/retained-file, bounded slow-consumer, generated-script interpreter arguments and abrupt disconnect tests."
       }
     },
     "macos_aarch64": {
@@ -47,16 +51,43 @@
         "passed": 3,
         "egress_floor": "metadata",
         "scope": "Dedicated Unix-socket worker and two reachable host-owned private-address TCP responders; offline denial, allowed CIDR, denied CIDR, mapped loopback TCP, port conflict and long-lived exec streams."
+      },
+      "explicit_terminal_arguments_rerun": {
+        "passed": 3,
+        "scope": "Complete interactive input/resize/control/retained-file, bounded slow-consumer, generated-script interpreter arguments and abrupt disconnect tests."
       }
+    },
+    "linux_aarch64": {
+      "runtime": "1.35.1",
+      "scope": "ordinary-linux-arm64-http-lifecycle",
+      "status": "passed",
+      "architecture": "aarch64",
+      "sdk_source_modified": false,
+      "fixture_sha256": "098260ddf6395067bf4b26c3111b428dcda7e969060d14885de50534aa626c75",
+      "create_start_exec_stop_restart_delete": true,
+      "incarnation_preserved": true,
+      "binary_upload_download": true,
+      "retained_after_stop_start": true,
+      "observed_exit": 7,
+      "measurements_parsed": true,
+      "inventory_empty": true,
+      "deliberately_interrupted": false
+    },
+    "durable_postgresql_recovery": {
+      "status": "passed",
+      "controller_recovery_tests": 25,
+      "checkpoint_recovery_tests": 3,
+      "runtime": "1.35.1",
+      "worker_sdk_inventory_empty_before_normal_shutdown": true,
+      "controller_fault_boundaries_qualified": true,
+      "native_process_fault_boundaries_qualified": false
     }
   },
   "pending": [
-    "Linux ARM64 build and live native qualification",
-    "Live Kubernetes 1.35.1 qualification",
-    "Complete changed-package HTTP/native parity including storage, capture/export, registry/network and durable PostgreSQL campaigns",
-    "Current and minimum no-Rust public consumer/install/upgrade checks",
-    "Matching 1.35.1 corresponding-source and notices review, distribution approval, signed release bundles and public installer qualification",
-    "A resolution or explicit release acceptance of the upstream dynamic terminal executable lookup limitation"
+    "Publish and independently verify the reviewed corresponding-source and notice archives",
+    "Build and attest all three targets from an approved release tag",
+    "Qualify exact public downloads with current/minimum Elixir and OTP, no Rust, fresh standard accounts and Gatekeeper enabled on macOS",
+    "Promote defaults only after the public distribution gates pass"
   ],
   "branch": "support/smolvm-1.35.1",
   "upstream_impact_review": {
@@ -71,7 +102,8 @@
       "Keep 1.34.0 and 1.22.0 branch intent hashes readable; require the active revision before dispatch.",
       "Use rusqlite 0.41 and handle its fallible progress-handler installation.",
       "Project the verified macOS HOME into branch/capture workers after clearing their environment.",
-      "Explicitly reject six new SDK record fields outside the approved bare checkpoint/branch profile."
+      "Explicitly reject six new SDK record fields outside the approved bare checkpoint/branch profile.",
+      "Bind exact post-collection helper logs, known sockets and private empty attachment roots; keep bounded metadata and non-recursive directory retirement."
     ],
     "other_changes": [
       "New optional exec-session, automatic-port and switch functionality is not exposed or enabled.",
@@ -84,7 +116,7 @@
     "elixir_macos": {
       "command": "ERL_FLAGS=\"+S 4:4\" mix ci",
       "status": "passed",
-      "passed": 2317,
+      "passed": 2323,
       "excluded": 42,
       "includes": [
         "format",
@@ -100,9 +132,9 @@
     },
     "elixir_linux": {
       "status": "passed",
-      "passed": 2316,
+      "passed": 2322,
       "excluded": 42,
-      "scope": "deterministic tests before the final fixture-only follow-ups"
+      "scope": "Final current production code and fixture followups, full mix ci"
     },
     "native_python": {
       "total": 64,
@@ -114,7 +146,7 @@
       "status": "passed"
     },
     "rust_macos": {
-      "workspace_passed": 1344,
+      "workspace_passed": 1349,
       "workspace_ignored": 27,
       "added_namespace_regression_passed": 1,
       "ordinary_non_vm_fixtures": 12,
@@ -130,7 +162,7 @@
     },
     "rust_linux": {
       "status": "passed",
-      "workspace_passed": 1346,
+      "workspace_passed": 1350,
       "workspace_ignored": 27,
       "command": "umask 077; cargo +1.100.0 test --manifest-path native/Cargo.toml --workspace --lib --bins --test contract --locked",
       "port_umask_release_helper": "passed",
@@ -140,6 +172,28 @@
       "status": "passed",
       "warnings_as_errors": true,
       "local_pages_checked": 162
+    },
+    "terminal_argument_followup": {
+      "full_mix_ci_passed": 2323,
+      "full_mix_ci_excluded": 42,
+      "additional_reader_regressions_passed": 4,
+      "terminal_contract_transport_regressions_passed": 20,
+      "credo_strict": "passed after final reader test",
+      "macos_rust_engine_passed": 1088,
+      "macos_rust_port_passed": 91,
+      "macos_rust_protocol_library_passed": 109,
+      "macos_rust_protocol_contract_passed": 61,
+      "macos_rust_ignored": 27,
+      "linux_rust_workspace_passed": 1350,
+      "linux_rust_ignored": 27,
+      "clippy_all_targets_warnings_denied": "passed on final source",
+      "postgresql_store_suite_passed": 310,
+      "postgresql_excluded": 29,
+      "minimum_no_rust_compile": {
+        "macos_aarch64": "passed: Elixir 1.18.4 / OTP 27.3.4.15",
+        "linux_x86_64": "passed: Elixir 1.18.4 / OTP 27.3.4.15"
+      },
+      "rustdoc_warnings_denied": "passed on final source"
     }
   },
   "known_limits": [
@@ -150,8 +204,8 @@
         "macos_aarch64",
         "linux_x86_64"
       ],
-      "workaround": "Open an interpreter or shell already shipped in the image and launch the program through it.",
-      "qualified_fix": false
+      "workaround": "Explicit Terminal.Spec args launch the generated program through an interpreter shipped in the image. Nonempty args require HTTP 1.35.1 or native terminal_arguments: 1.",
+      "qualified_fix": true
     },
     {
       "area": "HTTP port fixture",
@@ -162,37 +216,755 @@
   ],
   "native": {
     "macos_aarch64": {
-      "manifest_sha256": "f46a8e51cde39c942fa1a2d00e91a9837035a4b759628a740d3971762896c9c1",
+      "manifest_sha256": "e5c2bbf87b7ef500c15f94c918cc73c66b1691414f94e1cae4e4665680dec0af",
       "identity": {
         "engine_version": "0.2.0",
         "smolvm_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
         "source_sha256": "63d92153fcef1c548847a55bfba9e2710467b1d7937f4fd1fbad3f6ef17193c0",
-        "build_sha256": "86960cb00a13c3abfadd603d34ef364092fcdb2d62c1e607da0aad10392f970f",
-        "assets_sha256": "c207d5565a95ea870ba98ceeb64383e9e4386d6dadfa84b7a4820c04cb1609a4",
+        "build_sha256": "a7ffd6e14b94028ac0442fcea35d7c0aaec02c0c416fa272547deb475b5d2ce9",
+        "assets_sha256": "01e78db8918c2d1adc89f32dbc1157570703e3c0a4d73b9a7d64eb4ce306dd83",
         "platform": "macos",
         "architecture": "aarch64"
       },
-      "ordinary_lifecycle": "passed",
-      "retained_after_stop_start": true,
-      "fresh_helper_readback": true,
-      "file_bytes": 1048593,
-      "non_root_exec": true,
-      "observed_exit": 7,
-      "observability": "passed",
-      "terminal_preflight": "passed",
-      "owned_deleted": true,
-      "inventory_empty": true,
-      "padded_telemetry": {
-        "status": "passed",
-        "naturally_produced_sample_bytes": 1024,
-        "running_egress_bytes": 0,
-        "stopped_egress_bytes": 0
+      "ordinary_lifecycle": {
+        "proof": "passed",
+        "scope": "ordinary-native-lifecycle",
+        "package_manifest_sha256": "e5c2bbf87b7ef500c15f94c918cc73c66b1691414f94e1cae4e4665680dec0af",
+        "identity": {
+          "engine_version": "0.2.0",
+          "smolvm_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+          "source_sha256": "63d92153fcef1c548847a55bfba9e2710467b1d7937f4fd1fbad3f6ef17193c0",
+          "build_sha256": "a7ffd6e14b94028ac0442fcea35d7c0aaec02c0c416fa272547deb475b5d2ce9",
+          "assets_sha256": "01e78db8918c2d1adc89f32dbc1157570703e3c0a4d73b9a7d64eb4ce306dd83",
+          "platform": "macos",
+          "architecture": "aarch64"
+        },
+        "fixture_sha256": "ec6ccce9b31a97bf8157cef7b5b6a5739f3bc7905f46f54656e143fe780291b9",
+        "observed_exit": 7,
+        "file_bytes": 1048593,
+        "file_sha256": "b863256dee74effc15743dff63a34ea93bb1f6778b22f6c971469c259638dd41",
+        "retained_after_stop_start": true,
+        "retained_after_stopped_helper_shutdown": true,
+        "fresh_epoch": true,
+        "owned_deleted": true,
+        "inventory_before": [],
+        "inventory_after": [],
+        "upgrade": null,
+        "normal_stop_child_reaping": [],
+        "ordinary_observability": [
+          {
+            "state": "empty",
+            "total": 0,
+            "running": 0,
+            "allocated_cpus": 0,
+            "allocated_memory_mb": 0,
+            "inventory_count": 0,
+            "running_process_sampled": null,
+            "metrics_bound_to_lifecycle": true,
+            "readiness": true
+          },
+          {
+            "state": "stopped",
+            "total": 1,
+            "running": 0,
+            "allocated_cpus": 0,
+            "allocated_memory_mb": 0,
+            "inventory_count": 1,
+            "running_process_sampled": false,
+            "metrics_bound_to_lifecycle": true,
+            "readiness": true
+          },
+          {
+            "state": "running",
+            "total": 1,
+            "running": 1,
+            "allocated_cpus": 1,
+            "allocated_memory_mb": 512,
+            "inventory_count": 1,
+            "running_process_sampled": true,
+            "metrics_bound_to_lifecycle": true,
+            "readiness": true
+          },
+          {
+            "state": "stopped",
+            "total": 1,
+            "running": 0,
+            "allocated_cpus": 0,
+            "allocated_memory_mb": 0,
+            "inventory_count": 1,
+            "running_process_sampled": false,
+            "metrics_bound_to_lifecycle": true,
+            "readiness": true
+          },
+          {
+            "state": "stopped",
+            "total": 1,
+            "running": 0,
+            "allocated_cpus": 0,
+            "allocated_memory_mb": 0,
+            "inventory_count": 1,
+            "running_process_sampled": false,
+            "metrics_bound_to_lifecycle": true,
+            "readiness": true
+          },
+          {
+            "state": "missing",
+            "total": 0,
+            "running": 0,
+            "allocated_cpus": 0,
+            "allocated_memory_mb": 0,
+            "inventory_count": 0,
+            "running_process_sampled": false,
+            "metrics_bound_to_lifecycle": true,
+            "readiness": true
+          }
+        ],
+        "ordinary_terminal_preflight": [
+          {
+            "state": "stopped",
+            "no_stream_events": true,
+            "sdk_records_unchanged": true,
+            "owned_children_unchanged": false
+          },
+          {
+            "state": "running",
+            "no_stream_events": true,
+            "sdk_records_unchanged": true,
+            "owned_children_unchanged": false
+          },
+          {
+            "state": "stopped",
+            "no_stream_events": true,
+            "sdk_records_unchanged": true,
+            "owned_children_unchanged": false
+          },
+          {
+            "state": "stopped",
+            "no_stream_events": true,
+            "sdk_records_unchanged": true,
+            "owned_children_unchanged": false
+          },
+          {
+            "state": "missing",
+            "no_stream_events": true,
+            "sdk_records_unchanged": true,
+            "owned_children_unchanged": false
+          }
+        ],
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false
       },
-      "deliberate_process_interruption": false,
-      "crash_handling_qualified": false,
+      "padded_telemetry": {
+        "proof": "passed",
+        "sdk": {
+          "sdk_version": "1.35.1",
+          "source_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+          "feature_versions": {
+            "lifecycle": 1,
+            "foreground_exec": 1,
+            "extended_exec": 1,
+            "files": 1,
+            "extended_files": 1,
+            "material_proofs": 2,
+            "observability": 1,
+            "networking": 1,
+            "ports": 1,
+            "workloads": 1,
+            "compact_creation": 1,
+            "job_resources": 1,
+            "buffered_exec": 1,
+            "background_exec": 1,
+            "logs": 1,
+            "streaming_exec": 1,
+            "terminals": 1,
+            "terminal_preflight": 1,
+            "remote_sources": 1,
+            "images": 1,
+            "checkpoints": 1,
+            "branches": 1,
+            "branch_release_env": 1,
+            "partial_collection_preflight": 1,
+            "exports": 1,
+            "terminal_arguments": 1
+          }
+        },
+        "package_identity": {
+          "engine_version": "0.2.0",
+          "smolvm_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+          "source_sha256": "63d92153fcef1c548847a55bfba9e2710467b1d7937f4fd1fbad3f6ef17193c0",
+          "build_sha256": "a7ffd6e14b94028ac0442fcea35d7c0aaec02c0c416fa272547deb475b5d2ce9",
+          "assets_sha256": "01e78db8918c2d1adc89f32dbc1157570703e3c0a4d73b9a7d64eb4ce306dd83",
+          "platform": "macos",
+          "architecture": "aarch64"
+        },
+        "manifest_sha256": "e5c2bbf87b7ef500c15f94c918cc73c66b1691414f94e1cae4e4665680dec0af",
+        "sample_bytes": 1024,
+        "running_counters": {
+          "cpu_millis": 154,
+          "cpu_seconds": 0,
+          "disk_used_mb": null,
+          "egress_bytes": 0,
+          "private_memory_mb": null,
+          "pss_mb": null,
+          "rss_mb": 114,
+          "shared_memory_mapped_mb": null
+        },
+        "stopped_counters": {
+          "cpu_millis": null,
+          "cpu_seconds": null,
+          "disk_used_mb": null,
+          "egress_bytes": 0,
+          "private_memory_mb": null,
+          "pss_mb": null,
+          "rss_mb": null,
+          "shared_memory_mapped_mb": null
+        },
+        "inventory_empty": true,
+        "deliberate_process_interruption": false
+      },
+      "public_managed_lifecycle": {
+        "crash_handling_qualified": false,
+        "deliberate_process_interruption": false,
+        "disposable_exit": 7,
+        "drain_blocks_new_assignments": true,
+        "drain_survives_runtime_restart": true,
+        "existing_command_while_draining": true,
+        "file_bytes": 1048593,
+        "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+        "final_reserved_slots": 0,
+        "fixture_sha256": "ec6ccce9b31a97bf8157cef7b5b6a5739f3bc7905f46f54656e143fe780291b9",
+        "http_workers_exercised_while_native_draining": 0,
+        "identity": {
+          "architecture": "aarch64",
+          "assets_sha256": "01e78db8918c2d1adc89f32dbc1157570703e3c0a4d73b9a7d64eb4ce306dd83",
+          "build_sha256": "a7ffd6e14b94028ac0442fcea35d7c0aaec02c0c416fa272547deb475b5d2ce9",
+          "engine_version": "0.2.0",
+          "platform": "macos",
+          "smolvm_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+          "source_sha256": "63d92153fcef1c548847a55bfba9e2710467b1d7937f4fd1fbad3f6ef17193c0"
+        },
+        "owned_deleted": true,
+        "package_manifest_sha256": "e5c2bbf87b7ef500c15f94c918cc73c66b1691414f94e1cae4e4665680dec0af",
+        "proof": "passed",
+        "public_native_admission_enabled": true,
+        "resume_version_checked": true,
+        "retained_after_normal_runtime_restart": true,
+        "retained_write_exit": 7,
+        "scope": "public-managed-port-lifecycle",
+        "store_mode": "ephemeral",
+        "terminal": {
+          "arguments": {
+            "codec": 55,
+            "empty_argument": true,
+            "generated_script": true,
+            "initial_size": {
+              "cols": 120,
+              "rows": 43
+            },
+            "literal_metacharacters": true,
+            "observed_exit": 7,
+            "stdin_roundtrip": true
+          },
+          "binary_input_bytes": 3,
+          "binary_output_verified": true,
+          "codec": 17,
+          "deliberate_process_interruption": false,
+          "duplicate_open_reuses_execution": true,
+          "exercised": true,
+          "observed_exit": 7,
+          "resize": {
+            "cols": 120,
+            "rows": 43
+          },
+          "scope": "ordinary-public-retained-image-pty",
+          "slot_released": true,
+          "transcript_persisted": false
+        }
+      },
+      "compatible_same_sdk_package_upgrade": {
+        "from_manifest_sha256": "94ab2984895cb84c1344a421432b09a6d43342afda4e64568d545f67940f17ed",
+        "to_manifest_sha256": "e5c2bbf87b7ef500c15f94c918cc73c66b1691414f94e1cae4e4665680dec0af",
+        "from_identity": {
+          "engine_version": "0.2.0",
+          "smolvm_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+          "source_sha256": "63d92153fcef1c548847a55bfba9e2710467b1d7937f4fd1fbad3f6ef17193c0",
+          "build_sha256": "ca7e58404c335d698f65f62d73da8b73b58bde686d53fc59ef5a75834350d08a",
+          "assets_sha256": "01e78db8918c2d1adc89f32dbc1157570703e3c0a4d73b9a7d64eb4ce306dd83",
+          "platform": "macos",
+          "architecture": "aarch64"
+        },
+        "to_identity": {
+          "engine_version": "0.2.0",
+          "smolvm_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+          "source_sha256": "63d92153fcef1c548847a55bfba9e2710467b1d7937f4fd1fbad3f6ef17193c0",
+          "build_sha256": "a7ffd6e14b94028ac0442fcea35d7c0aaec02c0c416fa272547deb475b5d2ce9",
+          "assets_sha256": "01e78db8918c2d1adc89f32dbc1157570703e3c0a4d73b9a7d64eb4ce306dd83",
+          "platform": "macos",
+          "architecture": "aarch64"
+        },
+        "retained_full_receipt": true,
+        "domain_generation_unchanged": true,
+        "old_assets_retained_during_upgrade": true,
+        "codec_rollback_qualified": false
+      },
+      "previous_candidate_manifest_sha256": "94ab2984895cb84c1344a421432b09a6d43342afda4e64568d545f67940f17ed",
+      "previous_candidate_evidence_transferred": false,
+      "public_checkpoints": {
+        "campaign": "ordinary-public-native-checkpoints",
+        "package_manifest_sha256": "e5c2bbf87b7ef500c15f94c918cc73c66b1691414f94e1cae4e4665680dec0af",
+        "store_mode": "ephemeral",
+        "capture_source_continues": true,
+        "duplicate_capture_retained": true,
+        "stopped_runtime_replacement": true,
+        "ram_and_disk_restored": true,
+        "independent_restores": 2,
+        "cold_restart_does_not_restore_ram": true,
+        "captured_bytes_unchanged": true,
+        "capture_artifact_removed": true,
+        "native_capture_cleanup": true,
+        "codec_roundtrips": true,
+        "owned_deleted": true,
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0,
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false,
+        "stdout_log_sha256": "4abe3691744d5950dfe4da9c9dac676ecfafb74fc1ebe56a8c4d04cc963b1b8d"
+      },
+      "public_export_reimport": {
+        "mode": "container",
+        "store": "memory",
+        "final_reserved_slots": 0,
+        "crash_validation_deferred": true,
+        "content_sha256": "fdf7b61032e50f23110e464b2d5ad7ca85f4a3f9de46fdc797a787a9543ba71f",
+        "package_manifest_sha256": "e5c2bbf87b7ef500c15f94c918cc73c66b1691414f94e1cae4e4665680dec0af",
+        "runtime_replacement": true,
+        "native_cleanup_resolved": true,
+        "export_history_after_delete": true,
+        "pinned_registry_reimport": true,
+        "source_and_copy_independent": true,
+        "manifest_sha256": "9832fee827188a38d53b81a8e53e4740eecf28e5c82988d32c6da954c6549fd0",
+        "size_bytes": 30292100
+      },
+      "public_registry": {
+        "campaign": "ordinary-public-native-images",
+        "cold_warm_registry": true,
+        "configured_startup": false,
+        "crash_handling_qualified": false,
+        "deliberate_process_interruption": false,
+        "final_reserved_slots": 0,
+        "identity": {
+          "architecture": "aarch64",
+          "assets_sha256": "01e78db8918c2d1adc89f32dbc1157570703e3c0a4d73b9a7d64eb4ce306dd83",
+          "build_sha256": "a7ffd6e14b94028ac0442fcea35d7c0aaec02c0c416fa272547deb475b5d2ce9",
+          "engine_version": "0.2.0",
+          "platform": "macos",
+          "smolvm_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+          "source_sha256": "63d92153fcef1c548847a55bfba9e2710467b1d7937f4fd1fbad3f6ef17193c0"
+        },
+        "image_operations": {
+          "imported_pull_rejected": true,
+          "inventory_observed": true
+        },
+        "immutable_creation_retained": true,
+        "owned_deleted": true,
+        "package_manifest_sha256": "e5c2bbf87b7ef500c15f94c918cc73c66b1691414f94e1cae4e4665680dec0af",
+        "retained_binary_bytes": 65537,
+        "retained_binary_sha256": "f6b82df7d28d7ebac8601da4c154ce0d5389b929901075bbbeec3003e37e12b4",
+        "source": {
+          "architecture": "aarch64",
+          "content_sha256": "fdf7b61032e50f23110e464b2d5ad7ca85f4a3f9de46fdc797a787a9543ba71f",
+          "id": "registry-demo",
+          "kind": "registry",
+          "reference": "127.0.0.1:51383/proof/export@sha256:9832fee827188a38d53b81a8e53e4740eecf28e5c82988d32c6da954c6549fd0",
+          "sha256": "9832fee827188a38d53b81a8e53e4740eecf28e5c82988d32c6da954c6549fd0"
+        },
+        "source_kind": "registry",
+        "startup_counts": [],
+        "stopped_runtime_replacement": true,
+        "store_mode": "ephemeral"
+      },
+      "durable_public_lifecycle": {
+        "crash_handling_qualified": false,
+        "deliberate_process_interruption": false,
+        "disposable_exit": 7,
+        "drain_blocks_new_assignments": true,
+        "drain_survives_runtime_restart": true,
+        "existing_command_while_draining": true,
+        "file_bytes": 1048593,
+        "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+        "final_reserved_slots": 0,
+        "fixture_sha256": "ec6ccce9b31a97bf8157cef7b5b6a5739f3bc7905f46f54656e143fe780291b9",
+        "http_workers_exercised_while_native_draining": 0,
+        "identity": {
+          "architecture": "aarch64",
+          "assets_sha256": "01e78db8918c2d1adc89f32dbc1157570703e3c0a4d73b9a7d64eb4ce306dd83",
+          "build_sha256": "a7ffd6e14b94028ac0442fcea35d7c0aaec02c0c416fa272547deb475b5d2ce9",
+          "engine_version": "0.2.0",
+          "platform": "macos",
+          "smolvm_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+          "source_sha256": "63d92153fcef1c548847a55bfba9e2710467b1d7937f4fd1fbad3f6ef17193c0"
+        },
+        "owned_deleted": true,
+        "package_manifest_sha256": "e5c2bbf87b7ef500c15f94c918cc73c66b1691414f94e1cae4e4665680dec0af",
+        "proof": "passed",
+        "public_native_admission_enabled": true,
+        "resume_version_checked": true,
+        "retained_after_normal_runtime_restart": true,
+        "retained_write_exit": 7,
+        "scope": "public-managed-port-lifecycle",
+        "store_mode": "durable",
+        "terminal": {
+          "arguments": {
+            "codec": 55,
+            "empty_argument": true,
+            "generated_script": true,
+            "initial_size": {
+              "cols": 120,
+              "rows": 43
+            },
+            "literal_metacharacters": true,
+            "observed_exit": 7,
+            "stdin_roundtrip": true
+          },
+          "binary_input_bytes": 3,
+          "binary_output_verified": true,
+          "codec": 17,
+          "deliberate_process_interruption": false,
+          "duplicate_open_reuses_execution": true,
+          "exercised": true,
+          "observed_exit": 7,
+          "resize": {
+            "cols": 120,
+            "rows": 43
+          },
+          "scope": "ordinary-public-retained-image-pty",
+          "slot_released": true,
+          "transcript_persisted": false
+        }
+      }
+    },
+    "linux_x86_64": {
+      "manifest_sha256": "ece2ed31b5974ca9a294c3d346e15e9df9713a34414789314809ef3166cc7ade",
+      "identity": {
+        "engine_version": "0.2.0",
+        "smolvm_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+        "source_sha256": "63d92153fcef1c548847a55bfba9e2710467b1d7937f4fd1fbad3f6ef17193c0",
+        "build_sha256": "cfed408f028aad6a22aa2dc2927577c33af8b0febc03e50c094ffc6db633cfb7",
+        "assets_sha256": "97a62fc5e7c1b5881150d27696e08b144bc302589cf701fd8a89f61c3415d0a2",
+        "platform": "linux",
+        "architecture": "x86_64"
+      },
+      "ordinary_lifecycle": {
+        "proof": "passed",
+        "scope": "ordinary-native-lifecycle",
+        "package_manifest_sha256": "ece2ed31b5974ca9a294c3d346e15e9df9713a34414789314809ef3166cc7ade",
+        "identity": {
+          "engine_version": "0.2.0",
+          "smolvm_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+          "source_sha256": "63d92153fcef1c548847a55bfba9e2710467b1d7937f4fd1fbad3f6ef17193c0",
+          "build_sha256": "cfed408f028aad6a22aa2dc2927577c33af8b0febc03e50c094ffc6db633cfb7",
+          "assets_sha256": "97a62fc5e7c1b5881150d27696e08b144bc302589cf701fd8a89f61c3415d0a2",
+          "platform": "linux",
+          "architecture": "x86_64"
+        },
+        "fixture_sha256": "ac45bd5b794e57f9627369facd15a18649f6af3b600f866f223f5f91b5bfa954",
+        "observed_exit": 7,
+        "file_bytes": 1048593,
+        "file_sha256": "b863256dee74effc15743dff63a34ea93bb1f6778b22f6c971469c259638dd41",
+        "retained_after_stop_start": true,
+        "retained_after_stopped_helper_shutdown": true,
+        "fresh_epoch": true,
+        "owned_deleted": true,
+        "inventory_before": [],
+        "inventory_after": [],
+        "upgrade": null,
+        "normal_stop_child_reaping": [],
+        "ordinary_observability": [
+          {
+            "state": "empty",
+            "total": 0,
+            "running": 0,
+            "allocated_cpus": 0,
+            "allocated_memory_mb": 0,
+            "inventory_count": 0,
+            "running_process_sampled": null,
+            "metrics_bound_to_lifecycle": true,
+            "readiness": true
+          },
+          {
+            "state": "stopped",
+            "total": 1,
+            "running": 0,
+            "allocated_cpus": 0,
+            "allocated_memory_mb": 0,
+            "inventory_count": 1,
+            "running_process_sampled": false,
+            "metrics_bound_to_lifecycle": true,
+            "readiness": true
+          },
+          {
+            "state": "running",
+            "total": 1,
+            "running": 1,
+            "allocated_cpus": 1,
+            "allocated_memory_mb": 512,
+            "inventory_count": 1,
+            "running_process_sampled": true,
+            "metrics_bound_to_lifecycle": true,
+            "readiness": true
+          },
+          {
+            "state": "stopped",
+            "total": 1,
+            "running": 0,
+            "allocated_cpus": 0,
+            "allocated_memory_mb": 0,
+            "inventory_count": 1,
+            "running_process_sampled": false,
+            "metrics_bound_to_lifecycle": true,
+            "readiness": true
+          },
+          {
+            "state": "stopped",
+            "total": 1,
+            "running": 0,
+            "allocated_cpus": 0,
+            "allocated_memory_mb": 0,
+            "inventory_count": 1,
+            "running_process_sampled": false,
+            "metrics_bound_to_lifecycle": true,
+            "readiness": true
+          },
+          {
+            "state": "missing",
+            "total": 0,
+            "running": 0,
+            "allocated_cpus": 0,
+            "allocated_memory_mb": 0,
+            "inventory_count": 0,
+            "running_process_sampled": false,
+            "metrics_bound_to_lifecycle": true,
+            "readiness": true
+          }
+        ],
+        "ordinary_terminal_preflight": [
+          {
+            "state": "stopped",
+            "no_stream_events": true,
+            "sdk_records_unchanged": true,
+            "owned_children_unchanged": true
+          },
+          {
+            "state": "running",
+            "no_stream_events": true,
+            "sdk_records_unchanged": true,
+            "owned_children_unchanged": true
+          },
+          {
+            "state": "stopped",
+            "no_stream_events": true,
+            "sdk_records_unchanged": true,
+            "owned_children_unchanged": true
+          },
+          {
+            "state": "stopped",
+            "no_stream_events": true,
+            "sdk_records_unchanged": true,
+            "owned_children_unchanged": true
+          },
+          {
+            "state": "missing",
+            "no_stream_events": true,
+            "sdk_records_unchanged": true,
+            "owned_children_unchanged": true
+          }
+        ],
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false
+      },
+      "padded_telemetry": {
+        "proof": "passed",
+        "sdk": {
+          "sdk_version": "1.35.1",
+          "source_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+          "feature_versions": {
+            "lifecycle": 1,
+            "foreground_exec": 1,
+            "extended_exec": 1,
+            "files": 1,
+            "extended_files": 1,
+            "material_proofs": 2,
+            "observability": 1,
+            "networking": 1,
+            "ports": 1,
+            "workloads": 1,
+            "compact_creation": 1,
+            "job_resources": 1,
+            "buffered_exec": 1,
+            "background_exec": 1,
+            "logs": 1,
+            "streaming_exec": 1,
+            "terminals": 1,
+            "volumes": 1,
+            "disk_growth": 1,
+            "terminal_preflight": 1,
+            "remote_sources": 1,
+            "images": 1,
+            "checkpoints": 1,
+            "branches": 1,
+            "branch_release_env": 1,
+            "branch_static_egress": 1,
+            "branch_https_credentials": 1,
+            "partial_collection_preflight": 1,
+            "exports": 1,
+            "terminal_arguments": 1
+          }
+        },
+        "package_identity": {
+          "engine_version": "0.2.0",
+          "smolvm_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+          "source_sha256": "63d92153fcef1c548847a55bfba9e2710467b1d7937f4fd1fbad3f6ef17193c0",
+          "build_sha256": "cfed408f028aad6a22aa2dc2927577c33af8b0febc03e50c094ffc6db633cfb7",
+          "assets_sha256": "97a62fc5e7c1b5881150d27696e08b144bc302589cf701fd8a89f61c3415d0a2",
+          "platform": "linux",
+          "architecture": "x86_64"
+        },
+        "manifest_sha256": "ece2ed31b5974ca9a294c3d346e15e9df9713a34414789314809ef3166cc7ade",
+        "sample_bytes": 1024,
+        "running_counters": {
+          "cpu_millis": 190,
+          "cpu_seconds": 0,
+          "disk_used_mb": 1,
+          "egress_bytes": 0,
+          "private_memory_mb": 85,
+          "pss_mb": null,
+          "rss_mb": 121,
+          "shared_memory_mapped_mb": 36
+        },
+        "stopped_counters": {
+          "cpu_millis": null,
+          "cpu_seconds": null,
+          "disk_used_mb": 6,
+          "egress_bytes": 0,
+          "private_memory_mb": null,
+          "pss_mb": null,
+          "rss_mb": null,
+          "shared_memory_mapped_mb": null
+        },
+        "inventory_empty": true,
+        "deliberate_process_interruption": false
+      },
+      "public_managed_lifecycle": {
+        "crash_handling_qualified": false,
+        "deliberate_process_interruption": false,
+        "disposable_exit": 7,
+        "drain_blocks_new_assignments": true,
+        "drain_survives_runtime_restart": true,
+        "existing_command_while_draining": true,
+        "file_bytes": 1048593,
+        "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+        "final_reserved_slots": 0,
+        "fixture_sha256": "ac45bd5b794e57f9627369facd15a18649f6af3b600f866f223f5f91b5bfa954",
+        "http_workers_exercised_while_native_draining": 0,
+        "identity": {
+          "architecture": "x86_64",
+          "assets_sha256": "97a62fc5e7c1b5881150d27696e08b144bc302589cf701fd8a89f61c3415d0a2",
+          "build_sha256": "cfed408f028aad6a22aa2dc2927577c33af8b0febc03e50c094ffc6db633cfb7",
+          "engine_version": "0.2.0",
+          "platform": "linux",
+          "smolvm_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+          "source_sha256": "63d92153fcef1c548847a55bfba9e2710467b1d7937f4fd1fbad3f6ef17193c0"
+        },
+        "owned_deleted": true,
+        "package_manifest_sha256": "ece2ed31b5974ca9a294c3d346e15e9df9713a34414789314809ef3166cc7ade",
+        "proof": "passed",
+        "public_native_admission_enabled": true,
+        "resume_version_checked": true,
+        "retained_after_normal_runtime_restart": true,
+        "retained_write_exit": 7,
+        "scope": "public-managed-port-lifecycle",
+        "store_mode": "ephemeral",
+        "terminal": {
+          "arguments": {
+            "codec": 55,
+            "empty_argument": true,
+            "generated_script": true,
+            "initial_size": {
+              "cols": 120,
+              "rows": 43
+            },
+            "literal_metacharacters": true,
+            "observed_exit": 7,
+            "stdin_roundtrip": true
+          },
+          "binary_input_bytes": 3,
+          "binary_output_verified": true,
+          "codec": 17,
+          "deliberate_process_interruption": false,
+          "duplicate_open_reuses_execution": true,
+          "exercised": true,
+          "observed_exit": 7,
+          "resize": {
+            "cols": 120,
+            "rows": 43
+          },
+          "scope": "ordinary-public-retained-image-pty",
+          "slot_released": true,
+          "transcript_persisted": false
+        }
+      },
+      "compatible_same_sdk_package_upgrade": {
+        "from_manifest_sha256": "ff9a221cdfa1fcb42ddc30d89663ce8613f3ace29fed2fc31c94da43e8d4cd7b",
+        "to_manifest_sha256": "ece2ed31b5974ca9a294c3d346e15e9df9713a34414789314809ef3166cc7ade",
+        "from_identity": {
+          "engine_version": "0.2.0",
+          "smolvm_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+          "source_sha256": "63d92153fcef1c548847a55bfba9e2710467b1d7937f4fd1fbad3f6ef17193c0",
+          "build_sha256": "570448c4f074b930731611b557be60998e67c1091c9e79a167d2cc4a0cd66d09",
+          "assets_sha256": "97a62fc5e7c1b5881150d27696e08b144bc302589cf701fd8a89f61c3415d0a2",
+          "platform": "linux",
+          "architecture": "x86_64"
+        },
+        "to_identity": {
+          "engine_version": "0.2.0",
+          "smolvm_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+          "source_sha256": "63d92153fcef1c548847a55bfba9e2710467b1d7937f4fd1fbad3f6ef17193c0",
+          "build_sha256": "cfed408f028aad6a22aa2dc2927577c33af8b0febc03e50c094ffc6db633cfb7",
+          "assets_sha256": "97a62fc5e7c1b5881150d27696e08b144bc302589cf701fd8a89f61c3415d0a2",
+          "platform": "linux",
+          "architecture": "x86_64"
+        },
+        "retained_full_receipt": true,
+        "domain_generation_unchanged": true,
+        "old_assets_retained_during_upgrade": true,
+        "codec_rollback_qualified": false
+      },
+      "previous_candidate_manifest_sha256": "ff9a221cdfa1fcb42ddc30d89663ce8613f3ace29fed2fc31c94da43e8d4cd7b",
+      "previous_candidate_evidence_transferred": false,
+      "public_checkpoints": {
+        "campaign": "ordinary-public-native-checkpoints",
+        "package_manifest_sha256": "ece2ed31b5974ca9a294c3d346e15e9df9713a34414789314809ef3166cc7ade",
+        "store_mode": "ephemeral",
+        "capture_source_continues": true,
+        "duplicate_capture_retained": true,
+        "stopped_runtime_replacement": true,
+        "ram_and_disk_restored": true,
+        "independent_restores": 2,
+        "cold_restart_does_not_restore_ram": true,
+        "captured_bytes_unchanged": true,
+        "capture_artifact_removed": true,
+        "native_capture_cleanup": true,
+        "codec_roundtrips": true,
+        "owned_deleted": true,
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0,
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false,
+        "stdout_log_sha256": "f62d9ee82920ee879c7b0db1a5e6a83d36eb277beb5d73910086f58d3537b679"
+      },
       "public_branches": {
         "campaign": "ordinary-public-native-branches",
-        "package_manifest_sha256": "f46a8e51cde39c942fa1a2d00e91a9837035a4b759628a740d3971762896c9c1",
+        "package_manifest_sha256": "ece2ed31b5974ca9a294c3d346e15e9df9713a34414789314809ef3166cc7ade",
         "store_mode": "ephemeral",
         "cold_restart_does_not_restore_ram": true,
         "codec_roundtrips": true,
@@ -207,45 +979,639 @@
         "source_dependencies_retired": 2,
         "native_backing_acknowledgements": 2,
         "branch_budget_rejected_before_dispatch": true,
-        "drain_rejected_new_branch": true
+        "drain_rejected_new_branch": true,
+        "stdout_log_sha256": "d090c2dc3b56ee4b85a91b30882e4f8c02976b175822b81b39e80f341362205a"
+      },
+      "public_export_reimport": {
+        "mode": "container",
+        "store": "memory",
+        "final_reserved_slots": 0,
+        "crash_validation_deferred": true,
+        "content_sha256": "fcde2e57c1059d5ca1823bbe897c75b9d4f1c1343b397aae52b5296fd3582938",
+        "package_manifest_sha256": "ece2ed31b5974ca9a294c3d346e15e9df9713a34414789314809ef3166cc7ade",
+        "runtime_replacement": true,
+        "native_cleanup_resolved": true,
+        "export_history_after_delete": true,
+        "pinned_registry_reimport": true,
+        "source_and_copy_independent": true,
+        "manifest_sha256": "dd89fa2ce28971a03aceaeb776f1a4f56a4c13f45982c1b82992d38873b5b1fd",
+        "size_bytes": 31867804
+      },
+      "public_registry": {
+        "campaign": "ordinary-public-native-images",
+        "cold_warm_registry": true,
+        "configured_startup": false,
+        "crash_handling_qualified": false,
+        "deliberate_process_interruption": false,
+        "final_reserved_slots": 0,
+        "identity": {
+          "architecture": "x86_64",
+          "assets_sha256": "97a62fc5e7c1b5881150d27696e08b144bc302589cf701fd8a89f61c3415d0a2",
+          "build_sha256": "cfed408f028aad6a22aa2dc2927577c33af8b0febc03e50c094ffc6db633cfb7",
+          "engine_version": "0.2.0",
+          "platform": "linux",
+          "smolvm_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+          "source_sha256": "63d92153fcef1c548847a55bfba9e2710467b1d7937f4fd1fbad3f6ef17193c0"
+        },
+        "image_operations": {
+          "imported_pull_rejected": true,
+          "inventory_observed": true
+        },
+        "immutable_creation_retained": true,
+        "owned_deleted": true,
+        "package_manifest_sha256": "ece2ed31b5974ca9a294c3d346e15e9df9713a34414789314809ef3166cc7ade",
+        "retained_binary_bytes": 65537,
+        "retained_binary_sha256": "f6b82df7d28d7ebac8601da4c154ce0d5389b929901075bbbeec3003e37e12b4",
+        "source": {
+          "architecture": "x86_64",
+          "content_sha256": "fcde2e57c1059d5ca1823bbe897c75b9d4f1c1343b397aae52b5296fd3582938",
+          "id": "registry-demo",
+          "kind": "registry",
+          "reference": "127.0.0.1:40651/proof/export@sha256:dd89fa2ce28971a03aceaeb776f1a4f56a4c13f45982c1b82992d38873b5b1fd",
+          "sha256": "dd89fa2ce28971a03aceaeb776f1a4f56a4c13f45982c1b82992d38873b5b1fd"
+        },
+        "source_kind": "registry",
+        "startup_counts": [],
+        "stopped_runtime_replacement": true,
+        "store_mode": "ephemeral"
+      },
+      "public_oci_startup": {
+        "campaign": "ordinary-public-native-images",
+        "cold_warm_registry": false,
+        "configured_startup": true,
+        "crash_handling_qualified": false,
+        "deliberate_process_interruption": false,
+        "final_reserved_slots": 0,
+        "identity": {
+          "architecture": "x86_64",
+          "assets_sha256": "97a62fc5e7c1b5881150d27696e08b144bc302589cf701fd8a89f61c3415d0a2",
+          "build_sha256": "cfed408f028aad6a22aa2dc2927577c33af8b0febc03e50c094ffc6db633cfb7",
+          "engine_version": "0.2.0",
+          "platform": "linux",
+          "smolvm_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+          "source_sha256": "63d92153fcef1c548847a55bfba9e2710467b1d7937f4fd1fbad3f6ef17193c0"
+        },
+        "image_operations": {
+          "approved_pull_observed": true,
+          "creation_source_unchanged": true,
+          "duplicate_pull_reused": true,
+          "inventory_observed": true
+        },
+        "immutable_creation_retained": true,
+        "owned_deleted": true,
+        "package_manifest_sha256": "ece2ed31b5974ca9a294c3d346e15e9df9713a34414789314809ef3166cc7ade",
+        "retained_binary_bytes": 65537,
+        "retained_binary_sha256": "f6b82df7d28d7ebac8601da4c154ce0d5389b929901075bbbeec3003e37e12b4",
+        "source": {
+          "architecture": "x86_64",
+          "id": "busybox-pinned",
+          "kind": "oci",
+          "reference": "docker.io/library/busybox@sha256:66a6306db78bf2dbf3487f293aa8d6990d8e506fdffab9cc43fe422becf886e4",
+          "sha256": "66a6306db78bf2dbf3487f293aa8d6990d8e506fdffab9cc43fe422becf886e4"
+        },
+        "source_kind": "oci",
+        "startup_counts": [
+          1,
+          2
+        ],
+        "stopped_runtime_replacement": true,
+        "store_mode": "ephemeral"
+      },
+      "isolated_native_network": {
+        "proof": "passed",
+        "scope": "ordinary-raw-port-network-mappings",
+        "package_manifest_sha256": "ece2ed31b5974ca9a294c3d346e15e9df9713a34414789314809ef3166cc7ade",
+        "identity": {
+          "engine_version": "0.2.0",
+          "smolvm_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+          "source_sha256": "63d92153fcef1c548847a55bfba9e2710467b1d7937f4fd1fbad3f6ef17193c0",
+          "build_sha256": "cfed408f028aad6a22aa2dc2927577c33af8b0febc03e50c094ffc6db633cfb7",
+          "assets_sha256": "97a62fc5e7c1b5881150d27696e08b144bc302589cf701fd8a89f61c3415d0a2",
+          "platform": "linux",
+          "architecture": "x86_64"
+        },
+        "fixture_sha256": "9aa816cfc8635543262f21393e5895d17de9c7707a6c568a29d78d4bfb7587bc",
+        "cases": [
+          {
+            "network": {
+              "enabled": false,
+              "hosts": [],
+              "cidrs": []
+            },
+            "ports": [
+              {
+                "host": 28435,
+                "guest": 8000
+              }
+            ],
+            "observed_backend": "virtio-net",
+            "cycles": [
+              {
+                "outbound_reached": [
+                  false,
+                  false
+                ],
+                "host_positive_controls": [
+                  true,
+                  true
+                ],
+                "inbound_reply_verified": true,
+                "listener_addresses": [
+                  "127.0.0.1:28435",
+                  "[::1]:28435"
+                ],
+                "ordinary_background_launch_acknowledged": true
+              },
+              {
+                "outbound_reached": [
+                  false,
+                  false
+                ],
+                "host_positive_controls": [
+                  true,
+                  true
+                ],
+                "inbound_reply_verified": true,
+                "listener_addresses": [
+                  "127.0.0.1:28435",
+                  "[::1]:28435"
+                ],
+                "ordinary_background_launch_acknowledged": true
+              }
+            ],
+            "owned_deleted": true,
+            "retained_after_stop_start": true
+          },
+          {
+            "network": {
+              "enabled": true,
+              "hosts": [],
+              "cidrs": [
+                "1.1.1.1/32"
+              ]
+            },
+            "ports": [
+              {
+                "host": 28435,
+                "guest": 8000
+              }
+            ],
+            "observed_backend": "virtio-net",
+            "cycles": [
+              {
+                "outbound_reached": [
+                  true,
+                  false
+                ],
+                "host_positive_controls": [
+                  true,
+                  true
+                ],
+                "inbound_reply_verified": true,
+                "listener_addresses": [
+                  "127.0.0.1:28435",
+                  "[::1]:28435"
+                ],
+                "ordinary_background_launch_acknowledged": true
+              },
+              {
+                "outbound_reached": [
+                  true,
+                  false
+                ],
+                "host_positive_controls": [
+                  true,
+                  true
+                ],
+                "inbound_reply_verified": true,
+                "listener_addresses": [
+                  "127.0.0.1:28435",
+                  "[::1]:28435"
+                ],
+                "ordinary_background_launch_acknowledged": true
+              }
+            ],
+            "owned_deleted": true,
+            "retained_after_stop_start": true
+          }
+        ],
+        "normal_stop_child_reaping": [
+          {
+            "stopped_helper_children": 0
+          },
+          {
+            "stopped_helper_children": 0
+          },
+          {
+            "stopped_helper_children": 0
+          },
+          {
+            "stopped_helper_children": 0
+          }
+        ],
+        "inventory_before": [],
+        "inventory_after": [],
+        "public_managed_reservations_qualified": false,
+        "workload_startup_qualified": false,
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false
+      },
+      "durable_growth": {
+        "scope": "public-linux-growth-runtime",
+        "identity": {
+          "architecture": "x86_64",
+          "assets_sha256": "97a62fc5e7c1b5881150d27696e08b144bc302589cf701fd8a89f61c3415d0a2",
+          "build_sha256": "cfed408f028aad6a22aa2dc2927577c33af8b0febc03e50c094ffc6db633cfb7",
+          "engine_version": "0.2.0",
+          "platform": "linux",
+          "smolvm_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+          "source_sha256": "63d92153fcef1c548847a55bfba9e2710467b1d7937f4fd1fbad3f6ef17193c0"
+        },
+        "phase": "resume",
+        "package_manifest_sha256": "ece2ed31b5974ca9a294c3d346e15e9df9713a34414789314809ef3166cc7ade",
+        "owned_deleted": true,
+        "separate_normal_beam_restart": true,
+        "historical_output_after_normal_beam_restart": true,
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0,
+        "store_mode": "durable",
+        "fixture_sha256": "ac45bd5b794e57f9627369facd15a18649f6af3b600f866f223f5f91b5bfa954",
+        "creation_input": {
+          "architecture": "x86_64",
+          "id": "application",
+          "sha256": "ac45bd5b794e57f9627369facd15a18649f6af3b600f866f223f5f91b5bfa954"
+        },
+        "worker_capacity": {
+          "slots": 1,
+          "cpus": 1,
+          "memory_mb": 768,
+          "disk_gb": 8
+        },
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false,
+        "file_bytes": 65554,
+        "file_sha256": "25ac6018e1a86a5aa310d7cd70d12c517e89e42b33afb021d07ca3c0ce909638",
+        "stopped_runtime_replacement": true,
+        "growth_history_retained": true,
+        "immutable_creation_retained": true,
+        "growth_budget_rejected_before_dispatch": true,
+        "running_growth_rejected": true,
+        "drain_retained": true,
+        "duplicate_growth_retained": true,
+        "conflicting_growth_rejected": true,
+        "storage_filesystem_growth": true,
+        "overlay_geometry_verified": true,
+        "omitted_target_retained": true,
+        "material_chain_retained": true
+      },
+      "durable_volumes": {
+        "scope": "public-linux-mounted-runtime",
+        "identity": {
+          "architecture": "x86_64",
+          "assets_sha256": "97a62fc5e7c1b5881150d27696e08b144bc302589cf701fd8a89f61c3415d0a2",
+          "build_sha256": "cfed408f028aad6a22aa2dc2927577c33af8b0febc03e50c094ffc6db633cfb7",
+          "engine_version": "0.2.0",
+          "platform": "linux",
+          "smolvm_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+          "source_sha256": "63d92153fcef1c548847a55bfba9e2710467b1d7937f4fd1fbad3f6ef17193c0"
+        },
+        "phase": "resume",
+        "owned_deleted": true,
+        "separate_normal_beam_restart": true,
+        "historical_output_after_normal_beam_restart": true,
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0,
+        "store_mode": "durable",
+        "package_manifest_sha256": "ece2ed31b5974ca9a294c3d346e15e9df9713a34414789314809ef3166cc7ade",
+        "fixture_sha256": "ac45bd5b794e57f9627369facd15a18649f6af3b600f866f223f5f91b5bfa954",
+        "worker_capacity": {
+          "slots": 2,
+          "cpus": 2,
+          "memory_mb": 1536,
+          "disk_gb": 10
+        },
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false,
+        "file_bytes": 65554,
+        "file_sha256": "25ac6018e1a86a5aa310d7cd70d12c517e89e42b33afb021d07ca3c0ce909638",
+        "readonly_reattachment": true,
+        "stopped_runtime_replacement": true,
+        "drain_retained": true,
+        "running_sibling_preserved": true,
+        "competing_attachment_rejected": true,
+        "volume_budget_rejected_before_dispatch": true,
+        "proof_retained": true
       }
     },
-    "linux_x86_64": {
-      "manifest_sha256": "9c5635d86721439ee3e29931f1c6efda6cacd7c70c252697d97c17de30b1b268",
+    "linux_aarch64": {
+      "manifest_sha256": "0180891bbbdce929543dded8f52b6685d75dfce362881e1a7aebdb3b10ef6ec1",
       "identity": {
         "engine_version": "0.2.0",
         "smolvm_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
         "source_sha256": "63d92153fcef1c548847a55bfba9e2710467b1d7937f4fd1fbad3f6ef17193c0",
-        "build_sha256": "faa8e23ef34157a3b9d754fd0eee8f9978496eb5d2dbf3bf61330f3edaa89f7f",
-        "assets_sha256": "65f7a36a2b825b193699140c95ca51a3879f2521e47c4aace2d0de63eeaed872",
+        "build_sha256": "01361d717999d351043dcf3c56a8e09c6cd3bd723003653a8b7382d20201119a",
+        "assets_sha256": "25c5e83233ffa03ccd61a6df32f612b78d0efe80f6a9a1c55545cac6016d886c",
         "platform": "linux",
-        "architecture": "x86_64"
+        "architecture": "aarch64"
       },
-      "ordinary_lifecycle": "passed",
-      "retained_after_stop_start": true,
-      "fresh_helper_readback": true,
-      "file_bytes": 1048593,
-      "non_root_exec": true,
-      "observed_exit": 7,
-      "observability": "passed",
-      "terminal_preflight": "passed",
-      "owned_deleted": true,
-      "inventory_empty": true,
+      "ordinary_lifecycle": {
+        "proof": "passed",
+        "scope": "ordinary-native-lifecycle",
+        "package_manifest_sha256": "0180891bbbdce929543dded8f52b6685d75dfce362881e1a7aebdb3b10ef6ec1",
+        "identity": {
+          "engine_version": "0.2.0",
+          "smolvm_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+          "source_sha256": "63d92153fcef1c548847a55bfba9e2710467b1d7937f4fd1fbad3f6ef17193c0",
+          "build_sha256": "01361d717999d351043dcf3c56a8e09c6cd3bd723003653a8b7382d20201119a",
+          "assets_sha256": "25c5e83233ffa03ccd61a6df32f612b78d0efe80f6a9a1c55545cac6016d886c",
+          "platform": "linux",
+          "architecture": "aarch64"
+        },
+        "fixture_sha256": "11ee6ae490cdc148d398a40aeda571c5fd2cfaf9d706faa4070741df3f08c0dd",
+        "observed_exit": 7,
+        "file_bytes": 1048593,
+        "file_sha256": "b863256dee74effc15743dff63a34ea93bb1f6778b22f6c971469c259638dd41",
+        "retained_after_stop_start": true,
+        "retained_after_stopped_helper_shutdown": true,
+        "fresh_epoch": true,
+        "owned_deleted": true,
+        "inventory_before": [],
+        "inventory_after": [],
+        "upgrade": null,
+        "normal_stop_child_reaping": [],
+        "ordinary_observability": [
+          {
+            "state": "empty",
+            "total": 0,
+            "running": 0,
+            "allocated_cpus": 0,
+            "allocated_memory_mb": 0,
+            "inventory_count": 0,
+            "running_process_sampled": null,
+            "metrics_bound_to_lifecycle": true,
+            "readiness": true
+          },
+          {
+            "state": "stopped",
+            "total": 1,
+            "running": 0,
+            "allocated_cpus": 0,
+            "allocated_memory_mb": 0,
+            "inventory_count": 1,
+            "running_process_sampled": false,
+            "metrics_bound_to_lifecycle": true,
+            "readiness": true
+          },
+          {
+            "state": "running",
+            "total": 1,
+            "running": 1,
+            "allocated_cpus": 1,
+            "allocated_memory_mb": 512,
+            "inventory_count": 1,
+            "running_process_sampled": true,
+            "metrics_bound_to_lifecycle": true,
+            "readiness": true
+          },
+          {
+            "state": "stopped",
+            "total": 1,
+            "running": 0,
+            "allocated_cpus": 0,
+            "allocated_memory_mb": 0,
+            "inventory_count": 1,
+            "running_process_sampled": false,
+            "metrics_bound_to_lifecycle": true,
+            "readiness": true
+          },
+          {
+            "state": "stopped",
+            "total": 1,
+            "running": 0,
+            "allocated_cpus": 0,
+            "allocated_memory_mb": 0,
+            "inventory_count": 1,
+            "running_process_sampled": false,
+            "metrics_bound_to_lifecycle": true,
+            "readiness": true
+          },
+          {
+            "state": "missing",
+            "total": 0,
+            "running": 0,
+            "allocated_cpus": 0,
+            "allocated_memory_mb": 0,
+            "inventory_count": 0,
+            "running_process_sampled": false,
+            "metrics_bound_to_lifecycle": true,
+            "readiness": true
+          }
+        ],
+        "ordinary_terminal_preflight": [
+          {
+            "state": "stopped",
+            "no_stream_events": true,
+            "sdk_records_unchanged": true,
+            "owned_children_unchanged": true
+          },
+          {
+            "state": "running",
+            "no_stream_events": true,
+            "sdk_records_unchanged": true,
+            "owned_children_unchanged": true
+          },
+          {
+            "state": "stopped",
+            "no_stream_events": true,
+            "sdk_records_unchanged": true,
+            "owned_children_unchanged": true
+          },
+          {
+            "state": "stopped",
+            "no_stream_events": true,
+            "sdk_records_unchanged": true,
+            "owned_children_unchanged": true
+          },
+          {
+            "state": "missing",
+            "no_stream_events": true,
+            "sdk_records_unchanged": true,
+            "owned_children_unchanged": true
+          }
+        ],
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false
+      },
       "padded_telemetry": {
-        "status": "passed",
-        "naturally_produced_sample_bytes": 1024,
-        "running_egress_bytes": 0,
-        "stopped_egress_bytes": 0
+        "proof": "passed",
+        "sdk": {
+          "sdk_version": "1.35.1",
+          "source_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+          "feature_versions": {
+            "lifecycle": 1,
+            "foreground_exec": 1,
+            "extended_exec": 1,
+            "files": 1,
+            "extended_files": 1,
+            "material_proofs": 2,
+            "observability": 1,
+            "networking": 1,
+            "ports": 1,
+            "workloads": 1,
+            "compact_creation": 1,
+            "job_resources": 1,
+            "buffered_exec": 1,
+            "background_exec": 1,
+            "logs": 1,
+            "streaming_exec": 1,
+            "terminals": 1,
+            "volumes": 1,
+            "disk_growth": 1,
+            "terminal_preflight": 1,
+            "remote_sources": 1,
+            "images": 1,
+            "checkpoints": 1,
+            "branches": 1,
+            "branch_release_env": 1,
+            "branch_static_egress": 1,
+            "branch_https_credentials": 1,
+            "partial_collection_preflight": 1,
+            "exports": 1,
+            "terminal_arguments": 1
+          }
+        },
+        "package_identity": {
+          "engine_version": "0.2.0",
+          "smolvm_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+          "source_sha256": "63d92153fcef1c548847a55bfba9e2710467b1d7937f4fd1fbad3f6ef17193c0",
+          "build_sha256": "01361d717999d351043dcf3c56a8e09c6cd3bd723003653a8b7382d20201119a",
+          "assets_sha256": "25c5e83233ffa03ccd61a6df32f612b78d0efe80f6a9a1c55545cac6016d886c",
+          "platform": "linux",
+          "architecture": "aarch64"
+        },
+        "manifest_sha256": "0180891bbbdce929543dded8f52b6685d75dfce362881e1a7aebdb3b10ef6ec1",
+        "sample_bytes": 1024,
+        "running_counters": {
+          "cpu_millis": 2130,
+          "cpu_seconds": 2,
+          "disk_used_mb": 2,
+          "egress_bytes": 0,
+          "private_memory_mb": 66,
+          "pss_mb": null,
+          "rss_mb": 92,
+          "shared_memory_mapped_mb": 25
+        },
+        "stopped_counters": {
+          "cpu_millis": null,
+          "cpu_seconds": null,
+          "disk_used_mb": 11,
+          "egress_bytes": 0,
+          "private_memory_mb": null,
+          "pss_mb": null,
+          "rss_mb": null,
+          "shared_memory_mapped_mb": null
+        },
+        "inventory_empty": true,
+        "deliberate_process_interruption": false
       },
-      "deliberate_process_interruption": false,
-      "crash_handling_qualified": false
+      "public_managed_lifecycle": {
+        "crash_handling_qualified": false,
+        "deliberate_process_interruption": false,
+        "disposable_exit": 7,
+        "drain_blocks_new_assignments": true,
+        "drain_survives_runtime_restart": true,
+        "existing_command_while_draining": true,
+        "file_bytes": 1048593,
+        "file_sha256": "6421abc875ac81a86d58d53f269fd5a9a19a78b4619ee3ca76654fbb0b4fe5fc",
+        "final_reserved_slots": 0,
+        "fixture_sha256": "11ee6ae490cdc148d398a40aeda571c5fd2cfaf9d706faa4070741df3f08c0dd",
+        "http_workers_exercised_while_native_draining": 0,
+        "identity": {
+          "architecture": "aarch64",
+          "assets_sha256": "25c5e83233ffa03ccd61a6df32f612b78d0efe80f6a9a1c55545cac6016d886c",
+          "build_sha256": "01361d717999d351043dcf3c56a8e09c6cd3bd723003653a8b7382d20201119a",
+          "engine_version": "0.2.0",
+          "platform": "linux",
+          "smolvm_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+          "source_sha256": "63d92153fcef1c548847a55bfba9e2710467b1d7937f4fd1fbad3f6ef17193c0"
+        },
+        "owned_deleted": true,
+        "package_manifest_sha256": "0180891bbbdce929543dded8f52b6685d75dfce362881e1a7aebdb3b10ef6ec1",
+        "proof": "passed",
+        "public_native_admission_enabled": true,
+        "resume_version_checked": true,
+        "retained_after_normal_runtime_restart": true,
+        "retained_write_exit": 7,
+        "scope": "public-managed-port-lifecycle",
+        "store_mode": "ephemeral",
+        "terminal": {
+          "arguments": {
+            "codec": 55,
+            "empty_argument": true,
+            "generated_script": true,
+            "initial_size": {
+              "cols": 120,
+              "rows": 43
+            },
+            "literal_metacharacters": true,
+            "observed_exit": 7,
+            "stdin_roundtrip": true
+          },
+          "binary_input_bytes": 3,
+          "binary_output_verified": true,
+          "codec": 17,
+          "deliberate_process_interruption": false,
+          "duplicate_open_reuses_execution": true,
+          "exercised": true,
+          "observed_exit": 7,
+          "resize": {
+            "cols": 120,
+            "rows": 43
+          },
+          "scope": "ordinary-public-retained-image-pty",
+          "slot_released": true,
+          "transcript_persisted": false
+        }
+      },
+      "compatible_same_sdk_package_upgrade": {
+        "from_manifest_sha256": "da6917e0abc8ad50712b83daacb59e52ef1a3673bc0be5bb2356db7f5fb3bd5e",
+        "to_manifest_sha256": "0180891bbbdce929543dded8f52b6685d75dfce362881e1a7aebdb3b10ef6ec1",
+        "from_identity": {
+          "engine_version": "0.2.0",
+          "smolvm_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+          "source_sha256": "63d92153fcef1c548847a55bfba9e2710467b1d7937f4fd1fbad3f6ef17193c0",
+          "build_sha256": "a575b505759d5719682667a2829a94e8af58ec9fbd472b2d815c1f29d07d2ba2",
+          "assets_sha256": "25c5e83233ffa03ccd61a6df32f612b78d0efe80f6a9a1c55545cac6016d886c",
+          "platform": "linux",
+          "architecture": "aarch64"
+        },
+        "to_identity": {
+          "engine_version": "0.2.0",
+          "smolvm_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+          "source_sha256": "63d92153fcef1c548847a55bfba9e2710467b1d7937f4fd1fbad3f6ef17193c0",
+          "build_sha256": "01361d717999d351043dcf3c56a8e09c6cd3bd723003653a8b7382d20201119a",
+          "assets_sha256": "25c5e83233ffa03ccd61a6df32f612b78d0efe80f6a9a1c55545cac6016d886c",
+          "platform": "linux",
+          "architecture": "aarch64"
+        },
+        "retained_full_receipt": true,
+        "domain_generation_unchanged": true,
+        "old_assets_retained_during_upgrade": true,
+        "codec_rollback_qualified": false
+      },
+      "previous_candidate_manifest_sha256": "da6917e0abc8ad50712b83daacb59e52ef1a3673bc0be5bb2356db7f5fb3bd5e",
+      "previous_candidate_evidence_transferred": false
     }
   },
   "attempts_and_retained_evidence": [
     "Initial Elixir qualification exposed concurrent fixture cleanup races; use the existing retrying Package.remove! helper. Focused reruns and the final complete mix ci passed.",
     "Initial macOS branch worker used the login-account SDK namespace after env_clear. The worker HOME projection fix passed the fresh two-child public branch campaign. The original failed domain remains retained, its helper shut down through shutdown_retained, and its original VMM is gone; no deletion or backing-release claim is made for it.",
     "Initial Linux Rust runs inherited a shared-group umask and old writable test executables. The repository native check requires umask 077; the final rebuilt workspace passed under that setting, including the previously rejected executable-ownership cases.",
-    "The ordinary negative branch worker fixture was updated to the macOS namespace shape while retaining its non-SDK database filename; it still cannot enter the SDK or dispatch a VM."
+    "The ordinary negative branch worker fixture was updated to the macOS namespace shape while retaining its non-SDK database filename; it still cannot enter the SDK or dispatch a VM.",
+    "ARM64 KVM ACL disappeared between lab sessions. The diagnostic-only build exposed KvmPermission beneath conservative ownership handling. The fresh lab account was added to the KVM group; the uninstrumented release passed lifecycle, stop/start, telemetry and public terminal argv qualification. Failed original domains remain retained; no capacity-release claim is made for them.",
+    "The new argv live proof exposed a missing native terminal I/O argv comparison; it now compares the complete ordered vector and has a regression through the public SDK wire peer. A noninteractive shell fixture now ignores WINCH while blocked in read. Fresh macOS, Linux x86_64 and Linux ARM64 proofs passed.",
+    "An attempted checkpoint campaign started from a local packed artifact, which existing portable capture preflight deliberately rejects. Its failed domain and records remain retained; no capture dispatch or artifact was observed. Fresh qualification with supported checkpoint seed sources passed on both final macOS and Linux packages.",
+    "The first Linux public-volume campaign retained an unknown provisioning result. Its controller and helper received normal shutdown; no volume backing deletion or capacity release is claimed. The fixture used a noncanonical volume root; fresh campaigns using the canonical SDK volume root passed, including separate-BEAM PostgreSQL recovery."
   ],
   "evidence_storage": {
     "local_root": "/Users/humberto/Projects/smolbox/.local/qualification-1.35.1-20261116",
@@ -254,6 +1620,507 @@
   },
   "http_cleanup": {
     "macos_aarch64": "empty inventory verified before normal worker shutdown",
-    "linux_x86_64": "empty inventory verified before normal worker shutdown"
+    "linux_x86_64": "empty inventory verified before normal worker shutdown",
+    "linux_aarch64": {
+      "health": {
+        "status": "ok",
+        "version": "1.35.1",
+        "machines": {
+          "total": 0,
+          "running": 0
+        },
+        "uptime_seconds": 290,
+        "nested_virt": false
+      },
+      "normal_shutdown_confirmed": true,
+      "empty_inventory": true
+    },
+    "macos_postgresql": {
+      "health": {
+        "status": "ok",
+        "version": "1.35.1",
+        "machines": {
+          "total": 0,
+          "running": 0
+        },
+        "uptime_seconds": 2103,
+        "nested_virt": false
+      },
+      "normal_shutdown_requested": true,
+      "empty_inventory": true
+    }
+  },
+  "commits": {
+    "initial_compatibility": "41cc4592",
+    "terminal_arguments": "9dd73d29"
+  },
+  "terminal_compatibility": {
+    "decision": "explicit ordered arguments; upstream SDK and runtime remain unmodified",
+    "http_versions": [
+      "1.35.1"
+    ],
+    "native_feature": "terminal_arguments: 1",
+    "store_reader": "terminal_arguments: 1",
+    "record_envelope": 55,
+    "legacy_empty_arguments": "Existing record envelopes and fingerprints retained",
+    "qualified_semantics": [
+      "Generated script launched through an image interpreter",
+      "Empty argument retained",
+      "Literal shell metacharacters preserved without expansion",
+      "Arguments with spaces preserved",
+      "Binary PTY input and output",
+      "Resize",
+      "Input roundtrip",
+      "Observed exit 7",
+      "Selective v55 codec roundtrip",
+      "Duplicate open retains one execution",
+      "Normal Runtime replacement and owned deletion"
+    ],
+    "native_qualified_platforms": [
+      "macos_aarch64",
+      "linux_x86_64",
+      "linux_aarch64"
+    ],
+    "http_qualified_platforms": [
+      "macos_aarch64",
+      "linux_x86_64"
+    ]
+  },
+  "kubernetes": {
+    "phase0": "passed",
+    "cleanup_verified": true,
+    "runtime": {
+      "sha256": {
+        "containerd-shim-smolvm-v2": "711e16b6e494910ec1ff000d0171e5482e1b856ebe054c0595ee6339ed825e8a",
+        "smolvm-bin": "b17712db1b1bb59b2b2aeeaf78c6c98e3784df857a4b9ffc915e5219503713f5",
+        "lib/libkrun.so": "c3bcc4616738e17a1cf3a7a93b38eb08b3d04bb567a72d7f68e95b24c9481c46",
+        "lib/libkrunfw.so.5.5.0": "96b78e5f644119cd2e8a6af61861625aa9c60bc7d3e14822ed107c6ca140ed64",
+        "storage-template.ext4.zst": "028100b3d7c0e6358e3ce3d37f83ff0dcd0c61f78f14d09264399110824a87c3",
+        "overlay-template.ext4.zst": "b3b6d0758803568176547577bdc69f18d67da079c33326a4d638c2a53a87e745"
+      },
+      "archive_verified": true,
+      "template_sizes": {
+        "storage-template.ext4": 21474836480,
+        "overlay-template.ext4": 10737418240
+      },
+      "agent_rootfs": {
+        "sha256": "5cbda404a710b37ce362cb2c8d259d41c7259bbd62935e93cc5f309c73508500",
+        "entries": 791,
+        "scheme": "sorted-posix-path-type-content-v1"
+      }
+    },
+    "pins": {
+      "cloud_image": {
+        "url": "https://cloud-images.ubuntu.com/releases/noble/release-20260826/ubuntu-24.04-server-cloudimg-amd64.img",
+        "sha256": "d0fe84bb5f80853425fa6be28e2c106f30104c3cfe8611933f2e65c9b63f0e30"
+      },
+      "k3s": {
+        "version": "v1.35.10+k3s1",
+        "url": "https://github.com/k3s-io/k3s/releases/download/v1.35.10%2Bk3s1/k3s",
+        "sha256": "5cd49f0faca5b2ea4355d4761e7b1445b8aa05cd50e612fd9c370551db49e5e2"
+      },
+      "smolvm": {
+        "version": "1.35.1",
+        "url": "https://github.com/smol-machines/smolvm/releases/download/v1.35.1/smolvm-1.35.1-linux-x86_64.tar.gz",
+        "sha256": "1c9377f6ada3c7c6753efada90595d5f44eb7a900ca0e4f8b786815b84fd22be"
+      },
+      "image": "docker.io/library/busybox@sha256:b7f3d86d6e84fc17718c48bcde1450807faa2d56704205c697b4bd5df7b9e29f"
+    },
+    "source_review": "scripts/kubernetes/source-basis-1.35.1.json",
+    "node_history_review": "scripts/kubernetes/node-history-source-basis-1.35.1.json",
+    "raw_harness_source_basis": "The immutable raw phase-0 report carries the prior default 1.34.0 source-basis metadata. Candidate runtime pins were independently verified as 1.35.1; the new source reviews are recorded separately.",
+    "public_controller_reports": {
+      "binary-pg-1351.json": {
+        "mode": "binary",
+        "state": "completed",
+        "usage": {
+          "slots": 0,
+          "cpus": 0,
+          "memory_mb": 0,
+          "disk_gb": 0
+        },
+        "cleanup": "complete",
+        "artifacts": [
+          {
+            "destination": "binary-output",
+            "path": "/workspace/output",
+            "sha256": "8f1a936251db3b3d4d5741bae241e19ca879baaebf21e2838eb5512aca79bc94",
+            "size": 4352
+          }
+        ],
+        "pod_uid": "51973dcc-d27c-4c80-9335-269277475e69",
+        "execution": [
+          "kubernetes-smoke",
+          "binary-pg-1351"
+        ],
+        "evidence": "exited",
+        "result_exit": 7,
+        "collection": "complete",
+        "cleanup_proof_version": 3,
+        "observer_epoch": "6b513d53-fcbc-485d-b1d0-f84b941fb53b",
+        "result_stdout_sha256": "f742b965f156c10374bc23aea96e3a8aff8facd6fc079defeaa30219ad86f211",
+        "result_stderr_sha256": "8509b81230019d2ad970d970f791dfbdc8caf54f5c594fcd327cef9feed206c1"
+      },
+      "cancel-1351.json": {
+        "mode": "cancel",
+        "state": "unknown",
+        "usage": {
+          "slots": 0,
+          "cpus": 0,
+          "memory_mb": 0,
+          "disk_gb": 0
+        },
+        "cleanup": "complete",
+        "artifacts": [],
+        "pod_uid": "639e6b9e-688a-4547-a306-febfd7f3121c",
+        "execution": [
+          "kubernetes-smoke",
+          "cancel-1351"
+        ],
+        "evidence": "termination_confirmed",
+        "result_exit": null,
+        "collection": "pending",
+        "cleanup_proof_version": 3,
+        "observer_epoch": "6b513d53-fcbc-485d-b1d0-f84b941fb53b",
+        "result_stdout_sha256": null,
+        "result_stderr_sha256": null
+      },
+      "cancel-pg-1351.json": {
+        "mode": "cancel",
+        "state": "unknown",
+        "usage": {
+          "slots": 0,
+          "cpus": 0,
+          "memory_mb": 0,
+          "disk_gb": 0
+        },
+        "cleanup": "complete",
+        "artifacts": [],
+        "pod_uid": "b0fc32e6-05b4-4c40-afe8-5fc4758eba0e",
+        "execution": [
+          "kubernetes-smoke",
+          "cancel-pg-1351"
+        ],
+        "evidence": "termination_confirmed",
+        "result_exit": null,
+        "collection": "pending",
+        "cleanup_proof_version": 3,
+        "observer_epoch": "6b513d53-fcbc-485d-b1d0-f84b941fb53b",
+        "result_stdout_sha256": null,
+        "result_stderr_sha256": null
+      },
+      "silent-1351.json": {
+        "mode": "silent",
+        "state": "completed",
+        "usage": {
+          "slots": 0,
+          "cpus": 0,
+          "memory_mb": 0,
+          "disk_gb": 0
+        },
+        "cleanup": "complete",
+        "artifacts": [],
+        "pod_uid": "6ccaae72-f059-43af-9645-842b883944fa",
+        "execution": [
+          "kubernetes-smoke",
+          "silent-1351"
+        ],
+        "evidence": "exited",
+        "result_exit": 0,
+        "collection": "complete",
+        "cleanup_proof_version": 3,
+        "observer_epoch": "6b513d53-fcbc-485d-b1d0-f84b941fb53b",
+        "result_stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "result_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "overflow-1351.json": {
+        "mode": "overflow",
+        "state": "unknown",
+        "usage": {
+          "slots": 0,
+          "cpus": 0,
+          "memory_mb": 0,
+          "disk_gb": 0
+        },
+        "cleanup": "complete",
+        "artifacts": [],
+        "pod_uid": "d56a5ece-a9fd-4e91-88b6-ca29c9c21b67",
+        "execution": [
+          "kubernetes-smoke",
+          "overflow-1351"
+        ],
+        "evidence": "termination_confirmed",
+        "result_exit": null,
+        "collection": "pending",
+        "cleanup_proof_version": 3,
+        "observer_epoch": "6b513d53-fcbc-485d-b1d0-f84b941fb53b",
+        "result_stdout_sha256": null,
+        "result_stderr_sha256": null
+      },
+      "binary-1351.json": {
+        "mode": "binary",
+        "state": "completed",
+        "usage": {
+          "slots": 0,
+          "cpus": 0,
+          "disk_gb": 0,
+          "memory_mb": 0
+        },
+        "cleanup": "complete",
+        "evidence": "exited",
+        "execution": [
+          "kubernetes-smoke",
+          "binary-1351"
+        ],
+        "collection": "complete",
+        "artifacts": [
+          {
+            "destination": "binary-output",
+            "path": "/workspace/output",
+            "sha256": "8f1a936251db3b3d4d5741bae241e19ca879baaebf21e2838eb5512aca79bc94",
+            "size": 4352
+          }
+        ],
+        "pod_uid": "1f71675f-137c-46e6-8286-b2f826192fd2",
+        "observer_epoch": "6b513d53-fcbc-485d-b1d0-f84b941fb53b",
+        "result_exit": 7,
+        "cleanup_proof_version": 3,
+        "result_stdout_sha256": "f742b965f156c10374bc23aea96e3a8aff8facd6fc079defeaa30219ad86f211",
+        "result_stderr_sha256": "8509b81230019d2ad970d970f791dfbdc8caf54f5c594fcd327cef9feed206c1"
+      }
+    },
+    "durable_postgresql_modes_passed": [
+      "binary",
+      "silent",
+      "cancel",
+      "overflow"
+    ],
+    "historical_source_approval_transferred": false,
+    "raw_source_basis_note": "The raw phase0 harness retained the older default source-basis metadata; the explicit 1.35.1 runtime/pins and separate 1.35.1 source/region review establish this campaign basis without rewriting the raw report."
+  },
+  "source_review_staging": {
+    "status": "local_archives_staged_not_published",
+    "native_source_commit": "e548f4f336dced0c6c8125b87f8aa09bc33351ef",
+    "current_registry_crates_verified": 714,
+    "indexed_corresponding_sources_verified": 1416,
+    "crun": "1.31-r0, aports 267ae2d4995f339f1d9fa82cb5bdab2510e28329",
+    "linux_libraries_and_macos_firmware": "exact tag Git LFS match",
+    "macos_libkrun": "all 14 file-backed Mach-O sections match the tag, official runtime and local package",
+    "crane": "same reviewed 0.22.1 bytes on all three targets",
+    "archives": {
+      "smolbox-embedded-sources.tar.gz": {
+        "sha256": "cfb144d2ff587fad6a99828ee8fdb5df73cf74b5404e3d51d2398cf0084f45fa",
+        "bytes": 1000306930
+      },
+      "smolbox-embedded-notices.tar.gz": {
+        "sha256": "9b9593506bba5d74d3baca6ce9f82a065e6618ecc655057066f6b8ff4795467f",
+        "bytes": 744820
+      }
+    },
+    "source_files": 3441,
+    "review": "docs/evidence/embedded-port-1.35.1-release-sources.md",
+    "draft_catalog": "native/release-inputs-1.35.1.json"
+  },
+  "staged_packaged_consumers": {
+    "status": "passed",
+    "cases": 6,
+    "public_release_provenance_qualified": false,
+    "fresh_os_accounts_qualified": false,
+    "matrix": {
+      "macos_aarch64": {
+        "current": {
+          "platform": "macos-aarch64",
+          "toolchain": "current",
+          "without_rust": true,
+          "client_archive_sha256": "72c881067abf7856e96d1d4b866f01289509e744228f04f3bb38809a7734a27c",
+          "native_archive_sha256": "2f60177c53b6c44420d137eee0309a904412b06a15be56023cd287acc5987d10",
+          "manifest_sha256": "e5c2bbf87b7ef500c15f94c918cc73c66b1691414f94e1cae4e4665680dec0af",
+          "notices_sha256": "9b9593506bba5d74d3baca6ce9f82a065e6618ecc655057066f6b8ff4795467f",
+          "explicit_tag": "v0.6.1-rc.1",
+          "installer_mode": "staged archive with independently selected digest",
+          "guest_stdout_42": true,
+          "owned_deleted": true,
+          "inventory_empty": true,
+          "versions": "Erlang/OTP 29 [erts-17.1.1] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit]\n\nElixir 1.20.5 (compiled with Erlang/OTP 29)\n",
+          "isolation": "fresh HOME, MIX_HOME and GitHub CLI configuration under the existing non-root UID",
+          "fresh_os_account_qualified": false,
+          "public_download_qualified": false
+        },
+        "minimum": {
+          "platform": "macos-aarch64",
+          "toolchain": "minimum",
+          "without_rust": true,
+          "client_archive_sha256": "72c881067abf7856e96d1d4b866f01289509e744228f04f3bb38809a7734a27c",
+          "native_archive_sha256": "2f60177c53b6c44420d137eee0309a904412b06a15be56023cd287acc5987d10",
+          "manifest_sha256": "e5c2bbf87b7ef500c15f94c918cc73c66b1691414f94e1cae4e4665680dec0af",
+          "notices_sha256": "9b9593506bba5d74d3baca6ce9f82a065e6618ecc655057066f6b8ff4795467f",
+          "explicit_tag": "v0.6.1-rc.1",
+          "installer_mode": "staged archive with independently selected digest",
+          "guest_stdout_42": true,
+          "owned_deleted": true,
+          "inventory_empty": true,
+          "versions": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)\n",
+          "isolation": "fresh HOME, MIX_HOME and GitHub CLI configuration under the existing non-root UID",
+          "fresh_os_account_qualified": false,
+          "public_download_qualified": false
+        }
+      },
+      "linux_x86_64": {
+        "current": {
+          "platform": "linux-x86_64",
+          "toolchain": "current",
+          "without_rust": true,
+          "client_archive_sha256": "72c881067abf7856e96d1d4b866f01289509e744228f04f3bb38809a7734a27c",
+          "native_archive_sha256": "fe5644d581936abdb8d8940b8d2224087c78e19fd17f967b8b19d5e0ecc9a721",
+          "manifest_sha256": "ece2ed31b5974ca9a294c3d346e15e9df9713a34414789314809ef3166cc7ade",
+          "notices_sha256": "9b9593506bba5d74d3baca6ce9f82a065e6618ecc655057066f6b8ff4795467f",
+          "explicit_tag": "v0.6.1-rc.1",
+          "installer_mode": "staged archive with independently selected digest",
+          "guest_stdout_42": true,
+          "owned_deleted": true,
+          "inventory_empty": true,
+          "versions": "Erlang/OTP 29 [erts-17.0.6] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.20.4 (compiled with Erlang/OTP 29)\n",
+          "isolation": "fresh HOME, MIX_HOME and GitHub CLI configuration under the existing non-root UID",
+          "fresh_os_account_qualified": false,
+          "public_download_qualified": false
+        },
+        "minimum": {
+          "platform": "linux-x86_64",
+          "toolchain": "minimum",
+          "without_rust": true,
+          "client_archive_sha256": "72c881067abf7856e96d1d4b866f01289509e744228f04f3bb38809a7734a27c",
+          "native_archive_sha256": "fe5644d581936abdb8d8940b8d2224087c78e19fd17f967b8b19d5e0ecc9a721",
+          "manifest_sha256": "ece2ed31b5974ca9a294c3d346e15e9df9713a34414789314809ef3166cc7ade",
+          "notices_sha256": "9b9593506bba5d74d3baca6ce9f82a065e6618ecc655057066f6b8ff4795467f",
+          "explicit_tag": "v0.6.1-rc.1",
+          "installer_mode": "staged archive with independently selected digest",
+          "guest_stdout_42": true,
+          "owned_deleted": true,
+          "inventory_empty": true,
+          "versions": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)\n",
+          "isolation": "fresh HOME, MIX_HOME and GitHub CLI configuration under the existing non-root UID",
+          "fresh_os_account_qualified": false,
+          "public_download_qualified": false
+        }
+      },
+      "linux_aarch64": {
+        "current": {
+          "platform": "linux-aarch64",
+          "toolchain": "current",
+          "without_rust": true,
+          "client_archive_sha256": "72c881067abf7856e96d1d4b866f01289509e744228f04f3bb38809a7734a27c",
+          "native_archive_sha256": "8e7c0cc44bca7a183ca81b95a626898f4d618232118c163171f8fac7787dbcb0",
+          "manifest_sha256": "0180891bbbdce929543dded8f52b6685d75dfce362881e1a7aebdb3b10ef6ec1",
+          "notices_sha256": "9b9593506bba5d74d3baca6ce9f82a065e6618ecc655057066f6b8ff4795467f",
+          "explicit_tag": "v0.6.1-rc.1",
+          "installer_mode": "staged archive with independently selected digest",
+          "guest_stdout_42": true,
+          "owned_deleted": true,
+          "inventory_empty": true,
+          "versions": "=ESOCK WARNING MSG==== 16-Nov-2026::11:55:18.992542 ===\n\n[UNIX-ESSIO] Failed open sctp dynamic library: libsctp.so.1\n\nErlang/OTP 29 [erts-17.1.1] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit]\n\nElixir 1.20.5 (compiled with Erlang/OTP 29)\n",
+          "isolation": "fresh HOME, MIX_HOME and GitHub CLI configuration under the existing non-root UID",
+          "fresh_os_account_qualified": false,
+          "public_download_qualified": false
+        },
+        "minimum": {
+          "platform": "linux-aarch64",
+          "toolchain": "minimum",
+          "without_rust": true,
+          "client_archive_sha256": "72c881067abf7856e96d1d4b866f01289509e744228f04f3bb38809a7734a27c",
+          "native_archive_sha256": "8e7c0cc44bca7a183ca81b95a626898f4d618232118c163171f8fac7787dbcb0",
+          "manifest_sha256": "0180891bbbdce929543dded8f52b6685d75dfce362881e1a7aebdb3b10ef6ec1",
+          "notices_sha256": "9b9593506bba5d74d3baca6ce9f82a065e6618ecc655057066f6b8ff4795467f",
+          "explicit_tag": "v0.6.1-rc.1",
+          "installer_mode": "staged archive with independently selected digest",
+          "guest_stdout_42": true,
+          "owned_deleted": true,
+          "inventory_empty": true,
+          "versions": "Erlang/OTP 27 [erts-15.2.7.13] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)\n",
+          "isolation": "fresh HOME, MIX_HOME and GitHub CLI configuration under the existing non-root UID",
+          "fresh_os_account_qualified": false,
+          "public_download_qualified": false
+        }
+      }
+    }
+  },
+  "staged_native_bundles": {
+    "macos_aarch64": {
+      "asset": "smolbox-embedded-macos-aarch64.tar.gz",
+      "demo_sha256": "ec6ccce9b31a97bf8157cef7b5b6a5739f3bc7905f46f54656e143fe780291b9",
+      "manifest_sha256": "e5c2bbf87b7ef500c15f94c918cc73c66b1691414f94e1cae4e4665680dec0af",
+      "notices_sha256": "9b9593506bba5d74d3baca6ce9f82a065e6618ecc655057066f6b8ff4795467f",
+      "schema": 1,
+      "sha256": "2f60177c53b6c44420d137eee0309a904412b06a15be56023cd287acc5987d10",
+      "tag": "v0.6.1-rc.1"
+    },
+    "linux_x86_64": {
+      "asset": "smolbox-embedded-linux-x86_64.tar.gz",
+      "demo_sha256": "ac45bd5b794e57f9627369facd15a18649f6af3b600f866f223f5f91b5bfa954",
+      "manifest_sha256": "ece2ed31b5974ca9a294c3d346e15e9df9713a34414789314809ef3166cc7ade",
+      "notices_sha256": "9b9593506bba5d74d3baca6ce9f82a065e6618ecc655057066f6b8ff4795467f",
+      "schema": 1,
+      "sha256": "fe5644d581936abdb8d8940b8d2224087c78e19fd17f967b8b19d5e0ecc9a721",
+      "tag": "v0.6.1-rc.1"
+    },
+    "linux_aarch64": {
+      "asset": "smolbox-embedded-linux-aarch64.tar.gz",
+      "demo_sha256": "11ee6ae490cdc148d398a40aeda571c5fd2cfaf9d706faa4070741df3f08c0dd",
+      "manifest_sha256": "0180891bbbdce929543dded8f52b6685d75dfce362881e1a7aebdb3b10ef6ec1",
+      "notices_sha256": "9b9593506bba5d74d3baca6ce9f82a065e6618ecc655057066f6b8ff4795467f",
+      "schema": 1,
+      "sha256": "8e7c0cc44bca7a183ca81b95a626898f4d618232118c163171f8fac7787dbcb0",
+      "tag": "v0.6.1-rc.1"
+    }
+  },
+  "followup_attempt_notes": [
+    {
+      "area": "export conversion",
+      "finding": "The earlier helper rejected SDK post-collection files and empty attachment roots. The bounded custody fix passed both platform export/reimport campaigns on rebuilt helpers.",
+      "earlier_failed_authority_retained": true,
+      "earlier_failed_reservations_not_claimed_released": true
+    },
+    {
+      "area": "terminal fixture control slots",
+      "finding": "The argv witness now retries only admission_exhausted/not_dispatched input and uses an initial size. Its preceding ordinary PTY witness independently tests live resize. Accepted input is never replayed."
+    },
+    {
+      "area": "native network fixture",
+      "finding": "The native fixture was packed with current approved assets and no legacy 20-GiB template. The proof ran in an isolated guest network namespace containing only loopback, using public-address aliases to exercise the strict floor."
+    },
+    {
+      "area": "macOS minimum consumer",
+      "finding": "One earlier staged run timed out before readiness with no VM created. A monitored fresh retry and another unmodified quickstart passed. Final artifact checks wait for normal account-lock collection between campaigns.",
+      "earlier_failed_root_preserved": true
+    },
+    {
+      "area": "OCI fixture",
+      "finding": "An initial host allowlist omitted index.docker.io and was correctly denied. The original owner confirmed stop, resolved stopped, deleted the machine and closed normally. A fresh campaign with the exact additional hostname passed."
+    },
+    {
+      "area": "check environment",
+      "finding": "Linux source-transfer AppleDouble metadata was removed before final CI. Full macOS Rust checks use the normal temporary root; the long-socket fixture now uses a short private test root."
+    }
+  ],
+  "commit_basis": {
+    "candidate_support": "41cc4592",
+    "terminal_compatibility": "9dd73d29",
+    "export_custody_and_fixtures": "659bca5b",
+    "socket_fixture_and_native_source_archive": "e548f4f336dced0c6c8125b87f8aa09bc33351ef"
+  },
+  "public_distribution_prerequisites": {
+    "source_input_release": "embedded-port-inputs-v1.35.1",
+    "proposed_qualification_prerelease": "v0.6.1-rc.1",
+    "published": false,
+    "hosted_attestation_verified": false,
+    "exact_public_installer_matrix_passed": false,
+    "fresh_macos_standard_account_required": true,
+    "macos_account_creation_available_in_session": false
+  },
+  "local_environment_cleanup": {
+    "private_postgresql_cluster": "normal smart shutdown confirmed",
+    "arm64_lima_guest": "normal stop confirmed",
+    "kubernetes_guest": "normal poweroff confirmed; task QEMU unit inactive/dead, MainPID 0, Result success",
+    "task_only_ssh_forwards": "normal shutdown requested",
+    "failed_authority_roots": "preserved; no blanket reservation release claimed"
   }
 }

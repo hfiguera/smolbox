@@ -1,0 +1,38 @@
+{
+  "release_tag": "v1.35.1",
+  "release_commit": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+  "reference_commit": "d77eaf1c6eeff16bc8c258613746033e9bf567ca",
+  "files": {
+    "crates/smolvm-shim/src/engine.rs": {
+      "release_sha256": "82757415903b1b451185eff93d6880f415d9cdf862a82461fd7a60ae1c4bce55",
+      "reference_sha256": "82757415903b1b451185eff93d6880f415d9cdf862a82461fd7a60ae1c4bce55",
+      "identical": true
+    },
+    "crates/smolvm-shim/src/task.rs": {
+      "release_sha256": "35a11fca857deb0e06c1786bce749d7b208efd0195ab1b1d76b62ce988cd573a",
+      "reference_sha256": "35a11fca857deb0e06c1786bce749d7b208efd0195ab1b1d76b62ce988cd573a",
+      "identical": true
+    },
+    "crates/smolvm-shim/src/service.rs": {
+      "release_sha256": "0fac906774b15a644d249fd76b8f8fc54727f77735118703275c35846f695169",
+      "reference_sha256": "565b368ac6cefd63e4c4340de380ef8e82cb2a82bbed2639a785925a8b491fe3",
+      "identical": false
+    },
+    "crates/smolvm-agent/src/pod.rs": {
+      "release_sha256": "6e74eb41e43a4e3c725f5856fdbcb0a5589534fabddc526231f2aa999ca9a508",
+      "reference_sha256": "01daa2abfc2b2492a234e3b3b7c83b91ad72ac282c3e3810b2e50e25f9483412",
+      "identical": false
+    },
+    "src/data/resources.rs": {
+      "release_sha256": "cc4719dd79f1922bf220f57e3e611529a978a50b3f05e22e3733a0d1bbcb6628",
+      "reference_sha256": "96b874e1e1cc3bb7daaa44caf30c427ecca8c38d96e6a2a8f6820ce04b1c4bcf",
+      "identical": false
+    }
+  },
+  "review_notes": [
+    "Compared against the previously qualified 1.34.0 release, not an unreleased reference checkout.",
+    "The 1.35.1 live node uses its digest-verified official shim, libraries, templates and rootfs. Source hash equality is recorded per file/region; live proofs remain independently required.",
+    "Shim engine and task code are byte-identical to 1.34.0. Service startup now installs VmReaper and its containerd-shim configuration; cleanup/lifecycle must be observed under that reaper.",
+    "Agent pod changes only expose two existing process helpers as pub(crate). VM resource policy additions do not alter the pinned two-CPU/1024-MiB CRI allocation; live probes verify the guest geometry."
+  ]
+}
