@@ -19,6 +19,9 @@ defmodule SmolBox.Embedded.TerminalContract do
       "descriptors" => 20
     }
 
+  def spec?(%{"args" => args} = spec),
+    do: Spec.arguments?(args) and spec?(Map.delete(spec, "args"))
+
   def spec?(spec) do
     Shape.keys?(
       spec,

@@ -939,6 +939,7 @@ mod tests {
         // Compare the feature contract with the historical 1.22.0 descriptor.
         // The SDK pin and later features are checked separately.
         let mut fixture_features = sdk.feature_versions.clone();
+        assert_eq!(fixture_features.remove("terminal_arguments"), Some(1));
         assert_eq!(fixture_features.remove("exports"), Some(1));
         assert_eq!(fixture_features.remove("branch_release_env"), Some(1));
         if cfg!(target_os = "linux") {

@@ -38,6 +38,7 @@ defmodule SmolBox.Client do
   @derive {Inspect, only: []}
   defstruct [
     :worker,
+    :terminal_runtime_version,
     transport: SmolBox.Transport.Req,
     guest_paths: nil,
     max_file_bytes: 1_048_576
@@ -1092,10 +1093,11 @@ defmodule SmolBox.Client do
          {:ok, %{version: version}}
          when version in ["1.17.0", "1.19.0", "1.20.2", "1.22.0", "1.34.0", "1.35.1"] <-
            health(client),
+         true <- spec.args == [] or version == "1.35.1",
          {:ok, client} <- remaining_create_budget(client, deadline),
          :ok <- background_machine(client, path, %{background: true}),
          {:ok, client} <- remaining_create_budget(client, deadline) do
-      {:ok, client}
+      {:ok, %{client | terminal_runtime_version: version}}
     else
       false -> error(:unsupported_capability, :terminal)
       {:ok, _unsupported} -> error(:unsupported_capability, :terminal)

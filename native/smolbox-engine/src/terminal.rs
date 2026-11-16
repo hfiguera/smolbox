@@ -16,6 +16,8 @@ pub const TERMINAL_INPUT_BYTES: u64 = 16 * 1024 * 1024;
 #[serde(deny_unknown_fields)]
 pub struct TerminalOptions {
     pub program: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub args: Vec<String>,
     pub cols: u16,
     pub rows: u16,
     pub session: Duration,
@@ -36,6 +38,12 @@ impl TerminalOptions {
         if self.program.is_empty()
             || self.program.len() > 4096
             || self.program.contains('\0')
+            || self.args.len() > 64
+            || self
+                .args
+                .iter()
+                .any(|arg| arg.len() > 4096 || arg.contains('\0'))
+            || self.args.iter().map(String::len).sum::<usize>() > 16_384
             || self.cols == 0
             || self.rows == 0
             || !bounded(self.session, 1000, 86_400_000)
@@ -50,6 +58,12 @@ impl TerminalOptions {
             return Err(Error::before(ErrorCode::Validation));
         }
         Ok(())
+    }
+
+    pub(crate) fn argv(&self) -> Vec<String> {
+        std::iter::once(self.program.clone())
+            .chain(self.args.clone())
+            .collect()
     }
 }
 
@@ -391,6 +405,7 @@ mod tests {
     fn options() -> TerminalOptions {
         TerminalOptions {
             program: "/bin/sh".into(),
+            args: vec![],
             cols: 80,
             rows: 24,
             session: Duration::from_secs(30),

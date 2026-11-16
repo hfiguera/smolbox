@@ -33,6 +33,8 @@ impl Default for TerminalLimits {
 #[serde(deny_unknown_fields)]
 pub struct TerminalSpec {
     pub program: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub args: Vec<String>,
     pub cols: u16,
     pub rows: u16,
     pub session_ms: u64,
@@ -48,6 +50,12 @@ impl TerminalSpec {
         if self.program.is_empty()
             || self.program.len() > 4096
             || self.program.contains('\0')
+            || self.args.len() > 64
+            || self
+                .args
+                .iter()
+                .any(|arg| arg.len() > 4096 || arg.contains('\0'))
+            || self.args.iter().map(String::len).sum::<usize>() > 16_384
             || self.cols == 0
             || self.rows == 0
             || !(1000..=86_400_000).contains(&self.session_ms)

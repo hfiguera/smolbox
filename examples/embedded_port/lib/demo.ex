@@ -10,6 +10,9 @@ defmodule SmolBox.Example.EmbeddedPort do
     terminal = Keyword.get(options, :terminal, false)
     true = is_boolean(terminal)
     true = not terminal or Features.supports?(target, :terminals)
+    arguments = Keyword.get(options, :terminal_arguments, false)
+    true = is_boolean(arguments)
+    true = not arguments or (terminal and Features.supports?(target, :terminal_arguments))
     root = Path.expand(root)
     :ok = File.mkdir(root)
     :ok = File.chmod(root, 0o700)
@@ -45,7 +48,8 @@ defmodule SmolBox.Example.EmbeddedPort do
       store: store,
       http_workers: Keyword.get(options, :http_workers, []),
       root: root,
-      terminal: terminal
+      terminal: terminal,
+      terminal_arguments: arguments
     }
 
     try do
@@ -204,6 +208,28 @@ defmodule SmolBox.Example.EmbeddedPort do
     :ok = Terminal.input(handle, <<0, 255, 128>>)
     input = terminal_marker(handle, "SB_TTY_INPUT_DONE")
     true = Regex.match?(~r/\b0\s+255\s+128\b/, input)
+
+    if context.terminal_arguments do
+      :ok =
+        Terminal.input(handle, """
+        cat > '/workspace/terminal argv.sh' <<'SMOLBOX_ARGV_SCRIPT'
+        stty -echo
+        trap '' WINCH
+        [ "$#" = 3 ] && [ "$1" = '' ] && [ "$2" = '$(touch /workspace/terminal-argv-unwanted)' ] && [ "$3" = 'one two' ] || exit 9
+        [ ! -e /workspace/terminal-argv-unwanted ] || exit 10
+        printf 'SB_ARGV_READY\\n'
+        IFS= read -r line
+        [ "$line" = 'round trip' ] || exit 11
+        stty size
+        printf 'SB_ARGV_DONE\\n'
+        exit 7
+        SMOLBOX_ARGV_SCRIPT
+        printf 'SB_TTY_%s\\n' ARGS_CREATED
+        """)
+
+      terminal_marker(handle, "SB_TTY_ARGS_CREATED")
+    end
+
     :ok = Terminal.input(handle, "exit 7\n")
     terminal_exit(handle, System.monotonic_time(:millisecond) + 10_000)
     record = completed(key, 7)
@@ -211,7 +237,7 @@ defmodule SmolBox.Example.EmbeddedPort do
     {:ok, <<"smolbox-record-v17\0", _::binary>> = encoded} = Codec.encode(record)
     {:ok, ^record} = Codec.decode(encoded)
 
-    %{
+    evidence = %{
       "exercised" => true,
       "scope" => "ordinary-public-retained-image-pty",
       "observed_exit" => 7,
@@ -223,6 +249,51 @@ defmodule SmolBox.Example.EmbeddedPort do
       "slot_released" => true,
       "transcript_persisted" => false,
       "deliberate_process_interruption" => false
+    }
+
+    if context.terminal_arguments,
+      do: Map.put(evidence, "arguments", terminal_arguments(context, machine)),
+      else: evidence
+  end
+
+  defp terminal_arguments(context, machine) do
+    {:ok, terminal} =
+      TerminalSpec.new(
+        program: "/bin/sh",
+        args: [
+          "/workspace/terminal argv.sh",
+          "",
+          "$(touch /workspace/terminal-argv-unwanted)",
+          "one two"
+        ],
+        session_ms: 30_000,
+        idle_ms: 15_000,
+        max_buffer_bytes: 65_536
+      )
+
+    spec = %{command(context, "terminal-arguments", "unused") | command: terminal}
+    {:ok, key} = Terminal.open(__MODULE__, machine, spec)
+    {:ok, ^key} = Terminal.open(__MODULE__, machine, spec)
+    {:ok, handle} = Terminal.attach(__MODULE__, key, 10_000)
+    terminal_marker(handle, "SB_ARGV_READY")
+    :ok = Terminal.resize(handle, 120, 43)
+    :ok = Terminal.input(handle, "round trip\n")
+    output = terminal_marker(handle, "SB_ARGV_DONE")
+    true = :binary.match(output, "43 120") != :nomatch
+    terminal_exit(handle, System.monotonic_time(:millisecond) + 10_000)
+    record = completed(key, 7)
+    %{state: :running} = idle(machine)
+    {:ok, <<"smolbox-record-v55\0", _::binary>> = encoded} = Codec.encode(record)
+    {:ok, ^record} = Codec.decode(encoded)
+
+    %{
+      "observed_exit" => 7,
+      "codec" => 55,
+      "empty_argument" => true,
+      "literal_metacharacters" => true,
+      "generated_script" => true,
+      "stdin_roundtrip" => true,
+      "resize" => %{"cols" => 120, "rows" => 43}
     }
   end
 

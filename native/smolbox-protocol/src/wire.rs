@@ -420,6 +420,7 @@ impl SdkIdentity {
                     | "background_exec"
                     | "logs"
                     | "terminals"
+                    | "terminal_arguments"
                     | "terminal_preflight"
                     | "volumes"
                     | "disk_growth"
@@ -495,6 +496,10 @@ impl SdkIdentity {
         )?;
         require(
             self.feature_versions.get("terminal_preflight") != Some(&1)
+                || self.feature_versions.get("terminals") == Some(&1),
+        )?;
+        require(
+            self.feature_versions.get("terminal_arguments") != Some(&1)
                 || self.feature_versions.get("terminals") == Some(&1),
         )?;
         require(

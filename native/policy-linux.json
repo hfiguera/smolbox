@@ -34,7 +34,8 @@
       "branch_static_egress": 1,
       "branch_https_credentials": 1,
       "partial_collection_preflight": 1,
-      "exports": 1
+      "exports": 1,
+      "terminal_arguments": 1
     }
   },
   "observation_limits": {

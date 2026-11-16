@@ -15,5 +15,12 @@ defmodule SmolBox.ExecutionFeatures do
   def extended?(_invalid), do: false
 
   def worker_supported?(worker, spec),
-    do: not extended?(spec) or Features.supports?(worker, :extended_exec)
+    do:
+      (not extended?(spec) or Features.supports?(worker, :extended_exec)) and
+        arguments_supported?(worker, spec)
+
+  defp arguments_supported?(worker, %{command: %SmolBox.Terminal.Spec{args: [_ | _]}}),
+    do: Features.supports?(worker, :terminal_arguments)
+
+  defp arguments_supported?(_worker, _spec), do: true
 end

@@ -32,7 +32,8 @@ defmodule SmolBox.DurableHost.BackendStore do
       CodecNativeCaptures,
       CodecNativeCheckpoints,
       CodecNativeExports,
-      CodecNativeSources
+      CodecNativeSources,
+      CodecTerminalArguments
     }
 
     def capabilities(context) do
@@ -56,6 +57,7 @@ defmodule SmolBox.DurableHost.BackendStore do
       |> background_capabilities()
       |> streaming_capabilities()
       |> terminal_capabilities()
+      |> terminal_argument_capabilities()
       |> growth_capabilities()
       |> source_capabilities()
       |> checkpoint_capabilities()
@@ -89,6 +91,19 @@ defmodule SmolBox.DurableHost.BackendStore do
         do: Map.put(capabilities, :native_terminal_sessions, CodecMaterial.terminal_sessions())
     else
       defp terminal_capabilities(capabilities), do: capabilities
+    end
+
+    if Code.ensure_loaded?(CodecTerminalArguments) and
+         function_exported?(CodecTerminalArguments, :reader, 0) do
+      defp terminal_argument_capabilities(capabilities),
+        do:
+          Map.put(
+            capabilities,
+            :terminal_arguments,
+            CodecTerminalArguments.reader()
+          )
+    else
+      defp terminal_argument_capabilities(capabilities), do: capabilities
     end
 
     if Code.ensure_loaded?(CodecGrowth) and function_exported?(CodecGrowth, :reader, 0) do

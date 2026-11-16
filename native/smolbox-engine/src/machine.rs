@@ -5962,6 +5962,7 @@ pub(crate) mod tests {
         let request = || crate::TerminalRequest {
             options: crate::TerminalOptions {
                 program: "/bin/sh".into(),
+                args: vec![],
                 cols: 80,
                 rows: 24,
                 session: std::time::Duration::from_secs(1),

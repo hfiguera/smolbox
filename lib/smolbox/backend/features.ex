@@ -24,6 +24,7 @@ defmodule SmolBox.Backend.Features do
     extended_exec: @extended,
     background_exec: @extended,
     terminals: @extended,
+    terminal_arguments: ~w(1.35.1),
     terminal_preflight: @extended,
     workloads: @extended,
     networking: @network,

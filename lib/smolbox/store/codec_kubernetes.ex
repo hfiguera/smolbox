@@ -2,7 +2,7 @@ defmodule SmolBox.Store.CodecKubernetes do
   @moduledoc false
   alias SmolBox.{Error, Execution}
   alias SmolBox.Kubernetes.ExecutionPolicy
-  alias SmolBox.Store.CodecFields
+  alias SmolBox.Store.{CodecFields, CodecTerminalArguments}
 
   @prefix "smolbox-record-v54\0"
   @max_bytes 16_777_216
@@ -27,11 +27,13 @@ defmodule SmolBox.Store.CodecKubernetes do
   ]
 
   def required?(record), do: ExecutionPolicy.required?(record)
-  def strip(record), do: CodecFields.transform(record, @defaults, :strip)
+
+  def strip(record),
+    do: record |> CodecTerminalArguments.strip() |> CodecFields.transform(@defaults, :strip)
 
   def upgrade(record) do
     if required?(record), do: raise(ArgumentError)
-    CodecFields.transform(record, @defaults, :upgrade)
+    record |> CodecFields.transform(@defaults, :upgrade) |> CodecTerminalArguments.upgrade()
   end
 
   def legacy_payload(record), do: record |> strip() |> :erlang.term_to_binary()

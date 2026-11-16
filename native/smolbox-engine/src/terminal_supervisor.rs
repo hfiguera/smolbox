@@ -104,7 +104,7 @@ impl crate::Engine {
         let record = self.guest_work_record(receipt)?;
         terminal_eligibility(&record)?;
         let command = crate::BufferedCommand {
-            argv: vec![request.options.program.clone()],
+            argv: request.options.argv(),
             env: vec![],
             workdir: None,
             user: None,
@@ -819,6 +819,7 @@ mod tests {
         let deadline = Instant::now() + Duration::from_secs(15);
         let options = TerminalOptions {
             program: "/bin/sh".into(),
+            args: vec![],
             cols: 100,
             rows: 37,
             session: Duration::from_secs(30),

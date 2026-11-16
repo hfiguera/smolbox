@@ -4,6 +4,65 @@ defmodule SmolBox.TerminalTransportTest do
   alias SmolBox.Terminal.{Connection, Spec}
   @moduletag capture_log: true
 
+  test "1.35.1 carries ordered literal arguments and older workers reject before upgrade" do
+    parent = self()
+    args = ["/workspace/script with spaces", "", "$(printf unwanted)", "x=y"]
+
+    port =
+      TestPeer.start(fn conn ->
+        case conn.request_path do
+          "/health" ->
+            TestPeer.json(conn, %{status: "ok", version: "1.35.1"})
+
+          "/api/v1/machines/owned" ->
+            body = File.read!("test/fixtures/wire/created.json") |> Jason.decode!()
+
+            TestPeer.json(
+              conn,
+              Map.merge(body, %{"name" => "owned", "image" => "python", "branchable" => false})
+            )
+
+          "/api/v1/machines/owned/exec/interactive" ->
+            send(parent, {:query, URI.query_decoder(conn.query_string) |> Enum.to_list()})
+            upgrade(conn)
+        end
+      end)
+
+    {:ok, worker} =
+      Worker.new("arguments", "http://127.0.0.1:#{port}", allow_insecure_loopback: true)
+
+    {:ok, spec} = Spec.new(program: "python3", args: args)
+
+    for version <- [nil, "1.22.0", "1.34.0"] do
+      assert {:error, %{category: :unsupported_capability}} =
+               Connection.open(
+                 {SmolBox.Terminal.Connection.HTTP, {worker, version}},
+                 "owned",
+                 spec
+               )
+    end
+
+    for version <- ["1.22.0", "1.34.0"] do
+      old =
+        TestPeer.start(fn conn ->
+          assert conn.request_path == "/health"
+          TestPeer.json(conn, %{status: "ok", version: version})
+        end)
+
+      assert {:error, %{category: :unsupported_capability, evidence: :not_dispatched}} =
+               Client.open_terminal(client(old), "owned", spec)
+    end
+
+    {:ok, client} = Client.new(worker)
+    assert {:ok, terminal} = Client.open_terminal(client, "owned", spec)
+    assert_receive {:query, query}
+    assert for({"arg", value} <- query, do: value) == args
+    assert {"cmd", "python3"} in query
+    assert :ok = Terminal.input(terminal, "exit")
+    assert {:ok, {:output, _}} = Terminal.next(terminal)
+    assert {:ok, {:closed, {:ok, %{exit_code: 7}}}} = Terminal.next(terminal)
+  end
+
   setup_all do
     dir =
       Path.join(

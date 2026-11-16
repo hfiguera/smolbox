@@ -236,6 +236,9 @@ defmodule SmolBox.ExecutionSpec do
   defp canonical(%Command{background: false} = value),
     do: value |> Map.from_struct() |> Map.delete(:background) |> canonical()
 
+  defp canonical(%TerminalSpec{args: []} = value),
+    do: value |> Map.from_struct() |> Map.delete(:args) |> canonical()
+
   defp canonical(%Profile{} = value) do
     fields = Map.from_struct(value)
     fields = if value.network == :offline, do: Map.delete(fields, :network), else: fields

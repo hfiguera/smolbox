@@ -5,7 +5,21 @@ defmodule SmolBox.Terminal.Connection.HTTP do
   alias SmolBox.Terminal.Wire
 
   @impl true
-  def open(worker, name, spec) do
+  def open(%Worker{} = worker, name, spec), do: open({worker, nil}, name, spec)
+
+  def open({worker, version}, name, spec) do
+    if spec.args == [] or version == "1.35.1",
+      do: open_connection(worker, name, spec),
+      else:
+        {:error,
+         %Error{
+           category: :unsupported_capability,
+           operation: :terminal,
+           evidence: :not_dispatched
+         }}
+  end
+
+  defp open_connection(worker, name, spec) do
     uri = URI.parse(worker.base_url)
     scheme = if uri.scheme == "https", do: :https, else: :http
     address = if worker.unix_socket, do: {:local, worker.unix_socket}, else: uri.host
@@ -45,7 +59,13 @@ defmodule SmolBox.Terminal.Connection.HTTP do
 
   defp upgrade(conn, worker, name, spec, deadline, scheme) do
     headers = if worker.token, do: [{"authorization", "Bearer " <> worker.token}], else: []
-    query = URI.encode_query(%{"cmd" => spec.program, "cols" => spec.cols, "rows" => spec.rows})
+
+    query =
+      URI.encode_query(
+        [{"cmd", spec.program}, {"cols", spec.cols}, {"rows", spec.rows}] ++
+          Enum.map(spec.args, &{"arg", &1})
+      )
+
     path = "/api/v1/machines/" <> name <> "/exec/interactive?" <> query
     ws_scheme = if scheme == :https, do: :wss, else: :ws
 

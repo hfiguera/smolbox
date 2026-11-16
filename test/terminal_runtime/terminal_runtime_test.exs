@@ -258,18 +258,15 @@ defmodule SmolBox.TerminalRuntimeTest do
 
     {:ok, command} = Command.new(["python3", "-c", prepare])
     assert {:ok, %{exit_code: 0}} = Client.exec(c.client, c.machine.machine_name, command)
-    # 1.35.1 checks the image executable before joining the live container;
-    # executables created by an earlier exec are absent from that check's tree.
-    # Exercise disconnect semantics through an interpreter shipped in the image.
-    interpreter? = SmolBox.LabCandidate.runtime_version() == "1.35.1"
-    program = if interpreter?, do: "python3", else: "/workspace/disconnect-program"
-    {:ok, spec} = SmolBox.Terminal.Spec.new(program: program)
+    # The generated script is an explicit argument to an image interpreter on
+    # 1.35.1; the SDK only checks that interpreter in its original image tree.
+    {:ok, spec} =
+      if SmolBox.LabCandidate.runtime_version() == "1.35.1",
+        do:
+          SmolBox.Terminal.Spec.new(program: "python3", args: ["/workspace/disconnect-program"]),
+        else: SmolBox.Terminal.Spec.new(program: "/workspace/disconnect-program")
+
     {:ok, terminal} = Client.open_terminal(c.client, c.machine.machine_name, spec)
-
-    if interpreter? do
-      assert :ok = SmolBox.Terminal.input(terminal, "exec(" <> Jason.encode!(source) <> ")\n")
-    end
-
     until_output(terminal, "DESCENDANT_READY", "")
     monitor = Process.monitor(terminal.pid)
     Process.exit(terminal.pid, :kill)

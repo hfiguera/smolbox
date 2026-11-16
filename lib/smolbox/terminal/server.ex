@@ -5,7 +5,8 @@ defmodule SmolBox.Terminal.Server do
   alias SmolBox.Terminal.{Connection, Handle, Result, Spec}
 
   def start(client, name, spec, consumer, observer \\ self()) do
-    start_connection(client.worker, name, spec, consumer, observer)
+    source = {SmolBox.Terminal.Connection.HTTP, {client.worker, client.terminal_runtime_version}}
+    start_connection(source, name, spec, consumer, observer)
   end
 
   def start_connection(source, name, spec, consumer, observer \\ self()) do

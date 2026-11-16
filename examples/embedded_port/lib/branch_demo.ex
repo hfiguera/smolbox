@@ -109,11 +109,10 @@ defmodule SmolBox.Example.EmbeddedBranches do
     [approved_artifact] = target.artifacts
 
     artifact =
-      if Keyword.get(options, :campaign, :branches) == :checkpoints do
-        [seed] = target.checkpoints
-        Checkpoint.artifact(seed)
-      else
-        Map.take(approved_artifact, ~w(id sha256 architecture))
+      case {Keyword.get(options, :campaign, :branches), target.checkpoints} do
+        {:checkpoints, [seed]} -> Checkpoint.artifact(seed)
+        {:checkpoints, []} -> Map.take(approved_artifact, ~w(id sha256 architecture))
+        {:branches, _} -> Map.take(approved_artifact, ~w(id sha256 architecture))
       end
 
     [policy] = target.branch_policies

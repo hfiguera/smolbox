@@ -4,6 +4,7 @@
 
 - Add explicit SmolVM 1.35.1 selection while preserving existing worker and package versions and the 1.34.0 defaults.
 - Update the native SDK, bounded padded egress telemetry reads, and legacy macOS rootfs and branch-proof compatibility.
+- Add explicit terminal arguments for HTTP 1.35.1 and negotiated Embedded Port packages, including durable record compatibility for generated-script interpreter launches.
 - Resume Kubernetes recovery collection in a supervised task while health probes
   continue renewing the worker lease. Keep admission fenced until reconciliation
   finishes, and retain the original collection deadline and cleanup authority.

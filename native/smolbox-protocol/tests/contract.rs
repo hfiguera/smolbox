@@ -700,6 +700,75 @@ fn explicit_growth_qualification_has_distinct_capability_quiescence_budget_and_c
 }
 
 #[test]
+fn terminal_arguments_require_an_explicit_descriptor_and_preserve_literal_order() {
+    let mut message = ClientMessage::decode(
+        serde_json::from_str(include_str!("../fixtures/terminal-open-request.json")).unwrap(),
+    )
+    .unwrap();
+    let ClientMessage::Request {
+        operation: Operation::TerminalOpen { terminal, .. },
+        ..
+    } = &mut message
+    else {
+        panic!("terminal fixture")
+    };
+    terminal.args = vec![
+        "".into(),
+        "/workspace/program with spaces".into(),
+        "$(uninterpreted)".into(),
+    ];
+    terminal.validate().unwrap();
+    let mut h = parity_hello();
+    h.sdk.as_mut().unwrap().feature_versions.extend([
+        ("terminals".into(), 1),
+        ("buffered_exec".into(), 1),
+        ("job_resources".into(), 1),
+    ]);
+    h.limits = Limits::for_sdk(h.sdk.as_ref().unwrap());
+    h.capabilities.push(Capability::TerminalOpen);
+    let mut previous = Session::new(h.clone()).unwrap();
+    previous.approve(&h).unwrap();
+    assert!(matches!(
+        previous.admit(message.clone()).unwrap(),
+        ServerMessage::Terminal {
+            outcome: Outcome::Error {
+                code: SafeCode::Unsupported,
+                dispatch: Dispatch::NotDispatched
+            },
+            ..
+        }
+    ));
+    h.sdk
+        .as_mut()
+        .unwrap()
+        .feature_versions
+        .insert("terminal_arguments".into(), 1);
+    let mut current = Session::new(h.clone()).unwrap();
+    current.approve(&h).unwrap();
+    assert!(matches!(
+        current.admit(message.clone()).unwrap(),
+        ServerMessage::Accepted { .. }
+    ));
+    let encoded = serde_json::to_value(&message).unwrap();
+    assert!(ClientMessage::decode(encoded).unwrap() == message);
+    let ClientMessage::Request {
+        operation: Operation::TerminalOpen { terminal, .. },
+        ..
+    } = &mut message
+    else {
+        unreachable!()
+    };
+    terminal.args = vec!["x".repeat(4097)];
+    assert!(terminal.validate().is_err());
+    terminal.args = vec!["".into(); 65];
+    assert!(terminal.validate().is_err());
+    terminal.args = vec!["x".repeat(4096); 5];
+    assert!(terminal.validate().is_err());
+    terminal.args = vec!["nul\0argument".into()];
+    assert!(terminal.validate().is_err());
+}
+
+#[test]
 fn terminal_wire_binds_open_controls_whole_credit_and_collected_exit_without_lifetime_output_cap() {
     Outcome::Terminal {
         completion: Completion::NativeError,

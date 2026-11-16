@@ -221,13 +221,15 @@ defmodule SmolBox.DurableHost.TerminalDemo do
 
   defp terminal_spec(c) do
     {scope, id} = c.handle
+    {:ok, %{version: version}} = Client.health(c.client)
+
+    launch =
+      if version == "1.35.1",
+        do: [program: "/bin/sh", args: ["/workspace/terminal-program"]],
+        else: [program: "/workspace/terminal-program"]
 
     {:ok, terminal} =
-      Terminal.Spec.new(
-        program: "/workspace/terminal-program",
-        session_ms: 300_000,
-        idle_ms: 300_000
-      )
+      Terminal.Spec.new(launch ++ [session_ms: 300_000, idle_ms: 300_000])
 
     {:ok, spec} =
       ExecutionSpec.new(

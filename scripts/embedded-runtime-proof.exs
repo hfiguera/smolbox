@@ -6,7 +6,7 @@ defmodule SmolBox.EmbeddedRuntimeProof do
   alias SmolBox.Example.EmbeddedPort
 
   def run(arguments) do
-    options = ProofSupport.parse(arguments, terminal: :boolean)
+    options = ProofSupport.parse(arguments, terminal: :boolean, terminal_arguments: :boolean)
 
     true = options[:without_rust]
     nil = System.find_executable("rustc")
@@ -18,7 +18,13 @@ defmodule SmolBox.EmbeddedRuntimeProof do
     {target, _binding} = Code.eval_file(Path.join(tooling, "config.example.exs"))
     before = ProofSupport.inventory(tooling)
     output = Path.expand(Keyword.fetch!(options, :output))
-    evidence = EmbeddedPort.run(target, output, terminal: options[:terminal] || false)
+
+    evidence =
+      EmbeddedPort.run(target, output,
+        terminal: options[:terminal] || false,
+        terminal_arguments: options[:terminal_arguments] || false
+      )
+
     after_run = ProofSupport.inventory(tooling)
     true = before == after_run
 

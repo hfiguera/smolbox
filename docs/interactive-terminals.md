@@ -22,11 +22,26 @@ detach, worker draining, owned stopped resolution, and durable readback.
 
 `Client.open_terminal` remains an HTTP client operation.
 
-Explicit HTTP selection of 1.35.1 has an upstream executable lookup limitation:
-a program written into the image container by an earlier exec can be rejected
-as missing when opened as a terminal. Use a shell or interpreter already shipped
-in the image and launch the program from that session. SmolBox preserves the
-uncertain terminal outcome when upstream cannot start it. See the
+HTTP 1.35.1 and Embedded Port packages advertising `terminal_arguments: 1`
+accept explicit, ordered arguments:
+
+```elixir
+SmolBox.Terminal.Spec.new(program: "python3", args: ["/workspace/generated.py", "", "a b"])
+```
+
+Use an interpreter shipped in the image for scripts generated after startup.
+The unmodified 1.35.1 agent checks the executable against the original image
+before joining its running container; a generated script used directly as
+`program` can therefore appear missing. Passing the script as an interpreter
+argument avoids that check without an implicit shell or program replay.
+Arguments are literal strings, including empty strings and metacharacters.
+There are at most 64 arguments, 4 KiB each and 16 KiB combined. Older HTTP
+workers and packages without the feature reject nonempty arguments before
+opening a terminal. Empty arguments preserve the existing API.
+
+Upgrade every durable store reader and writer before advertising
+`terminal_arguments: 1`. Argument-bearing executions use selective codec v55;
+existing terminal records keep their earlier format and fingerprints. See the
 [1.35.1 qualification record](evidence/smolvm-1.35.1-qualification.json).
 
 ## Open and use a managed terminal

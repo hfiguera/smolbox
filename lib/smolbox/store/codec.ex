@@ -346,6 +346,13 @@ defmodule SmolBox.Store.Codec do
   retain the approved mode, lineage and release history. Credential values travel
   only through transient backend requests. Upgrade paired release writers and
   every reader before advertising `native_branch_https_credentials: 1`.
+
+  Terminal specifications with nonempty ordered arguments selectively use v55.
+  The envelope retains the existing compatible HTTP/native record alongside
+  the argument vector. Older records acquire args: [] on read and omit that
+  default on write; their fingerprints remain unchanged. Upgrade every reader
+  and writer before advertising `terminal_arguments: 1`. This store marker does
+  not grant the corresponding worker or package feature.
   """
 
   alias SmolBox.{Error, Execution, ExecutionFeatures}
@@ -396,6 +403,7 @@ defmodule SmolBox.Store.Codec do
     CodecPorts,
     CodecSources,
     CodecStaticBranchEgress,
+    CodecTerminalArguments,
     CodecVolumes,
     CodecWorkload
   }
@@ -566,6 +574,9 @@ defmodule SmolBox.Store.Codec do
 
   @spec encode(Execution.t() | SmolBox.ManagedMachine.t() | SmolBox.Volume.t()) ::
           {:ok, binary()} | {:error, Error.t()}
+  def encode(%Execution{spec: %{command: %SmolBox.Terminal.Spec{args: [_ | _]}}} = record),
+    do: CodecTerminalArguments.encode(record, &encode/1)
+
   def encode(%Execution{spec: %{retention_ms: 0}} = record), do: CodecKubernetes.encode(record)
 
   def encode(
@@ -803,6 +814,9 @@ defmodule SmolBox.Store.Codec do
   @spec decode(binary()) ::
           {:ok, Execution.t() | SmolBox.ManagedMachine.t() | SmolBox.Volume.t()}
           | {:error, Error.t()}
+  def decode(<<"smolbox-record-v55\0", _::binary>> = bytes),
+    do: CodecTerminalArguments.decode(bytes, &decode/1)
+
   def decode(<<"smolbox-record-v54\0", _::binary>> = bytes), do: CodecKubernetes.decode(bytes)
 
   def decode(<<@branch_https_prefix, 131, tag, _rest::binary>> = bytes)

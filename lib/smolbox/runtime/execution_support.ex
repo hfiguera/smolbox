@@ -9,8 +9,19 @@ defmodule SmolBox.Runtime.ExecutionSupport do
          :ok <- image_capability(config, spec),
          :ok <- source_capability(config, spec),
          :ok <- file_capability(config, spec.profile),
+         :ok <- terminal_arguments_capability(config, spec),
          do: check_existing(config, spec)
   end
+
+  defp terminal_arguments_capability(config, %{command: %SmolBox.Terminal.Spec{args: [_ | _]}}) do
+    case Session.store(config, :capabilities, []) do
+      {:ok, %{terminal_arguments: 1}} -> :ok
+      {:ok, _} -> Session.error(:unsupported_capability, :terminal)
+      error -> error
+    end
+  end
+
+  defp terminal_arguments_capability(_config, _spec), do: :ok
 
   defp static_branch_capability(config, %{branch_static_egress: true}) do
     case Session.store(config, :capabilities, []) do
