@@ -2699,7 +2699,9 @@ mod tests {
     use crate::{Cancellation, Engine};
     use std::time::Duration;
     fn fixture() -> (tempfile::TempDir, Engine, CreationReceipt) {
-        let temp = tempfile::tempdir().unwrap();
+        // macOS's default temporary directory can exceed sockaddr_un once the
+        // SDK's hashed VM directory and port-forward socket name are appended.
+        let temp = tempfile::tempdir_in("/tmp").unwrap();
         let (engine, receipt) = crate::export_source::tests::fixture(temp.path(), false);
         (temp, engine, receipt)
     }
