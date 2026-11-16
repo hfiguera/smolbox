@@ -45,6 +45,14 @@ DEADLINE = 0
 require = history.require
 
 
+def runtime_path(pins):
+    # The administrator's installed pins select the root, never a request or
+    # inherited environment variable. Existing nodes keep their original pin.
+    version = pins["smolvm"]["version"]
+    require(version in ("1.34.0", "1.35.1"), "unsupported runtime version")
+    return Path(f"/opt/smolvm-{version}-linux-x86_64")
+
+
 def tick():
     require(time.monotonic() < DEADLINE, "inspection deadline")
 
@@ -382,10 +390,11 @@ def exact(count):
 
 
 def main():
-    global DEADLINE, WATCH_INPUT
+    global DEADLINE, WATCH_INPUT, RUNTIME
     DEADLINE = time.monotonic() + 30
     require(os.geteuid() == 0 and platform.node() == "smolbox-k3s" and
             Path(__file__).parent == Path("/usr/local/lib/smolbox-kubernetes/node-history"), "dedicated inspector required")
+    RUNTIME = runtime_path(history.decode(Path("/etc/smolbox-kubernetes-lab/pins.json").read_bytes()))
     os.environ["KUBECONFIG"] = "/etc/rancher/k3s/k3s.yaml"
     signal.signal(signal.SIGALRM, lambda *_: (_ for _ in ()).throw(RuntimeError("inspection deadline")))
     signal.alarm(30)

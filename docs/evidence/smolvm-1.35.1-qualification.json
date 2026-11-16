@@ -1,0 +1,259 @@
+{
+  "schema": 1,
+  "date": "2026-11-16",
+  "status": "scoped_candidate_qualification_passed_defaults_not_promoted",
+  "runtime": "1.35.1",
+  "upstream_commit": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+  "previous_sdk_commit": "d77eaf1c6eeff16bc8c258613746033e9bf567ca",
+  "defaults": {
+    "http": "1.34.0",
+    "checkpoint": "1.34.0",
+    "public_embedded_installer": "1.34.0",
+    "kubernetes": "1.34.0",
+    "promoted": false
+  },
+  "distribution_approved": false,
+  "historical_evidence_transferred": false,
+  "http": {
+    "linux_x86_64": {
+      "ordinary_lifecycle_tests_passed": 9,
+      "extended_initial": {
+        "passed": 9,
+        "failed": 2,
+        "total": 11
+      },
+      "terminal_disconnect_rerun": {
+        "passed": 1,
+        "uses_image_interpreter": true
+      },
+      "ports_and_liveness_rerun": {
+        "passed": 3,
+        "egress_floor": "metadata",
+        "scope": "Dedicated Unix-socket worker and two reachable host-owned private-address TCP responders; offline denial, allowed CIDR, denied CIDR, mapped loopback TCP, port conflict and long-lived exec streams."
+      }
+    },
+    "macos_aarch64": {
+      "ordinary_lifecycle_tests_passed": 9,
+      "extended_initial": {
+        "passed": 9,
+        "failed": 2,
+        "total": 11
+      },
+      "terminal_disconnect_rerun": {
+        "passed": 1,
+        "uses_image_interpreter": true
+      },
+      "ports_and_liveness_rerun": {
+        "passed": 3,
+        "egress_floor": "metadata",
+        "scope": "Dedicated Unix-socket worker and two reachable host-owned private-address TCP responders; offline denial, allowed CIDR, denied CIDR, mapped loopback TCP, port conflict and long-lived exec streams."
+      }
+    }
+  },
+  "pending": [
+    "Linux ARM64 build and live native qualification",
+    "Live Kubernetes 1.35.1 qualification",
+    "Complete changed-package HTTP/native parity including storage, capture/export, registry/network and durable PostgreSQL campaigns",
+    "Current and minimum no-Rust public consumer/install/upgrade checks",
+    "Matching 1.35.1 corresponding-source and notices review, distribution approval, signed release bundles and public installer qualification",
+    "A resolution or explicit release acceptance of the upstream dynamic terminal executable lookup limitation"
+  ],
+  "branch": "support/smolvm-1.35.1",
+  "upstream_impact_review": {
+    "compared_tags": [
+      "v1.34.0",
+      "v1.35.1"
+    ],
+    "sdk_source_unmodified": true,
+    "changes_requiring_adaptation": [
+      "Bound egress samples to 1024 bytes, accepting both legacy decimal and padded samples; malformed samples remain unavailable and overlong samples fail closed.",
+      "Accept the exact legacy macOS rootfs digest of the same approved tree, matching the SDK resolver.",
+      "Keep 1.34.0 and 1.22.0 branch intent hashes readable; require the active revision before dispatch.",
+      "Use rusqlite 0.41 and handle its fallible progress-handler installation.",
+      "Project the verified macOS HOME into branch/capture workers after clearing their environment.",
+      "Explicitly reject six new SDK record fields outside the approved bare checkpoint/branch profile."
+    ],
+    "other_changes": [
+      "New optional exec-session, automatic-port and switch functionality is not exposed or enabled.",
+      "Upstream branch admission and memory-pressure/cgroup changes remain additional runtime admission limits.",
+      "The SQLite table schema used by the read-only adapter is unchanged.",
+      "Network implementation changes require their own live checks; historical network evidence is not transferred."
+    ]
+  },
+  "checks": {
+    "elixir_macos": {
+      "command": "ERL_FLAGS=\"+S 4:4\" mix ci",
+      "status": "passed",
+      "passed": 2317,
+      "excluded": 42,
+      "includes": [
+        "format",
+        "unused dependencies",
+        "warnings-as-errors compilation",
+        "xref cycles",
+        "tests",
+        "Credo strict",
+        "zero clone budget",
+        "Credence",
+        "Dialyzer"
+      ]
+    },
+    "elixir_linux": {
+      "status": "passed",
+      "passed": 2316,
+      "excluded": 42,
+      "scope": "deterministic tests before the final fixture-only follow-ups"
+    },
+    "native_python": {
+      "total": 64,
+      "skipped": 4,
+      "status": "passed"
+    },
+    "kubernetes_python": {
+      "total": 78,
+      "status": "passed"
+    },
+    "rust_macos": {
+      "workspace_passed": 1344,
+      "workspace_ignored": 27,
+      "added_namespace_regression_passed": 1,
+      "ordinary_non_vm_fixtures": 12,
+      "status": "passed",
+      "clean_sdk_api_witnesses": 3,
+      "clean_template_resolver_tests": 3,
+      "clippy": "passed: all targets, warnings denied",
+      "rustdoc": "passed: warnings denied",
+      "both_verified_source_caches": "passed",
+      "format": "passed",
+      "examples_model_tests": 20,
+      "port_umask": "skipped: Linux only"
+    },
+    "rust_linux": {
+      "status": "passed",
+      "workspace_passed": 1346,
+      "workspace_ignored": 27,
+      "command": "umask 077; cargo +1.100.0 test --manifest-path native/Cargo.toml --workspace --lib --bins --test contract --locked",
+      "port_umask_release_helper": "passed",
+      "port_umask_debug_helper": "passed"
+    },
+    "documentation": {
+      "status": "passed",
+      "warnings_as_errors": true,
+      "local_pages_checked": 162
+    }
+  },
+  "known_limits": [
+    {
+      "area": "HTTP terminals",
+      "finding": "1.35.1 rejects a terminal program created by earlier exec in a running image container, although ordinary exec sees it.",
+      "observed_on": [
+        "macos_aarch64",
+        "linux_x86_64"
+      ],
+      "workaround": "Open an interpreter or shell already shipped in the image and launch the program through it.",
+      "qualified_fix": false
+    },
+    {
+      "area": "HTTP port fixture",
+      "finding": "The default serve egress floor rejects the private responder addresses even when the machine CIDR allowlist includes them. This deployment restriction already exists in 1.34.0.",
+      "strict_floor_observation": "outbound probes denied; positive allowed reachability not qualified under strict",
+      "fixture_override": "Only dedicated local test workers used SMOLVM_EGRESS_FLOOR=metadata for positive CIDR/port checks; production defaults unchanged."
+    }
+  ],
+  "native": {
+    "macos_aarch64": {
+      "manifest_sha256": "f46a8e51cde39c942fa1a2d00e91a9837035a4b759628a740d3971762896c9c1",
+      "identity": {
+        "engine_version": "0.2.0",
+        "smolvm_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+        "source_sha256": "63d92153fcef1c548847a55bfba9e2710467b1d7937f4fd1fbad3f6ef17193c0",
+        "build_sha256": "86960cb00a13c3abfadd603d34ef364092fcdb2d62c1e607da0aad10392f970f",
+        "assets_sha256": "c207d5565a95ea870ba98ceeb64383e9e4386d6dadfa84b7a4820c04cb1609a4",
+        "platform": "macos",
+        "architecture": "aarch64"
+      },
+      "ordinary_lifecycle": "passed",
+      "retained_after_stop_start": true,
+      "fresh_helper_readback": true,
+      "file_bytes": 1048593,
+      "non_root_exec": true,
+      "observed_exit": 7,
+      "observability": "passed",
+      "terminal_preflight": "passed",
+      "owned_deleted": true,
+      "inventory_empty": true,
+      "padded_telemetry": {
+        "status": "passed",
+        "naturally_produced_sample_bytes": 1024,
+        "running_egress_bytes": 0,
+        "stopped_egress_bytes": 0
+      },
+      "deliberate_process_interruption": false,
+      "crash_handling_qualified": false,
+      "public_branches": {
+        "campaign": "ordinary-public-native-branches",
+        "package_manifest_sha256": "f46a8e51cde39c942fa1a2d00e91a9837035a4b759628a740d3971762896c9c1",
+        "store_mode": "ephemeral",
+        "cold_restart_does_not_restore_ram": true,
+        "codec_roundtrips": true,
+        "owned_deleted": true,
+        "final_reserved_slots": 0,
+        "final_reserved_disk_gb": 0,
+        "deliberate_process_interruption": false,
+        "crash_handling_qualified": false,
+        "source_and_two_children_independent": true,
+        "held_release": true,
+        "duplicate_release_retained": true,
+        "source_dependencies_retired": 2,
+        "native_backing_acknowledgements": 2,
+        "branch_budget_rejected_before_dispatch": true,
+        "drain_rejected_new_branch": true
+      }
+    },
+    "linux_x86_64": {
+      "manifest_sha256": "9c5635d86721439ee3e29931f1c6efda6cacd7c70c252697d97c17de30b1b268",
+      "identity": {
+        "engine_version": "0.2.0",
+        "smolvm_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+        "source_sha256": "63d92153fcef1c548847a55bfba9e2710467b1d7937f4fd1fbad3f6ef17193c0",
+        "build_sha256": "faa8e23ef34157a3b9d754fd0eee8f9978496eb5d2dbf3bf61330f3edaa89f7f",
+        "assets_sha256": "65f7a36a2b825b193699140c95ca51a3879f2521e47c4aace2d0de63eeaed872",
+        "platform": "linux",
+        "architecture": "x86_64"
+      },
+      "ordinary_lifecycle": "passed",
+      "retained_after_stop_start": true,
+      "fresh_helper_readback": true,
+      "file_bytes": 1048593,
+      "non_root_exec": true,
+      "observed_exit": 7,
+      "observability": "passed",
+      "terminal_preflight": "passed",
+      "owned_deleted": true,
+      "inventory_empty": true,
+      "padded_telemetry": {
+        "status": "passed",
+        "naturally_produced_sample_bytes": 1024,
+        "running_egress_bytes": 0,
+        "stopped_egress_bytes": 0
+      },
+      "deliberate_process_interruption": false,
+      "crash_handling_qualified": false
+    }
+  },
+  "attempts_and_retained_evidence": [
+    "Initial Elixir qualification exposed concurrent fixture cleanup races; use the existing retrying Package.remove! helper. Focused reruns and the final complete mix ci passed.",
+    "Initial macOS branch worker used the login-account SDK namespace after env_clear. The worker HOME projection fix passed the fresh two-child public branch campaign. The original failed domain remains retained, its helper shut down through shutdown_retained, and its original VMM is gone; no deletion or backing-release claim is made for it.",
+    "Initial Linux Rust runs inherited a shared-group umask and old writable test executables. The repository native check requires umask 077; the final rebuilt workspace passed under that setting, including the previously rejected executable-ownership cases.",
+    "The ordinary negative branch worker fixture was updated to the macOS namespace shape while retaining its non-SDK database filename; it still cannot enter the SDK or dispatch a VM."
+  ],
+  "evidence_storage": {
+    "local_root": "/Users/humberto/Projects/smolbox/.local/qualification-1.35.1-20261116",
+    "linux_root": "/home/humberto/smolbox-qualification-1351",
+    "note": "Raw attempt logs and private campaign authority are retained locally; this record summarizes scope and exact package identities. It is not a distribution attestation."
+  },
+  "http_cleanup": {
+    "macos_aarch64": "empty inventory verified before normal worker shutdown",
+    "linux_x86_64": "empty inventory verified before normal worker shutdown"
+  }
+}

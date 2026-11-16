@@ -31,7 +31,7 @@ defmodule SmolBox.EmbeddedRuntimeTest do
         unreachable_after_start: context[:unreachable_after_start]
       )
 
-    on_exit(fn -> File.rm_rf!(native.package_path) end)
+    on_exit(fn -> Package.remove!(native) end)
     store = start_supervised!(Memory)
     artifacts = start_supervised!({Agent, fn -> %{} end})
 

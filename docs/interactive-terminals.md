@@ -22,6 +22,13 @@ detach, worker draining, owned stopped resolution, and durable readback.
 
 `Client.open_terminal` remains an HTTP client operation.
 
+Explicit HTTP selection of 1.35.1 has an upstream executable lookup limitation:
+a program written into the image container by an earlier exec can be rejected
+as missing when opened as a terminal. Use a shell or interpreter already shipped
+in the image and launch the program from that session. SmolBox preserves the
+uncertain terminal outcome when upstream cannot start it. See the
+[1.35.1 qualification record](evidence/smolvm-1.35.1-qualification.json).
+
 ## Open and use a managed terminal
 
 Use an owned, running machine with an approved artifact and profile:

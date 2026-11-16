@@ -42,6 +42,7 @@ options = Enum.map(fields, &{&1, Map.fetch!(settings, Atom.to_string(&1))})
   Config.new(
     options ++
       [
+        runtime_version: Map.get(settings, "runtime_version", "1.34.0"),
         credential_provider: {:token_file, settings["token_file"]},
         sources: [source],
         profiles: [profile],

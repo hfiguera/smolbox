@@ -166,6 +166,16 @@ pub(crate) fn verify_boot_rootfs(record: &VmRecord, rootfs: &std::path::Path) ->
         let observed = smolvm_pack::assets::cached_agent_rootfs_digest(rootfs)
             .map_err(|_| Error::before(ErrorCode::Ownership))?;
         if *expected != observed {
+            // Match the SDK's rootfs resolver: older macOS captures counted
+            // symlink mode bits. Only accept that exact digest of this approved
+            // tree; never use the record's path to locate another rootfs.
+            #[cfg(target_os = "macos")]
+            if *expected
+                == smolvm_pack::assets::legacy_agent_rootfs_digest(rootfs)
+                    .map_err(|_| Error::before(ErrorCode::Ownership))?
+            {
+                return Ok(());
+            }
             return Err(Error::before(ErrorCode::Ownership));
         }
     }
@@ -202,6 +212,60 @@ mod tests {
 
     fn record() -> VmRecord {
         VmRecord::new("owned".into(), 1, 512, vec![], vec![], false)
+    }
+
+    #[test]
+    fn boot_rootfs_accepts_its_exact_digest_and_rejects_changed_contents() {
+        let temporary = tempfile::tempdir().unwrap();
+        std::fs::write(temporary.path().join("agent"), b"approved").unwrap();
+        let mut source = record();
+        source.agent_rootfs_digest =
+            Some(smolvm_pack::assets::agent_rootfs_digest(temporary.path()).unwrap());
+        verify_boot_rootfs(&source, temporary.path()).unwrap();
+        std::fs::write(temporary.path().join("agent"), b"different").unwrap();
+        assert_eq!(
+            verify_boot_rootfs(&source, temporary.path())
+                .unwrap_err()
+                .code,
+            ErrorCode::Ownership
+        );
+    }
+
+    #[cfg(target_os = "macos")]
+    #[test]
+    fn a_legacy_macos_rootfs_digest_only_accepts_the_same_approved_tree() {
+        use std::os::unix::ffi::OsStrExt;
+        let temporary = tempfile::tempdir().unwrap();
+        std::fs::write(temporary.path().join("agent"), b"approved").unwrap();
+        let link = temporary.path().join("legacy-link");
+        std::os::unix::fs::symlink("agent", &link).unwrap();
+        let path = std::ffi::CString::new(link.as_os_str().as_bytes()).unwrap();
+        assert_eq!(
+            unsafe {
+                libc::fchmodat(
+                    libc::AT_FDCWD,
+                    path.as_ptr(),
+                    0o700,
+                    libc::AT_SYMLINK_NOFOLLOW,
+                )
+            },
+            0
+        );
+        let mut source = record();
+        let legacy = smolvm_pack::assets::legacy_agent_rootfs_digest(temporary.path()).unwrap();
+        assert_ne!(
+            legacy,
+            smolvm_pack::assets::agent_rootfs_digest(temporary.path()).unwrap()
+        );
+        source.agent_rootfs_digest = Some(legacy);
+        verify_boot_rootfs(&source, temporary.path()).unwrap();
+        std::fs::write(temporary.path().join("agent"), b"different").unwrap();
+        assert_eq!(
+            verify_boot_rootfs(&source, temporary.path())
+                .unwrap_err()
+                .code,
+            ErrorCode::Ownership
+        );
     }
 
     #[test]

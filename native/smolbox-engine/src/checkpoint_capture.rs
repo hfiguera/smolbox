@@ -49,6 +49,12 @@ fn validate_bare_record(record: &VmRecord, static_egress: bool) -> Result<Resour
         || record.launch_network_plan().has_network() != static_egress
         || !record.ports.is_empty()
         || !record.udp_ports.is_empty()
+        || !record.allocated_ports.is_empty()
+        || !record.listen_addresses.is_empty()
+        || record.auto_ports.is_some()
+        || record.switch.is_some()
+        || record.oci_platform.is_some()
+        || record.recorded_ownership
         || !record.disks.is_empty()
         || record.cache_disk.is_some()
         || !record.disk_volumes.is_empty()
@@ -169,6 +175,51 @@ mod tests {
                 _ => changed.storage_gb = None,
             }
             assert!(validate_record(&changed).is_err(), "{case}");
+        }
+    }
+
+    #[test]
+    fn new_sdk_settings_cannot_enter_the_existing_checkpoint_or_branch_contract() {
+        let source = record();
+        for case in 0..6 {
+            let mut changed = source.clone();
+            match case {
+                0 => changed.recorded_ownership = true,
+                1 => changed.oci_platform = Some("linux/amd64".into()),
+                2 => changed.auto_ports = Some(smolvm::data::network::AutoPorts::excluding([])),
+                3 => {
+                    changed.switch = Some(smolvm::data::network::SwitchAttachment {
+                        dir: "/unapproved/switch".into(),
+                        endpoint: "foreign".into(),
+                    })
+                }
+                4 => {
+                    changed.allocated_ports = vec![smolvm::config::AllocatedPort {
+                        host: 8080,
+                        guest: 80,
+                        run: 1,
+                    }]
+                }
+                _ => {
+                    changed.listen_addresses = vec![smolvm::data::network::ListenAddress {
+                        host: 8080,
+                        protocol: smolvm::data::network::PortProtocol::Tcp,
+                        address: "0.0.0.0".parse().unwrap(),
+                    }]
+                }
+            }
+            assert_eq!(
+                validate_record(&changed).unwrap_err().code,
+                ErrorCode::Unsupported
+            );
+            assert_eq!(
+                validate_branch_record(&changed).unwrap_err().code,
+                ErrorCode::Unsupported
+            );
+            assert_ne!(
+                crate::identity::material_hash(&source).unwrap(),
+                crate::identity::material_hash(&changed).unwrap()
+            );
         }
     }
 

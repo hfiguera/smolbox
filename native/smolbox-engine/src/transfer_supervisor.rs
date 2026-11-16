@@ -1283,6 +1283,11 @@ impl TransferSupervisor {
             command
                 .env("XDG_DATA_HOME", data)
                 .env("XDG_CACHE_HOME", cache);
+            // macOS's dirs resolver ignores XDG. Bind its HOME to the same
+            // verified data/cache namespace instead of the account database's
+            // home after env_clear(), which may name another SDK domain.
+            #[cfg(target_os = "macos")]
+            command.env("HOME", macos_namespace_home(data, cache)?);
         }
         let mut child = command
             .spawn()
@@ -1609,6 +1614,19 @@ impl Owned {
     }
 }
 
+#[cfg(any(target_os = "macos", test))]
+fn macos_namespace_home<'a>(data: &'a Path, cache: &Path) -> Result<&'a Path> {
+    let home = data
+        .parent()
+        .and_then(Path::parent)
+        .filter(|home| home.is_absolute())
+        .ok_or(Error::before(ErrorCode::Ownership))?;
+    if data != home.join("Library/Application Support") || cache != home.join("Library/Caches") {
+        return Err(Error::before(ErrorCode::Ownership));
+    }
+    Ok(home)
+}
+
 fn retain_until_collected(owned: Owned) {
     let (send, receive) = std::sync::mpsc::sync_channel::<Owned>(1);
     let collector = std::thread::Builder::new()
@@ -1709,6 +1727,24 @@ mod tests {
     use super::*;
     use sha2::{Digest, Sha256};
 
+    #[test]
+    fn macos_job_namespace_requires_the_same_approved_home_for_data_and_cache() {
+        let home = Path::new("/private/qualified-home");
+        let data = home.join("Library/Application Support");
+        let cache = home.join("Library/Caches");
+        assert_eq!(macos_namespace_home(&data, &cache).unwrap(), home);
+        for (data, cache) in [
+            (data.clone(), PathBuf::from("/other/Library/Caches")),
+            (home.join("data"), cache.clone()),
+            (PathBuf::from("relative/Library/Application Support"), cache),
+        ] {
+            assert_eq!(
+                macos_namespace_home(&data, &cache).unwrap_err().code,
+                ErrorCode::Ownership
+            );
+        }
+    }
+
     fn registry_plan(
         source: &crate::ImagePullRequest,
         secret: &str,
@@ -1759,8 +1795,29 @@ mod tests {
     #[test]
     #[ignore = "requires a built helper; explicit ordinary non-VM branch namespace rejection"]
     fn ordinary_branch_worker_rejects_unentered_fixture_and_collects_original_leases() {
-        let (temp, metadata, expected) = crate::branch_worker::tests::fixture();
+        let (temp, metadata, _) = crate::branch_worker::tests::fixture();
         let root = root(&temp);
+        #[cfg(target_os = "macos")]
+        let metadata = {
+            let mut metadata = metadata;
+            // Use the platform namespace shape so the child can start, while
+            // retaining the deliberately non-SDK database filename below.
+            let database = root.join("Library/Application Support/smolvm/server/db");
+            let source = root.join("Library/Caches/smolvm/vms/source");
+            for path in [&database, &source] {
+                std::fs::DirBuilder::new()
+                    .recursive(true)
+                    .mode(0o700)
+                    .create(path.parent().unwrap())
+                    .unwrap();
+            }
+            std::fs::rename(&metadata.database, &database).unwrap();
+            std::fs::rename(&metadata.source_directory, &source).unwrap();
+            metadata.database = database;
+            metadata.source_directory = source;
+            metadata
+        };
+        let expected = metadata.encode().unwrap().1;
         // This private DB cannot resolve to the SDK's default smolvm/server DB,
         // even under the worker's inherited namespace projection. No SDK open,
         // snapshot, manager or VM is permitted in this ordinary negative test.

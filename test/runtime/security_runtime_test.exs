@@ -174,7 +174,9 @@ defmodule SmolBox.SecurityRuntimeTest do
 
     # The candidate rejects the FIFO without opening it for a blocking read.
     category =
-      if SmolBox.LabCandidate.runtime_version() == "1.34.0", do: :protocol, else: :transport
+      if SmolBox.LabCandidate.runtime_version() in ["1.34.0", "1.35.1"],
+        do: :protocol,
+        else: :transport
 
     assert {:error, %Error{category: ^category, evidence: :dispatch_uncertain}} =
              Client.download(bounded, context.name, "/workspace/fifo", 100)

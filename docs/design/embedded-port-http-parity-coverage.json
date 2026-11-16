@@ -2,7 +2,7 @@
   "schema": 1,
   "scope": "SmolBox managed HTTP backend feature parity; HTTP transports remain HTTP-specific",
   "sdk_revision": "9f446ae00219148ca4a703914f44a8e2fab11655",
-  "candidate_sdk_revision": "d77eaf1c6eeff16bc8c258613746033e9bf567ca",
+  "candidate_sdk_revision": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
   "crash_validation_deferred": true,
   "cli_race_validation_deferred": true,
   "crash_handling_qualified": false,
@@ -15,19 +15,28 @@
       {
         "id": "private-production-tls",
         "status": "deferred",
-        "operations": ["prepare_artifact"],
-        "specifications": ["credentials"]
+        "operations": [
+          "prepare_artifact"
+        ],
+        "specifications": [
+          "credentials"
+        ]
       },
       {
         "id": "held-branch-https-credentials",
         "status": "pending",
-        "operations": ["start_https_branch_source", "branch_install_https_credential"],
+        "operations": [
+          "start_https_branch_source",
+          "branch_install_https_credential"
+        ],
         "specifications": []
       },
       {
         "id": "held-branch-static-egress",
         "status": "pending",
-        "operations": ["start_static_branch_source"],
+        "operations": [
+          "start_static_branch_source"
+        ],
         "specifications": []
       }
     ]
@@ -772,7 +781,9 @@
     },
     {
       "name": "start_https_branch_source",
-      "arities": [3],
+      "arities": [
+        3
+      ],
       "contract": "branches",
       "http_supported": true,
       "port_operation_supported": false,
@@ -783,13 +794,19 @@
         "branches:durable-accounting-and-no-replay"
       ],
       "review": {
-        "evidence": ["test/contract/managed_branch_test.exs"],
-        "remaining": ["Embedded Port uses credential-aware creation and its ordinary start operation. A dedicated adapter for this HTTP helper operation remains pending."]
+        "evidence": [
+          "test/contract/managed_branch_test.exs"
+        ],
+        "remaining": [
+          "Embedded Port uses credential-aware creation and its ordinary start operation. A dedicated adapter for this HTTP helper operation remains pending."
+        ]
       }
     },
     {
       "name": "start_static_branch_source",
-      "arities": [3],
+      "arities": [
+        3
+      ],
       "contract": "branches",
       "http_supported": true,
       "port_operation_supported": false,
@@ -800,8 +817,13 @@
         "branches:durable-accounting-and-no-replay"
       ],
       "review": {
-        "evidence": ["test/contract/managed_branch_test.exs", "scripts/lab/branch-static-egress.exs"],
-        "remaining": ["Embedded Port starts forkable sources through its ordinary start operation. A dedicated equivalent of this HTTP operation remains pending."]
+        "evidence": [
+          "test/contract/managed_branch_test.exs",
+          "scripts/lab/branch-static-egress.exs"
+        ],
+        "remaining": [
+          "Embedded Port starts forkable sources through its ordinary start operation. A dedicated equivalent of this HTTP operation remains pending."
+        ]
       }
     },
     {
@@ -1050,7 +1072,9 @@
     },
     {
       "name": "branch_install_https_credential",
-      "arities": [3],
+      "arities": [
+        3
+      ],
       "contract": "branches",
       "http_supported": true,
       "port_operation_supported": false,
@@ -1061,8 +1085,12 @@
         "branches:durable-accounting-and-no-replay"
       ],
       "review": {
-        "evidence": ["test/contract/managed_branch_test.exs"],
-        "remaining": ["Embedded Port carries transient credentials on receipt-bound release and restart requests. A standalone equivalent of this HTTP installation operation remains pending."]
+        "evidence": [
+          "test/contract/managed_branch_test.exs"
+        ],
+        "remaining": [
+          "Embedded Port carries transient credentials on receipt-bound release and restart requests. A standalone equivalent of this HTTP installation operation remains pending."
+        ]
       }
     },
     {

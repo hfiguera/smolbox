@@ -581,6 +581,8 @@ impl InitialBranchJournal {
             || self.plan.total_additional != ordinary.add(self.approval.resources)?
             || (self.request_sha256 != self.request_hash(crate::SMOLVM_REVISION)?
                 && self.request_sha256
+                    != self.request_hash("d77eaf1c6eeff16bc8c258613746033e9bf567ca")?
+                && self.request_sha256
                     != self.request_hash("9f446ae00219148ca4a703914f44a8e2fab11655")?)
         {
             return Err(Error::before(ErrorCode::Ownership));
@@ -1155,6 +1157,27 @@ pub(crate) mod tests {
             })
             .unwrap();
         (engine, receipt, intent)
+    }
+
+    #[test]
+    fn historical_branch_intents_remain_readable_but_cannot_dispatch_on_another_sdk() {
+        let temp = tempfile::tempdir().unwrap();
+        let (_engine, source, mut intent) = prepared_stopped_model(temp.path(), false);
+        assert_eq!(intent.source, source);
+        for revision in [
+            crate::SMOLVM_REVISION,
+            "d77eaf1c6eeff16bc8c258613746033e9bf567ca",
+            "9f446ae00219148ca4a703914f44a8e2fab11655",
+        ] {
+            intent.request_sha256 = intent.request_hash(revision).unwrap();
+            intent.validate().unwrap();
+            assert_eq!(
+                intent.verify_current_revision().is_ok(),
+                revision == crate::SMOLVM_REVISION
+            );
+        }
+        intent.request_sha256 = intent.request_hash(&"f".repeat(40)).unwrap();
+        assert_eq!(intent.validate().unwrap_err().code, ErrorCode::Ownership);
     }
 
     #[test]

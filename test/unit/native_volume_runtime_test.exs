@@ -36,7 +36,7 @@ defmodule SmolBox.NativeVolumeRuntimeTest do
         capacity: %{slots: 1, cpus: 1, memory_mb: 512, disk_gb: 10}
       )
 
-    on_exit(fn -> File.rm_rf!(native.package_path) end)
+    on_exit(fn -> Package.remove!(native) end)
     store = start_supervised!(Memory)
     artifacts = start_supervised!({Agent, fn -> %{} end})
 
@@ -165,6 +165,7 @@ defmodule SmolBox.NativeVolumeRuntimeTest do
     assert {:ok, running} = Machines.await(runtime, machine_key, 5000)
     assert running.state == :running, inspect(running.last_error)
     inspections = length(volume_requests(context.native, "inspect_provision"))
+    await(fn -> ready?(runtime, context.native.id) end)
 
     assert {:ok, sibling_key} =
              Volumes.create(runtime,

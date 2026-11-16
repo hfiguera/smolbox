@@ -3,9 +3,9 @@
 `source.json` records the smolvm revision, full Git tree identity, archive SHA-256
 and authenticated complete content/executable-mode inventory. It declares zero
 patches. The archive was made with `git archive` from clean revision
-`d77eaf1c6eeff16bc8c258613746033e9bf567ca` at tag `v1.34.0`. All 331
+`bc58c3ef808e70db10c0ffb2b282c5f565ac6afc` at tag `v1.35.1`. All 374
 exported files were compared with upstream Git blobs and modes. The full tree is
-`64b8b32be3bfd8f328b016cd5a85aa9c7e34cf19`; this is a selected SDK export,
+`a86c733196fb418dfccf272e288c3205e908faff`; this is a selected SDK export,
 including source/crates, manifests, build script, toolchain and license documents.
 The research checkout under `external-references` is never a build input.
 
@@ -29,9 +29,14 @@ intended exact commit, review the compatibility schema/paths, update the depende
 pin and lockfile, and rerun applicable ordinary validation. Never rewrite cached
 SDK source, introduce a fork or transfer package approvals to changed bytes.
 
-The source remains Apache-2.0; `LICENSE` and `Licenses.md` are in the archive.
+The source remains Apache-2.0; `LICENSE` and `THIRD-PARTY-NOTICES.md` are in the archive.
 SmolBox's native crates use the repository MIT license. This archive includes no
 libkrun/libkrunfw binaries, firmware, rootfs or disk templates. Their exact
 provenance/license audit and corresponding-source delivery remain separate
 [distribution requirements](../release-review.md). Existing patched-package
 approvals/evidence remain historical.
+
+This is the 1.35.1 development build input. HTTP/checkpoint and public installer
+defaults remain 1.34.0 until the new qualification and distribution gates pass.
+Previously approved 1.34.0 and 1.22.0 packages and historical proofs retain their
+exact identities; this source change never upgrades an existing domain in place.

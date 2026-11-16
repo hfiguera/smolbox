@@ -7,6 +7,13 @@ parity remains the [long-term goal](https://github.com/hfiguera/smolbox/blob/mai
 preview supports the narrow policy below. Public qualification passed for this fixed lab setup; exact cases and limits are in
 [implementation progress](https://github.com/hfiguera/smolbox/blob/main/docs/design/kubernetes-backend-progress.md).
 
+Explicit `runtime_version: "1.35.1"` is also admitted when the approved
+`runtime_identity["smolvm_version"]` agrees. The default and existing lab pins
+remain 1.34.0. The alternate `scripts/kubernetes/pins-1.35.1.json` is a candidate
+input for a separately enrolled lab; it does not upgrade a node or transfer its
+evidence. Live Kubernetes qualification of 1.35.1 remains separate from
+HTTP and Embedded Port checks.
+
 ## Supported policy
 
 - One controller host, one durable store partition, one dedicated namespace,

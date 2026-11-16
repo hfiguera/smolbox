@@ -22,7 +22,8 @@ defmodule SmolBox.BranchHTTPSCredentials do
   @doc false
   def configured?(nil, _worker, _version), do: true
 
-  def configured?({module, _context}, worker, "1.34.0") when is_atom(module) do
+  def configured?({module, _context}, worker, version)
+      when is_atom(module) and version in ["1.34.0", "1.35.1"] do
     secure_transport?(worker) and resolver?({module, nil})
   end
 

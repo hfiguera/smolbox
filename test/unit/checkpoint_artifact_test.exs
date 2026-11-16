@@ -87,7 +87,7 @@ defmodule SmolBox.CheckpointArtifactTest do
     on_exit(fn -> File.rm(path) end)
     {:ok, profile} = Profile.new("test")
 
-    for version <- ["1.19.0", "1.20.2", "1.22.0", "1.34.0"] do
+    for version <- ["1.19.0", "1.20.2", "1.22.0", "1.34.0", "1.35.1"] do
       bytes =
         CheckpointFixture.bytes(Map.put(CheckpointFixture.manifest(), "smolvm_version", version))
 

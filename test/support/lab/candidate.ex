@@ -5,7 +5,7 @@ defmodule SmolBox.LabCandidate do
 
   # SmolVM 1.34 allows up to 15 seconds for the VMM's durable exit flush.
   def stop_observation_ms do
-    if runtime_version() == "1.34.0", do: 30_000, else: 10_000
+    if runtime_version() in ["1.34.0", "1.35.1"], do: 30_000, else: 10_000
   end
 
   # Cold artifact creation under the one-CPU cap exceeded the fixture's former

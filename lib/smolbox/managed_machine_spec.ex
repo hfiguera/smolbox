@@ -14,7 +14,7 @@ defmodule SmolBox.ManagedMachineSpec do
 
   `branch_static_egress: true` prepares an approved local bare guest for held
   branches with its explicit network allowlist on Linux x86_64. Use an HTTP
-  worker running SmolVM 1.34.0 or an Embedded Port package advertising
+  worker running SmolVM 1.34.0 or 1.35.1, or an Embedded Port package advertising
   `branch_static_egress: 1`. The source and its children retain the same allowlist.
 
   Optional `ports: [SmolBox.PortMapping.t()]` adds fixed TCP forwarding on image

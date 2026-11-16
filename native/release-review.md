@@ -7,6 +7,13 @@ installer results are recorded in the
 and the [qualification record](../docs/evidence/smolvm-1.34.0-qualification.md).
 The 1.22.0 evidence below applies to those earlier package identities.
 
+The native source workspace now builds the unmodified 1.35.1 SDK as a
+qualification candidate. The catalog above and public installer still select
+1.34.0. Do not use that older catalog with the new source pin: the distribution
+builder rejects an SDK/runtime mismatch. New corresponding sources, notices,
+platform package approvals and installer checks must be recorded before releasing
+1.35.1 bundles. See [candidate evidence](../docs/evidence/smolvm-1.35.1-qualification.json).
+
 ## Integrity and provenance
 
 The earlier approved distribution used SDK 1.22.0 revision

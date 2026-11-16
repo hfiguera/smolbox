@@ -345,7 +345,7 @@ defmodule SmolBox.EmbeddedImagesRuntimeTest do
         stop_no_change: Keyword.get(options, :stop_no_change, false)
       )
 
-    on_exit(fn -> File.rm_rf!(native.package_path) end)
+    on_exit(fn -> Package.remove!(native) end)
 
     source_options = [
       id: "original",

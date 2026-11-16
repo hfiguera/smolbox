@@ -3,7 +3,7 @@ defmodule SmolBox.Embedded.BranchOrigin do
   alias SmolBox.Embedded.{BranchCanonical, BranchRequest, Shape}
   alias SmolBox.Validation
 
-  @sdk_revisions ~w(9f446ae00219148ca4a703914f44a8e2fab11655 d77eaf1c6eeff16bc8c258613746033e9bf567ca)
+  @sdk_revisions ~w(9f446ae00219148ca4a703914f44a8e2fab11655 d77eaf1c6eeff16bc8c258613746033e9bf567ca bc58c3ef808e70db10c0ffb2b282c5f565ac6afc)
 
   def valid?(binding, child),
     do:

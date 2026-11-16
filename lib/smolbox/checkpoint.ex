@@ -8,7 +8,7 @@ defmodule SmolBox.Checkpoint do
   mounts, ports, device forwarding or automatic workload restart. Restoring RAM
   resumes processes; setting an entrypoint cannot neutralize captured work.
 
-  smolvm 1.16.1, 1.17.0, 1.19.0, 1.20.2, 1.22.0 and 1.34.0 are admitted.
+  smolvm 1.16.1, 1.17.0, 1.19.0, 1.20.2, 1.22.0, 1.34.0 and 1.35.1 are admitted.
   The default is 1.34.0. Pin existing approvals to their original capture runtime.
   SmolVM also checks CPU compatibility. Approval does not make a checkpoint
   portable across operating systems, architectures, CPU models or runtime versions. The file stays on the
@@ -62,7 +62,8 @@ defmodule SmolBox.Checkpoint do
              "1.19.0",
              "1.20.2",
              "1.22.0",
-             "1.34.0"
+             "1.34.0",
+             "1.35.1"
            ] and
              checkpoint.resume == :idle,
          :ok <- Profile.validate(checkpoint.profile),

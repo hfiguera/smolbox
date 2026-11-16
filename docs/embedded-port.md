@@ -562,6 +562,12 @@ and deterministic peer checks cannot transfer that historical evidence.
 Existing approved patched-package evidence remains
 historical and cannot approve their bytes.
 
+The native source build now targets the unmodified SmolVM 1.35.1 release.
+Existing 1.34.0 and 1.22.0 package identities remain accepted, and the public
+installer default stays on the released 1.34.0 bundles. A newly built package
+requires its own approval and enrollment; SDK selection never rewrites old
+receipts. See [1.35.1 qualification](evidence/smolvm-1.35.1-qualification.json).
+
 ## Package and host preparation
 
 The Hex package contains Elixir code. A separately approved native package contains

@@ -43,7 +43,7 @@ defmodule SmolBox.EmbeddedTerminalRuntimeTest do
       )
 
     native = %{native | budget: %{native.budget | max_response_bytes: 4096}}
-    on_exit(fn -> File.rm_rf!(native.package_path) end)
+    on_exit(fn -> Package.remove!(native) end)
     store = start_supervised!(Memory)
     artifacts = start_supervised!({Agent, fn -> %{} end})
 
