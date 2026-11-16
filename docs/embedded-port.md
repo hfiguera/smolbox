@@ -564,7 +564,10 @@ historical and cannot approve their bytes.
 
 The native source build now targets the unmodified SmolVM 1.35.1 release.
 Existing 1.34.0 and 1.22.0 package identities remain accepted, and the public
-installer default stays on the released 1.34.0 bundles. A newly built package
+installer selects a SmolBox release tag, whose published bundles retain their
+original 1.34.0 identities. The source/release catalog defaults to locally qualified
+1.35.1 with distribution approval false. Install that unpublished version only
+with an explicitly approved staged archive, tag and digest. A newly built package
 requires its own approval and enrollment; SDK selection never rewrites old
 receipts. See [1.35.1 qualification](evidence/smolvm-1.35.1-qualification.json).
 

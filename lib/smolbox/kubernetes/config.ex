@@ -46,7 +46,7 @@ defmodule SmolBox.Kubernetes.Config do
     controller_guard: nil,
     architecture: "x86_64",
     platform: :linux,
-    runtime_version: "1.34.0",
+    runtime_version: "1.35.1",
     qualification: :development,
     draining: false,
     capacity: %{slots: 1, cpus: 2, memory_mb: 1536, disk_gb: 30},

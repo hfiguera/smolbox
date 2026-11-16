@@ -1,6 +1,7 @@
 # Supported platforms
 
-SmolBox 0.6.0 defaults to **SmolVM 1.34.0** for both backends. Use the
+This checkout defaults to **SmolVM 1.35.1** for HTTP workers, checkpoint approvals,
+native source/release inputs and the Kubernetes preview. Use the
 [Embedded Port quickstart](embedded-quickstart.md) for a local helper or the
 [HTTP worker quickstart](getting-started.md) for a separate SmolVM server.
 
@@ -36,7 +37,7 @@ store limits, see [Embedded Port setup and operation](embedded-port.md).
 
 The Elixir controller can connect to a worker on a separate host.
 
-The HTTP worker defaults to **smolvm 1.34.0**. Explicitly configured 1.35.1, 1.22.0, 1.20.2, 1.19.0,
+The HTTP worker defaults to **smolvm 1.35.1**. Explicitly configured 1.34.0, 1.22.0, 1.20.2, 1.19.0,
 1.17.0, 1.16.1, 1.16.0, 1.14.6 and 1.14.1 remain selectable under their feature
 limits. The worker must report the exact configured version. A mismatch blocks
 new work; there is no automatic fallback or admission of arbitrary newer releases.
@@ -45,11 +46,14 @@ Use `runtime_version` in `SmolBox.Runtime.WorkerConfig.new/1` to retain an older
 worker. Pin checkpoint approvals to the version that captured them as well.
 Worker installation and upgrades are separate from the Elixir dependency.
 
-SmolVM 1.35.1 is an explicit selection in this checkout. Its native source build
-uses the exact release SDK; the public bundle installer still selects the
-existing 1.34.0 bundles. New qualification results and remaining platform gates
-are recorded in [the 1.35.1 evidence](evidence/smolvm-1.35.1-qualification.json).
-Existing package, domain and checkpoint approvals keep their original identities.
+SmolVM 1.35.1 defaults use completed local qualification with the exact unmodified
+release SDK. All native bundles, corresponding sources and notices remain
+unpublished; distribution approval is false. The public installer still selects
+a SmolBox release tag and does not silently substitute a local bundle. Install
+1.35.1 using an explicitly approved staged archive, its tag and digest.
+[Local results and pending public distribution checks](evidence/smolvm-1.35.1-qualification.md)
+record the scope separately from the published 1.34.0 results below. Existing
+package, domain and checkpoint approvals keep their original identities.
 
 ## Validated configurations
 
@@ -81,7 +85,7 @@ and host and source limits.
 ## Kubernetes development preview
 
 The opt-in preview is qualified only for one enrolled Linux x86_64/K3s node,
-SmolVM 1.34.0, the pinned Python OCI image and fixed resource/offline policy.
+SmolVM 1.35.1, the pinned Python OCI image and fixed resource/offline policy.
 The controller was qualified on Apple Silicon/macOS with Python 3 and verified
 SSH/HTTPS access to that node. This is a development preview with manual lab
 qualification; the production HTTP/Embedded matrix above remains separate.

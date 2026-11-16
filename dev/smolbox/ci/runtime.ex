@@ -65,7 +65,7 @@ defmodule SmolBox.CI.Runtime do
     Map.fetch!(@pins, {platform, version})
   end
 
-  def selected_version, do: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.34.0")
+  def selected_version, do: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.35.1")
 
   def wrapper_pin!(platform, version) do
     pin!(platform, version)

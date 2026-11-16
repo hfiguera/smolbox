@@ -1,16 +1,18 @@
 {
   "schema": 1,
   "date": "2026-11-16",
-  "status": "local_qualification_passed_public_distribution_gates_pending",
+  "status": "defaults_promoted_from_local_qualification_artifacts_unpublished",
   "runtime": "1.35.1",
   "upstream_commit": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
   "previous_sdk_commit": "d77eaf1c6eeff16bc8c258613746033e9bf567ca",
   "defaults": {
-    "http": "1.34.0",
-    "checkpoint": "1.34.0",
-    "public_embedded_installer": "1.34.0",
-    "kubernetes": "1.34.0",
-    "promoted": false
+    "http": "1.35.1",
+    "checkpoint": "1.35.1",
+    "embedded_source_and_release_catalog": "1.35.1",
+    "kubernetes": "1.35.1",
+    "promoted": true,
+    "basis": "Completed local qualification; explicit user instruction to promote defaults while keeping every artifact unpublished",
+    "public_embedded_installer": "Release-tag selection is unchanged; published 1.34.0 bundles retain their identities. Local 1.35.1 installation requires an explicit staged archive, tag and digest."
   },
   "distribution_approved": false,
   "historical_evidence_transferred": false,
@@ -84,8 +86,7 @@
     }
   },
   "pending": [
-    "Public source delivery, hosted provenance and public-download qualification remain unrun because the user requested that artifacts stay unpublished",
-    "Keep defaults at 1.34.0 until the distribution gates are separately authorized and pass"
+    "Public source delivery, hosted provenance and public-download qualification remain unrun because the user requested that artifacts stay unpublished. These remain distribution gates, not default-promotion gates under the explicit user instruction."
   ],
   "branch": "support/smolvm-1.35.1",
   "upstream_impact_review": {
@@ -2200,5 +2201,57 @@
     },
     "authorization": "Native macOS administrator authorization for provisioning; native interactive account-management authorization for deletion",
     "administrative_harness_notes": "The preflight Python-version mismatch was corrected before account creation. Idle per-user macOS services were stopped normally; native interactive account deletion resolved directory-service cleanup restrictions. All temporary accounts and HOME directories were removed."
+  },
+  "default_promotion_verification": {
+    "date": "2026-11-16",
+    "status": "passed",
+    "macos_ci": {
+      "command": "ERL_FLAGS='+S 4:4' mix ci",
+      "passed": 2323,
+      "excluded": 42,
+      "static_analysis": "passed",
+      "log": "/tmp/smolbox-1351-defaults-ci-final.log",
+      "initial_attempt": "One stale default admission fixture was corrected; two short-deadline tests failed at max_cases 32. The complete rerun passed at max_cases 8 with no deadline or production-code changes."
+    },
+    "native_python": {
+      "total": 64,
+      "skipped": 4,
+      "status": "passed"
+    },
+    "kubernetes_python": {
+      "total": 78,
+      "status": "passed"
+    },
+    "documentation": {
+      "warnings_as_errors": "passed",
+      "local_link_pages": 162
+    },
+    "default_catalogs_and_source_reviews_agree": true,
+    "distribution_approved_on_any_target": false,
+    "packaged_consumers": [
+      {
+        "lane": "current",
+        "status": "passed",
+        "toolchain": "Erlang/OTP 29 [erts-17.1.1] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit]\n\nElixir 1.20.5 (compiled with Erlang/OTP 29)",
+        "minimum_dependencies": false,
+        "without_rust": true,
+        "runtime_default": "1.35.1",
+        "package_sha256": "dc2f7c39960f926cb3b24285d4a072e0f75ab74c05280206158903043f92f34d",
+        "native_runtime_exercised": false,
+        "scope": "Fresh packaged production consumer; API/default and dependency checks, not a repeat of native VM qualification"
+      },
+      {
+        "lane": "minimum",
+        "status": "passed",
+        "toolchain": "Erlang/OTP 27 [erts-15.2.7.11] [source] [64-bit] [smp:2:2] [ds:2:2:10] [async-threads:1] [jit]\n\nElixir 1.18.4 (compiled with Erlang/OTP 27)",
+        "minimum_dependencies": true,
+        "without_rust": true,
+        "runtime_default": "1.35.1",
+        "package_sha256": "dc2f7c39960f926cb3b24285d4a072e0f75ab74c05280206158903043f92f34d",
+        "native_runtime_exercised": false,
+        "scope": "Fresh packaged production consumer; API/default and dependency checks, not a repeat of native VM qualification"
+      }
+    ],
+    "native_binary_qualification": "Reuses the completed exact-package campaigns above; this promotion changes configuration defaults, examples, release metadata and documentation, without changing the native helper or upstream SDK."
   }
 }

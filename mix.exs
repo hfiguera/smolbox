@@ -93,6 +93,8 @@ defmodule SmolBox.MixProject do
           "docs/runtime-1.22.0-qualification.md",
           "docs/evidence/smolvm-1.34.0-qualification.md",
           "docs/evidence/embedded-port-1.34.0-release-sources.md",
+          "docs/evidence/smolvm-1.35.1-qualification.md",
+          "docs/evidence/embedded-port-1.35.1-release-sources.md",
           "docs/evidence/*.json"
         ]
       ],

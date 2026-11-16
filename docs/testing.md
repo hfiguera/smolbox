@@ -31,7 +31,7 @@ and cancellation scenarios keep their explicit overrides.
 
 | Report | What it covers |
 | --- | --- |
-| [smolvm 1.35.1](evidence/smolvm-1.35.1-qualification.json) | Explicit-version qualification in this checkout; defaults remain 1.34.0 |
+| [smolvm 1.35.1](evidence/smolvm-1.35.1-qualification.json) | Completed local qualification used to promote defaults; artifacts remain unpublished and public distribution checks remain pending |
 | [smolvm 1.34.0](evidence/smolvm-1.34.0-qualification.md) | Live HTTP and Embedded Port checks and attested installation on all three Embedded Port targets |
 | [smolvm 1.22.0](runtime-1.22.0-qualification.md) | Earlier Linux and macOS checks, including failures and upgrade limits |
 | [smolvm 1.20.2](runtime-1.20.2-qualification.md) | Earlier worker checks and retained-state restrictions |

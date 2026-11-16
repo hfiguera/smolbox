@@ -4,7 +4,8 @@ The three candidate runtime archives match the official SmolVM `v1.35.1`
 release at `bc58c3ef808e70db10c0ffb2b282c5f565ac6afc`. The SDK snapshot is
 unmodified. This review records local source correspondence; public source
 availability, hosted build provenance and public installer qualification are
-still required before distribution approval or default promotion.
+still required before distribution approval. Default promotion uses completed
+local qualification at the user's explicit direction, with all artifacts unpublished.
 
 | Target | Runtime archive SHA-256 |
 | --- | --- |
@@ -42,11 +43,12 @@ native source, SDK, firmware, kernel, dependency archives, recipes and license
 texts. The separate notice archive includes the SDK notices and component
 license inventory. See the notices (`native/release-sources/1.35.1/THIRD-PARTY-NOTICES.md`).
 
-The draft catalog is `native/release-inputs-1.35.1.json`, with distribution
+The default catalog `native/release-inputs.json` matches the reviewed
+`native/release-inputs-1.35.1.json`, with distribution
 approval set to false on all targets. Its staged sources bind native commit
 `e548f4f336dced0c6c8125b87f8aa09bc33351ef`. The proposed input release is `embedded-port-inputs-v1.35.1`; it has not been
-published. `native/release-inputs.json` continues to select the approved 1.34.0
-inputs. Staged installation checks use an explicitly supplied archive digest
+published. The distribution builder rejects these unapproved entries.
+Staged installation checks use an explicitly supplied archive digest
 and do not establish hosted provenance or qualify a public download.
 
 Live checks and outstanding gates are recorded in

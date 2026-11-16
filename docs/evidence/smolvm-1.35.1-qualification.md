@@ -1,12 +1,18 @@
-# SmolVM 1.35.1 qualification candidate
+# SmolVM 1.35.1 qualification
 
-Local qualification passes for the unmodified SDK at
-`bc58c3ef808e70db10c0ffb2b282c5f565ac6afc`. Defaults remain **1.34.0** for
-HTTP workers, checkpoints, Kubernetes and the public embedded installer. Public
-source delivery, hosted provenance and clean-account public installation remain
-open gates. This candidate has not been published or approved for distribution. The user
-requested that artifacts remain unpublished; the public distribution gates are
-therefore intentionally pending.
+Completed local qualification supports the unmodified SDK at
+`bc58c3ef808e70db10c0ffb2b282c5f565ac6afc`. At the user's explicit direction,
+HTTP workers, checkpoint approvals, native source/release inputs and Kubernetes
+lab pins now default to **1.35.1** on that local basis. Explicit older versions
+remain supported. No SDK state, stored approval or historical evidence is migrated.
+
+All artifacts remain **unpublished**, and distribution approval remains false.
+Public source delivery, hosted provenance and public-download installation checks
+are intentionally pending. The public installer continues selecting a SmolBox
+release tag; published 1.34.0 bundles retain their original identities. Local
+1.35.1 installation requires the staged archive, its envelope tag and an
+independently approved digest. Promotion of source/configuration defaults does
+not claim public distribution qualification.
 
 The [machine-readable report](smolvm-1.35.1-qualification.json) binds each native
 campaign to its package, executable and asset digests. Historical evidence and
@@ -83,15 +89,36 @@ cleanup reports have zero charges and no remaining SmolVM RuntimeClass pods.
 The separate 1.35.1 source/critical-region reviews accompany the explicit runtime
 pins; the raw phase0 harness's older source-basis metadata was preserved.
 
+## Default promotion verification
+
+The promotion reran full macOS `mix ci`: 2,323 checks passed, 42 runtime cases
+excluded, and all static analysis passed. The initial run exposed a stale default
+admission fixture, which was corrected, plus two short-deadline failures at
+32 concurrent cases. The complete rerun used four BEAM schedulers/eight concurrent
+cases and passed without changing deadlines or production behavior.
+
+Fresh packaged production consumers passed on Elixir 1.20.5/OTP 29.1.2 and
+Elixir 1.18.4/OTP 27.3.4.15 with exact minimum dependencies, both without Rust on
+PATH. They confirmed the 1.35.1 default and existing API compatibility. These
+package/default checks started no native VM; the exact-package live evidence
+above remains the native qualification basis. All 64 native Python cases (four
+platform skips), 78 Kubernetes Python cases, warning-as-error documentation and
+local links across 162 pages passed. Default input catalogs and Kubernetes source
+reviews agree with their reviewed 1.35.1 versions; distribution approval is false
+on every target.
+
 ## Remaining publication gates
 
 The [corresponding-source review](embedded-port-1.35.1-release-sources.md)
 records 1,416 verified source inputs and the staged source/notices archives.
-`native/release-inputs-1.35.1.json` is a draft with distribution approval false;
-the active catalog continues to select 1.34.0.
+`native/release-inputs.json` now selects the reviewed 1.35.1 inputs and matches
+`native/release-inputs-1.35.1.json`. Both keep distribution approval false on all
+three targets, so the distribution builder remains blocked. Their proposed
+source/notices URLs are unpublished.
 
-Before promotion, complete the repository's
-[release process](../../native/release-review.md):
+The user's local-qualification instruction supersedes the publication prerequisite
+for **default promotion only**. Before any separately authorized distribution,
+complete the repository's [release process](../../native/release-review.md):
 
 1. Publish and independently verify the reviewed corresponding-source and notice
    inputs, proposed as `embedded-port-inputs-v1.35.1`.
@@ -101,7 +128,7 @@ Before promotion, complete the repository's
    and fresh standard accounts. Keep Gatekeeper enabled on macOS. Fresh macOS test
    accounts can be provisioned through the native administrator authorization
    flow, which the staged follow-up above exercised successfully.
-4. Record those identities and results before changing paired defaults.
+4. Record those exact identities and results before enabling distribution approval.
 
 No SDK-revision domain migration, codec rollback or additional native crash
 qualification is inferred from these ordinary campaigns. Retain existing worker

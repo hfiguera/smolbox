@@ -33,6 +33,27 @@ equivalent atomic behavior rather than those particular tables. Applications
 coming from 0.1.2 or earlier must also account for the
 [upgrades within 0.1.x](upgrading-within-0.1.x.md).
 
+## Adopt the unreleased 1.35.1 defaults
+
+This checkout defaults HTTP workers, checkpoint approvals, native source/release
+inputs and Kubernetes lab pins to SmolVM 1.35.1 using
+[completed local qualification](evidence/smolvm-1.35.1-qualification.md).
+Artifacts remain unpublished and distribution approval stays false. The public
+installer still follows the selected SmolBox release tag; install a local 1.35.1
+bundle with an explicit staged archive, tag and independently approved digest.
+
+Before upgrading controllers, explicitly pin existing workers to their installed
+runtime and existing checkpoint approvals to their capture runtime. Updating the
+library does not install SmolVM or migrate retained SDK domains. Drain existing
+work and enroll a separate approved 1.35.1 deployment. Kubernetes runtime identity
+must match the selected version; requalify and enroll the node separately.
+
+Upgrade all shared readers, writers and custom stores before using nonempty
+terminal arguments: those records require codec v55 and `terminal_arguments: 1`
+store support. Program-only terminal records preserve their old envelopes and
+fingerprints. On 1.35.1, launch generated scripts through an image interpreter,
+for example `program: "/bin/sh", args: ["/workspace/generated.sh"]`.
+
 ## Enable the unreleased Kubernetes preview
 
 Upgrade every shared controller, reader and writer before enabling Kubernetes

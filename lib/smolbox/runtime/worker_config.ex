@@ -91,7 +91,7 @@ defmodule SmolBox.Runtime.WorkerConfig do
   @derive {Inspect, only: [:architecture, :platform, :runtime_version]}
   defstruct @enforce_keys ++
               [
-                runtime_version: "1.34.0",
+                runtime_version: "1.35.1",
                 qualification: :development,
                 draining: false,
                 checkpoints: [],
@@ -148,8 +148,8 @@ defmodule SmolBox.Runtime.WorkerConfig do
   `SmolBox.Checkpoint` approvals. At least one local image, checkpoint, or remote
   source is required. `:sources` defaults to `[]`; `:registry_credentials` to nil.
 
-  Other optional fields are `:runtime_version` (default `"1.34.0"` for Linux x86_64 or
-  macOS Apple Silicon; explicitly select `"1.35.1"`, `"1.22.0"`, `"1.20.2"`, `"1.19.0"`, `"1.17.0"`, `"1.16.1"`, `"1.16.0"`, `"1.14.1"` or `"1.14.6"`
+  Other optional fields are `:runtime_version` (default `"1.35.1"` for Linux x86_64 or
+  macOS Apple Silicon; explicitly select `"1.34.0"`, `"1.22.0"`, `"1.20.2"`, `"1.19.0"`, `"1.17.0"`, `"1.16.1"`, `"1.16.0"`, `"1.14.1"` or `"1.14.6"`
   for another supported worker) and `:draining` (default `false`). Artifact IDs must
   be unique and architectures must match this worker. Construction makes no worker
   request or remote digest check. Profiles below the floor cannot support execution.
