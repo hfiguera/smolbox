@@ -23,13 +23,12 @@ Linux x86_64 or Linux ARM64. You need Elixir 1.18 or later and the
 starts the helper from your Mix application without a separate HTTP server.
 
 This checkout defaults to **SmolVM 1.35.1** using completed local qualification.
-Reviewed source/notices are published. The `v0.6.1-rc.1` native bundles passed
-all six public installer lanes. The final `v0.6.1` bundles are built and attested
-separately, with their own public installer qualification. Hex remains unpublished
-during final qualification; use the matching Git tag or a locally built Elixir
-package. Existing bundles keep their original identities. See
+Reviewed source/notices and attested stable native bundles are published for
+`v0.6.1`. All six current/minimum public installer lanes passed in fresh standard
+accounts. Hex remains unpublished; use the matching Git tag or the qualified
+local Elixir archive. Existing bundles keep their original identities. See
 [upgrade guidance](https://github.com/hfiguera/smolbox/blob/v0.6.1/docs/upgrading.md#upgrade-to-061) and
-[qualification and distribution status](https://github.com/hfiguera/smolbox/blob/main/docs/evidence/smolvm-1.35.1-qualification.md).
+[stable installer evidence](https://github.com/hfiguera/smolbox/blob/main/docs/evidence/embedded-port-0.6.1-public-installers.json).
 For a separate SmolVM server, follow the [HTTP worker quickstart](docs/getting-started.md).
 
 Held branches can receive their own non-secret environment values at release.

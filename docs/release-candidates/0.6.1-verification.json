@@ -2,7 +2,7 @@
   "version": "0.6.1",
   "branch": "release/0.6.1",
   "base_commit": "faf83f856b1edcd7d9c102a517acd858fb59f064",
-  "status": "stable-native-preparation",
+  "status": "stable-native-published-public-installers-passed-hex-unpublished",
   "package_archive_sha256": "89ddd86f8f4e1ca57c9a707f2f7f88f5105651daa4a89ab8cf8de699f4c1d9cb",
   "local_validation": {
     "elixir": "1.20.5",
@@ -23,16 +23,47 @@
     "reference_tag": "v0.6.1-rc.1",
     "production_native_code_sdk_catalog_packaging_and_hosted_workflow_unchanged": true
   },
-  "native_publication": "pending exact stable tagged builds and public installer qualification",
+  "native_publication": {
+    "tag": "v0.6.1",
+    "url": "https://github.com/hfiguera/smolbox/releases/tag/v0.6.1",
+    "prerelease": false,
+    "source_commit": "69477d851fd52e499635d996249d519b40713795",
+    "workflow_run": "https://github.com/hfiguera/smolbox/actions/runs/43998526710",
+    "source_input_release": "https://github.com/hfiguera/smolbox/releases/tag/embedded-port-inputs-v1.35.1"
+  },
   "hex": {
     "published": false,
-    "held_until_all_checks_pass": true
+    "held_until_all_checks_pass": true,
+    "public_api_status": 404
   },
   "ci_follow_up": {
     "failed_run": "https://github.com/hfiguera/smolbox/actions/runs/43998552831",
     "finding": "Elixir 1.19.5/OTP 28.5 caller-death test timed out waiting one second for the test server to observe the TLS exec request.",
     "fix": "Increase the test-only operation/setup budget, wait for the actual exec request before killing the caller, and collect the caller on failure. Preserve socket-closure and exactly-one-exec assertions.",
     "production_and_packaged_source_changed": false,
-    "focused_kubernetes_exec_tests": "passed"
+    "focused_kubernetes_exec_tests": "passed",
+    "implementation_ci": "passed",
+    "successful_run": "https://github.com/hfiguera/smolbox/actions/runs/43999553652"
+  },
+  "release_source_commit": "69477d851fd52e499635d996249d519b40713795",
+  "public_installer_evidence": "docs/evidence/embedded-port-0.6.1-public-installers.json",
+  "public_installer_cases": 6,
+  "qualified_client_tag_check": {
+    "status": "passed",
+    "tag": "v0.6.1",
+    "source_commit": "69477d851fd52e499635d996249d519b40713795",
+    "packaged_files_matched_to_git_tag": 792,
+    "archive_sha256": "89ddd86f8f4e1ca57c9a707f2f7f88f5105651daa4a89ab8cf8de699f4c1d9cb",
+    "hex_published": false
+  },
+  "implementation_ci": {
+    "conclusion": "success",
+    "headSha": "04dc9db9a59fc7c078d2311d8595235863e51b41",
+    "status": "completed",
+    "url": "https://github.com/hfiguera/smolbox/actions/runs/43999553652"
+  },
+  "final_evidence_docs": {
+    "warnings": 0,
+    "pages_checked": 162
   }
 }

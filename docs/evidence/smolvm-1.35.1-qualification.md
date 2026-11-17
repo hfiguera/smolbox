@@ -7,18 +7,20 @@ lab pins now default to **1.35.1** on that local basis. Explicit older versions
 remain supported. No SDK state, stored approval or historical evidence is migrated.
 
 The [source/notices release](https://github.com/hfiguera/smolbox/releases/tag/embedded-port-inputs-v1.35.1)
-and attested native [qualification prerelease `v0.6.1-rc.1`](https://github.com/hfiguera/smolbox/releases/tag/v0.6.1-rc.1)
-are now public. All six public installer lanes passed in fresh standard OS
+and attested stable native [`v0.6.1` bundles](https://github.com/hfiguera/smolbox/releases/tag/v0.6.1)
+are public. All six stable public installer lanes passed in fresh standard OS
 accounts: current/minimum Elixir/OTP on Apple Silicon, Linux x86_64 and Linux
-ARM64, with Rust absent. Every temporary account, HOME and account lock was
-removed after positive SDK cleanup and post-use asset verification. **Hex remains
-unpublished** for this candidate; use the matching Git tag and explicit native
-installer tag. Existing published 1.34.0 bundles keep their original identities.
+ARM64, with Rust absent. Current lanes exercised automatic tag selection and
+minimum lanes exercised explicit `--tag v0.6.1`. Every temporary account, HOME
+and account lock was removed after positive SDK cleanup and post-use asset
+verification. **Hex remains unpublished**; use the matching Git tag and native
+installer tag. Existing published bundles keep their original identities.
 
-The [public installer report](embedded-port-1.35.1-public-installers.json) binds
-the new hosted binaries to their source commit, attestations, exact archive and
-manifest hashes, and six consumer results. The earlier broader local campaigns
-below retain their original package identities and scope.
+The [stable installer report](embedded-port-0.6.1-public-installers.json) binds
+these exact hosted binaries to their source commit, attestations, archive and
+manifest hashes, and six consumer results. The earlier
+[RC installer report](embedded-port-1.35.1-public-installers.json) and broader local
+campaigns below retain their original package identities and scope.
 
 The [machine-readable report](smolvm-1.35.1-qualification.json) binds each native
 campaign to its package, executable and asset digests. Historical evidence and

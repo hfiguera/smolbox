@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "date": "2026-11-16",
-  "status": "native_qualification_prerelease_published_public_installers_passed_hex_unpublished",
+  "status": "stable_native_bundles_published_public_installers_passed_hex_unpublished",
   "runtime": "1.35.1",
   "upstream_commit": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
   "previous_sdk_commit": "d77eaf1c6eeff16bc8c258613746033e9bf567ca",
@@ -12,7 +12,7 @@
     "kubernetes": "1.35.1",
     "promoted": true,
     "basis": "Completed local qualification; explicit user instruction to promote defaults while keeping every artifact unpublished",
-    "public_embedded_installer": "Release-tag selection is unchanged. The public 1.35.1 native prerelease uses --tag v0.6.1-rc.1 with matching library source; older published bundles retain their identities."
+    "public_embedded_installer": "Release-tag selection is unchanged. Stable v0.6.1 native bundles use SmolVM 1.35.1; matching library version automatically selects that tag. Current/minimum public installers passed. Earlier bundles retain their identities."
   },
   "distribution_approved": true,
   "historical_evidence_transferred": false,
@@ -86,7 +86,7 @@
     }
   },
   "pending": [
-    "Hex publication remains explicitly unauthorized. Any broader native feature/crash qualification remains scoped to its exact recorded package identity."
+    "Hex remains unpublished. Broader native feature/crash qualification remains scoped to its exact recorded package identity."
   ],
   "branch": "support/smolvm-1.35.1",
   "upstream_impact_review": {
@@ -2124,10 +2124,13 @@
     "hex_publication_authorized": false,
     "source_input_release_published": true,
     "source_input_release_url": "https://github.com/hfiguera/smolbox/releases/tag/embedded-port-inputs-v1.35.1",
-    "input_approval_scope": "Reviewed inputs and exact hosted bundles approved for native qualification prerelease; six public installer lanes passed. Hex publication remains unauthorized.",
+    "input_approval_scope": "Reviewed source/notices and hosted native inputs approved for RC and stable publication; each release passed its own six public installer lanes. Hex remains unpublished.",
     "qualification_release_tag": "v0.6.1-rc.1",
     "qualification_release_url": "https://github.com/hfiguera/smolbox/releases/tag/v0.6.1-rc.1",
-    "hex_published": false
+    "hex_published": false,
+    "stable_release_tag": "v0.6.1",
+    "stable_release_url": "https://github.com/hfiguera/smolbox/releases/tag/v0.6.1",
+    "stable_public_installer_matrix_passed": true
   },
   "local_environment_cleanup": {
     "private_postgresql_cluster": "normal smart shutdown confirmed",
@@ -2291,6 +2294,22 @@
       "workflow_run": "https://github.com/hfiguera/smolbox/actions/runs/43985522858",
       "source_input_release": "https://github.com/hfiguera/smolbox/releases/tag/embedded-port-inputs-v1.35.1",
       "latest_stable_release_unchanged": "v0.6.0"
+    },
+    "cases": 6,
+    "fresh_standard_accounts": true,
+    "accounts_and_homes_removed": true,
+    "hex_published": false
+  },
+  "stable_native_distribution": {
+    "status": "passed",
+    "report": "docs/evidence/embedded-port-0.6.1-public-installers.json",
+    "release": {
+      "tag": "v0.6.1",
+      "url": "https://github.com/hfiguera/smolbox/releases/tag/v0.6.1",
+      "prerelease": false,
+      "source_commit": "69477d851fd52e499635d996249d519b40713795",
+      "workflow_run": "https://github.com/hfiguera/smolbox/actions/runs/43998526710",
+      "source_input_release": "https://github.com/hfiguera/smolbox/releases/tag/embedded-port-inputs-v1.35.1"
     },
     "cases": 6,
     "fresh_standard_accounts": true,

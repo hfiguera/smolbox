@@ -4,9 +4,8 @@ Run one offline command in a disposable VM, print `42`, and verify that
 SmolBox released its reservation. The Runtime starts a local helper and
 uses an in-memory store for the demo. The verified bundle contains the
 helper, matching runtime assets and demo image. SmolBox 0.6.1 uses SmolVM
-1.35.1. Its stable native bundles are qualified separately from the earlier
-`v0.6.1-rc.1` bundles, which passed six public installer lanes. Hex remains
-unpublished during final qualification. The example runs without Rust or a
+1.35.1. Its stable `v0.6.1` bundles passed all six current/minimum public
+installer lanes in fresh standard accounts. Hex remains unpublished. The example runs without Rust or a
 separate SmolVM HTTP server.
 
 ## Prerequisites
@@ -39,9 +38,10 @@ mix deps.compile
 mix smolbox.embedded.install --tag v0.6.1 --install-dir "$HOME/smolbox-demo-install"
 ```
 
-The earlier 1.35.1 prerelease passed
-[current/minimum fresh-account checks](evidence/embedded-port-1.35.1-public-installers.json).
-The final `v0.6.1` bundles require their own public installer checks.
+The stable 1.35.1 bundles passed
+[current/minimum fresh-account checks](evidence/embedded-port-0.6.1-public-installers.json),
+including automatic library-version selection and explicit `--tag v0.6.1`.
+The RC retains its original bundles and qualification evidence.
 Existing Hex users can pin `{:smolbox, "== 0.6.0"}` and its matching 1.34.0
 bundles; the Git dependency above selects the new library source.
 

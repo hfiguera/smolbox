@@ -24,15 +24,18 @@ results for earlier 1.34.0 identities remain in the
 and [qualification record](../docs/evidence/smolvm-1.34.0-qualification.md).
 The 1.22.0 evidence below applies to those earlier package identities.
 
-## Stable 0.6.1 preparation
+## Stable 0.6.1 publication
 
 The user authorized preparing 0.6.1 final, publishing stable native bundles and
 running their exact public installer checks. The final version uses the same
 native implementation, SDK and reviewed source/notices inputs as `v0.6.1-rc.1`.
-Build and attest all three archives on the immutable `v0.6.1` tag, publish those
-exact bytes, and run current/minimum public installers in fresh standard accounts.
-The RC and its evidence remain unchanged. Hex stays unpublished during final
-qualification; native publication does not publish the library package.
+All three archives were built and attested on the immutable `v0.6.1` tag, then
+published with matching checksums and attestation files. Current/minimum public
+installers passed in six fresh standard accounts, including automatic version
+selection and explicit tag selection. All accounts, HOME directories and account
+locks were removed after positive SDK cleanup; the Linux guests were stopped.
+See [stable identities and results](../docs/evidence/embedded-port-0.6.1-public-installers.json).
+The RC remains unchanged. Hex remains unpublished.
 
 ## Integrity and provenance
 

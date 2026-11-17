@@ -39,11 +39,12 @@ coming from 0.1.2 or earlier must also account for the
 This checkout defaults HTTP workers, checkpoint approvals, native source/release
 inputs and Kubernetes lab pins to SmolVM 1.35.1 using
 [completed local qualification](evidence/smolvm-1.35.1-qualification.md).
-Reviewed source/notices and attested native bundles for `v0.6.1-rc.1` passed
-six fresh-account public installer lanes. The final release uses separately
-built and attested `v0.6.1` bundles, with its own public installer qualification.
-Hex remains unpublished during final qualification. Use the matching Git
-dependency and explicit `--tag v0.6.1`; the installer follows the selected
+Reviewed source/notices and attested stable native bundles are published for
+`v0.6.1`. All six current/minimum fresh-account public installer lanes passed,
+including automatic selection from the library version and explicit tag selection.
+See [exact stable identities and results](evidence/embedded-port-0.6.1-public-installers.json).
+The RC and its earlier evidence remain unchanged. Hex remains unpublished. Use the
+matching Git dependency and `--tag v0.6.1`; the installer follows the selected
 SmolBox release tag. Existing staged-install digest verification remains available.
 
 Before upgrading controllers, explicitly pin existing workers to their installed
