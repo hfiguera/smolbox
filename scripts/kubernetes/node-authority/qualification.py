@@ -20,10 +20,10 @@ import sys
 ROOT = Path("/root/node-authority-qualification")
 LAB = Path("/home/lab/smolbox-kubernetes")
 STATE = Path("/var/lib/smolbox-kubernetes")
-RUNTIME = Path("/opt/smolvm-1.34.0-linux-x86_64")
+RUNTIME = Path("/opt/smolvm-1.35.1-linux-x86_64")
 DATABASE = STATE / "data/smolvm/server/smolvm.db"
 CONFIGURATION = Path("/etc/smolbox-node-authority/enrollment.json")
-ARCHIVE_SHA256 = "89e098b1f7749c515ed95263f081c469befb0aa10b49ee589ccb3e901090608a"
+ARCHIVE_SHA256 = "1c9377f6ada3c7c6753efada90595d5f44eb7a900ca0e4f8b786815b84fd22be"
 K3S_SHA256 = "5cd49f0faca5b2ea4355d4761e7b1445b8aa05cd50e612fd9c370551db49e5e2"
 CONTROLLER_RBAC_SHA256 = (
     "03f80ad9adfbd5eb86ed275b28e756f3b07b6d78205e342784c96e2befa27545"

@@ -87,11 +87,13 @@ as shown in the checked-in evidence. Obtain live UIDs/boot and policy digest for
 the enrolled lab; old evidence is not a portable cluster configuration.
 
 The example defaults to `"node_provider": "lab"`; omitting the field preserves
-existing lab settings. Standalone node authority passed all manual gates only
-for the explicitly approved fork-shim candidate documented in the
-[qualification evidence](https://github.com/hfiguera/smolbox/blob/main/docs/evidence/kubernetes-node-authority-shim-fix-2026-11-14.json).
-It retains the fixed single-node preview policy and same-host controller guard;
-it does not qualify the original official archive or other runtime identities.
+existing lab settings. The standalone installer targets the official Linux x86_64
+SmolVM 1.35.1 release, which includes the upstream child-wait fix. Its release
+qualification is recorded separately from the historical 1.34.0 fork-shim campaign
+in the [node-authority progress](https://github.com/hfiguera/smolbox/blob/main/docs/design/kubernetes-node-authority-progress.md).
+It retains the fixed single-node preview policy and same-host controller guard.
+Installation requires a fresh empty node and explicit new enrollment approvals;
+existing installations and retained records are not migrated.
 Explicit `"node_provider": "node_authority"` selects it using a separate
 `node_authority` object:
 

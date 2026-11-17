@@ -1,6 +1,8 @@
 {
   "version": 1,
-  "status": "phase5_passed_exact_fork_candidate_setup",
+  "status": "phase5_passed_official_smolvm_1.35.1_fresh_setup",
+  "current_qualification": "official_smolvm_1_35_1",
+  "historical_checkpoint_note": "Preexisting fields and sections retain the original 1.34.0 extraction and backport checkpoints; official_smolvm_1_35_1 records the current setup.",
   "base_commit": "d0bf044ecf32100d717e82b1b938011311d4306c",
   "legacy_files": {
     "scripts/kubernetes/node_history.py": "8cf6195deaba11145afea2bd9c5fa5c94b30be04e0fc364764d57d1cefb42c5f",
@@ -273,5 +275,51 @@
     "final_installer_ast_matches_actual_live_installer": true,
     "final_audit": "passed",
     "source_package_sha256": "0310e9fba11de9c2cba43e27b66d253f6a0b59a3c555b7833e5848a88f9c5dc3"
+  },
+  "official_smolvm_1_35_1": {
+    "base_main_commit": "53a83ee8bb3d25dd1e0fed70ece3be598914d6d0",
+    "release_source_commit": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+    "upstream_fix_pr": "https://github.com/smol-machines/smolvm/pull/2190",
+    "runtime_identity": {
+      "archive_sha256": "1c9377f6ada3c7c6753efada90595d5f44eb7a900ca0e4f8b786815b84fd22be",
+      "containerd_version": "2.2.10-k3s1",
+      "guard_sha256": "cac7a26eb375089efd8d45579c9b6fc977f3217415023ec66696c2b32cec1c4e",
+      "guard_template_sha256": "d0ea5d6a0df4d3cb84055c4e88d831db54d9c162e637aaed7cf9402ae72e938e",
+      "k3s_version": "v1.35.10+k3s1",
+      "kernel_sha256": "96b78e5f644119cd2e8a6af61861625aa9c60bc7d3e14822ed107c6ca140ed64",
+      "libkrun_sha256": "c3bcc4616738e17a1cf3a7a93b38eb08b3d04bb567a72d7f68e95b24c9481c46",
+      "rootfs_sha256": "5cbda404a710b37ce362cb2c8d259d41c7259bbd62935e93cc5f309c73508500",
+      "shim_sha256": "711e16b6e494910ec1ff000d0171e5482e1b856ebe054c0595ee6339ed825e8a",
+      "smolvm_version": "1.35.1"
+    },
+    "source_reviews": {
+      "scripts/kubernetes/source-basis-1.35.1.json": "3e244715fba322503420b6b44d2372cb5d21b2dbeb17214394f3d06d38d11ed5",
+      "scripts/kubernetes/node-history-source-basis-1.35.1.json": "cd0b55a66a7c6b72e314cecb4fbb4278fb18649190218351d1aac51d05fc916b",
+      "priv/kubernetes/node_authority/v1/source-basis-history.json": "cd0b55a66a7c6b72e314cecb4fbb4278fb18649190218351d1aac51d05fc916b"
+    },
+    "verifier_manifest_sha256": "109b463e953a4caea890c694ff9121ce36c682e3b6cfe2c66e2da93f68e3b19c",
+    "programs": {
+      "authority_assets.py": "e38fcf537554507537fb6f97e72ee0d127fa7554f0792a074bb9bd20a7143932",
+      "authority_bootstrap.py": "6af8cd0deff501b16fb156d7fab515788e551e69711722a203a67e978487bdf3",
+      "authority_config.py": "c1f718820408609f86d26db54d2dcb261e27403a1c81d406d888c4235b6523e9",
+      "authority_contract.py": "1891a6a4ff83d6608d899901ea29d87e03b0289437da27ca8d6352160c82a727",
+      "authority_endpoint.py": "82068790a072f5a3b3866284379106e594f7bc73e65a5ecdfb18d7a1bbfc553d",
+      "authority_guard.py": "d4eb6619c8498060902befd1b60a1c18b74aad53ee96a6d95867907e425a655b",
+      "authority_history.py": "c0c922be9e8782e48679f5d8d6f69334cf42b7fb4e0685d0f826fc5c84a685d0",
+      "authority_lifecycle.py": "8e3a7cd4ec60c3e5493f959cd29c14b2d2927e153f723b88177d6ed0678784e7",
+      "authority_runner.py": "15da4a6e68faae1fba158c0a769831a3f7be32a0991e89d764ac3bdf613b1471",
+      "authority_verifier.py": "b8a2bd67cf88eed919425021ae966d2f10bfe90177850b87ec4e6998d78049ce",
+      "entrypoint.sh": "3ec8c3cfda900a0cb9426391c577be6f736e4a5882b947c5c053aff63a3d78be",
+      "source-basis-history.json": "cd0b55a66a7c6b72e314cecb4fbb4278fb18649190218351d1aac51d05fc916b",
+      "source-basis-lifecycle.json": "c0f19189e0cedd301064a7dff17b01de2a86856c7750ae061785e81ea8d2c129",
+      "ssh-command.sh": "b1e0855d31b3c257663749a5094fca06141d533b8f35d7b1b421206820b07670"
+    },
+    "default_installer_archive_sha256": "1c9377f6ada3c7c6753efada90595d5f44eb7a900ca0e4f8b786815b84fd22be",
+    "unmodified_official_archive": true,
+    "fresh_domain": "node-authority-official1351-v1",
+    "qualification_report": "docs/evidence/kubernetes-node-authority-smolvm-1.35.1-2026-11-16.json",
+    "all_12_public_and_2_durable_recovery_cases_passed": true,
+    "prior_sections_are_historical_checkpoints": true,
+    "old_installations_not_replaced": true
   }
 }

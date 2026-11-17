@@ -32,6 +32,20 @@ class AuthorityContractTest(unittest.TestCase):
             changed[key] = "11111111-2222-4333-8444-555555555555" if key == "history_epoch" else "f" * 64
             self.assertNotEqual(contract.generation(changed), vectors["authority_generation"])
 
+    def test_runtime_versions_match_sdk_support_without_changing_frozen_vectors(self):
+        original = self.vectors["receipt"]["binding"]
+        self.assertEqual(original["runtime_identity"]["smolvm_version"], "1.34.0")
+        self.assertEqual(contract.RUNTIME_VERSIONS["smolvm_version"], "1.35.1")
+        for version in ("1.34.0", "1.35.1"):
+            value = copy.deepcopy(original)
+            value["runtime_identity"]["smolvm_version"] = version
+            self.assertEqual(contract.binding(value), value)
+        for version in ("1.35.0", "1.35.2", "../escape"):
+            value = copy.deepcopy(original)
+            value["runtime_identity"]["smolvm_version"] = version
+            with self.assertRaisesRegex(ValueError, "runtime identity"):
+                contract.binding(value)
+
     def test_each_action_has_a_valid_success_and_rejection(self):
         for action in contract.ACTIONS:
             request = contract.request(self.vectors["requests"][action])

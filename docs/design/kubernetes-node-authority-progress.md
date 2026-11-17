@@ -1,6 +1,8 @@
 # Kubernetes node authority progress
 
-Status: Phases 0–5 passed for the explicitly approved shim candidate on the tested single-node setup, November 14, 2026. The two failed official-runtime domains remain preserved and charged. Delivery branch:
+Status: Phases 0–5 passed on a fresh single-node setup with official SmolVM 1.35.1,
+November 16, 2026. The two failed original 1.34.0 domains remain preserved and
+charged. Delivery branch:
 `feature/kubernetes-node-authority`. Follow the [specification](kubernetes-node-authority.md),
 [frozen contracts](kubernetes-node-authority-contract.md) and
 [implementation plan](kubernetes-node-authority-implementation-plan.md).
@@ -12,7 +14,7 @@ Status: Phases 0–5 passed for the explicitly approved shim candidate on the te
 | 2 — Administrator installation | Passed (fixtures) | Deterministic bundle, explicit root installer and immutable enrollment; live installation remains Phase 5 |
 | 3 — Endpoint and SDK provider | Passed (protocol/access scope) | Strict SDK provider, bounded transport, package constructors and real pre-enrollment SSH controls; execution qualification remains Phase 5 |
 | 4 — Runtime/store integration | Passed (simulated node observations) | Shared public runtime campaign passes Memory/PostgreSQL, existing compatibility and full suites, package consumers and static/docs gates; physical proof remains Phase 5 |
-| 5 — Live qualification | Passed for the explicit candidate setup | Fresh v3 enrollment/access, 12 public cases, two durable recovery controls, original-authority proofs and final custody passed; the two failed old domains remain charged |
+| 5 — Live qualification | Passed for official SmolVM 1.35.1 | Fresh official-release enrollment/access, 12 public cases, two durable recovery controls, 14 proofs before release and final custody passed; all prior disks and both unresolved charges remain preserved |
 
 ## Phase 0 — Frozen v1 data and authority contracts
 
@@ -327,3 +329,50 @@ changed by the shim prerequisite. The updated manual tools pass 181 Python tests
 Both package dependency lanes and documentation checks are audited separately
 against the final source snapshot. The PostgreSQL full suite used a separate
 database so its DDL controls could not alter retained live partitions.
+
+## Official SmolVM 1.35.1 — Fresh-node requalification
+
+The branch was rebased onto main `53a83ee8` (SmolBox 0.6.1). Upstream
+[SmolVM PR #2190](https://github.com/smol-machines/smolvm/pull/2190) is included in
+release commit `bc58c3ef`. The installer and manual preparation now default to
+the official Linux x86_64 archive, SHA-256
+`1c9377f6ada3c7c6753efada90595d5f44eb7a900ca0e4f8b786815b84fd22be`.
+No custom build, archive modification or digest override was used. The packaged
+history source review follows 1.35.1; K3s, containerd, guard and lifecycle proof
+obligations remain unchanged. New core manifest and configuration approvals were
+established only on a new empty guest, `node-authority-official1351-v1`.
+
+All 12 serial public cases passed: Memory/PostgreSQL binary exits and artifacts,
+one-byte/4 KiB silent output caps, cancellation, overflow, lost create responses
+and lost terminal status. Both PostgreSQL recovery cases passed, including
+publication longer than the five-second lease with renewal during recovery,
+caller loss during a locked observation, refusal of paused-owner takeover,
+positive original-owner death, unavailable evidence and incorrect approvals.
+Negative evidence retained the original exit/artifact and charge; correct
+authority later completed with the original Pod UID and unchanged deadlines.
+Traces show one create and at most one application dispatch per public case,
+with guarded deletion of the saved original UID. All 14 version-3 proofs were
+persisted while their reservations were still held, before release to zero usage.
+Some cleanup mutation grants expired before a later scheduled read-only proof
+completed; no operation budget or original deadline was extended.
+
+All 30 server and 8 SDK client access checks passed. Four explicitly labeled
+counterfactuals rejected changed daemon/boot/history inputs without producing a
+release proof. Final custody confirmed complete idle history and unchanged
+immutable approvals. The new guest was stopped; all seven prior disks remained
+byte-identical, both original failure records matched their frozen snapshots and
+retained their charges, and the shared VM lock was available.
+
+Validation passed: 2,375 SDK checks (42 excluded), 335 PostgreSQL checks (29
+excluded), 184 manual Python checks, format/Credo/Credence/ExDNA/xref/Dialyzer,
+current and minimum dependency consumers without Rust, an independently unpacked
+deterministic 14-program bundle, and documentation/link checks. Protocol and
+persistence layouts and historical canonical vectors are unchanged. The SDK's
+existing acceptance of historical 1.34.0 identities is retained; this campaign
+qualifies new installations only for the exact official 1.35.1 setup. Live and
+Python checks stay manual; ordinary SDK test discovery and CI workflows are unchanged.
+
+See the [official-release evidence](../evidence/kubernetes-node-authority-smolvm-1.35.1-2026-11-16.json) for identities, per-case results, proof-before-release
+audit and preserved-state evidence. This completes the standalone single-node
+slice; distributed fencing, multi-node operation and the remaining
+HTTP/Embedded parity milestones are separate work.

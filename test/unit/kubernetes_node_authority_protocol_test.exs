@@ -9,7 +9,13 @@ defmodule SmolBox.KubernetesNodeAuthorityProtocolTest do
 
   setup do
     {:ok, context} = Fixture.context()
-    receipt = Fixture.receipt()
+
+    receipt =
+      Fixture.receipt(1000,
+        runtime_version: "1.34.0",
+        runtime_identity: Fixture.vectors()["receipt"]["binding"]["runtime_identity"]
+      )
+
     %{vectors: Fixture.vectors(), context: context, receipt: receipt, binding: receipt.binding}
   end
 

@@ -1,6 +1,11 @@
 # Kubernetes node authority implementation plan
 
-Status: Phases 0–5 passed for the explicitly approved fork-shim candidate on the tested single-node setup, November 14, 2026. The two failed official-runtime domains remain stopped and charged; this does not qualify that artifact or general Kubernetes production support. See progress and evidence.
+Status: Phases 0–5 passed on a fresh single-node setup with official SmolVM
+1.35.1, November 16, 2026. The complete manual campaign passed with the unmodified
+release archive; see the [official-release evidence](../evidence/kubernetes-node-authority-smolvm-1.35.1-2026-11-16.json).
+The two failed original 1.34.0
+domains remain stopped and charged. This does not qualify general production
+Kubernetes or HTTP/Embedded parity.
 Branch: `feature/kubernetes-node-authority`.
 Implement the [single-node authority specification](kubernetes-node-authority.md).
 This document creates no qualification claim or operational permission to change
@@ -246,7 +251,15 @@ release cannot be established. The existing lab preview remains available under
 its own approvals. Neither implementation difficulty nor a successful smoke
 authorizes weaker proof, broader capabilities or automatic migration.
 
-## Runtime prerequisite before resuming Phase 5
+## Completed runtime prerequisite and historical backport
+
+The child-wait fix was merged in upstream SmolVM PR #2190 and is included in the
+official 1.35.1 release. Rebase onto SmolBox 0.6.1, update the standalone default
+archive and packaged history source review, and qualify a fresh empty node with
+new enrollment approvals. That complete campaign has now passed; no custom shim
+or archive-digest override was used. Existing authorities were not upgraded.
+The following retains the earlier prerequisite review and backport acceptance
+criteria; it is not a remaining blocker or the current installation procedure.
 
 The user subsequently authorized implementing this prerequisite in the SmolVM
 fork and using it with SmolBox. The selected design has its own lifecycle review:
@@ -266,11 +279,11 @@ mount copy and chmod while its default containerd-shim SIGCHLD handler reaps
 arbitrary children. Competing waits are consistent with the observed ECHILD
 failures; source review does not establish the exact runtime interleaving.
 
-Prepare a separately reviewed runtime prerequisite, suggested branch
-`fix/shim-child-wait-race`, before changing this branch's approved runtime
-pins. Keep the existing version/hash restrictions and disabled provider in place
-until that review and the required artifact qualification are complete. This is
-an unmet dependency, not permission to replace either preserved installation.
+At the original checkpoint, a separately reviewed runtime prerequisite on
+`fix/shim-child-wait-race` was required before changing the approved runtime
+pins. Version/hash restrictions and explicit provider approvals stayed in place
+through that review and qualification. Neither the backport nor official-release
+qualification grants permission to replace either preserved installation.
 
 1. Reproduce the child-wait conflict in an isolated Linux test environment with
    the actual default shim reaper enabled. Identify every shim-owned helper wait

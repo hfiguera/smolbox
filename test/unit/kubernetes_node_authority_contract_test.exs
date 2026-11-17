@@ -24,7 +24,12 @@ defmodule SmolBox.KubernetesNodeAuthorityContractTest do
       assert :crypto.hash(:sha256, bytes) |> Base.encode16(case: :lower) == digest
     end
 
-    {:ok, config} = Fixture.config()
+    {:ok, config} =
+      Fixture.config(
+        runtime_version: "1.34.0",
+        runtime_identity: vectors["receipt"]["binding"]["runtime_identity"]
+      )
+
     assert Config.binding(config).generation == vectors["identity_fields"]["binding_generation"]
     refute vectors["authority_generation"] == vectors["identity_fields"]["history_epoch"]
   end
@@ -32,6 +37,7 @@ defmodule SmolBox.KubernetesNodeAuthorityContractTest do
   test "v54 and typed receipt comparisons preserve standalone epochs without adopting lab receipts" do
     vectors = @vectors |> File.read!() |> Jason.decode!()
     {:ok, config} = Fixture.config()
+    assert config.runtime_version == "1.35.1"
     {record, assignment} = Fixture.ready_record(config)
     lab = record.backend_receipt
     observation = %{lab.observation | observer_epoch: vectors["authority_generation"]}

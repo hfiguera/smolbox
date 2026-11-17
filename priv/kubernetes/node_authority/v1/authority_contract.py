@@ -19,7 +19,8 @@ GENERATION_KEYS = {"version", "binding_generation", "history_epoch", "enrollment
 BINDING_KEYS = {"version", "kind", "target_id", "cluster_id", "cluster_anchor_uid", "namespace",
                 "namespace_uid", "node_name", "node_uid", "node_boot_id", "runtime_class",
                 "runtime_class_uid", "runtime_policy_digest", "runtime_identity", "generation"}
-RUNTIME_VERSIONS = {"smolvm_version": "1.34.0", "k3s_version": "v1.35.10+k3s1",
+SUPPORTED_SMOLVM_VERSIONS = {"1.34.0", "1.35.1"}
+RUNTIME_VERSIONS = {"smolvm_version": "1.35.1", "k3s_version": "v1.35.10+k3s1",
                     "containerd_version": "2.2.10-k3s1"}
 RUNTIME_DIGESTS = {"archive_sha256", "shim_sha256", "libkrun_sha256", "kernel_sha256",
                    "rootfs_sha256", "guard_sha256", "guard_template_sha256"}
@@ -146,7 +147,9 @@ def binding(value):
             digest(value["runtime_policy_digest"]), "binding identity")
     runtime = value["runtime_identity"]
     require(exact(runtime, set(RUNTIME_VERSIONS) | RUNTIME_DIGESTS) and
-            all(runtime[key] == expected for key, expected in RUNTIME_VERSIONS.items()) and
+            runtime["smolvm_version"] in SUPPORTED_SMOLVM_VERSIONS and
+            all(runtime[key] == expected for key, expected in RUNTIME_VERSIONS.items()
+                if key != "smolvm_version") and
             all(digest(runtime[key]) for key in RUNTIME_DIGESTS), "runtime identity")
     return value
 

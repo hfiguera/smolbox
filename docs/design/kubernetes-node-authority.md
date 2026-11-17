@@ -1,20 +1,22 @@
 # Kubernetes single-node authority
 
-Status: implementation specification, November 14, 2026. The standalone provider is
-implemented through Phase 5 and qualified only for the explicitly approved fork-shim candidate setup. Delivery branch:
-`feature/kubernetes-node-authority`.
+Status: Phases 0–5 qualified on a fresh single-node setup with official SmolVM
+1.35.1, November 16, 2026. Delivery branch: `feature/kubernetes-node-authority`.
 
-Phase 0 contracts are frozen in the [contract checkpoint](kubernetes-node-authority-contract.md),
-with schemas/vectors and Python/Elixir compatibility checks. Standalone extraction
-and administrator installation have passed their fixture gates; protocol/SDK
-and real pre-enrollment access checks have passed Phase 3. Phase 4 public runtime,
-Memory/PostgreSQL and compatibility gates pass against simulated node evidence.
-A fresh v3 domain passed all manual live gates with the separately approved
-SmolVM shim fix. The exact candidate identity and qualification bounds are in the
-[fork-fix evidence](../evidence/kubernetes-node-authority-shim-fix-2026-11-14.json).
-The two original official-runtime failures, charges and stopped guests remain
-preserved. Default Lab selection and official runtime pins are unchanged. See the
-[implementation progress](kubernetes-node-authority-progress.md).
+The branch is rebased onto SmolBox 0.6.1 main. The standalone installer defaults
+to the unmodified official 1.35.1 archive, including the merged upstream child-wait
+fix. A new empty domain with new credentials and approvals passed all 12 public
+Memory/PostgreSQL cases, two durable recovery controls, 30 server and 8 client
+access controls, four labeled counterfactuals and final custody checks. See the
+[official-release evidence](../evidence/kubernetes-node-authority-smolvm-1.35.1-2026-11-16.json) and [implementation progress](kubernetes-node-authority-progress.md).
+
+The earlier 1.34.0 backport campaign and both failed original domains remain
+historical evidence; their records, stopped disks and unresolved charges were
+preserved. There is no runtime/verifier replacement, receipt migration or new
+1.34.0 installation qualification. Default provider selection remains
+`LabNodeEvidence`; standalone selection requires explicit enrollment approvals.
+Protocol v1, Binding v1, Observation v1, cleanup proof v3 and durable v54 remain
+unchanged. Historical canonical vectors are retained verbatim.
 
 Follow the [implementation plan](kubernetes-node-authority-implementation-plan.md),
 [backend parity matrix](kubernetes-backend-parity.md), and existing

@@ -18,7 +18,7 @@ ENTRYPOINTS = {
     Path("/usr/local/libexec/smolbox-node-authority-ssh"): "ssh-command.sh",
 }
 INSTALL_LOCK = Path("/run/smolbox-node-authority-install.lock")
-ARCHIVE_SHA256 = "89e098b1f7749c515ed95263f081c469befb0aa10b49ee589ccb3e901090608a"
+ARCHIVE_SHA256 = "1c9377f6ada3c7c6753efada90595d5f44eb7a900ca0e4f8b786815b84fd22be"
 K3S_SHA256 = "5cd49f0faca5b2ea4355d4761e7b1445b8aa05cd50e612fd9c370551db49e5e2"
 
 

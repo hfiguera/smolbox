@@ -162,10 +162,11 @@ without opening a connection, reading a credential or installing anything:
 ```
 
 These example paths and connection fields must be replaced with administrator
-approvals. The provider is live-qualified only for the exact fork-shim candidate
-setup recorded in the versioned evidence. The example/default selection remains
-`LabNodeEvidence`; standalone use requires explicit candidate and installation
-approvals. The original official archive does not inherit that qualification.
+approvals. The supported official runtime target is SmolVM 1.35.1 on the exact
+single-node setup recorded in the node-authority qualification evidence. The
+example/default selection remains `LabNodeEvidence`; standalone use requires
+explicit installation approvals. Historical candidate evidence does not qualify
+another archive or installation. See the official runtime procedure below.
 
 Host accepts an ASCII DNS name or IP literal (IPv6 without brackets); port and
 user are separate required fields. Paths are absolute ASCII paths using letters,
@@ -395,7 +396,29 @@ Preserve every failed observation, original record and active process identity
 before deciding the next action. Never change an enrolled verifier, substitute a
 global idle check for an original receipt, or force release to finish a campaign.
 
-## Explicit fork-runtime candidate validation
+## Official SmolVM 1.35.1 runtime
+
+The standalone installer and fresh-node preparation default to the unmodified
+Linux x86_64 SmolVM 1.35.1 release archive, SHA-256
+`1c9377f6ada3c7c6753efada90595d5f44eb7a900ca0e4f8b786815b84fd22be`.
+The shim child-wait fix was merged upstream in
+[smol-machines/smolvm#2190](https://github.com/smol-machines/smolvm/pull/2190)
+and is included in this release. No custom shim build or runtime-digest override
+is needed. K3s remains `v1.35.10+k3s1`, containerd `2.2.10-k3s1`.
+
+Review `scripts/kubernetes/source-basis-1.35.1.json` and
+`scripts/kubernetes/node-history-source-basis-1.35.1.json`; the latter is packaged
+in the verifier manifest. Prepare and enroll a fresh empty node with new
+credentials and approvals, then run the manual access, public Memory/PostgreSQL,
+recovery and custody campaign described above. Existing enrolled installations
+must not be replaced or re-enrolled. Retained historical records and canonical
+1.34.0 vectors do not qualify a new 1.34.0 installation.
+
+## Historical fork-runtime candidate validation
+
+The following records the earlier 1.34.0 backport campaign. It is not the procedure
+for the official 1.35.1 qualification.
+
 
 The user-authorized shim fix is developed separately in `hfiguera/smolvm` on
 `fix/shim-child-wait-race`. Its Linux regression boots the real
@@ -417,8 +440,8 @@ inputs, another architecture and existing output. The archive is labeled
 official v1.34.0 artifact and does not inherit its qualification.
 
 Run `qualification.py stage` on a **fresh guest only**, passing the explicit
-`--runtime-archive-sha256` from that candidate's reviewed report. Without this
-option the original runtime pin remains the default. Pass that same approval to
+`--runtime-archive-sha256` from that candidate's reviewed report. The current default is the official 1.35.1 archive; this historical
+candidate procedure requires explicit reviewed preparation inputs. Pass that same approval to
 the separately reviewed offline `install.py` invocation, including `--verify`.
 An override cannot change the archive recorded in the immutable binding; a
 mismatch refuses installation or verification. It does not qualify the candidate.

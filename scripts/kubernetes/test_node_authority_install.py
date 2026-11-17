@@ -38,6 +38,13 @@ builder = module("authority_bundle", "bundle.py")
 
 
 class BundleTest(unittest.TestCase):
+    def test_default_installer_pin_matches_the_official_release(self):
+        pins = json.loads((ROOT / "scripts/kubernetes/pins.json").read_bytes())
+        self.assertEqual(
+            pins["smolvm"]["version"], contract.RUNTIME_VERSIONS["smolvm_version"]
+        )
+        self.assertEqual(pins["smolvm"]["sha256"], installer.ARCHIVE_SHA256)
+
     def test_bundle_is_deterministic_complete_and_has_no_links_or_checkout_dependency(
         self,
     ):
@@ -125,8 +132,12 @@ class InstallationTest(unittest.TestCase):
                 ROOT / "test/fixtures/kubernetes/node-authority-v1/vectors.json"
             ).read_text()
         )["configuration"]
+        data["source_basis"]["history_sha256"] = hashlib.sha256(
+            (BUNDLE / "source-basis-history.json").read_bytes()
+        ).hexdigest()
         data["paths"]["state_directory"] = str(self.root / "state")
         data["paths"]["database"] = str(self.root / "runtime.db")
+        data["binding"]["runtime_identity"]["smolvm_version"] = "1.35.1"
         data["binding"]["runtime_identity"]["archive_sha256"] = installer.ARCHIVE_SHA256
         self.installation = installer.Installation(
             source, Configuration.from_dict(data)

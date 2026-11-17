@@ -26,9 +26,9 @@ defmodule SmolBox.Test.NodeAuthority do
     )
   end
 
-  def receipt(now \\ 1000) do
+  def receipt(now \\ 1000, overrides \\ []) do
     value = vectors()["receipt"]
-    {:ok, config} = Fixture.config()
+    {:ok, config} = Fixture.config(overrides)
     {:ok, observation} = Projection.observation(value["observation"])
 
     fields =
@@ -41,7 +41,11 @@ defmodule SmolBox.Test.NodeAuthority do
       Map.merge(fields, %{
         binding: Config.binding(config),
         phase: :ready,
-        observation: %{observation | observed_at_ms: now}
+        observation: %{
+          observation
+          | observed_at_ms: now,
+            binding_generation: Config.binding(config).generation
+        }
       })
     )
   end
