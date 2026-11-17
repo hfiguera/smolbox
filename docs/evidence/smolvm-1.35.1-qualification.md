@@ -6,13 +6,16 @@ HTTP workers, checkpoint approvals, native source/release inputs and Kubernetes
 lab pins now default to **1.35.1** on that local basis. Explicit older versions
 remain supported. No SDK state, stored approval or historical evidence is migrated.
 
-All artifacts remain **unpublished**, and distribution approval remains false.
-Public source delivery, hosted provenance and public-download installation checks
-are intentionally pending. The public installer continues selecting a SmolBox
-release tag; published 1.34.0 bundles retain their original identities. Local
-1.35.1 installation requires the staged archive, its envelope tag and an
-independently approved digest. Promotion of source/configuration defaults does
-not claim public distribution qualification.
+The user subsequently authorized publication of reviewed source/notices and
+native qualification bundles while keeping **Hex unpublished**. The
+[source/notices release](https://github.com/hfiguera/smolbox/releases/tag/embedded-port-inputs-v1.35.1)
+is published. Reviewed input approval now enables hosted `v0.6.1-rc.1` candidate
+builds. Their attestations and exact public installer checks are pending; none of
+the local qualification below is relabelled as a public-download result.
+
+The public installer continues selecting a SmolBox release tag. The qualification
+prerelease requires explicit `--tag v0.6.1-rc.1`; no new Hex release is authorized.
+Existing published 1.34.0 bundles retain their original identities.
 
 The [machine-readable report](smolvm-1.35.1-qualification.json) binds each native
 campaign to its package, executable and asset digests. Historical evidence and
@@ -104,31 +107,24 @@ package/default checks started no native VM; the exact-package live evidence
 above remains the native qualification basis. All 64 native Python cases (four
 platform skips), 78 Kubernetes Python cases, warning-as-error documentation and
 local links across 162 pages passed. Default input catalogs and Kubernetes source
-reviews agree with their reviewed 1.35.1 versions; distribution approval is false
-on every target.
+reviews agreed with their reviewed 1.35.1 versions; distribution approval was false
+on every target during that default-promotion check.
 
-## Remaining publication gates
+## Public distribution qualification
 
 The [corresponding-source review](embedded-port-1.35.1-release-sources.md)
-records 1,416 verified source inputs and the staged source/notices archives.
-`native/release-inputs.json` now selects the reviewed 1.35.1 inputs and matches
-`native/release-inputs-1.35.1.json`. Both keep distribution approval false on all
-three targets, so the distribution builder remains blocked. Their proposed
-source/notices URLs are unpublished.
+records 1,416 verified inputs and the source/notices archives, now published as
+`embedded-port-inputs-v1.35.1`. The matching default/versioned input catalogs
+are approved for the user's authorized native qualification prerelease.
 
-The user's local-qualification instruction supersedes the publication prerequisite
-for **default promotion only**. Before any separately authorized distribution,
-complete the repository's [release process](../../native/release-review.md):
+Remaining work follows the [release process](../../native/release-review.md):
 
-1. Publish and independently verify the reviewed corresponding-source and notice
-   inputs, proposed as `embedded-port-inputs-v1.35.1`.
-2. Build and attest all three targets from the matching qualification tag,
-   proposed as `v0.6.1-rc.1`.
-3. Verify the exact public downloads with current/minimum toolchains, Rust absent
-   and fresh standard accounts. Keep Gatekeeper enabled on macOS. Fresh macOS test
-   accounts can be provisioned through the native administrator authorization
-   flow, which the staged follow-up above exercised successfully.
-4. Record those exact identities and results before enabling distribution approval.
+1. Independently verify the exact public source/notices downloads.
+2. Build and attest all three targets from `v0.6.1-rc.1`.
+3. Verify exact public installer downloads with current/minimum toolchains,
+   Rust absent and fresh standard accounts; keep Gatekeeper enabled on macOS.
+4. Record the new identities and results. Keep Hex unpublished until separately
+   authorized, and do not transfer prior local evidence to newly built binaries.
 
 No SDK-revision domain migration, codec rollback or additional native crash
 qualification is inferred from these ordinary campaigns. Retain existing worker
