@@ -6,6 +6,8 @@ from pathlib import Path
 import struct
 import sys
 import time
+import urllib.parse
+import urllib.request
 
 
 root = Path(__file__).parent
@@ -22,11 +24,24 @@ def exact(count):
 
 
 magic = exact(4)
-assert magic in [b"SBH1", b"SBG1"]
+assert magic in [b"SBH1", b"SBG1", b"SBA1"]
 request = json.loads(exact(struct.unpack(">I", exact(4))[0]))
 (root / "request.json").write_text(json.dumps({"argv": sys.argv[1:], "request": request}))
 options = json.loads((root / "response.json").read_text())
 mode = options["mode"]
+if mode == "authority":
+    endpoint = urllib.parse.urlsplit(options["endpoint"])
+    assert endpoint.scheme == "http" and endpoint.hostname == "127.0.0.1"
+    query = urllib.request.Request(options["endpoint"], json.dumps(request).encode(), {"Content-Type": "application/json"})
+    with urllib.request.urlopen(query, timeout=max(0.001, request["timeout_ms"] / 1000)) as response:
+        options["response"] = json.loads(response.read(65537))
+    options["recorded"] = True
+    mode = "normal"
+if magic == b"SBA1" and not options.get("recorded", False):
+    for field in ["version", "action", "nonce", "binding_generation", "authority_generation", "verifier_manifest_sha256"]:
+        options["response"][field] = request[field]
+    with (root / "requests.jsonl").open("a") as log:
+        log.write(json.dumps(request) + "\n")
 if mode == "controller":
     state_path = root / "controller-state.json"
     if state_path.exists():
@@ -61,11 +76,23 @@ elif mode == "partial":
     os.write(1, magic + b"\x00\x00\x00\x10{}")
 elif mode == "diagnostic":
     os.write(2, b"private-node-diagnostic")
+elif mode == "exit":
+    sys.exit(options.get("exit_code", 255))
 else:
-    data = json.dumps(options["response"]).encode()
+    data = json.dumps(options["response"], separators=(",", ":")).encode()
+    if mode == "duplicate":
+        data = data.replace(b'"ok":true', b'"ok":true,"ok":true', 1)
+    if mode == "nested_duplicate":
+        data = data.replace(b'"watermark":2', b'"watermark":2,"watermark":2', 1)
+    if mode == "padded":
+        data += b" " * (65536 - len(data))
+    if mode == "wrongmagic":
+        magic = b"BAD!"
     frame = magic + struct.pack(">I", len(data)) + data
     if mode == "trailing":
         frame += b"extra"
     for part in [frame[:3], frame[3:8], frame[8:]]:
         os.write(1, part)
         time.sleep(0.001)
+    if mode == "status":
+        sys.exit(options["exit_code"])

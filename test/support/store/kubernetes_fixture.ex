@@ -138,16 +138,7 @@ defmodule SmolBox.Test.Kubernetes do
         now
       )
 
-    machine = %Machine{
-      name: assignment.pod_name,
-      state: :running,
-      created_at: nil,
-      cpus: 2,
-      memory_mb: 1024,
-      storage_gb: 20,
-      overlay_gb: 10,
-      backend_identity: %Identity{receipt: ready}
-    }
+    machine = machine(ready, record.spec.profile)
 
     {:ok, record} =
       Execution.transition(
@@ -157,6 +148,20 @@ defmodule SmolBox.Test.Kubernetes do
       )
 
     {record, assignment}
+  end
+
+  def machine(receipt, profile) do
+    fields =
+      profile
+      |> Map.take([:cpus, :memory_mb, :storage_gb, :overlay_gb])
+      |> Map.merge(%{
+        name: receipt.pod_name,
+        state: :running,
+        created_at: nil,
+        backend_identity: %Identity{receipt: receipt}
+      })
+
+    struct!(Machine, fields)
   end
 
   def runtime(config, store, artifact_store, {prepared, assignment}, options \\ []) do

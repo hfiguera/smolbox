@@ -1,6 +1,7 @@
 # Kubernetes backend parity matrix
 
-Status: implementation version 7, November 13, 2026. The long-term goal is equivalent
+Status: matrix revision 15, November 16, 2026. Preview implementation remains at
+the qualified Phase 7 scope. The long-term goal is equivalent
 SmolBox public domain behavior across HTTP, Embedded and Kubernetes. Follow
 [the design](kubernetes-backend.md), [delivery plan](kubernetes-backend-implementation-plan.md),
 and [implementation status](kubernetes-backend-progress.md).
@@ -10,6 +11,18 @@ platform and per-capability qualification. This matrix identifies contracts to
 preserve; it does not expand their existing qualification claims. Kubernetes
 runtime-only evidence is not marked as an implemented library capability.
 
+The current delivery slice is the [single-node authority](kubernetes-node-authority.md)
+on `feature/kubernetes-node-authority`. Its
+[implementation plan](kubernetes-node-authority-implementation-plan.md) preserves
+the same-host controller guard; distributed fencing and multi-node operation
+remain separate work. All node-authority live gates pass on a fresh setup using
+the unmodified official SmolVM 1.35.1 release with K3s v1.35.10+k3s1; see the
+[official-release evidence](../evidence/kubernetes-node-authority-smolvm-1.35.1-2026-11-16.json).
+Explicit standalone selection is qualified for that
+setup only, with new enrollment approvals. Default Lab selection remains unchanged.
+Both original created-only charges remain held. General production support and
+the remaining parity milestones are separate.
+
 | Domain contract / reference | HTTP and Embedded baseline | Kubernetes status | Delivery gate |
 | --- | --- | --- | --- |
 | Target admission, fixed resources, effective offline policy | Existing target/package/profile approvals | Qualified fixed runtime/network/resource policy, store enrollment and guarded public admission in the single-node preview | Phases 0–3, then public Phase 7 |
@@ -18,7 +31,8 @@ runtime-only evidence is not marked as an implemented library capability.
 | Bounded input files and artifact collection | Existing file/ArtifactStore contracts | Qualified shared binary staging/read-back/artifact publication; component corruption and unsafe-path controls retained | Phase 5 + public qualification |
 | Durable intent, ownership, no replay, positive cleanup | Existing store/backend evidence contracts | Qualified selective v54, complete startup scans, same-host process-death takeover, unknown recovery and version-3 proof-bound release | Phases 2 and 6–7 |
 | OCI image/source approval | Existing qualified source catalogs | Qualified pinned Python OCI catalog through the public disposable path; unapproved sources rejected | Phases 1–4 and 7 |
-| Production node evidence, multi-node failure recovery, measurements | Existing backend-specific operational contracts | Planned after preview | Production foundation milestone |
+| Standalone single-node evidence authority | Existing backend-specific evidence contracts | Phases 0–5 passed for official SmolVM 1.35.1 on a fresh node: 12 public cases, two durable recovery controls, restricted access and original-authority v3 release. Same-host guard remains required; default Lab and both original failed charges are preserved | [Node-authority slice](kubernetes-node-authority-progress.md) of production foundation |
+| Controller fencing, multi-node failure recovery, measurements | Existing backend-specific operational contracts | Planned after the node-authority boundary; current same-host guard remains required | Remaining production foundation milestone |
 | Private credentials, broader artifacts, image operations | Existing qualified source/image APIs | Planned after preview | Sources/connectivity milestone |
 | Network allowlists and ports | Existing qualified network policies/mappings | Planned after preview | Sources/connectivity milestone |
 | Retained machines, attached commands, persistent data | Existing managed machine lifecycle | Planned after preview | Retained machines/storage milestone |

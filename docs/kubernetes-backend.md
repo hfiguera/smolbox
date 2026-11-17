@@ -86,6 +86,41 @@ archive, shim, libkrun, kernel, rootfs and guard hashes plus qualified versions,
 as shown in the checked-in evidence. Obtain live UIDs/boot and policy digest for
 the enrolled lab; old evidence is not a portable cluster configuration.
 
+The example defaults to `"node_provider": "lab"`; omitting the field preserves
+existing lab settings. The standalone installer targets the official Linux x86_64
+SmolVM 1.35.1 release, which includes the upstream child-wait fix. Its release
+qualification is recorded separately from the historical 1.34.0 fork-shim campaign
+in the [node-authority progress](https://github.com/hfiguera/smolbox/blob/main/docs/design/kubernetes-node-authority-progress.md).
+It retains the fixed single-node preview policy and same-host controller guard.
+Installation requires a fresh empty node and explicit new enrollment approvals;
+existing installations and retained records are not migrated.
+Explicit `"node_provider": "node_authority"` selects it using a separate
+`node_authority` object:
+
+```json
+{
+  "node_provider": "node_authority",
+  "node_authority": {
+    "ssh_host": "127.0.0.1",
+    "ssh_port": 22471,
+    "ssh_user": "smolbox-evidence",
+    "identity_file": "/absolute/private/node-key",
+    "known_hosts_file": "/absolute/private/node-known-hosts",
+    "authority_generation": "<administrator-approved 64-character SHA-256>",
+    "verifier_manifest_sha256": "<administrator-approved 64-character SHA-256>"
+  }
+}
+```
+
+This is a redacted configuration shape, not an enrollment descriptor. Obtain
+both hashes from the administrator's verified installation; do not copy them
+from another node or substitute the lab history UUID. All other target,
+credential, artifact and same-host controller fields above remain required.
+Construction reads no SSH credentials and makes no node connection. Unknown
+provider names fail rather than falling back. Runtime use requires the restricted
+endpoint, pinned host key and the same positively enrolled authority throughout
+an execution. Old lab receipts cannot be continued by switching this field.
+
 From the project root, with the lab and HTTPS tunnel running:
 
 ```sh
@@ -157,6 +192,14 @@ administrator node evidence. Preserve original UIDs, receipts, ledgers and error
 Do not sweep by labels, force release, reset enrollment, delete audit history or
 silently adopt a replacement Pod. A node reboot, daemon restart or lost mapping
 requires investigation; this preview does not promise automatic repair.
+
+Preparation can fail before an original ready-incarnation witness is saved. A
+created-only receipt remains charged even if its original Pod is deleted and a
+node-wide check reports idle: neither proves the missing original VM/KVM/cgroup
+witness. Preserve the original domain and escalate instead of reconstructing a
+receipt or forcing release. The standalone provider's manual campaign and
+[escalation guide](https://github.com/hfiguera/smolbox/blob/main/scripts/kubernetes/node-authority/README.md#unresolved-authority-and-escalation)
+record this limitation and the observed pinned-runtime startup failure.
 
 ## Manual validation
 

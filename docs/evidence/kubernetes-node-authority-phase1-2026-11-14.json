@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "phase": 1,
+  "scope": "standalone_core_fixture_qualification_only",
+  "new_provider_enabled": false,
+  "new_provider_live_qualified": false,
+  "checks": {
+    "manual_python": {
+      "passed": 140,
+      "standalone_core_checks": 53,
+      "legacy_cases_reexecuted_on_core": 30
+    },
+    "focused_elixir": {
+      "passed": 14
+    },
+    "legacy_source_files_unchanged": true,
+    "ci_workflows_unchanged": true
+  },
+  "bundle_files_sha256": {
+    "authority_assets.py": "77dfb6b70c5e0bdf42d5029f7422cde676ae24bf521baf26ed40349c6c1fc683",
+    "authority_config.py": "a836ae3c86a5a1652227aa7384f5c02b1784440c3e1cf5e1a9177d1b9048aa6c",
+    "authority_contract.py": "6bcd7babadb481c6a46181d90bcf2f78de74080559a9a37e04ddc195e310a8ef",
+    "authority_guard.py": "d4eb6619c8498060902befd1b60a1c18b74aad53ee96a6d95867907e425a655b",
+    "authority_history.py": "c0c922be9e8782e48679f5d8d6f69334cf42b7fb4e0685d0f826fc5c84a685d0",
+    "authority_lifecycle.py": "8e3a7cd4ec60c3e5493f959cd29c14b2d2927e153f723b88177d6ed0678784e7",
+    "authority_runner.py": "65661e72451daa4a568f7ade5dd8852d2b6f22cadb5ff4a547bcec47533512c5",
+    "authority_verifier.py": "46e6a5e051c4c6bbda4ecb4c2b519a768c7d76b3e7bd8e07d9c4dafd222d6cd8",
+    "source-basis-history.json": "84342b63582d337ef86e366ce78e67fcc469825c34005de52bcc8d1975d55e65",
+    "source-basis-lifecycle.json": "c0f19189e0cedd301064a7dff17b01de2a86856c7750ae061785e81ea8d2c129"
+  },
+  "verifier_manifest_sha256": "8bbd7bcf9280e5637e4c095b739c5b2fb9b7ec2ae99742cb78f745490230c15c",
+  "test_source_sha256": "f2601b301bb4c013e6f6cd26b1dc3d4a09fc9d6d9eb36302a19028f03f1a0967",
+  "fixtures": {
+    "real_components": [
+      "temporary SQLite audit schema, rows, triggers and replay",
+      "ledger files, fsync/rename and interrupted publication",
+      "process child cancellation and flock contention",
+      "filesystem cgroup-directory witnesses"
+    ],
+    "synthetic_observations": [
+      "Kubernetes and CRI resources",
+      "VM processes/KVM descriptors and daemon images",
+      "bridge rules and network namespace mapping",
+      "kernel cgroup2 mount metadata"
+    ],
+    "controls": [
+      "missing mappings/events/prefix continuity",
+      "sandbox reinsertion and PID reuse",
+      "original-UID and process-birth cleanup",
+      "leaked scoped paths and remaining CRI/API resources",
+      "cgroup replacement and daemon births",
+      "unknown readiness markers and asset changes",
+      "guard rules and bridge mapping changes",
+      "input/child/SQLite/lock deadline and owner loss",
+      "root ownership/mode/symlink/program inventory violations",
+      "runtime change during capture",
+      "interruption before and after ledger replacement"
+    ]
+  },
+  "live_side_effects": [],
+  "pending_phases": [
+    2,
+    3,
+    4,
+    5
+  ]
+}

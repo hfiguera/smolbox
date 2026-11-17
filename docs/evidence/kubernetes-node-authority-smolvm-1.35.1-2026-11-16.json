@@ -1,0 +1,1710 @@
+{
+  "version": 1,
+  "status": "passed_official_smolvm_1.35.1_fresh_node_qualification",
+  "completed_at_utc": "2026-11-17T04:04:18.572992+00:00",
+  "branch": "feature/kubernetes-node-authority",
+  "rebased_onto_main": "53a83ee8bb3d25dd1e0fed70ece3be598914d6d0",
+  "smolbox_version": "0.6.1",
+  "domain": "node-authority-official1351-v1",
+  "runtime": {
+    "release": "1.35.1",
+    "archive_url": "https://github.com/smol-machines/smolvm/releases/download/v1.35.1/smolvm-1.35.1-linux-x86_64.tar.gz",
+    "source_commit": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
+    "upstream_fix_pr": "https://github.com/smol-machines/smolvm/pull/2190",
+    "upstream_merge_commit": "ae5cd9253c01dc81bad2ea1f16a139a9f3cf2848",
+    "unmodified_official_archive": true,
+    "runtime_digest_override_used": false,
+    "custom_shim_build_used": false,
+    "identity": {
+      "archive_sha256": "1c9377f6ada3c7c6753efada90595d5f44eb7a900ca0e4f8b786815b84fd22be",
+      "containerd_version": "2.2.10-k3s1",
+      "guard_sha256": "cac7a26eb375089efd8d45579c9b6fc977f3217415023ec66696c2b32cec1c4e",
+      "guard_template_sha256": "d0ea5d6a0df4d3cb84055c4e88d831db54d9c162e637aaed7cf9402ae72e938e",
+      "k3s_version": "v1.35.10+k3s1",
+      "kernel_sha256": "96b78e5f644119cd2e8a6af61861625aa9c60bc7d3e14822ed107c6ca140ed64",
+      "libkrun_sha256": "c3bcc4616738e17a1cf3a7a93b38eb08b3d04bb567a72d7f68e95b24c9481c46",
+      "rootfs_sha256": "5cbda404a710b37ce362cb2c8d259d41c7259bbd62935e93cc5f309c73508500",
+      "shim_sha256": "711e16b6e494910ec1ff000d0171e5482e1b856ebe054c0595ee6339ed825e8a",
+      "smolvm_version": "1.35.1"
+    },
+    "assets": {
+      "agent_rootfs": {
+        "entries": 791,
+        "scheme": "sorted-posix-path-type-content-v1",
+        "sha256": "5cbda404a710b37ce362cb2c8d259d41c7259bbd62935e93cc5f309c73508500"
+      },
+      "archive_verified": true,
+      "sha256": {
+        "containerd-shim-smolvm-v2": "711e16b6e494910ec1ff000d0171e5482e1b856ebe054c0595ee6339ed825e8a",
+        "lib/libkrun.so": "c3bcc4616738e17a1cf3a7a93b38eb08b3d04bb567a72d7f68e95b24c9481c46",
+        "lib/libkrunfw.so.5.5.0": "96b78e5f644119cd2e8a6af61861625aa9c60bc7d3e14822ed107c6ca140ed64",
+        "overlay-template.ext4.zst": "b3b6d0758803568176547577bdc69f18d67da079c33326a4d638c2a53a87e745",
+        "smolvm-bin": "b17712db1b1bb59b2b2aeeaf78c6c98e3784df857a4b9ffc915e5219503713f5",
+        "storage-template.ext4.zst": "028100b3d7c0e6358e3ce3d37f83ff0dcd0c61f78f14d09264399110824a87c3"
+      },
+      "template_sizes": {
+        "overlay-template.ext4": 10737418240,
+        "storage-template.ext4": 21474836480
+      }
+    }
+  },
+  "lab_boundary": {
+    "runner_sha256": "e90b49d158ec6050b1aafacb9520c67a5acac0811777f0d13ad1e7490e6e72e5",
+    "live_unit_limits": {
+      "RuntimeMaxUSec": "4h",
+      "Result": "success",
+      "CPUQuotaPerSecUSec": "4s",
+      "MemoryMax": "12884901888",
+      "MemorySwapMax": "0",
+      "TasksMax": "256",
+      "ActiveState": "active",
+      "SubState": "running"
+    },
+    "cap_or_runtime_not_restarted_during_campaign": true,
+    "physical_host_runtime_not_installed_or_replaced": true
+  },
+  "approval": {
+    "authority_generation": "82a839eb1ad09534e4190904936b0ec122cd339e3a2783dfa271291f337fff4c",
+    "binding_generation": "e7c997219a4cf9f8460b43e4936ca416cd5832f597a94e90e94f73af325e9a4a",
+    "configuration_sha256": "0404281a750cb2c862c7066446dc9b787ce7a717d2953a131f983aa97f67af51",
+    "history_epoch": "571380d9-6509-4a42-8016-39dad30eadf6",
+    "initial_journal": {
+      "prefix_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "watermark": 0
+    },
+    "verifier_manifest_sha256": "109b463e953a4caea890c694ff9121ce36c682e3b6cfe2c66e2da93f68e3b19c",
+    "version": 1
+  },
+  "bundle": {
+    "archive_sha256": "6c1d3c63ed0c0fb28a90ad4f5180483b8056e429983db7d3b4dc105adbe41757",
+    "programs": {
+      "authority_assets.py": "e38fcf537554507537fb6f97e72ee0d127fa7554f0792a074bb9bd20a7143932",
+      "authority_bootstrap.py": "6af8cd0deff501b16fb156d7fab515788e551e69711722a203a67e978487bdf3",
+      "authority_config.py": "c1f718820408609f86d26db54d2dcb261e27403a1c81d406d888c4235b6523e9",
+      "authority_contract.py": "1891a6a4ff83d6608d899901ea29d87e03b0289437da27ca8d6352160c82a727",
+      "authority_endpoint.py": "82068790a072f5a3b3866284379106e594f7bc73e65a5ecdfb18d7a1bbfc553d",
+      "authority_guard.py": "d4eb6619c8498060902befd1b60a1c18b74aad53ee96a6d95867907e425a655b",
+      "authority_history.py": "c0c922be9e8782e48679f5d8d6f69334cf42b7fb4e0685d0f826fc5c84a685d0",
+      "authority_lifecycle.py": "8e3a7cd4ec60c3e5493f959cd29c14b2d2927e153f723b88177d6ed0678784e7",
+      "authority_runner.py": "15da4a6e68faae1fba158c0a769831a3f7be32a0991e89d764ac3bdf613b1471",
+      "authority_verifier.py": "b8a2bd67cf88eed919425021ae966d2f10bfe90177850b87ec4e6998d78049ce",
+      "entrypoint.sh": "3ec8c3cfda900a0cb9426391c577be6f736e4a5882b947c5c053aff63a3d78be",
+      "source-basis-history.json": "cd0b55a66a7c6b72e314cecb4fbb4278fb18649190218351d1aac51d05fc916b",
+      "source-basis-lifecycle.json": "c0f19189e0cedd301064a7dff17b01de2a86856c7750ae061785e81ea8d2c129",
+      "ssh-command.sh": "b1e0855d31b3c257663749a5094fca06141d533b8f35d7b1b421206820b07670"
+    },
+    "verifier_manifest_sha256": "109b463e953a4caea890c694ff9121ce36c682e3b6cfe2c66e2da93f68e3b19c",
+    "version": 1
+  },
+  "source_reviews": {
+    "scripts/kubernetes/source-basis-1.35.1.json": "3e244715fba322503420b6b44d2372cb5d21b2dbeb17214394f3d06d38d11ed5",
+    "scripts/kubernetes/node-history-source-basis-1.35.1.json": "cd0b55a66a7c6b72e314cecb4fbb4278fb18649190218351d1aac51d05fc916b",
+    "priv/kubernetes/node_authority/v1/source-basis-history.json": "cd0b55a66a7c6b72e314cecb4fbb4278fb18649190218351d1aac51d05fc916b"
+  },
+  "public_campaign": {
+    "all_requested_cases_complete": true,
+    "completed": [
+      {
+        "case": "memory-binary",
+        "controller_log_sha256": "6c8aa54fb99357c10aa5783d469407f99e4cdced73bd96c6cc71ad63b3752f5c",
+        "counts": {
+          "application_exec_requests": 1,
+          "creates": 1,
+          "original_uid_delete": true
+        },
+        "mode": "binary",
+        "passed": true,
+        "report": {
+          "artifacts": [
+            {
+              "destination": "binary-output",
+              "path": "/workspace/output",
+              "sha256": "8f1a936251db3b3d4d5741bae241e19ca879baaebf21e2838eb5512aca79bc94",
+              "size": 4352
+            }
+          ],
+          "cleanup": "complete",
+          "cleanup_proof_version": 3,
+          "collection": "complete",
+          "evidence": "exited",
+          "execution": [
+            "kubernetes-smoke",
+            "authority-memory-binary"
+          ],
+          "mode": "binary",
+          "observer_epoch": "82a839eb1ad09534e4190904936b0ec122cd339e3a2783dfa271291f337fff4c",
+          "pod_uid": "acdf1893-a1ad-4f4a-9a33-9fd7204a511d",
+          "result_exit": 7,
+          "result_stderr_sha256": "8509b81230019d2ad970d970f791dfbdc8caf54f5c594fcd327cef9feed206c1",
+          "result_stdout_sha256": "f742b965f156c10374bc23aea96e3a8aff8facd6fc079defeaa30219ad86f211",
+          "state": "completed",
+          "usage": {
+            "cpus": 0,
+            "disk_gb": 0,
+            "memory_mb": 0,
+            "slots": 0
+          }
+        },
+        "store": "memory",
+        "trace_sha256": "18550473f7d513929647908e1fc83199347b2a8991923e40543b94af6e358e07"
+      },
+      {
+        "case": "postgres-binary",
+        "controller_log_sha256": "427070ce843e0f40e5c2af49054c4b5154c53296a11a0f58a5f597e2c29809c8",
+        "counts": {
+          "application_exec_requests": 1,
+          "creates": 1,
+          "original_uid_delete": true
+        },
+        "mode": "binary",
+        "passed": true,
+        "report": {
+          "artifacts": [
+            {
+              "destination": "binary-output",
+              "path": "/workspace/output",
+              "sha256": "8f1a936251db3b3d4d5741bae241e19ca879baaebf21e2838eb5512aca79bc94",
+              "size": 4352
+            }
+          ],
+          "cleanup": "complete",
+          "cleanup_proof_version": 3,
+          "collection": "complete",
+          "evidence": "exited",
+          "execution": [
+            "kubernetes-smoke",
+            "authority-postgres-binary"
+          ],
+          "mode": "binary",
+          "observer_epoch": "82a839eb1ad09534e4190904936b0ec122cd339e3a2783dfa271291f337fff4c",
+          "pod_uid": "7001f12c-1c58-4851-b92b-8d9cd97a2586",
+          "result_exit": 7,
+          "result_stderr_sha256": "8509b81230019d2ad970d970f791dfbdc8caf54f5c594fcd327cef9feed206c1",
+          "result_stdout_sha256": "f742b965f156c10374bc23aea96e3a8aff8facd6fc079defeaa30219ad86f211",
+          "state": "completed",
+          "usage": {
+            "cpus": 0,
+            "disk_gb": 0,
+            "memory_mb": 0,
+            "slots": 0
+          }
+        },
+        "store": "postgresql",
+        "trace_sha256": "57662f24e594606eb072201fc5fc9678ac87e0f98722cdf49ba2ab292d01fc40"
+      },
+      {
+        "case": "memory-silent-cap1",
+        "controller_log_sha256": "0f66730216940e4405d43f51c2a43d1941b7c4f45474605714fbaf174b4670b6",
+        "counts": {
+          "application_exec_requests": 1,
+          "creates": 1,
+          "original_uid_delete": true
+        },
+        "mode": "silent",
+        "passed": true,
+        "report": {
+          "artifacts": [],
+          "cleanup": "complete",
+          "cleanup_proof_version": 3,
+          "collection": "complete",
+          "evidence": "exited",
+          "execution": [
+            "kubernetes-smoke",
+            "authority-memory-silent-cap1"
+          ],
+          "mode": "silent",
+          "observer_epoch": "82a839eb1ad09534e4190904936b0ec122cd339e3a2783dfa271291f337fff4c",
+          "pod_uid": "4576b462-31fb-4f83-a1f2-444750006eff",
+          "result_exit": 0,
+          "result_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "result_stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "state": "completed",
+          "usage": {
+            "cpus": 0,
+            "disk_gb": 0,
+            "memory_mb": 0,
+            "slots": 0
+          }
+        },
+        "store": "memory",
+        "trace_sha256": "d143ad5943830bce0f906a40646b28cb35d91829768a249304bba25766cceb4b"
+      },
+      {
+        "case": "memory-silent-cap4096",
+        "controller_log_sha256": "0f66730216940e4405d43f51c2a43d1941b7c4f45474605714fbaf174b4670b6",
+        "counts": {
+          "application_exec_requests": 1,
+          "creates": 1,
+          "original_uid_delete": true
+        },
+        "mode": "silent",
+        "passed": true,
+        "report": {
+          "artifacts": [],
+          "cleanup": "complete",
+          "cleanup_proof_version": 3,
+          "collection": "complete",
+          "evidence": "exited",
+          "execution": [
+            "kubernetes-smoke",
+            "authority-memory-silent-cap4096"
+          ],
+          "mode": "silent",
+          "observer_epoch": "82a839eb1ad09534e4190904936b0ec122cd339e3a2783dfa271291f337fff4c",
+          "pod_uid": "7f768682-66b2-41ce-8608-aee362b581e6",
+          "result_exit": 0,
+          "result_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "result_stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "state": "completed",
+          "usage": {
+            "cpus": 0,
+            "disk_gb": 0,
+            "memory_mb": 0,
+            "slots": 0
+          }
+        },
+        "store": "memory",
+        "trace_sha256": "73c1cf3bcea149f54e97f1ef8d72af579c52ec389c9ead94d3344f71d703ac3d"
+      },
+      {
+        "case": "postgres-silent-cap4096",
+        "controller_log_sha256": "0f66730216940e4405d43f51c2a43d1941b7c4f45474605714fbaf174b4670b6",
+        "counts": {
+          "application_exec_requests": 1,
+          "creates": 1,
+          "original_uid_delete": true
+        },
+        "mode": "silent",
+        "passed": true,
+        "report": {
+          "artifacts": [],
+          "cleanup": "complete",
+          "cleanup_proof_version": 3,
+          "collection": "complete",
+          "evidence": "exited",
+          "execution": [
+            "kubernetes-smoke",
+            "authority-postgres-silent-cap4096"
+          ],
+          "mode": "silent",
+          "observer_epoch": "82a839eb1ad09534e4190904936b0ec122cd339e3a2783dfa271291f337fff4c",
+          "pod_uid": "13e97219-20ac-4584-a3c8-0663536243e6",
+          "result_exit": 0,
+          "result_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "result_stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "state": "completed",
+          "usage": {
+            "cpus": 0,
+            "disk_gb": 0,
+            "memory_mb": 0,
+            "slots": 0
+          }
+        },
+        "store": "postgresql",
+        "trace_sha256": "748cabd0c91194f9322f0dc857592756091dc29f8019865289236060245952bf"
+      },
+      {
+        "case": "memory-cancel",
+        "controller_log_sha256": "351c67b1b021965631897f6a05e26275f6c7f3a67ddf5da1e98d4065a1e33b06",
+        "counts": {
+          "application_exec_requests": 1,
+          "creates": 1,
+          "original_uid_delete": true
+        },
+        "mode": "cancel",
+        "passed": true,
+        "report": {
+          "artifacts": [],
+          "cleanup": "complete",
+          "cleanup_proof_version": 3,
+          "collection": "pending",
+          "evidence": "termination_confirmed",
+          "execution": [
+            "kubernetes-smoke",
+            "authority-memory-cancel"
+          ],
+          "mode": "cancel",
+          "observer_epoch": "82a839eb1ad09534e4190904936b0ec122cd339e3a2783dfa271291f337fff4c",
+          "pod_uid": "d7d899f9-26a7-4914-94ab-78a9348a5eb0",
+          "result_exit": null,
+          "result_stderr_sha256": null,
+          "result_stdout_sha256": null,
+          "state": "unknown",
+          "usage": {
+            "cpus": 0,
+            "disk_gb": 0,
+            "memory_mb": 0,
+            "slots": 0
+          }
+        },
+        "store": "memory",
+        "trace_sha256": "4bce8b88cd4bc9398727d3eaa375c8749f9241b5c7a1c4c14fca09ad01816a34"
+      },
+      {
+        "case": "postgres-cancel",
+        "controller_log_sha256": "3d3955341c60c304e1e25e8639923cd2718ea104f874192b117c1cd67c298956",
+        "counts": {
+          "application_exec_requests": 1,
+          "creates": 1,
+          "original_uid_delete": true
+        },
+        "mode": "cancel",
+        "passed": true,
+        "report": {
+          "artifacts": [],
+          "cleanup": "complete",
+          "cleanup_proof_version": 3,
+          "collection": "pending",
+          "evidence": "termination_confirmed",
+          "execution": [
+            "kubernetes-smoke",
+            "authority-postgres-cancel"
+          ],
+          "mode": "cancel",
+          "observer_epoch": "82a839eb1ad09534e4190904936b0ec122cd339e3a2783dfa271291f337fff4c",
+          "pod_uid": "a750f72b-e6ed-4831-946d-8fe272d8e223",
+          "result_exit": null,
+          "result_stderr_sha256": null,
+          "result_stdout_sha256": null,
+          "state": "unknown",
+          "usage": {
+            "cpus": 0,
+            "disk_gb": 0,
+            "memory_mb": 0,
+            "slots": 0
+          }
+        },
+        "store": "postgresql",
+        "trace_sha256": "06f208e2b03438a38f57a4ce6545ca4686c301907bb42e0ab7d7997828e2d1f1"
+      },
+      {
+        "case": "memory-overflow",
+        "controller_log_sha256": "1955ab08349f1b29a8dcc30141d67d1eac1a46a2164cccbcb980aafb8d42058e",
+        "counts": {
+          "application_exec_requests": 1,
+          "creates": 1,
+          "original_uid_delete": true
+        },
+        "mode": "overflow",
+        "passed": true,
+        "report": {
+          "artifacts": [],
+          "cleanup": "complete",
+          "cleanup_proof_version": 3,
+          "collection": "pending",
+          "evidence": "termination_confirmed",
+          "execution": [
+            "kubernetes-smoke",
+            "authority-memory-overflow"
+          ],
+          "mode": "overflow",
+          "observer_epoch": "82a839eb1ad09534e4190904936b0ec122cd339e3a2783dfa271291f337fff4c",
+          "pod_uid": "09e13d91-70cd-4155-b42b-f15f9b327624",
+          "result_exit": null,
+          "result_stderr_sha256": null,
+          "result_stdout_sha256": null,
+          "state": "unknown",
+          "usage": {
+            "cpus": 0,
+            "disk_gb": 0,
+            "memory_mb": 0,
+            "slots": 0
+          }
+        },
+        "store": "memory",
+        "trace_sha256": "3d064f28e645991ebe41f38668c63e70cd6e95496217b5c759ab01f78b82683a"
+      },
+      {
+        "case": "memory-lost-create",
+        "controller_log_sha256": "f38bbe071657bb1bc2fc991414a6375881a3681fbca6dbfa0e8f1d3da0ddcb03",
+        "counts": {
+          "application_exec_requests": 0,
+          "creates": 1,
+          "original_uid_delete": true
+        },
+        "mode": "reject",
+        "passed": true,
+        "report": {
+          "artifacts": [],
+          "cleanup": "complete",
+          "cleanup_proof_version": 3,
+          "collection": "pending",
+          "evidence": "not_dispatched",
+          "execution": [
+            "kubernetes-smoke",
+            "authority-memory-lost-create"
+          ],
+          "mode": "reject",
+          "observer_epoch": "82a839eb1ad09534e4190904936b0ec122cd339e3a2783dfa271291f337fff4c",
+          "pod_uid": "f35d3dee-97b0-4f64-ab3f-195556d04700",
+          "result_exit": null,
+          "result_stderr_sha256": null,
+          "result_stdout_sha256": null,
+          "state": "failed",
+          "usage": {
+            "cpus": 0,
+            "disk_gb": 0,
+            "memory_mb": 0,
+            "slots": 0
+          }
+        },
+        "store": "memory",
+        "trace_sha256": "07f2f5ea3b81c408643c2fde4656df8a1542357bc2851110649b206ae2bc75e0"
+      },
+      {
+        "case": "postgres-lost-create",
+        "controller_log_sha256": "f38bbe071657bb1bc2fc991414a6375881a3681fbca6dbfa0e8f1d3da0ddcb03",
+        "counts": {
+          "application_exec_requests": 0,
+          "creates": 1,
+          "original_uid_delete": true
+        },
+        "mode": "reject",
+        "passed": true,
+        "report": {
+          "artifacts": [],
+          "cleanup": "complete",
+          "cleanup_proof_version": 3,
+          "collection": "pending",
+          "evidence": "not_dispatched",
+          "execution": [
+            "kubernetes-smoke",
+            "authority-postgres-lost-create"
+          ],
+          "mode": "reject",
+          "observer_epoch": "82a839eb1ad09534e4190904936b0ec122cd339e3a2783dfa271291f337fff4c",
+          "pod_uid": "5275cf80-733b-4c48-a5fd-05481464c468",
+          "result_exit": null,
+          "result_stderr_sha256": null,
+          "result_stdout_sha256": null,
+          "state": "failed",
+          "usage": {
+            "cpus": 0,
+            "disk_gb": 0,
+            "memory_mb": 0,
+            "slots": 0
+          }
+        },
+        "store": "postgresql",
+        "trace_sha256": "749a439bb9079ae78f242dce367bce5132d15125d291c1726d0479b5687db996"
+      },
+      {
+        "case": "memory-lost-status",
+        "controller_log_sha256": "b96ca908a733a32dfed5b7d08e0c60c000cb5273d811e413b420872fb0143e32",
+        "counts": {
+          "application_exec_requests": 1,
+          "creates": 1,
+          "original_uid_delete": true
+        },
+        "mode": "lost",
+        "passed": true,
+        "report": {
+          "artifacts": [],
+          "cleanup": "complete",
+          "cleanup_proof_version": 3,
+          "collection": "pending",
+          "evidence": "termination_confirmed",
+          "execution": [
+            "kubernetes-smoke",
+            "authority-memory-lost-status"
+          ],
+          "mode": "lost",
+          "observer_epoch": "82a839eb1ad09534e4190904936b0ec122cd339e3a2783dfa271291f337fff4c",
+          "pod_uid": "8cdd7203-8b2d-4e17-8f4e-b0475b01ff34",
+          "result_exit": null,
+          "result_stderr_sha256": null,
+          "result_stdout_sha256": null,
+          "state": "unknown",
+          "usage": {
+            "cpus": 0,
+            "disk_gb": 0,
+            "memory_mb": 0,
+            "slots": 0
+          }
+        },
+        "store": "memory",
+        "trace_sha256": "95d3637d089eb2b422a16efe7dc27b4d0f4591bac210309d43aa89c0ff508b3d"
+      },
+      {
+        "case": "postgres-lost-status",
+        "controller_log_sha256": "133154938c191293430120d67bb2ec4691cfefe30ef5bf9d3c40e7125923c5fb",
+        "counts": {
+          "application_exec_requests": 1,
+          "creates": 1,
+          "original_uid_delete": true
+        },
+        "mode": "lost",
+        "passed": true,
+        "report": {
+          "artifacts": [],
+          "cleanup": "complete",
+          "cleanup_proof_version": 3,
+          "collection": "pending",
+          "evidence": "termination_confirmed",
+          "execution": [
+            "kubernetes-smoke",
+            "authority-postgres-lost-status"
+          ],
+          "mode": "lost",
+          "observer_epoch": "82a839eb1ad09534e4190904936b0ec122cd339e3a2783dfa271291f337fff4c",
+          "pod_uid": "8b6e304c-5209-4e40-b08f-9c4130ffb15e",
+          "result_exit": null,
+          "result_stderr_sha256": null,
+          "result_stdout_sha256": null,
+          "state": "unknown",
+          "usage": {
+            "cpus": 0,
+            "disk_gb": 0,
+            "memory_mb": 0,
+            "slots": 0
+          }
+        },
+        "store": "postgresql",
+        "trace_sha256": "826a35d9f487a5eed6caded9b6d507b825ae1deaf1687cb8ec43135e92b7ddac"
+      }
+    ],
+    "scope": "real_enrolled_public_runtime",
+    "version": 1
+  },
+  "durable_recovery_controls": {
+    "collection": {
+      "version": 1,
+      "scope": "real_public_postgresql_recovery_with_labeled_controls",
+      "case": "collection",
+      "passed": true,
+      "actions": [
+        {
+          "gate": "publication_longer_than_lease",
+          "renewal_count": 9
+        },
+        {
+          "gate": "caller_loss_during_locked_observation",
+          "original_endpoints": [
+            [
+              181833,
+              141792
+            ]
+          ],
+          "exit_within_ms": 467,
+          "unchanged_vmm": true
+        },
+        {
+          "gate": "paused_owner_after_lease_expiry_refused",
+          "report": {
+            "denied": true,
+            "original_record": {
+              "processes": [
+                {
+                  "pid": 174746,
+                  "sandbox_id": "f2396977473a77ec7117dee891da956a10faa0be1fe21f3950ea1f69da596f34",
+                  "vm_directory": "5a610340bd55cd58",
+                  "start_ticks": 136739,
+                  "exe_sha256": "711e16b6e494910ec1ff000d0171e5482e1b856ebe054c0595ee6339ed825e8a",
+                  "kvm": [
+                    "anon_inode:kvm-vcpu:0",
+                    "anon_inode:kvm-vcpu:1",
+                    "anon_inode:kvm-vm"
+                  ]
+                }
+              ],
+              "state": "collecting",
+              "usage": {
+                "slots": 1,
+                "cpus": 2,
+                "disk_gb": 30,
+                "memory_mb": 1536
+              },
+              "key": [
+                "kubernetes-smoke",
+                "authority-recovery-collection"
+              ],
+              "cleanup": "pending",
+              "exit_code": 7,
+              "artifacts": [],
+              "collection": "pending",
+              "deadlines": {
+                "queue": 1794888024112,
+                "collection": 1794888129880,
+                "execution": 1794888034144,
+                "preparation": 1794888276905
+              },
+              "reserved": true,
+              "proof_version": null,
+              "pod_uid": "8b03b1fb-2a7d-4b30-805a-033ec771099b"
+            }
+          }
+        },
+        {
+          "gate": "recovery_publication_longer_than_lease",
+          "renewal_count": 5,
+          "boundary": {
+            "processes": [
+              {
+                "pid": 174746,
+                "sandbox_id": "f2396977473a77ec7117dee891da956a10faa0be1fe21f3950ea1f69da596f34",
+                "vm_directory": "5a610340bd55cd58",
+                "start_ticks": 136739,
+                "exe_sha256": "711e16b6e494910ec1ff000d0171e5482e1b856ebe054c0595ee6339ed825e8a",
+                "kvm": [
+                  "anon_inode:kvm-vcpu:0",
+                  "anon_inode:kvm-vcpu:1",
+                  "anon_inode:kvm-vm"
+                ]
+              }
+            ],
+            "state": "collecting",
+            "usage": {
+              "slots": 1,
+              "cpus": 2,
+              "disk_gb": 30,
+              "memory_mb": 1536
+            },
+            "key": [
+              "kubernetes-smoke",
+              "authority-recovery-collection"
+            ],
+            "cleanup": "pending",
+            "exit_code": 7,
+            "owner_pid": "44879",
+            "artifacts": [],
+            "collection": "pending",
+            "queued": null,
+            "deadlines": {
+              "queue": 1794888024112,
+              "collection": 1794888129880,
+              "execution": 1794888034144,
+              "preparation": 1794888276905
+            },
+            "reserved": true,
+            "proof_version": null,
+            "pod_uid": "8b03b1fb-2a7d-4b30-805a-033ec771099b"
+          }
+        }
+      ],
+      "boundary": {
+        "processes": [
+          {
+            "pid": 174746,
+            "sandbox_id": "f2396977473a77ec7117dee891da956a10faa0be1fe21f3950ea1f69da596f34",
+            "vm_directory": "5a610340bd55cd58",
+            "start_ticks": 136739,
+            "exe_sha256": "711e16b6e494910ec1ff000d0171e5482e1b856ebe054c0595ee6339ed825e8a",
+            "kvm": [
+              "anon_inode:kvm-vcpu:0",
+              "anon_inode:kvm-vcpu:1",
+              "anon_inode:kvm-vm"
+            ]
+          }
+        ],
+        "state": "collecting",
+        "usage": {
+          "slots": 1,
+          "cpus": 2,
+          "disk_gb": 30,
+          "memory_mb": 1536
+        },
+        "key": [
+          "kubernetes-smoke",
+          "authority-recovery-collection"
+        ],
+        "cleanup": "pending",
+        "exit_code": 7,
+        "owner_pid": "44326",
+        "artifacts": [],
+        "collection": "pending",
+        "queued": [
+          "kubernetes-smoke",
+          "authority-recovery-collection-queued"
+        ],
+        "deadlines": {
+          "queue": 1794888024112,
+          "collection": 1794888129880,
+          "execution": 1794888034144,
+          "preparation": 1794888276905
+        },
+        "reserved": true,
+        "proof_version": null,
+        "pod_uid": "8b03b1fb-2a7d-4b30-805a-033ec771099b"
+      },
+      "final": {
+        "processes": [
+          {
+            "pid": 174746,
+            "sandbox_id": "f2396977473a77ec7117dee891da956a10faa0be1fe21f3950ea1f69da596f34",
+            "vm_directory": "5a610340bd55cd58",
+            "start_ticks": 136739,
+            "exe_sha256": "711e16b6e494910ec1ff000d0171e5482e1b856ebe054c0595ee6339ed825e8a",
+            "kvm": [
+              "anon_inode:kvm-vcpu:0",
+              "anon_inode:kvm-vcpu:1",
+              "anon_inode:kvm-vm"
+            ]
+          }
+        ],
+        "state": "completed",
+        "usage": {
+          "slots": 0,
+          "cpus": 0,
+          "disk_gb": 0,
+          "memory_mb": 0
+        },
+        "key": [
+          "kubernetes-smoke",
+          "authority-recovery-collection"
+        ],
+        "cleanup": "complete",
+        "exit_code": 7,
+        "artifacts": [
+          {
+            "destination": "binary-output",
+            "path": "/workspace/output",
+            "sha256": "8f1a936251db3b3d4d5741bae241e19ca879baaebf21e2838eb5512aca79bc94",
+            "size": 4352
+          }
+        ],
+        "collection": "complete",
+        "deadlines": {
+          "queue": 1794888024112,
+          "cleanup": 1794888080750,
+          "collection": 1794888129880,
+          "execution": 1794888034144,
+          "preparation": 1794888276905
+        },
+        "reserved": false,
+        "proof_version": 3,
+        "pod_uid": "8b03b1fb-2a7d-4b30-805a-033ec771099b"
+      },
+      "application_requests": 1,
+      "creates": 1,
+      "original_uid_delete": true,
+      "trace_sha256": "9e2ff7509b32314e96f6004a73dabf2071e0a1532678d2afad8ed2840c6fa713"
+    },
+    "authority": {
+      "version": 1,
+      "scope": "real_public_postgresql_recovery_with_labeled_controls",
+      "case": "authority",
+      "passed": true,
+      "actions": [
+        {
+          "gate": "publication_longer_than_lease",
+          "renewal_count": 9
+        },
+        {
+          "gate": "synthetic_unavailable_retains_real_exit_artifact_charge",
+          "report": {
+            "processes": [
+              {
+                "pid": 186651,
+                "sandbox_id": "9ce5b67a25113b2c63447011b8efd6f2f0945372de004711070c71a56deeee10",
+                "vm_directory": "c804e1a770c72c3d",
+                "start_ticks": 148480,
+                "exe_sha256": "711e16b6e494910ec1ff000d0171e5482e1b856ebe054c0595ee6339ed825e8a",
+                "kvm": [
+                  "anon_inode:kvm-vcpu:0",
+                  "anon_inode:kvm-vcpu:1",
+                  "anon_inode:kvm-vm"
+                ]
+              }
+            ],
+            "state": "completed",
+            "usage": {
+              "slots": 1,
+              "cpus": 2,
+              "disk_gb": 30,
+              "memory_mb": 1536
+            },
+            "key": [
+              "kubernetes-smoke",
+              "authority-recovery-authority"
+            ],
+            "cleanup": "in_progress",
+            "exit_code": 7,
+            "artifacts": [
+              {
+                "destination": "binary-output",
+                "path": "/workspace/output",
+                "sha256": "8f1a936251db3b3d4d5741bae241e19ca879baaebf21e2838eb5512aca79bc94",
+                "size": 4352
+              }
+            ],
+            "collection": "complete",
+            "deadlines": {
+              "queue": 1794888142185,
+              "cleanup": 1794888168070,
+              "collection": 1794888241181,
+              "execution": 1794888145853,
+              "preparation": 1794888394334
+            },
+            "reserved": true,
+            "proof_version": null,
+            "pod_uid": "9e8f566b-5699-4276-aa26-2f5ebf47d826"
+          }
+        },
+        {
+          "gate": "wrong_manifest_retains_charge",
+          "report": {
+            "processes": [
+              {
+                "pid": 186651,
+                "sandbox_id": "9ce5b67a25113b2c63447011b8efd6f2f0945372de004711070c71a56deeee10",
+                "vm_directory": "c804e1a770c72c3d",
+                "start_ticks": 148480,
+                "exe_sha256": "711e16b6e494910ec1ff000d0171e5482e1b856ebe054c0595ee6339ed825e8a",
+                "kvm": [
+                  "anon_inode:kvm-vcpu:0",
+                  "anon_inode:kvm-vcpu:1",
+                  "anon_inode:kvm-vm"
+                ]
+              }
+            ],
+            "state": "completed",
+            "usage": {
+              "slots": 1,
+              "cpus": 2,
+              "disk_gb": 30,
+              "memory_mb": 1536
+            },
+            "key": [
+              "kubernetes-smoke",
+              "authority-recovery-authority"
+            ],
+            "cleanup": "in_progress",
+            "exit_code": 7,
+            "artifacts": [
+              {
+                "destination": "binary-output",
+                "path": "/workspace/output",
+                "sha256": "8f1a936251db3b3d4d5741bae241e19ca879baaebf21e2838eb5512aca79bc94",
+                "size": 4352
+              }
+            ],
+            "collection": "complete",
+            "deadlines": {
+              "queue": 1794888142185,
+              "cleanup": 1794888168070,
+              "collection": 1794888241181,
+              "execution": 1794888145853,
+              "preparation": 1794888394334
+            },
+            "reserved": true,
+            "proof_version": null,
+            "pod_uid": "9e8f566b-5699-4276-aa26-2f5ebf47d826"
+          }
+        },
+        {
+          "gate": "wrong_generation_retains_charge",
+          "report": {
+            "processes": [
+              {
+                "pid": 186651,
+                "sandbox_id": "9ce5b67a25113b2c63447011b8efd6f2f0945372de004711070c71a56deeee10",
+                "vm_directory": "c804e1a770c72c3d",
+                "start_ticks": 148480,
+                "exe_sha256": "711e16b6e494910ec1ff000d0171e5482e1b856ebe054c0595ee6339ed825e8a",
+                "kvm": [
+                  "anon_inode:kvm-vcpu:0",
+                  "anon_inode:kvm-vcpu:1",
+                  "anon_inode:kvm-vm"
+                ]
+              }
+            ],
+            "state": "completed",
+            "usage": {
+              "slots": 1,
+              "cpus": 2,
+              "disk_gb": 30,
+              "memory_mb": 1536
+            },
+            "key": [
+              "kubernetes-smoke",
+              "authority-recovery-authority"
+            ],
+            "cleanup": "in_progress",
+            "exit_code": 7,
+            "artifacts": [
+              {
+                "destination": "binary-output",
+                "path": "/workspace/output",
+                "sha256": "8f1a936251db3b3d4d5741bae241e19ca879baaebf21e2838eb5512aca79bc94",
+                "size": 4352
+              }
+            ],
+            "collection": "complete",
+            "deadlines": {
+              "queue": 1794888142185,
+              "cleanup": 1794888168070,
+              "collection": 1794888241181,
+              "execution": 1794888145853,
+              "preparation": 1794888394334
+            },
+            "reserved": true,
+            "proof_version": null,
+            "pod_uid": "9e8f566b-5699-4276-aa26-2f5ebf47d826"
+          }
+        }
+      ],
+      "boundary": {
+        "processes": [
+          {
+            "pid": 186651,
+            "sandbox_id": "9ce5b67a25113b2c63447011b8efd6f2f0945372de004711070c71a56deeee10",
+            "vm_directory": "c804e1a770c72c3d",
+            "start_ticks": 148480,
+            "exe_sha256": "711e16b6e494910ec1ff000d0171e5482e1b856ebe054c0595ee6339ed825e8a",
+            "kvm": [
+              "anon_inode:kvm-vcpu:0",
+              "anon_inode:kvm-vcpu:1",
+              "anon_inode:kvm-vm"
+            ]
+          }
+        ],
+        "state": "collecting",
+        "usage": {
+          "slots": 1,
+          "cpus": 2,
+          "disk_gb": 30,
+          "memory_mb": 1536
+        },
+        "key": [
+          "kubernetes-smoke",
+          "authority-recovery-authority"
+        ],
+        "cleanup": "pending",
+        "exit_code": 7,
+        "owner_pid": "45257",
+        "artifacts": [],
+        "collection": "pending",
+        "queued": [
+          "kubernetes-smoke",
+          "authority-recovery-authority-queued"
+        ],
+        "deadlines": {
+          "queue": 1794888142185,
+          "collection": 1794888241181,
+          "execution": 1794888145853,
+          "preparation": 1794888394334
+        },
+        "reserved": true,
+        "proof_version": null,
+        "pod_uid": "9e8f566b-5699-4276-aa26-2f5ebf47d826"
+      },
+      "final": {
+        "processes": [
+          {
+            "pid": 186651,
+            "sandbox_id": "9ce5b67a25113b2c63447011b8efd6f2f0945372de004711070c71a56deeee10",
+            "vm_directory": "c804e1a770c72c3d",
+            "start_ticks": 148480,
+            "exe_sha256": "711e16b6e494910ec1ff000d0171e5482e1b856ebe054c0595ee6339ed825e8a",
+            "kvm": [
+              "anon_inode:kvm-vcpu:0",
+              "anon_inode:kvm-vcpu:1",
+              "anon_inode:kvm-vm"
+            ]
+          }
+        ],
+        "state": "completed",
+        "usage": {
+          "slots": 0,
+          "cpus": 0,
+          "disk_gb": 0,
+          "memory_mb": 0
+        },
+        "key": [
+          "kubernetes-smoke",
+          "authority-recovery-authority"
+        ],
+        "cleanup": "complete",
+        "exit_code": 7,
+        "artifacts": [
+          {
+            "destination": "binary-output",
+            "path": "/workspace/output",
+            "sha256": "8f1a936251db3b3d4d5741bae241e19ca879baaebf21e2838eb5512aca79bc94",
+            "size": 4352
+          }
+        ],
+        "collection": "complete",
+        "deadlines": {
+          "queue": 1794888142185,
+          "cleanup": 1794888168070,
+          "collection": 1794888241181,
+          "execution": 1794888145853,
+          "preparation": 1794888394334
+        },
+        "reserved": false,
+        "proof_version": 3,
+        "pod_uid": "9e8f566b-5699-4276-aa26-2f5ebf47d826"
+      },
+      "application_requests": 1,
+      "creates": 1,
+      "original_uid_delete": true,
+      "trace_sha256": "daef3ac82d78130ef15830ae2ceef5ec36a82b2b55ad5f1e16f987032b68e8a0"
+    }
+  },
+  "all_14_original_uid_v3_proofs_persisted_before_release": [
+    {
+      "key": [
+        "kubernetes-smoke",
+        "authority-memory-binary"
+      ],
+      "record_sha256_in_original_process": "1597851a4c2f69027fd173045c409f3c87d9cc410473e3bdeefdefcaf3c6da03",
+      "proof_sha256": "89c91194b1b8be83ff13e942963be589b28c536ac8bfab2a6bee9cd481e1be0c",
+      "reservation_held_before_release": true
+    },
+    {
+      "key": [
+        "kubernetes-smoke",
+        "authority-postgres-binary"
+      ],
+      "record_sha256_in_original_process": "7689377372c5bc79f90ea354c91a9a281ee8e88108f2c5f50512ec27e2b03a47",
+      "proof_sha256": "3a06b47f6038c4b2dc810f0650343ef924c8db53677ca470db671088b47ab5f6",
+      "reservation_held_before_release": true
+    },
+    {
+      "key": [
+        "kubernetes-smoke",
+        "authority-memory-silent-cap1"
+      ],
+      "record_sha256_in_original_process": "1155c2e44485ff68725f795d17b92b60fe18b958734b120420c4aeb3809835a8",
+      "proof_sha256": "35a18e49f459d3ac9245da2a2f44791f80930ba5420b49d81f33748f33122920",
+      "reservation_held_before_release": true
+    },
+    {
+      "key": [
+        "kubernetes-smoke",
+        "authority-memory-silent-cap4096"
+      ],
+      "record_sha256_in_original_process": "14fed991680f5c1e318ece92aa0cdacbaaacf37ef2f7cd675a230e7f38829ec8",
+      "proof_sha256": "885a43b0b9a69a7e9fa0ee5feba8fc9558f3070c90c752f3edcc2e2036abce5d",
+      "reservation_held_before_release": true
+    },
+    {
+      "key": [
+        "kubernetes-smoke",
+        "authority-postgres-silent-cap4096"
+      ],
+      "record_sha256_in_original_process": "df50579885a7dd1b5148fddf0d00fbac75dc1cd38b0ed1ae5b7a10388343f79e",
+      "proof_sha256": "1133d69a24114b4a61c8e15fac6b238cc3f89ff25410fd08973355d04a81ddfb",
+      "reservation_held_before_release": true
+    },
+    {
+      "key": [
+        "kubernetes-smoke",
+        "authority-memory-cancel"
+      ],
+      "record_sha256_in_original_process": "7f8e6a1615d5f292ea49c45312c79c6d1d2db7b767f3d6f01483f6894f966feb",
+      "proof_sha256": "1657a5b68b2a1b2c0035aff4e8cf6cbd96ca7a4c2764ddb17a51b6be1be96ebe",
+      "reservation_held_before_release": true
+    },
+    {
+      "key": [
+        "kubernetes-smoke",
+        "authority-postgres-cancel"
+      ],
+      "record_sha256_in_original_process": "f10006b56339c6fc7aa4f2ad63d87778c86c54b7e4fa57d3be77dd6108db8954",
+      "proof_sha256": "8142917e1dd469c93b3ef8643ba6ac964c778c785ac5a05561aa1b2561f6f2f7",
+      "reservation_held_before_release": true
+    },
+    {
+      "key": [
+        "kubernetes-smoke",
+        "authority-memory-overflow"
+      ],
+      "record_sha256_in_original_process": "839d0d7f46c48cfcd053e770630bff5d2849c5546ff551284ed887f71843db2f",
+      "proof_sha256": "b5838848e22931efdb091dcba7bd42e06ede5318d4e1d4ec5519b18e7d82b664",
+      "reservation_held_before_release": true
+    },
+    {
+      "key": [
+        "kubernetes-smoke",
+        "authority-memory-lost-create"
+      ],
+      "record_sha256_in_original_process": "d386943cad9717359896ef701cb26c81c745a4f456fcac5a3c6519eeb6711ec6",
+      "proof_sha256": "005624b37363ae13cabe0da868f67c854e6cb808b5b3ddfad8c3f8e97149b980",
+      "reservation_held_before_release": true
+    },
+    {
+      "key": [
+        "kubernetes-smoke",
+        "authority-postgres-lost-create"
+      ],
+      "record_sha256_in_original_process": "a7c291a3ccca2fa004a60593da3221753bf9749fa662e51eb923121a8ea62b14",
+      "proof_sha256": "142361c73e30e637c7a7943242d84f712a4a064db67e0f8ee8ed00033ca2ced5",
+      "reservation_held_before_release": true
+    },
+    {
+      "key": [
+        "kubernetes-smoke",
+        "authority-memory-lost-status"
+      ],
+      "record_sha256_in_original_process": "b138ef99a8142a2b2ac5b76169e573265d14bf76bc18cc55a5525a8fd4c0dea0",
+      "proof_sha256": "6a513a755c636689c766375ab39867d25e93e46113ec9023ae30e4058a480d4c",
+      "reservation_held_before_release": true
+    },
+    {
+      "key": [
+        "kubernetes-smoke",
+        "authority-postgres-lost-status"
+      ],
+      "record_sha256_in_original_process": "6ecbb7c5a5550461007b9347544934558c088d1fa2d75c7ccc6facdc5ae234a8",
+      "proof_sha256": "4847e95cc7e47f41fa4494a837447c4f112a52d784250fd3717b4cc47ae5eb8b",
+      "reservation_held_before_release": true
+    },
+    {
+      "key": [
+        "kubernetes-smoke",
+        "authority-recovery-collection"
+      ],
+      "record_sha256_in_original_process": "f03ceed58b751ee30a950109112bed3ca6cbb65d7aa6c4f7c00e191f3b838871",
+      "proof_sha256": "c209d6acaa5973cbfcd855676818e48bb14e4b6e14c7f7bfaf5e731a2a18a670",
+      "reservation_held_before_release": true
+    },
+    {
+      "key": [
+        "kubernetes-smoke",
+        "authority-recovery-authority"
+      ],
+      "record_sha256_in_original_process": "8bb34b1e0e26f828749412b8796ad08a36351ff80b9d01d136aa76d5bbe0844f",
+      "proof_sha256": "15d26db8bbff85cd2eb1013cbd9365ca1acf3500aaf4f8b2ead74eae4be1c87a",
+      "reservation_held_before_release": true
+    }
+  ],
+  "server_access_controls": {
+    "all_controls_passed": true,
+    "archive_kind": "runtime",
+    "archive_sha256": "1c9377f6ada3c7c6753efada90595d5f44eb7a900ca0e4f8b786815b84fd22be",
+    "authority_generation": "82a839eb1ad09534e4190904936b0ec122cd339e3a2783dfa271291f337fff4c",
+    "controls": {
+      "additional_arguments_denied": true,
+      "agent_forwarding_denied": true,
+      "arbitrary_command_denied": true,
+      "arbitrary_sudo_denied": true,
+      "arbitrary_sudo_over_ssh_denied": true,
+      "authorized_keys_not_principal_writable": true,
+      "client_loss_ends_original_endpoint": true,
+      "dynamic_forwarding_denied": true,
+      "effective_sshd_policy": true,
+      "entrypoint_arguments_sudo_denied": true,
+      "home_not_principal_writable": true,
+      "interpreter_environment_injection_denied": true,
+      "interpreter_sudo_denied": true,
+      "literal_fixed_root_entrypoint": true,
+      "local_forwarding_denied": true,
+      "missing_explicit_key_no_default_fallback": true,
+      "missing_key_control_would_fallback_without_none": true,
+      "original_command_environment_injection_denied": true,
+      "partial_header_original_30_second_deadline": true,
+      "programs_not_principal_writable": true,
+      "pty_denied": true,
+      "remote_forwarding_denied": true,
+      "shell_denied": true,
+      "shell_metacharacters_denied": true,
+      "ssh_directory_not_principal_writable": true,
+      "subsystem_denied": true,
+      "wrong_host_key_denied": true,
+      "wrong_key_denied": true,
+      "wrong_token_denied": true,
+      "x11_forwarding_denied": true
+    },
+    "no_node_enrollment_or_workload_evidence": false,
+    "no_workload_execution_performed": true,
+    "node_boot_id": "65e9151b-db35-4c58-b4e0-9188f9d1f0e5",
+    "not_yet_tested": [],
+    "scope": "enrolled_node_access_campaign",
+    "ssh_version": "OpenSSH_9.6p1 Ubuntu-3ubuntu13.18, OpenSSL 3.0.13 30 Jan 2024",
+    "verifier_manifest_sha256": "109b463e953a4caea890c694ff9121ce36c682e3b6cfe2c66e2da93f68e3b19c",
+    "version": 1
+  },
+  "client_access_controls": {
+    "scope": "real_enrolled_client_access_only",
+    "version": 1,
+    "verifier_manifest_sha256": "109b463e953a4caea890c694ff9121ce36c682e3b6cfe2c66e2da93f68e3b19c",
+    "authority_generation": "82a839eb1ad09534e4190904936b0ec122cd339e3a2783dfa271291f337fff4c",
+    "controls": {
+      "approved_positive_idle": {
+        "passed": true,
+        "elapsed_ms": 1444
+      },
+      "missing_private_key_denied": {
+        "passed": true,
+        "elapsed_ms": 43
+      },
+      "wrong_endpoint_denied": {
+        "passed": true,
+        "elapsed_ms": 5
+      },
+      "wrong_generation_denied": {
+        "passed": true,
+        "elapsed_ms": 160
+      },
+      "wrong_host_key_denied": {
+        "passed": true,
+        "elapsed_ms": 39
+      },
+      "wrong_manifest_denied": {
+        "passed": true,
+        "elapsed_ms": 170
+      },
+      "wrong_node_binding_denied": {
+        "passed": true,
+        "elapsed_ms": 161
+      },
+      "wrong_private_key_denied": {
+        "passed": true,
+        "elapsed_ms": 48
+      }
+    },
+    "binding_generation": "e7c997219a4cf9f8460b43e4936ca416cd5832f597a94e90e94f73af325e9a4a",
+    "all_controls_passed": true,
+    "no_workload_execution_performed": true
+  },
+  "counterfactual_controls": {
+    "actual_node_boot_daemons_runtime_and_history_unchanged": true,
+    "authority_generation": "82a839eb1ad09534e4190904936b0ec122cd339e3a2783dfa271291f337fff4c",
+    "controls": {
+      "changed_node_boot_observation": {
+        "predicate": "enrolled node changed",
+        "rejected": true
+      },
+      "changed_saved_daemon_birth": {
+        "predicate": "kubelet/containerd lifecycle epoch changed",
+        "rejected": true
+      },
+      "missing_original_sandbox_mapping": {
+        "predicate": "cleanup sandbox history changed",
+        "rejected": true
+      },
+      "owned_vm_directory_remains_fixture": {
+        "predicate": "owned record/directory/share remains",
+        "rejected": true
+      }
+    },
+    "installed_configuration_enrollment_and_ledger_unchanged": true,
+    "original_pod_uid": "acdf1893-a1ad-4f4a-9a33-9fd7204a511d",
+    "original_receipt_sha256": "b06680ad575710abf5925ef5aaed9e2cc44232f6301aeb19aab5f1539c969429",
+    "real_physical_failure_claim": false,
+    "release_proof_produced": false,
+    "scope": "counterfactual_inputs_against_real_enrolled_verifier",
+    "verifier_manifest_sha256": "109b463e953a4caea890c694ff9121ce36c682e3b6cfe2c66e2da93f68e3b19c",
+    "version": 1
+  },
+  "final_custody": {
+    "attempt_count": 14,
+    "authority_generation": "82a839eb1ad09534e4190904936b0ec122cd339e3a2783dfa271291f337fff4c",
+    "configuration_sha256": "0404281a750cb2c862c7066446dc9b787ce7a717d2953a131f983aa97f67af51",
+    "enrollment_sha256": "f20f81da5ef856c41c49cc34dc340fd4cdf9ab86fc8eb299007b249f37c57406",
+    "history_epoch": "571380d9-6509-4a42-8016-39dad30eadf6",
+    "ledger_sha256": "3ee89bd451fd626b6f767736a0cf51f13db188178c89a5de86c5e3783100916a",
+    "positive_check": {
+      "journal": {
+        "history_epoch": "571380d9-6509-4a42-8016-39dad30eadf6",
+        "prefix_sha256": "84b9998e629ad9388bd09302d62eb657512a1d2e5309e5f214ec9a13e9c83454",
+        "watermark": 70
+      },
+      "value": {
+        "complete_history": true,
+        "idle": true,
+        "observer_epoch": "82a839eb1ad09534e4190904936b0ec122cd339e3a2783dfa271291f337fff4c"
+      }
+    },
+    "scope": "real_final_node_custody",
+    "verifier_manifest_sha256": "109b463e953a4caea890c694ff9121ce36c682e3b6cfe2c66e2da93f68e3b19c",
+    "version": 1
+  },
+  "preserved_disks": {
+    "all_prior_disks_byte_identical": true,
+    "disks": {
+      "kubernetes": {
+        "sha256": "acc91ccd6a5cac9ce29f0e2c82429c085b97c51ee629c97cbe9e9c7e59731c18",
+        "size": 1750794240
+      },
+      "node-authority-access-v1": {
+        "sha256": "9e9d29f58b52ec6e96481077f2bca89c3c0342af83a557673938214d19978c4f",
+        "size": 79953920
+      },
+      "node-authority-official1351-v1": {
+        "sha256": "e746cd384eee5ef706517f834b6c58acafd15359819fc7007753a72df9251961",
+        "size": 1909129216
+      },
+      "node-authority-qualification-v1": {
+        "sha256": "9d286e8d62078d0139993c13c500057d51724ff481e159ea69c256550f7ce01d",
+        "size": 1760428032
+      },
+      "node-authority-qualification-v2": {
+        "sha256": "c7db977f1ba466886af82f82c09bd293197dd31b2061113258fe5c5a82ec2f2c",
+        "size": 1889009664
+      },
+      "node-authority-qualification-v3": {
+        "sha256": "f85bdd5bb3d48346da8ca3fa050d1ccb3b83250a7cc859bf32c3dd1427739846",
+        "size": 1925316608
+      },
+      "node-authority-shim-head-v1": {
+        "sha256": "cf0c56fae21e56939456677f42b5acfa14f8dd1c2017cb18d108eb0638b78566",
+        "size": 1325334528
+      },
+      "node-authority-smolvm1351": {
+        "sha256": "43218a749c6538305610f9962d775c8d0ce10ecc4336f1777bd590b5cc29e988",
+        "size": 3103260672
+      }
+    },
+    "owned_lab_qemu_processes": [],
+    "shared_lock_available": true
+  },
+  "original_failed_records_and_charges": {
+    "read_only_adapter_fetch": true,
+    "original_failed_charges": [
+      {
+        "id": "authority-postgres-silent-cap4096",
+        "state": "failed",
+        "domain": "v1",
+        "usage": {
+          "slots": 1,
+          "cpus": 2,
+          "memory_mb": 1536,
+          "disk_gb": 30
+        },
+        "cleanup": "failed",
+        "pod_uid": "4a9dc5b9-a2a1-4283-a0ba-bc12d187a254",
+        "receipt_phase": "created",
+        "reserved": true,
+        "matches_entire_original_frozen_record": true,
+        "original_snapshot_sha256": "c6d1a58cd7855706ad6ab435f493105929a836e67aff5d8288189e69f8f223e9",
+        "deterministic_term_sha256": "9d777ea5fb23b831100bb76eabe475b25dcd9386c48827315bc7feeebf02c08d"
+      },
+      {
+        "id": "authority-postgres-lost-create",
+        "state": "failed",
+        "domain": "v2",
+        "usage": {
+          "slots": 1,
+          "cpus": 2,
+          "memory_mb": 1536,
+          "disk_gb": 30
+        },
+        "cleanup": "failed",
+        "pod_uid": "c62fbf7b-3ebe-4d08-9070-c5818ca6abcd",
+        "receipt_phase": "created",
+        "reserved": true,
+        "matches_entire_original_frozen_record": true,
+        "original_snapshot_sha256": "586fd86842833ef693f0588d81f04391e109aab90dd7d65befe89504aa8c652a",
+        "deterministic_term_sha256": "4b180df4fedff8c8cc826ea065804b2938caace5b30b63f00c4b95fd735b741f"
+      }
+    ]
+  },
+  "validation": {
+    "sdk": {
+      "passed": 2375,
+      "excluded": 42
+    },
+    "postgresql": {
+      "passed": 335,
+      "excluded": 29
+    },
+    "manual_python": {
+      "passed": 184
+    },
+    "static_checks": [
+      {
+        "command": [
+          "mix",
+          "format",
+          "--check-formatted"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "mix",
+          "credo",
+          "--strict"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "mix",
+          "smolbox.ci.credence"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "mix",
+          "ex_dna",
+          "lib",
+          "dev",
+          "scripts",
+          "test/support",
+          "examples/durable_host/lib",
+          "examples/durable_host/priv",
+          "examples/durable_host/test/support",
+          "examples/minimal_host/lib",
+          "examples/support/lib",
+          "examples/support/store",
+          "--max-clones",
+          "0"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "mix",
+          "xref",
+          "graph",
+          "--format",
+          "cycles",
+          "--fail-above",
+          "0"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "mix",
+          "dialyzer"
+        ],
+        "exit_code": 0
+      }
+    ],
+    "package_consumers": {
+      "current": {
+        "native": {
+          "scope": "not-requested",
+          "exercised": false
+        },
+        "runtime_dependencies": [
+          "finch",
+          "hpax",
+          "jason",
+          "mime",
+          "mint",
+          "mint_web_socket",
+          "nimble_options",
+          "nimble_pool",
+          "req",
+          "telemetry"
+        ],
+        "platform": "macos",
+        "minimum": false,
+        "without_rust": true,
+        "smoke": {
+          "checkpoint": true,
+          "client": true,
+          "guest_files": true,
+          "interactive": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "managed_branches": true,
+          "managed_checkpoints": true,
+          "managed_exports": true,
+          "network_policy": true,
+          "node_authority_offline": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.35.1",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.5",
+            "mint": "1.11.0",
+            "mint_web_socket": "1.0.6",
+            "nimble_options": "1.2.0",
+            "req": "0.7.5",
+            "telemetry": "1.4.3"
+          },
+          "without_rust": true,
+          "workload": true
+        },
+        "package_sha256": "6c67cf1eef9a2c6abfc8d9246dcacd6344a5931411d0b7bf449cac7f711dadf1",
+        "architecture": "arm64",
+        "toolchain": "Erlang/OTP 29 [erts-17.1.1] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.20.5 (compiled with Erlang/OTP 29)",
+        "consumer_lockfile": "%{\n  \"finch\": {:hex, :finch, \"0.24.0\", \"4022b6194e907b6d9b597c168001cac38e488a35fe36cef9d8297e3159782510\", [:mix], [{:mime, \"~> 1.0 or ~> 2.0\", [hex: :mime, repo: \"hexpm\", optional: false]}, {:mint, \"~> 1.8\", [hex: :mint, repo: \"hexpm\", optional: false]}, {:nimble_options, \"~> 0.4 or ~> 1.0\", [hex: :nimble_options, repo: \"hexpm\", optional: false]}, {:nimble_pool, \"~> 1.1\", [hex: :nimble_pool, repo: \"hexpm\", optional: false]}, {:telemetry, \"~> 0.4 or ~> 1.0\", [hex: :telemetry, repo: \"hexpm\", optional: false]}], \"hexpm\", \"33ba40069c3587c2f99f9125b766e19dad87d6d54be3c6961db2304df04cef00\"},\n  \"hpax\": {:hex, :hpax, \"1.1.0\", \"782931867cc23217c68fb5f68fe1a11f5e7544c7fda82c8a7019a5df5a4a1cdf\", [:mix], [], \"hexpm\", \"0b8d0f05832f55571d65ac720f79bf8994138ffbb133209dc4685eae0ad456a8\"},\n  \"jason\": {:hex, :jason, \"1.4.5\", \"2e3a008590b0b8d7388c20293e9dcc9cf3e5d642fd2a114e4cbbb52e595d940a\", [:mix], [{:decimal, \"~> 1.0 or ~> 2.0 or ~> 3.0\", [hex: :decimal, repo: \"hexpm\", optional: true]}], \"hexpm\", \"b0c823996102bcd0239b3c2444eb00409b72f6a140c1950bc8b457d836b30684\"},\n  \"mime\": {:hex, :mime, \"2.0.7\", \"b8d739037be7cd402aee1ba0306edfdef982687ee7e9859bee6198c1e7e2f128\", [:mix], [], \"hexpm\", \"6171188e399ee16023ffc5b76ce445eb6d9672e2e241d2df6050f3c771e80ccd\"},\n  \"mint\": {:hex, :mint, \"1.11.0\", \"a713551624815c0435237b93d90ea8b9b14254690c66f732d0ef8930f76ff1d9\", [:mix], [{:castore, \"~> 0.1.0 or ~> 1.0\", [hex: :castore, repo: \"hexpm\", optional: true]}, {:hpax, \"~> 1.1\", [hex: :hpax, repo: \"hexpm\", optional: false]}], \"hexpm\", \"c6279ba2d6aa3a383a1d4cfbe7b59f42e6efd400f58d8e2acfeac48a438693ab\"},\n  \"mint_web_socket\": {:hex, :mint_web_socket, \"1.0.6\", \"5ffcf350df5b90f2d7a04adf877165228804993714592512374218d4679e325a\", [:mix], [{:mint, \">= 1.4.1 and < 2.0.0-0\", [hex: :mint, repo: \"hexpm\", optional: false]}], \"hexpm\", \"0c360e9012413f1c115a63532601eb5d63731aab7010949178769760686c1698\"},\n  \"nimble_options\": {:hex, :nimble_options, \"1.2.0\", \"73e5c5fecb08e59f390e0f59c2320b585d72470dbdd9230a469e06881b9dd4a8\", [:mix], [], \"hexpm\", \"3a784a75ef9e407619c8c9e98239b1acd29216deb737044a8c1063e2671ce6d9\"},\n  \"nimble_pool\": {:hex, :nimble_pool, \"1.2.0\", \"7f7e19c4fc7e960ffd405b0bcaec73e29a96e249a806b386f57e18192f24fa4f\", [:mix], [], \"hexpm\", \"bc442e72578c21842589fa8e5886b6175fa5245fdbbad35fc08db277ac2b2c0d\"},\n  \"req\": {:hex, :req, \"0.7.5\", \"0c3293cbf7717aba20b1b1b3ea13fe8d3fdf6f1557490f390c3f1ef6dd9db955\", [:mix], [{:brotli, \"~> 0.3.1\", [hex: :brotli, repo: \"hexpm\", optional: true]}, {:finch, \"~> 0.21\", [hex: :finch, repo: \"hexpm\", optional: false]}, {:jason, \"~> 1.0\", [hex: :jason, repo: \"hexpm\", optional: false]}, {:mime, \"~> 2.0.6 or ~> 2.1\", [hex: :mime, repo: \"hexpm\", optional: false]}, {:nimble_csv, \"~> 1.0\", [hex: :nimble_csv, repo: \"hexpm\", optional: true]}, {:plug, \"~> 1.0\", [hex: :plug, repo: \"hexpm\", optional: true]}], \"hexpm\", \"576853c4bf403faa3c1fa5d093e0759227083b78f8a6864c67d62c0a9c45514d\"},\n  \"telemetry\": {:hex, :telemetry, \"1.4.3\", \"d0333fa869361e6833d6ff8e806ff4d8553fe1332fcce0af86c7381951a1dc2f\", [:rebar3], [], \"hexpm\", \"17a63581cf2e832a238287f5fe6811e8ca1f333249f1376ad653164a3c4770d4\"},\n}\n",
+        "package_file_count": 828,
+        "package_module_count": 536,
+        "package_file_manifest_sha256": "ace935798eff8bf6ab7c90cdad34dd5f33fcbc0a4452fdb01598689039ea113d",
+        "full_consumer_report_sha256": "e900b20533c1f9cef4a542e8753c9fb3848aa0f07241c960b2430eecfcac12b8"
+      },
+      "minimum": {
+        "native": {
+          "scope": "not-requested",
+          "exercised": false
+        },
+        "runtime_dependencies": [
+          "finch",
+          "hpax",
+          "jason",
+          "mime",
+          "mint",
+          "mint_web_socket",
+          "nimble_options",
+          "nimble_pool",
+          "req",
+          "telemetry"
+        ],
+        "platform": "macos",
+        "minimum": true,
+        "without_rust": true,
+        "smoke": {
+          "checkpoint": true,
+          "client": true,
+          "guest_files": true,
+          "interactive": true,
+          "legacy_1_14_6_explicit": "1.14.6",
+          "legacy_runtime_explicit": "1.14.1",
+          "managed_branches": true,
+          "managed_checkpoints": true,
+          "managed_exports": true,
+          "network_policy": true,
+          "node_authority_offline": true,
+          "offline_default": true,
+          "runtime_1_16_0_explicit": "1.16.0",
+          "runtime_default": "1.35.1",
+          "supervisor": true,
+          "unqualified_runtime_rejected": "1.16.2",
+          "versions": {
+            "jason": "1.4.0",
+            "mint": "1.11.0",
+            "mint_web_socket": "1.0.6",
+            "nimble_options": "1.1.0",
+            "req": "0.7.4",
+            "telemetry": "1.3.0"
+          },
+          "without_rust": true,
+          "workload": true
+        },
+        "package_sha256": "6c67cf1eef9a2c6abfc8d9246dcacd6344a5931411d0b7bf449cac7f711dadf1",
+        "architecture": "arm64",
+        "toolchain": "Erlang/OTP 29 [erts-17.1.1] [source] [64-bit] [smp:16:16] [ds:16:16:10] [async-threads:1] [jit]\n\nElixir 1.20.5 (compiled with Erlang/OTP 29)",
+        "consumer_lockfile": "%{\n  \"finch\": {:hex, :finch, \"0.24.0\", \"4022b6194e907b6d9b597c168001cac38e488a35fe36cef9d8297e3159782510\", [:mix], [{:mime, \"~> 1.0 or ~> 2.0\", [hex: :mime, repo: \"hexpm\", optional: false]}, {:mint, \"~> 1.8\", [hex: :mint, repo: \"hexpm\", optional: false]}, {:nimble_options, \"~> 0.4 or ~> 1.0\", [hex: :nimble_options, repo: \"hexpm\", optional: false]}, {:nimble_pool, \"~> 1.1\", [hex: :nimble_pool, repo: \"hexpm\", optional: false]}, {:telemetry, \"~> 0.4 or ~> 1.0\", [hex: :telemetry, repo: \"hexpm\", optional: false]}], \"hexpm\", \"33ba40069c3587c2f99f9125b766e19dad87d6d54be3c6961db2304df04cef00\"},\n  \"hpax\": {:hex, :hpax, \"1.1.0\", \"782931867cc23217c68fb5f68fe1a11f5e7544c7fda82c8a7019a5df5a4a1cdf\", [:mix], [], \"hexpm\", \"0b8d0f05832f55571d65ac720f79bf8994138ffbb133209dc4685eae0ad456a8\"},\n  \"jason\": {:hex, :jason, \"1.4.0\", \"e855647bc964a44e2f67df589ccf49105ae039d4179db7f6271dfd3843dc27e6\", [:mix], [{:decimal, \"~> 1.0 or ~> 2.0\", [hex: :decimal, repo: \"hexpm\", optional: true]}], \"hexpm\", \"79a3791085b2a0f743ca04cec0f7be26443738779d09302e01318f97bdb82121\"},\n  \"mime\": {:hex, :mime, \"2.0.7\", \"b8d739037be7cd402aee1ba0306edfdef982687ee7e9859bee6198c1e7e2f128\", [:mix], [], \"hexpm\", \"6171188e399ee16023ffc5b76ce445eb6d9672e2e241d2df6050f3c771e80ccd\"},\n  \"mint\": {:hex, :mint, \"1.11.0\", \"a713551624815c0435237b93d90ea8b9b14254690c66f732d0ef8930f76ff1d9\", [:mix], [{:castore, \"~> 0.1.0 or ~> 1.0\", [hex: :castore, repo: \"hexpm\", optional: true]}, {:hpax, \"~> 1.1\", [hex: :hpax, repo: \"hexpm\", optional: false]}], \"hexpm\", \"c6279ba2d6aa3a383a1d4cfbe7b59f42e6efd400f58d8e2acfeac48a438693ab\"},\n  \"mint_web_socket\": {:hex, :mint_web_socket, \"1.0.6\", \"5ffcf350df5b90f2d7a04adf877165228804993714592512374218d4679e325a\", [:mix], [{:mint, \">= 1.4.1 and < 2.0.0-0\", [hex: :mint, repo: \"hexpm\", optional: false]}], \"hexpm\", \"0c360e9012413f1c115a63532601eb5d63731aab7010949178769760686c1698\"},\n  \"nimble_options\": {:hex, :nimble_options, \"1.1.0\", \"3b31a57ede9cb1502071fade751ab0c7b8dbe75a9a4c2b5bbb0943a690b63172\", [:mix], [], \"hexpm\", \"8bbbb3941af3ca9acc7835f5655ea062111c9c27bcac53e004460dfd19008a99\"},\n  \"nimble_pool\": {:hex, :nimble_pool, \"1.2.0\", \"7f7e19c4fc7e960ffd405b0bcaec73e29a96e249a806b386f57e18192f24fa4f\", [:mix], [], \"hexpm\", \"bc442e72578c21842589fa8e5886b6175fa5245fdbbad35fc08db277ac2b2c0d\"},\n  \"req\": {:hex, :req, \"0.7.4\", \"23e9ffec17de032a46a4b15ed65c09793893bf4a7c680f4bbf6227fce6bdf74d\", [:mix], [{:brotli, \"~> 0.3.1\", [hex: :brotli, repo: \"hexpm\", optional: true]}, {:finch, \"~> 0.21\", [hex: :finch, repo: \"hexpm\", optional: false]}, {:jason, \"~> 1.0\", [hex: :jason, repo: \"hexpm\", optional: false]}, {:mime, \"~> 2.0.6 or ~> 2.1\", [hex: :mime, repo: \"hexpm\", optional: false]}, {:nimble_csv, \"~> 1.0\", [hex: :nimble_csv, repo: \"hexpm\", optional: true]}, {:plug, \"~> 1.0\", [hex: :plug, repo: \"hexpm\", optional: true]}], \"hexpm\", \"4b192d63253e8dcc6221ef992ea9ebef7d3555166e8423aa5b553e86bc3c69a2\"},\n  \"telemetry\": {:hex, :telemetry, \"1.3.0\", \"fedebbae410d715cf8e7062c96a1ef32ec22e764197f70cda73d82778d61e7a2\", [:rebar3], [], \"hexpm\", \"7015fc8919dbe63764f4b4b87a95b7c0996bd539e0d499be6ec9d7f3875b79e6\"},\n}\n",
+        "package_file_count": 828,
+        "package_module_count": 536,
+        "package_file_manifest_sha256": "ace935798eff8bf6ab7c90cdad34dd5f33fcbc0a4452fdb01598689039ea113d",
+        "full_consumer_report_sha256": "37e3723eb7c80c55de6c0bf25a3a1be521a8f01571e0e4cd5042bad5c1afda6a"
+      }
+    },
+    "offline_unpacked_package": {
+      "source_package_sha256": "6c67cf1eef9a2c6abfc8d9246dcacd6344a5931411d0b7bf449cac7f711dadf1",
+      "independent_checkout_free_builder": "passed",
+      "two_builds_byte_identical": true,
+      "program_count": 14,
+      "bundle": {
+        "archive_sha256": "61c270b3e5f39f8b7dbf3b874a9d3e7c728c065f25ba893b8a858ec993f9c516",
+        "programs": {
+          "authority_assets.py": "e38fcf537554507537fb6f97e72ee0d127fa7554f0792a074bb9bd20a7143932",
+          "authority_bootstrap.py": "6af8cd0deff501b16fb156d7fab515788e551e69711722a203a67e978487bdf3",
+          "authority_config.py": "c1f718820408609f86d26db54d2dcb261e27403a1c81d406d888c4235b6523e9",
+          "authority_contract.py": "1891a6a4ff83d6608d899901ea29d87e03b0289437da27ca8d6352160c82a727",
+          "authority_endpoint.py": "82068790a072f5a3b3866284379106e594f7bc73e65a5ecdfb18d7a1bbfc553d",
+          "authority_guard.py": "d4eb6619c8498060902befd1b60a1c18b74aad53ee96a6d95867907e425a655b",
+          "authority_history.py": "c0c922be9e8782e48679f5d8d6f69334cf42b7fb4e0685d0f826fc5c84a685d0",
+          "authority_lifecycle.py": "8e3a7cd4ec60c3e5493f959cd29c14b2d2927e153f723b88177d6ed0678784e7",
+          "authority_runner.py": "15da4a6e68faae1fba158c0a769831a3f7be32a0991e89d764ac3bdf613b1471",
+          "authority_verifier.py": "b8a2bd67cf88eed919425021ae966d2f10bfe90177850b87ec4e6998d78049ce",
+          "entrypoint.sh": "3ec8c3cfda900a0cb9426391c577be6f736e4a5882b947c5c053aff63a3d78be",
+          "source-basis-history.json": "cd0b55a66a7c6b72e314cecb4fbb4278fb18649190218351d1aac51d05fc916b",
+          "source-basis-lifecycle.json": "c0f19189e0cedd301064a7dff17b01de2a86856c7750ae061785e81ea8d2c129",
+          "ssh-command.sh": "b1e0855d31b3c257663749a5094fca06141d533b8f35d7b1b421206820b07670"
+        },
+        "verifier_manifest_sha256": "109b463e953a4caea890c694ff9121ce36c682e3b6cfe2c66e2da93f68e3b19c",
+        "version": 1
+      },
+      "isolated_unpacked_installer_help": "passed",
+      "explicit_candidate_approval_argument_present": true,
+      "no_node_or_runtime_access_performed": true
+    },
+    "docs_warnings_as_errors": true,
+    "docs_validation": true
+  },
+  "qualification_scope": {
+    "os_architecture": "Linux x86_64",
+    "k3s": "v1.35.10+k3s1",
+    "containerd": "2.2.10-k3s1",
+    "controller": "macOS",
+    "default_provider": "LabNodeEvidence",
+    "explicit_node_authority_selection_qualified": true,
+    "same_host_controller_guard_required": true,
+    "fresh_empty_node_and_new_approvals_required": true,
+    "old_created_only_records_released": false,
+    "new_1.34_installations_qualified_by_this_report": false,
+    "general_production_kubernetes_or_http_embedded_parity": false,
+    "counterfactual_failures_are_process_local_or_owned_temporary_inputs": true
+  },
+  "live_qualification_manual_only": true,
+  "ci_workflows_unchanged": true,
+  "new_guest_stopped_and_preserved": true,
+  "all_owned_vm_proxy_controller_and_tunnel_processes_stopped": true,
+  "logs": {
+    "static-final-2.log": "c5e82279df9b3a1f51e62494e4ed99e4e81e464874bb26fc491da7dce383180f",
+    "static-final-3.log": "764ad9350e8ba131b3fc80bb6b301e31858d17d39a4bd9d9a1f07291de7f7946",
+    "docs-check.log": "1e802c42e2c042f70e763aa0f9cfcde2d59be232a46aaf78b6fa7b3143b19d02",
+    "static-final-1.log": "e5295a56c1eab40d2a311175a3cf3be0ee60c22da9e72f47db4ebf8a96fee35f",
+    "package-consumers.log": "68ca35c79fa393f87a39c9fced7a246150a8c2be19031e376e62d45c67598f98",
+    "static-final-0.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stage.log": "3764f611054b6027dde9c6f1f0c18a87651ddb49220acf242a94952443c9e544",
+    "preserved-records-after.log": "df2c8574603be4acd6210b980ac57bb47e01a83a19bba33efb8770efe09ca257",
+    "static-final-4.log": "b1c3f14a360684308230855d49dfd13a16509d47c1e327b4f3d7a63d2f46e548",
+    "docs-build.log": "b36c5be76e9b970dfcc20ba5d5ea30339a1ef6948e1701a8f58d6d87b380ad6d",
+    "memory-binary-proxy.log": "f7a86d23fd421166c0e7f01658c18ae66ee88da241e48c1c02edec063f077896",
+    "authority-recovery-authority-wrong-manifest-inspect.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "static-final-5.log": "2260c8066f34d6070131f60f01462f5598fb6442ba659d250e84d8ad97c0c740",
+    "authority-recovery-authority-wrong-manifest.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "start.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "export-receipt.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "postgres-binary-proxy.log": "f7a86d23fd421166c0e7f01658c18ae66ee88da241e48c1c02edec063f077896",
+    "preserved-records-before.log": "df2c8574603be4acd6210b980ac57bb47e01a83a19bba33efb8770efe09ca257",
+    "memory-lost-status.log": "b96ca908a733a32dfed5b7d08e0c60c000cb5273d811e413b420872fb0143e32",
+    "retire.log": "bc559cf66dddd0bc323e9bb50c1627ad1bd76a376d5e2bcb3dbb332bd3956716",
+    "static-1.log": "b2c9b397a587708d4e4c122343c606335f881219258e220f3db9fa2d753ce460",
+    "authority-recovery-authority-owner.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "postgres-binary.log": "427070ce843e0f40e5c2af49054c4b5154c53296a11a0f58a5f597e2c29809c8",
+    "memory-silent-cap1.log": "0f66730216940e4405d43f51c2a43d1941b7c4f45474605714fbaf174b4670b6",
+    "static-0.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-cancel.log": "351c67b1b021965631897f6a05e26275f6c7f3a67ddf5da1e98d4065a1e33b06",
+    "static-2.log": "c5e82279df9b3a1f51e62494e4ed99e4e81e464874bb26fc491da7dce383180f",
+    "authority-recovery-collection-interrupted-probe.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "memory-lost-status-proxy.log": "f7a86d23fd421166c0e7f01658c18ae66ee88da241e48c1c02edec063f077896",
+    "authority-recovery-collection-proxy.log": "f7a86d23fd421166c0e7f01658c18ae66ee88da241e48c1c02edec063f077896",
+    "client-access.log": "f5e33892e09ea5fc8a1fdce717a686ab7e13cad4fd958ad0d52f591f048f37c0",
+    "final-custody.log": "83526d669e691a6edf158f156faeb27de7b49abed1765f4eae1972037e3b7289",
+    "memory-silent-cap4096.log": "0f66730216940e4405d43f51c2a43d1941b7c4f45474605714fbaf174b4670b6",
+    "install-2.log": "784c10ef429bd9adbabb8d61f4e9bfbfa76a96e606761e805432e80da3eadcc2",
+    "static-3.log": "a249ecea744772a5b22536b2cae3f1b368bd8d047494da17b867f08301803e2d",
+    "enroll.log": "81386d31475ccae1bc0860ca68f17411a6773c2c462f254e6408ce0c1f13e01a",
+    "postgres-lost-status.log": "133154938c191293430120d67bb2ec4691cfefe30ef5bf9d3c40e7125923c5fb",
+    "recovery-controls.log": "03598cb118ca8aed17db3c672e8909a971708a41497e2a9d202b48bbaa646369",
+    "memory-overflow.log": "1955ab08349f1b29a8dcc30141d67d1eac1a46a2164cccbcb980aafb8d42058e",
+    "enroll-2.log": "6fbc58512515d0b22290b90679ecca33fb772a478641d1f4989fbf557d40aca8",
+    "static-4.log": "9f9918d4264ce9a6ee71cc429433a78850ec24fda518a39d36e14ae3141473ea",
+    "postgres-lost-status-proxy.log": "f7a86d23fd421166c0e7f01658c18ae66ee88da241e48c1c02edec063f077896",
+    "authority-recovery-collection-paused-owner-standby.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "offline-package.log": "9ac3a2541641dad4ee26acb00df2f9e56d9acc01fc97173d3ebb902a133ffbb4",
+    "static-5.log": "7c153559bee81649518596541739aebb2061dd18067a725be8b0a727398b7074",
+    "postgres-lost-create.log": "f38bbe071657bb1bc2fc991414a6375881a3681fbca6dbfa0e8f1d3da0ddcb03",
+    "authority-recovery-authority-recovery.log": "3218cde5be9600ef3c2fb41e08f0f21fda0dd753eb966e580181d8f81d894c1e",
+    "memory-overflow-proxy.log": "f7a86d23fd421166c0e7f01658c18ae66ee88da241e48c1c02edec063f077896",
+    "postgres-cancel.log": "3d3955341c60c304e1e25e8639923cd2718ea104f874192b117c1cd67c298956",
+    "postgres-silent-cap4096-proxy.log": "f7a86d23fd421166c0e7f01658c18ae66ee88da241e48c1c02edec063f077896",
+    "sdk-tests-final.log": "331ea42e46d3fa9c44e72e163fe3cfc64f78d27fa8d19b04df5fadf72d361af0",
+    "memory-binary.log": "6c8aa54fb99357c10aa5783d469407f99e4cdced73bd96c6cc71ad63b3752f5c",
+    "prepare.log": "de28c7fef7d6ff5ae66742ffe7c69e13b44bc26def12450da5897ee52aafb125",
+    "bootstrap.log": "6d7feaed66d4f098bc7de0d73a5f0fddc16d116f58bb15799bf5abf480f2431e",
+    "postgres-lost-create-proxy.log": "f7a86d23fd421166c0e7f01658c18ae66ee88da241e48c1c02edec063f077896",
+    "authority-recovery-authority-wrong-generation-inspect.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "postgres-silent-cap4096.log": "0f66730216940e4405d43f51c2a43d1941b7c4f45474605714fbaf174b4670b6",
+    "public-campaign.log": "f5a598ff1ac4c9be8ed5d46f6bbf5d3ae63bbcba1e2ac535c2f2e3257333c33b",
+    "postgres-tests.log": "7b2c61dd6fc2e99163d450405ddd5a16478bac39fee5b3f9a978fdc4888e8241",
+    "memory-lost-create.log": "f38bbe071657bb1bc2fc991414a6375881a3681fbca6dbfa0e8f1d3da0ddcb03",
+    "memory-silent-cap1-proxy.log": "f7a86d23fd421166c0e7f01658c18ae66ee88da241e48c1c02edec063f077896",
+    "install.log": "d9307b2a2f0de2cf10f807b73772e69ea6a942906a2ba7677996c5e72344c745",
+    "memory-lost-create-proxy.log": "f7a86d23fd421166c0e7f01658c18ae66ee88da241e48c1c02edec063f077896",
+    "authority-recovery-authority-unavailable-inspect-302462562841541.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "authority-recovery-collection-owner.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "postgres-cancel-proxy.log": "f7a86d23fd421166c0e7f01658c18ae66ee88da241e48c1c02edec063f077896",
+    "memory-cancel-proxy.log": "f7a86d23fd421166c0e7f01658c18ae66ee88da241e48c1c02edec063f077896",
+    "authority-recovery-authority-wrong-generation.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "authority-recovery-collection-recovery.log": "3218cde5be9600ef3c2fb41e08f0f21fda0dd753eb966e580181d8f81d894c1e",
+    "memory-silent-cap4096-proxy.log": "f7a86d23fd421166c0e7f01658c18ae66ee88da241e48c1c02edec063f077896",
+    "authority-recovery-authority-proxy.log": "f7a86d23fd421166c0e7f01658c18ae66ee88da241e48c1c02edec063f077896"
+  }
+}

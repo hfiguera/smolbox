@@ -14,6 +14,11 @@ defmodule SmolBox.CI.Package do
   }
   @forbidden ~w(credo ex_slop ex_dna credence dialyxir ex_doc mix_audit ecto ecto_sql postgrex stream_data plug bandit)
   @public ~w(mix.exs README.md CHANGELOG.md LICENSE docs/notebooks/getting-started.livemd examples/embedded_port/scripts/quickstart.exs examples/kubernetes_host/settings.exs scripts/kubernetes/backend-smoke.exs priv/kubernetes/guest_helper_v1.py priv/kubernetes/guest_loader_v1.py priv/kubernetes/controller_guard_v1.py)
+  @authority_programs ~w(authority_assets.py authority_bootstrap.py authority_config.py authority_contract.py authority_endpoint.py authority_guard.py authority_history.py authority_lifecycle.py authority_runner.py authority_verifier.py entrypoint.sh ssh-command.sh source-basis-history.json source-basis-lifecycle.json)
+  @authority_tools ~w(bundle.py install.py access-policy.txt observer-rbac.yaml README.md)
+  @authority Enum.map(@authority_programs, &("priv/kubernetes/node_authority/v1/" <> &1)) ++
+               Enum.map(@authority_tools, &("scripts/kubernetes/node-authority/" <> &1)) ++
+               ~w(priv/kubernetes/node_authority/configuration-v1.schema.json priv/kubernetes/node_authority/protocol-v1.schema.json)
   @docs ~w(getting-started supported-platforms troubleshooting client embedded-port kubernetes-backend embedded-quickstart host-integration recovery upgrading upgrading-within-0.1.x upgrading-to-0.2.0 upgrading-to-0.2.1 upgrading-to-0.3.0 upgrading-to-0.3.1 upgrading-to-0.4.0 upgrading-to-0.4.1 upgrading-to-0.4.2 upgrading-to-0.4.3 testing telemetry worker-measurements worker-measurements-validation worker-draining worker-draining-validation disk-expansion local-volumes security resource-qualification provisioning-performance compatibility network-access network-access-validation port-mappings port-mappings-validation long-running-exec long-running-exec-validation workloads workloads-validation guest-files guest-files-validation images-and-registry-artifacts images-and-registry-artifacts-validation machine-exports managed-checkpoints managed-branches interactive-terminals interactive-terminals-validation checkpoints persistent-machines persistent-machines-validation runtime-1.17.0-qualification runtime-1.19.0-qualification runtime-1.20.2-qualification runtime-1.22.0-qualification evidence/smolvm-1.34.0-qualification evidence/embedded-port-1.34.0-release-sources evidence/smolvm-1.35.1-qualification evidence/embedded-port-1.35.1-release-sources)
 
   def run(arguments) do
@@ -59,6 +64,10 @@ defmodule SmolBox.CI.Package do
         do: Util.ensure!(!File.exists?(file), "output already exists")
 
     root = Util.temporary("smolbox-consumer")
+    # macOS exposes its temp directory through /var -> /private/var. Mix builds
+    # broken relative priv links when source cwd and MIX_BUILD_PATH use different
+    # spellings of that same directory. Keep this independent consumer physical.
+    root = Util.command!(["/bin/pwd", "-P"], cd: root) |> String.trim()
 
     try do
       archive = Path.join(root, "smolbox.tar")
@@ -160,7 +169,7 @@ defmodule SmolBox.CI.Package do
     Enum.each(names, &Util.ensure!(allowed?(&1), "unexpected package file: #{&1}"))
 
     Enum.each(
-      @public ++ ~w(lib/smolbox.ex lib/smolbox/runtime.ex),
+      @public ++ @authority ++ ~w(lib/smolbox.ex lib/smolbox/runtime.ex),
       &Util.ensure!(&1 in names, "required package file absent")
     )
 
@@ -193,7 +202,7 @@ defmodule SmolBox.CI.Package do
     safe = Path.type(name) == :relative and !Enum.any?(parts, &(&1 in ["..", "."]))
 
     safe and
-      (name in @public or
+      (name in @public or name in @authority or
          (List.first(parts) == "lib" and Path.extname(name) == ".ex") or
          name in Enum.map(@docs, &"docs/#{&1}.md") or
          (Enum.take(parts, 2) == ["docs", "evidence"] and Path.extname(name) == ".json"))

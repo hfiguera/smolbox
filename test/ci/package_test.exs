@@ -278,6 +278,14 @@ defmodule SmolBox.CI.PackageTest do
     names =
       ~w(mix.exs README.md CHANGELOG.md LICENSE lib/smolbox.ex lib/smolbox/runtime.ex priv/kubernetes/guest_helper_v1.py priv/kubernetes/guest_loader_v1.py priv/kubernetes/controller_guard_v1.py docs/notebooks/getting-started.livemd docs/images-and-registry-artifacts.md docs/images-and-registry-artifacts-validation.md docs/provisioning-performance.md docs/upgrading-to-0.3.0.md docs/upgrading-to-0.4.3.md docs/upgrading.md docs/upgrading-within-0.1.x.md docs/supported-platforms.md docs/testing.md docs/embedded-port.md docs/kubernetes-backend.md docs/embedded-quickstart.md examples/embedded_port/scripts/quickstart.exs examples/kubernetes_host/settings.exs scripts/kubernetes/backend-smoke.exs docs/network-access-validation.md docs/worker-measurements-validation.md docs/worker-draining-validation.md)
 
+    programs =
+      ~w(authority_assets.py authority_bootstrap.py authority_config.py authority_contract.py authority_endpoint.py authority_guard.py authority_history.py authority_lifecycle.py authority_runner.py authority_verifier.py entrypoint.sh ssh-command.sh source-basis-history.json source-basis-lifecycle.json)
+
+    names =
+      names ++
+        Enum.map(programs, &("priv/kubernetes/node_authority/v1/" <> &1)) ++
+        ~w(priv/kubernetes/node_authority/configuration-v1.schema.json priv/kubernetes/node_authority/protocol-v1.schema.json scripts/kubernetes/node-authority/bundle.py scripts/kubernetes/node-authority/install.py scripts/kubernetes/node-authority/README.md scripts/kubernetes/node-authority/access-policy.txt scripts/kubernetes/node-authority/observer-rbac.yaml)
+
     inner = Path.join(root, "contents.tar")
     members = Enum.map(names, &{String.to_charlist(&1), "fixture"})
     :ok = :erl_tar.create(String.to_charlist(inner), members, [])

@@ -1,0 +1,332 @@
+{
+  "version": 1,
+  "phase": 3,
+  "scope": "sdk_protocol_package_and_pre_enrollment_access_only",
+  "new_provider_enabled": false,
+  "new_provider_live_qualified": false,
+  "checks": {
+    "focused_elixir": {
+      "passed": 41,
+      "new_protocol": 12,
+      "new_provider": 10,
+      "legacy_lab_controller_codec_and_epoch": 19
+    },
+    "manual_python": {
+      "passed": 159
+    },
+    "format_compile_static_duplication": true,
+    "generated_docs_pages_checked": 163,
+    "legacy_sources_unchanged": true,
+    "ci_workflows_unchanged": true
+  },
+  "source_sha256": {
+    "lib/smolbox/kubernetes/node_authority.ex": "7bac2dab5dbd66d070d0fd04eab3d9d52ef17c564f96702cf243ab03efc68ad6",
+    "lib/smolbox/kubernetes/node_authority/context.ex": "d0632e43478753e32c8b8c7b5abdbdb8522da9364d20287d122dce5f7f91d6dc",
+    "lib/smolbox/kubernetes/node_authority/json.ex": "09e98b7dfd0dc964186d3468fc0802a20dc0e58f0724129938bee97732b4b969",
+    "lib/smolbox/kubernetes/node_authority/protocol.ex": "023b5fcd6296ec073d2cd530206f2e8b1f14d1e2821877e2934f80cde472047f",
+    "lib/smolbox/kubernetes/node_authority/transport.ex": "29b538fcd7a4f9877002e8e9161b1b28efe76b0fb129e12d2e87bc82e3ab3ad1",
+    "lib/smolbox/kubernetes/framed_port.ex": "4694aded8ec3264f19ce81452cba5367206a7828ca3faaf5ebfa2b1ba8767c73",
+    "lib/smolbox/kubernetes/node_evidence/projection.ex": "b5ed2925b195e7f979474b3a40d41ab0928091cea0070be90b543a4ce2be0e6b",
+    "lib/smolbox/kubernetes/lab_node_evidence/projection.ex": "a70b908a989c2d6ec466977a33b962b1a2ceb91499f11f52a3cb525c11af54f1",
+    "scripts/kubernetes/node-authority/access.py": "a294b5b8311ec4d5488104cdf7bfe44cc2fd4d6980fa68a128b93c6801f91518",
+    "scripts/kubernetes/node-authority/lab.py": "e90b49d158ec6050b1aafacb9520c67a5acac0811777f0d13ad1e7490e6e72e5",
+    "scripts/kubernetes/node-authority/access-client.exs": "12c91e307a7e8fb80d142cce7b38d5c5313c084f3ef55b7b7257de2033af2284",
+    "scripts/kubernetes/node-authority/access-policy.txt": "bd9809b5583c4272539c2b4cbca12572006060b5175d907c66f04243435f1b68",
+    "scripts/kubernetes/node-authority/README.md": "e49b6b9d6adf118b5b0ecb1019b98575859db1200df0473eb8a08741f4c45f18",
+    "scripts/kubernetes/node-authority/bundle.py": "f9f66f7073a983a420581dc429998fa44c4570e86433adeb8f979820356606b1",
+    "priv/kubernetes/node_authority/configuration-v1.schema.json": "de35c61080e443bfaa4ba4ce3500cd78972d03c2d545e55021d434747644ce5b",
+    "priv/kubernetes/node_authority/protocol-v1.schema.json": "d0e38553c134bc0e5a9595067b30f8ff737e7125ac5744cdd27ded7c5be4f51e",
+    "mix.exs": "865cce6d1dc6c41e75e8ad18a236d94f194b6fb42ae4e6c8b83aec1bb53d4005",
+    "dev/smolbox/ci/package.ex": "1d411ad5bd2745b9c7423a81e4ea2104d4380d5c2a7a6ecf2833d2c3bdfc4fc6",
+    "test/fixtures/ci/consumer.exs.template": "b901b95353e9446b5465761501647b9c62de6b3e6e6d3828b03b8c8074639d5b",
+    "test/support/node_authority_fixture.ex": "8b920b999fe5f6862110f61f17029515d3a427d764c987cd1925b9edbde480d1",
+    "test/support/kubernetes_node_peer.py": "052869aa9e450ec1dd12b48fd962ad792951bf52b8aab82c645f2fa83ccfd912",
+    "test/unit/kubernetes_node_authority_test.exs": "4d4bbae17faa7f016052595479aadd19f47383c20a341c64439a45f6b60b6bfc",
+    "test/unit/kubernetes_node_authority_protocol_test.exs": "fad748d7457befcbe20108d2a99264d48ca6e3eccf078ce5051938509e661446",
+    "test/unit/kubernetes_node_authority_contract_test.exs": "ec2aa7315f5e03a76fecc62ee526ba037f6d2effa1d71609a040a6e9b69eb7f5",
+    "scripts/kubernetes/test_node_authority_endpoint.py": "16890ca84a2e69a41e2e9500a28460201556aba0374e689b71babba29d57bd05",
+    "scripts/kubernetes/test_node_authority_install.py": "e9b2007be44309c9b6b7756533ff6765f64b311634db86edb25a3ac528a385a0",
+    "scripts/kubernetes/test_node_authority_contract.py": "2376fcade888ccecb64b839d422a59e0ca14b01b5762afbf7a29688fdc87c855"
+  },
+  "node_access": {
+    "all_controls_passed": true,
+    "archive_sha256": "332302147b75f52c6fb966982504cdd6b4e94f607a30891a48da4d9963761901",
+    "controls": {
+      "additional_arguments_denied": true,
+      "agent_forwarding_denied": true,
+      "arbitrary_command_denied": true,
+      "arbitrary_sudo_denied": true,
+      "arbitrary_sudo_over_ssh_denied": true,
+      "authorized_keys_not_principal_writable": true,
+      "client_loss_ends_original_endpoint": true,
+      "dynamic_forwarding_denied": true,
+      "effective_sshd_policy": true,
+      "entrypoint_arguments_sudo_denied": true,
+      "home_not_principal_writable": true,
+      "interpreter_environment_injection_denied": true,
+      "interpreter_sudo_denied": true,
+      "literal_fixed_root_entrypoint": true,
+      "local_forwarding_denied": true,
+      "missing_explicit_key_no_default_fallback": true,
+      "missing_key_control_would_fallback_without_none": true,
+      "original_command_environment_injection_denied": true,
+      "partial_header_original_30_second_deadline": true,
+      "programs_not_principal_writable": true,
+      "pty_denied": true,
+      "remote_forwarding_denied": true,
+      "shell_denied": true,
+      "shell_metacharacters_denied": true,
+      "ssh_directory_not_principal_writable": true,
+      "subsystem_denied": true,
+      "wrong_host_key_denied": true,
+      "wrong_key_denied": true,
+      "wrong_token_denied": true,
+      "x11_forwarding_denied": true
+    },
+    "effective_policy": {
+      "acceptenv": "LC_*",
+      "authenticationmethods": "publickey",
+      "authorizedkeysfile": "/var/lib/smolbox-node-evidence-home/.ssh/authorized_keys",
+      "disableforwarding": "yes",
+      "forcecommand": "/usr/local/libexec/smolbox-node-authority-ssh",
+      "kbdinteractiveauthentication": "no",
+      "passwordauthentication": "no",
+      "permittty": "no",
+      "permituserenvironment": "no",
+      "permituserrc": "no"
+    },
+    "no_authority_state_created": true,
+    "no_node_enrollment_or_workload_evidence": true,
+    "node_boot_id": "ac0f489b-7d5e-42f3-8b5d-8cd201a8975d",
+    "not_yet_tested": [],
+    "principal_groups": [
+      "smolbox-evidence"
+    ],
+    "privilege_files_sha256": {
+      "/etc/ssh/sshd_config": "78f3bd38a8c4ede78ec741547efbd7d2951e7e2af5f2060fe5473c14ca61cf88",
+      "/etc/sudoers.d/smolbox-node-authority": "2d1f3e41cdd0b995c54d2d4bfc938a79c9c31109a3c68c2e938c24596c5255bb",
+      "/var/lib/smolbox-node-evidence-home/.ssh/authorized_keys": "0260f6f5eed41add50f9e1dc8d31fb303e558fb6ddd8245aaceeeef263185c61"
+    },
+    "scope": "pre_enrollment_access_fixture_only",
+    "ssh_version": "OpenSSH_9.6p1 Ubuntu-3ubuntu13.18, OpenSSL 3.0.13 30 Jan 2024",
+    "sudo_version": "Sudo version 1.9.15p5",
+    "verifier_manifest_sha256": "cec1597ec86107f838c45f60be9ac56f4c5b9bb7bc2dbe88ffa94cc4f5469e27",
+    "version": 1
+  },
+  "mac_access": {
+    "scope": "pre_enrollment_client_access_only",
+    "version": 1,
+    "controls": {
+      "authenticated_pre_enrollment_rejection": true,
+      "missing_private_key_denied": true,
+      "wrong_host_key_denied": true,
+      "wrong_private_key_denied": true
+    },
+    "client_platform": [
+      "unix",
+      "darwin"
+    ],
+    "ssh_version": "OpenSSH_10.5p1, LibreSSL 3.3.6",
+    "all_controls_passed": true,
+    "no_node_enrollment_or_workload_evidence": true
+  },
+  "lab_final_custody": {
+    "access": {
+      "ActiveState": "inactive",
+      "CPUQuotaPerSecUSec": "4s",
+      "MainPID": "0",
+      "MemoryMax": "12884901888",
+      "MemorySwapMax": "0",
+      "Result": "success",
+      "RuntimeMaxUSec": "4h",
+      "SubState": "dead",
+      "TasksMax": "256"
+    },
+    "access_program_sha256": "e90b49d158ec6050b1aafacb9520c67a5acac0811777f0d13ad1e7490e6e72e5",
+    "available_bytes": 57932890112,
+    "legacy": {
+      "ActiveState": "failed",
+      "CPUQuotaPerSecUSec": "4s",
+      "MainPID": "0",
+      "MemoryMax": "12884901888",
+      "MemorySwapMax": "0",
+      "Result": "timeout",
+      "RuntimeMaxUSec": "4h",
+      "SubState": "failed",
+      "TasksMax": "256"
+    },
+    "preserved_disks": {
+      "kubernetes": {
+        "exists": true,
+        "size": 1750794240,
+        "uid": 1000
+      },
+      "node-authority-access-v1": {
+        "exists": true,
+        "size": 79953920,
+        "uid": 1000
+      }
+    },
+    "shared_lock_released": true
+  },
+  "package_consumers": {
+    "current": {
+      "passed": true,
+      "without_rust": true,
+      "offline_constructor": true,
+      "runtime_dependencies": [
+        "finch",
+        "hpax",
+        "jason",
+        "mime",
+        "mint",
+        "mint_web_socket",
+        "nimble_options",
+        "nimble_pool",
+        "req",
+        "telemetry"
+      ],
+      "versions": {
+        "jason": "1.4.5",
+        "mint": "1.11.0",
+        "mint_web_socket": "1.0.6",
+        "nimble_options": "1.2.0",
+        "req": "0.7.5",
+        "telemetry": "1.4.2"
+      },
+      "package_sha256": "8d2aa85586762a1b2639ebb9965952e700934f13ea53f345d7ff086b0c839f7f",
+      "report_sha256": "02d926ba18e39816b5f96fd4c1d9868279bca778da9ad42c8c4bfa7d6833f5f7",
+      "authority_package_files": {
+        "priv/kubernetes/node_authority/v1/entrypoint.sh": "3ec8c3cfda900a0cb9426391c577be6f736e4a5882b947c5c053aff63a3d78be",
+        "priv/kubernetes/node_authority/v1/authority_endpoint.py": "82068790a072f5a3b3866284379106e594f7bc73e65a5ecdfb18d7a1bbfc553d",
+        "scripts/kubernetes/node-authority/README.md": "b2007011ae934812da66b98bf0aaece95ae826013d2dde5c12fa22f91e328ae6",
+        "priv/kubernetes/node_authority/v1/authority_bootstrap.py": "6af8cd0deff501b16fb156d7fab515788e551e69711722a203a67e978487bdf3",
+        "priv/kubernetes/node_authority/v1/source-basis-history.json": "84342b63582d337ef86e366ce78e67fcc469825c34005de52bcc8d1975d55e65",
+        "priv/kubernetes/node_authority/protocol-v1.schema.json": "d0e38553c134bc0e5a9595067b30f8ff737e7125ac5744cdd27ded7c5be4f51e",
+        "docs/evidence/kubernetes-node-authority-phase1-2026-11-14.json": "c0763f6df3ddf0dbfa133670975cb4c5ee91390a32260e9edb7d3ef030304be8",
+        "priv/kubernetes/node_authority/v1/authority_history.py": "c0c922be9e8782e48679f5d8d6f69334cf42b7fb4e0685d0f826fc5c84a685d0",
+        "priv/kubernetes/node_authority/v1/authority_verifier.py": "b8a2bd67cf88eed919425021ae966d2f10bfe90177850b87ec4e6998d78049ce",
+        "lib/smolbox/kubernetes/node_authority/protocol.ex": "023b5fcd6296ec073d2cd530206f2e8b1f14d1e2821877e2934f80cde472047f",
+        "scripts/kubernetes/node-authority/access-policy.txt": "bd9809b5583c4272539c2b4cbca12572006060b5175d907c66f04243435f1b68",
+        "scripts/kubernetes/node-authority/install.py": "56fa171883a30215267d887931705ed10eac1d3d0b456d7b322ee589324a10e5",
+        "docs/evidence/kubernetes-node-authority-phase2-2026-11-14.json": "a2f1aae75fe8015eb6555c6accb5a238c96e84bc5c70ecfb80141ccf4fc149b0",
+        "lib/smolbox/kubernetes/node_authority.ex": "7bac2dab5dbd66d070d0fd04eab3d9d52ef17c564f96702cf243ab03efc68ad6",
+        "priv/kubernetes/node_authority/v1/authority_guard.py": "d4eb6619c8498060902befd1b60a1c18b74aad53ee96a6d95867907e425a655b",
+        "lib/smolbox/kubernetes/node_authority/context.ex": "d0632e43478753e32c8b8c7b5abdbdb8522da9364d20287d122dce5f7f91d6dc",
+        "priv/kubernetes/node_authority/v1/authority_assets.py": "e38fcf537554507537fb6f97e72ee0d127fa7554f0792a074bb9bd20a7143932",
+        "scripts/kubernetes/node-authority/observer-rbac.yaml": "bdc6634914ffb128ed34d98039b7970d207bc98999224b971b6c37845ce5454a",
+        "priv/kubernetes/node_authority/v1/authority_lifecycle.py": "8e3a7cd4ec60c3e5493f959cd29c14b2d2927e153f723b88177d6ed0678784e7",
+        "priv/kubernetes/node_authority/v1/ssh-command.sh": "b1e0855d31b3c257663749a5094fca06141d533b8f35d7b1b421206820b07670",
+        "priv/kubernetes/node_authority/v1/authority_contract.py": "6bcd7babadb481c6a46181d90bcf2f78de74080559a9a37e04ddc195e310a8ef",
+        "priv/kubernetes/node_authority/v1/authority_runner.py": "15da4a6e68faae1fba158c0a769831a3f7be32a0991e89d764ac3bdf613b1471",
+        "lib/smolbox/kubernetes/node_authority/json.ex": "09e98b7dfd0dc964186d3468fc0802a20dc0e58f0724129938bee97732b4b969",
+        "lib/smolbox/kubernetes/node_authority/transport.ex": "29b538fcd7a4f9877002e8e9161b1b28efe76b0fb129e12d2e87bc82e3ab3ad1",
+        "priv/kubernetes/node_authority/configuration-v1.schema.json": "de35c61080e443bfaa4ba4ce3500cd78972d03c2d545e55021d434747644ce5b",
+        "docs/evidence/kubernetes-node-authority-phase0-2026-11-14.json": "9c63b9b37c714ab1f810ebc702acb8c826b5cb1f9c911f7d771364f9746c3181",
+        "priv/kubernetes/node_authority/v1/authority_config.py": "c1f718820408609f86d26db54d2dcb261e27403a1c81d406d888c4235b6523e9",
+        "priv/kubernetes/node_authority/v1/source-basis-lifecycle.json": "c0f19189e0cedd301064a7dff17b01de2a86856c7750ae061785e81ea8d2c129",
+        "scripts/kubernetes/node-authority/bundle.py": "f9f66f7073a983a420581dc429998fa44c4570e86433adeb8f979820356606b1"
+      }
+    },
+    "minimum": {
+      "passed": true,
+      "without_rust": true,
+      "offline_constructor": true,
+      "runtime_dependencies": [
+        "finch",
+        "hpax",
+        "jason",
+        "mime",
+        "mint",
+        "mint_web_socket",
+        "nimble_options",
+        "nimble_pool",
+        "req",
+        "telemetry"
+      ],
+      "versions": {
+        "jason": "1.4.0",
+        "mint": "1.11.0",
+        "mint_web_socket": "1.0.6",
+        "nimble_options": "1.1.0",
+        "req": "0.7.4",
+        "telemetry": "1.3.0"
+      },
+      "package_sha256": "8d2aa85586762a1b2639ebb9965952e700934f13ea53f345d7ff086b0c839f7f",
+      "report_sha256": "44506e5923deff177842195f4e496ecdd7c942b0713020c9be67cf9203addd0e",
+      "authority_package_files": {
+        "priv/kubernetes/node_authority/v1/entrypoint.sh": "3ec8c3cfda900a0cb9426391c577be6f736e4a5882b947c5c053aff63a3d78be",
+        "priv/kubernetes/node_authority/v1/authority_endpoint.py": "82068790a072f5a3b3866284379106e594f7bc73e65a5ecdfb18d7a1bbfc553d",
+        "scripts/kubernetes/node-authority/README.md": "b2007011ae934812da66b98bf0aaece95ae826013d2dde5c12fa22f91e328ae6",
+        "priv/kubernetes/node_authority/v1/authority_bootstrap.py": "6af8cd0deff501b16fb156d7fab515788e551e69711722a203a67e978487bdf3",
+        "priv/kubernetes/node_authority/v1/source-basis-history.json": "84342b63582d337ef86e366ce78e67fcc469825c34005de52bcc8d1975d55e65",
+        "priv/kubernetes/node_authority/protocol-v1.schema.json": "d0e38553c134bc0e5a9595067b30f8ff737e7125ac5744cdd27ded7c5be4f51e",
+        "docs/evidence/kubernetes-node-authority-phase1-2026-11-14.json": "c0763f6df3ddf0dbfa133670975cb4c5ee91390a32260e9edb7d3ef030304be8",
+        "priv/kubernetes/node_authority/v1/authority_history.py": "c0c922be9e8782e48679f5d8d6f69334cf42b7fb4e0685d0f826fc5c84a685d0",
+        "priv/kubernetes/node_authority/v1/authority_verifier.py": "b8a2bd67cf88eed919425021ae966d2f10bfe90177850b87ec4e6998d78049ce",
+        "lib/smolbox/kubernetes/node_authority/protocol.ex": "023b5fcd6296ec073d2cd530206f2e8b1f14d1e2821877e2934f80cde472047f",
+        "scripts/kubernetes/node-authority/access-policy.txt": "bd9809b5583c4272539c2b4cbca12572006060b5175d907c66f04243435f1b68",
+        "scripts/kubernetes/node-authority/install.py": "56fa171883a30215267d887931705ed10eac1d3d0b456d7b322ee589324a10e5",
+        "docs/evidence/kubernetes-node-authority-phase2-2026-11-14.json": "a2f1aae75fe8015eb6555c6accb5a238c96e84bc5c70ecfb80141ccf4fc149b0",
+        "lib/smolbox/kubernetes/node_authority.ex": "7bac2dab5dbd66d070d0fd04eab3d9d52ef17c564f96702cf243ab03efc68ad6",
+        "priv/kubernetes/node_authority/v1/authority_guard.py": "d4eb6619c8498060902befd1b60a1c18b74aad53ee96a6d95867907e425a655b",
+        "lib/smolbox/kubernetes/node_authority/context.ex": "d0632e43478753e32c8b8c7b5abdbdb8522da9364d20287d122dce5f7f91d6dc",
+        "priv/kubernetes/node_authority/v1/authority_assets.py": "e38fcf537554507537fb6f97e72ee0d127fa7554f0792a074bb9bd20a7143932",
+        "scripts/kubernetes/node-authority/observer-rbac.yaml": "bdc6634914ffb128ed34d98039b7970d207bc98999224b971b6c37845ce5454a",
+        "priv/kubernetes/node_authority/v1/authority_lifecycle.py": "8e3a7cd4ec60c3e5493f959cd29c14b2d2927e153f723b88177d6ed0678784e7",
+        "priv/kubernetes/node_authority/v1/ssh-command.sh": "b1e0855d31b3c257663749a5094fca06141d533b8f35d7b1b421206820b07670",
+        "priv/kubernetes/node_authority/v1/authority_contract.py": "6bcd7babadb481c6a46181d90bcf2f78de74080559a9a37e04ddc195e310a8ef",
+        "priv/kubernetes/node_authority/v1/authority_runner.py": "15da4a6e68faae1fba158c0a769831a3f7be32a0991e89d764ac3bdf613b1471",
+        "lib/smolbox/kubernetes/node_authority/json.ex": "09e98b7dfd0dc964186d3468fc0802a20dc0e58f0724129938bee97732b4b969",
+        "lib/smolbox/kubernetes/node_authority/transport.ex": "29b538fcd7a4f9877002e8e9161b1b28efe76b0fb129e12d2e87bc82e3ab3ad1",
+        "priv/kubernetes/node_authority/configuration-v1.schema.json": "de35c61080e443bfaa4ba4ce3500cd78972d03c2d545e55021d434747644ce5b",
+        "docs/evidence/kubernetes-node-authority-phase0-2026-11-14.json": "9c63b9b37c714ab1f810ebc702acb8c826b5cb1f9c911f7d771364f9746c3181",
+        "priv/kubernetes/node_authority/v1/authority_config.py": "c1f718820408609f86d26db54d2dcb261e27403a1c81d406d888c4235b6523e9",
+        "priv/kubernetes/node_authority/v1/source-basis-lifecycle.json": "c0f19189e0cedd301064a7dff17b01de2a86856c7750ae061785e81ea8d2c129",
+        "scripts/kubernetes/node-authority/bundle.py": "f9f66f7073a983a420581dc429998fa44c4570e86433adeb8f979820356606b1"
+      }
+    }
+  },
+  "independent_offline_package": {
+    "no_test_checkout": true,
+    "no_bytecode_caches": true,
+    "bundle_builder_passed": true
+  },
+  "failed_controls_and_resolutions": [
+    {
+      "stage": "policy_source_review",
+      "observation": "root-owned authorized_keys 0600 is not principal-readable",
+      "resolution": "root-owned public key policy 0644 with root-owned 0755 home/.ssh; real authentication and no-write checks passed"
+    },
+    {
+      "stage": "first_sshd_syntax_validation",
+      "observation": "OpenSSH 9.6 rejects PermitUserEnvironment inside Match; reload and fixture publication did not occur",
+      "resolution": "global PermitUserEnvironment no; sshd -t and effective policy passed; no node enrollment existed"
+    },
+    {
+      "stage": "first_agent_log_assertion",
+      "observation": "service-unit filtering omitted post-authentication session-scope sshd logs",
+      "resolution": "comm/syslog cursor filtering observed real agent-forwarding denial; final thirty controls passed"
+    },
+    {
+      "stage": "first_package_consumer",
+      "observation": "macOS temp-root aliases produced dangling Mix priv links, so schema asset lookup failed",
+      "resolution": "canonical physical temporary root; current/minimum independent consumers passed without Rust"
+    },
+    {
+      "stage": "python_fixture_shutdown_race",
+      "observation": "invalid input was rejected before the fixture could half-close its socket",
+      "resolution": "accept terminal ENOTCONN/ECONNRESET/EPIPE only during fixture half-close; full manual suite passed"
+    }
+  ],
+  "limitations": [
+    "The access guest was never enrolled and has no K3s/workload/proof evidence",
+    "A fresh runtime domain and repeated effective access checks remain Phase 5 requirements",
+    "Public Memory/PostgreSQL runtime and recovery qualification is incomplete",
+    "Same-host controller guard, single slot, offline policy and zero retention remain required"
+  ],
+  "pending_phases": [
+    4,
+    5
+  ]
+}

@@ -1,0 +1,421 @@
+{
+  "purpose": "Synthetic protocol fixtures; not live node evidence",
+  "configuration": {
+    "version": 1,
+    "binding": {
+      "cluster_anchor_uid": "cluster-anchor-uid",
+      "cluster_id": "lab-cluster",
+      "generation": "abf4b4deae020cad069ba91b77bd13b81e1474413f4c27d0bfbfc7e49282b9d1",
+      "kind": "kubernetes",
+      "namespace": "smolbox-preview",
+      "namespace_uid": "namespace-uid",
+      "node_boot_id": "00000000-0000-0000-0000-000000000001",
+      "node_name": "smolbox-k3s",
+      "node_uid": "node-uid",
+      "runtime_class": "smolbox-preview",
+      "runtime_class_uid": "runtime-class-uid",
+      "runtime_identity": {
+        "archive_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "containerd_version": "2.2.10-k3s1",
+        "guard_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "guard_template_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "k3s_version": "v1.35.10+k3s1",
+        "kernel_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "libkrun_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "rootfs_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "shim_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "smolvm_version": "1.34.0"
+      },
+      "runtime_policy_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "target_id": "kube-lab",
+      "version": 1
+    },
+    "paths": {
+      "state_directory": "/var/lib/smolbox-node-authority",
+      "database": "/var/lib/smolbox-kubernetes/data/smolvm/server/smolvm.db",
+      "vm_root": "/var/lib/smolbox-kubernetes/cache/smolvm/vms",
+      "share_root": "/var/lib/containerd-shim-smolvm",
+      "runtime_root": "/opt/smolvm-1.34.0-linux-x86_64",
+      "runtime_archive": "/var/lib/smolbox-node-authority/inputs/smolvm.tar.gz",
+      "kubeconfig": "/etc/smolbox-node-authority/observer.kubeconfig",
+      "cri_socket": "/run/k3s/containerd/containerd.sock",
+      "k3s_executable": "/usr/local/bin/k3s",
+      "daemon_executable": "/var/lib/rancher/k3s/data/current/bin/k3s",
+      "kubectl_executable": "/usr/local/bin/kubectl",
+      "systemctl_executable": "/usr/bin/systemctl",
+      "ip_executable": "/usr/sbin/ip",
+      "nft_executable": "/usr/sbin/nft",
+      "nsenter_executable": "/usr/bin/nsenter",
+      "proc_root": "/proc",
+      "cgroup_root": "/sys/fs/cgroup",
+      "netns_root": "/run/netns",
+      "guard_program": "/usr/local/lib/smolbox-kubernetes/offline_guard.py",
+      "guard_state": "/var/lib/smolbox-kubernetes/offline-guard.json"
+    },
+    "guard": {
+      "table_name": "smolbox_preview_guard",
+      "marker": "SmolBox preview offline guard v1",
+      "namespace_manager": "smolbox-kubernetes-preview",
+      "bridge": "cni0"
+    },
+    "source_basis": {
+      "history_sha256": "84342b63582d337ef86e366ce78e67fcc469825c34005de52bcc8d1975d55e65",
+      "lifecycle_sha256": "c0f19189e0cedd301064a7dff17b01de2a86856c7750ae061785e81ea8d2c129"
+    }
+  },
+  "configuration_canonical": "{\"binding\":{\"cluster_anchor_uid\":\"cluster-anchor-uid\",\"cluster_id\":\"lab-cluster\",\"generation\":\"abf4b4deae020cad069ba91b77bd13b81e1474413f4c27d0bfbfc7e49282b9d1\",\"kind\":\"kubernetes\",\"namespace\":\"smolbox-preview\",\"namespace_uid\":\"namespace-uid\",\"node_boot_id\":\"00000000-0000-0000-0000-000000000001\",\"node_name\":\"smolbox-k3s\",\"node_uid\":\"node-uid\",\"runtime_class\":\"smolbox-preview\",\"runtime_class_uid\":\"runtime-class-uid\",\"runtime_identity\":{\"archive_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"containerd_version\":\"2.2.10-k3s1\",\"guard_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"guard_template_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"k3s_version\":\"v1.35.10+k3s1\",\"kernel_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"libkrun_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"rootfs_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"shim_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"smolvm_version\":\"1.34.0\"},\"runtime_policy_digest\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"target_id\":\"kube-lab\",\"version\":1},\"guard\":{\"bridge\":\"cni0\",\"marker\":\"SmolBox preview offline guard v1\",\"namespace_manager\":\"smolbox-kubernetes-preview\",\"table_name\":\"smolbox_preview_guard\"},\"paths\":{\"cgroup_root\":\"/sys/fs/cgroup\",\"cri_socket\":\"/run/k3s/containerd/containerd.sock\",\"daemon_executable\":\"/var/lib/rancher/k3s/data/current/bin/k3s\",\"database\":\"/var/lib/smolbox-kubernetes/data/smolvm/server/smolvm.db\",\"guard_program\":\"/usr/local/lib/smolbox-kubernetes/offline_guard.py\",\"guard_state\":\"/var/lib/smolbox-kubernetes/offline-guard.json\",\"ip_executable\":\"/usr/sbin/ip\",\"k3s_executable\":\"/usr/local/bin/k3s\",\"kubeconfig\":\"/etc/smolbox-node-authority/observer.kubeconfig\",\"kubectl_executable\":\"/usr/local/bin/kubectl\",\"netns_root\":\"/run/netns\",\"nft_executable\":\"/usr/sbin/nft\",\"nsenter_executable\":\"/usr/bin/nsenter\",\"proc_root\":\"/proc\",\"runtime_archive\":\"/var/lib/smolbox-node-authority/inputs/smolvm.tar.gz\",\"runtime_root\":\"/opt/smolvm-1.34.0-linux-x86_64\",\"share_root\":\"/var/lib/containerd-shim-smolvm\",\"state_directory\":\"/var/lib/smolbox-node-authority\",\"systemctl_executable\":\"/usr/bin/systemctl\",\"vm_root\":\"/var/lib/smolbox-kubernetes/cache/smolvm/vms\"},\"source_basis\":{\"history_sha256\":\"84342b63582d337ef86e366ce78e67fcc469825c34005de52bcc8d1975d55e65\",\"lifecycle_sha256\":\"c0f19189e0cedd301064a7dff17b01de2a86856c7750ae061785e81ea8d2c129\"},\"version\":1}",
+  "identity_fields": {
+    "version": 1,
+    "binding_generation": "abf4b4deae020cad069ba91b77bd13b81e1474413f4c27d0bfbfc7e49282b9d1",
+    "history_epoch": "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+    "enrollment_nonce": "1111111111111111111111111111111111111111111111111111111111111111",
+    "verifier_manifest_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+    "configuration_sha256": "a1f342f4206ba65462b3ef4623caad6c66a8ab8ecdc8cdc579b9d9d49ad66332"
+  },
+  "identity_canonical": "{\"binding_generation\":\"abf4b4deae020cad069ba91b77bd13b81e1474413f4c27d0bfbfc7e49282b9d1\",\"configuration_sha256\":\"a1f342f4206ba65462b3ef4623caad6c66a8ab8ecdc8cdc579b9d9d49ad66332\",\"enrollment_nonce\":\"1111111111111111111111111111111111111111111111111111111111111111\",\"history_epoch\":\"aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee\",\"verifier_manifest_sha256\":\"2222222222222222222222222222222222222222222222222222222222222222\",\"version\":1}",
+  "authority_generation": "f05eedbfa9a42c526baad2d1cdd7250947217b73c55016db0c75624adb2f5d6f",
+  "receipt": {
+    "binding": {
+      "cluster_anchor_uid": "cluster-anchor-uid",
+      "cluster_id": "lab-cluster",
+      "generation": "abf4b4deae020cad069ba91b77bd13b81e1474413f4c27d0bfbfc7e49282b9d1",
+      "kind": "kubernetes",
+      "namespace": "smolbox-preview",
+      "namespace_uid": "namespace-uid",
+      "node_boot_id": "00000000-0000-0000-0000-000000000001",
+      "node_name": "smolbox-k3s",
+      "node_uid": "node-uid",
+      "runtime_class": "smolbox-preview",
+      "runtime_class_uid": "runtime-class-uid",
+      "runtime_identity": {
+        "archive_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "containerd_version": "2.2.10-k3s1",
+        "guard_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "guard_template_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "k3s_version": "v1.35.10+k3s1",
+        "kernel_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "libkrun_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "rootfs_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "shim_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "smolvm_version": "1.34.0"
+      },
+      "runtime_policy_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "target_id": "kube-lab",
+      "version": 1
+    },
+    "container_id": "containerd://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "image_id": "registry.example/team/python@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "image_reference": "registry.example/team/python@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "intent_digest": "30cc21256c3c436bb0fb3ea4549cf240e7175bb1ba6233073dddb9a0c80ad265",
+    "nonce": "50b5b332552518d2577cafcc97145c80c7ac425a2188a8cd33fb581a15a13111",
+    "observation": {
+      "binding_generation": "abf4b4deae020cad069ba91b77bd13b81e1474413f4c27d0bfbfc7e49282b9d1",
+      "complete_history": true,
+      "guard_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "guard_template_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "interfaces": [
+        {
+          "ifindex": 9,
+          "name": "vethcafe",
+          "sandbox_id": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        }
+      ],
+      "isolated": true,
+      "observed_at_ms": 1000,
+      "observer_epoch": "f05eedbfa9a42c526baad2d1cdd7250947217b73c55016db0c75624adb2f5d6f",
+      "pod_uid": "11111111-2222-4333-8444-555555555555",
+      "processes": [
+        {
+          "exe_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "kvm": [
+            "anon_inode:kvm-vcpu:0",
+            "anon_inode:kvm-vcpu:1",
+            "anon_inode:kvm-vm"
+          ],
+          "pid": 1234,
+          "sandbox_id": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "start_ticks": 777,
+          "vm_directory": "d91323a5298f3b9f"
+        }
+      ],
+      "sandbox_ids": [
+        "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      ],
+      "version": 1
+    },
+    "phase": "ready",
+    "pod_name": "kube-unit-creation",
+    "pod_uid": "11111111-2222-4333-8444-555555555555",
+    "version": 1
+  },
+  "receipt_canonical": "{\"binding\":{\"cluster_anchor_uid\":\"cluster-anchor-uid\",\"cluster_id\":\"lab-cluster\",\"generation\":\"abf4b4deae020cad069ba91b77bd13b81e1474413f4c27d0bfbfc7e49282b9d1\",\"kind\":\"kubernetes\",\"namespace\":\"smolbox-preview\",\"namespace_uid\":\"namespace-uid\",\"node_boot_id\":\"00000000-0000-0000-0000-000000000001\",\"node_name\":\"smolbox-k3s\",\"node_uid\":\"node-uid\",\"runtime_class\":\"smolbox-preview\",\"runtime_class_uid\":\"runtime-class-uid\",\"runtime_identity\":{\"archive_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"containerd_version\":\"2.2.10-k3s1\",\"guard_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"guard_template_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"k3s_version\":\"v1.35.10+k3s1\",\"kernel_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"libkrun_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"rootfs_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"shim_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"smolvm_version\":\"1.34.0\"},\"runtime_policy_digest\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"target_id\":\"kube-lab\",\"version\":1},\"container_id\":\"containerd://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"image_id\":\"registry.example/team/python@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"image_reference\":\"registry.example/team/python@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"intent_digest\":\"30cc21256c3c436bb0fb3ea4549cf240e7175bb1ba6233073dddb9a0c80ad265\",\"nonce\":\"50b5b332552518d2577cafcc97145c80c7ac425a2188a8cd33fb581a15a13111\",\"observation\":{\"binding_generation\":\"abf4b4deae020cad069ba91b77bd13b81e1474413f4c27d0bfbfc7e49282b9d1\",\"complete_history\":true,\"guard_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"guard_template_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"interfaces\":[{\"ifindex\":9,\"name\":\"vethcafe\",\"sandbox_id\":\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\"}],\"isolated\":true,\"observed_at_ms\":1000,\"observer_epoch\":\"f05eedbfa9a42c526baad2d1cdd7250947217b73c55016db0c75624adb2f5d6f\",\"pod_uid\":\"11111111-2222-4333-8444-555555555555\",\"processes\":[{\"exe_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"kvm\":[\"anon_inode:kvm-vcpu:0\",\"anon_inode:kvm-vcpu:1\",\"anon_inode:kvm-vm\"],\"pid\":1234,\"sandbox_id\":\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\",\"start_ticks\":777,\"vm_directory\":\"d91323a5298f3b9f\"}],\"sandbox_ids\":[\"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\"],\"version\":1},\"phase\":\"ready\",\"pod_name\":\"kube-unit-creation\",\"pod_uid\":\"11111111-2222-4333-8444-555555555555\",\"version\":1}",
+  "receipt_sha256": "8f20a9a56b804342c5f7f4b615d63b99e77533982f426c507010e7ec21a10283",
+  "requests": {
+    "check": {
+      "version": 1,
+      "action": "check",
+      "nonce": "20f65c28671b40937c5bf23acc7c6f37e5a5ec0622e347b57685725df5ba9e50",
+      "binding_generation": "abf4b4deae020cad069ba91b77bd13b81e1474413f4c27d0bfbfc7e49282b9d1",
+      "authority_generation": "f05eedbfa9a42c526baad2d1cdd7250947217b73c55016db0c75624adb2f5d6f",
+      "verifier_manifest_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "timeout_ms": 3000,
+      "max_response_bytes": 65544,
+      "arguments": {}
+    },
+    "capture": {
+      "version": 1,
+      "action": "capture",
+      "nonce": "460ee6aa3a80359181b794cc31a7185addba77626e9f719c10e3c8efb8668a1d",
+      "binding_generation": "abf4b4deae020cad069ba91b77bd13b81e1474413f4c27d0bfbfc7e49282b9d1",
+      "authority_generation": "f05eedbfa9a42c526baad2d1cdd7250947217b73c55016db0c75624adb2f5d6f",
+      "verifier_manifest_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "timeout_ms": 3000,
+      "max_response_bytes": 65544,
+      "arguments": {
+        "pod_uid": "11111111-2222-4333-8444-555555555555"
+      }
+    },
+    "cleanup": {
+      "version": 1,
+      "action": "cleanup",
+      "nonce": "611496f412cac947be720d17a0ee6d7463221d14731fbc18244756271e8f5189",
+      "binding_generation": "abf4b4deae020cad069ba91b77bd13b81e1474413f4c27d0bfbfc7e49282b9d1",
+      "authority_generation": "f05eedbfa9a42c526baad2d1cdd7250947217b73c55016db0c75624adb2f5d6f",
+      "verifier_manifest_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "timeout_ms": 3000,
+      "max_response_bytes": 65544,
+      "arguments": {
+        "receipt": {
+          "binding": {
+            "cluster_anchor_uid": "cluster-anchor-uid",
+            "cluster_id": "lab-cluster",
+            "generation": "abf4b4deae020cad069ba91b77bd13b81e1474413f4c27d0bfbfc7e49282b9d1",
+            "kind": "kubernetes",
+            "namespace": "smolbox-preview",
+            "namespace_uid": "namespace-uid",
+            "node_boot_id": "00000000-0000-0000-0000-000000000001",
+            "node_name": "smolbox-k3s",
+            "node_uid": "node-uid",
+            "runtime_class": "smolbox-preview",
+            "runtime_class_uid": "runtime-class-uid",
+            "runtime_identity": {
+              "archive_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "containerd_version": "2.2.10-k3s1",
+              "guard_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "guard_template_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "k3s_version": "v1.35.10+k3s1",
+              "kernel_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "libkrun_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "rootfs_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "shim_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "smolvm_version": "1.34.0"
+            },
+            "runtime_policy_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "target_id": "kube-lab",
+            "version": 1
+          },
+          "container_id": "containerd://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "image_id": "registry.example/team/python@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "image_reference": "registry.example/team/python@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "intent_digest": "30cc21256c3c436bb0fb3ea4549cf240e7175bb1ba6233073dddb9a0c80ad265",
+          "nonce": "50b5b332552518d2577cafcc97145c80c7ac425a2188a8cd33fb581a15a13111",
+          "observation": {
+            "binding_generation": "abf4b4deae020cad069ba91b77bd13b81e1474413f4c27d0bfbfc7e49282b9d1",
+            "complete_history": true,
+            "guard_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "guard_template_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "interfaces": [
+              {
+                "ifindex": 9,
+                "name": "vethcafe",
+                "sandbox_id": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+              }
+            ],
+            "isolated": true,
+            "observed_at_ms": 1000,
+            "observer_epoch": "f05eedbfa9a42c526baad2d1cdd7250947217b73c55016db0c75624adb2f5d6f",
+            "pod_uid": "11111111-2222-4333-8444-555555555555",
+            "processes": [
+              {
+                "exe_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "kvm": [
+                  "anon_inode:kvm-vcpu:0",
+                  "anon_inode:kvm-vcpu:1",
+                  "anon_inode:kvm-vm"
+                ],
+                "pid": 1234,
+                "sandbox_id": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+                "start_ticks": 777,
+                "vm_directory": "d91323a5298f3b9f"
+              }
+            ],
+            "sandbox_ids": [
+              "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            ],
+            "version": 1
+          },
+          "phase": "ready",
+          "pod_name": "kube-unit-creation",
+          "pod_uid": "11111111-2222-4333-8444-555555555555",
+          "version": 1
+        },
+        "receipt_sha256": "8f20a9a56b804342c5f7f4b615d63b99e77533982f426c507010e7ec21a10283"
+      }
+    }
+  },
+  "successes": {
+    "check": {
+      "version": 1,
+      "action": "check",
+      "nonce": "20f65c28671b40937c5bf23acc7c6f37e5a5ec0622e347b57685725df5ba9e50",
+      "binding_generation": "abf4b4deae020cad069ba91b77bd13b81e1474413f4c27d0bfbfc7e49282b9d1",
+      "authority_generation": "f05eedbfa9a42c526baad2d1cdd7250947217b73c55016db0c75624adb2f5d6f",
+      "verifier_manifest_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "ok": true,
+      "journal": {
+        "history_epoch": "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+        "watermark": 2,
+        "prefix_sha256": "3333333333333333333333333333333333333333333333333333333333333333"
+      },
+      "value": {
+        "complete_history": true,
+        "idle": true,
+        "observer_epoch": "f05eedbfa9a42c526baad2d1cdd7250947217b73c55016db0c75624adb2f5d6f"
+      },
+      "error": null
+    },
+    "capture": {
+      "version": 1,
+      "action": "capture",
+      "nonce": "460ee6aa3a80359181b794cc31a7185addba77626e9f719c10e3c8efb8668a1d",
+      "binding_generation": "abf4b4deae020cad069ba91b77bd13b81e1474413f4c27d0bfbfc7e49282b9d1",
+      "authority_generation": "f05eedbfa9a42c526baad2d1cdd7250947217b73c55016db0c75624adb2f5d6f",
+      "verifier_manifest_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "ok": true,
+      "journal": {
+        "history_epoch": "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+        "watermark": 2,
+        "prefix_sha256": "3333333333333333333333333333333333333333333333333333333333333333"
+      },
+      "value": {
+        "binding_generation": "abf4b4deae020cad069ba91b77bd13b81e1474413f4c27d0bfbfc7e49282b9d1",
+        "complete_history": true,
+        "guard_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "guard_template_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "interfaces": [
+          {
+            "ifindex": 9,
+            "name": "vethcafe",
+            "sandbox_id": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+          }
+        ],
+        "isolated": true,
+        "observed_at_ms": 1000,
+        "observer_epoch": "f05eedbfa9a42c526baad2d1cdd7250947217b73c55016db0c75624adb2f5d6f",
+        "pod_uid": "11111111-2222-4333-8444-555555555555",
+        "processes": [
+          {
+            "exe_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "kvm": [
+              "anon_inode:kvm-vcpu:0",
+              "anon_inode:kvm-vcpu:1",
+              "anon_inode:kvm-vm"
+            ],
+            "pid": 1234,
+            "sandbox_id": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+            "start_ticks": 777,
+            "vm_directory": "d91323a5298f3b9f"
+          }
+        ],
+        "sandbox_ids": [
+          "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        ],
+        "version": 1
+      },
+      "error": null
+    },
+    "cleanup": {
+      "version": 1,
+      "action": "cleanup",
+      "nonce": "611496f412cac947be720d17a0ee6d7463221d14731fbc18244756271e8f5189",
+      "binding_generation": "abf4b4deae020cad069ba91b77bd13b81e1474413f4c27d0bfbfc7e49282b9d1",
+      "authority_generation": "f05eedbfa9a42c526baad2d1cdd7250947217b73c55016db0c75624adb2f5d6f",
+      "verifier_manifest_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "ok": true,
+      "journal": {
+        "history_epoch": "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
+        "watermark": 2,
+        "prefix_sha256": "3333333333333333333333333333333333333333333333333333333333333333"
+      },
+      "value": {
+        "version": 3,
+        "observed_at_ms": 1001,
+        "observer_epoch": "f05eedbfa9a42c526baad2d1cdd7250947217b73c55016db0c75624adb2f5d6f",
+        "api_absent": true,
+        "terminated_processes": [
+          {
+            "exe_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "kvm": [
+              "anon_inode:kvm-vcpu:0",
+              "anon_inode:kvm-vcpu:1",
+              "anon_inode:kvm-vm"
+            ],
+            "pid": 1234,
+            "sandbox_id": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+            "start_ticks": 777,
+            "vm_directory": "d91323a5298f3b9f"
+          }
+        ],
+        "absent_records": [
+          "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        ],
+        "absent_vm_directories": [
+          "d91323a5298f3b9f"
+        ],
+        "absent_shares": [
+          "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        ],
+        "complete_history": true
+      },
+      "error": null
+    }
+  },
+  "rejections": {
+    "check": {
+      "version": 1,
+      "action": "check",
+      "nonce": "20f65c28671b40937c5bf23acc7c6f37e5a5ec0622e347b57685725df5ba9e50",
+      "binding_generation": "abf4b4deae020cad069ba91b77bd13b81e1474413f4c27d0bfbfc7e49282b9d1",
+      "authority_generation": "f05eedbfa9a42c526baad2d1cdd7250947217b73c55016db0c75624adb2f5d6f",
+      "verifier_manifest_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "ok": false,
+      "journal": null,
+      "value": null,
+      "error": "unavailable"
+    },
+    "capture": {
+      "version": 1,
+      "action": "capture",
+      "nonce": "460ee6aa3a80359181b794cc31a7185addba77626e9f719c10e3c8efb8668a1d",
+      "binding_generation": "abf4b4deae020cad069ba91b77bd13b81e1474413f4c27d0bfbfc7e49282b9d1",
+      "authority_generation": "f05eedbfa9a42c526baad2d1cdd7250947217b73c55016db0c75624adb2f5d6f",
+      "verifier_manifest_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "ok": false,
+      "journal": null,
+      "value": null,
+      "error": "unavailable"
+    },
+    "cleanup": {
+      "version": 1,
+      "action": "cleanup",
+      "nonce": "611496f412cac947be720d17a0ee6d7463221d14731fbc18244756271e8f5189",
+      "binding_generation": "abf4b4deae020cad069ba91b77bd13b81e1474413f4c27d0bfbfc7e49282b9d1",
+      "authority_generation": "f05eedbfa9a42c526baad2d1cdd7250947217b73c55016db0c75624adb2f5d6f",
+      "verifier_manifest_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "ok": false,
+      "journal": null,
+      "value": null,
+      "error": "unavailable"
+    }
+  }
+}

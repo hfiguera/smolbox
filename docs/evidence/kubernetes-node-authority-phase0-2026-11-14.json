@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "phase": 0,
+  "scope": "contract_and_source_checkpoint_only",
+  "new_provider_enabled": false,
+  "new_provider_live_qualified": false,
+  "checks": {
+    "manual_python": {
+      "passed": 87,
+      "new_contract_checks": 10
+    },
+    "focused_elixir": {
+      "passed": 7,
+      "new_authority_checks": 2,
+      "cold_epoch_decode": true
+    },
+    "legacy_source_files_unchanged": true,
+    "cached_archive_matches_qualified_runtime": true
+  },
+  "source_sha256": {
+    "priv/kubernetes/node_authority/v1/authority_contract.py": "6bcd7babadb481c6a46181d90bcf2f78de74080559a9a37e04ddc195e310a8ef",
+    "test/fixtures/kubernetes/node-authority-v1/configuration.schema.json": "de35c61080e443bfaa4ba4ce3500cd78972d03c2d545e55021d434747644ce5b",
+    "test/fixtures/kubernetes/node-authority-v1/protocol.schema.json": "d0e38553c134bc0e5a9595067b30f8ff737e7125ac5744cdd27ded7c5be4f51e",
+    "test/fixtures/kubernetes/node-authority-v1/vectors.json": "03c611cbfd0f90ff5e80413bfbf27e31a638e0994614d9d16c2e3796a7987aba",
+    "scripts/kubernetes/test_node_authority_contract.py": "6a814a54683327073231435932657741d42967c6ca622e71da70c7013bfd6efd",
+    "test/unit/kubernetes_node_authority_contract_test.exs": "d048b0b4bed7e52bb29f5123de55f9005dc3173a7f4d85ba26c46dab5e2cdd8b",
+    "scripts/kubernetes/node-authority/source-basis.json": "fc4a35af83c511b2be2a0dffb2a0f7624c82d395ee96af533eb2ae295024d735"
+  },
+  "live_side_effects": [],
+  "pending_phases": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ]
+}

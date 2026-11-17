@@ -20,6 +20,8 @@ defmodule SmolBox.DurableHost.MixProject do
         {:ex_slop, "~> 0.4.5", only: [:dev, :test], runtime: false},
         {:ex_dna, "~> 1.5.4", only: [:dev, :test], runtime: false},
         {:smolbox, path: "../.."},
+        {:plug, "~> 1.18", only: :test},
+        {:bandit, "~> 1.8", only: :test},
         {:ecto_sql, "~> 3.14.0"},
         {:postgrex, "~> 0.22.4"},
         {:jason, "~> 1.4"},
@@ -40,9 +42,7 @@ defmodule SmolBox.DurableHost.MixProject do
       "lib",
       Path.expand("../support/store", __DIR__),
       "test/support",
-      Path.expand("../../test/support/store", __DIR__),
-      Path.expand("../../test/support/fault", __DIR__),
-      Path.expand("../../test/support/lab", __DIR__),
+      Path.expand("../../test/support", __DIR__),
       Path.expand("../support/lib", __DIR__)
     ]
 
