@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "date": "2026-11-16",
-  "status": "defaults_promoted_from_local_qualification_artifacts_unpublished",
+  "status": "native_qualification_prerelease_published_public_installers_passed_hex_unpublished",
   "runtime": "1.35.1",
   "upstream_commit": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
   "previous_sdk_commit": "d77eaf1c6eeff16bc8c258613746033e9bf567ca",
@@ -12,9 +12,9 @@
     "kubernetes": "1.35.1",
     "promoted": true,
     "basis": "Completed local qualification; explicit user instruction to promote defaults while keeping every artifact unpublished",
-    "public_embedded_installer": "Release-tag selection is unchanged; published 1.34.0 bundles retain their identities. Local 1.35.1 installation requires an explicit staged archive, tag and digest."
+    "public_embedded_installer": "Release-tag selection is unchanged. The public 1.35.1 native prerelease uses --tag v0.6.1-rc.1 with matching library source; older published bundles retain their identities."
   },
-  "distribution_approved": false,
+  "distribution_approved": true,
   "historical_evidence_transferred": false,
   "http": {
     "linux_x86_64": {
@@ -86,7 +86,7 @@
     }
   },
   "pending": [
-    "Public source delivery, hosted provenance and public-download qualification remain unrun because the user requested that artifacts stay unpublished. These remain distribution gates, not default-promotion gates under the explicit user instruction."
+    "Hex publication remains explicitly unauthorized. Any broader native feature/crash qualification remains scoped to its exact recorded package identity."
   ],
   "branch": "support/smolvm-1.35.1",
   "upstream_impact_review": {
@@ -1898,7 +1898,7 @@
     "raw_source_basis_note": "The raw phase0 harness retained the older default source-basis metadata; the explicit 1.35.1 runtime/pins and separate 1.35.1 source/region review establish this campaign basis without rewriting the raw report."
   },
   "source_review_staging": {
-    "status": "local_archives_staged_not_published",
+    "status": "reviewed_archives_published_anonymous_public_downloads_verified",
     "native_source_commit": "e548f4f336dced0c6c8125b87f8aa09bc33351ef",
     "current_registry_crates_verified": 714,
     "indexed_corresponding_sources_verified": 1416,
@@ -2112,15 +2112,22 @@
   "public_distribution_prerequisites": {
     "source_input_release": "embedded-port-inputs-v1.35.1",
     "proposed_qualification_prerelease": "v0.6.1-rc.1",
-    "published": false,
-    "hosted_attestation_verified": false,
-    "exact_public_installer_matrix_passed": false,
+    "published": true,
+    "hosted_attestation_verified": true,
+    "exact_public_installer_matrix_passed": true,
     "fresh_macos_standard_account_required": true,
     "macos_account_creation_available_in_session": true,
-    "publication_decision": "keep_artifacts_unpublished_at_user_request",
-    "publication_authorized": false,
+    "publication_decision": "publish_sources_notices_and_native_qualification_bundles_keep_hex_unpublished",
+    "publication_authorized": true,
     "macos_account_setup": "agent-managed temporary standard accounts using native macOS administrator authorization",
-    "macos_staged_fresh_standard_account_matrix_passed": true
+    "macos_staged_fresh_standard_account_matrix_passed": true,
+    "hex_publication_authorized": false,
+    "source_input_release_published": true,
+    "source_input_release_url": "https://github.com/hfiguera/smolbox/releases/tag/embedded-port-inputs-v1.35.1",
+    "input_approval_scope": "Reviewed inputs and exact hosted bundles approved for native qualification prerelease; six public installer lanes passed. Hex publication remains unauthorized.",
+    "qualification_release_tag": "v0.6.1-rc.1",
+    "qualification_release_url": "https://github.com/hfiguera/smolbox/releases/tag/v0.6.1-rc.1",
+    "hex_published": false
   },
   "local_environment_cleanup": {
     "private_postgresql_cluster": "normal smart shutdown confirmed",
@@ -2253,5 +2260,41 @@
       }
     ],
     "native_binary_qualification": "Reuses the completed exact-package campaigns above; this promotion changes configuration defaults, examples, release metadata and documentation, without changing the native helper or upstream SDK."
+  },
+  "public_source_delivery": {
+    "status": "passed",
+    "inputs": [
+      {
+        "input": "notices",
+        "url": "https://github.com/hfiguera/smolbox/releases/download/embedded-port-inputs-v1.35.1/smolbox-embedded-notices.tar.gz",
+        "sha256": "9b9593506bba5d74d3baca6ce9f82a065e6618ecc655057066f6b8ff4795467f",
+        "bytes": 744820,
+        "anonymous_public_download_verified": true
+      },
+      {
+        "input": "sources",
+        "url": "https://github.com/hfiguera/smolbox/releases/download/embedded-port-inputs-v1.35.1/smolbox-embedded-sources.tar.gz",
+        "sha256": "cfb144d2ff587fad6a99828ee8fdb5df73cf74b5404e3d51d2398cf0084f45fa",
+        "bytes": 1000306930,
+        "anonymous_public_download_verified": true
+      }
+    ]
+  },
+  "public_native_distribution": {
+    "status": "passed",
+    "report": "docs/evidence/embedded-port-1.35.1-public-installers.json",
+    "release": {
+      "tag": "v0.6.1-rc.1",
+      "url": "https://github.com/hfiguera/smolbox/releases/tag/v0.6.1-rc.1",
+      "prerelease": true,
+      "source_commit": "626b0a8f706c5246267a83f946d3e26a88a24c82",
+      "workflow_run": "https://github.com/hfiguera/smolbox/actions/runs/43985522858",
+      "source_input_release": "https://github.com/hfiguera/smolbox/releases/tag/embedded-port-inputs-v1.35.1",
+      "latest_stable_release_unchanged": "v0.6.0"
+    },
+    "cases": 6,
+    "fresh_standard_accounts": true,
+    "accounts_and_homes_removed": true,
+    "hex_published": false
   }
 }

@@ -4,8 +4,11 @@ The Embedded Port backend runs a locally approved helper under Elixir
 supervision through `SmolBox.Runtime`. A Runtime can use Embedded Port and
 HTTP workers together.
 
-The public installer provides the attested SmolVM 1.34.0 bundle for Apple
-Silicon, Linux x86_64 and Linux ARM64. The helper and its assets install
+The public installer provides attested bundles for Apple Silicon, Linux x86_64
+and Linux ARM64. Published SmolBox 0.6.0 uses SmolVM 1.34.0; the public
+`v0.6.1-rc.1` native qualification prerelease uses 1.35.1 and passed six fresh-account
+installer lanes. Hex is unpublished for the candidate, so use its matching Git
+dependency and explicit installer tag. The helper and its assets install
 separately from the Elixir package. [Embedded Port quickstart](embedded-quickstart.md)
 
 For an HTTP-only application, follow the [Getting started guide](getting-started.md).
@@ -563,11 +566,13 @@ Existing approved patched-package evidence remains
 historical and cannot approve their bytes.
 
 The native source build now targets the unmodified SmolVM 1.35.1 release.
-Existing 1.34.0 and 1.22.0 package identities remain accepted, and the public
-installer selects a SmolBox release tag, whose published bundles retain their
-original 1.34.0 identities. The source/release catalog defaults to locally qualified
-1.35.1 with distribution approval false. Install that unpublished version only
-with an explicitly approved staged archive, tag and digest. A newly built package
+Existing 1.34.0 and 1.22.0 package identities remain accepted. The public
+installer selects a SmolBox release tag, and earlier 1.34.0 bundles retain their
+original identities. The source/release catalog defaults to locally qualified
+1.35.1 with reviewed input approval enabled. Its attested `v0.6.1-rc.1` bundles
+and six public installer lanes are recorded in the
+[public qualification report](evidence/embedded-port-1.35.1-public-installers.json).
+Use the matching Git tag while Hex stays unpublished. A newly built package
 requires its own approval and enrollment; SDK selection never rewrites old
 receipts. See [1.35.1 qualification](evidence/smolvm-1.35.1-qualification.json).
 

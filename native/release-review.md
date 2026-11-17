@@ -1,19 +1,22 @@
 # Embedded Port release review
 
 The [release input catalog](release-inputs.json) selects the locally qualified,
-unmodified SDK 1.35.1 for all three targets. It matches
-[the reviewed versioned catalog](release-inputs-1.35.1.json), with distribution
-approval **false** throughout. The user explicitly authorized default promotion
-from completed local qualification while requiring every artifact to remain
-unpublished. This changes configuration/source defaults, not distribution approval.
-The distribution builder rejects these entries until a separately authorized
-release completes the public source, provenance and installer gates.
+unmodified SDK 1.35.1 for all three targets and matches
+[the reviewed versioned catalog](release-inputs-1.35.1.json). The user has now
+explicitly authorized publishing source/notices and native qualification bundles,
+while keeping Hex unpublished. Reviewed input distribution approval enables
+`v0.6.1-rc.1` hosted builds. All three attested bundles are published, and all
+six exact public installer checks passed in fresh standard accounts with Rust
+absent. See [public identities and results](../docs/evidence/embedded-port-1.35.1-public-installers.json).
+Broader local feature campaigns retain their own package identities. Hex remains
+unpublished.
 
-See the [1.35.1 input review](../docs/evidence/embedded-port-1.35.1-release-sources.md)
-and [local qualification](../docs/evidence/smolvm-1.35.1-qualification.md).
-The public installer continues selecting the SmolBox release tag; it does not
-publish or substitute the staged 1.35.1 bundle. That local bundle requires its
-explicit archive, envelope tag and approved digest.
+The [source/notices release](https://github.com/hfiguera/smolbox/releases/tag/embedded-port-inputs-v1.35.1)
+is published. See the [1.35.1 input review](../docs/evidence/embedded-port-1.35.1-release-sources.md)
+and [qualification](../docs/evidence/smolvm-1.35.1-qualification.md).
+The installer continues selecting the SmolBox release tag, with explicit
+`--tag v0.6.1-rc.1` for qualification. Publishing a native prerelease does not
+publish a Hex package.
 
 The matching published sources/notices, attested build and public installer
 results for earlier 1.34.0 identities remain in the
