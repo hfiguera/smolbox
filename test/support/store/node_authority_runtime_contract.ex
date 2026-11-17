@@ -445,6 +445,13 @@ defmodule SmolBox.Test.NodeAuthorityRuntimeContract do
     runtime = start(c)
     ready(runtime)
     {:ok, key} = SmolBox.submit(runtime, Fixture.execution(c.kube, outputs: [output]).spec)
+
+    # Preparation and execution have their own budgets. Start the publication
+    # wait only after the real exit has been persisted for collection.
+    eventually(fn ->
+      match?({:ok, %{state: :collecting, result: %{exit_code: 7}}}, fetch(c, key))
+    end)
+
     assert_receive {:publishing, publisher}, 5000
     NodeAuthorityPeer.mode(c.node, :proof_unavailable)
     send(publisher, :publish)
