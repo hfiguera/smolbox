@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "date": "2026-11-16",
-  "status": "stable_native_bundles_published_public_installers_passed_hex_unpublished",
+  "status": "stable_native_bundles_and_hex_published_public_installers_passed",
   "runtime": "1.35.1",
   "upstream_commit": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
   "previous_sdk_commit": "d77eaf1c6eeff16bc8c258613746033e9bf567ca",
@@ -86,7 +86,7 @@
     }
   },
   "pending": [
-    "Hex remains unpublished. Broader native feature/crash qualification remains scoped to its exact recorded package identity."
+    "Broader native feature/crash qualification remains scoped to its exact recorded package identity."
   ],
   "branch": "support/smolvm-1.35.1",
   "upstream_impact_review": {
@@ -2124,10 +2124,10 @@
     "hex_publication_authorized": false,
     "source_input_release_published": true,
     "source_input_release_url": "https://github.com/hfiguera/smolbox/releases/tag/embedded-port-inputs-v1.35.1",
-    "input_approval_scope": "Reviewed source/notices and hosted native inputs approved for RC and stable publication; each release passed its own six public installer lanes. Hex remains unpublished.",
+    "input_approval_scope": "Reviewed source/notices and hosted native inputs approved for RC and stable publication; each release passed its own six installer lanes. Hex 0.6.1 published after all checks passed.",
     "qualification_release_tag": "v0.6.1-rc.1",
     "qualification_release_url": "https://github.com/hfiguera/smolbox/releases/tag/v0.6.1-rc.1",
-    "hex_published": false,
+    "hex_published": true,
     "stable_release_tag": "v0.6.1",
     "stable_release_url": "https://github.com/hfiguera/smolbox/releases/tag/v0.6.1",
     "stable_public_installer_matrix_passed": true
@@ -2315,5 +2315,11 @@
     "fresh_standard_accounts": true,
     "accounts_and_homes_removed": true,
     "hex_published": false
+  },
+  "hex_publication": {
+    "status": "published_and_verified",
+    "report": "docs/evidence/smolbox-0.6.1-publication.json",
+    "version": "0.6.1",
+    "checksum": "89ddd86f8f4e1ca57c9a707f2f7f88f5105651daa4a89ab8cf8de699f4c1d9cb"
   }
 }

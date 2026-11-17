@@ -8,7 +8,8 @@ archives are now [published](https://github.com/hfiguera/smolbox/releases/tag/em
 Hosted native provenance and all six exact public installer lanes now pass for
 [`v0.6.1-rc.1`](https://github.com/hfiguera/smolbox/releases/tag/v0.6.1-rc.1).
 See the [public installer evidence](embedded-port-1.35.1-public-installers.json).
-Hex remains unpublished.
+Hex was held during that RC campaign. Stable SmolBox 0.6.1 is now published
+on Hex; see [publication verification](smolbox-0.6.1-publication.json).
 
 Stable [`v0.6.1` bundles](https://github.com/hfiguera/smolbox/releases/tag/v0.6.1)
 are also published under the user's explicit authorization. Their native code,
@@ -60,7 +61,7 @@ commit `e548f4f336dced0c6c8125b87f8aa09bc33351ef`; production native code, Cargo
 SDK pins, policies and packaging inputs match merged commit `938b199d34ef067dca45ce37d9798bc9ceb1fb65`.
 The input release is `embedded-port-inputs-v1.35.1`. Prior staged installation
 checks used explicitly supplied digests and remain separate from hosted provenance
-and public-download checks. Hex publication remains unauthorized.
+and public-download checks. Hex was published separately after stable qualification.
 
 Live checks and outstanding gates are recorded in
 [the qualification report](smolvm-1.35.1-qualification.json).
