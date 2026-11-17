@@ -5,9 +5,11 @@ unmodified SDK 1.35.1 for all three targets and matches
 [the reviewed versioned catalog](release-inputs-1.35.1.json). The user has now
 explicitly authorized publishing source/notices and native qualification bundles,
 while keeping Hex unpublished. Reviewed input distribution approval enables
-`v0.6.1-rc.1` hosted builds; hosted provenance and exact public installer checks
-remain separately pending. This approval is for candidate distribution, not a
-claim that public installer qualification has already passed.
+`v0.6.1-rc.1` hosted builds. All three attested bundles are published, and all
+six exact public installer checks passed in fresh standard accounts with Rust
+absent. See [public identities and results](../docs/evidence/embedded-port-1.35.1-public-installers.json).
+Broader local feature campaigns retain their own package identities. Hex remains
+unpublished.
 
 The [source/notices release](https://github.com/hfiguera/smolbox/releases/tag/embedded-port-inputs-v1.35.1)
 is published. See the [1.35.1 input review](../docs/evidence/embedded-port-1.35.1-release-sources.md)

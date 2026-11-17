@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "date": "2026-11-16",
-  "status": "qualification_prerelease_publication_authorized_public_installers_pending",
+  "status": "native_qualification_prerelease_published_public_installers_passed_hex_unpublished",
   "runtime": "1.35.1",
   "upstream_commit": "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
   "previous_sdk_commit": "d77eaf1c6eeff16bc8c258613746033e9bf567ca",
@@ -12,7 +12,7 @@
     "kubernetes": "1.35.1",
     "promoted": true,
     "basis": "Completed local qualification; explicit user instruction to promote defaults while keeping every artifact unpublished",
-    "public_embedded_installer": "Release-tag selection is unchanged; published 1.34.0 bundles retain their identities. Local 1.35.1 installation requires an explicit staged archive, tag and digest."
+    "public_embedded_installer": "Release-tag selection is unchanged. The public 1.35.1 native prerelease uses --tag v0.6.1-rc.1 with matching library source; older published bundles retain their identities."
   },
   "distribution_approved": true,
   "historical_evidence_transferred": false,
@@ -86,7 +86,7 @@
     }
   },
   "pending": [
-    "Hosted 1.35.1 candidate builds and exact public-download installer qualification; Hex publication remains explicitly unauthorized."
+    "Hex publication remains explicitly unauthorized. Any broader native feature/crash qualification remains scoped to its exact recorded package identity."
   ],
   "branch": "support/smolvm-1.35.1",
   "upstream_impact_review": {
@@ -2112,9 +2112,9 @@
   "public_distribution_prerequisites": {
     "source_input_release": "embedded-port-inputs-v1.35.1",
     "proposed_qualification_prerelease": "v0.6.1-rc.1",
-    "published": false,
-    "hosted_attestation_verified": false,
-    "exact_public_installer_matrix_passed": false,
+    "published": true,
+    "hosted_attestation_verified": true,
+    "exact_public_installer_matrix_passed": true,
     "fresh_macos_standard_account_required": true,
     "macos_account_creation_available_in_session": true,
     "publication_decision": "publish_sources_notices_and_native_qualification_bundles_keep_hex_unpublished",
@@ -2124,7 +2124,10 @@
     "hex_publication_authorized": false,
     "source_input_release_published": true,
     "source_input_release_url": "https://github.com/hfiguera/smolbox/releases/tag/embedded-port-inputs-v1.35.1",
-    "input_approval_scope": "Reviewed inputs approved for the authorized v0.6.1-rc.1 native qualification prerelease; public installer qualification is still pending"
+    "input_approval_scope": "Reviewed inputs and exact hosted bundles approved for native qualification prerelease; six public installer lanes passed. Hex publication remains unauthorized.",
+    "qualification_release_tag": "v0.6.1-rc.1",
+    "qualification_release_url": "https://github.com/hfiguera/smolbox/releases/tag/v0.6.1-rc.1",
+    "hex_published": false
   },
   "local_environment_cleanup": {
     "private_postgresql_cluster": "normal smart shutdown confirmed",
@@ -2276,5 +2279,22 @@
         "anonymous_public_download_verified": true
       }
     ]
+  },
+  "public_native_distribution": {
+    "status": "passed",
+    "report": "docs/evidence/embedded-port-1.35.1-public-installers.json",
+    "release": {
+      "tag": "v0.6.1-rc.1",
+      "url": "https://github.com/hfiguera/smolbox/releases/tag/v0.6.1-rc.1",
+      "prerelease": true,
+      "source_commit": "626b0a8f706c5246267a83f946d3e26a88a24c82",
+      "workflow_run": "https://github.com/hfiguera/smolbox/actions/runs/43985522858",
+      "source_input_release": "https://github.com/hfiguera/smolbox/releases/tag/embedded-port-inputs-v1.35.1",
+      "latest_stable_release_unchanged": "v0.6.0"
+    },
+    "cases": 6,
+    "fresh_standard_accounts": true,
+    "accounts_and_homes_removed": true,
+    "hex_published": false
   }
 }

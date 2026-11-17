@@ -6,16 +6,19 @@ HTTP workers, checkpoint approvals, native source/release inputs and Kubernetes
 lab pins now default to **1.35.1** on that local basis. Explicit older versions
 remain supported. No SDK state, stored approval or historical evidence is migrated.
 
-The user subsequently authorized publication of reviewed source/notices and
-native qualification bundles while keeping **Hex unpublished**. The
-[source/notices release](https://github.com/hfiguera/smolbox/releases/tag/embedded-port-inputs-v1.35.1)
-is published. Reviewed input approval now enables hosted `v0.6.1-rc.1` candidate
-builds. Their attestations and exact public installer checks are pending; none of
-the local qualification below is relabelled as a public-download result.
+The [source/notices release](https://github.com/hfiguera/smolbox/releases/tag/embedded-port-inputs-v1.35.1)
+and attested native [qualification prerelease `v0.6.1-rc.1`](https://github.com/hfiguera/smolbox/releases/tag/v0.6.1-rc.1)
+are now public. All six public installer lanes passed in fresh standard OS
+accounts: current/minimum Elixir/OTP on Apple Silicon, Linux x86_64 and Linux
+ARM64, with Rust absent. Every temporary account, HOME and account lock was
+removed after positive SDK cleanup and post-use asset verification. **Hex remains
+unpublished** for this candidate; use the matching Git tag and explicit native
+installer tag. Existing published 1.34.0 bundles keep their original identities.
 
-The public installer continues selecting a SmolBox release tag. The qualification
-prerelease requires explicit `--tag v0.6.1-rc.1`; no new Hex release is authorized.
-Existing published 1.34.0 bundles retain their original identities.
+The [public installer report](embedded-port-1.35.1-public-installers.json) binds
+the new hosted binaries to their source commit, attestations, exact archive and
+manifest hashes, and six consumer results. The earlier broader local campaigns
+below retain their original package identities and scope.
 
 The [machine-readable report](smolvm-1.35.1-qualification.json) binds each native
 campaign to its package, executable and asset digests. Historical evidence and
@@ -113,18 +116,38 @@ on every target during that default-promotion check.
 ## Public distribution qualification
 
 The [corresponding-source review](embedded-port-1.35.1-release-sources.md)
-records 1,416 verified inputs and the source/notices archives, now published as
-`embedded-port-inputs-v1.35.1`. The matching default/versioned input catalogs
-are approved for the user's authorized native qualification prerelease.
+records 1,416 verified inputs. Anonymous public source/notices downloads match
+the reviewed hashes. All three native bundles were built and attested on
+GitHub-hosted runners from tag `v0.6.1-rc.1`, commit
+`626b0a8f706c5246267a83f946d3e26a88a24c82`, and published without changing the
+latest stable release. The matching input catalogs are approved for this native
+qualification prerelease.
 
-Remaining work follows the [release process](../../native/release-review.md):
+The exact public installer route passed six times in fresh standard accounts:
 
-1. Independently verify the exact public source/notices downloads.
-2. Build and attest all three targets from `v0.6.1-rc.1`.
-3. Verify exact public installer downloads with current/minimum toolchains,
-   Rust absent and fresh standard accounts; keep Gatekeeper enabled on macOS.
-4. Record the new identities and results. Keep Hex unpublished until separately
-   authorized, and do not transfer prior local evidence to newly built binaries.
+| Platform | Current toolchain | Minimum toolchain | Result |
+| --- | --- | --- | --- |
+| Apple Silicon | Elixir 1.20.5 / OTP 29.1.2 | Elixir 1.18.4 / OTP 27.3.4.15 | Both passed; Gatekeeper enabled and signatures/entitlement verified |
+| Linux x86_64 | Elixir 1.20.4 / OTP 29.0.6 | Elixir 1.18.4 / OTP 27.3.4.15 | Both passed in the dedicated nested-KVM guest |
+| Linux ARM64 | Elixir 1.20.5 / OTP 29 | Elixir 1.18.4 / OTP 27.3.4.17 | Both passed in the dedicated Lima nested-KVM guest |
+
+Each lane used empty GitHub CLI configuration and no Rust on PATH. The unmodified
+installer downloaded the public archive and bundle, enforcing repository ID,
+workflow, tag and hosted-runner provenance. A read-only verifier fixture recorded
+exact download hashes before delegating to the official GitHub CLI. Each guest
+printed `42`; SDK VM and create-reservation rows ended at zero. All 808 macOS,
+806 Linux x86_64 and 807 ARM64 assets verified after use. Temporary accounts,
+HOME directories and account locks were removed; the task's Linux test guests
+were normally stopped.
+
+Initial Linux harness attempts failed at the Elixir version probe because the
+operator's private working directory was inaccessible. No installer or VM was
+dispatched. Their empty test accounts were collected after proving no SDK state,
+locks or processes existed, logs were preserved, and fresh accounts passed after
+setting the working directory explicitly.
+
+See [exact public identities and results](embedded-port-1.35.1-public-installers.json).
+Hex publication remains unauthorized and no candidate Hex release exists.
 
 No SDK-revision domain migration, codec rollback or additional native crash
 qualification is inferred from these ordinary campaigns. Retain existing worker

@@ -47,16 +47,18 @@ worker. Pin checkpoint approvals to the version that captured them as well.
 Worker installation and upgrades are separate from the Elixir dependency.
 
 SmolVM 1.35.1 defaults use completed local qualification with the exact unmodified
-release SDK. The reviewed source/notices are published, and approved native
-inputs enable the `v0.6.1-rc.1` qualification build. Public installer checks are
-pending, and Hex remains unpublished. The public installer still selects
-a SmolBox release tag and does not silently substitute a local bundle. Install
-1.35.1 using an approved staged archive while qualification is pending; the
-public candidate will require explicit `--tag v0.6.1-rc.1` and matching library
-source.
-[Local results and pending public distribution checks](evidence/smolvm-1.35.1-qualification.md)
-record the scope separately from the published 1.34.0 results below. Existing
-package, domain and checkpoint approvals keep their original identities.
+release SDK. Its reviewed source/notices and attested native bundles are now
+published as the `v0.6.1-rc.1` qualification prerelease. Six public installer lanes
+passed with current/minimum toolchains in fresh standard accounts, without Rust;
+Gatekeeper stayed enabled on macOS. Every new VM, reservation and account was
+collected, and installed assets verified after use.
+[Exact hosted identities and public installer results](evidence/embedded-port-1.35.1-public-installers.json)
+remain separate from broader feature campaigns on the original local packages.
+
+Hex remains unpublished for this candidate. Use the Git dependency at tag
+`v0.6.1-rc.1` and explicit `--tag v0.6.1-rc.1` when installing its native bundle.
+The installer still follows the selected SmolBox release tag. Existing package,
+domain, worker and checkpoint approvals keep their original identities.
 
 ## Validated configurations
 

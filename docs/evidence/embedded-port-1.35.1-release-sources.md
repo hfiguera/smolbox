@@ -5,9 +5,10 @@ release at `bc58c3ef808e70db10c0ffb2b282c5f565ac6afc`. The SDK snapshot is
 unmodified. The user authorized publication of the reviewed source/notices and
 native qualification bundles, with Hex explicitly held. Source and notice
 archives are now [published](https://github.com/hfiguera/smolbox/releases/tag/embedded-port-inputs-v1.35.1).
-Hosted native build provenance and exact public installer qualification remain
-pending. The approved inputs enable the `v0.6.1-rc.1` qualification build; they do
-not establish that its public installer checks have already passed.
+Hosted native provenance and all six exact public installer lanes now pass for
+[`v0.6.1-rc.1`](https://github.com/hfiguera/smolbox/releases/tag/v0.6.1-rc.1).
+See the [public installer evidence](embedded-port-1.35.1-public-installers.json).
+Hex remains unpublished.
 
 | Target | Runtime archive SHA-256 |
 | --- | --- |
