@@ -6,8 +6,8 @@ HTTP workers together.
 
 The public installer provides attested stable `v0.6.1` bundles for Apple Silicon,
 Linux x86_64 and Linux ARM64 using SmolVM 1.35.1. All six current/minimum public
-installer lanes passed in fresh standard accounts. Hex remains unpublished; use
-the matching Git dependency and installer tag. The helper and its assets install
+installer lanes passed in fresh standard accounts. The matching library is
+published on Hex as 0.6.1; the installer selects its release tag automatically. The helper and its assets install
 separately from the Elixir package. [Embedded Port quickstart](embedded-quickstart.md)
 
 For an HTTP-only application, follow the [Getting started guide](getting-started.md).
@@ -572,7 +572,7 @@ original identities. The source/release catalog defaults to locally qualified
 and six public installer lanes are recorded in the
 [stable public qualification report](evidence/embedded-port-0.6.1-public-installers.json).
 The RC keeps its original identities and separate evidence.
-Use the matching Git tag while Hex stays unpublished. A newly built package
+Use the matching 0.6.1 Hex library and native release tag. A newly built package
 requires its own approval and enrollment; SDK selection never rewrites old
 receipts. See [1.35.1 qualification](evidence/smolvm-1.35.1-qualification.json).
 

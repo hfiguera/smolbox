@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "status": "published_and_verified",
+  "version": "0.6.1",
+  "date": "2026-11-16",
+  "source_tag": "v0.6.1",
+  "source_commit": "69477d851fd52e499635d996249d519b40713795",
+  "authorization": "User explicitly authorized publishing Hex after all qualification and PR checks passed.",
+  "hex": {
+    "url": "https://hex.pm/packages/smolbox/0.6.1",
+    "api_url": "https://hex.pm/api/packages/smolbox/releases/0.6.1",
+    "docs_url": "https://smolbox.hexdocs.pm/0.6.1/",
+    "published_at": "2026-11-17T02:52:55.376238Z",
+    "checksum": "89ddd86f8f4e1ca57c9a707f2f7f88f5105651daa4a89ab8cf8de699f4c1d9cb",
+    "published": true,
+    "has_docs": true
+  },
+  "package_verification": {
+    "qualified_archive_sha256": "89ddd86f8f4e1ca57c9a707f2f7f88f5105651daa4a89ab8cf8de699f4c1d9cb",
+    "rebuilt_archive_byte_identical": true,
+    "anonymous_public_download_byte_identical": true,
+    "packaged_files_previously_matched_to_tag": 792,
+    "package_replaced": false
+  },
+  "public_hex_consumer": {
+    "status": "passed",
+    "version": "0.6.1",
+    "source": "public Hex registry",
+    "http_runtime_default": "1.35.1",
+    "kubernetes_runtime_default": "1.35.1",
+    "explicit_terminal_arguments": true,
+    "native_vm_started": false
+  },
+  "consumer_retry": {
+    "initial_failure": "Hex resolved 0.6.1, then the public tarball download timed out before compilation.",
+    "retry": "Same public registry route with HEX_HTTP_CONCURRENCY=1 and HEX_HTTP_TIMEOUT=120; resolution, download, compilation and API smoke passed.",
+    "staged_archive_bypass": false
+  },
+  "hexdocs_public_pages": [
+    {
+      "url": "https://smolbox.hexdocs.pm/0.6.1/index.html",
+      "status": 200,
+      "bytes": 558
+    },
+    {
+      "url": "https://smolbox.hexdocs.pm/0.6.1/readme.html",
+      "status": 200,
+      "bytes": 21866
+    },
+    {
+      "url": "https://smolbox.hexdocs.pm/0.6.1/SmolBox.Terminal.Spec.html",
+      "status": 200,
+      "bytes": 10644
+    },
+    {
+      "url": "https://smolbox.hexdocs.pm/0.6.1/embedded-quickstart.html",
+      "status": 200,
+      "bytes": 11445
+    },
+    {
+      "url": "https://smolbox.hexdocs.pm/0.6.1/kubernetes-backend.html",
+      "status": 200,
+      "bytes": 19751
+    }
+  ],
+  "native_qualification": {
+    "release": "https://github.com/hfiguera/smolbox/releases/tag/v0.6.1",
+    "report": "docs/evidence/embedded-port-0.6.1-public-installers.json",
+    "cases": 6,
+    "artifacts_unchanged": true,
+    "historical_qualification_time_hex_unpublished_fields_preserved": true
+  },
+  "scope": "Published the same library bytes used for six stable native installer lanes. The post-publication consumer checked registry resolution/compilation and exposed defaults/terminal construction, without starting a VM.",
+  "hexdocs_guidance_refresh": {
+    "status": "published_and_verified",
+    "package_archive_changed": false,
+    "pages": [
+      {
+        "url": "https://smolbox.hexdocs.pm/0.6.1/readme.html",
+        "http_status": 200,
+        "published_hex_dependency_guidance_verified": true
+      },
+      {
+        "url": "https://smolbox.hexdocs.pm/0.6.1/embedded-quickstart.html",
+        "http_status": 200,
+        "published_hex_dependency_guidance_verified": true
+      }
+    ],
+    "local_docs_checks": {
+      "warnings": 0,
+      "pages_checked": 162
+    }
+  }
+}

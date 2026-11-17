@@ -2,14 +2,13 @@
 
 The [release input catalog](release-inputs.json) selects the locally qualified,
 unmodified SDK 1.35.1 for all three targets and matches
-[the reviewed versioned catalog](release-inputs-1.35.1.json). The user has now
-explicitly authorized publishing source/notices and native qualification bundles,
-while keeping Hex unpublished. Reviewed input distribution approval enables
+[the reviewed versioned catalog](release-inputs-1.35.1.json). The user authorized
+publishing source/notices and native qualification bundles while holding Hex
+during that qualification. Reviewed input distribution approval enables
 `v0.6.1-rc.1` hosted builds. All three attested bundles are published, and all
 six exact public installer checks passed in fresh standard accounts with Rust
 absent. See [public identities and results](../docs/evidence/embedded-port-1.35.1-public-installers.json).
-Broader local feature campaigns retain their own package identities. Hex remains
-unpublished.
+Broader local feature campaigns retain their own package identities.
 
 The [source/notices release](https://github.com/hfiguera/smolbox/releases/tag/embedded-port-inputs-v1.35.1)
 is published. See the [1.35.1 input review](../docs/evidence/embedded-port-1.35.1-release-sources.md)
@@ -35,7 +34,9 @@ installers passed in six fresh standard accounts, including automatic version
 selection and explicit tag selection. All accounts, HOME directories and account
 locks were removed after positive SDK cleanup; the Linux guests were stopped.
 See [stable identities and results](../docs/evidence/embedded-port-0.6.1-public-installers.json).
-The RC remains unchanged. Hex remains unpublished.
+The RC remains unchanged. After all checks passed, the user authorized Hex
+publication. The exact qualified 0.6.1 library archive and HexDocs are published;
+see [publication verification](../docs/evidence/smolbox-0.6.1-publication.json).
 
 ## Integrity and provenance
 

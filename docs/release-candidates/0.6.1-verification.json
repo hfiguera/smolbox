@@ -2,7 +2,7 @@
   "version": "0.6.1",
   "branch": "release/0.6.1",
   "base_commit": "faf83f856b1edcd7d9c102a517acd858fb59f064",
-  "status": "stable-native-published-public-installers-passed-hex-unpublished",
+  "status": "published_and_verified",
   "package_archive_sha256": "89ddd86f8f4e1ca57c9a707f2f7f88f5105651daa4a89ab8cf8de699f4c1d9cb",
   "local_validation": {
     "elixir": "1.20.5",
@@ -32,9 +32,14 @@
     "source_input_release": "https://github.com/hfiguera/smolbox/releases/tag/embedded-port-inputs-v1.35.1"
   },
   "hex": {
-    "published": false,
-    "held_until_all_checks_pass": true,
-    "public_api_status": 404
+    "published": true,
+    "held_until_all_checks_pass": false,
+    "public_api_status": 200,
+    "publication_authorized": true,
+    "checksum": "89ddd86f8f4e1ca57c9a707f2f7f88f5105651daa4a89ab8cf8de699f4c1d9cb",
+    "url": "https://hex.pm/packages/smolbox/0.6.1",
+    "has_docs": true,
+    "publication_report": "docs/evidence/smolbox-0.6.1-publication.json"
   },
   "ci_follow_up": {
     "failed_run": "https://github.com/hfiguera/smolbox/actions/runs/43998552831",

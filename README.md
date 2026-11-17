@@ -25,8 +25,9 @@ starts the helper from your Mix application without a separate HTTP server.
 This checkout defaults to **SmolVM 1.35.1** using completed local qualification.
 Reviewed source/notices and attested stable native bundles are published for
 `v0.6.1`. All six current/minimum public installer lanes passed in fresh standard
-accounts. Hex remains unpublished; use the matching Git tag or the qualified
-local Elixir archive. Existing bundles keep their original identities. See
+accounts. [SmolBox 0.6.1 is published on Hex](https://hex.pm/packages/smolbox/0.6.1)
+with [HexDocs](https://smolbox.hexdocs.pm/0.6.1/). Use `{:smolbox, "~> 0.6.1"}`.
+Existing bundles keep their original identities. See
 [upgrade guidance](https://github.com/hfiguera/smolbox/blob/v0.6.1/docs/upgrading.md#upgrade-to-061) and
 [stable installer evidence](https://github.com/hfiguera/smolbox/blob/main/docs/evidence/embedded-port-0.6.1-public-installers.json).
 For a separate SmolVM server, follow the [HTTP worker quickstart](docs/getting-started.md).

@@ -13,8 +13,9 @@ accounts: current/minimum Elixir/OTP on Apple Silicon, Linux x86_64 and Linux
 ARM64, with Rust absent. Current lanes exercised automatic tag selection and
 minimum lanes exercised explicit `--tag v0.6.1`. Every temporary account, HOME
 and account lock was removed after positive SDK cleanup and post-use asset
-verification. **Hex remains unpublished**; use the matching Git tag and native
-installer tag. Existing published bundles keep their original identities.
+verification. **SmolBox 0.6.1 is published on Hex** with HexDocs; use
+`{:smolbox, "~> 0.6.1"}` and its matching native release tag. Existing
+published bundles keep their original identities.
 
 The [stable installer report](embedded-port-0.6.1-public-installers.json) binds
 these exact hosted binaries to their source commit, attestations, archive and
@@ -149,7 +150,8 @@ locks or processes existed, logs were preserved, and fresh accounts passed after
 setting the working directory explicitly.
 
 See [exact public identities and results](embedded-port-1.35.1-public-installers.json).
-Hex publication remains unauthorized and no candidate Hex release exists.
+Hex was held during that RC campaign. The exact qualified stable 0.6.1
+library archive is now published; see [publication verification](smolbox-0.6.1-publication.json).
 
 No SDK-revision domain migration, codec rollback or additional native crash
 qualification is inferred from these ordinary campaigns. Retain existing worker

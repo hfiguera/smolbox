@@ -43,9 +43,10 @@ Reviewed source/notices and attested stable native bundles are published for
 `v0.6.1`. All six current/minimum fresh-account public installer lanes passed,
 including automatic selection from the library version and explicit tag selection.
 See [exact stable identities and results](evidence/embedded-port-0.6.1-public-installers.json).
-The RC and its earlier evidence remain unchanged. Hex remains unpublished. Use the
-matching Git dependency and `--tag v0.6.1`; the installer follows the selected
-SmolBox release tag. Existing staged-install digest verification remains available.
+The RC and its earlier evidence remain unchanged. SmolBox 0.6.1 is published on
+Hex; use `{:smolbox, "~> 0.6.1"}`. The installer automatically selects the
+matching SmolBox release tag; `--tag v0.6.1` remains available for explicit
+selection. Existing staged-install digest verification remains available.
 
 Before upgrading controllers, explicitly pin existing workers to their installed
 runtime and existing checkpoint approvals to their capture runtime. Updating the
