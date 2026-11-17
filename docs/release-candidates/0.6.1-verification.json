@@ -27,5 +27,12 @@
   "hex": {
     "published": false,
     "held_until_all_checks_pass": true
+  },
+  "ci_follow_up": {
+    "failed_run": "https://github.com/hfiguera/smolbox/actions/runs/43998552831",
+    "finding": "Elixir 1.19.5/OTP 28.5 caller-death test timed out waiting one second for the test server to observe the TLS exec request.",
+    "fix": "Increase the test-only operation/setup budget, wait for the actual exec request before killing the caller, and collect the caller on failure. Preserve socket-closure and exactly-one-exec assertions.",
+    "production_and_packaged_source_changed": false,
+    "focused_kubernetes_exec_tests": "passed"
   }
 }

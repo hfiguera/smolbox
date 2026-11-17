@@ -167,15 +167,18 @@ defmodule SmolBox.KubernetesExecTest do
 
   test "caller death closes the upgraded socket and cannot leave an exec observer orphan", c do
     install(c, [], mode: :hold)
-    ref = reference(c, timeout_ms: 5000)
+    ref = reference(c, timeout_ms: 30_000)
 
     {caller, monitor} =
       spawn_monitor(fn -> Backend.exec(ref, c.record.machine_name, c.record.spec.command) end)
 
-    assert_receive {:exec_request, socket, _}, 1000
+    on_exit(fn -> if Process.alive?(caller), do: Process.exit(caller, :kill) end)
+
+    # TLS setup can take longer on shared runners; kill only after exec is observed.
+    assert_receive {:exec_request, socket, _}, 10_000
     Process.exit(caller, :kill)
-    assert_receive {:DOWN, ^monitor, :process, ^caller, _}
-    assert_receive {:exec_socket_closed, ^socket}, 1000
+    assert_receive {:DOWN, ^monitor, :process, ^caller, _}, 5000
+    assert_receive {:exec_socket_closed, ^socket}, 5000
     assert Enum.count(Peer.requests(c.peer), &String.ends_with?(&1.path, "/exec")) == 1
   end
 
