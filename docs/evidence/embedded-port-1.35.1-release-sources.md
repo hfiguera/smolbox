@@ -10,6 +10,13 @@ Hosted native provenance and all six exact public installer lanes now pass for
 See the [public installer evidence](embedded-port-1.35.1-public-installers.json).
 Hex remains unpublished.
 
+Stable [`v0.6.1` bundles](https://github.com/hfiguera/smolbox/releases/tag/v0.6.1)
+are also published under the user's explicit authorization. Their native code,
+SDK pins, policies and packaging inputs match the reviewed source snapshot.
+All six exact stable public installer lanes passed; see the
+[separate stable evidence](embedded-port-0.6.1-public-installers.json). The RC
+and its original evidence remain unchanged.
+
 | Target | Runtime archive SHA-256 |
 | --- | --- |
 | Apple Silicon | `962142af8820f2c7dc5a03d755ed1fbecea418201ff24e4bad48d2cdd313de0e` |

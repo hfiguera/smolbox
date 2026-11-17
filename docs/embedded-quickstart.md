@@ -3,11 +3,10 @@
 Run one offline command in a disposable VM, print `42`, and verify that
 SmolBox released its reservation. The Runtime starts a local helper and
 uses an in-memory store for the demo. The verified bundle contains the
-helper, matching runtime assets and demo image. Published SmolBox 0.6.0 bundles
-use SmolVM 1.34.0. This checkout defaults to 1.35.1; its attested native
-`v0.6.1-rc.1` prerelease passed six public installer lanes while Hex stays
-unpublished. The example runs without
-Rust or a separate SmolVM HTTP server.
+helper, matching runtime assets and demo image. SmolBox 0.6.1 uses SmolVM
+1.35.1. Its stable `v0.6.1` bundles passed all six current/minimum public
+installer lanes in fresh standard accounts. Hex remains unpublished. The example runs without Rust or a
+separate SmolVM HTTP server.
 
 ## Prerequisites
 
@@ -27,7 +26,7 @@ Run `mix new smolbox_demo`, enter the new directory, and add the matching Git
 dependency to `deps/0` in `mix.exs` while the candidate Hex release stays unpublished.
 
 ```elixir
-{:smolbox, github: "hfiguera/smolbox", tag: "v0.6.1-rc.1"}
+{:smolbox, github: "hfiguera/smolbox", tag: "v0.6.1"}
 ```
 
 Install the dependency and bundle into a new, private directory. The
@@ -36,12 +35,14 @@ installer selects the GitHub release tag that matches the dependency version.
 ```sh
 mix deps.get
 mix deps.compile
-mix smolbox.embedded.install --tag v0.6.1-rc.1 --install-dir "$HOME/smolbox-demo-install"
+mix smolbox.embedded.install --tag v0.6.1 --install-dir "$HOME/smolbox-demo-install"
 ```
 
-The public 1.35.1 prerelease uses `--tag v0.6.1-rc.1` and passed
-[current/minimum fresh-account checks](evidence/embedded-port-1.35.1-public-installers.json).
-Existing Hex users can keep `{:smolbox, "~> 0.6.0"}` and its matching 1.34.0
+The stable 1.35.1 bundles passed
+[current/minimum fresh-account checks](evidence/embedded-port-0.6.1-public-installers.json),
+including automatic library-version selection and explicit `--tag v0.6.1`.
+The RC retains its original bundles and qualification evidence.
+Existing Hex users can pin `{:smolbox, "== 0.6.0"}` and its matching 1.34.0
 bundles; the Git dependency above selects the new library source.
 
 For another staged candidate, add
