@@ -11,6 +11,7 @@ defmodule SmolBox.Kubernetes.RuntimeIdentity do
     do:
       Shape.exact_keys?(value, @digests ++ @versions) and
         Enum.all?(@digests, &Validation.digest?(value[&1])) and
-        value["smolvm_version"] == "1.34.0" and value["k3s_version"] == "v1.35.10+k3s1" and
+        value["smolvm_version"] in ["1.34.0", "1.35.1"] and
+        value["k3s_version"] == "v1.35.10+k3s1" and
         value["containerd_version"] == "2.2.10-k3s1"
 end

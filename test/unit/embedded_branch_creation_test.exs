@@ -143,7 +143,7 @@ defmodule SmolBox.Embedded.BranchCreationTest do
 
     {:ok, policy} = SmolBox.BranchPolicy.new(id: approval["id"], resources: resources)
     config = Package.create(protocol_major: 2)
-    on_exit(fn -> File.rm_rf!(config.package_path) end)
+    on_exit(fn -> Package.remove!(config) end)
 
     config = %{
       config

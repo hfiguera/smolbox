@@ -55,7 +55,7 @@ The install action waits for guest SSH, transfers the verified downloads, then
 provisions **inside the new guest** using its lab-only sudo account. It installs
 K3s as a guest service and extends K3s's base containerd v3 configuration with
 `io.containerd.smolvm.v2`. The unchanged upstream shim and full runtime assets
-remain together under `/opt/smolvm-1.34.0-linux-x86_64`. The service supplies
+remain together under `/opt/smolvm-1.35.1-linux-x86_64`. The service supplies
 explicit rootfs/library paths and dedicated XDG data/cache/config roots.
 Disk templates are expanded sparsely before a Pod's readiness deadline starts.
 

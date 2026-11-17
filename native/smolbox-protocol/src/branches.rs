@@ -224,6 +224,7 @@ impl BranchIntent {
                 && self.plan.total_additional == child.add(self.approval.resources)?,
         )?;
         for revision in [
+            "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc",
             "d77eaf1c6eeff16bc8c258613746033e9bf567ca",
             "9f446ae00219148ca4a703914f44a8e2fab11655",
         ] {

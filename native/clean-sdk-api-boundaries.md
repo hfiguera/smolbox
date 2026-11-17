@@ -1,12 +1,16 @@
 # Unmodified SDK API boundary audit
 
 Migration baseline: upstream `9f446ae00219148ca4a703914f44a8e2fab11655` (1.22.0),
-verified through `vendor/source.json`. The active workspace now uses the clean
+recorded in the historical migration evidence. The active workspace now uses the clean
 input, with zero downstream patches. Clean ordinary lifecycle, current/minimum
 public consumers and native checks have passed on Linux x86_64 and macOS arm64.
 The [current evidence](../docs/evidence/embedded-port-unmodified-sdk-ordinary.json)
 separates completed checks from remaining work. The checkpoint sections below are
 historical snapshots; their pending statements are not the current status.
+
+The active source pin is now the unmodified 1.35.1 release;
+[its qualification record](../docs/evidence/smolvm-1.35.1-qualification.json)
+binds new checks to that revision and keeps earlier evidence historical.
 
 The next proposed milestone is [embedded HTTP parity](../docs/design/embedded-port-http-parity.md).
 Its [P0 feasibility audit](../docs/design/embedded-port-http-parity-implementation-plan.md#p0-establish-the-parity-contract-and-feasibility)

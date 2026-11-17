@@ -3,3 +3,6 @@ test/fixtures/wire/exec.sse binary
 test/fixtures/wire/*/exec.sse binary
 # Unified-diff blank context lines contain a required single space.
 native/upstream-patches/*.patch whitespace=-blank-at-eol
+
+# A trailing tab preserves an empty final field in the source inventories.
+native/release-sources/**/*.tsv whitespace=-blank-at-eol

@@ -1,7 +1,8 @@
 defmodule SmolBox.Terminal.Spec do
   @moduledoc """
-  Immutable interactive terminal intent. Upstream accepts a single executable,
-  not argv, environment, user or working-directory overrides. No shell is inserted.
+  Immutable interactive terminal intent. Ordered arguments require HTTP 1.35.1
+  or a package advertising `terminal_arguments: 1`. Environment, user and
+  working-directory overrides are unsupported. No shell is inserted.
 
   Session and idle budgets bound observation, not guest lifetime. Managed sessions
   also fit the host-approved profile execution budget. Terminal bytes are not
@@ -11,6 +12,7 @@ defmodule SmolBox.Terminal.Spec do
 
   @derive {Inspect, only: [:cols, :rows]}
   defstruct program: "/bin/sh",
+            args: [],
             cols: 80,
             rows: 24,
             session_ms: 30_000,
@@ -22,6 +24,7 @@ defmodule SmolBox.Terminal.Spec do
 
   @type t :: %__MODULE__{
           program: String.t(),
+          args: [String.t()],
           cols: pos_integer(),
           rows: pos_integer(),
           session_ms: pos_integer(),
@@ -50,6 +53,7 @@ defmodule SmolBox.Terminal.Spec do
       Validation.struct_shape?(spec, __MODULE__),
       Validation.text?(spec.program, 4096),
       spec.program != "",
+      arguments?(spec.args),
       dimensions?(spec.cols, spec.rows),
       Validation.integer?(spec.session_ms, 1000, 86_400_000),
       Validation.integer?(spec.idle_ms, 1000, spec.session_ms),
@@ -63,6 +67,12 @@ defmodule SmolBox.Terminal.Spec do
   end
 
   def validate(_spec), do: error()
+
+  @doc false
+  def arguments?(args),
+    do:
+      Validation.list?(args, 64) and Enum.all?(args, &Validation.text?(&1, 4096)) and
+        Enum.reduce(args, 0, &(byte_size(&1) + &2)) <= 16_384
 
   @doc false
   def dimensions?(cols, rows),

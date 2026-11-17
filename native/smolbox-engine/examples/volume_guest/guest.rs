@@ -581,7 +581,8 @@ fn terminal(session: &Session) -> ProofResult<()> {
     let controls = queue.clone();
     let events = queue.clone();
     let mut output = vec![];
-    let outcome=session.engine.terminal_owned_with_volume_policy(session.original()?,TerminalRequest {options:TerminalOptions {program:"/bin/sh".into(),cols:80,rows:24,session:Duration::from_secs(30),idle:Duration::from_secs(10),attach:Duration::from_secs(5),close:Duration::from_secs(2),max_buffer_bytes:65536,max_input_bytes:65536,total_input_bytes:65536},deadline:Instant::now()+Duration::from_secs(30),cancel:Cancellation::new()},move ||Ok(controls.borrow_mut().pop_front()),|event|{
+    let outcome=session.engine.terminal_owned_with_volume_policy(session.original()?,TerminalRequest {options:TerminalOptions {program:"/bin/sh".into(),
+            args: vec![],cols:80,rows:24,session:Duration::from_secs(30),idle:Duration::from_secs(10),attach:Duration::from_secs(5),close:Duration::from_secs(2),max_buffer_bytes:65536,max_input_bytes:65536,total_input_bytes:65536},deadline:Instant::now()+Duration::from_secs(30),cancel:Cancellation::new()},move ||Ok(controls.borrow_mut().pop_front()),|event|{
         match event {
             TerminalEvent::Opened=>{events.borrow_mut().push_back(TerminalMessage::Attach);events.borrow_mut().push_back(TerminalMessage::Command(TerminalControl::Resize { cols:120, rows:43 }));events.borrow_mut().push_back(TerminalMessage::Command(TerminalControl::Input(format!("stty -echo\nstty size > {RW}/pty-size.txt; printf 'mounted-terminal\\n' > {RW}/pty.txt; test -r {RO}/seed.bin; printf 'terminal-complete\\n'; exit 7\n").into_bytes())));},
             TerminalEvent::Output(chunk)=>{if output.len()+chunk.bytes.len()>65536 {return Err(());}events.borrow_mut().push_back(TerminalMessage::Consumed {sequence:chunk.sequence,bytes:chunk.bytes.len() as u64});output.extend(chunk.bytes);},

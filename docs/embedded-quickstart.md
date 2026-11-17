@@ -3,7 +3,9 @@
 Run one offline command in a disposable VM, print `42`, and verify that
 SmolBox released its reservation. The Runtime starts a local helper and
 uses an in-memory store for the demo. The verified bundle contains the
-helper, SmolVM 1.34.0 runtime assets and demo image. The example runs without
+helper, matching runtime assets and demo image. Published SmolBox 0.6.0 bundles
+use SmolVM 1.34.0; this checkout defaults to locally qualified 1.35.1, whose
+artifacts remain unpublished. The example runs without
 Rust or a separate SmolVM HTTP server.
 
 ## Prerequisites
@@ -37,7 +39,9 @@ mix smolbox.embedded.install --install-dir "$HOME/smolbox-demo-install"
 ```
 
 For a staged candidate, use the same command with
-`--archive /private/path/to/candidate.tar.gz --sha256 APPROVED_SHA256`.
+`--tag CANDIDATE_TAG --archive /private/path/to/candidate.tar.gz --sha256 APPROVED_SHA256`.
+The qualified local 1.35.1 bundles use `--tag v0.6.1-rc.1`; that tag is an
+archive envelope, not a published release. See [local qualification](evidence/smolvm-1.35.1-qualification.md).
 Obtain the digest separately from the operator who supplied the candidate.
 The public route verifies the downloaded archive against the SmolBox release
 workflow and tag before unpacking it. The installer leaves the package,

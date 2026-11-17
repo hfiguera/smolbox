@@ -40,7 +40,7 @@ defmodule SmolBox.EmbeddedPackageActivationTest do
 
   setup do
     native = Package.create(protocol_major: 2, backend: true, persistent_backend: true)
-    on_exit(fn -> File.rm_rf!(native.package_path) end)
+    on_exit(fn -> Package.remove!(native) end)
     %{native: native}
   end
 
@@ -80,7 +80,7 @@ defmodule SmolBox.EmbeddedPackageActivationTest do
         sdk_identity: policy["sdk"]
       )
 
-    on_exit(fn -> File.rm_rf!(current.package_path) end)
+    on_exit(fn -> Package.remove!(current) end)
     assert :ok = Config.validate(current)
     assert Config.protocol_major(current) == policy["port_protocol_major"]
     assert policy["sdk"] == Config.sdk_identity(current)
@@ -109,7 +109,7 @@ defmodule SmolBox.EmbeddedPackageActivationTest do
     refute SDKIdentity.approved?(sdk, "1.22.0", sdk["source_revision"], :unknown)
 
     candidate = Package.create(protocol_major: 2, platform: :macos, sdk_identity: sdk)
-    on_exit(fn -> File.rm_rf!(candidate.package_path) end)
+    on_exit(fn -> Package.remove!(candidate) end)
     assert :ok = Config.validate(candidate)
     assert Features.supports?(candidate, :remote_sources)
     assert Features.supports?(candidate, :images)
@@ -148,7 +148,7 @@ defmodule SmolBox.EmbeddedPackageActivationTest do
     assert SDKIdentity.approved?(sdk, "1.22.0", sdk["source_revision"], :macos)
     refute SDKIdentity.approved?(sdk, "1.22.0", sdk["source_revision"])
     native = Package.create(protocol_major: 2, platform: :macos, sdk_identity: sdk)
-    on_exit(fn -> File.rm_rf!(native.package_path) end)
+    on_exit(fn -> Package.remove!(native) end)
     assert :ok = Config.validate(native)
 
     for feature <- [:checkpoints, :branches, :partial_collection_preflight],
@@ -194,7 +194,7 @@ defmodule SmolBox.EmbeddedPackageActivationTest do
     assert SDKIdentity.approved?(sdk, "1.22.0", sdk["source_revision"], :linux)
     refute SDKIdentity.approved?(sdk, "1.22.0", sdk["source_revision"], :macos)
     candidate = Package.create(protocol_major: 2, platform: :linux, sdk_identity: sdk)
-    on_exit(fn -> File.rm_rf!(candidate.package_path) end)
+    on_exit(fn -> Package.remove!(candidate) end)
     assert :ok = Config.validate(candidate)
     assert Package.received(candidate) == []
     store = start_supervised!(Memory)
@@ -226,7 +226,7 @@ defmodule SmolBox.EmbeddedPackageActivationTest do
       |> Map.fetch!("hello")
 
     native = Package.create(protocol_major: 2, platform: :linux, sdk_identity: hello["sdk"])
-    on_exit(fn -> File.rm_rf!(native.package_path) end)
+    on_exit(fn -> Package.remove!(native) end)
     assert :ok = Config.validate(native)
     assert Features.supports?(native, :remote_sources)
     assert Features.supports?(native, :images)
@@ -258,7 +258,7 @@ defmodule SmolBox.EmbeddedPackageActivationTest do
       |> Map.fetch!("hello")
 
     native = Package.create(protocol_major: 2, platform: :linux, sdk_identity: hello["sdk"])
-    on_exit(fn -> File.rm_rf!(native.package_path) end)
+    on_exit(fn -> Package.remove!(native) end)
     assert :ok = Config.validate(native)
     assert Features.supports?(native, :disk_growth)
     assert Features.supports?(native, :volumes)

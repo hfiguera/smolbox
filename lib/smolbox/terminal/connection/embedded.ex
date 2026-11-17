@@ -78,6 +78,7 @@ defmodule SmolBox.Terminal.Connection.Embedded do
   # The bridge independently checks the approved package, receipt and epoch.
   def source(context, name, spec, budget) do
     with true <- Features.supports?(context.config, :terminals),
+         true <- spec.args == [] or Features.supports?(context.config, :terminal_arguments),
          true <- EmbeddedContext.scoped?(context) and context.name == name,
          true <- context.managed_machine != nil and context.spec.command == spec,
          :ok <- Spec.validate(spec),
@@ -92,6 +93,7 @@ defmodule SmolBox.Terminal.Connection.Embedded do
         Map.new(Map.from_struct(spec), fn {key, value} -> {Atom.to_string(key), value} end)
 
       terminal = Map.put(terminal, "total_input_bytes", total_input)
+      terminal = if spec.args == [], do: Map.delete(terminal, "args"), else: terminal
 
       source = %Source{
         owner: pinned.server,

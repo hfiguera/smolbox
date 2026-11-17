@@ -246,7 +246,7 @@ defmodule SmolBox.TerminalRuntimeTest do
     while not root.joinpath('terminal-heartbeat').exists():
         if time.monotonic() >= deadline: raise RuntimeError('descendant not ready')
         time.sleep(0.01)
-    print('DESCENDANT_READY', flush=True)
+    print('DESCENDANT_' + 'READY', flush=True)
     while True: time.sleep(1)
     """
 
@@ -258,7 +258,14 @@ defmodule SmolBox.TerminalRuntimeTest do
 
     {:ok, command} = Command.new(["python3", "-c", prepare])
     assert {:ok, %{exit_code: 0}} = Client.exec(c.client, c.machine.machine_name, command)
-    {:ok, spec} = SmolBox.Terminal.Spec.new(program: "/workspace/disconnect-program")
+    # The generated script is an explicit argument to an image interpreter on
+    # 1.35.1; the SDK only checks that interpreter in its original image tree.
+    {:ok, spec} =
+      if SmolBox.LabCandidate.runtime_version() == "1.35.1",
+        do:
+          SmolBox.Terminal.Spec.new(program: "python3", args: ["/workspace/disconnect-program"]),
+        else: SmolBox.Terminal.Spec.new(program: "/workspace/disconnect-program")
+
     {:ok, terminal} = Client.open_terminal(c.client, c.machine.machine_name, spec)
     until_output(terminal, "DESCENDANT_READY", "")
     monitor = Process.monitor(terminal.pid)
@@ -289,7 +296,7 @@ defmodule SmolBox.TerminalRuntimeTest do
 
     # The 1.19.0 counterexample remains covered. Newer workers may reap this
     # container's descendants; that observation is not a cancellation receipt.
-    if SmolBox.LabCandidate.runtime_version() in ["1.20.2", "1.22.0", "1.34.0"] do
+    if SmolBox.LabCandidate.runtime_version() in ["1.20.2", "1.22.0", "1.34.0", "1.35.1"] do
       assert observation =~ "descendant_active=False"
     else
       assert observation =~ "descendant_active=True"

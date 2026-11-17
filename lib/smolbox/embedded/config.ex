@@ -88,7 +88,8 @@ defmodule SmolBox.Embedded.Config do
   @legacy_revision "9f446ae00219148ca4a703914f44a8e2fab11655"
   @sdk_versions %{
     @legacy_revision => "1.22.0",
-    "d77eaf1c6eeff16bc8c258613746033e9bf567ca" => "1.34.0"
+    "d77eaf1c6eeff16bc8c258613746033e9bf567ca" => "1.34.0",
+    "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc" => "1.35.1"
   }
   @package_keys ~w(engine_version smolvm_revision source_sha256 build_sha256 assets_sha256 platform architecture)
   @artifact_keys ~w(id sha256 architecture path max_bytes)

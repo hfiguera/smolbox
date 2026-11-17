@@ -1,0 +1,80 @@
+{
+  "sources": {
+    "url": "https://github.com/hfiguera/smolbox/releases/download/embedded-port-inputs-v1.35.1/smolbox-embedded-sources.tar.gz",
+    "sha256": "cfb144d2ff587fad6a99828ee8fdb5df73cf74b5404e3d51d2398cf0084f45fa"
+  },
+  "notices": {
+    "url": "https://github.com/hfiguera/smolbox/releases/download/embedded-port-inputs-v1.35.1/smolbox-embedded-notices.tar.gz",
+    "sha256": "9b9593506bba5d74d3baca6ce9f82a065e6618ecc655057066f6b8ff4795467f"
+  },
+  "macos-aarch64": {
+    "distribution_approved": false,
+    "source_review": "docs/evidence/embedded-port-1.35.1-release-sources.md",
+    "runtime": {
+      "url": "https://github.com/smol-machines/smolvm/releases/download/v1.35.1/smolvm-1.35.1-darwin-arm64.tar.gz",
+      "sha256": "962142af8820f2c7dc5a03d755ed1fbecea418201ff24e4bad48d2cdd313de0e"
+    },
+    "demo": {
+      "url": "https://github.com/hfiguera/smolbox/releases/download/embedded-port-inputs-v1/demo-macos-aarch64.smolmachine",
+      "sha256": "ec6ccce9b31a97bf8157cef7b5b6a5739f3bc7905f46f54656e143fe780291b9"
+    },
+    "resize2fs": {
+      "path": "/opt/homebrew/opt/e2fsprogs/sbin/resize2fs",
+      "sha256": "2f5c1940c364b2cd451f09f37004c0b7a3eff4a822672acead493f4618e734f0"
+    },
+    "macos_signing": "ad-hoc",
+    "resize2fs_package": {
+      "url": "https://ghcr.io/v2/homebrew/core/e2fsprogs/blobs/sha256:f8024861ae8b5a645374d7960a5b5e3c41576c792712925d55deb186a74a1d06",
+      "sha256": "f8024861ae8b5a645374d7960a5b5e3c41576c792712925d55deb186a74a1d06",
+      "filename": "e2fsprogs--1.47.4.arm64_tahoe.bottle.tar.gz"
+    }
+  },
+  "linux-x86_64": {
+    "distribution_approved": false,
+    "source_review": "docs/evidence/embedded-port-1.35.1-release-sources.md",
+    "runtime": {
+      "url": "https://github.com/smol-machines/smolvm/releases/download/v1.35.1/smolvm-1.35.1-linux-x86_64.tar.gz",
+      "sha256": "1c9377f6ada3c7c6753efada90595d5f44eb7a900ca0e4f8b786815b84fd22be"
+    },
+    "demo": {
+      "url": "https://github.com/hfiguera/smolbox/releases/download/embedded-port-inputs-v1/demo-linux-x86_64.smolmachine",
+      "sha256": "ac45bd5b794e57f9627369facd15a18649f6af3b600f866f223f5f91b5bfa954"
+    },
+    "resize2fs": {
+      "path": "/sbin/resize2fs",
+      "sha256": "1a0ea5f6784285b82098fe7935c95bf1ac76713aec904cc9b43920fa85ebe35d"
+    },
+    "resize2fs_package": {
+      "url": "https://archive.ubuntu.com/ubuntu/pool/main/e/e2fsprogs/e2fsprogs_1.47.0-2.4~exp1ubuntu4.1_amd64.deb",
+      "sha256": "1d0fb19dcf14316d04602260871dba3c1441c0ecf3c3bde54eacba35dcc5a40b"
+    },
+    "resize2fs_library": {
+      "url": "https://archive.ubuntu.com/ubuntu/pool/main/e/e2fsprogs/libext2fs2t64_1.47.0-2.4~exp1ubuntu4.1_amd64.deb",
+      "sha256": "276686704314749497f1530ff9e62fd0280328be786a28db0cfe2aa31c88119e"
+    }
+  },
+  "linux-aarch64": {
+    "distribution_approved": false,
+    "source_review": "docs/evidence/embedded-port-1.35.1-release-sources.md",
+    "runtime": {
+      "url": "https://github.com/smol-machines/smolvm/releases/download/v1.35.1/smolvm-1.35.1-linux-arm64.tar.gz",
+      "sha256": "554a3793009bdace519e46923d5f6466e17c126f4bb2111da874d45ef7e95cce"
+    },
+    "demo": {
+      "url": "https://github.com/hfiguera/smolbox/releases/download/embedded-port-inputs-v1/demo-linux-aarch64.smolmachine",
+      "sha256": "11ee6ae490cdc148d398a40aeda571c5fd2cfaf9d706faa4070741df3f08c0dd"
+    },
+    "resize2fs": {
+      "path": "/sbin/resize2fs",
+      "sha256": "e742981c302ad5efec590381e22910180447052f0b5eb6b999c16a4ca6da68d9"
+    },
+    "resize2fs_package": {
+      "url": "https://ports.ubuntu.com/ubuntu-ports/pool/main/e/e2fsprogs/e2fsprogs_1.47.0-2.4~exp1ubuntu4.1_arm64.deb",
+      "sha256": "95f305751689654f41813818f9d4f029880072657d2ee7a1a27b7d19e02a53e6"
+    },
+    "resize2fs_library": {
+      "url": "https://ports.ubuntu.com/ubuntu-ports/pool/main/e/e2fsprogs/libext2fs2t64_1.47.0-2.4~exp1ubuntu4.1_arm64.deb",
+      "sha256": "f32a0f3298b60aa158c3bae59ba5ebef9de600901bb1918d3ee133ba58cd4648"
+    }
+  }
+}

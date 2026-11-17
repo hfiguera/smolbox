@@ -38,6 +38,7 @@ defmodule SmolBox.Client do
   @derive {Inspect, only: []}
   defstruct [
     :worker,
+    :terminal_runtime_version,
     transport: SmolBox.Transport.Req,
     guest_paths: nil,
     max_file_bytes: 1_048_576
@@ -177,7 +178,7 @@ defmodule SmolBox.Client do
   upstream cold pulls share partial files and a timeout does not stop a download.
   OCI sources require an explicit guest network policy and use upstream's guest
   registry configuration, with no per-request authentication option here. The
-  1.34.0 HTTP candidate can fetch an OCI image on the worker host when upstream
+  1.34.0 and 1.35.1 HTTP workers can fetch an OCI image on the worker host when upstream
   determines that the guest cannot reach the registry. Host registry traffic
   follows the worker's host policy independently of the guest allowlist.
 
@@ -207,7 +208,7 @@ defmodule SmolBox.Client do
 
   defp create_runtime(client, _spec, branch_https: true) do
     if SmolBox.BranchHTTPSCredentials.secure_transport?(client.worker),
-      do: creation_runtime_versions(client, ["1.34.0"]),
+      do: creation_runtime_versions(client, ["1.34.0", "1.35.1"]),
       else: error(:unsupported_capability, :create)
   end
 
@@ -279,13 +280,21 @@ defmodule SmolBox.Client do
   defp prepare_creation(client, _spec, _options), do: {:ok, client}
 
   defp creation_runtime(client, %{mounts: [_ | _]}),
-    do: creation_runtime_versions(client, ["1.20.2", "1.22.0", "1.34.0"])
+    do: creation_runtime_versions(client, ["1.20.2", "1.22.0", "1.34.0", "1.35.1"])
 
   defp creation_runtime(client, %{source: %SmolBox.Source{}}),
-    do: creation_runtime_versions(client, ["1.19.0", "1.20.2", "1.22.0", "1.34.0"])
+    do: creation_runtime_versions(client, ["1.19.0", "1.20.2", "1.22.0", "1.34.0", "1.35.1"])
 
   defp creation_runtime(client, %{workload: %SmolBox.Workload{}}),
-    do: creation_runtime_versions(client, ["1.17.0", "1.19.0", "1.20.2", "1.22.0", "1.34.0"])
+    do:
+      creation_runtime_versions(client, [
+        "1.17.0",
+        "1.19.0",
+        "1.20.2",
+        "1.22.0",
+        "1.34.0",
+        "1.35.1"
+      ])
 
   defp creation_runtime(client, %{source: :checkpoint}),
     do:
@@ -295,11 +304,20 @@ defmodule SmolBox.Client do
         "1.19.0",
         "1.20.2",
         "1.22.0",
-        "1.34.0"
+        "1.34.0",
+        "1.35.1"
       ])
 
   defp creation_runtime(client, %{ports: [_ | _]}),
-    do: creation_runtime_versions(client, ["1.17.0", "1.19.0", "1.20.2", "1.22.0", "1.34.0"])
+    do:
+      creation_runtime_versions(client, [
+        "1.17.0",
+        "1.19.0",
+        "1.20.2",
+        "1.22.0",
+        "1.34.0",
+        "1.35.1"
+      ])
 
   defp creation_runtime(client, %{network: :offline}), do: {:ok, client}
 
@@ -312,7 +330,8 @@ defmodule SmolBox.Client do
         "1.19.0",
         "1.20.2",
         "1.22.0",
-        "1.34.0"
+        "1.34.0",
+        "1.35.1"
       ])
 
   defp creation_runtime_versions(client, versions) do
@@ -365,7 +384,7 @@ defmodule SmolBox.Client do
          true <- source.kind == :registry,
          {:ok, credentials} <- registry_credentials(options),
          {:ok, client} <-
-           creation_runtime_versions(client, ["1.19.0", "1.20.2", "1.22.0", "1.34.0"]),
+           creation_runtime_versions(client, ["1.19.0", "1.20.2", "1.22.0", "1.34.0", "1.35.1"]),
          wire = Map.merge(%{"reference" => source.reference}, credentials),
          {:ok, body} <- json(client, :post, "/artifacts/warm", wire, :prepare_artifact) do
       SmolBox.ArtifactPreparation.from_wire(source, body)
@@ -403,7 +422,7 @@ defmodule SmolBox.Client do
   def list_images(client, name) do
     with {:ok, path} <- machine_path(name),
          {:ok, client} <-
-           creation_runtime_versions(client, ["1.19.0", "1.20.2", "1.22.0", "1.34.0"]),
+           creation_runtime_versions(client, ["1.19.0", "1.20.2", "1.22.0", "1.34.0", "1.35.1"]),
          {:ok, body} <- json(client, :get, path <> "/images", nil, :images) do
       SmolBox.ImageInventory.from_wire(body)
     else
@@ -431,7 +450,7 @@ defmodule SmolBox.Client do
          true <- source.kind == :oci,
          {:ok, path} <- machine_path(name),
          {:ok, client} <-
-           creation_runtime_versions(client, ["1.19.0", "1.20.2", "1.22.0", "1.34.0"]),
+           creation_runtime_versions(client, ["1.19.0", "1.20.2", "1.22.0", "1.34.0", "1.35.1"]),
          wire = %{
            "image" => source.reference,
            "ociPlatform" => SmolBox.Source.oci_platform(source)
@@ -490,7 +509,8 @@ defmodule SmolBox.Client do
     with {:ok, targets} <- SmolBox.DiskExpansion.targets(options),
          true <- expected.state in [:created, :stopped],
          true <- Enum.all?(targets, fn {k, n} -> n >= Map.fetch!(expected, k) end),
-         {:ok, client} <- creation_runtime_versions(client, ["1.20.2", "1.22.0", "1.34.0"]),
+         {:ok, client} <-
+           creation_runtime_versions(client, ["1.20.2", "1.22.0", "1.34.0", "1.35.1"]),
          {:ok, client} <- remaining_create_budget(client, deadline),
          :ok <- expansion_preflight(client, expected),
          {:ok, client} <- remaining_create_budget(client, deadline) do
@@ -601,8 +621,8 @@ defmodule SmolBox.Client do
     end
   end
 
-  defp branch_runtime_versions(:offline), do: ["1.19.0", "1.20.2", "1.22.0", "1.34.0"]
-  defp branch_runtime_versions(_network), do: ["1.34.0"]
+  defp branch_runtime_versions(:offline), do: ["1.19.0", "1.20.2", "1.22.0", "1.34.0", "1.35.1"]
+  defp branch_runtime_versions(_network), do: ["1.34.0", "1.35.1"]
 
   @doc """
   Stream a running idle checkpointable guest into a new private directory on the
@@ -852,7 +872,7 @@ defmodule SmolBox.Client do
          true <- SmolBox.RegistryCredentials.token?(push_token),
          {:ok, path} <- machine_path(name),
          {:ok, client} <-
-           creation_runtime_versions(client, ["1.19.0", "1.20.2", "1.22.0", "1.34.0"]),
+           creation_runtime_versions(client, ["1.19.0", "1.20.2", "1.22.0", "1.34.0", "1.35.1"]),
          {:ok, observed} <- inspect_machine(client, name),
          true <- observed.state == :stopped,
          {:ok, client} <- remaining_create_budget(client, deadline) do
@@ -878,7 +898,8 @@ defmodule SmolBox.Client do
           {:ok, String.t()} | {:error, Error.t()}
   def provision_volume(client, id, size_gb) do
     with true <- volume_id?(id) and Validation.integer?(size_gb, 1, 1024),
-         {:ok, client} <- creation_runtime_versions(client, ["1.20.2", "1.22.0", "1.34.0"]),
+         {:ok, client} <-
+           creation_runtime_versions(client, ["1.20.2", "1.22.0", "1.34.0", "1.35.1"]),
          {:ok, body} <-
            json(
              client,
@@ -906,7 +927,8 @@ defmodule SmolBox.Client do
   @spec delete_volume(t(), String.t()) :: :ok | {:error, Error.t()}
   def delete_volume(client, id) do
     with true <- volume_id?(id),
-         {:ok, client} <- creation_runtime_versions(client, ["1.20.2", "1.22.0", "1.34.0"]),
+         {:ok, client} <-
+           creation_runtime_versions(client, ["1.20.2", "1.22.0", "1.34.0", "1.35.1"]),
          {:ok, ""} <-
            client.transport.request(client.worker, %{
              method: :delete,
@@ -1022,7 +1044,14 @@ defmodule SmolBox.Client do
 
       client = %{client | worker: worker}
 
-      case creation_runtime_versions(client, ["1.17.0", "1.19.0", "1.20.2", "1.22.0", "1.34.0"]) do
+      case creation_runtime_versions(client, [
+             "1.17.0",
+             "1.19.0",
+             "1.20.2",
+             "1.22.0",
+             "1.34.0",
+             "1.35.1"
+           ]) do
         {:ok, client} ->
           query = URI.encode_query(%{"tail" => options.tail, "follow" => options.follow})
 
@@ -1062,12 +1091,13 @@ defmodule SmolBox.Client do
          {:ok, path} <- machine_path(name),
          :ok <- Worker.validate(client.worker),
          {:ok, %{version: version}}
-         when version in ["1.17.0", "1.19.0", "1.20.2", "1.22.0", "1.34.0"] <-
+         when version in ["1.17.0", "1.19.0", "1.20.2", "1.22.0", "1.34.0", "1.35.1"] <-
            health(client),
+         true <- spec.args == [] or version == "1.35.1",
          {:ok, client} <- remaining_create_budget(client, deadline),
          :ok <- background_machine(client, path, %{background: true}),
          {:ok, client} <- remaining_create_budget(client, deadline) do
-      {:ok, client}
+      {:ok, %{client | terminal_runtime_version: version}}
     else
       false -> error(:unsupported_capability, :terminal)
       {:ok, _unsupported} -> error(:unsupported_capability, :terminal)
@@ -1082,7 +1112,7 @@ defmodule SmolBox.Client do
       deadline = System.monotonic_time(:millisecond) + client.worker.operation_timeout_ms
 
       with {:ok, %{version: version}}
-           when version in ["1.17.0", "1.19.0", "1.20.2", "1.22.0", "1.34.0"] <-
+           when version in ["1.17.0", "1.19.0", "1.20.2", "1.22.0", "1.34.0", "1.35.1"] <-
              health(client),
            {:ok, client} <- remaining_create_budget(client, deadline),
            :ok <- background_machine(client, path, %{background: command.background or outside}),
@@ -1117,7 +1147,14 @@ defmodule SmolBox.Client do
       deadline = System.monotonic_time(:millisecond) + client.worker.operation_timeout_ms
 
       with {:ok, client} <-
-             creation_runtime_versions(client, ["1.17.0", "1.19.0", "1.20.2", "1.22.0", "1.34.0"]),
+             creation_runtime_versions(client, [
+               "1.17.0",
+               "1.19.0",
+               "1.20.2",
+               "1.22.0",
+               "1.34.0",
+               "1.35.1"
+             ]),
            :ok <- background_machine(client, "/api/v1/machines/" <> name, %{background: true}),
            do: remaining_create_budget(client, deadline)
     else

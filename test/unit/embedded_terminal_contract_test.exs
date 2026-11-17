@@ -18,6 +18,32 @@ defmodule SmolBox.EmbeddedTerminalContractTest do
              __DIR__
            )
 
+  test "argument-bearing requests require the separately approved feature" do
+    fixture = fixture()
+    operation = put_in(fixture["operation"]["terminal"]["args"], ["", "/workspace/generated.py"])
+    assert Request.valid?(operation["operation"], fixture["budget_ms"], 2)
+    path = Path.expand("../../native/smolbox-protocol/fixtures/hello-v2-current.json", __DIR__)
+    {:ok, %{"hello" => hello}} = Protocol.decode(File.read!(path), 2)
+    assert :error = Channel.register(Channel.new(hello), operation["operation"], 0, 1)
+    hello = put_in(hello["sdk"]["feature_versions"]["terminal_arguments"], 1)
+
+    refute SDKIdentity.approved?(
+             hello["sdk"],
+             hello["sdk"]["sdk_version"],
+             hello["sdk"]["source_revision"]
+           )
+
+    sdk = Map.put(hello["sdk"], "sdk_version", "1.35.1")
+    assert SDKIdentity.approved?(sdk, "1.35.1", sdk["source_revision"])
+
+    assert {:ok, _channel, _request} =
+             Channel.register(Channel.new(hello), operation["operation"], 0, 1)
+
+    refute TerminalContract.spec?(
+             Map.put(operation["operation"]["terminal"], "args", ["nul\0arg"])
+           )
+  end
+
   test "shared open fixture preserves bounds and distinguishes approved current and older descriptors" do
     fixture = fixture()
     assert Request.valid?(fixture["operation"], fixture["budget_ms"], 2)

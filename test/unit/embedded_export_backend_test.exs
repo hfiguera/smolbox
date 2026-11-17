@@ -73,7 +73,7 @@ defmodule SmolBox.EmbeddedExportBackendTest do
     config = Package.create(protocol_major: 2)
     config = %{config | export_destinations: [context.export.spec.destination]}
 
-    on_exit(fn -> File.rm_rf!(config.package_path) end)
+    on_exit(fn -> Package.remove!(config) end)
 
     health = %{
       status: :ready,

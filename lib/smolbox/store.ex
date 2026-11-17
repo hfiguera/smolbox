@@ -934,6 +934,10 @@ defmodule SmolBox.Store do
   `interactive_terminal: 1` and `extended_execution: 1` markers remain required
   for terminal submission. No connection, input or transcript is persisted, and
   a surviving record never permits reconnect or input replay.
+  Nonempty terminal arguments additionally require `terminal_arguments: 1`
+  after every reader supports selective v55 records and every writer preserves
+  their ordered argument list. Empty argument lists keep existing envelopes
+  and fingerprints. Upgrade all shared readers before advertising this marker.
   Future native remote_sources/images descriptors additionally require
   native_sources: 1 after every reader accepts selective v19 OCI creation and
   retained image-pull authority. Preserve registry_sources: 1 atomic source

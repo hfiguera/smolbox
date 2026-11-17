@@ -83,7 +83,7 @@ defmodule SmolBox.EmbeddedBackendTest do
       end
 
     config = Package.create([backend: true] ++ options)
-    on_exit(fn -> File.rm_rf!(config.package_path) end)
+    on_exit(fn -> Package.remove!(config) end)
     owner = start_supervised!(Supervisor.child_spec({Port, config}, restart: :temporary))
     wait(owner)
     :ok = Port.activate(owner, Config.domain_binding(config))

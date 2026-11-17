@@ -71,7 +71,7 @@ pub fn run_terminal_agent(
     options.validate()?;
     let now = Instant::now();
     if deadline <= now
-        || config.command != [options.program.clone()]
+        || config.command != options.argv()
         || config.image.is_empty()
         || config.image.len() > 16_384
         || config.image.contains('\0')
@@ -296,6 +296,7 @@ mod tests {
     fn options() -> TerminalOptions {
         TerminalOptions {
             program: "/bin/sh".into(),
+            args: vec![],
             cols: 100,
             rows: 37,
             session: Duration::from_secs(30),
@@ -358,15 +359,30 @@ mod tests {
 
     #[test]
     fn natural_agent_exit_preserves_final_output_without_input_close() {
-        for _ in 0..16 {
+        for iteration in 0..16 {
             let directory = tempfile::tempdir_in("/tmp").unwrap();
             let root = directory.path().canonicalize().unwrap();
             std::fs::set_permissions(&root, std::fs::Permissions::from_mode(0o700)).unwrap();
             let listener = UnixListener::bind(root.join("agent.sock")).unwrap();
             let (_input, receiver) = mpsc::channel();
+            let args = if iteration % 2 == 0 {
+                vec![]
+            } else {
+                vec![
+                    "/workspace/script with spaces".into(),
+                    "".into(),
+                    "$(uninterpreted)".into(),
+                ]
+            };
+            let mut request = request(root);
+            request.options.args = args;
+            request.config.command = request.options.argv();
+            let expected = request.config.command.clone();
             let peer = std::thread::spawn(move || {
                 let mut socket = accept(&listener);
-                assert!(matches!(read(&mut socket), Some(AgentRequest::Run { .. })));
+                assert!(
+                    matches!(read(&mut socket), Some(AgentRequest::Run { command, .. }) if command == expected)
+                );
                 socket
                     .write_all(&encode_message(&AgentResponse::Started).unwrap())
                     .unwrap();
@@ -392,7 +408,7 @@ mod tests {
                     .unwrap();
             });
             let mut bytes = vec![];
-            let proof = run_terminal_agent(request(root), receiver, |output| {
+            let proof = run_terminal_agent(request, receiver, |output| {
                 bytes.extend(output.bytes);
                 Ok(())
             })

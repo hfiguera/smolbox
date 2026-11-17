@@ -18,6 +18,7 @@ MAX_FRAME = 1024 * 1024
 MAX_CHUNK = 65536
 SDK_PINS = {
     '1.22.0': '9f446ae00219148ca4a703914f44a8e2fab11655',
+    '1.35.1': 'bc58c3ef808e70db10c0ffb2b282c5f565ac6afc',
     '1.34.0': 'd77eaf1c6eeff16bc8c258613746033e9bf567ca',
 }
 

@@ -19,6 +19,14 @@ EPOCH = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
 
 
 class InspectorTest(unittest.TestCase):
+    def test_runtime_root_requires_an_explicit_known_installed_version(self):
+        for version in ("1.34.0", "1.35.1"):
+            self.assertEqual(inspector.runtime_path({"smolvm": {"version": version}}),
+                             Path(f"/opt/smolvm-{version}-linux-x86_64"))
+        for version in ("1.35.0", "../escape", "1.35.2"):
+            with self.assertRaises(RuntimeError):
+                inspector.runtime_path({"smolvm": {"version": version}})
+
     def setUp(self):
         inspector.DEADLINE = time.monotonic() + 30
         cri = patch.object(inspector, "cri", return_value=[])

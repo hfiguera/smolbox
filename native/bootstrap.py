@@ -59,7 +59,7 @@ def verify_dependency_configuration() -> None:
                     if (manifest_path.parent != ROOT / "tests/clean-sdk-api"
                             or not isinstance(dependency, dict)
                             or set(dependency) != {"path", "version"}
-                            or dependency["version"] != "=1.34.0"
+                            or dependency["version"] != "=1.35.1"
                             or (manifest_path.parent / dependency["path"]).resolve() != allowed.resolve()):
                         raise ValueError("native SDK dependency bypasses verified workspace source")
             else:
@@ -79,13 +79,13 @@ def verify_dependency_configuration() -> None:
         "smolvm-protocol": "target/upstream/smolvm/crates/smolvm-protocol",
         "smolvm-registry": "target/upstream/smolvm/crates/smolvm-registry",
     }.items():
-        if dependencies.get(name) != {"path": path, "version": "=1.34.0"}:
+        if dependencies.get(name) != {"path": path, "version": "=1.35.1"}:
             raise ValueError("native SDK dependency differs from verified source pin")
 
 
 def bootstrap(check: bool = False, clean: bool = False) -> None:
     source = json.loads((ROOT / "vendor" / "source.json").read_text())
-    if source["schema"] != 2 or source["revision"] != "d77eaf1c6eeff16bc8c258613746033e9bf567ca":
+    if source["schema"] != 2 or source["revision"] != "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc":
         raise ValueError("unsupported native source pin")
     destination = DESTINATION.with_name("smolvm-clean") if clean else DESTINATION
     if source["patches"] != []:

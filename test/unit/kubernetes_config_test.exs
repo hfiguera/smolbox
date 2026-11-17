@@ -26,6 +26,18 @@ defmodule SmolBox.KubernetesConfigTest do
     end
   end
 
+  test "1.35.1 is the default and explicit older versions require their original identity" do
+    assert {:ok, %{runtime_version: "1.35.1"}} = Fixture.config()
+    identity = Map.put(Fixture.identity(), "smolvm_version", "1.34.0")
+
+    assert {:ok, previous} =
+             Fixture.config(runtime_version: "1.34.0", runtime_identity: identity)
+
+    assert :ok = Config.validate(previous)
+    assert {:error, %Error{category: :validation}} = Fixture.config(runtime_version: "1.34.0")
+    assert {:error, %Error{category: :validation}} = Fixture.config(runtime_identity: identity)
+  end
+
   test "enrollment requires exact identities and HTTPS with explicit CA and auth" do
     for options <- [
           [namespace_uid: nil],

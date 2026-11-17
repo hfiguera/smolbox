@@ -1,5 +1,6 @@
 defmodule SmolBox.KubernetesClientTest do
-  use ExUnit.Case, async: true
+  # Deadline assertions need scheduler headroom while coverage instruments TLS.
+  use ExUnit.Case, async: false
   alias SmolBox.Kubernetes.{Client, Operation}
   alias SmolBox.KubernetesPeer, as: Peer
   alias SmolBox.TestPeer
@@ -124,20 +125,30 @@ defmodule SmolBox.KubernetesClientTest do
   end
 
   test "stalled response consumes the same total deadline after request dispatch", c do
+    # Load the TLS path before measuring the bounded operation itself.
+    assert {:ok, _} = Client.request(operation(c.config), "GET", "/version")
+    owner = self()
+
     Peer.change(
       c.peer,
       &put_in(&1, [:overrides, {"GET", "/version"}], fn conn ->
-        Process.sleep(700)
-        TestPeer.json(conn, %{})
+        send(owner, {:stalled_response, self()})
+
+        receive do
+          :release_response -> TestPeer.json(conn, %{})
+        end
       end)
     )
 
+    op = operation(c.config, timeout_ms: 1000)
     started = Operation.now()
+    task = Task.async(fn -> Client.request(op, "GET", "/version") end)
+    on_exit(fn -> Process.exit(task.pid, :kill) end)
 
-    assert {:error, %{evidence: :dispatch_uncertain}} =
-             Client.request(operation(c.config, timeout_ms: 300), "GET", "/version")
-
-    assert Operation.now() - started < 1000
+    assert_receive {:stalled_response, responder}, 2000
+    on_exit(fn -> send(responder, :release_response) end)
+    assert {:error, %{evidence: :dispatch_uncertain}} = Task.await(task, 2000)
+    assert Operation.now() - started < 2000
   end
 
   test "request byte cap is checked before credentials and HTTP dispatch", c do

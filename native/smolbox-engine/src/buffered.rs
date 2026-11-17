@@ -335,7 +335,7 @@ impl Metadata {
         if self.background
             || self.command.stdin.is_some()
             || !self.command.env.is_empty()
-            || self.command.argv != [options.program.clone()]
+            || self.command.argv != options.argv()
         {
             return Err(Error::before(ErrorCode::Unsupported));
         }
@@ -917,6 +917,7 @@ mod tests {
         };
         let options = crate::TerminalOptions {
             program: "/bin/sh".into(),
+            args: vec![],
             cols: 80,
             rows: 24,
             session: Duration::from_secs(30),
@@ -937,6 +938,20 @@ mod tests {
         let (config, deadline) = metadata.terminal(&options).unwrap();
         assert!(config.timeout.is_none() && config.stdin.is_none() && !config.stop_vm_on_exit);
         assert!(deadline <= until);
+        let mut argument_options = options.clone();
+        argument_options.args = vec![
+            "/workspace/program with spaces".into(),
+            "".into(),
+            "$(uninterpreted)".into(),
+        ];
+        assert!(metadata.terminal(&argument_options).is_err());
+        let mut with_arguments = metadata.clone();
+        with_arguments
+            .command
+            .argv
+            .extend(argument_options.args.clone());
+        let (config, _) = with_arguments.terminal(&argument_options).unwrap();
+        assert_eq!(config.command, with_arguments.command.argv);
         for mode in 0..3 {
             let mut altered = metadata.clone();
             match mode {

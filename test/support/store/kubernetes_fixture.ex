@@ -70,7 +70,7 @@ defmodule SmolBox.Test.Kubernetes do
       &{&1, digest()}
     )
     |> Map.merge(%{
-      "smolvm_version" => "1.34.0",
+      "smolvm_version" => "1.35.1",
       "k3s_version" => "v1.35.10+k3s1",
       "containerd_version" => "2.2.10-k3s1"
     })

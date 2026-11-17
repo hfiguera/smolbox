@@ -239,7 +239,7 @@ defmodule SmolBox.NativeVolumeRecoveryTest do
 
   test "current package rejects volume scoping and public dispatch without enabling the future descriptor" do
     config = Package.create(protocol_major: 2)
-    on_exit(fn -> File.rm_rf!(config.package_path) end)
+    on_exit(fn -> Package.remove!(config) end)
     {:ok, context} = EmbeddedContext.new(config, self())
     assert {:error, _} = EmbeddedContext.assign(context, record())
     refute EmbeddedContext.volume_scoped?(%{context | volume: record()})
@@ -258,7 +258,7 @@ defmodule SmolBox.NativeVolumeRecoveryTest do
   test "native volume readers require both the marker and every callback before enrollment" do
     store = start_supervised!(Memory)
     config = Package.create(protocol_major: 2)
-    on_exit(fn -> File.rm_rf!(config.package_path) end)
+    on_exit(fn -> Package.remove!(config) end)
     sdk = put_in(Config.sdk_identity(config)["feature_versions"]["volumes"], 1)
     config = %{config | sdk_identity: sdk, platform: :linux}
     target = %Target{kind: :embedded, native_config: config}

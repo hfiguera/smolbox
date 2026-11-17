@@ -19,7 +19,7 @@ defmodule SmolBox.Embedded.PortTest do
 
   defp package(options \\ []) do
     config = Package.create(options)
-    on_exit(fn -> File.rm_rf!(config.package_path) end)
+    on_exit(fn -> Package.remove!(config) end)
     config
   end
 

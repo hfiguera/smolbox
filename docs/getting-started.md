@@ -2,7 +2,7 @@
 
 Run a Python program in a disposable VM, read `42` from its output file, and
 wait for the VM to be deleted. The Mix example uses SmolBox **0.6.0** and
-SmolVM **1.34.0**. The downloadable Livebook has its own pins to SmolBox 0.4.3
+SmolVM **1.35.1**. The downloadable Livebook has its own pins to SmolBox 0.4.3
 and SmolVM 1.22.0.
 
 Choose one path before preparing the worker:
@@ -45,22 +45,22 @@ The Mix steps below are the alternative path; the notebook includes its own setu
 
 ## 1. Install smolvm and SmolBox
 
-### Install smolvm 1.34.0
+### Install smolvm 1.35.1
 
-If `smolvm --version` already reports `1.34.0`, skip installation. Otherwise,
-run the [upstream installer from the 1.34.0 release](https://github.com/smol-machines/smolvm/blob/v1.34.0/scripts/install.sh)
+If `smolvm --version` already reports `1.35.1`, skip installation. Otherwise,
+run the [upstream installer from the 1.35.1 release](https://github.com/smol-machines/smolvm/blob/v1.35.1/scripts/install.sh)
 in a Bash terminal as your normal user, with `curl` and `tar` available:
 
 ```bash
 SMOLBOX_INSTALLER="$(mktemp)"
-curl -fsSL https://raw.githubusercontent.com/smol-machines/smolvm/v1.34.0/scripts/install.sh \
+curl -fsSL https://raw.githubusercontent.com/smol-machines/smolvm/v1.35.1/scripts/install.sh \
   -o "$SMOLBOX_INSTALLER" &&
-  bash "$SMOLBOX_INSTALLER" --version 1.34.0
+  bash "$SMOLBOX_INSTALLER" --version 1.35.1
 export PATH="$HOME/.local/bin:$PATH"
 smolvm --version
 ```
 
-Continue only when the version reports `1.34.0`. The installer selects the host
+Continue only when the version reports `1.35.1`. The installer selects the host
 distribution and installs its matching libraries, agent and disk templates.
 It replaces the smolvm installation for this account. To preserve a different
 installed version, use a separate account or follow
@@ -74,7 +74,7 @@ test -r /dev/kvm && test -w /dev/kvm && echo "KVM access ready"
 
 If the check does not print `KVM access ready`, resolve KVM availability and
 permissions before preparing the image. See the
-[upstream platform requirements](https://github.com/smol-machines/smolvm/blob/v1.34.0/README.md#platform-support)
+[upstream platform requirements](https://github.com/smol-machines/smolvm/blob/v1.35.1/README.md#platform-support)
 and [host prerequisites](supported-platforms.md#host-prerequisites).
 
 ### Install the Elixir dependency
@@ -103,7 +103,7 @@ Preparation downloads Python; the demo guest later runs offline.
 
 For Linux, run these commands in **Bash on the worker host**, inside your Nix
 development shell if applicable. macOS users should use the separate recipe below.
-`smolvm --version` should report `1.34.0`. Use a new directory for the image, worker
+`smolvm --version` should report `1.35.1`. Use a new directory for the image, worker
 state and demo output:
 
 ```bash
@@ -203,7 +203,7 @@ approved digest:
 ```bash
 export SMOLBOX_DEMO_ROOT=/absolute/path/printed/in_step_2
 export SMOLBOX_RUNTIME_URL=http://127.0.0.1:19471
-export SMOLBOX_RUNTIME_VERSION=1.34.0
+export SMOLBOX_RUNTIME_VERSION=1.35.1
 export SMOLBOX_PYTHON_ARTIFACT="$SMOLBOX_DEMO_ROOT/images/python.smolmachine"
 export SMOLBOX_PYTHON_SHA256=paste_the_sha256_printed_in_step_2
 export SMOLBOX_DEMO_DIR="$SMOLBOX_DEMO_ROOT/objects"
@@ -252,7 +252,7 @@ worker_options =
   Worker.new("demo-worker", System.fetch_env!("SMOLBOX_RUNTIME_URL"), worker_options)
 
 {:ok, client} = SmolBox.Client.new(worker)
-runtime_version = System.get_env("SMOLBOX_RUNTIME_VERSION", "1.34.0")
+runtime_version = System.get_env("SMOLBOX_RUNTIME_VERSION", "1.35.1")
 {:ok, %{version: ^runtime_version}} = SmolBox.Client.health(client)
 :ok = SmolBox.Client.readiness(client)
 case SmolBox.Client.list(client) do

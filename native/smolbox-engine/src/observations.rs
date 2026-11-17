@@ -372,17 +372,7 @@ impl Engine {
         }
         let telemetry = directory.join("egress");
         if telemetry.exists() {
-            let mut body = Vec::new();
-            plain_file(&telemetry)?
-                .take(33)
-                .read_to_end(&mut body)
-                .map_err(|_| Error::before(ErrorCode::Io))?;
-            if body.len() > 32 {
-                return Err(Error::before(ErrorCode::OutputLimit));
-            }
-            result.egress_bytes = std::str::from_utf8(&body)
-                .ok()
-                .and_then(|text| text.trim().parse().ok());
+            result.egress_bytes = read_egress_telemetry(&telemetry)?;
         }
         budget.check()?;
         let after = self.observation_records(budget)?;
@@ -396,6 +386,24 @@ impl Engine {
         }
         Ok((observation, result))
     }
+}
+
+fn read_egress_telemetry(path: &Path) -> Result<Option<u64>> {
+    // 1.35 writes in place and pads samples to 1 KiB. Older engines write
+    // only the decimal counter. Bound both formats, including trailing data;
+    // an invalid/torn sample remains unavailable rather than a guessed value.
+    const MAX_BYTES: u64 = 1024;
+    let mut body = Vec::new();
+    plain_file(path)?
+        .take(MAX_BYTES + 1)
+        .read_to_end(&mut body)
+        .map_err(|_| Error::before(ErrorCode::Io))?;
+    if body.len() as u64 > MAX_BYTES {
+        return Err(Error::before(ErrorCode::OutputLimit));
+    }
+    Ok(std::str::from_utf8(&body)
+        .ok()
+        .and_then(|text| text.trim().parse().ok()))
 }
 
 fn inventory_state(
@@ -534,6 +542,38 @@ fn inventory_value(record: &VmRecord, state: &str) -> Result<serde_json::Value> 
 #[cfg(test)]
 mod inventory_tests {
     use super::*;
+
+    #[test]
+    fn egress_samples_accept_legacy_and_padded_counters_without_accepting_truncated_data() {
+        use std::os::unix::fs::PermissionsExt;
+        let directory = tempfile::tempdir().unwrap();
+        let path = directory.path().canonicalize().unwrap().join("egress");
+        let write = |bytes: &[u8]| {
+            std::fs::write(&path, bytes).unwrap();
+            std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o600)).unwrap();
+        };
+        for value in [0, 42, u64::MAX] {
+            write(value.to_string().as_bytes());
+            assert_eq!(read_egress_telemetry(&path).unwrap(), Some(value));
+            write(format!("{:<1024}", value).as_bytes());
+            assert_eq!(read_egress_telemetry(&path).unwrap(), Some(value));
+        }
+        for bytes in [
+            b"".as_slice(),
+            b"42 43",
+            b"18446744073709551616",
+            b"-1",
+            b"42\xff",
+        ] {
+            write(bytes);
+            assert_eq!(read_egress_telemetry(&path).unwrap(), None);
+        }
+        write(format!("{:<1024}x", 42).as_bytes());
+        assert_eq!(
+            read_egress_telemetry(&path).unwrap_err().code,
+            ErrorCode::OutputLimit
+        );
+    }
 
     #[test]
     fn a_frozen_source_is_included_without_probing_its_paused_agent() {

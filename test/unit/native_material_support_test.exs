@@ -66,7 +66,7 @@ defmodule SmolBox.Runtime.NativeMaterialSupportTest do
 
   test "future branch descriptor requires native readers and paired store transactions before enrollment" do
     native = Package.create(protocol_major: 2)
-    on_exit(fn -> File.rm_rf!(native.package_path) end)
+    on_exit(fn -> Package.remove!(native) end)
     target = Target.normalize(native)
     sdk = put_in(native.sdk_identity, ["feature_versions", "branches"], 1)
     future = %{target | native_config: %{native | sdk_identity: sdk}}
@@ -199,7 +199,7 @@ defmodule SmolBox.Runtime.NativeMaterialSupportTest do
 
   test "future growth descriptor requires both the native history reader and atomic expansion store" do
     native = Package.create(protocol_major: 2)
-    on_exit(fn -> File.rm_rf!(native.package_path) end)
+    on_exit(fn -> Package.remove!(native) end)
     target = Target.normalize(native)
     sdk = put_in(native.sdk_identity, ["feature_versions", "disk_growth"], 1)
     future = %{target | native_config: %{native | sdk_identity: sdk}}
@@ -214,7 +214,7 @@ defmodule SmolBox.Runtime.NativeMaterialSupportTest do
 
   test "terminal descriptor requires its native reader marker before any enrollment" do
     native = Package.create(protocol_major: 2)
-    on_exit(fn -> File.rm_rf!(native.package_path) end)
+    on_exit(fn -> Package.remove!(native) end)
     target = Target.normalize(native)
     sdk = put_in(native.sdk_identity, ["feature_versions", "terminals"], 1)
     future = %{target | native_config: %{native | sdk_identity: sdk}}
@@ -260,7 +260,7 @@ defmodule SmolBox.Runtime.NativeMaterialSupportTest do
 
   test "background descriptor requires explicit reader support before enrollment" do
     native = Package.create(protocol_major: 2)
-    on_exit(fn -> File.rm_rf!(native.package_path) end)
+    on_exit(fn -> Package.remove!(native) end)
     target = Target.normalize(native)
 
     assert {:error, %Error{category: :unsupported_capability, operation: :runtime}} =
@@ -280,7 +280,7 @@ defmodule SmolBox.Runtime.NativeMaterialSupportTest do
     }
 
     old = Package.create(protocol_major: 2, sdk_identity: old_sdk)
-    on_exit(fn -> File.rm_rf!(old.package_path) end)
+    on_exit(fn -> Package.remove!(old) end)
 
     assert :ok =
              NativeSupport.verify(%{
@@ -293,7 +293,7 @@ defmodule SmolBox.Runtime.NativeMaterialSupportTest do
 
   test "protocol-2 negotiation requires explicit material-reader capability before enrollment" do
     config = Package.create()
-    on_exit(fn -> File.rm_rf!(config.package_path) end)
+    on_exit(fn -> Package.remove!(config) end)
     legacy = Target.normalize(config)
     assert :ok = NativeSupport.verify(%{workers: [legacy], store: {LegacyStore, nil}})
 
@@ -312,11 +312,11 @@ defmodule SmolBox.Runtime.NativeMaterialSupportTest do
 
   test "older protocol-2 descriptor needs no streaming reader upgrade" do
     current = Package.create(protocol_major: 2)
-    on_exit(fn -> File.rm_rf!(current.package_path) end)
+    on_exit(fn -> Package.remove!(current) end)
     sdk = current.sdk_identity
     sdk = update_in(sdk, ["feature_versions"], &Map.drop(&1, ~w(streaming_exec terminals)))
     native = Package.create(protocol_major: 2, sdk_identity: sdk)
-    on_exit(fn -> File.rm_rf!(native.package_path) end)
+    on_exit(fn -> Package.remove!(native) end)
 
     assert :ok =
              NativeSupport.verify(%{

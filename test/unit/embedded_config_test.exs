@@ -60,19 +60,27 @@ defmodule SmolBox.Embedded.ConfigTest do
     refute Map.has_key?(Config.domain_binding(config), :epoch)
   end
 
-  test "the 1.34 SDK requires a protocol-2 package and the exact descriptor" do
-    revision = "d77eaf1c6eeff16bc8c258613746033e9bf567ca"
-    package = %{options()[:package_identity] | "smolvm_revision" => revision}
-    assert_invalid(Keyword.put(options(), :package_identity, package))
+  for {version, revision} <- [
+        {"1.34.0", "d77eaf1c6eeff16bc8c258613746033e9bf567ca"},
+        {"1.35.1", "bc58c3ef808e70db10c0ffb2b282c5f565ac6afc"}
+      ] do
+    test "the #{version} SDK requires a protocol-2 package and the exact descriptor" do
+      version = unquote(version)
+      revision = unquote(revision)
+      package = %{options()[:package_identity] | "smolvm_revision" => revision}
+      assert_invalid(Keyword.put(options(), :package_identity, package))
 
-    options = Keyword.put(options(), :package_identity, %{package | "engine_version" => "0.2.0"})
-    assert {:ok, config} = Config.new(options)
-    target = Target.normalize(config)
-    assert Config.sdk_version(config) == "1.34.0"
-    assert Target.supports_feature?(target, :terminals)
+      options =
+        Keyword.put(options(), :package_identity, %{package | "engine_version" => "0.2.0"})
 
-    wrong_sdk = SDKIdentity.implemented("1.22.0", revision)
-    assert_invalid(Keyword.put(options, :sdk_identity, wrong_sdk))
+      assert {:ok, config} = Config.new(options)
+      target = Target.normalize(config)
+      assert Config.sdk_version(config) == version
+      assert Target.supports_feature?(target, :terminals)
+
+      wrong_sdk = SDKIdentity.implemented("1.22.0", revision)
+      assert_invalid(Keyword.put(options, :sdk_identity, wrong_sdk))
+    end
   end
 
   test "shared source approval survives normalization without enabling unsupported operations" do

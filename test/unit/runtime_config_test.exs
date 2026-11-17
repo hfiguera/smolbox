@@ -1,5 +1,7 @@
 defmodule SmolBox.RuntimeConfigTest do
   use ExUnit.Case, async: true
+
+  alias SmolBox.Backend.Features
   alias SmolBox.{Client, Command, Error, Execution, ExecutionSpec, Worker}
   alias SmolBox.Runtime.{Config, WorkerConfig}
   alias SmolBox.Store.{Codec, Contract, Memory}
@@ -126,9 +128,12 @@ defmodule SmolBox.RuntimeConfigTest do
              WorkerConfig.new(Keyword.delete(context.options, :allocation_floor))
   end
 
-  test "runtime defaults to 1.34.0 and accepts only qualified explicit versions",
+  test "runtime defaults to 1.35.1 and accepts only qualified explicit versions",
        context do
-    assert context.worker.runtime_version == "1.34.0"
+    assert context.worker.runtime_version == "1.35.1"
+
+    assert {:ok, %{runtime_version: "1.34.0"}} =
+             WorkerConfig.new(Keyword.put(context.options, :runtime_version, "1.34.0"))
 
     assert {:ok, %{runtime_version: "1.16.0"}} =
              WorkerConfig.new(Keyword.put(context.options, :runtime_version, "1.16.0"))
@@ -188,8 +193,41 @@ defmodule SmolBox.RuntimeConfigTest do
     end
   end
 
-  test "1.34.0 default requires a supported platform", context do
-    assert context.worker.runtime_version == "1.34.0"
+  test "1.35.1 default preserves the existing feature and platform boundaries", context do
+    assert context.worker.runtime_version == "1.35.1"
+
+    assert {:ok, candidate} =
+             WorkerConfig.new(Keyword.put(context.options, :runtime_version, "1.35.1"))
+
+    assert :ok = WorkerConfig.validate(candidate)
+
+    for feature <-
+          ~w(lifecycle foreground_exec files extended_exec background_exec terminals workloads networking
+                      extended_files remote_sources images checkpoints exports branches branch_release_env disk_growth volumes ports)a do
+      assert Features.supports?(candidate, feature)
+    end
+
+    mac = %{
+      candidate
+      | platform: :macos,
+        architecture: "aarch64",
+        artifacts: Enum.map(candidate.artifacts, &Map.put(&1, "architecture", "aarch64"))
+    }
+
+    assert :ok = WorkerConfig.validate(mac)
+    refute Features.supports?(mac, :volumes)
+
+    assert {:error, %Error{category: :validation}} =
+             WorkerConfig.validate(%{candidate | architecture: "aarch64"})
+
+    for version <- ["1.35.0", "1.35.2", "1.35.1-dev"] do
+      assert {:error, %Error{category: :validation}} =
+               WorkerConfig.validate(%{candidate | runtime_version: version})
+    end
+  end
+
+  test "1.35.1 default requires a supported platform", context do
+    assert context.worker.runtime_version == "1.35.1"
 
     for {platform, architecture} <- [{:linux, "x86_64"}, {:macos, "aarch64"}] do
       artifacts = Enum.map(context.worker.artifacts, &Map.put(&1, "architecture", architecture))

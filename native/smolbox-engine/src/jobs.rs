@@ -1516,6 +1516,7 @@ mod tests {
         let second = pool.acquire(Demand::volume_observation()).unwrap();
         let options = crate::TerminalOptions {
             program: "/bin/sh".into(),
+            args: vec![],
             cols: 80,
             rows: 24,
             session: std::time::Duration::from_secs(1),
@@ -1976,6 +1977,7 @@ mod tests {
     fn terminal_reserves_peak_memory_child_and_descriptors_without_starving_observations() {
         let options = crate::TerminalOptions {
             program: "/bin/sh".into(),
+            args: vec![],
             cols: 80,
             rows: 24,
             session: std::time::Duration::from_secs(30),

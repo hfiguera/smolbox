@@ -481,13 +481,18 @@ defmodule SmolBox.Backend.Assignment do
              match?(%{"feature_versions" => %{"background_exec" => 1}}, sdk)) and
           streaming_approved?(sdk, command, spec.profile)
 
-      %TerminalSpec{} ->
-        match?(%{"feature_versions" => %{"terminals" => 1}}, sdk)
+      %TerminalSpec{args: args} ->
+        terminal_approved?(sdk, args)
 
       _ ->
         false
     end
   end
+
+  defp terminal_approved?(sdk, args),
+    do:
+      match?(%{"feature_versions" => %{"terminals" => 1}}, sdk) and
+        (args == [] or match?(%{"feature_versions" => %{"terminal_arguments" => 1}}, sdk))
 
   defp streaming_approved?(sdk, %Command{background: false, stdin: nil} = command, profile),
     do:

@@ -7,11 +7,18 @@ parity remains the [long-term goal](https://github.com/hfiguera/smolbox/blob/mai
 preview supports the narrow policy below. Public qualification passed for this fixed lab setup; exact cases and limits are in
 [implementation progress](https://github.com/hfiguera/smolbox/blob/main/docs/design/kubernetes-backend-progress.md).
 
+The default runtime and lab pins select SmolVM **1.35.1**, including the matching
+source and critical-region reviews. A fresh lab passed phase0 and public controller
+cases with Memory and PostgreSQL; see [local qualification](evidence/smolvm-1.35.1-qualification.md).
+Existing 1.34.0 enrollments remain supported when both `runtime_version` and
+`runtime_identity["smolvm_version"]` retain that version. Updating these defaults
+does not upgrade an existing node or transfer its cleanup authority.
+
 ## Supported policy
 
 - One controller host, one durable store partition, one dedicated namespace,
   one enrolled node, one execution slot, one bare Pod/container per execution.
-- K3s `v1.35.10+k3s1`, containerd `2.2.10-k3s1`, SmolVM `1.34.0`, and the exact
+- K3s `v1.35.10+k3s1`, containerd `2.2.10-k3s1`, SmolVM `1.35.1`, and the exact
   approved archive/shim/rootfs/guard identities. Node reboot or daemon restart
   invalidates existing proof authority.
 - Approved public OCI platform-manifest digest containing the qualified Python

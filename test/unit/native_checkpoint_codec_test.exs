@@ -275,7 +275,7 @@ defmodule SmolBox.Store.NativeCheckpointCodecTest do
 
   test "current helpers reject checkpoint admission despite structural reader support" do
     config = Package.create(protocol_major: 2)
-    on_exit(fn -> File.rm_rf!(config.package_path) end)
+    on_exit(fn -> Package.remove!(config) end)
     {checkpoint, record, assignment} = fixture(config.architecture)
     config = %{config | checkpoints: [checkpoint], profiles: [record.spec.profile]}
     assert :ok = Config.validate(config)
@@ -302,7 +302,7 @@ defmodule SmolBox.Store.NativeCheckpointCodecTest do
   test "optional checkpoint descriptors require source, capture and resolution readers before enrollment" do
     store = start_supervised!(Memory)
     config = Package.create(protocol_major: 2)
-    on_exit(fn -> File.rm_rf!(config.package_path) end)
+    on_exit(fn -> Package.remove!(config) end)
     sdk = put_in(Config.sdk_identity(config)["feature_versions"]["checkpoints"], 1)
     config = %{config | sdk_identity: sdk}
     assert :ok = Config.validate(config)

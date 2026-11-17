@@ -136,7 +136,12 @@ defmodule SmolBox.Lab.BranchStaticEgress do
     {:ok, endpoint} = Worker.new("proof", "http://localhost", unix_socket: socket)
     {:ok, client} = Client.new(endpoint)
     {:ok, %{version: "1.34.0"}} = Client.health(client)
-    {:ok, worker} = WorkerConfig.new([client: client, artifacts: [artifact]] ++ options)
+
+    {:ok, worker} =
+      WorkerConfig.new(
+        [client: client, artifacts: [artifact], runtime_version: "1.34.0"] ++ options
+      )
+
     {worker, fn -> {:ok, []} = Client.list(client) end}
   end
 

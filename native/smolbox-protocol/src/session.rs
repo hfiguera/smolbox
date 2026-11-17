@@ -75,98 +75,107 @@ impl Session {
         }
         check(id > self.last_request)?;
         self.last_request = id;
-        let code =
-            if rejection.is_some() {
-                rejection
-            } else if !self.hello.capabilities.contains(&operation.capability())
-                || (matches!(&operation, Operation::Volume { .. })
-                    && (self.hello.major != 2
-                        || self
-                            .hello
-                            .sdk
-                            .as_ref()
-                            .is_none_or(|sdk| sdk.feature_versions.get("volumes") != Some(&1))))
-                || (operation.creation_mounts().is_some()
-                    && (self.hello.major != 2
-                        || self
-                            .hello
-                            .sdk
-                            .as_ref()
-                            .is_none_or(|sdk| sdk.feature_versions.get("volumes") != Some(&1))))
-                || (operation.requires_remote_source()
-                    && (self.hello.major != 2
-                        || self.hello.sdk.as_ref().is_none_or(|sdk| {
-                            sdk.feature_versions.get("remote_sources") != Some(&1)
-                        })))
-                || (operation.requires_exports()
-                    && (self.hello.major != 2
-                        || self
-                            .hello
-                            .sdk
-                            .as_ref()
-                            .is_none_or(|sdk| sdk.feature_versions.get("exports") != Some(&1))))
-                || (operation.requires_checkpoints()
-                    && (self.hello.major != 2
-                        || self
-                            .hello
-                            .sdk
-                            .as_ref()
-                            .is_none_or(|sdk| sdk.feature_versions.get("checkpoints") != Some(&1))))
-                || (operation.requires_branch_credentials()
-                    && self.hello.sdk.as_ref().is_none_or(|sdk| {
-                        sdk.feature_versions.get("branch_https_credentials") != Some(&1)
-                    }))
-                || (operation.branch_static_egress()
-                    && self.hello.sdk.as_ref().is_none_or(|sdk| {
-                        sdk.feature_versions.get("branch_static_egress") != Some(&1)
-                    }))
-                || (matches!(&operation, Operation::ResolvePartialBranchCleanup { .. })
-                    && self.hello.sdk.as_ref().is_none_or(|sdk| {
-                        sdk.feature_versions.get("partial_cleanup_resolution") != Some(&1)
-                    }))
-                || (matches!(&operation, Operation::InspectPartialBranchCollection { .. })
-                    && self.hello.sdk.as_ref().is_none_or(|sdk| {
-                        sdk.feature_versions.get("partial_collection_preflight") != Some(&1)
-                    }))
-                || (matches!(&operation,
-                    Operation::ReleaseHeldBranch { request, .. }
-                    | Operation::QualifyHeldBranchRelease { request }
-                    if !request.request.env.is_empty()
-                ) && self
+        let code = if rejection.is_some() {
+            rejection
+        } else if !self.hello.capabilities.contains(&operation.capability())
+            || (matches!(&operation, Operation::TerminalOpen { terminal, .. } if !terminal.args.is_empty())
+                && self
                     .hello
                     .sdk
                     .as_ref()
-                    .is_none_or(|sdk| sdk.feature_versions.get("branch_release_env") != Some(&1)))
-                || (operation.requires_branches()
-                    && (self.hello.major != 2
-                        || self
-                            .hello
-                            .sdk
-                            .as_ref()
-                            .is_none_or(|sdk| sdk.feature_versions.get("branches") != Some(&1))))
-                || operation
-                    .creation_features()
-                    .is_some_and(|features| !features.approved(&self.hello))
-            {
-                Some(SafeCode::Unsupported)
-            } else if operation.receipt().is_some_and(|r| {
-                !r.matches_domain(&self.hello.domain) || r.validate_for(self.hello.major).is_err()
-            }) || operation
-                .branch_platform()
-                .is_some_and(|platform| platform != self.hello.package.platform)
-                || operation.creation_mounts().is_some_and(|mounts| {
-                    crate::VolumeMount::bound(mounts, &self.hello.domain).is_err()
-                })
-                || operation
-                    .branch_epoch()
-                    .is_some_and(|epoch| epoch != self.hello.epoch)
-            {
-                Some(SafeCode::Ownership)
-            } else if self.pending.len() >= MAX_IN_FLIGHT {
-                Some(SafeCode::Overload)
-            } else {
-                None
-            };
+                    .is_none_or(|sdk| sdk.feature_versions.get("terminal_arguments") != Some(&1)))
+            || (matches!(&operation, Operation::Volume { .. })
+                && (self.hello.major != 2
+                    || self
+                        .hello
+                        .sdk
+                        .as_ref()
+                        .is_none_or(|sdk| sdk.feature_versions.get("volumes") != Some(&1))))
+            || (operation.creation_mounts().is_some()
+                && (self.hello.major != 2
+                    || self
+                        .hello
+                        .sdk
+                        .as_ref()
+                        .is_none_or(|sdk| sdk.feature_versions.get("volumes") != Some(&1))))
+            || (operation.requires_remote_source()
+                && (self.hello.major != 2
+                    || self
+                        .hello
+                        .sdk
+                        .as_ref()
+                        .is_none_or(|sdk| sdk.feature_versions.get("remote_sources") != Some(&1))))
+            || (operation.requires_exports()
+                && (self.hello.major != 2
+                    || self
+                        .hello
+                        .sdk
+                        .as_ref()
+                        .is_none_or(|sdk| sdk.feature_versions.get("exports") != Some(&1))))
+            || (operation.requires_checkpoints()
+                && (self.hello.major != 2
+                    || self
+                        .hello
+                        .sdk
+                        .as_ref()
+                        .is_none_or(|sdk| sdk.feature_versions.get("checkpoints") != Some(&1))))
+            || (operation.requires_branch_credentials()
+                && self.hello.sdk.as_ref().is_none_or(|sdk| {
+                    sdk.feature_versions.get("branch_https_credentials") != Some(&1)
+                }))
+            || (operation.branch_static_egress()
+                && self
+                    .hello
+                    .sdk
+                    .as_ref()
+                    .is_none_or(|sdk| sdk.feature_versions.get("branch_static_egress") != Some(&1)))
+            || (matches!(&operation, Operation::ResolvePartialBranchCleanup { .. })
+                && self.hello.sdk.as_ref().is_none_or(|sdk| {
+                    sdk.feature_versions.get("partial_cleanup_resolution") != Some(&1)
+                }))
+            || (matches!(&operation, Operation::InspectPartialBranchCollection { .. })
+                && self.hello.sdk.as_ref().is_none_or(|sdk| {
+                    sdk.feature_versions.get("partial_collection_preflight") != Some(&1)
+                }))
+            || (matches!(&operation,
+                Operation::ReleaseHeldBranch { request, .. }
+                | Operation::QualifyHeldBranchRelease { request }
+                if !request.request.env.is_empty()
+            ) && self
+                .hello
+                .sdk
+                .as_ref()
+                .is_none_or(|sdk| sdk.feature_versions.get("branch_release_env") != Some(&1)))
+            || (operation.requires_branches()
+                && (self.hello.major != 2
+                    || self
+                        .hello
+                        .sdk
+                        .as_ref()
+                        .is_none_or(|sdk| sdk.feature_versions.get("branches") != Some(&1))))
+            || operation
+                .creation_features()
+                .is_some_and(|features| !features.approved(&self.hello))
+        {
+            Some(SafeCode::Unsupported)
+        } else if operation.receipt().is_some_and(|r| {
+            !r.matches_domain(&self.hello.domain) || r.validate_for(self.hello.major).is_err()
+        }) || operation
+            .branch_platform()
+            .is_some_and(|platform| platform != self.hello.package.platform)
+            || operation.creation_mounts().is_some_and(|mounts| {
+                crate::VolumeMount::bound(mounts, &self.hello.domain).is_err()
+            })
+            || operation
+                .branch_epoch()
+                .is_some_and(|epoch| epoch != self.hello.epoch)
+        {
+            Some(SafeCode::Ownership)
+        } else if self.pending.len() >= MAX_IN_FLIGHT {
+            Some(SafeCode::Overload)
+        } else {
+            None
+        };
         if let Some(code) = code {
             return Ok(ServerMessage::Terminal {
                 epoch,

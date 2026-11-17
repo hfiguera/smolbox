@@ -5,7 +5,7 @@ defmodule SmolBox.Embedded.SDKIdentity do
 
   @features ~w(lifecycle foreground_exec extended_exec files extended_files material_proofs
                observability networking ports workloads compact_creation job_resources buffered_exec remote_sources images background_exec
-               logs streaming_exec terminals terminal_preflight volumes disk_growth checkpoints exports branches branch_release_env branch_static_egress branch_https_credentials partial_cleanup_resolution partial_collection_preflight)
+               logs streaming_exec terminals terminal_arguments terminal_preflight volumes disk_growth checkpoints exports branches branch_release_env branch_static_egress branch_https_credentials partial_cleanup_resolution partial_collection_preflight)
 
   # This is the implemented package contract, not all APIs present in the SDK.
   # Launch and Hello must both bind it to the exact locally approved package.
@@ -74,6 +74,9 @@ defmodule SmolBox.Embedded.SDKIdentity do
 
     implemented = Map.put(implemented, "terminal_preflight", 1)
 
+    implemented =
+      if version == "1.35.1", do: Map.put(implemented, "terminal_arguments", 1), else: implemented
+
     valid?(sdk) and sdk["sdk_version"] == version and sdk["source_revision"] == revision and
       Map.take(
         sdk["feature_versions"],
@@ -105,6 +108,7 @@ defmodule SmolBox.Embedded.SDKIdentity do
           {"streaming_exec", "buffered_exec"},
           {"terminals", "buffered_exec"},
           {"terminal_preflight", "terminals"},
+          {"terminal_arguments", "terminals"},
           {"disk_growth", "job_resources"},
           {"exports", "job_resources"},
           {"exports", "buffered_exec"},

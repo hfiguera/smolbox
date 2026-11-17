@@ -1,7 +1,9 @@
 # SmolVM 1.34.0 qualification
 
-This checkout defaults to SmolVM 1.34.0 for the HTTP worker and Embedded Port
-after the live backend and public installation checks recorded here. Earlier
+This historical report records the promotion of SmolVM 1.34.0 for the HTTP worker
+and Embedded Port after the live backend and public installation checks below.
+The current defaults and unpublished distribution status are recorded separately
+in the [1.35.1 qualification](smolvm-1.35.1-qualification.md). Earlier
 Embedded Port package identities remain accepted under their original protocol
 and feature approvals.
 

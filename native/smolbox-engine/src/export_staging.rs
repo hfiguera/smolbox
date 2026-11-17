@@ -2699,7 +2699,9 @@ mod tests {
     use crate::{Cancellation, Engine};
     use std::time::Duration;
     fn fixture() -> (tempfile::TempDir, Engine, CreationReceipt) {
-        let temp = tempfile::tempdir().unwrap();
+        // macOS's default temporary directory can exceed sockaddr_un once the
+        // SDK's hashed VM directory and port-forward socket name are appended.
+        let temp = tempfile::tempdir_in("/tmp").unwrap();
         let (engine, receipt) = crate::export_source::tests::fixture(temp.path(), false);
         (temp, engine, receipt)
     }
@@ -3171,6 +3173,23 @@ mod tests {
             std::fs::write(rootfs_path.join("other-marker"), b"preserve").unwrap();
             std::fs::write(path.join("vm.lock"), b"").unwrap();
             std::fs::write(path.join("boot-config.json"), b"{}").unwrap();
+            std::fs::write(path.join("vmm-exit.json"), b"{}").unwrap();
+            std::fs::write(path.join("workload.log"), b"").unwrap();
+            for name in [
+                "storage.formatted",
+                "overlay.formatted",
+                "agent-console.log",
+                "agent-startup-error.log",
+            ] {
+                std::fs::write(path.join(name), b"").unwrap();
+            }
+            for directory in ["smolvm_attach_ro", "smolvm_attach_rw"] {
+                std::fs::create_dir(path.join(directory)).unwrap();
+            }
+            for name in ["ports.sock", "port-forward.sock", "agent.ready"] {
+                drop(std::os::unix::net::UnixListener::bind(path.join(name)).unwrap());
+            }
+            assert!(std::fs::read_dir(&path).unwrap().count() > 16);
             let socket = std::os::unix::net::UnixListener::bind(path.join("agent.sock")).unwrap();
             drop(socket); // Stale private socket model, no connection or SDK entry.
             if marker {

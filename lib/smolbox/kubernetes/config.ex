@@ -46,7 +46,7 @@ defmodule SmolBox.Kubernetes.Config do
     controller_guard: nil,
     architecture: "x86_64",
     platform: :linux,
-    runtime_version: "1.34.0",
+    runtime_version: "1.35.1",
     qualification: :development,
     draining: false,
     capacity: %{slots: 1, cpus: 2, memory_mb: 1536, disk_gb: 30},
@@ -98,7 +98,10 @@ defmodule SmolBox.Kubernetes.Config do
 
   defp identity?(value),
     do:
-      value.runtime_version == "1.34.0" and value.architecture == "x86_64" and
+      value.runtime_version in ["1.34.0", "1.35.1"] and
+        is_map(value.runtime_identity) and
+        Map.get(value.runtime_identity, "smolvm_version") == value.runtime_version and
+        value.architecture == "x86_64" and
         value.platform == :linux and value.qualification == :development and
         is_boolean(value.draining) and match?({:ok, _}, Binding.new(binding_fields(value)))
 

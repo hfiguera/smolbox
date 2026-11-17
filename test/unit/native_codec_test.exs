@@ -19,7 +19,7 @@ defmodule SmolBox.Store.NativeCodecTest do
 
   defp fixture do
     config = Package.create()
-    on_exit(fn -> File.rm_rf!(config.package_path) end)
+    on_exit(fn -> Package.remove!(config) end)
     profile = hd(config.profiles)
     artifact = config.artifacts |> hd() |> Map.take(~w(id sha256 architecture))
 

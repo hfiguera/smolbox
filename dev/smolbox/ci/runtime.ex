@@ -5,6 +5,7 @@ defmodule SmolBox.CI.Runtime do
   @legacy_wrapper "8caeb3b6e7d834493a578b0fe8bd1e7aa02e68fba6d61bcf70fdbec41a27ce68"
   # Verified in both qualified platform archives; unknown versions fail closed.
   @wrapper_pins %{
+    "1.35.1" => "b67b25f363403e19deceb6897e5a4d94be30a079f8cb751372782f17fc99003a",
     "1.34.0" => "b67b25f363403e19deceb6897e5a4d94be30a079f8cb751372782f17fc99003a",
     "1.22.0" => "b67b25f363403e19deceb6897e5a4d94be30a079f8cb751372782f17fc99003a",
     "1.20.2" => @legacy_wrapper,
@@ -17,6 +18,10 @@ defmodule SmolBox.CI.Runtime do
   }
 
   @pins %{
+    {"linux", "1.35.1"} =>
+      {"x86_64", "b17712db1b1bb59b2b2aeeaf78c6c98e3784df857a4b9ffc915e5219503713f5"},
+    {"macos", "1.35.1"} =>
+      {"arm64", "5f3f3c787940dbe5731fb1846f83193973fc252109efdcf5e68f253b74b308b5"},
     {"linux", "1.34.0"} =>
       {"x86_64", "feeb3b3627c416dd4196e054e64854e5d648ba3c100767351f212757acddd2e0"},
     {"macos", "1.34.0"} =>
@@ -60,7 +65,7 @@ defmodule SmolBox.CI.Runtime do
     Map.fetch!(@pins, {platform, version})
   end
 
-  def selected_version, do: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.34.0")
+  def selected_version, do: System.get_env("SMOLBOX_RUNTIME_VERSION", "1.35.1")
 
   def wrapper_pin!(platform, version) do
     pin!(platform, version)

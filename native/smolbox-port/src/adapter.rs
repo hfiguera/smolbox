@@ -1148,6 +1148,7 @@ pub fn terminal(
 ) -> wire::Outcome {
     let options = engine::TerminalOptions {
         program: spec.program,
+        args: spec.args,
         cols: spec.cols,
         rows: spec.rows,
         session: Duration::from_millis(spec.session_ms),

@@ -482,6 +482,7 @@ mod tests {
             },
             options: crate::TerminalOptions {
                 program: "/bin/sh".into(),
+                args: vec![],
                 cols: 100,
                 rows: 37,
                 session: Duration::from_secs(30),

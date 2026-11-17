@@ -4,7 +4,7 @@ A branch creates another running machine from a prepared source, including its
 memory and disks. Prepare once, then give separate tasks their own copies. Changes
 to one child's guest memory or disks do not change its siblings or source.
 
-This contract supports **idle, offline bare guests on smolvm 1.19.0, 1.20.2, 1.22.0 or 1.34.0**, on the
+This contract supports **idle, offline bare guests on smolvm 1.19.0, 1.20.2, 1.22.0, 1.34.0 or 1.35.1**, on the
 source's worker. Held children can also use [static egress](#static-egress) on
 supported HTTP and Embedded Port workers. Both support
 [per-child HTTPS credentials](#per-child-https-credentials) on their documented configurations.
@@ -113,7 +113,7 @@ release. The controller persists intent before sending the worker mutation.
 
 Supply non-secret parameters to the held child's branchpoint workload with
 `Branches.release(runtime, handle, release_version, env: [{"MODE", "worker"}])`.
-This requires a SmolVM 1.34.0 HTTP worker or an Embedded Port package advertising
+This requires a SmolVM 1.34.0 or 1.35.1 HTTP worker or an Embedded Port package advertising
 `branch_release_env: 1`. The store must also advertise `branch_release_env: 1`.
 Upgrade shared store readers and writers before use. Releases with an environment
 use record format v51. Empty releases retain their existing record formats.
@@ -126,7 +126,7 @@ their original environment. Use `SmolBox.Command` for command-specific parameter
 
 ### Static egress
 
-On Linux x86_64, use an HTTP worker running SmolVM 1.34.0 or an Embedded Port
+On Linux x86_64, use an HTTP worker running SmolVM 1.34.0 or 1.35.1, or an Embedded Port
 package advertising `branch_static_egress: 1`. Approve a profile with a
 nonempty `SmolBox.NetworkPolicy` and a local bare artifact. Create the source
 with that profile and `branch_static_egress: true` in
@@ -160,7 +160,7 @@ before and after the sibling checks.
 
 ### Per-child HTTPS credentials
 
-Use an HTTP worker running SmolVM 1.34.0 over TLS or a local Unix socket, or an
+Use an HTTP worker running SmolVM 1.34.0 or 1.35.1 over TLS or a local Unix socket, or an
 Embedded Port package advertising `branch_https_credentials: 1` on Linux x86_64.
 Set `branch_https_credentials: {Resolver, context}` on the worker's
 `SmolBox.Runtime.WorkerConfig` or `SmolBox.Embedded.Config`.

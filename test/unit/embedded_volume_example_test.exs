@@ -160,7 +160,7 @@ defmodule SmolBox.EmbeddedVolumeExampleTest do
       |> put_in(["feature_versions", "volumes"], 1)
 
     target = EmbeddedPackage.create(protocol_major: 2, platform: :linux, sdk_identity: sdk)
-    on_exit(fn -> File.rm_rf!(target.package_path) end)
+    on_exit(fn -> EmbeddedPackage.remove!(target) end)
     target = EmbeddedVolumes.configure(target, "/srv/smolvm/volumes")
     assert target.volume_policy.root == "/srv/smolvm/volumes"
     output = Path.join(root, "not-created")

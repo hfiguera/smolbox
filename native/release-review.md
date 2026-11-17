@@ -1,10 +1,24 @@
 # Embedded Port release review
 
-The [release input catalog](release-inputs.json) pins SDK 1.34.0 for all
-three targets. The matching source and notices, attested build and public
-installer results are recorded in the
+The [release input catalog](release-inputs.json) selects the locally qualified,
+unmodified SDK 1.35.1 for all three targets. It matches
+[the reviewed versioned catalog](release-inputs-1.35.1.json), with distribution
+approval **false** throughout. The user explicitly authorized default promotion
+from completed local qualification while requiring every artifact to remain
+unpublished. This changes configuration/source defaults, not distribution approval.
+The distribution builder rejects these entries until a separately authorized
+release completes the public source, provenance and installer gates.
+
+See the [1.35.1 input review](../docs/evidence/embedded-port-1.35.1-release-sources.md)
+and [local qualification](../docs/evidence/smolvm-1.35.1-qualification.md).
+The public installer continues selecting the SmolBox release tag; it does not
+publish or substitute the staged 1.35.1 bundle. That local bundle requires its
+explicit archive, envelope tag and approved digest.
+
+The matching published sources/notices, attested build and public installer
+results for earlier 1.34.0 identities remain in the
 [1.34.0 input review](../docs/evidence/embedded-port-1.34.0-release-sources.md)
-and the [qualification record](../docs/evidence/smolvm-1.34.0-qualification.md).
+and [qualification record](../docs/evidence/smolvm-1.34.0-qualification.md).
 The 1.22.0 evidence below applies to those earlier package identities.
 
 ## Integrity and provenance

@@ -1,5 +1,5 @@
 //! Revision-specific SDK path/schema knowledge lives here, never in a bridge.
-//! Source compatibility: d77eaf1c6eeff16bc8c258613746033e9bf567ca.
+//! Source compatibility: bc58c3ef808e70db10c0ffb2b282c5f565ac6afc.
 use crate::host::unredirected;
 use crate::{Error, ErrorCode, Result};
 use std::fs::{File, OpenOptions};
@@ -577,7 +577,9 @@ fn with_observation_budget<T>(
     // would cancel this process's POSIX locks, including the SDK's cached ones.
     verify_database_connection(&connection, database, identity)?;
     let interrupted = budget.clone();
-    connection.progress_handler(1000, Some(move || interrupted.check().is_err()));
+    connection
+        .progress_handler(1000, Some(move || interrupted.check().is_err()))
+        .map_err(|_| Error::before(ErrorCode::Database))?;
     connection
         .busy_timeout(std::time::Duration::ZERO)
         .map_err(|_| Error::before(ErrorCode::Database))?;
@@ -1170,7 +1172,7 @@ mod tests {
         let (_temporary, _db, path, identity) = database();
         let writer = rusqlite::Connection::open(&path).unwrap();
         with_observation(&path, identity, |reader| {
-            assert!(reader.is_readonly(rusqlite::DatabaseName::Main).unwrap());
+            assert!(reader.is_readonly("main").unwrap());
             assert!(reader
                 .execute("INSERT INTO config VALUES ('reader', 'forbidden')", [])
                 .is_err());

@@ -35,7 +35,7 @@ defmodule SmolBox.EmbeddedCreationFeaturesTest do
 
   setup do
     native = Package.create(protocol_major: 2, backend: true, persistent_backend: true)
-    on_exit(fn -> File.rm_rf!(native.package_path) end)
+    on_exit(fn -> Package.remove!(native) end)
     store = start_supervised!(Memory)
     artifacts = start_supervised!({Agent, fn -> %{} end})
     %{native: native, store: store, artifacts: artifacts}
