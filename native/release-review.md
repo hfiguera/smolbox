@@ -24,6 +24,16 @@ results for earlier 1.34.0 identities remain in the
 and [qualification record](../docs/evidence/smolvm-1.34.0-qualification.md).
 The 1.22.0 evidence below applies to those earlier package identities.
 
+## Stable 0.6.1 preparation
+
+The user authorized preparing 0.6.1 final, publishing stable native bundles and
+running their exact public installer checks. The final version uses the same
+native implementation, SDK and reviewed source/notices inputs as `v0.6.1-rc.1`.
+Build and attest all three archives on the immutable `v0.6.1` tag, publish those
+exact bytes, and run current/minimum public installers in fresh standard accounts.
+The RC and its evidence remain unchanged. Hex stays unpublished during final
+qualification; native publication does not publish the library package.
+
 ## Integrity and provenance
 
 The earlier approved distribution used SDK 1.22.0 revision

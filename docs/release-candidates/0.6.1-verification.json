@@ -1,0 +1,31 @@
+{
+  "version": "0.6.1",
+  "branch": "release/0.6.1",
+  "base_commit": "faf83f856b1edcd7d9c102a517acd858fb59f064",
+  "status": "stable-native-preparation",
+  "package_archive_sha256": "89ddd86f8f4e1ca57c9a707f2f7f88f5105651daa4a89ab8cf8de699f4c1d9cb",
+  "local_validation": {
+    "elixir": "1.20.5",
+    "otp": "29.1.2",
+    "mix_ci": {
+      "passed": 2323,
+      "excluded": 42,
+      "quality_checks": "passed",
+      "dialyzer_errors": 0
+    },
+    "docs": {
+      "warnings": 0,
+      "pages_checked": 162
+    },
+    "hex_build": "passed; private archive only"
+  },
+  "native_source_comparison": {
+    "reference_tag": "v0.6.1-rc.1",
+    "production_native_code_sdk_catalog_packaging_and_hosted_workflow_unchanged": true
+  },
+  "native_publication": "pending exact stable tagged builds and public installer qualification",
+  "hex": {
+    "published": false,
+    "held_until_all_checks_pass": true
+  }
+}

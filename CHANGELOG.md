@@ -2,9 +2,16 @@
 
 ## Unreleased
 
+## 0.6.1
+
+SmolVM **1.35.1** is the default. This release adds explicit terminal arguments
+and an opt-in single-node Kubernetes development preview.
+[Upgrade guidance](docs/upgrading.md#upgrade-to-061)
+
 - Default HTTP workers, checkpoint approvals, native source/release inputs and Kubernetes lab pins to SmolVM 1.35.1 using completed local qualification. Preserve explicit older versions and approvals. Publish reviewed source/notices and attested native bundles as `v0.6.1-rc.1`, with six passing fresh-account public installer lanes; keep Hex unpublished. Public installer release-tag selection is unchanged.
 - Update the native SDK, bounded padded egress telemetry reads, and legacy macOS rootfs and branch-proof compatibility.
 - Add explicit terminal arguments for HTTP 1.35.1 and negotiated Embedded Port packages, including durable record compatibility for generated-script interpreter launches.
+- Bound held-branch credential resolution by the release deadline.
 - Resume Kubernetes recovery collection in a supervised task while health probes
   continue renewing the worker lease. Keep admission fenced until reconciliation
   finishes, and retain the original collection deadline and cleanup authority.

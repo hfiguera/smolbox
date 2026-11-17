@@ -11,7 +11,7 @@ for helper approval and shared-store reader compatibility.
 
 ## Choose your upgrade path
 
-When upgrading to 0.6.0, follow applicable steps in release order. You can
+When upgrading to 0.6.1, follow applicable steps in release order. You can
 deploy the target library once, after accounting for the intervening requirements.
 
 | If your application predates | Required action | Detailed instructions |
@@ -27,22 +27,24 @@ deploy the target library once, after accounting for the intervening requirement
 | 0.5.0 | Apply the PostgreSQL example's backend-bindings migration and coordinate store readers before enabling Embedded Port | [Upgrade to 0.5.0](#upgrade-to-050) |
 | 0.5.1 | Pin existing workers and checkpoint captures, or adopt SmolVM 1.34.0 in a separately prepared deployment | [Upgrade to 0.5.1](#upgrade-to-051) |
 | 0.6.0 | Upgrade shared readers and branch transactions before enabling release environments, static egress or native HTTPS credentials; approve the matching native bundle | [Upgrade to 0.6.0](#upgrade-to-060) |
+| 0.6.1 | Pin existing runtime versions; coordinate terminal-argument readers and stores; apply the Kubernetes migration before enabling the preview | [Upgrade to 0.6.1](#upgrade-to-061) |
 
 SQL migrations belong to the supplied PostgreSQL example. Custom stores need
 equivalent atomic behavior rather than those particular tables. Applications
 coming from 0.1.2 or earlier must also account for the
 [upgrades within 0.1.x](upgrading-within-0.1.x.md).
 
-## Adopt the unreleased 1.35.1 defaults
+## Upgrade to 0.6.1
 
 This checkout defaults HTTP workers, checkpoint approvals, native source/release
 inputs and Kubernetes lab pins to SmolVM 1.35.1 using
 [completed local qualification](evidence/smolvm-1.35.1-qualification.md).
-Reviewed source/notices and attested native bundles are published as the
-`v0.6.1-rc.1` qualification prerelease, with six passing fresh-account public
-installer lanes. Hex remains unpublished. Use the matching Git dependency and
-explicit `--tag v0.6.1-rc.1`; the installer follows the selected SmolBox release
-tag. Existing staged-install digest verification remains available.
+Reviewed source/notices and attested native bundles for `v0.6.1-rc.1` passed
+six fresh-account public installer lanes. The final release uses separately
+built and attested `v0.6.1` bundles, with its own public installer qualification.
+Hex remains unpublished during final qualification. Use the matching Git
+dependency and explicit `--tag v0.6.1`; the installer follows the selected
+SmolBox release tag. Existing staged-install digest verification remains available.
 
 Before upgrading controllers, explicitly pin existing workers to their installed
 runtime and existing checkpoint approvals to their capture runtime. Updating the
@@ -56,7 +58,7 @@ store support. Program-only terminal records preserve their old envelopes and
 fingerprints. On 1.35.1, launch generated scripts through an image interpreter,
 for example `program: "/bin/sh", args: ["/workspace/generated.sh"]`.
 
-## Enable the unreleased Kubernetes preview
+### Enable the Kubernetes development preview
 
 Upgrade every shared controller, reader and writer before enabling Kubernetes
 records. They selectively use codec v54; existing HTTP/Embedded records retain

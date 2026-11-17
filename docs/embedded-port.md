@@ -7,8 +7,9 @@ HTTP workers together.
 The public installer provides attested bundles for Apple Silicon, Linux x86_64
 and Linux ARM64. Published SmolBox 0.6.0 uses SmolVM 1.34.0; the public
 `v0.6.1-rc.1` native qualification prerelease uses 1.35.1 and passed six fresh-account
-installer lanes. Hex is unpublished for the candidate, so use its matching Git
-dependency and explicit installer tag. The helper and its assets install
+installer lanes. Stable `v0.6.1` bundles use the same reviewed inputs and
+require their own public installer qualification. Hex stays unpublished during
+final qualification; use the matching Git dependency and installer tag. The helper and its assets install
 separately from the Elixir package. [Embedded Port quickstart](embedded-quickstart.md)
 
 For an HTTP-only application, follow the [Getting started guide](getting-started.md).
